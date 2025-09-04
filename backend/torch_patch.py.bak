@@ -1,0 +1,38 @@
+# torch_patch.py
+import torch
+import importlib.util
+
+# Check if accelerate is installed
+accelerate_installed = importlib.util.find_spec("accelerate") is not None
+
+# If accelerate is not installed, monkey patch the necessary functions
+if not accelerate_installed:
+    # Add the missing method to torch
+    if not hasattr(torch, 'get_default_device'):
+        def get_default_device():
+            return 'cuda' if torch.cuda.is_available() else 'cpu'
+
+        torch.get_default_device = get_default_device
+
+    # Patch the transformers library to avoid requiring accelerate
+    try:
+        import transformers.modeling_utils as modeling_utils
+
+        # Store the original function
+        original_from_pretrained = modeling_utils.PreTrainedModel.from_pretrained
+
+        # Create a patched version that doesn't require accelerate
+        def patched_from_pretrained(cls, *args, **kwargs):
+            # Remove device_map if present to avoid requiring accelerate
+            if 'device_map' in kwargs:
+                del kwargs['device_map']
+
+            # Call the original function
+            return original_from_pretrained(cls, *args, **kwargs)
+
+        # Replace the original function with our patched version
+        modeling_utils.PreTrainedModel.from_pretrained = classmethod(patched_from_pretrained)
+
+        print("Successfully patched transformers library to work without accelerate")
+    except ImportError:
+        print("Could not patch transformers library - it might not be installed")

@@ -1,0 +1,7 @@
+# venv
+.venv/
+# Python cache
+__pycache__/
+*.py[cod]
+# env files
+.env

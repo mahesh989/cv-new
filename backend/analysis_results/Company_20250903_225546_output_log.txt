@@ -1,0 +1,119 @@
+
+================================================================================
+[2025-09-03T22:55:46.297580] [CV_CLAUDE_ANALYSIS] OUTPUT:
+Of course. Here is the precise extraction of skills and keywords from the provided CV.
+
+### CONTEXT EVIDENCE
+
+**SOFT SKILLS - EXPLICIT**
+*   **Communication skills:** "Presented Python-enabled research findings at international conferences, demonstrating technical expertise and communication skills."
+*   **Teamwork:** "promoting teamwork"
+
+**SOFT SKILLS - STRONGLY IMPLIED**
+*   **Collaboration:** "improving data accuracy and team collaboration", "Collaborated with the development team", "Supported cross-functional teams", "collaborated with faculty", "improving collaboration and research skills"
+*   **Mentoring:** "Mentored students on projects"
+
+**TECHNICAL SKILLS - EXPLICIT**
+*   **Python:** "over three years of experience in Python coding", "Specialized in Python programming", "Designed and implemented Python scripts", "Developed machine learning models in Python", "Automated data extraction... using Python", "Built Python scripts", "Utilized advanced Python programming"
+*   **AI (Artificial Intelligence):** "expertise encompasses modeling and training AI models", "Leveraged AI techniques"
+*   **Machine Learning:** "machine learning", "machine learning using libraries such as... scikit-learn", "Developed machine learning models"
+*   **Pandas:** "libraries such as Pandas"
+*   **NumPy:** "libraries such as... NumPy"
+*   **scikit-learn:** "libraries such as... scikit-learn"
+*   **SQL:** "proficient in SQL", "SQL for querying, modeling, and managing complex relational databases"
+*   **PostgreSQL:** "relational databases like PostgreSQL"
+*   **MySQL:** "relational databases like... MySQL"
+*   **Tableau:** "proficient in SQL, Tableau, and Power BI", "Skilled in creating interactive dashboards and visualizations using Tableau", "producing Tableau dashboards"
+*   **Power BI:** "proficient in SQL, Tableau, and Power BI", "Skilled in creating interactive dashboards and visualizations using... Power BI", "Used dashboard using Power BI"
+*   **Matplotlib:** "Skilled in creating interactive dashboards and visualizations using... Matplotlib", "Built dynamic dashboards and visualizations using Python libraries like Matplotlib"
+*   **GitHub:** "Experienced with GitHub for version control"
+*   **Docker:** "Experienced with... Docker for containerization"
+*   **Snowflake:** "Experienced with... Snowflake for cloud data warehousing"
+*   **Visual Studio Code:** "Adept at leveraging tools like Visual Studio Code"
+*   **Google Analytics:** "Adept at leveraging tools like... Google Analytics", "Integrated Google Analytics data with Python"
+*   **Excel:** "Adept at leveraging tools like... Excel"
+*   **Seaborn:** "Python libraries like Matplotlib and Seaborn"
+
+**TECHNICAL SKILLS - STRONGLY IMPLIED**
+*   **Data Cleaning:** "data cleaning, preprocessing, and analysis"
+*   **Data Preprocessing:** "data cleaning, preprocessing, and analysis", "Leveraged Python for data preprocessing and analysis"
+
+**DOMAIN KEYWORDS - EXPLICIT**
+*   **Data Analysis:** "data analysis", "data cleaning, preprocessing, and analysis", "Analyzed customer support data"
+*   **Automation:** "automation", "automate repetitive tasks", "Automated data extraction"
+*   **Data Pipelines:** "designing and deploying robust data pipelines", "improving data pipeline efficiency"
+*   **Visualizations:** "creating advanced visualizations", "creating interactive dashboards and visualizations", "Built dynamic dashboards and visualizations"
+*   **Actionable Insights:** "convert complex
+================================================================================
+
+================================================================================
+[2025-09-03T22:55:46.298599] [JD_CLAUDE_ANALYSIS] OUTPUT:
+Of course. Here is the precise extraction of skills and keywords from the job description.
+
+### CONTEXT EVIDENCE:
+
+**SOFT SKILLS:**
+*   **Communication:** "communicate analysis findings to management, funding bodies and other key stakeholders."
+*   **Stakeholder Management:** "communicate analysis findings to management, funding bodies and other key stakeholders."
+
+**TECHNICAL SKILLS:**
+*   **Business Intelligence (BI) tools:** "Develop reports using the Business Intelligence (BI) tools", "Demonstrated knowledge of Business Intelligence tools"
+*   **Databases:** "Technical proficiency with databases"
+*   **Microsoft Excel:** "Advanced Microsoft Excel skills"
+*   **Systems Administration:** "Be responsible for all Systems Administration on the Business Intelligence platforms", "Experience troubleshooting as a Systems Administrator or Super User"
+*   **Troubleshooting:** "Experience troubleshooting as a Systems Administrator or Super User"
+*   **Reporting:** "Strong reporting capability, particularly regarding reporting against set KPIs"
+
+**DOMAIN KEYWORDS:**
+*   **Data Analysis:** "analysing data sets", "Performing analysis to assess data quality and meaning of data"
+*   **Reporting:** "reporting using different methodologies", "Fulfil reporting requirements"
+*   **Methodologies:** "reporting using different methodologies"
+*   **Business Analytical Tools:** "business analytical tools"
+*   **Regulatory Requirements:** "meet regulatory and governance requirements"
+*   **Governance Requirements:** "meet regulatory and governance requirements"
+*   **Data Quality:** "assess data quality"
+*   **Data Collection:** "data collection, storage and usage"
+*   **Data Storage:** "data collection, storage and usage"
+*   **Data Usage:** "data collection, storage and usage"
+*   **Contractual Obligations:** "in line with contractual obligations"
+*   **KPIs (Key Performance Indicators):** "reporting against set KPIs"
+*   **Systems Administration:** "Systems Administration on the Business Intelligence platforms"
+*   **Workforce Planner:** "Manage the Workforce Planner’s performance"
+
+***
+
+### FINAL CLEAN LISTS:
+
+```python
+SOFT_SKILLS = [
+    "Communication",
+    "Stakeholder Management"
+]
+
+TECHNICAL_SKILLS = [
+    "Business Intelligence (BI) tools",
+    "Databases",
+    "Microsoft Excel",
+    "Systems Administration",
+    "Troubleshooting",
+    "Reporting"
+]
+
+DOMAIN_KEYWORDS = [
+    "Data Analysis",
+    "Reporting",
+    "Methodologies",
+    "Business Analytical Tools",
+    "Regulatory Requirements",
+    "Governance Requirements",
+    "Data Quality",
+    "Data Collection",
+    "Data Storage",
+    "Data Usage",
+    "Contractual Obligations",
+    "KPIs",
+    "Systems Administration",
+    "Workforce Planner"
+]
+```
+================================================================================

@@ -1,0 +1,575 @@
+
+================================================================================
+[2025-08-30T17:36:29.325134] [CV_CLAUDE_ANALYSIS] OUTPUT:
+## SOFT SKILLS:
+
+**EXPLICIT (directly stated):**
+- Communication skills - "demonstrating technical expertise and communication skills"
+- Teamwork - "promoting teamwork"
+- Collaboration - "improving collaboration and research skills", "team collaboration"
+
+**STRONGLY IMPLIED (very likely based on responsibilities):**
+- Leadership - "Led engaging physics tutorials for master's students"
+- Mentoring - "Mentored students on projects"
+- Problem-solving - "solving complex research problems"
+- Time management - "meeting strict deadlines for strategic decision-making"
+
+## TECHNICAL SKILLS:
+
+**EXPLICIT (directly stated):**
+- Python programming - "Python programming", "Python coding"
+- AI - "AI, and machine learning"
+- Machine learning - "machine learning"
+- SQL - "proficient in SQL"
+- Tableau - "Tableau, and Power BI"
+- Power BI - "Power BI"
+- Pandas - "libraries such as Pandas, NumPy, and scikit-learn"
+- NumPy - "libraries such as Pandas, NumPy, and scikit-learn"
+- scikit-learn - "libraries such as Pandas, NumPy, and scikit-learn"
+- PostgreSQL - "relational databases like PostgreSQL and MySQL"
+- MySQL - "relational databases like PostgreSQL and MySQL"
+- Matplotlib - "using Tableau, Power BI, and Matplotlib"
+- GitHub - "GitHub for version control"
+- Docker - "Docker for containerization"
+- Snowflake - "Snowflake for cloud data warehousing"
+- Visual Studio Code - "Visual Studio Code, Google Analytics, and Excel"
+- Google Analytics - "Google Analytics, and Excel"
+- Excel - "Google Analytics, and Excel"
+- Seaborn - "Python libraries like Matplotlib and Seaborn"
+
+**STRONGLY IMPLIED (very likely based on responsibilities):**
+- Version control - "GitHub for version control"
+- Containerization - "Docker for containerization"
+- Cloud data warehousing - "Snowflake for cloud data warehousing"
+
+## DOMAIN KEYWORDS:
+
+**EXPLICIT:**
+- Data analysis - "data analysis, automation"
+- Data pipelines - "designing and deploying robust data pipelines"
+- Data visualization - "creating advanced visualizations"
+- Dashboards - "building comprehensive dashboards"
+- Data-driven decision-making - "support data-driven decision-making"
+- Predictive analytics - "machine learning models in Python for predictive analytics"
+- Data cleaning - "Python scripts for data cleaning, preprocessing, and analysis"
+- Data preprocessing - "data cleaning, preprocessing, and analysis"
+- Key metrics - "Python scripts to track key metrics"
+- Data accuracy - "ensuring 99% data accuracy"
+- Data integrity - "improving data integrity"
+- Computational modeling - "computational modeling and solving complex research problems"
+- Relational databases - "managing complex relational databases"
+- Interactive dashboards - "creating interactive dashboards and visualizations"
+- Data extraction - "Automated data extraction and structuring"
+- Customer behavior insights - "enhancing customer behavior insights"
+
+**STRONGLY IMPLIED:**
+- ETL processes - "data extraction and structuring", "data cleaning, preprocessing"
+- Business intelligence - "Tableau dashboards", "Power BI dashboards"
+- Data warehousing - "Snowflake for cloud data warehousing"
+- Analytics - "advanced analysis", "predictive analytics"
+- Reporting - "dynamic reports and dashboards"
+- Data modeling - "modeling and training AI models"
+
+## CONTEXT EVIDENCE:
+
+**Soft Skills:**
+- Communication skills: "demonstrating technical expertise and communication skills"
+- Teamwork: "promoting teamwork"
+- Collaboration: "improving collaboration and research skills", "team collaboration"
+- Leadership: "Led engaging physics tutorials for master's students"
+- Mentoring: "Mentored students on projects"
+
+**Technical Skills:**
+- Python: "three years of experience in Python coding"
+- Machine learning: "machine learning using libraries such as Pandas, NumPy, and scikit-learn"
+- SQL: "Proficient in SQL for querying, modeling, and managing complex relational databases"
+- Tableau/Power BI: "creating interactive dashboards and visualizations using Tableau, Power BI"
+
+**Domain Keywords:**
+- Data pipelines: "designing and deploying robust data pipelines"
+- Predictive analytics: "machine learning models in Python for predictive
+================================================================================
+
+================================================================================
+[2025-08-30T17:36:29.328170] [JD_CLAUDE_ANALYSIS] OUTPUT:
+## SOFT SKILLS:
+
+**EXPLICIT (directly stated):**
+- Leadership - "Business Analyst with a flair for Leadership"
+- Written communication skills - "excellent written and verbal communication skills"
+- Verbal communication skills - "excellent written and verbal communication skills"
+- Initiative - "your initiative and analytical skills are outstanding"
+- Analytical skills - "your initiative and analytical skills are outstanding"
+- Organization skills - "high calibre organisation skills"
+- Communication skills - "Strong communication and collaboration skills"
+- Collaboration skills - "Strong communication and collaboration skills"
+- Attention to detail - "keen eye for detail"
+- Lateral thinking skills - "Strong analytical and lateral thinking skills"
+- Listening skills - "Strong communication skills (including listening, written and verbal)"
+
+**STRONGLY IMPLIED (very likely based on responsibilities):**
+- Stakeholder management - "Work with stakeholders to take an idea, tease it out, and shape it into a deliverable scope"
+- Team leadership - "Lead and inspire fellow team mates to deliver the goal"
+- Problem-solving - "drive you to find the best solution, while being cognisant of constraints"
+
+## TECHNICAL SKILLS:
+
+**EXPLICIT (directly stated):**
+- Java - "Interest in and ability to use web-based technologies including Java and CSS"
+- CSS - "Interest in and ability to use web-based technologies including Java and CSS"
+- Scrum - "Experience working in an agile environment (scrum)"
+- Web-based applications - "Experience in web-based application/s and web form projects"
+- Web form projects - "Experience in web-based application/s and web form projects"
+- Mobile friendly applications - "including mobile friendly applications"
+- Web-based technologies - "Interest in and ability to use web-based technologies"
+
+**STRONGLY IMPLIED (very likely based on responsibilities):**
+- Agile methodology - "Experience working in an agile environment (scrum)"
+
+## DOMAIN KEYWORDS:
+
+**EXPLICIT:**
+- Business Analyst - "We are looking for an experienced, enthusiastic and energetic Business Analyst"
+- Project Management - "With your flair for Project Management"
+- Requirements - "Seek specific requirements from users"
+- User stories - "Refine the scope and specific requirements into deliverables and testable user stories"
+- Business rules - "translate customer needs into requirements, user stories, business rules and acceptance criteria"
+- Acceptance criteria - "translate customer needs into requirements, user stories, business rules and acceptance criteria"
+- Functional design - "to produce a functional design that will meet users' needs"
+- Deliverables - "leading the team and deliverables throughout the process"
+- Scope - "shape it into a deliverable scope"
+- Quality control - "commitment to continuous improvement and quality control"
+- Bug fixes - "prioritise new features alongside other commitments including bug fixes"
+- Enhancements - "including bug fixes, and small enhancements"
+- Platform - "helping us to prioritise, shape and define new features for our platform"
+
+**STRONGLY IMPLIED:**
+- Requirements elicitation - "able to elicit the requirements and convey them to others"
+- Product strategy - "while progressing the strategy of the product"
+- Feature prioritization - "Work with stakeholders to prioritise new features"
+- Release management - "take an idea from conception right through to release"
+
+## CONTEXT EVIDENCE:
+
+**Soft Skills:**
+- Leadership: "Business Analyst with a flair for Leadership"
+- Communication: "excellent written and verbal communication skills"
+- Initiative: "your initiative and analytical skills are outstanding"
+- Organization: "high calibre organisation skills"
+- Collaboration: "Strong communication and collaboration skills"
+- Detail-oriented: "keen eye for detail"
+- Stakeholder management: "Work with stakeholders to take an idea, tease it out"
+- Team leadership: "Lead and inspire fellow team mates to deliver the goal"
+
+**Technical Skills:**
+- Java/CSS: "Interest in and ability to use web-based technologies including Java and CSS"
+- Scrum: "Experience working in an agile environment (scrum)"
+- Web applications: "Experience in web-based application/s and web form projects, including mobile friendly applications"
+
+**Domain Keywords:**
+- Business Analysis: "We are looking for an experienced, enthusiastic and energetic Business Analyst"
+- Requirements: "translate customer needs into requirements, user stories, business rules and acceptance criteria"
+- User stories: "Refine the scope and specific requirements into deliverables and testable user stories
+================================================================================
+
+================================================================================
+[2025-08-30T17:36:56.323931] [ANALYZE_MATCH] OUTPUT:
+**DECISION:** 🟡 STRATEGIC PURSUE (55-65% probability)
+
+**MARKET REALITY CHECK:**
+- **What they actually need:** Strong analytical thinking + stakeholder communication + project coordination. The "Business Analyst" title is misleading - this is really a Product Owner/Technical BA hybrid role.
+- **Flexibility indicators:** MASSIVE flexibility signals - social enterprise (mission over perfection), 4-day work week (progressive culture), "parents returning to workforce" (explicitly flexible), established but startup-agile culture
+- **Hard blockers identified:** None. The Java/CSS mention is buried as "interest in" not "expertise required"
+- **Hiring urgency signals:** Moderate urgency - posted recently, detailed role description suggests they know what they want but aren't desperate
+
+**INTELLIGENT OBSERVATIONS:**
+- **Hidden strengths:** PhD research background = elite stakeholder management and requirements gathering (supervising students, presenting at conferences, working with faculty). This is EXACTLY what BAs do but in academic context.
+- **Smart connections:** Data pipeline work = understanding user stories and technical constraints. Python automation = grasping technical feasibility. Dashboard creation = translating requirements into deliverables.
+- **Growth potential:** Clear learning trajectory from Physics → Data Science → increasingly business-focused roles. Shows adaptability and communication skills (lecturer experience).
+- **Positioning opportunities:** Reframe research experience as stakeholder management, frame data analysis as requirements analysis, emphasize the teaching/mentoring as team leadership.
+
+**REALISTIC ODDS:** 60% chance of interview if CV tailored strategically
+
+**IF PURSUING - STRATEGIC PRIORITIES:**
+1. **Lead with stakeholder management**: Transform "Research Assistant" and "Lecturer" into "Collaborated with diverse stakeholders to define project requirements and delivered complex technical solutions to non-technical audiences"
+2. **Emphasize analytical problem-solving**: Connect data analysis work to business requirements - "Translated business needs into technical specifications" rather than just "built Python scripts"
+3. **Address the leadership gap**: Highlight mentoring students, leading research projects, and coordinating with cross-functional teams as evidence of project leadership capability
+
+**HONEST BOTTOM LINE:** 
+This is actually a smart play. Social enterprises are notorious for valuing cultural fit and mission alignment over perfect experience matches. The PhD gives credibility, the data background shows analytical chops, and the teaching experience proves communication skills. The role screams "we need someone smart who can figure it out" rather than "we need 5 years of BA experience." 
+
+The 4-day week and progressive culture signals suggest they'll absolutely consider a career changer with strong fundamentals. Worth pursuing if genuinely interested in social impact work - but tailor heavily toward business context rather than technical achievements.
+
+**KEY INSIGHT:** They want a "Business Analyst with flair for leadership" - the PhD research and teaching background actually positions him as overqualified for analytical thinking and stakeholder management, just in a different domain. Smart positioning can make this a strength, not a weakness.
+================================================================================
+
+================================================================================
+[2025-08-30T17:37:26.154009] [CLAUDE_SKILL_COMPARISON] OUTPUT:
+```json
+{
+    "technical_skills": {
+        "matched": [
+            {
+                "jd_skill": "Agile methodology",
+                "cv_equivalent": "Version control, Collaboration, Teamwork",
+                "reasoning": "CV shows experience with collaborative development practices and version control, indicating familiarity with Agile workflows"
+            }
+        ],
+        "missing": [
+            {
+                "jd_skill": "Java",
+                "reasoning": "CV only shows Python programming experience, no Java development skills mentioned"
+            },
+            {
+                "jd_skill": "CSS",
+                "reasoning": "No front-end web development technologies listed in CV skills"
+            },
+            {
+                "jd_skill": "Scrum",
+                "reasoning": "While Agile methodology understanding is implied, specific Scrum framework experience is not mentioned"
+            },
+            {
+                "jd_skill": "Web-based applications",
+                "reasoning": "CV focuses on data analysis tools and backend technologies, no web application development experience shown"
+            },
+            {
+                "jd_skill": "Web form projects",
+                "reasoning": "No web development or form creation experience indicated in CV"
+            },
+            {
+                "jd_skill": "Mobile friendly applications",
+                "reasoning": "No mobile development or responsive design experience mentioned"
+            },
+            {
+                "jd_skill": "Web-based technologies",
+                "reasoning": "CV lacks web development technologies beyond basic analytics tools"
+            }
+        ]
+    },
+    "soft_skills": {
+        "matched": [
+            {
+                "jd_skill": "Leadership",
+                "cv_equivalent": "Leadership, Mentoring",
+                "reasoning": "Direct match with leadership and mentoring experience shown in CV"
+            },
+            {
+                "jd_skill": "Written communication skills",
+                "cv_equivalent": "Communication skills",
+                "reasoning": "CV lists communication skills which encompasses both written and verbal communication"
+            },
+            {
+                "jd_skill": "Verbal communication skills",
+                "cv_equivalent": "Communication skills",
+                "reasoning": "Communication skills in CV covers verbal communication abilities"
+            },
+            {
+                "jd_skill": "Analytical skills",
+                "cv_equivalent": "Problem-solving, Data analysis, Predictive analytics",
+                "reasoning": "Strong analytical capabilities demonstrated through data analysis and problem-solving skills"
+            },
+            {
+                "jd_skill": "Communication skills",
+                "cv_equivalent": "Communication skills",
+                "reasoning": "Exact match in CV skills"
+            },
+            {
+                "jd_skill": "Collaboration skills",
+                "cv_equivalent": "Collaboration, Teamwork",
+                "reasoning": "Direct match with collaboration and teamwork skills listed in CV"
+            },
+            {
+                "jd_skill": "Team leadership",
+                "cv_equivalent": "Leadership, Mentoring",
+                "reasoning": "Leadership and mentoring skills indicate team leadership capabilities"
+            },
+            {
+                "jd_skill": "Problem-solving",
+                "cv_equivalent": "Problem-solving",
+                "reasoning": "Exact match in CV skills"
+            }
+        ],
+        "missing": [
+            {
+                "jd_skill": "Initiative",
+                "reasoning": "While leadership is present, specific initiative-taking skills are not explicitly mentioned"
+            },
+            {
+                "jd_skill": "Organization skills",
+                "reasoning": "Time management is listed but broader organizational skills are not specifically mentioned"
+            },
+            {
+                "jd_skill": "Attention to detail",
+                "reasoning": "While data accuracy/integrity suggests detail orientation, attention to detail is not explicitly stated"
+            },
+            {
+                "jd_skill": "Lateral thinking skills",
+                "reasoning": "No specific creative or lateral thinking abilities mentioned in CV"
+            },
+            {
+                "jd_skill": "Listening skills",
+                "reasoning": "General communication skills present but active listening not specifically highlighted"
+            },
+            {
+                "jd_skill": "Stakeholder management",
+                "reasoning": "No experience in managing stakeholder relationships mentioned in CV"
+            }
+        ]
+    },
+    "domain_keywords": {
+        "matched": [
+            {
+                "jd_skill": "Requirements",
+                "cv_equivalent": "Data-driven decision-making, Business intelligence",
+                "reasoning": "Experience in gathering and analyzing business requirements through BI and data analysis work"
+            },
+            {
+                "jd_skill": "Analytical skills",
+                "cv_equivalent": "Data analysis, Predictive analytics, Analytics",
+                "reasoning": "Strong analytical background demonstrated through various data analysis and analytics skills"
+            },
+            {
+                "jd_skill": "Quality control",
+                "cv_equivalent": "Data accuracy, Data integrity",
+                "reasoning": "Data quality management experience translates to general quality control understanding"
+            }
+        ],
+        "missing": [
+            {
+                "jd_skill": "Business Analyst",
+                "reasoning": "CV shows data analyst background but lacks specific business analyst role experience"
+            },
+            {
+                "jd_skill": "Project Management",
+                "reasoning": "No project management experience or methodologies mentioned in CV"
+            },
+            {
+                "jd_skill": "User stories",
+                "reasoning": "No experience with user story creation or management indicated"
+            },
+            {
+                "jd_skill": "Business rules",
+                "reasoning": "No experience with business rules definition or management shown"
+            },
+            {
+                "jd_skill": "Acceptance criteria",
+                "reasoning": "No experience with defining or managing acceptance criteria mentioned"
+            },
+            {
+                "jd_skill": "Functional design",
+                "reasoning": "CV lacks functional design or system design experience"
+            },
+            {
+                "jd_skill": "Deliverables",
+                "reasoning": "No specific experience managing project deliverables mentioned"
+            },
+            {
+                "jd_skill": "Scope",
+                "reasoning": "No project scope management experience indicated"
+            },
+            {
+                "jd_skill": "Bug fixes",
+                "reasoning": "No software debugging or bug fixing experience shown"
+            },
+            {
+                "jd_skill": "Enhancements",
+                "reasoning": "No experience with system enhancements or feature improvements mentioned"
+            },
+            {
+                "jd_skill": "Platform",
+                "reasoning": "While technical platforms are used, no platform management or development experience shown"
+            },
+            {
+                "jd_skill": "Requirements elicitation",
+                "reasoning": "No specific experience in requirements gathering techniques mentioned"
+            },
+            {
+                "jd_skill": "Product strategy",
+                "reasoning": "No product management or strategy experience indicated in CV"
+            },
+            {
+                "jd_skill": "Feature prioritization",
+                "reasoning": "No experience with feature planning or prioritization shown"
+            },
+            {
+                "jd_skill": "Release management",
+                "reasoning": "No software release or deployment management experience mentioned"
+            }
+        ]
+    }
+}
+```
+================================================================================
+
+================================================================================
+[2025-08-30T17:37:26.171189] [AI_SKILLS_ANALYSIS] OUTPUT:
+
+==========================================================================================
+🤖 AI-POWERED SKILLS ANALYSIS
+Enhanced semantic matching with detailed reasoning
+==========================================================================================
+
+🎯 OVERALL SUMMARY
+----------------------------------------
+Total Requirements: 40
+Matched: 12
+Missing: 28
+Match Rate: 30.0%
+
+📊 SUMMARY TABLE
+--------------------------------------------------------------------------------
+Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
+Technical Skills            22         8         1         7            12.5
+Soft Skills                  7        14         8         6            57.1
+Domain Keywords             22        18         3        15            16.7
+
+🧠 DETAILED AI ANALYSIS
+--------------------------------------------------------------------------------
+
+🔹 TECHNICAL SKILLS
+  ✅ MATCHED JD REQUIREMENTS (1 items):
+    1. JD Required: 'Agile methodology'
+       → Found in CV: 'Version control, Collaboration, Teamwork'
+       💡 CV shows experience with collaborative development practices and version control, indicating familiarity with Agile workflows
+  ❌ MISSING FROM CV (7 items):
+    1. JD Requires: 'Java'
+       💡 CV only shows Python programming experience, no Java development skills mentioned
+    2. JD Requires: 'CSS'
+       💡 No front-end web development technologies listed in CV skills
+    3. JD Requires: 'Scrum'
+       💡 While Agile methodology understanding is implied, specific Scrum framework experience is not mentioned
+    4. JD Requires: 'Web-based applications'
+       💡 CV focuses on data analysis tools and backend technologies, no web application development experience shown
+    5. JD Requires: 'Web form projects'
+       💡 No web development or form creation experience indicated in CV
+    6. JD Requires: 'Mobile friendly applications'
+       💡 No mobile development or responsive design experience mentioned
+    7. JD Requires: 'Web-based technologies'
+       💡 CV lacks web development technologies beyond basic analytics tools
+
+🔹 SOFT SKILLS
+  ✅ MATCHED JD REQUIREMENTS (8 items):
+    1. JD Required: 'Leadership'
+       → Found in CV: 'Leadership, Mentoring'
+       💡 Direct match with leadership and mentoring experience shown in CV
+    2. JD Required: 'Written communication skills'
+       → Found in CV: 'Communication skills'
+       💡 CV lists communication skills which encompasses both written and verbal communication
+    3. JD Required: 'Verbal communication skills'
+       → Found in CV: 'Communication skills'
+       💡 Communication skills in CV covers verbal communication abilities
+    4. JD Required: 'Analytical skills'
+       → Found in CV: 'Problem-solving, Data analysis, Predictive analytics'
+       💡 Strong analytical capabilities demonstrated through data analysis and problem-solving skills
+    5. JD Required: 'Communication skills'
+       → Found in CV: 'Communication skills'
+       💡 Exact match in CV skills
+    6. JD Required: 'Collaboration skills'
+       → Found in CV: 'Collaboration, Teamwork'
+       💡 Direct match with collaboration and teamwork skills listed in CV
+    7. JD Required: 'Team leadership'
+       → Found in CV: 'Leadership, Mentoring'
+       💡 Leadership and mentoring skills indicate team leadership capabilities
+    8. JD Required: 'Problem-solving'
+       → Found in CV: 'Problem-solving'
+       💡 Exact match in CV skills
+  ❌ MISSING FROM CV (6 items):
+    1. JD Requires: 'Initiative'
+       💡 While leadership is present, specific initiative-taking skills are not explicitly mentioned
+    2. JD Requires: 'Organization skills'
+       💡 Time management is listed but broader organizational skills are not specifically mentioned
+    3. JD Requires: 'Attention to detail'
+       💡 While data accuracy/integrity suggests detail orientation, attention to detail is not explicitly stated
+    4. JD Requires: 'Lateral thinking skills'
+       💡 No specific creative or lateral thinking abilities mentioned in CV
+    5. JD Requires: 'Listening skills'
+       💡 General communication skills present but active listening not specifically highlighted
+    6. JD Requires: 'Stakeholder management'
+       💡 No experience in managing stakeholder relationships mentioned in CV
+
+🔹 DOMAIN KEYWORDS
+  ✅ MATCHED JD REQUIREMENTS (3 items):
+    1. JD Required: 'Requirements'
+       → Found in CV: 'Data-driven decision-making, Business intelligence'
+       💡 Experience in gathering and analyzing business requirements through BI and data analysis work
+    2. JD Required: 'Analytical skills'
+       → Found in CV: 'Data analysis, Predictive analytics, Analytics'
+       💡 Strong analytical background demonstrated through various data analysis and analytics skills
+    3. JD Required: 'Quality control'
+       → Found in CV: 'Data accuracy, Data integrity'
+       💡 Data quality management experience translates to general quality control understanding
+  ❌ MISSING FROM CV (15 items):
+    1. JD Requires: 'Business Analyst'
+       💡 CV shows data analyst background but lacks specific business analyst role experience
+    2. JD Requires: 'Project Management'
+       💡 No project management experience or methodologies mentioned in CV
+    3. JD Requires: 'User stories'
+       💡 No experience with user story creation or management indicated
+    4. JD Requires: 'Business rules'
+       💡 No experience with business rules definition or management shown
+    5. JD Requires: 'Acceptance criteria'
+       💡 No experience with defining or managing acceptance criteria mentioned
+    6. JD Requires: 'Functional design'
+       💡 CV lacks functional design or system design experience
+    7. JD Requires: 'Deliverables'
+       💡 No specific experience managing project deliverables mentioned
+    8. JD Requires: 'Scope'
+       💡 No project scope management experience indicated
+    9. JD Requires: 'Bug fixes'
+       💡 No software debugging or bug fixing experience shown
+    10. JD Requires: 'Enhancements'
+       💡 No experience with system enhancements or feature improvements mentioned
+    11. JD Requires: 'Platform'
+       💡 While technical platforms are used, no platform management or development experience shown
+    12. JD Requires: 'Requirements elicitation'
+       💡 No specific experience in requirements gathering techniques mentioned
+    13. JD Requires: 'Product strategy'
+       💡 No product management or strategy experience indicated in CV
+    14. JD Requires: 'Feature prioritization'
+       💡 No experience with feature planning or prioritization shown
+    15. JD Requires: 'Release management'
+       💡 No software release or deployment management experience mentioned
+==========================================================================================
+
+================================================================================
+
+================================================================================
+[2025-08-30T17:39:19.196855] [ATS_SCORE] OUTPUT:
+
+🎯 ATS Score Analysis - Final Results
+==========================================================================================
+
+🎯 Overall Performance
+Final ATS Score: 8.2/100
+Category: ❌ Poor fit - Generally rejected
+Needs improvement. Address critical gaps first.
+
+📊 Score Breakdown by Category
+Category                 Score     Status         Impact    
+------------------------------------------------------------
+Technical Skills         12.5      ❌ Weak         Low       
+Soft Skills              57.1      ⚠️ Moderate    Medium    
+Domain Keywords          16.7      ❌ Weak         Low       
+
+🧠 Detailed Component Analysis
+Component                     Score   Weight  Contribution
+------------------------------------------------------------
+Technical Skills Match        12.5    25.0    3.1       
+Soft Skills Match             57.1    10.0    5.7       
+Domain Keywords Match         16.7    8.0     1.3       
+Skills Relevance              0.0     12.0    0.0       
+Experience Alignment          0.0     15.0    0.0       
+Industry Fit                  0.0     10.0    0.0       
+Role Seniority                10.0    8.0     0.8       
+Technical Depth               8.8     3.0     0.3       
+Criticality Bonus             0.0     0.0     0.0       
+Requirement Bonus             -3.0    0.0     -3.0      
+
+🎯 Critical Requirements Status
+------------------------------------------------------------
+Essential Requirements Met: 0/0 ✅
+Preferred Requirements Met: None
+Missing Critical Skills: Initiative, Analytical skills, Organization skills
+==========================================================================================
+
+================================================================================

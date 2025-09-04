@@ -1,0 +1,14 @@
+
+================================================================================
+[2025-09-04T13:54:07.186138] [CV_CLAUDE_ANALYSIS] OUTPUT:
+SOFT_SKILLS = ["Communication", "Teamwork", "Collaboration", "Mentoring"]
+TECHNICAL_SKILLS = ["Python", "SQL", "Tableau", "Power BI", "Pandas", "NumPy", "scikit-learn", "GitHub", "Docker", "Snowflake", "Visual Studio Code", "Google Analytics", "Excel", "Matplotlib", "Seaborn", "PostgreSQL", "MySQL"]
+DOMAIN_KEYWORDS = ["Data analysis", "Machine learning", "AI", "Predictive analytics", "Data cleaning", "Data preprocessing", "Data pipelines", "Relational databases", "Cloud data warehousing", "Version control", "Containerization", "Data visualization", "Dashboard", "Computational modeling", "Automation"]
+================================================================================
+
+================================================================================
+[2025-09-04T13:54:07.186646] [JD_CLAUDE_ANALYSIS] OUTPUT:
+SOFT_SKILLS = ["Communication", "Leadership", "Accountability"]
+TECHNICAL_SKILLS = ["Business Intelligence tools", "Databases", "Microsoft Excel", "Systems Administration", "Troubleshooting"]
+DOMAIN_KEYWORDS = ["Data analysis", "Reporting", "Data quality", "KPIs", "Regulatory requirements", "Governance requirements", "Contractual obligations", "Data collection", "Data storage", "Data usage"]
+================================================================================
