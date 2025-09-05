@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, BigInteger
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from .base import Base
+from app.database import Base
 
 
 class CV(Base):

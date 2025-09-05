@@ -16,6 +16,18 @@ from app.database import create_tables, check_connection
 from app.routes.auth import router as auth_router
 from app.routes.ai import router as ai_router
 
+# Import enhanced routes with error handling
+try:
+    from app.routes import (
+        cv_enhanced_router,
+        jd_enhanced_router,
+        analysis_enhanced_router
+    )
+    enhanced_routes_available = True
+except ImportError as e:
+    logger.warning(f"Enhanced routes not available: {e}")
+    enhanced_routes_available = False
+
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
@@ -87,6 +99,15 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Include routers
 app.include_router(auth_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
+
+# Include enhanced routers if available
+if enhanced_routes_available:
+    app.include_router(cv_enhanced_router, prefix="/api")
+    app.include_router(jd_enhanced_router, prefix="/api")
+    app.include_router(analysis_enhanced_router, prefix="/api")
+    logger.info("✅ Enhanced routes enabled")
+else:
+    logger.info("⚠️ Enhanced routes disabled due to import errors")
 
 
 # Root endpoint

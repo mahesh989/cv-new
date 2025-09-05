@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
 from sqlalchemy.sql import func
 from passlib.context import CryptContext
-from .base import Base
+from app.database import Base
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
