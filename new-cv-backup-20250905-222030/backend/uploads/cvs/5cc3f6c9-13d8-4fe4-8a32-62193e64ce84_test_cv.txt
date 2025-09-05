@@ -1,0 +1,21 @@
+
+        John Doe
+        Software Engineer
+        Email: john.doe@example.com
+        Phone: +1-234-567-8900
+        
+        EXPERIENCE:
+        Senior Software Engineer (2020-Present)
+        - Developed Python applications using Django and FastAPI
+        - Worked with React and JavaScript for frontend development
+        - Experience with AWS, Docker, and Kubernetes
+        - Led team of 5 developers
+        
+        SKILLS:
+        Technical: Python, JavaScript, React, Django, FastAPI, AWS, Docker, Git
+        Soft Skills: Leadership, Communication, Project Management
+        
+        EDUCATION:
+        Bachelor of Science in Computer Science (2018)
+        University of Technology
+        

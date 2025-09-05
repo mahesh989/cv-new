@@ -1,0 +1,263 @@
+"""
+Simplified CV processing routes with improved structure
+"""
+import logging
+import os
+import shutil
+from pathlib import Path
+from typing import List, Optional
+
+from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi.responses import JSONResponse
+
+from ..services.cv_processor import cv_processor
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
+
+# Constants
+UPLOAD_DIR = Path("storage/uploads")
+ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Ensure upload directory exists
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+
+@router.post("/upload")
+async def upload_cv(cv: UploadFile = File(...)):
+    """Upload a CV file with improved validation and processing"""
+    
+    if not cv.filename:
+        raise HTTPException(status_code=400, detail="No filename provided")
+    
+    # Validate file extension
+    file_extension = Path(cv.filename).suffix.lower()
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    try:
+        # Read and validate file size
+        file_content = await cv.read()
+        if len(file_content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400, 
+                detail="File too large. Maximum size is 10MB"
+            )
+        
+        # Save file to upload directory
+        file_path = UPLOAD_DIR / cv.filename
+        with open(file_path, "wb") as buffer:
+            buffer.write(file_content)
+        
+        logger.info(f"CV uploaded successfully: {cv.filename} ({len(file_content)} bytes)")
+        
+        return JSONResponse(content={
+            "message": "CV uploaded successfully",
+            "filename": cv.filename,
+            "size": len(file_content),
+            "type": file_extension[1:].upper()  # Remove dot and uppercase
+        })
+        
+    except Exception as e:
+        logger.error(f"Error uploading CV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error uploading CV: {str(e)}")
+
+
+@router.get("/list")
+async def list_cvs():
+    """List all uploaded CVs with metadata"""
+    
+    try:
+        cvs = []
+        
+        if UPLOAD_DIR.exists():
+            for file_path in UPLOAD_DIR.iterdir():
+                if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
+                    try:
+                        stat = file_path.stat()
+                        cvs.append({
+                            "filename": file_path.name,
+                            "size": stat.st_size,
+                            "type": file_path.suffix[1:].upper(),
+                            "uploaded_date": stat.st_mtime
+                        })
+                    except Exception as e:
+                        logger.warning(f"Error reading file metadata for {file_path.name}: {e}")
+                        continue
+        
+        # Sort by upload date (newest first)
+        cvs.sort(key=lambda x: x['uploaded_date'], reverse=True)
+        
+        logger.info(f"Listed {len(cvs)} CV files")
+        
+        return JSONResponse(content={
+            "uploaded_cvs": [cv["filename"] for cv in cvs],  # Keep compatibility
+            "cv_details": cvs,
+            "total_count": len(cvs)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error listing CVs: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error listing CVs: {str(e)}")
+
+
+@router.get("/content/{filename}")
+async def get_cv_content(filename: str):
+    """Get CV text content with improved extraction"""
+    
+    try:
+        file_path = UPLOAD_DIR / filename
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="CV file not found")
+        
+        # Extract text using improved processor
+        result = cv_processor.extract_text_from_file(file_path)
+        
+        if not result['success']:
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Failed to extract text: {result['error']}"
+            )
+        
+        # Get file metadata
+        stat = file_path.stat()
+        
+        logger.info(f"CV content extracted: {filename} ({len(result['text'])} characters)")
+        
+        return JSONResponse(content={
+            "filename": filename,
+            "content": result['text'],
+            "metadata": result.get('metadata', {}),
+            "file_info": {
+                "size": stat.st_size,
+                "type": file_path.suffix[1:].upper(),
+                "uploaded_date": stat.st_mtime
+            },
+            "extraction_info": {
+                "method": result.get('method', 'unknown'),
+                "character_count": len(result['text']),
+                "word_count": len(result['text'].split())
+            }
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error extracting CV content: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error extracting CV content: {str(e)}")
+
+
+@router.get("/preview/{filename}")
+async def get_cv_preview(filename: str, max_length: int = 500):
+    """Get CV content preview with customizable length"""
+    
+    try:
+        file_path = UPLOAD_DIR / filename
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="CV file not found")
+        
+        # Extract text
+        result = cv_processor.extract_text_from_file(file_path)
+        
+        if not result['success']:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to extract text: {result['error']}"
+            )
+        
+        # Generate preview
+        full_text = result['text']
+        preview = cv_processor.get_text_preview(full_text, max_length)
+        
+        # Extract basic info
+        basic_info = cv_processor.extract_basic_info(full_text)
+        
+        logger.info(f"CV preview generated: {filename} ({len(preview)} characters)")
+        
+        return JSONResponse(content={
+            "filename": filename,
+            "preview": preview,
+            "full_length": len(full_text),
+            "preview_length": len(preview),
+            "is_truncated": len(full_text) > max_length,
+            "basic_info": basic_info,
+            "extraction_method": result.get('method', 'unknown')
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating CV preview: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating CV preview: {str(e)}")
+
+
+@router.delete("/{filename}")
+async def delete_cv(filename: str):
+    """Delete a CV file"""
+    
+    try:
+        file_path = UPLOAD_DIR / filename
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="CV file not found")
+        
+        # Delete the file
+        file_path.unlink()
+        
+        logger.info(f"CV deleted successfully: {filename}")
+        
+        return JSONResponse(content={
+            "message": "CV deleted successfully",
+            "filename": filename
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting CV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error deleting CV: {str(e)}")
+
+
+
+@router.get("/stats")
+async def get_upload_stats():
+    """Get upload directory statistics"""
+    
+    try:
+        stats = {
+            "total_files": 0,
+            "total_size": 0,
+            "file_types": {},
+            "upload_directory": str(UPLOAD_DIR.absolute())
+        }
+        
+        if UPLOAD_DIR.exists():
+            for file_path in UPLOAD_DIR.iterdir():
+                if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
+                    stats["total_files"] += 1
+                    file_size = file_path.stat().st_size
+                    stats["total_size"] += file_size
+                    
+                    file_type = file_path.suffix[1:].upper()
+                    if file_type not in stats["file_types"]:
+                        stats["file_types"][file_type] = {"count": 0, "size": 0}
+                    
+                    stats["file_types"][file_type]["count"] += 1
+                    stats["file_types"][file_type]["size"] += file_size
+        
+        # Convert total size to MB for readability
+        stats["total_size_mb"] = round(stats["total_size"] / (1024 * 1024), 2)
+        
+        logger.info(f"Upload stats retrieved: {stats['total_files']} files")
+        
+        return JSONResponse(content=stats)
+        
+    except Exception as e:
+        logger.error(f"Error getting upload stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting upload stats: {str(e)}")

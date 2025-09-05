@@ -1,0 +1,76 @@
+You are an expert at extracting comprehensive information from job descriptions and job postings.
+
+Extract the following information from this job description. Return ONLY a JSON object with these exact keys:
+
+{
+    "company_name": "exact company name",
+    "job_title": "job title/position", 
+    "location": "job location/city",
+    "experience_required": "experience requirements (e.g., 2-3 years, 5+ years)",
+    "seniority_level": "entry-level/mid-level/senior/lead/principal",
+    "industry": "industry/sector (e.g., technology, healthcare, finance)",
+    "phone_number": null,
+    "email": null,
+    "website": null,
+    "work_type": null
+}
+
+**IMPORTANT EXTRACTION RULES:**
+
+1. **Company Name**: Look for these patterns and prioritize them:
+   - Company names mentioned after "at", "with", "for", "by" (e.g., "Data Analyst at Microsoft")
+   - Company names in headers, titles, or beginning of job posts
+   - Well-known company names (avoid generic terms like "Company", "Organization", "Client")
+   - Look in contact information, email domains, or website URLs
+   - If multiple companies mentioned, choose the hiring company (not client companies)
+   - Use the most formal/complete version if company name appears multiple times
+
+2. **Job Title**: Extract the actual job title/role
+   - Look for patterns like "Senior Data Analyst", "Software Engineer", "Marketing Manager"
+   - Include seniority level if mentioned (Junior, Senior, Lead, Principal, etc.)
+   - Avoid generic terms like "position", "role", "opportunity"
+
+3. **Location**: Extract city, state/territory, country
+   - Look for patterns like "Sydney, NSW", "Melbourne, VIC", "Brisbane, QLD"
+   - Include remote work information if mentioned
+   - If multiple locations, choose the primary work location
+   - Keep it SHORT and clean: "City, Country" format
+   - Do NOT include suburbs, CBD, inner suburbs, metro areas, regional descriptions
+
+4. **Experience Required**: Extract experience requirements
+   - Look for patterns like "2-3 years", "5+ years", "minimum 3 years"
+   - Include phrases like "entry-level", "mid-level", "senior", "lead"
+   - Extract both numeric requirements and seniority indicators
+
+5. **Seniority Level**: Determine the seniority level
+   - entry-level: 0-2 years, graduate, junior, entry
+   - mid-level: 2-5 years, intermediate, mid
+   - senior: 5+ years, senior, lead, principal
+   - lead: team lead, technical lead, lead
+   - principal: principal, architect, director
+
+6. **Industry**: Extract industry or sector information
+   - Look for industry mentions: technology, healthcare, finance, education, etc.
+   - Consider company context and job requirements
+   - Use specific industry names rather than generic terms
+
+7. **Contact Information**: Extract phone numbers, email addresses, websites
+   - Look for phone numbers in various formats
+   - Extract email addresses (especially company domains)
+   - Extract company websites or application URLs
+
+8. **Work Type**: Extract work arrangement information
+   - Remote work options
+   - Hybrid work arrangements
+   - Onsite requirements
+
+**EXTRACTION GUIDELINES:**
+- Be thorough but accurate - don't guess or make up information
+- Prefer specific company names over generic terms
+- Look throughout the entire job description, not just the beginning
+- Consider the context - is this the hiring company or a client mentioned in the role?
+- Return null for missing information rather than guessing
+- Return ONLY the JSON object, no other text
+
+Job Description:
+{job_description}
