@@ -25,22 +25,43 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     Raises:
         HTTPException: If token is invalid or user not found
     """
-    # Verify the token
-    token_data = verify_token(credentials.credentials)
+    from app.config import settings
     
-    # For now, since we're using demo users, just return a demo user
-    # In production, you would fetch the user from the database using token_data.user_id
-    user = create_demo_user()
-    user.id = token_data.user_id  # Use the user_id from the token
-    user.email = token_data.email  # Use the email from the token
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    return user
+    try:
+        # Debug logging
+        token_preview = credentials.credentials[:20] + "..." if len(credentials.credentials) > 20 else credentials.credentials
+        print(f"Auth attempt with token: {token_preview}")
+        
+        # Verify the token
+        token_data = verify_token(credentials.credentials)
+        
+        # For now, since we're using demo users, just return a demo user
+        # In production, you would fetch the user from the database using token_data.user_id
+        user = create_demo_user()
+        user.id = token_data.user_id  # Use the user_id from the token
+        user.email = token_data.email  # Use the email from the token
+        
+        print(f"✅ Auth successful for user: {user.email}")
+        return user
+        
+    except HTTPException as e:
+        print(f"❌ Auth failed: {e.detail}")
+        
+        # In development mode, provide more helpful error messages
+        if settings.DEVELOPMENT_MODE:
+            if "expired" in str(e.detail).lower():
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token expired - please log in again",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid authentication token - please log in again",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        raise
 
 
 async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))) -> Optional[UserData]:

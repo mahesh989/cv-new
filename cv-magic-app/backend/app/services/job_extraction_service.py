@@ -2,9 +2,12 @@ import os
 import json
 import re
 import httpx
+import logging
 from datetime import datetime
 from typing import Dict, Any, Optional
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 class JobExtractionService:
     """Service for extracting job information and saving to organized folders"""
@@ -24,25 +27,34 @@ class JobExtractionService:
     
     def _get_fallback_prompt(self) -> str:
         """Fallback prompt if file is not found"""
-        return """
-        Extract the following information from this job description. Return ONLY a JSON object with these exact keys:
-        
-        {
-            "company_name": "exact company name",
-            "job_title": "job title/position", 
-            "location": "job location/city",
-            "experience_required": "experience requirements",
-            "seniority_level": "entry-level/mid-level/senior/lead/principal",
-            "industry": "industry/sector",
-            "phone_number": "phone number if mentioned, otherwise null",
-            "email": "email address if mentioned, otherwise null",
-            "website": "company website if mentioned, otherwise null",
-            "work_type": "remote/hybrid/onsite if mentioned, otherwise null"
-        }
-        
-        Job Description:
-        {job_description}
-        """
+        return """EXTRACT JOB INFORMATION FROM THE FOLLOWING TEXT AND RETURN ONLY VALID JSON.
+
+CRITICAL INSTRUCTIONS:
+1. Return ONLY a valid JSON object without any additional text, explanations, or markdown formatting
+2. Do NOT wrap the JSON in code blocks (no ```json ```)
+3. Start with {{ and end with }}
+4. Use double quotes for all keys and string values
+5. If information is not available, use null
+
+REQUIRED JSON FORMAT:
+{{
+  "company_name": "string or null",
+  "job_title": "string or null", 
+  "location": "string or null",
+  "experience_required": "string or null",
+  "seniority_level": "string or null",
+  "industry": "string or null",
+  "phone_number": "string or null",
+  "email": "string or null",
+  "website": "string or null",
+  "work_type": "string or null"
+}}
+
+IMPORTANT: YOUR RESPONSE MUST BE PARSABLE BY json.loads() WITHOUT ANY MODIFICATION.
+
+TEXT TO ANALYZE:
+{job_description}"""
+    
     
     def _create_company_slug(self, company_name: str) -> str:
         """Create a safe company slug for folder names"""
@@ -63,7 +75,7 @@ class JobExtractionService:
     
     async def extract_job_information(self, job_description: str, auth_token: Optional[str] = None) -> Dict[str, Any]:
         """
-        Extract job information using the selected AI model
+        Extract job information using the selected AI model with comprehensive error handling
         
         Args:
             job_description: The job description text
@@ -75,89 +87,329 @@ class JobExtractionService:
         if not job_description or len(job_description.strip()) < 10:
             return {"error": "Job description too short or empty"}
         
+        # Step 1: Try AI extraction if auth token is provided
+        if auth_token:
+            print(f"🔍 Starting AI extraction with token: {auth_token[:20]}...")
+            try:
+                ai_result = await self._try_ai_extraction(job_description, auth_token)
+                print(f"🔍 AI extraction result: {ai_result}")
+                if ai_result and "error" not in ai_result:
+                    print(f"✅ AI extraction successful: {ai_result.get('company_name', 'Unknown')}")
+                    return ai_result
+                else:
+                    print(f"⚠️ AI extraction failed: {ai_result.get('error', 'Unknown error')}")
+            except Exception as e:
+                print(f"⚠️ AI extraction exception: {str(e)}")
+                print(f"⚠️ Exception details: {repr(e)}")
+        else:
+            print(f"⚠️ No auth token provided, skipping AI extraction")
+        
+        # Step 2: Fallback to rule-based extraction
+        print("⚠️ Using rule-based extraction as fallback")
         try:
-            # Use LLM-based extraction with the selected AI model
-            if auth_token:
-                # Load the prompt template only when using AI
-                prompt_template = self._load_prompt()
-                
-                # Format the prompt with the job description
-                prompt = prompt_template.format(job_description=job_description[:3000])  # Limit to 3000 chars
-                try:
-                    # Make authenticated call to AI API
-                    async with httpx.AsyncClient() as client:
-                        headers = {
-                            "Authorization": f"Bearer {auth_token}",
-                            "Content-Type": "application/json"
-                        }
-                        
-                        response = await client.post(
-                            "http://localhost:8000/api/ai/chat",
-                            headers=headers,
-                            json={
-                                "prompt": prompt,
-                                "temperature": 0.1,
-                                "max_tokens": 500
-                            },
-                            timeout=30.0
-                        )
-                        
-                        if response.status_code == 200:
-                            ai_response = response.json()
-                            response_text = ai_response.get("content", "")
-                            
-                            # Parse the JSON response
-                            job_info = self._parse_json_response(response_text)
-                            
-                            # Validate and clean the extracted data
-                            job_info = self._validate_job_info(job_info)
-                            
-                            print(f"✅ LLM extraction successful: {job_info.get('company_name', 'Unknown')}")
-                            return job_info
-                        else:
-                            print(f"AI API call failed with status {response.status_code}: {response.text}")
-                            # Fall through to rule-based extraction
-                except Exception as ai_error:
-                    print(f"AI API call failed: {ai_error}")
-                    # Fall through to rule-based extraction
-            
-            # Fallback to rule-based extraction if AI is not available
-            print("⚠️ Using rule-based extraction as fallback")
             return self._extract_with_rules(job_description)
-            
         except Exception as e:
-            print(f"Job extraction error: {e}")
-            raise Exception(f"Failed to extract job information: {str(e)}")
+            print(f"Rule-based extraction failed: {str(e)}")
+            # Step 3: Return minimal default if everything fails
+            return self._get_default_job_info()
     
-    def _parse_json_response(self, response: str) -> Dict[str, Any]:
-        """Parse JSON from AI response"""
+    async def _try_ai_extraction(self, job_description: str, auth_token: str) -> Dict[str, Any]:
+        """Attempt AI extraction with comprehensive error handling"""
         try:
-            # Clean the response
-            response = response.strip()
+            # Load prompt template
+            prompt_template = self._load_prompt()
+            # Use safe string replacement to avoid format issues with braces
+            prompt = prompt_template.replace('{job_description}', job_description[:3000])
             
-            # Remove any markdown formatting if present
-            if response.startswith('```json'):
-                response = response[7:]
-            if response.endswith('```'):
-                response = response[:-3]
-            response = response.strip()
-            
-            # Try to find JSON in the response
-            json_start = response.find('{')
-            json_end = response.rfind('}') + 1
-            
-            if json_start >= 0 and json_end > json_start:
-                json_str = response[json_start:json_end]
-                return json.loads(json_str)
-            else:
-                # Try to parse the entire response as JSON
-                return json.loads(response)
+            async with httpx.AsyncClient() as client:
+                headers = {
+                    "Authorization": f"Bearer {auth_token}",
+                    "Content-Type": "application/json"
+                }
                 
-        except json.JSONDecodeError as e:
-            # If JSON parsing fails, raise exception
-            print(f"JSON parsing failed: {e}")
-            print(f"Response was: {response}")
-            raise Exception(f"Failed to parse JSON response: {str(e)}")
+                response = await client.post(
+                    "http://localhost:8000/api/ai/chat",
+                    headers=headers,
+                    json={
+                        "prompt": prompt,
+                        "system_prompt": "You are a precise job information extractor. CRITICAL: Return ONLY a valid JSON object that starts with { and ends with }. Do NOT wrap in code blocks. Do NOT add any text before or after the JSON. Use double quotes for all keys. If information is not available, use null. Your response must be parsable by json.loads() without modification.",
+                        "temperature": 0.1,
+                        "max_tokens": 1000
+                    },
+                    timeout=30.0
+                )
+                
+                # Handle HTTP errors
+                if response.status_code == 403:
+                    return {"error": "Authentication failed - invalid or expired token"}
+                elif response.status_code == 400:
+                    return {"error": "Bad request - check AI model configuration"}
+                elif response.status_code != 200:
+                    return {"error": f"AI API returned status {response.status_code}"}
+                
+                # Parse AI response
+                try:
+                    ai_response = response.json()
+                    response_text = ai_response.get("content", "")
+                    
+                    if not response_text.strip():
+                        return {"error": "AI returned empty response"}
+                    
+                    # Debug logging
+                    logger.debug("AI response length: %s", len(response_text))
+                    logger.debug("Response type: %s", type(response_text))
+                    logger.debug("Response preview: %s", str(response_text)[:200] + "...")
+                    print(f"🤖 AI raw response (first 100 chars): '{response_text[:100]}'")
+                    print(f"🤖 AI raw response (last 50 chars): '{response_text[-50:]}'")
+                    print(f"🤖 Response length: {len(response_text)} characters")
+                    print(f"🤖 Starts with: '{response_text[:10]}'")
+                    print(f"🤖 Ends with: '{response_text[-10:]}'")
+                    print(f"🤖 Full response: '{response_text}'")
+                    print(f"🤖 Response repr: {repr(response_text)}")
+                    
+                    # Parse and validate JSON
+                    try:
+                        job_info = self._parse_ai_response(response_text)
+                        if job_info and self._validate_ai_response(job_info):
+                            validated_info = self._validate_job_info(job_info)
+                            print(f"✅ Successfully extracted and validated job info: {validated_info.get('company_name', 'Unknown')}")
+                            return validated_info
+                        else:
+                            print(f"❌ AI response failed validation")
+                            return {"error": "AI response failed validation"}
+                    except Exception as parse_error:
+                        print(f"❌ JSON parsing error in _parse_ai_response: {str(parse_error)}")
+                        print(f"❌ Full error details: {repr(parse_error)}")
+                        print(f"❌ Response that caused error: '{response_text}'")
+                        print(f"❌ Response repr that caused error: {repr(response_text)}")
+                        print(f"❌ Response length: {len(response_text)}")
+                        return {"error": f"AI extraction failed: {str(parse_error)}"}
+                    
+                except json.JSONDecodeError as e:
+                    return {"error": f"Invalid JSON from AI API: {str(e)}"}
+                except Exception as e:
+                    return {"error": f"Failed to process AI response: {str(e)}"}
+                
+        except httpx.TimeoutException:
+            return {"error": "AI API request timed out"}
+        except httpx.ConnectError:
+            return {"error": "Cannot connect to AI API - is the backend running?"}
+        except Exception as e:
+            return {"error": f"AI extraction failed: {str(e)}"}
+    
+    def _get_default_job_info(self) -> Dict[str, Any]:
+        """Return default job info when all extraction methods fail"""
+        return {
+            "company_name": "Unknown_Company",
+            "job_title": "Unknown_Position",
+            "location": "Unknown_Location",
+            "experience_required": "Not specified",
+            "seniority_level": "Unknown",
+            "industry": "Unknown",
+            "phone_number": None,
+            "email": None,
+            "website": None,
+            "work_type": None
+        }
+    
+    
+    def _fix_json_issues(self, json_string: str) -> str:
+        """
+        Fix common JSON formatting issues from AI responses.
+        Handles cases where JSON might be missing braces, have malformed keys, etc.
+        """
+        if not json_string or not isinstance(json_string, str):
+            return "{}"
+        
+        # Clean the string first
+        cleaned = json_string.strip()
+        
+        logger.debug("Original AI response: %s", cleaned[:200] + "...")
+        
+        # Case 1: If it starts with a quoted key without opening brace (your specific error)
+        if cleaned.startswith('"') and not cleaned.startswith('{'):
+            logger.debug("Fixing JSON: missing opening brace")
+            # Check if it has a closing brace at the end
+            if not cleaned.endswith('}'):
+                cleaned = '{' + cleaned + '}'
+            else:
+                cleaned = '{' + cleaned
+        
+        # Case 2: If it's missing both braces but has key-value pairs
+        elif not cleaned.startswith('{') and not cleaned.endswith('}'):
+            if ':' in cleaned and ('"' in cleaned or "'" in cleaned):
+                logger.debug("Fixing JSON: missing both braces")
+                cleaned = '{' + cleaned + '}'
+        
+        # Case 3: Handle newlines/whitespace before keys (common with GPT models)
+        if '\n' in cleaned and any(line.strip().startswith('"') for line in cleaned.split('\n') if line.strip()):
+            logger.debug("Fixing JSON: newline formatting issues")
+            # Remove excessive whitespace but maintain structure
+            lines = []
+            for line in cleaned.split('\n'):
+                stripped = line.strip()
+                if stripped:  # Only keep non-empty lines
+                    lines.append(stripped)
+            cleaned = ' '.join(lines)  # Join as single line
+        
+        # Case 4: Handle markdown code blocks
+        if '```json' in cleaned:
+            logger.debug("Extracting JSON from markdown code block")
+            start_idx = cleaned.find('```json') + 7
+            end_idx = cleaned.find('```', start_idx)
+            if end_idx != -1:
+                cleaned = cleaned[start_idx:end_idx].strip()
+        elif '```' in cleaned:
+            logger.debug("Extracting JSON from generic code block")
+            start_idx = cleaned.find('```') + 3
+            end_idx = cleaned.find('```', start_idx)
+            if end_idx != -1:
+                cleaned = cleaned[start_idx:end_idx].strip()
+        
+        # Final validation and cleanup
+        if not cleaned.startswith('{'):
+            logger.debug("Adding missing opening brace")
+            cleaned = '{' + cleaned
+        if not cleaned.endswith('}'):
+            logger.debug("Adding missing closing brace")
+            cleaned += '}'
+        
+        logger.debug("Fixed JSON: %s", cleaned[:200] + "...")
+        return cleaned
+    
+    def _extract_key_values(self, response: str) -> Dict[str, Any]:
+        """Extract key-value pairs as last resort"""
+        result = self._get_default_job_info()
+        
+        # Look for key-value patterns
+        patterns = [
+            r'"(company_name|job_title|location|experience_required|seniority_level|industry|phone_number|email|website|work_type)"\s*:\s*"([^"]+)"',
+            r'"(company_name|job_title|location|experience_required|seniority_level|industry|phone_number|email|website|work_type)"\s*:\s*([^,}\n]+)'
+        ]
+        
+        for pattern in patterns:
+            matches = re.findall(pattern, response, re.IGNORECASE)
+            for key, value in matches:
+                value = value.strip().strip('"').strip("'")
+                if value and value.lower() not in ['null', 'none', 'unknown']:
+                    result[key] = value
+        
+        return result
+    
+    def _validate_ai_response(self, data: Dict[str, Any]) -> bool:
+        """Validate that the AI response contains expected job information."""
+        if not isinstance(data, dict):
+            return False
+        
+        # Check for at least one of these key fields
+        required_fields = ['company_name', 'job_title', 'location', 'experience_required']
+        has_required_field = any(field in data and data[field] and str(data[field]).strip() for field in required_fields)
+        
+        if not has_required_field:
+            print(f"⚠️ AI response missing required fields: {list(data.keys())}")
+            return False
+        
+        # Validate field types
+        for field in ['company_name', 'job_title', 'location', 'experience_required', 'seniority_level', 'industry']:
+            if field in data and data[field] is not None and not isinstance(data[field], str):
+                print(f"⚠️ Field '{field}' has invalid type: {type(data[field])}")
+                return False
+        
+        return True
+    
+    def _parse_ai_response(self, response: str) -> Optional[Dict[str, Any]]:
+        """Parse AI response with multiple fallback strategies."""
+        if not response:
+            return None
+        
+        logger.debug("_parse_ai_response called with: %s", repr(response[:100]) + "...")
+        logger.debug("Response length: %s", len(response))
+        
+        parsing_attempts = [
+            self._attempt_direct_json_parse,
+            self._attempt_fixed_json_parse,
+            self._attempt_regex_json_extraction,
+            self._attempt_manual_json_reconstruction
+        ]
+        
+        for attempt in parsing_attempts:
+            try:
+                result = attempt(response)
+                if result and self._validate_ai_response(result):
+                    logger.debug("Parsing successful with %s", attempt.__name__)
+                    return result
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.debug("%s failed: %s", attempt.__name__, str(e))
+                continue
+        
+        logger.warning("All JSON parsing attempts failed")
+        print(f"❌ Could not parse AI response with any method")
+        print(f"❌ Full response: {repr(response)}")
+        return None
+    
+    def _attempt_direct_json_parse(self, response: str) -> Optional[Dict[str, Any]]:
+        """Attempt direct JSON parsing."""
+        logger.debug("Attempting direct JSON parsing")
+        result = json.loads(response.strip())
+        logger.debug("Direct JSON parsing successful")
+        return result
+    
+    def _attempt_fixed_json_parse(self, response: str) -> Optional[Dict[str, Any]]:
+        """Attempt parsing after fixing common issues."""
+        logger.debug("Attempting fixed JSON parsing")
+        fixed = self._fix_json_issues(response)
+        result = json.loads(fixed)
+        logger.debug("Fixed JSON parsing successful")
+        return result
+    
+    def _attempt_regex_json_extraction(self, response: str) -> Optional[Dict[str, Any]]:
+        """Attempt to extract JSON using regex patterns."""
+        logger.debug("Attempting regex JSON extraction")
+        json_patterns = [
+            r'\{.*\}',  # Basic JSON object
+            r'```json\s*(\{.*\})\s*```',  # Markdown JSON code block
+            r'```\s*(\{.*\})\s*```',  # Generic code block
+        ]
+        
+        for pattern in json_patterns:
+            match = re.search(pattern, response, re.DOTALL)
+            if match:
+                try:
+                    json_str = match.group(1) if match.groups() else match.group(0)
+                    result = json.loads(json_str.strip())
+                    logger.debug("Regex JSON extraction successful")
+                    return result
+                except json.JSONDecodeError:
+                    continue
+        return None
+    
+    def _attempt_manual_json_reconstruction(self, response: str) -> Optional[Dict[str, Any]]:
+        """
+        Attempt to manually reconstruct JSON from malformed key-value pairs.
+        Handles cases like: "key": "value" without braces.
+        """
+        logger.debug("Attempting manual JSON reconstruction")
+        lines = response.strip().split('\n')
+        json_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if line and ':' in line and line.count('"') >= 2:
+                # This looks like a key-value pair
+                json_lines.append(line)
+        
+        if json_lines:
+            try:
+                # Reconstruct as proper JSON
+                reconstructed = '{' + ', '.join(json_lines) + '}'
+                result = json.loads(reconstructed)
+                logger.debug("Manual JSON reconstruction successful")
+                return result
+            except json.JSONDecodeError:
+                pass
+        
+        return None
+    
     
     def _validate_job_info(self, job_info: Dict[str, Any]) -> Dict[str, Any]:
         """Validate and clean extracted job information"""
@@ -206,22 +458,16 @@ class JobExtractionService:
         
         # Company name extraction patterns (improved)
         company_patterns = [
-            # Look for company names in "About us" sections (most reliable)
             r'About\s+us\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
             r'About\s+the\s+company\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
-            # Look for repeated company names (like "No To Violence" appearing twice)
             r'([A-Z][a-zA-Z\s&.-]+?)\s+Job\s+Summary\s+\1',
             r'([A-Z][a-zA-Z\s&.-]+?)\s+Applications\s+close.*?\1',
-            # Look for company names in job titles/headers (but exclude job titles)
             r'(?:^|\n)\s*([A-Z][a-zA-Z\s&.-]+?)\s+Job\s+Summary',
             r'(?:^|\n)\s*([A-Z][a-zA-Z\s&.-]+?)\s+Applications\s+close',
-            # Look for company names after "at", "with", "for" (but not job titles)
             r'(?:^|\n)\s*[A-Z][a-zA-Z\s]*\s+at\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s|,|\.|$)',
             r'(?:^|\n)\s*[A-Z][a-zA-Z\s]*\s+with\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s|,|\.|$)',
             r'(?:^|\n)\s*[A-Z][a-zA-Z\s]*\s+for\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s|,|\.|$)',
-            # Look for company names in email domains
             r'@([a-zA-Z0-9.-]+)\.(?:com|org|au|net)',
-            # Look for company names in website URLs
             r'https?://(?:www\.)?([a-zA-Z0-9.-]+)\.(?:com|org|au|net)',
         ]
         
@@ -231,14 +477,13 @@ class JobExtractionService:
                 company_name = match.group(1).strip()
                 # Filter out invalid company names
                 if (len(company_name) > 3 and len(company_name) < 50 and 
-                    not company_name.lower() in ['work', 'job', 'position', 'role', 'applications', 'close', 'posted', 'summary', 'description', 'requirements', 'responsibilities', 'experience', 'skills', 'qualifications', 'benefits', 'offer', 'apply', 'contact', 'email', 'phone', 'website', 'location', 'salary', 'full', 'time', 'part', 'contract', 'permanent', 'temporary', 'remote', 'hybrid', 'onsite', 'office', 'home', 'based', 'melbourne', 'sydney', 'brisbane', 'perth', 'adelaide', 'canberra', 'darwin', 'hobart', 'australia', 'new', 'zealand']):
+                    not company_name.lower() in ['work', 'job', 'position', 'role', 'applications', 'close', 'posted', 'summary']):
                     job_info["company_name"] = company_name
                     break
         
         # Job title extraction patterns
         title_patterns = [
             r'(Senior|Junior|Lead|Principal|Staff)?\s*(Software Engineer|Data Analyst|Developer|Manager|Analyst|Designer|Consultant|Specialist)',
-            r'(Software Engineer|Data Analyst|Developer|Manager|Analyst|Designer|Consultant|Specialist)',
             r'Position:\s*([A-Z][a-zA-Z\s-]+?)(?:\s|,|\.|$)',
             r'Role:\s*([A-Z][a-zA-Z\s-]+?)(?:\s|,|\.|$)',
         ]
@@ -250,59 +495,6 @@ class JobExtractionService:
                 if len(job_title) > 3 and len(job_title) < 100:
                     job_info["job_title"] = job_title
                     break
-        
-        # Location extraction patterns
-        location_patterns = [
-            r'(Melbourne|Sydney|Brisbane|Perth|Adelaide|Canberra|Darwin|Hobart)',
-            r'(Australia|New Zealand)',
-            r'Location:\s*([A-Z][a-zA-Z\s,-]+?)(?:\s|,|\.|$)',
-            r'Based in\s+([A-Z][a-zA-Z\s,-]+?)(?:\s|,|\.|$)',
-        ]
-        
-        for pattern in location_patterns:
-            match = re.search(pattern, job_description, re.IGNORECASE)
-            if match:
-                location = match.group(1).strip()
-                if len(location) > 2 and len(location) < 50:
-                    job_info["location"] = location
-                    break
-        
-        # Experience extraction patterns
-        experience_patterns = [
-            r'(\d+[\+\-\s]*\d*)\s*years?\s*(?:of\s*)?experience',
-            r'(\d+[\+\-\s]*\d*)\s*years?\s*(?:in|with)',
-            r'minimum\s*(\d+)\s*years?',
-            r'at least\s*(\d+)\s*years?',
-        ]
-        
-        for pattern in experience_patterns:
-            match = re.search(pattern, job_description, re.IGNORECASE)
-            if match:
-                experience = match.group(1).strip()
-                job_info["experience_required"] = experience
-                break
-        
-        # Seniority level extraction
-        if re.search(r'senior|lead|principal|staff', job_description, re.IGNORECASE):
-            job_info["seniority_level"] = "senior"
-        elif re.search(r'junior|entry|graduate|trainee', job_description, re.IGNORECASE):
-            job_info["seniority_level"] = "entry-level"
-        elif re.search(r'mid|intermediate', job_description, re.IGNORECASE):
-            job_info["seniority_level"] = "mid-level"
-        
-        # Industry extraction
-        industry_keywords = {
-            'technology': ['software', 'tech', 'IT', 'programming', 'development'],
-            'healthcare': ['health', 'medical', 'hospital', 'clinic'],
-            'finance': ['banking', 'financial', 'investment', 'fintech'],
-            'education': ['education', 'university', 'school', 'teaching'],
-            'retail': ['retail', 'commerce', 'e-commerce', 'shopping'],
-        }
-        
-        for industry, keywords in industry_keywords.items():
-            if any(keyword in job_description.lower() for keyword in keywords):
-                job_info["industry"] = industry
-                break
         
         # Email extraction
         email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', job_description)
@@ -318,14 +510,6 @@ class JobExtractionService:
         website_match = re.search(r'https?://[^\s]+', job_description)
         if website_match:
             job_info["website"] = website_match.group(0)
-        
-        # Work type extraction
-        if re.search(r'remote|work from home|WFH', job_description, re.IGNORECASE):
-            job_info["work_type"] = "Remote"
-        elif re.search(r'hybrid', job_description, re.IGNORECASE):
-            job_info["work_type"] = "Hybrid"
-        elif re.search(r'onsite|on-site|office', job_description, re.IGNORECASE):
-            job_info["work_type"] = "Onsite"
         
         return job_info
     

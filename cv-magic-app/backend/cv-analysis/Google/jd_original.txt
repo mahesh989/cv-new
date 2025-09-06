@@ -1,0 +1,10 @@
+================================================================================
+ORIGINAL JOB DESCRIPTION
+Company: Google
+Job Title: Software Engineer
+Extracted: 2025-09-06 20:10:26
+Length: 156 characters
+URL: https://example.com/google-job-fixed
+================================================================================
+
+Software Engineer at Google. Requirements: Python, JavaScript, 3+ years experience. Location: Mountain View, CA. Full-time position with excellent benefits.

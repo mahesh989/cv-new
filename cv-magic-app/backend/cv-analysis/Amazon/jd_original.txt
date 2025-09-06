@@ -1,0 +1,10 @@
+================================================================================
+ORIGINAL JOB DESCRIPTION
+Company: Amazon
+Job Title: Senior Software Engineer
+Extracted: 2025-09-06 19:52:26
+Length: 125 characters
+URL: https://example.com/amazon-job
+================================================================================
+
+Senior Software Engineer at Amazon. Seattle, WA. 6+ years experience required in Java, AWS, and microservices. Full benefits.

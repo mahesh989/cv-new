@@ -43,16 +43,25 @@ async def extract_and_save_job(request: Request, current_user: UserData = Depend
         auth_token = request.headers.get("authorization", "").replace("Bearer ", "")
         
         # Extract and save job information with LLM
-        result = await job_extraction_service.save_job_analysis(
-            job_description=job_description,
-            job_url=job_url if job_url else None,
-            auth_token=auth_token if auth_token else None
-        )
-        
-        if "error" in result:
-            raise HTTPException(status_code=500, detail=result["error"])
-        
-        return JSONResponse(content=result)
+        try:
+            result = await job_extraction_service.save_job_analysis(
+                job_description=job_description,
+                job_url=job_url if job_url else None,
+                auth_token=auth_token if auth_token else None
+            )
+            
+            if "error" in result:
+                # Log the error but don't crash the API
+                print(f"Job analysis error: {result['error']}")
+                raise HTTPException(status_code=400, detail=f"Job analysis failed: {result['error']}")
+            
+            return JSONResponse(content=result)
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"Unexpected error in job analysis: {str(e)}")
+            raise HTTPException(status_code=500, detail="Job analysis service temporarily unavailable")
         
     except HTTPException:
         raise

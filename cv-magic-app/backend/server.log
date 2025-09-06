@@ -1,0 +1,5 @@
+INFO:     Will watch for changes in these directories: ['/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [76772] using WatchFiles
+Anthropic API key validation failed: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CSrw9rAfgatdHKejaSZTh'}
+⚠️ anthropic provider initialized but not available

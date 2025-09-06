@@ -1,0 +1,10 @@
+================================================================================
+ORIGINAL JOB DESCRIPTION
+Company: Microsoft
+Job Title: Senior Data Analyst
+Extracted: 2025-09-06 19:10:45
+Length: 175 characters
+URL: https://example.com/microsoft-job
+================================================================================
+
+Senior Data Analyst at Microsoft Corporation. Location: Seattle, WA. Experience: 5+ years required. Skills: Python, SQL, Machine Learning. Full-time remote position available.

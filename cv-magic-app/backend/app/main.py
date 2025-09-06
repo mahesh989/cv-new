@@ -77,6 +77,35 @@ app.add_middleware(
     expose_headers=["*"],  # Expose all headers
 )
 
+# Add authentication debugging middleware
+@app.middleware("http")
+async def auth_debug_middleware(request: Request, call_next):
+    # Skip auth logging for OPTIONS requests (CORS preflight)
+    if request.method == "OPTIONS":
+        response = await call_next(request)
+        return response
+    
+    path = request.url.path
+    auth_header = request.headers.get("authorization")
+    
+    # Define public endpoints that don't need auth
+    public_endpoints = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh-session", "/api/quick-login", "/health", "/api/info", "/api/ai/health"]
+    
+    # Only log auth attempts for protected API routes
+    if path.startswith("/api/") and path not in public_endpoints:
+        if not auth_header:
+            logger.debug(f"❌ No auth header on {request.method} {path}")
+        else:
+            logger.debug(f"🔑 Auth attempt on {request.method} {path}")
+    
+    response = await call_next(request)
+    
+    # Log auth failures only for non-public endpoints
+    if response.status_code == 403 and path not in public_endpoints:
+        logger.warning(f"🚫 Auth failed (403) for {request.method} {path}")
+    
+    return response
+
 
 # Global exception handler
 @app.exception_handler(Exception)
@@ -119,7 +148,11 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
-        "version": settings.APP_VERSION
+        "version": settings.APP_VERSION,
+        "auth_config": {
+            "jwt_expiration_minutes": settings.JWT_EXPIRATION_MINUTES,
+            "development_mode": settings.DEVELOPMENT_MODE
+        }
     }
 
 
@@ -157,6 +190,31 @@ async def api_info():
             "analysis": "/api/analysis"
         }
     }
+
+
+# Quick login endpoint for testing
+@app.post("/api/quick-login")
+async def quick_login():
+    """Quick login for development testing"""
+    from app.core.auth import create_demo_user, create_access_token, create_refresh_token
+    from app.models.auth import TokenResponse
+    
+    # Create demo user and tokens
+    user = create_demo_user()
+    user_dict = {"id": user.id, "email": user.email}
+    access_token = create_access_token(user_dict)
+    refresh_token = create_refresh_token(user.id)
+    
+    print(f"🔑 Quick login created for user: {user.email}")
+    print(f"🔑 Token preview: {access_token[:30]}...")
+    
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=settings.JWT_EXPIRATION_MINUTES * 60,
+        user=user
+    )
 
 
 if __name__ == "__main__":

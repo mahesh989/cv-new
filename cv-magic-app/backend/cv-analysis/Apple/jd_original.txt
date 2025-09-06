@@ -1,0 +1,10 @@
+================================================================================
+ORIGINAL JOB DESCRIPTION
+Company: Apple
+Job Title: Software Engineer
+Extracted: 2025-09-06 19:10:22
+Length: 271 characters
+URL: https://example.com/apple-job
+================================================================================
+
+Software Engineer at Apple Inc. We are looking for a talented Software Engineer to join our team in Cupertino, CA. Must have 3+ years experience in Python and JavaScript. This is a full-time onsite position. Contact us at jobs@apple.com or visit https://apple.com/careers

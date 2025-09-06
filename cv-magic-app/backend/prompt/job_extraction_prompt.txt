@@ -1,24 +1,30 @@
-You are an expert at extracting comprehensive information from job descriptions and job postings.
+EXTRACT JOB INFORMATION FROM THE FOLLOWING TEXT AND RETURN ONLY VALID JSON.
 
-Extract the following information from this job description. Return ONLY a JSON object with these exact keys:
+CRITICAL INSTRUCTIONS:
+1. Return ONLY a valid JSON object without any additional text, explanations, or markdown formatting
+2. Do NOT wrap the JSON in code blocks (no ```json ```)
+3. Start with {{ and end with }}
+4. Use double quotes for all keys and string values
+5. If information is not available, use null
 
-{
-    "company_name": "exact company name",
-    "job_title": "job title/position", 
-    "location": "job location/city",
-    "experience_required": "experience requirements (e.g., 2-3 years, 5+ years)",
-    "seniority_level": "entry-level/mid-level/senior/lead/principal",
-    "industry": "industry/sector (e.g., technology, healthcare, finance)",
-    "phone_number": null,
-    "email": null,
-    "website": null,
-    "work_type": null
-}
+REQUIRED JSON FORMAT:
+{{
+  "company_name": "string or null",
+  "job_title": "string or null", 
+  "location": "string or null",
+  "experience_required": "string or null",
+  "seniority_level": "string or null",
+  "industry": "string or null",
+  "phone_number": "string or null",
+  "email": "string or null",
+  "website": "string or null",
+  "work_type": "string or null"
+}}
 
-**IMPORTANT EXTRACTION RULES:**
+IMPORTANT: YOUR RESPONSE MUST BE PARSABLE BY json.loads() WITHOUT ANY MODIFICATION.
 
-1. **Company Name**: Look for these patterns and prioritize them:
-   - Company names mentioned after "at", "with", "for", "by" (e.g., "Data Analyst at Microsoft")
+TEXT TO ANALYZE:
+{job_description}
    - Company names in headers, titles, or beginning of job posts
    - Well-known company names (avoid generic terms like "Company", "Organization", "Client")
    - Look in contact information, email domains, or website URLs
@@ -64,13 +70,9 @@ Extract the following information from this job description. Return ONLY a JSON 
    - Hybrid work arrangements
    - Onsite requirements
 
-**EXTRACTION GUIDELINES:**
-- Be thorough but accurate - don't guess or make up information
-- Prefer specific company names over generic terms
-- Look throughout the entire job description, not just the beginning
-- Consider the context - is this the hiring company or a client mentioned in the role?
-- Return null for missing information rather than guessing
-- Return ONLY the JSON object, no other text
+}
 
-Job Description:
+IMPORTANT: Return ONLY the JSON object. Do not wrap it in markdown code blocks or add any other text.
+
+TEXT TO ANALYZE:
 {job_description}

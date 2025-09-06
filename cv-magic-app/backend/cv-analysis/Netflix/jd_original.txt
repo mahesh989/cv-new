@@ -1,0 +1,10 @@
+================================================================================
+ORIGINAL JOB DESCRIPTION
+Company: Netflix
+Job Title: Developer
+Extracted: 2025-09-06 19:47:32
+Length: 126 characters
+URL: https://example.com/netflix-job
+================================================================================
+
+Backend Developer at Netflix. San Francisco, CA. 4+ years experience in Python, Django, and PostgreSQL. Remote work available.

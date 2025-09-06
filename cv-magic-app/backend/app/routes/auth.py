@@ -85,3 +85,45 @@ async def get_profile(current_user: UserData = Depends(get_current_user)):
 async def update_profile(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Update user profile endpoint"""
     return {"message": "Profile update endpoint - to be implemented"}
+
+
+@router.get("/debug-token")
+async def debug_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Debug endpoint to check token status"""
+    from app.core.auth import verify_token
+    try:
+        token_data = verify_token(credentials.credentials)
+        return {
+            "status": "valid",
+            "user_id": token_data.user_id,
+            "email": token_data.email,
+            "expires_at": token_data.exp.isoformat(),
+            "issued_at": token_data.iat.isoformat()
+        }
+    except HTTPException as e:
+        return {
+            "status": "invalid",
+            "error": e.detail,
+            "status_code": e.status_code
+        }
+
+
+@router.post("/refresh-session")
+async def refresh_session():
+    """Create a new session token for development"""
+    from app.core.auth import create_demo_user, create_access_token, create_refresh_token
+    from app.models.auth import TokenResponse
+    
+    # Create a fresh demo user and tokens
+    user = create_demo_user()
+    user_dict = {"id": user.id, "email": user.email}
+    access_token = create_access_token(user_dict)
+    refresh_token = create_refresh_token(user.id)
+    
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=settings.JWT_EXPIRATION_MINUTES * 60,
+        user=user
+    )
