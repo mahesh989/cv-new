@@ -226,16 +226,6 @@ class JDStatsResponse(BaseModel):
     has_salary: Optional[bool] = None
 
 
-class SkillExtractionResponse(BaseModel):
-    """Response model for skill extraction"""
-    text_type: str
-    text_length: int
-    word_count: int
-    technical_skills: List[str]
-    soft_skills: List[str]
-    total_skills_found: int
-    extraction_date: datetime
-
 
 class URLTestResponse(BaseModel):
     """Response model for URL extraction testing"""

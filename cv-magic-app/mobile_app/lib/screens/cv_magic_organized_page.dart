@@ -14,6 +14,8 @@ import '../modules/cv/cv_selection_module.dart';
 import '../modules/cv/cv_preview_module.dart';
 import '../widgets/job_input.dart';
 import '../services/api_service.dart';
+import '../controllers/skills_analysis_controller.dart';
+import '../widgets/skills_display_widget.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   const CVMagicOrganizedPage({super.key});
@@ -30,6 +32,29 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
   // Job description controllers
   final TextEditingController jdController = TextEditingController();
   final TextEditingController jdUrlController = TextEditingController();
+
+  // Skills analysis controller
+  late final SkillsAnalysisController _skillsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _skillsController = SkillsAnalysisController();
+
+    // Add listener to jdController to debug changes
+    jdController.addListener(() {
+      print(
+          '🔍 [DEBUG] CV Magic: jdController changed - length: ${jdController.text.length}');
+    });
+  }
+
+  @override
+  void dispose() {
+    _skillsController.dispose();
+    jdController.dispose();
+    jdUrlController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +95,135 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
               jdUrlController: jdUrlController,
               onExtract:
                   () {}, // Not used anymore, analysis is handled in JobInput widget
+            ),
+            const SizedBox(height: 16),
+
+            // Skills Analysis Section
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.psychology_outlined,
+                          color: Colors.purple,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Skills Analysis',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.purple,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Compare your CV skills against job requirements',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ListenableBuilder(
+                        listenable:
+                            Listenable.merge([_skillsController, jdController]),
+                        builder: (context, _) {
+                          final canAnalyze = selectedCVFilename != null &&
+                              jdController.text.trim().isNotEmpty;
+                          final isAnalyzing = _skillsController.isLoading;
+
+                          // Debug logging
+                          print(
+                              '🔍 [DEBUG] Button state - canAnalyze: $canAnalyze, isAnalyzing: $isAnalyzing');
+                          print(
+                              '🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
+                          print(
+                              '🔍 [DEBUG] jdController.text.length: ${jdController.text.length}');
+
+                          return ElevatedButton.icon(
+                            onPressed: (canAnalyze && !isAnalyzing)
+                                ? _analyzeSkills
+                                : null,
+                            icon: isAnalyzing
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.psychology),
+                            label: Text(isAnalyzing
+                                ? 'Analyzing Skills...'
+                                : 'Analyze Skills'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  canAnalyze ? Colors.purple : Colors.grey,
+                              foregroundColor:
+                                  canAnalyze ? Colors.white : Colors.grey,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    if (selectedCVFilename == null ||
+                        jdController.text.trim().isEmpty) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.purple.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.purple,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                selectedCVFilename == null
+                                    ? 'Please select a CV first'
+                                    : 'Please enter a job description first',
+                                style: TextStyle(
+                                  color: Colors.purple[700],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Skills Analysis Results
+            SkillsDisplayWidget(
+              controller: _skillsController,
             ),
 
             // Loading indicator
@@ -125,16 +279,56 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
     });
   }
 
+  /// Analyze skills by comparing CV with Job Description
+  Future<void> _analyzeSkills() async {
+    print('🔍 [DEBUG] _analyzeSkills called');
+    print('🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
+    print('🔍 [DEBUG] jdController.text: "${jdController.text}"');
+    print(
+        '🔍 [DEBUG] jdController.text.trim().isEmpty: ${jdController.text.trim().isEmpty}');
+
+    if (selectedCVFilename == null || jdController.text.trim().isEmpty) {
+      print('❌ [DEBUG] Cannot analyze - missing CV or JD');
+      _showSnackBar('Please select a CV and enter a job description first',
+          isError: true);
+      return;
+    }
+
+    print('✅ [DEBUG] Starting skills analysis...');
+    try {
+      await _skillsController.performAnalysis(
+        cvFilename: selectedCVFilename!,
+        jdText: jdController.text.trim(),
+      );
+
+      if (_skillsController.hasResults) {
+        _showSnackBar('Skills analysis completed successfully!');
+      } else if (_skillsController.hasError) {
+        _showSnackBar(
+            'Skills analysis failed: ${_skillsController.errorMessage}',
+            isError: true);
+      }
+    } catch (e) {
+      print('❌ [DEBUG] Error in _analyzeSkills: $e');
+      _showSnackBar('Error performing skills analysis: $e', isError: true);
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Colors.red : Colors.green,
+          duration: Duration(seconds: isError ? 4 : 3),
+        ),
+      );
+    }
+  }
+
   Future<void> _refreshCVList() async {
     // This would trigger a refresh of the CV selection module
     // For now, we'll just update the state
     setState(() {});
-  }
-
-  @override
-  void dispose() {
-    jdController.dispose();
-    jdUrlController.dispose();
-    super.dispose();
   }
 }

@@ -136,6 +136,30 @@ class AIModelService extends ChangeNotifier {
     }
   }
 
+  // Map frontend model ID to backend API model name
+  String _getBackendModelName(String modelId) {
+    switch (modelId) {
+      case 'gpt-4o':
+        return 'gpt-4o';
+      case 'gpt-4o-mini':
+        return 'gpt-4o-mini';
+      case 'gpt-3.5-turbo':
+        return 'gpt-3.5-turbo';
+      case 'claude-3.5-sonnet':
+        return 'claude-3-5-sonnet-20241022';
+      case 'claude-3-haiku':
+        return 'claude-3-haiku-20240307';
+      case 'deepseek-chat':
+        return 'deepseek-chat';
+      case 'deepseek-coder':
+        return 'deepseek-coder';
+      case 'deepseek-reasoner':
+        return 'deepseek-reasoner';
+      default:
+        return modelId; // fallback to original ID
+    }
+  }
+
   // Sync model selection with backend
   Future<void> _syncModelWithBackend(String modelId) async {
     try {
@@ -152,11 +176,24 @@ class AIModelService extends ChangeNotifier {
         headers['Authorization'] = 'Bearer $token';
       }
 
+      // Get the actual model info to extract provider and model name
+      final model = AIModelsConfig.getModel(modelId);
+      if (model == null) {
+        debugPrint('❌ Model not found for backend sync: $modelId');
+        return;
+      }
+
+      // Map frontend model ID to backend API model name
+      String provider = model.provider.toLowerCase();
+      String apiModelName = _getBackendModelName(modelId);
+
+      debugPrint('🔄 Syncing model: $modelId -> $provider/$apiModelName');
+
       final response = await http.post(
         Uri.parse('http://localhost:8000/api/ai/switch-model'),
         headers: headers,
         body: jsonEncode({
-          'model': modelId,
+          'model': apiModelName,
         }),
       );
 

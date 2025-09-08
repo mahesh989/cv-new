@@ -553,17 +553,11 @@ class AppTheme {
 
   // 🏷️ VIBRANT CHIP COLORS
   static Map<String, Color> get chipColors => {
-        'technical_skills': const Color(0xFFD1FAE5), // Emerald 100
-        'soft_skills': const Color(0xFFEDE9FE), // Violet 100
-        'domain_keywords': const Color(0xFFFEF3C7), // Amber 100
         'matched': const Color(0xFFDCFDF7), // Emerald 50
         'missed': const Color(0xFFFEE2E2), // Red 50
       };
 
   static Map<String, Color> get chipTextColors => {
-        'technical_skills': const Color(0xFF047857), // Emerald 700
-        'soft_skills': const Color(0xFF6D28D9), // Violet 700
-        'domain_keywords': const Color(0xFF92400E), // Amber 700
         'matched': const Color(0xFF047857), // Emerald 700
         'missed': const Color(0xFFB91C1C), // Red 700
       };

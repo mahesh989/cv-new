@@ -5,8 +5,7 @@
 ///
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../services/api_service.dart';
 
 class CVSelectionModule extends StatefulWidget {
   final String? selectedCVFilename;
@@ -38,15 +37,11 @@ class _CVSelectionModuleState extends State<CVSelectionModule> {
     });
 
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:8000/api/cv/list'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> cvList = data['uploaded_cvs'] ?? [];
-        setState(() {
-          availableCVs = cvList.map((cv) => cv.toString()).toList();
-        });
-      }
+      // Use APIService instead of direct HTTP call
+      final cvs = await APIService.fetchUploadedCVs();
+      setState(() {
+        availableCVs = cvs;
+      });
     } catch (e) {
       debugPrint('Error loading CVs: $e');
       // Fallback to default list
@@ -108,13 +103,8 @@ class CVSelectionService {
   /// Load available CVs from backend
   static Future<List<String>> loadAvailableCVs() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:8000/api/cv/list'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> cvList = data['uploaded_cvs'] ?? [];
-        return cvList.map((cv) => cv.toString()).toList();
-      }
+      // Use APIService instead of direct HTTP call
+      return await APIService.fetchUploadedCVs();
     } catch (e) {
       debugPrint('Error loading CVs: $e');
     }
@@ -130,11 +120,11 @@ class CVSelectionService {
   /// Get CV information
   static Future<Map<String, dynamic>?> getCVInfo(String filename) async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:8000/api/cv/info/$filename'));
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      }
+      final response = await APIService.makeAuthenticatedCall(
+        endpoint: '/cv/info/$filename',
+        method: 'GET',
+      );
+      return response;
     } catch (e) {
       debugPrint('Error getting CV info: $e');
     }

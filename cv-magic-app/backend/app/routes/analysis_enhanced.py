@@ -1,5 +1,5 @@
 """
-Enhanced analysis routes for CV-JD comparison and skill extraction
+Enhanced analysis routes for CV-JD comparison
 """
 import logging
 from typing import Optional, List
@@ -25,13 +25,6 @@ class AnalysisRequest(BaseModel):
     analysis_type: AnalysisType = Field(default=AnalysisType.SKILL_MATCH, description="Type of analysis")
     include_suggestions: bool = Field(default=True, description="Include improvement suggestions")
 
-
-class SkillExtractionRequest(BaseModel):
-    """Request model for skill extraction from text"""
-    text: str = Field(..., description="Text content to extract skills from")
-    text_type: str = Field(default="cv", description="Type of text (cv or jd)")
-    extract_technical: bool = Field(default=True, description="Extract technical skills")
-    extract_soft: bool = Field(default=True, description="Extract soft skills")
 
 
 async def perform_cv_jd_analysis(analysis_id: str):
@@ -383,63 +376,6 @@ async def reprocess_analysis(analysis_id: str, background_tasks: BackgroundTasks
     except Exception as e:
         logger.error(f"Error reprocessing analysis: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error reprocessing analysis: {str(e)}")
-
-
-@router.post("/extract-skills")
-async def extract_skills_from_text(request: SkillExtractionRequest):
-    """Extract skills from text content"""
-    
-    try:
-        # Validate text length
-        if len(request.text) < 10:
-            raise HTTPException(status_code=400, detail="Text too short for skill extraction")
-        
-        if len(request.text) > 100000:  # 100KB limit
-            raise HTTPException(status_code=400, detail="Text too long for skill extraction")
-        
-        # Simple skill extraction (can be enhanced with AI/ML)
-        text_lower = request.text.lower()
-        
-        technical_skills = []
-        soft_skills = []
-        
-        if request.extract_technical:
-            # Technical skills detection
-            tech_keywords = [
-                'python', 'java', 'javascript', 'react', 'angular', 'vue', 'node', 'express',
-                'django', 'flask', 'fastapi', 'sql', 'mysql', 'postgresql', 'mongodb',
-                'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'git', 'linux', 'windows',
-                'html', 'css', 'bootstrap', 'tailwind', 'sass', 'typescript', 'php',
-                'c++', 'c#', 'go', 'rust', 'swift', 'kotlin', 'flutter', 'dart'
-            ]
-            
-            technical_skills = [skill for skill in tech_keywords if skill in text_lower]
-        
-        if request.extract_soft:
-            # Soft skills detection
-            soft_keywords = [
-                'communication', 'leadership', 'teamwork', 'problem solving', 'analytical',
-                'creative', 'adaptable', 'organized', 'time management', 'project management',
-                'collaboration', 'mentoring', 'presentation', 'writing', 'research'
-            ]
-            
-            soft_skills = [skill for skill in soft_keywords if skill in text_lower]
-        
-        return {
-            "text_type": request.text_type,
-            "text_length": len(request.text),
-            "word_count": len(request.text.split()),
-            "technical_skills": technical_skills,
-            "soft_skills": soft_skills,
-            "total_skills_found": len(technical_skills) + len(soft_skills),
-            "extraction_date": datetime.now().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error extracting skills: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error extracting skills: {str(e)}")
 
 
 @router.get("/cv/{cv_id}/analyses")

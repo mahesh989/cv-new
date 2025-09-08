@@ -3,9 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import '../utils/responsive_utils.dart';
 import '../widgets/mobile_bottom_nav.dart';
-import '../widgets/ai_model_selector.dart';
 import 'welcome_home_page.dart';
-import 'cv_magic_page.dart';
 import 'cv_magic_organized_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -28,12 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   final CVMagicOrganizedPage _cvMagicPage = const CVMagicOrganizedPage();
 
-  late final List<Widget> _pages = [
-    _welcomeHomePage,
-    _cvMagicPage,
-  ];
-
-  // 🎨 Beautiful tab data with cosmic icons and gradients - same as mt2
+  // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
     TabData(
       icon: Icons.home_rounded,
@@ -184,19 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildTabContent() {
     switch (_currentIndex) {
       case 0:
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.only(
-            left: context.responsivePadding.left,
-            right: context.responsivePadding.right,
-            top: context.responsivePadding.top,
-            bottom: context.isMobile
-                ? 80
-                : context
-                    .responsivePadding.bottom, // Extra space for mobile nav
-          ),
-          child: _buildGuideSection(),
-        );
+        return _welcomeHomePage;
       case 1:
         return _cvMagicPage;
       default:
@@ -204,68 +185,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Text('Tab content coming soon!'),
         );
     }
-  }
-
-  Widget _buildGuideSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Welcome Card
-        _buildWelcomeCard(),
-        const SizedBox(height: 20),
-        // AI Model Selector
-        const AIModelSelector(),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-
-  Widget _buildWelcomeCard() {
-    return AppTheme.createCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: AppTheme.cosmicGradient,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.waving_hand,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Ready to optimize your CV?',
-                      style: AppTheme.headingSmall.copyWith(
-                        color: AppTheme.primaryCosmic,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Select your AI model below and start creating amazing resumes!',
-                      style: AppTheme.bodySmall.copyWith(
-                        color: AppTheme.neutralGray600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildAppBar() {

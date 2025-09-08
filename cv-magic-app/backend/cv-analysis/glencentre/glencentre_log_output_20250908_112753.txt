@@ -1,0 +1,172 @@
+================================================================================
+SKILL EXTRACTION ANALYSIS RESULTS
+================================================================================
+Generated: 2025-09-08T11:27:53.514
+CV File: maheshwor_tiwari.pdf
+JD URL: https://www.ethicaljobs.com.au/members/glencentre/data-analyst
+User ID: 1
+================================================================================
+
+================================================================================
+[2025-09-08T11:27:53.514] [CV_CLAUDE_ANALYSIS] OUTPUT:
+## SOFT SKILLS:
+
+**EXPLICIT:**
+- Communication: "Presented Python-enabled research findings at international conferences, demonstrating technical expertise and communication skills."
+- Teamwork: "Led engaging physics tutorials for master’s students, enhancing understanding and promoting teamwork."
+
+**STRONGLY IMPLIED:**
+- Problem-solving: "Utilized advanced Python programming for computational modeling and solving complex research problems."
+- Mentoring: "Mentored students on projects, collaborated with faculty, and fostered student engagement."
+- Collaboration: "Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%."
+
+## TECHNICAL SKILLS:
+
+**EXPLICIT:**
+- Python: "Specialized in Python programming, including data analysis, automation, and machine learning using libraries such as Pandas, NumPy, and scikit-learn."
+- SQL: "Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL."
+- Tableau: "Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib."
+- Power BI: "Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib."
+- GitHub: "Experienced with GitHub for version control."
+- Docker: "Experienced with Docker for containerization."
+- Snowflake: "Experienced with Snowflake for cloud data warehousing."
+- Visual Studio Code: "Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting."
+- Google Analytics: "Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting."
+- Excel: "Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting."
+
+**STRONGLY IMPLIED:**
+- Machine Learning: "Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions."
+- Data Visualization: "Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively."
+
+## DOMAIN KEYWORDS:
+
+**EXPLICIT:**
+- Data Analysis: "Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%."
+- Predictive Analytics: "Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions."
+- Data Pipelines: "Designing and deploying robust data pipelines."
+- AI: "Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity."
+- Computational Modeling: "Utilized advanced Python programming for computational modeling and solving complex research problems."
+
+**STRONGLY IMPLIED:**
+- Data Cleaning: "Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%."
+- Data Preprocessing: "Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision-making."
+- Research: "Conducting innovative research, and creating advanced visualizations that convert complex data into actionable insights."
+
+```python
+SOFT_SKILLS = ["Communication", "Teamwork", "Problem-solving", "Mentoring", "Collaboration"]
+TECHNICAL_SKILLS = ["Python", "SQL", "Tableau", "Power BI", "GitHub", "Docker", "Snowflake", "Visual Studio Code", "Google Analytics", "Excel", "Machine Learning", "Data Visualization"]
+DOMAIN_KEYWORDS = ["Data Analysis", "Predictive Analytics", "Data Pipelines", "AI", "Computational Modeling", "Data Cleaning", "Data Preprocessing", "Research"]
+```
+================================================================================
+
+================================================================================
+[2025-09-08T11:27:53.514] [JD_CLAUDE_ANALYSIS] OUTPUT:
+## SOFT SKILLS:
+
+**EXPLICIT:**
+
+1. **Communication skills**  
+   - Evidence: "Good communication skills (including listening, verbal and written)"
+
+2. **Attention to detail**  
+   - Evidence: "Attention to detail"
+
+3. **Ability to work independently**  
+   - Evidence: "Ability to work independently"
+
+4. **Project management skills**  
+   - Evidence: "Project management skills"
+
+**STRONGLY IMPLIED:**
+
+1. **Problem-solving**  
+   - Evidence: "Ability to provide solutions when you identify a problem"
+
+2. **Time management**  
+   - Evidence: "Ability to plan your work, and manage your priorities, focus and time"
+
+3. **Open-minded and innovative**  
+   - Evidence: "Open-minded and innovative"
+
+4. **Understanding user needs**  
+   - Evidence: "Ability to understand user needs and create visualisations that resonate with the end user"
+
+## TECHNICAL SKILLS:
+
+**EXPLICIT:**
+
+1. **PowerBI**  
+   - Evidence: "Ability to use PowerBI"
+
+2. **MS Excel**  
+   - Evidence: "Ability to use MS Excel"
+
+3. **MS Forms**  
+   - Evidence: "Ability to use MS Forms"
+
+4. **MS Teams**  
+   - Evidence: "Ability to use MS Teams"
+
+**STRONGLY IMPLIED:**
+
+1. **Data extraction and cleaning**  
+   - Evidence: "Ability to extract data from one system, clean and upload into another"
+
+2. **Data visualization**  
+   - Evidence: "Support CEO to create data visualisations of finance data"
+
+## DOMAIN KEYWORDS:
+
+**EXPLICIT:**
+
+1. **Data Strategy**  
+   - Evidence: "implement The Glen Group’s Data Strategy"
+
+2. **Data Dashboard**  
+   - Evidence: "Maintain The Glen Group’s PowerBI Data Dashboard"
+
+3. **Data analysis**  
+   - Evidence: "Use PowerBI to analyse long-term trends for WHS incidents, client and staff survey data"
+
+4. **Data collection processes**  
+   - Evidence: "Support CEO and Compliance Manager to review and improve data collection processes"
+
+**STRONGLY IMPLIED:**
+
+1. **Funding reporting**  
+   - Evidence: "Respond to data requests for funding reporting, research projects, funding applications, annual reports and proposals"
+
+2. **Client management systems**  
+   - Evidence: "Export data from our client management systems to funding bodies or other systems"
+
+3. **Finance data**  
+   - Evidence: "Support CEO to create data visualisations of finance data"
+
+SOFT_SKILLS = ["Communication skills", "Attention to detail", "Ability to work independently", "Project management skills", "Problem-solving", "Time management", "Open-minded and innovative", "Understanding user needs"]
+
+TECHNICAL_SKILLS = ["PowerBI", "MS Excel", "MS Forms", "MS Teams", "Data extraction and cleaning", "Data visualization"]
+
+DOMAIN_KEYWORDS = ["Data Strategy", "Data Dashboard", "Data analysis", "Data collection processes", "Funding reporting", "Client management systems", "Finance data"]
+================================================================================
+
+================================================================================
+EXTRACTION SUMMARY
+================================================================================
+
+CV SKILLS EXTRACTED:
+  Soft Skills (5): ['Communication', 'Teamwork', 'Problem-solving', 'Mentoring', 'Collaboration']
+  Technical Skills (12): ['Python', 'SQL', 'Tableau', 'Power BI', 'GitHub', 'Docker', 'Snowflake', 'Visual Studio Code', 'Google Analytics', 'Excel', 'Machine Learning', 'Data Visualization']
+  Domain Keywords (8): ['Data Analysis', 'Predictive Analytics', 'Data Pipelines', 'AI', 'Computational Modeling', 'Data Cleaning', 'Data Preprocessing', 'Research']
+
+JD REQUIREMENTS EXTRACTED:
+  Soft Skills (8): ['Communication skills', 'Attention to detail', 'Ability to work independently', 'Project management skills', 'Problem-solving', 'Time management', 'Open-minded and innovative', 'Understanding user needs']
+  Technical Skills (6): ['PowerBI', 'MS Excel', 'MS Forms', 'MS Teams', 'Data extraction and cleaning', 'Data visualization']
+  Domain Keywords (7): ['Data Strategy', 'Data Dashboard', 'Data analysis', 'Data collection processes', 'Funding reporting', 'Client management systems', 'Finance data']
+
+CACHING STATUS:
+  CV Skills: Fresh Analysis
+  JD Skills: Fresh Analysis
+
+================================================================================
+END OF ANALYSIS
+================================================================================
