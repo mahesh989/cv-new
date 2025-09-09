@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
-import '../core/theme/app_theme.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -368,88 +367,125 @@ class SkillsDisplayWidget extends StatelessWidget {
     MaterialColor baseColor,
     String type,
   ) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        bool isExpanded = false;
+    // Debug logging
+    debugPrint('🔍 [UI_DEBUG] Building expandable analysis for $type');
+    debugPrint('   Analysis length: ${analysis.length}');
+    debugPrint('   Analysis preview: ${analysis.substring(0, analysis.length > 100 ? 100 : analysis.length)}');
+    
+    return _ExpandableAnalysisWidget(
+      analysis: analysis,
+      baseColor: baseColor,
+      type: type,
+    );
+  }
+}
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => setState(() => isExpanded = !isExpanded),
-                icon: Icon(
-                  isExpanded ? Icons.expand_less : Icons.expand_more,
-                  size: 20,
-                ),
-                label: Text(
-                  isExpanded ? 'Hide Analysis' : 'Show Detailed Analysis',
-                  style: const TextStyle(fontSize: 14),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: baseColor.shade100,
-                  foregroundColor: baseColor.shade700,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: baseColor.shade300),
-                  ),
-                ),
+class _ExpandableAnalysisWidget extends StatefulWidget {
+  final String analysis;
+  final MaterialColor baseColor;
+  final String type;
+
+  const _ExpandableAnalysisWidget({
+    required this.analysis,
+    required this.baseColor,
+    required this.type,
+  });
+
+  @override
+  State<_ExpandableAnalysisWidget> createState() => _ExpandableAnalysisWidgetState();
+}
+
+class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              debugPrint('📝 [UI_DEBUG] Expand button clicked for ${widget.type}. Current state: $isExpanded');
+              setState(() => isExpanded = !isExpanded);
+              debugPrint('📝 [UI_DEBUG] New expand state: $isExpanded');
+            },
+            icon: Icon(
+              isExpanded ? Icons.expand_less : Icons.expand_more,
+              size: 20,
+            ),
+            label: Text(
+              isExpanded ? 'Hide Analysis' : 'Show Detailed Analysis',
+              style: const TextStyle(fontSize: 14),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.baseColor.shade100,
+              foregroundColor: widget.baseColor.shade700,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: widget.baseColor.shade300),
               ),
             ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              height: isExpanded ? null : 0,
-              child: isExpanded
-                  ? Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: baseColor.shade300),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+        ),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          height: isExpanded ? null : 0,
+          child: isExpanded
+              ? Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: widget.baseColor.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.psychology,
-                                size: 16,
-                                color: baseColor.shade600,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'AI Detailed Analysis',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: baseColor.shade700,
-                                ),
-                              ),
-                            ],
+                          Icon(
+                            Icons.psychology,
+                            size: 16,
+                            color: widget.baseColor.shade600,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(width: 6),
                           Text(
-                            analysis,
+                            'AI Detailed Analysis',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: widget.baseColor.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Builder(
+                        builder: (context) {
+                          debugPrint('📝 [UI_DEBUG] Rendering analysis text for ${widget.type}');
+                          debugPrint('   Analysis content: ${widget.analysis.isEmpty ? "EMPTY" : "${widget.analysis.length} chars"}');
+                          return Text(
+                            widget.analysis.isEmpty ? "No detailed analysis available" : widget.analysis,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey.shade700,
                               height: 1.4,
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ],
-        );
-      },
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 }
