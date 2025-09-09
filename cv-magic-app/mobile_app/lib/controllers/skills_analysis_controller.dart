@@ -91,6 +91,7 @@ class SkillsAnalysisController extends ChangeNotifier {
       }
 
       // Perform fresh analysis
+      print('=== CONTROLLER CALLING SERVICE ===');
       debugPrint('[SKILLS_ANALYSIS] Starting fresh analysis...');
       debugPrint('   CV: $cvFilename');
       debugPrint('   JD text length: ${jdText.length} chars');
@@ -100,6 +101,11 @@ class SkillsAnalysisController extends ChangeNotifier {
         jdText: jdText,
       );
 
+      print('=== CONTROLLER RECEIVED RESULT ===');
+      print('Result success: ${result.isSuccess}');
+      print('CV comprehensive analysis length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
+      print('JD comprehensive analysis length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
+      
       if (result.isSuccess) {
         _result = result;
         _executionDuration = result.executionDuration;
@@ -108,6 +114,16 @@ class SkillsAnalysisController extends ChangeNotifier {
         debugPrint('   CV Skills: ${result.cvSkills.totalSkillsCount}');
         debugPrint('   JD Skills: ${result.jdSkills.totalSkillsCount}');
         debugPrint('   Duration: ${result.executionDuration.inSeconds}s');
+        debugPrint('   CV Comprehensive Analysis Length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
+        debugPrint('   JD Comprehensive Analysis Length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
+        
+        final cvAnalysisPreview = result.cvComprehensiveAnalysis != null ? 
+          result.cvComprehensiveAnalysis!.substring(0, result.cvComprehensiveAnalysis!.length > 200 ? 200 : result.cvComprehensiveAnalysis!.length) : "NULL";
+        final jdAnalysisPreview = result.jdComprehensiveAnalysis != null ? 
+          result.jdComprehensiveAnalysis!.substring(0, result.jdComprehensiveAnalysis!.length > 200 ? 200 : result.jdComprehensiveAnalysis!.length) : "NULL";
+          
+        debugPrint('   CV Comprehensive Analysis Preview: $cvAnalysisPreview');
+        debugPrint('   JD Comprehensive Analysis Preview: $jdAnalysisPreview');
       } else {
         _setError(result.errorMessage ?? 'Unknown error occurred');
       }
