@@ -18,6 +18,7 @@ from app.services.skills_analysis_config import skills_analysis_config_service
 from app.services.skill_extraction.prompt_templates import get_prompt as get_skill_prompt
 from app.services.skill_extraction.response_parser import SkillExtractionParser
 from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
+from app.ai.ai_service import ai_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Skills Analysis"])
@@ -509,6 +510,50 @@ async def perform_preliminary_skills_analysis(
                 if logging_params["enable_detailed_logging"]:
                     logger.warning(f"⚠️ [FILE_SAVE] Failed to save results to file: {str(e)}")
                 result["saved_file_path"] = None
+        
+        # NEW: Perform analyze match after skills analysis completes
+        try:
+            if logging_params["enable_detailed_logging"]:
+                logger.info("🔍 [ANALYZE_MATCH] Starting analyze match assessment...")
+            
+            # Get analyze match prompt
+            analyze_match_prompt = get_skill_prompt('analyze_match', cv_text=cv_content, job_text=jd_text)
+            
+            # Generate AI response for analyze match
+            analyze_match_response = await ai_service.generate_response(
+                prompt=analyze_match_prompt,
+                temperature=0.3,
+                max_tokens=4000
+            )
+            analyze_match_content = analyze_match_response.content
+            
+            if logging_params["enable_detailed_logging"]:
+                logger.info(f"✅ [ANALYZE_MATCH] Analysis completed (length: {len(analyze_match_content)} chars)")
+            
+            # Save analyze match to the same file
+            try:
+                analyze_match_file_path = result_saver.append_analyze_match(analyze_match_content, company_name)
+                if logging_params["enable_detailed_logging"]:
+                    logger.info(f"📁 [ANALYZE_MATCH] Results appended to: {analyze_match_file_path}")
+                result["analyze_match_file_path"] = analyze_match_file_path
+            except Exception as e:
+                if logging_params["enable_detailed_logging"]:
+                    logger.warning(f"⚠️ [ANALYZE_MATCH] Failed to save analyze match: {str(e)}")
+                result["analyze_match_file_path"] = None
+            
+            # Add analyze match to response
+            result["analyze_match"] = {
+                "raw_analysis": analyze_match_content,
+                "company_name": company_name
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ [ANALYZE_MATCH] Error in analyze match: {str(e)}")
+            # Don't fail the entire request if analyze match fails
+            result["analyze_match"] = {
+                "error": f"Analyze match failed: {str(e)}",
+                "raw_analysis": None
+            }
         
         return result
         

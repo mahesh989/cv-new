@@ -231,4 +231,10 @@ Text to analyze:
 {text.strip()}
 """
 
+    elif key == "analyze_match":
+        from .prompts.analyze_match_prompt import ANALYZE_MATCH_PROMPT
+        cv_text = kwargs.get('cv_text', '')
+        job_text = kwargs.get('job_text', '')
+        return ANALYZE_MATCH_PROMPT.format(cv_text=cv_text, job_text=job_text)
+
     raise ValueError(f"Unknown prompt key: {key}")

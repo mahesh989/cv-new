@@ -387,6 +387,52 @@ class SkillExtractionResultSaver:
             logger.error(f"❌ Failed to list saved analyses: {str(e)}")
             return {"companies": [], "total_files": 0, "error": str(e)}
 
+    def append_analyze_match(self, raw_analysis: str, company_name: str) -> str:
+        """
+        Append analyze match output to the existing log file
+        
+        Args:
+            raw_analysis: The raw analyze match analysis text
+            company_name: Company name for file path
+            
+        Returns:
+            str: Path to the updated file
+        """
+        try:
+            # Create company slug using the same logic as save_analysis_results
+            company_slug = self._create_company_slug(company_name)
+            
+            # Check if folder exists and use exact folder name if found
+            if self.base_dir.exists():
+                existing_folders = [f.name for f in self.base_dir.iterdir() if f.is_dir()]
+                for folder in existing_folders:
+                    if folder.lower() == company_slug.lower():
+                        company_slug = folder
+                        break
+            
+            # Create company folder path
+            company_folder = self.base_dir / company_slug
+            
+            # Generate the same filename as used in save_analysis_results
+            filename = f"{company_slug}_skills_analysis.txt"
+            file_path = company_folder / filename
+            
+            # Ensure directory exists
+            company_folder.mkdir(parents=True, exist_ok=True)
+            
+            # Append analyze match output to the existing file
+            with open(file_path, 'a', encoding='utf-8') as f:
+                f.write(f"\n[ANALYZE_MATCH] OUTPUT:\n")
+                f.write(raw_analysis)
+                f.write("\n" + "="*80 + "\n")
+            
+            logger.info(f"📁 [ANALYZE_MATCH] Results appended to: {file_path}")
+            return str(file_path)
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to append analyze match: {str(e)}")
+            raise e
+
 
 # Global instance
 result_saver = SkillExtractionResultSaver("cv-analysis")
