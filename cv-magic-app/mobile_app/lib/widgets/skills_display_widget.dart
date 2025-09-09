@@ -154,7 +154,7 @@ class SkillsDisplayWidget extends StatelessWidget {
         children: [
           // Header with execution info
           _buildResultsHeader(),
-          
+
           // Side by side comparison
           Padding(
             padding: const EdgeInsets.all(16),
@@ -307,12 +307,21 @@ class SkillsDisplayWidget extends StatelessWidget {
         ],
 
         // Expandable Comprehensive Analysis
-        if (comprehensiveAnalysis != null && comprehensiveAnalysis.isNotEmpty) ...[
+        debugPrint('🔍 [UI_DEBUG] Checking comprehensive analysis for $type');
+        debugPrint('   comprehensiveAnalysis is null: ${comprehensiveAnalysis == null}');
+        debugPrint('   comprehensiveAnalysis is empty: ${comprehensiveAnalysis?.isEmpty ?? true}');
+        debugPrint('   comprehensiveAnalysis length: ${comprehensiveAnalysis?.length ?? 0}');
+        
+        if (comprehensiveAnalysis != null &&
+            comprehensiveAnalysis.isNotEmpty) ...[
+          debugPrint('   ✅ Building expandable analysis for $type');
           _buildExpandableAnalysis(
             comprehensiveAnalysis,
             baseColor,
             type,
           ),
+        ] else ...[
+          debugPrint('   ❌ Skipping expandable analysis for $type - no content');
         ],
       ],
     );
@@ -370,8 +379,9 @@ class SkillsDisplayWidget extends StatelessWidget {
     // Debug logging
     debugPrint('🔍 [UI_DEBUG] Building expandable analysis for $type');
     debugPrint('   Analysis length: ${analysis.length}');
-    debugPrint('   Analysis preview: ${analysis.substring(0, analysis.length > 100 ? 100 : analysis.length)}');
-    
+    debugPrint(
+        '   Analysis preview: ${analysis.substring(0, analysis.length > 100 ? 100 : analysis.length)}');
+
     return _ExpandableAnalysisWidget(
       analysis: analysis,
       baseColor: baseColor,
@@ -392,7 +402,8 @@ class _ExpandableAnalysisWidget extends StatefulWidget {
   });
 
   @override
-  State<_ExpandableAnalysisWidget> createState() => _ExpandableAnalysisWidgetState();
+  State<_ExpandableAnalysisWidget> createState() =>
+      _ExpandableAnalysisWidgetState();
 }
 
 class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
@@ -407,7 +418,8 @@ class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: () {
-              debugPrint('📝 [UI_DEBUG] Expand button clicked for ${widget.type}. Current state: $isExpanded');
+              debugPrint(
+                  '📝 [UI_DEBUG] Expand button clicked for ${widget.type}. Current state: $isExpanded');
               setState(() => isExpanded = !isExpanded);
               debugPrint('📝 [UI_DEBUG] New expand state: $isExpanded');
             },
@@ -468,10 +480,14 @@ class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
                       const SizedBox(height: 8),
                       Builder(
                         builder: (context) {
-                          debugPrint('📝 [UI_DEBUG] Rendering analysis text for ${widget.type}');
-                          debugPrint('   Analysis content: ${widget.analysis.isEmpty ? "EMPTY" : "${widget.analysis.length} chars"}');
+                          debugPrint(
+                              '📝 [UI_DEBUG] Rendering analysis text for ${widget.type}');
+                          debugPrint(
+                              '   Analysis content: ${widget.analysis.isEmpty ? "EMPTY" : "${widget.analysis.length} chars"}');
                           return Text(
-                            widget.analysis.isEmpty ? "No detailed analysis available" : widget.analysis,
+                            widget.analysis.isEmpty
+                                ? "No detailed analysis available"
+                                : widget.analysis,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey.shade700,
