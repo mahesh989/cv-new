@@ -19,6 +19,9 @@ class SkillsAnalysisController extends ChangeNotifier {
   String? _currentJdText;
   Duration _executionDuration = Duration.zero;
 
+  // Notification callbacks
+  Function(String message, {bool isError})? _onNotification;
+
   // Getters for state management
   SkillsAnalysisState get state => _state;
   SkillsAnalysisResult? get result => _result;
@@ -29,7 +32,8 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   // Convenience getters for UI
   bool get isLoading => _state == SkillsAnalysisState.loading;
-  bool get hasResults => _state == SkillsAnalysisState.completed && _result != null;
+  bool get hasResults =>
+      _state == SkillsAnalysisState.completed && _result != null;
   bool get hasError => _state == SkillsAnalysisState.error;
   bool get isEmpty => _result?.isEmpty ?? true;
 
@@ -49,10 +53,29 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   // Additional getters
   List<String> get extractedKeywords => _result?.extractedKeywords ?? [];
-  
+
+  // Analyze Match getters
+  AnalyzeMatchResult? get analyzeMatch => _result?.analyzeMatch;
+  String? get analyzeMatchRawAnalysis => _result?.analyzeMatch?.rawAnalysis;
+  String? get analyzeMatchCompanyName => _result?.analyzeMatch?.companyName;
+  String? get analyzeMatchFilePath => _result?.analyzeMatch?.filePath;
+  bool get hasAnalyzeMatch =>
+      _result?.analyzeMatch != null && !_result!.analyzeMatch!.isEmpty;
+  bool get hasAnalyzeMatchError => _result?.analyzeMatch?.hasError ?? false;
+
   // Skill counts for UI display
   int get cvTotalSkills => cvSkills?.totalSkillsCount ?? 0;
   int get jdTotalSkills => jdSkills?.totalSkillsCount ?? 0;
+
+  // Notification methods
+  void setNotificationCallback(
+      Function(String message, {bool isError}) callback) {
+    _onNotification = callback;
+  }
+
+  void _showNotification(String message, {bool isError = false}) {
+    _onNotification?.call(message, isError: isError);
+  }
 
   /// Perform skills analysis with the given CV filename and JD text
   Future<void> performAnalysis({
@@ -64,7 +87,7 @@ class SkillsAnalysisController extends ChangeNotifier {
       cvFilename: cvFilename,
       jdText: jdText,
     );
-    
+
     if (validationError != null) {
       _setError(validationError);
       return;
@@ -77,17 +100,28 @@ class SkillsAnalysisController extends ChangeNotifier {
 
     try {
       // Check for cached results first
+      print('🔍 [CONTROLLER_DEBUG] Checking for cached results...');
       final cachedResult = await SkillsAnalysisService.getCachedAnalysis(
         cvFilename: cvFilename,
         jdText: jdText,
       );
 
       if (cachedResult != null) {
+        print('🔍 [CONTROLLER_DEBUG] Found cached results!');
+        print(
+            '🔍 [CONTROLLER_DEBUG] Cached analyzeMatch: ${cachedResult.analyzeMatch != null}');
+        if (cachedResult.analyzeMatch != null) {
+          print(
+              '🔍 [CONTROLLER_DEBUG] Cached analyzeMatch raw analysis length: ${cachedResult.analyzeMatch!.rawAnalysis.length}');
+        }
         _result = cachedResult;
         _executionDuration = Duration.zero; // Cached results are instant
         _setState(SkillsAnalysisState.completed);
         debugPrint('✅ [SKILLS_ANALYSIS] Used cached results');
         return;
+      } else {
+        print(
+            '🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis');
       }
 
       // Perform fresh analysis
@@ -96,6 +130,10 @@ class SkillsAnalysisController extends ChangeNotifier {
       debugPrint('   CV: $cvFilename');
       debugPrint('   JD text length: ${jdText.length} chars');
 
+      // Show starting notification
+      _showNotification(
+          '🚀 Starting skills analysis and recruiter assessment...');
+
       final result = await SkillsAnalysisService.performPreliminaryAnalysis(
         cvFilename: cvFilename,
         jdText: jdText,
@@ -103,9 +141,25 @@ class SkillsAnalysisController extends ChangeNotifier {
 
       print('=== CONTROLLER RECEIVED RESULT ===');
       print('Result success: ${result.isSuccess}');
-      print('CV comprehensive analysis length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
-      print('JD comprehensive analysis length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
-      
+      print(
+          'CV comprehensive analysis length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
+      print(
+          'JD comprehensive analysis length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
+      print(
+          '🔍 [ANALYZE_MATCH_DEBUG] Analyze match present: ${result.analyzeMatch != null}');
+      if (result.analyzeMatch != null) {
+        print(
+            '🔍 [ANALYZE_MATCH_DEBUG] Raw analysis length: ${result.analyzeMatch!.rawAnalysis.length}');
+        print(
+            '🔍 [ANALYZE_MATCH_DEBUG] Company name: ${result.analyzeMatch!.companyName}');
+        print(
+            '🔍 [ANALYZE_MATCH_DEBUG] Has error: ${result.analyzeMatch!.hasError}');
+        if (result.analyzeMatch!.rawAnalysis.isNotEmpty) {
+          print(
+              '🔍 [ANALYZE_MATCH_DEBUG] First 200 chars: ${result.analyzeMatch!.rawAnalysis.substring(0, result.analyzeMatch!.rawAnalysis.length > 200 ? 200 : result.analyzeMatch!.rawAnalysis.length)}');
+        }
+      }
+
       if (result.isSuccess) {
         _result = result;
         _executionDuration = result.executionDuration;
@@ -114,16 +168,46 @@ class SkillsAnalysisController extends ChangeNotifier {
         debugPrint('   CV Skills: ${result.cvSkills.totalSkillsCount}');
         debugPrint('   JD Skills: ${result.jdSkills.totalSkillsCount}');
         debugPrint('   Duration: ${result.executionDuration.inSeconds}s');
-        debugPrint('   CV Comprehensive Analysis Length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
-        debugPrint('   JD Comprehensive Analysis Length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
-        
-        final cvAnalysisPreview = result.cvComprehensiveAnalysis != null ? 
-          result.cvComprehensiveAnalysis!.substring(0, result.cvComprehensiveAnalysis!.length > 200 ? 200 : result.cvComprehensiveAnalysis!.length) : "NULL";
-        final jdAnalysisPreview = result.jdComprehensiveAnalysis != null ? 
-          result.jdComprehensiveAnalysis!.substring(0, result.jdComprehensiveAnalysis!.length > 200 ? 200 : result.jdComprehensiveAnalysis!.length) : "NULL";
-          
+        debugPrint(
+            '   CV Comprehensive Analysis Length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
+        debugPrint(
+            '   JD Comprehensive Analysis Length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
+
+        final cvAnalysisPreview = result.cvComprehensiveAnalysis != null
+            ? result.cvComprehensiveAnalysis!.substring(
+                0,
+                result.cvComprehensiveAnalysis!.length > 200
+                    ? 200
+                    : result.cvComprehensiveAnalysis!.length)
+            : "NULL";
+        final jdAnalysisPreview = result.jdComprehensiveAnalysis != null
+            ? result.jdComprehensiveAnalysis!.substring(
+                0,
+                result.jdComprehensiveAnalysis!.length > 200
+                    ? 200
+                    : result.jdComprehensiveAnalysis!.length)
+            : "NULL";
+
         debugPrint('   CV Comprehensive Analysis Preview: $cvAnalysisPreview');
         debugPrint('   JD Comprehensive Analysis Preview: $jdAnalysisPreview');
+
+        // Show success notification
+        _showNotification(
+          'Skills analysis completed! Found ${result.cvSkills.totalSkillsCount} CV skills and ${result.jdSkills.totalSkillsCount} JD skills.',
+        );
+
+        // Show analyze match notification if available
+        if (result.analyzeMatch != null && !result.analyzeMatch!.isEmpty) {
+          _showNotification(
+            '🎯 Analyze Match completed! Recruiter assessment is ready.',
+          );
+        } else if (result.analyzeMatch != null &&
+            result.analyzeMatch!.hasError) {
+          _showNotification(
+            '⚠️ Analyze Match failed: ${result.analyzeMatch!.error}',
+            isError: true,
+          );
+        }
       } else {
         _setError(result.errorMessage ?? 'Unknown error occurred');
       }
@@ -156,9 +240,10 @@ class SkillsAnalysisController extends ChangeNotifier {
   /// Check if we can perform analysis with current inputs
   bool canPerformAnalysis(String? cvFilename, String? jdText) {
     return SkillsAnalysisService.validateAnalysisInputs(
-      cvFilename: cvFilename,
-      jdText: jdText,
-    ) == null;
+          cvFilename: cvFilename,
+          jdText: jdText,
+        ) ==
+        null;
   }
 
   // Private methods

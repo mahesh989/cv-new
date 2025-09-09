@@ -5,7 +5,6 @@ import '../widgets/skills_display_widget.dart';
 import '../widgets/job_input.dart';
 import '../modules/cv/cv_selection_module.dart';
 import '../core/theme/app_theme.dart';
-import '../services/api_service.dart';
 
 /// Screen for performing and displaying skills analysis results
 class SkillsAnalysisScreen extends StatefulWidget {
@@ -25,6 +24,7 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
   void initState() {
     super.initState();
     _controller = SkillsAnalysisController();
+    _controller.setNotificationCallback(_showSnackBar);
   }
 
   @override
@@ -83,7 +83,8 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
                   setState(() {
                     _selectedCvFilename = filename;
                   });
-                  _controller.clearResults(); // Clear previous results when CV changes
+                  _controller
+                      .clearResults(); // Clear previous results when CV changes
                 },
               ),
               const SizedBox(height: 16),
@@ -164,18 +165,17 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     return Consumer<SkillsAnalysisController>(
       builder: (context, controller, child) {
         final canAnalyze = _canPerformAnalysis();
-        final buttonText = controller.isLoading 
-            ? 'Analyzing...' 
-            : controller.hasResults 
+        final buttonText = controller.isLoading
+            ? 'Analyzing...'
+            : controller.hasResults
                 ? 'Re-analyze Skills'
                 : 'Analyze Skills';
 
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: canAnalyze && !controller.isLoading 
-                ? _performAnalysis 
-                : null,
+            onPressed:
+                canAnalyze && !controller.isLoading ? _performAnalysis : null,
             icon: controller.isLoading
                 ? const SizedBox(
                     width: 20,
@@ -194,8 +194,10 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: canAnalyze 
-                  ? (controller.hasResults ? Colors.orange : AppTheme.primaryNeon)
+              backgroundColor: canAnalyze
+                  ? (controller.hasResults
+                      ? Colors.orange
+                      : AppTheme.primaryNeon)
                   : Colors.grey,
               foregroundColor: canAnalyze ? Colors.black : Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -212,9 +214,9 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
 
   bool _canPerformAnalysis() {
     return _selectedCvFilename != null &&
-           _selectedCvFilename!.isNotEmpty &&
-           _jdController.text.trim().isNotEmpty &&
-           _jdController.text.trim().length >= 50;
+        _selectedCvFilename!.isNotEmpty &&
+        _jdController.text.trim().isNotEmpty &&
+        _jdController.text.trim().length >= 50;
   }
 
   Future<void> _performAnalysis() async {
@@ -239,13 +241,8 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
         jdText: _jdController.text.trim(),
       );
 
-      if (_controller.hasResults) {
-        _showSnackBar(
-          'Skills analysis completed! Found ${_controller.cvTotalSkills} CV skills and ${_controller.jdTotalSkills} JD skills.',
-        );
-      } else if (_controller.hasError) {
-        _showSnackBar(_controller.errorMessage ?? 'Analysis failed', isError: true);
-      }
+      // Notifications are now handled by the controller
+      // No need to show duplicate notifications here
     } catch (e) {
       _showSnackBar('Error performing analysis: $e', isError: true);
     }

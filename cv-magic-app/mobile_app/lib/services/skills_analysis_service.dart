@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../models/skills_analysis_model.dart';
 import 'api_service.dart';
 
@@ -29,12 +28,27 @@ class SkillsAnalysisService {
       );
 
       print('📡 [SERVICE_DEBUG] Received response from API');
-      print('   Response type: ${result.runtimeType}');
+      print('📡 [SERVICE_DEBUG] Raw result type: ${result.runtimeType}');
+      print('📡 [SERVICE_DEBUG] Raw result: $result');
       print('   Response keys: ${result.keys.toList()}');
       print(
           '   cv_comprehensive_analysis present: ${result.containsKey("cv_comprehensive_analysis")}');
       print(
           '   jd_comprehensive_analysis present: ${result.containsKey("jd_comprehensive_analysis")}');
+      print(
+          '🔍 [ANALYZE_MATCH_SERVICE] analyze_match present: ${result.containsKey("analyze_match")}');
+      if (result.containsKey('analyze_match')) {
+        final analyzeMatch = result['analyze_match'] as Map<String, dynamic>?;
+        print('🔍 [ANALYZE_MATCH_SERVICE] analyze_match data: $analyzeMatch');
+        if (analyzeMatch != null) {
+          print(
+              '🔍 [ANALYZE_MATCH_SERVICE] raw_analysis length: ${(analyzeMatch['raw_analysis'] as String?)?.length ?? 0}');
+          print(
+              '🔍 [ANALYZE_MATCH_SERVICE] company_name: ${analyzeMatch['company_name']}');
+          print(
+              '🔍 [ANALYZE_MATCH_SERVICE] has error: ${analyzeMatch.containsKey('error')}');
+        }
+      }
       if (result.containsKey('cv_comprehensive_analysis')) {
         final cvAnalysis = result['cv_comprehensive_analysis'] as String?;
         print(
@@ -55,18 +69,36 @@ class SkillsAnalysisService {
           '   CV comprehensive analysis length: ${analysisResult.cvComprehensiveAnalysis?.length ?? 0}');
       print(
           '   JD comprehensive analysis length: ${analysisResult.jdComprehensiveAnalysis?.length ?? 0}');
+      print(
+          '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch in parsed result: ${analysisResult.analyzeMatch != null}');
+      if (analysisResult.analyzeMatch != null) {
+        print(
+            '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch raw analysis length: ${analysisResult.analyzeMatch!.rawAnalysis.length}');
+        print(
+            '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch company name: ${analysisResult.analyzeMatch!.companyName}');
+      }
 
       // Return with execution duration
-      return SkillsAnalysisResult(
+      final finalResult = SkillsAnalysisResult(
         cvSkills: analysisResult.cvSkills,
         jdSkills: analysisResult.jdSkills,
         cvComprehensiveAnalysis: analysisResult.cvComprehensiveAnalysis,
         jdComprehensiveAnalysis: analysisResult.jdComprehensiveAnalysis,
         expandableAnalysis: analysisResult.expandableAnalysis,
         extractedKeywords: analysisResult.extractedKeywords,
+        analyzeMatch: analysisResult.analyzeMatch,
         executionDuration: stopwatch.elapsed,
         isSuccess: true,
       );
+
+      print(
+          '🔍 [SERVICE_DEBUG] Final result analyzeMatch: ${finalResult.analyzeMatch != null}');
+      if (finalResult.analyzeMatch != null) {
+        print(
+            '🔍 [SERVICE_DEBUG] Final result analyzeMatch raw analysis length: ${finalResult.analyzeMatch!.rawAnalysis.length}');
+      }
+
+      return finalResult;
     } catch (e, stackTrace) {
       print('❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: $e');
       print('❌ [SERVICE_ERROR] Stack trace: $stackTrace');
@@ -105,7 +137,19 @@ class SkillsAnalysisService {
       );
 
       if (result['cached'] == true) {
-        return SkillsAnalysisResult.fromJson(result['data']);
+        print('🔍 [CACHE_DEBUG] Found cached results');
+        print(
+            '🔍 [CACHE_DEBUG] Cached data keys: ${result['data'].keys.toList()}');
+        print(
+            '🔍 [CACHE_DEBUG] Cached analyze_match present: ${result['data'].containsKey('analyze_match')}');
+        final cachedResult = SkillsAnalysisResult.fromJson(result['data']);
+        print(
+            '🔍 [CACHE_DEBUG] Parsed cached analyzeMatch: ${cachedResult.analyzeMatch != null}');
+        if (cachedResult.analyzeMatch != null) {
+          print(
+              '🔍 [CACHE_DEBUG] Cached analyzeMatch raw analysis length: ${cachedResult.analyzeMatch!.rawAnalysis.length}');
+        }
+        return cachedResult;
       }
 
       return null;

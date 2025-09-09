@@ -28,15 +28,11 @@ class SkillsData {
     };
   }
 
-  bool get isEmpty => 
-      technicalSkills.isEmpty && 
-      softSkills.isEmpty && 
-      domainKeywords.isEmpty;
+  bool get isEmpty =>
+      technicalSkills.isEmpty && softSkills.isEmpty && domainKeywords.isEmpty;
 
-  int get totalSkillsCount => 
-      technicalSkills.length + 
-      softSkills.length + 
-      domainKeywords.length;
+  int get totalSkillsCount =>
+      technicalSkills.length + softSkills.length + domainKeywords.length;
 }
 
 /// Complete skills analysis result containing both CV and JD skills
@@ -47,6 +43,7 @@ class SkillsAnalysisResult {
   final String? jdComprehensiveAnalysis;
   final Map<String, dynamic>? expandableAnalysis;
   final List<String>? extractedKeywords;
+  final AnalyzeMatchResult? analyzeMatch;
   final Duration executionDuration;
   final bool isSuccess;
   final String? errorMessage;
@@ -58,6 +55,7 @@ class SkillsAnalysisResult {
     this.jdComprehensiveAnalysis,
     this.expandableAnalysis,
     this.extractedKeywords,
+    this.analyzeMatch,
     this.executionDuration = Duration.zero,
     this.isSuccess = true,
     this.errorMessage,
@@ -67,48 +65,78 @@ class SkillsAnalysisResult {
     // Debug logging to see what data is received
     debugPrint('🔍 [MODEL_DEBUG] Parsing SkillsAnalysisResult from JSON');
     debugPrint('   Keys in JSON: ${json.keys.toList()}');
-    debugPrint('   cv_comprehensive_analysis present: ${json.containsKey("cv_comprehensive_analysis")}');
-    debugPrint('   jd_comprehensive_analysis present: ${json.containsKey("jd_comprehensive_analysis")}');
-    debugPrint('   expandable_analysis present: ${json.containsKey("expandable_analysis")}');
-    
+    debugPrint(
+        '   cv_comprehensive_analysis present: ${json.containsKey("cv_comprehensive_analysis")}');
+    debugPrint(
+        '   jd_comprehensive_analysis present: ${json.containsKey("jd_comprehensive_analysis")}');
+    debugPrint(
+        '   expandable_analysis present: ${json.containsKey("expandable_analysis")}');
+    debugPrint(
+        '   analyze_match present: ${json.containsKey("analyze_match")}');
+
     // Handle expandable_analysis structure
-    final expandableAnalysis = json['expandable_analysis'] as Map<String, dynamic>?;
-    
+    final expandableAnalysis =
+        json['expandable_analysis'] as Map<String, dynamic>?;
+
     // Get comprehensive analysis with fallback to expandable_analysis content
-    String? cvComprehensiveAnalysis = json['cv_comprehensive_analysis'] as String?;
-    String? jdComprehensiveAnalysis = json['jd_comprehensive_analysis'] as String?;
-    
+    String? cvComprehensiveAnalysis =
+        json['cv_comprehensive_analysis'] as String?;
+    String? jdComprehensiveAnalysis =
+        json['jd_comprehensive_analysis'] as String?;
+
     // Debug the lengths
-    debugPrint('   cv_comprehensive_analysis length: ${cvComprehensiveAnalysis?.length ?? 0}');
-    debugPrint('   jd_comprehensive_analysis length: ${jdComprehensiveAnalysis?.length ?? 0}');
-    
+    debugPrint(
+        '   cv_comprehensive_analysis length: ${cvComprehensiveAnalysis?.length ?? 0}');
+    debugPrint(
+        '   jd_comprehensive_analysis length: ${jdComprehensiveAnalysis?.length ?? 0}');
+
     // If comprehensive analysis is empty, try to get from expandable_analysis
-    if ((cvComprehensiveAnalysis == null || cvComprehensiveAnalysis.trim().isEmpty) && 
+    if ((cvComprehensiveAnalysis == null ||
+            cvComprehensiveAnalysis.trim().isEmpty) &&
         expandableAnalysis != null) {
-      final cvAnalysis = expandableAnalysis['cv_analysis'] as Map<String, dynamic>?;
+      final cvAnalysis =
+          expandableAnalysis['cv_analysis'] as Map<String, dynamic>?;
       if (cvAnalysis != null) {
         cvComprehensiveAnalysis = cvAnalysis['content'] as String?;
       }
     }
-    
-    if ((jdComprehensiveAnalysis == null || jdComprehensiveAnalysis.trim().isEmpty) && 
+
+    if ((jdComprehensiveAnalysis == null ||
+            jdComprehensiveAnalysis.trim().isEmpty) &&
         expandableAnalysis != null) {
-      final jdAnalysis = expandableAnalysis['jd_analysis'] as Map<String, dynamic>?;
+      final jdAnalysis =
+          expandableAnalysis['jd_analysis'] as Map<String, dynamic>?;
       if (jdAnalysis != null) {
         jdComprehensiveAnalysis = jdAnalysis['content'] as String?;
       }
     }
-    
+
+    // Parse analyze match
+    AnalyzeMatchResult? analyzeMatch;
+    if (json['analyze_match'] != null) {
+      analyzeMatch = AnalyzeMatchResult.fromJson(
+          json['analyze_match'] as Map<String, dynamic>);
+    }
+
     // Debug final values
-    debugPrint('   FINAL cvComprehensiveAnalysis length: ${cvComprehensiveAnalysis?.length ?? 0}');
-    debugPrint('   FINAL jdComprehensiveAnalysis length: ${jdComprehensiveAnalysis?.length ?? 0}');
+    debugPrint(
+        '   FINAL cvComprehensiveAnalysis length: ${cvComprehensiveAnalysis?.length ?? 0}');
+    debugPrint(
+        '   FINAL jdComprehensiveAnalysis length: ${jdComprehensiveAnalysis?.length ?? 0}');
+    debugPrint('   FINAL analyzeMatch present: ${analyzeMatch != null}');
     if (cvComprehensiveAnalysis != null && cvComprehensiveAnalysis.isNotEmpty) {
-      debugPrint('   CV Analysis preview: ${cvComprehensiveAnalysis.substring(0, cvComprehensiveAnalysis.length > 200 ? 200 : cvComprehensiveAnalysis.length)}');
+      debugPrint(
+          '   CV Analysis preview: ${cvComprehensiveAnalysis.substring(0, cvComprehensiveAnalysis.length > 200 ? 200 : cvComprehensiveAnalysis.length)}');
     }
     if (jdComprehensiveAnalysis != null && jdComprehensiveAnalysis.isNotEmpty) {
-      debugPrint('   JD Analysis preview: ${jdComprehensiveAnalysis.substring(0, jdComprehensiveAnalysis.length > 200 ? 200 : jdComprehensiveAnalysis.length)}');
+      debugPrint(
+          '   JD Analysis preview: ${jdComprehensiveAnalysis.substring(0, jdComprehensiveAnalysis.length > 200 ? 200 : jdComprehensiveAnalysis.length)}');
     }
-    
+    if (analyzeMatch != null && !analyzeMatch.isEmpty) {
+      debugPrint(
+          '   Analyze Match preview: ${analyzeMatch.rawAnalysis.substring(0, analyzeMatch.rawAnalysis.length > 200 ? 200 : analyzeMatch.rawAnalysis.length)}');
+    }
+
     return SkillsAnalysisResult(
       cvSkills: SkillsData.fromJson(json['cv_skills'] ?? {}),
       jdSkills: SkillsData.fromJson(json['jd_skills'] ?? {}),
@@ -118,6 +146,7 @@ class SkillsAnalysisResult {
       extractedKeywords: json['extracted_keywords'] != null
           ? List<String>.from(json['extracted_keywords'])
           : null,
+      analyzeMatch: analyzeMatch,
       isSuccess: true,
     );
   }
@@ -135,6 +164,7 @@ class SkillsAnalysisResult {
         domainKeywords: [],
       ),
       expandableAnalysis: null,
+      analyzeMatch: null,
       isSuccess: false,
       errorMessage: errorMessage,
     );
@@ -148,10 +178,59 @@ class SkillsAnalysisResult {
       'jd_comprehensive_analysis': jdComprehensiveAnalysis,
       'expandable_analysis': expandableAnalysis,
       'extracted_keywords': extractedKeywords,
+      'analyze_match': analyzeMatch?.toJson(),
       'is_success': isSuccess,
       'error_message': errorMessage,
     };
   }
 
   bool get isEmpty => cvSkills.isEmpty && jdSkills.isEmpty;
+}
+
+/// Analyze match result containing recruiter-style assessment
+class AnalyzeMatchResult {
+  final String rawAnalysis;
+  final String? companyName;
+  final String? filePath;
+  final String? error;
+
+  AnalyzeMatchResult({
+    required this.rawAnalysis,
+    this.companyName,
+    this.filePath,
+    this.error,
+  });
+
+  factory AnalyzeMatchResult.fromJson(Map<String, dynamic> json) {
+    debugPrint('🔍 [MODEL_DEBUG] Parsing AnalyzeMatchResult from JSON');
+    debugPrint('   Keys in JSON: ${json.keys.toList()}');
+    debugPrint(
+        '   raw_analysis length: ${(json['raw_analysis'] as String?)?.length ?? 0}');
+
+    return AnalyzeMatchResult(
+      rawAnalysis: json['raw_analysis'] as String? ?? '',
+      companyName: json['company_name'] as String?,
+      filePath: json['analyze_match_file_path'] as String?,
+      error: json['error'] as String?,
+    );
+  }
+
+  factory AnalyzeMatchResult.error(String errorMessage) {
+    return AnalyzeMatchResult(
+      rawAnalysis: '',
+      error: errorMessage,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'raw_analysis': rawAnalysis,
+      'company_name': companyName,
+      'analyze_match_file_path': filePath,
+      'error': error,
+    };
+  }
+
+  bool get isEmpty => rawAnalysis.trim().isEmpty;
+  bool get hasError => error != null && error!.isNotEmpty;
 }

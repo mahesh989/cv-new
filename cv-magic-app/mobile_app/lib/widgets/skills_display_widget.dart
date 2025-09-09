@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
+import 'analyze_match_widget.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -189,6 +190,35 @@ class SkillsDisplayWidget extends StatelessWidget {
               ],
             ),
           ),
+
+          // Analyze Match Section - Always show during loading or when we have results
+          if (controller.isLoading || controller.hasResults) ...[
+            Builder(
+              builder: (context) {
+                debugPrint('🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget');
+                debugPrint('   hasAnalyzeMatch: ${controller.hasAnalyzeMatch}');
+                debugPrint('   isLoading: ${controller.isLoading}');
+                debugPrint('   hasResults: ${controller.hasResults}');
+                debugPrint(
+                    '   analyzeMatch: ${controller.analyzeMatch != null}');
+                return AnalyzeMatchWidget(
+                  analyzeMatch: controller.analyzeMatch,
+                  isLoading: controller.isLoading,
+                );
+              },
+            ),
+          ] else ...[
+            Builder(
+              builder: (context) {
+                debugPrint(
+                    '🔍 [SKILLS_DISPLAY] NOT rendering AnalyzeMatchWidget');
+                debugPrint('   hasAnalyzeMatch: ${controller.hasAnalyzeMatch}');
+                debugPrint('   isLoading: ${controller.isLoading}');
+                debugPrint('   hasResults: ${controller.hasResults}');
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -556,6 +586,17 @@ class _FormattedAnalysisText extends StatelessWidget {
           ),
         ));
       }
+      // Handle numbered lists
+      else if (RegExp(r'^\d+\.\s').hasMatch(line)) {
+        spans.add(TextSpan(
+          text: '$line\n',
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey.shade700,
+            height: 1.5,
+          ),
+        ));
+      }
       // Handle bullet points
       else if (line.startsWith('- ')) {
         spans.add(TextSpan(
@@ -563,6 +604,7 @@ class _FormattedAnalysisText extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             color: Colors.grey.shade700,
+            height: 1.5,
           ),
         ));
       }
@@ -577,6 +619,7 @@ class _FormattedAnalysisText extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             color: Colors.grey.shade700,
+            height: 1.4,
           ),
         ));
       }

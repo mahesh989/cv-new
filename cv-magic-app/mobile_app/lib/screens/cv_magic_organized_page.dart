@@ -16,6 +16,7 @@ import '../widgets/job_input.dart';
 import '../services/api_service.dart';
 import '../controllers/skills_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
+import '../widgets/test_analyze_match_widget.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   const CVMagicOrganizedPage({super.key});
@@ -63,6 +64,20 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
         title: const Text('CV Magic - Organized'),
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TestAnalyzeMatchWidget(),
+                ),
+              );
+            },
+            tooltip: 'Test Analyze Match Widget',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
