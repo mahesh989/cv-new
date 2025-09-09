@@ -58,7 +58,7 @@ class SkillExtractionService:
                 # Step 1: Get or create CV record
                 cv_data = await self._get_cv_data(db, cv_filename, user_id)
                 if not cv_data:
-                    raise ValueError(f"CV '{cv_filename}' not found for user {user_id}")
+                    raise ValueError(f"CV file '{cv_filename}' not found. Please upload the CV file first.")
                 
                 # Step 2: Get or create Job Application record
                 jd_data = await self._get_jd_data(db, jd_url, user_id)
@@ -107,6 +107,7 @@ class SkillExtractionService:
                 
         except Exception as e:
             logger.error(f"❌ Skill analysis failed: {str(e)}")
+            logger.error(f"❌ CV: {cv_filename}, JD URL: {jd_url}, User: {user_id}")
             raise Exception(f"Skill analysis error: {str(e)}")
     
     async def _get_cv_data(self, db: Session, cv_filename: str, user_id: int) -> Optional[Dict]:
@@ -120,6 +121,7 @@ class SkillExtractionService:
             
             if not file_path.exists():
                 logger.error(f"❌ CV file not found: {file_path}")
+                logger.error(f"❌ Available files in uploads: {list(upload_dir.glob('*')) if upload_dir.exists() else 'Uploads directory does not exist'}")
                 return None
             
             # Extract text from file
@@ -127,6 +129,7 @@ class SkillExtractionService:
             
             if not extraction_result['success']:
                 logger.error(f"❌ Failed to extract CV text: {extraction_result['error']}")
+                logger.error(f"❌ File type: {file_path.suffix}, Size: {file_path.stat().st_size if file_path.exists() else 'N/A'} bytes")
                 return None
             
             cv_text = extraction_result['text']
@@ -167,6 +170,7 @@ class SkillExtractionService:
             
         except Exception as e:
             logger.error(f"❌ Error getting CV data: {str(e)}")
+            logger.error(f"❌ CV filename: {cv_filename}, User ID: {user_id}")
             return None
     
     async def _get_jd_data(self, db: Session, jd_url: str, user_id: int) -> Optional[Dict]:
