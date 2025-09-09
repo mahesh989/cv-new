@@ -32,7 +32,8 @@ class SkillExtractionResultSaver:
         cv_filename: str,
         user_id: int,
         cv_data: Optional[Dict] = None,
-        jd_data: Optional[Dict] = None
+        jd_data: Optional[Dict] = None,
+        company_name: Optional[str] = None
     ) -> str:
         """
         Save skill extraction results to organized file structure
@@ -45,67 +46,53 @@ class SkillExtractionResultSaver:
             user_id: User ID
             cv_data: Optional CV data containing text content
             jd_data: Optional JD data containing text content and metadata
+            company_name: Optional direct company name to use (if provided, skips extraction)
             
         Returns:
             Path to saved file
         """
         try:
-            # Extract company name from JD data when available (preferred), otherwise from URL/skills
-            company_name = self._extract_company_name(jd_skills, jd_url, jd_data)
+            # Use direct company name if provided, otherwise extract from JD data/URL/skills
+            if company_name:
+                # Use the provided company name and ensure it's a proper slug
+                company_slug = self._create_company_slug(company_name)
+                # Check if folder exists and use exact folder name if found
+                if self.base_dir.exists():
+                    existing_folders = [f.name for f in self.base_dir.iterdir() if f.is_dir()]
+                    for folder in existing_folders:
+                        if folder.lower() == company_slug.lower():
+                            company_slug = folder
+                            break
+                logger.info(f"🏢 Using provided company name: {company_name} -> {company_slug}")
+            else:
+                # Extract company name from JD data when available (preferred), otherwise from URL/skills
+                company_slug = self._extract_company_name(jd_skills, jd_url, jd_data)
             
             # Create company folder
-            company_folder = self.base_dir / company_name
+            company_folder = self.base_dir / company_slug
             company_folder.mkdir(parents=True, exist_ok=True)
             
-            # Save original CV text file in root cv-analysis directory (not in company folder)
+            # Save original CV text file in root cv-analysis directory if it doesn't exist
             if cv_data and cv_data.get('text'):
                 cv_file_path = self.base_dir / "original_cv.txt"
-                with open(cv_file_path, 'w', encoding='utf-8') as f:
-                    f.write("=" * 80 + "\n")
-                    f.write("ORIGINAL CV TEXT\n")
-                    f.write(f"Filename: {cv_filename}\n")
-                    f.write(f"User ID: {user_id}\n")
-                    f.write(f"Extracted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                    f.write(f"Length: {len(cv_data['text'])} characters\n")
-                    f.write("=" * 80 + "\n\n")
-                    f.write(cv_data['text'])
-                logger.info(f"💾 CV text saved to: {cv_file_path}")
+                if not cv_file_path.exists():  # Only save if not already exists
+                    with open(cv_file_path, 'w', encoding='utf-8') as f:
+                        f.write("=" * 80 + "\n")
+                        f.write("ORIGINAL CV TEXT\n")
+                        f.write(f"Filename: {cv_filename}\n")
+                        f.write(f"User ID: {user_id}\n")
+                        f.write(f"Extracted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                        f.write(f"Length: {len(cv_data['text'])} characters\n")
+                        f.write("=" * 80 + "\n\n")
+                        f.write(cv_data['text'])
+                    logger.info(f"💾 CV text saved to: {cv_file_path}")
+                else:
+                    logger.info(f"💾 CV text already exists, skipping save: {cv_file_path}")
             
-            # Save JD original text file if provided and not already existing
-            jd_original_path = company_folder / "jd_original.txt"
-            if jd_data and jd_data.get('text') and not jd_original_path.exists():
-                with open(jd_original_path, 'w', encoding='utf-8') as f:
-                    f.write("=" * 80 + "\n")
-                    f.write("ORIGINAL JOB DESCRIPTION\n")
-                    f.write(f"URL: {jd_url}\n")
-                    f.write(f"User ID: {user_id}\n")
-                    f.write(f"Scraped: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                    f.write(f"Length: {len(jd_data['text'])} characters\n")
-                    f.write("=" * 80 + "\n\n")
-                    f.write(jd_data['text'])
-                logger.info(f"💾 JD text saved to: {jd_original_path}")
+            # Skip JD content saving during skills analysis - it's already saved separately
             
-            # Save JD metadata JSON file if provided and not already existing
-            jd_json_path = company_folder / f"job_info_{company_name}.json"
-            if jd_data and jd_data.get('record') and not jd_json_path.exists():
-                jd_record = jd_data['record']
-                job_info = {
-                    "company_name": jd_record.company or "Unknown",
-                    "job_title": jd_record.job_title or "Unknown",
-                    "job_url": jd_url,
-                    "user_id": user_id,
-                    "application_date": jd_record.application_date.isoformat() if jd_record.application_date else None,
-                    "status": jd_record.status or "analyzing",
-                    "extracted_at": datetime.now().isoformat(),
-                    "notes": jd_record.notes
-                }
-                
-                with open(jd_json_path, 'w', encoding='utf-8') as f:
-                    json.dump(job_info, f, indent=2, ensure_ascii=False)
-                logger.info(f"💾 JD metadata saved to: {jd_json_path}")
-            
-            # Generate skill analysis log filename (no numbers as requested)
-            filename = "log_output.txt"
+            # Generate skill analysis log filename with company slug
+            filename = f"{company_slug}_skills_analysis.txt"
             file_path = company_folder / filename
             
             # Generate skill analysis content
@@ -370,7 +357,8 @@ class SkillExtractionResultSaver:
                 # List files for specific company
                 company_folder = self.base_dir / self._clean_company_name(company_name)
                 if company_folder.exists():
-                    files = list(company_folder.glob("log_output.txt"))
+                    # Look for both old and new filename patterns
+                    files = list(company_folder.glob("*log_output*.txt")) + list(company_folder.glob("*skills_analysis.txt"))
                     result["companies"].append({
                         "name": company_name,
                         "folder": str(company_folder),
@@ -383,7 +371,8 @@ class SkillExtractionResultSaver:
                 if self.base_dir.exists():
                     for company_folder in self.base_dir.iterdir():
                         if company_folder.is_dir():
-                            files = list(company_folder.glob("log_output.txt"))
+                            # Look for both old and new filename patterns
+                            files = list(company_folder.glob("*log_output*.txt")) + list(company_folder.glob("*skills_analysis.txt"))
                             result["companies"].append({
                                 "name": company_folder.name,
                                 "folder": str(company_folder),

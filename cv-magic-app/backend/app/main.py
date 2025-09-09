@@ -3,7 +3,7 @@ Main FastAPI application
 """
 import logging
 from datetime import datetime
-from fastapi import FastAPI, Request, status, HTTPException
+from fastapi import FastAPI, Request, status, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
@@ -18,6 +18,9 @@ from app.routes.ai import router as ai_router
 from app.routes.cv_simple import router as cv_router
 from app.routes.cv_organized import router as cv_organized_router
 from app.routes.job_description import router as job_router
+
+# Import dependencies
+from app.core.model_dependency import get_current_model
 from app.routes.job_analysis import router as job_analysis_router
 
 # Configure logging
@@ -316,7 +319,10 @@ async def analyze_skills(request: Request):
 
 # Preliminary Analysis endpoint for mobile app
 @app.post("/api/preliminary-analysis")
-async def preliminary_analysis(request: Request):
+async def preliminary_analysis(
+    request: Request,
+    current_model: str = Depends(get_current_model)
+):
     """Preliminary skills analysis from CV filename and JD text"""
     from app.core.auth import verify_token
     
@@ -395,7 +401,7 @@ insights effectively.
         
         # Perform simple skills extraction
         logger.info(f"Starting skills analysis")
-        result = await perform_preliminary_skills_analysis(cv_content, jd_text, cv_filename)
+        result = await perform_preliminary_skills_analysis(cv_content, jd_text, cv_filename, current_model)
         logger.info(f"Skills analysis completed successfully")
         
         return JSONResponse(content=result)
@@ -509,8 +515,8 @@ async def get_preliminary_analysis_status(request: Request):
         )
 
 
-async def perform_preliminary_skills_analysis(cv_content: str, jd_text: str, cv_filename: str) -> dict:
-    """Perform preliminary skills analysis between CV and JD using AI prompts from mt1"""
+async def perform_preliminary_skills_analysis(cv_content: str, jd_text: str, cv_filename: str, current_model: str) -> dict:
+    """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     from datetime import datetime
     
     try:
@@ -521,140 +527,95 @@ async def perform_preliminary_skills_analysis(cv_content: str, jd_text: str, cv_
         # Get AI service instance
         from app.ai.ai_service import ai_service
         
-        # Technical skills extraction prompt (from mt1)
-        technical_skills_prompt = """You are an expert in parsing CVs and job descriptions for technical skills.
-
-Task:  
-From the text below, extract only individual technical skills, programming languages, software tools, platforms, libraries, frameworks, and certifications.
-
-CRITICAL RULES:
-- Return ONLY a comma-separated list of technical skills
-- NO explanations, NO commentary, NO reasoning about why you included or excluded items
-- NO quotes around skill names
-- NO additional text or explanations whatsoever
-- Do NOT include job titles, soft skills, company names, locations, UI/navigation text, or full sentences
-- Do NOT include generic phrases, responsibilities, or action verbs
-- Include full names for tools/platforms (e.g., "Business Intelligence" not "BI", "Database Management" not just "databases")
-- Include implied technical skills (e.g., if "databases" mentioned, include "SQL")
-- Include systems administration and technical certifications
-
-Good examples:  
-Python, SQL, Tableau, AWS, Docker, ReactJS, Microsoft Excel, Power BI, Salesforce, Google Analytics, Java, C++, Linux, Git, Kubernetes, TensorFlow, Azure, SAP, HTML, CSS, JavaScript, R, SPSS, Hadoop, Jenkins, Business Intelligence, Database Management, Systems Administration, Data Analytics, Management Information Systems, Oracle, MySQL, PostgreSQL, Scrum Master, PMP, AWS Certified Solutions Architect, CCNA, ITIL
-
-Bad examples:  
-work from home advanced search, main navigation ethical jobs logo, Data Analyst at Deloitte, managed a team, excellent communication, Sydney, Australia, project management experience, responsible for, join us sign in, job ad, career advice, led a project, passionate about technology
-
-REMEMBER: Return ONLY the skills as a comma-separated list. NO other text.
-
-Text:  
-{text}"""
-
-        # Soft skills extraction prompt (from mt1)
-        soft_skills_prompt = """You are analyzing text for interpersonal and behavioral competencies.
-
-Task:  
-From the text below, extract only individual soft skills or interpersonal traits.
-
-CRITICAL RULES:
-- Return ONLY a comma-separated list of soft skills
-- NO explanations, NO commentary, NO reasoning about why you included or excluded items
-- NO quotes around skill names
-- NO additional text or explanations whatsoever
-- Do NOT include job titles, technical skills, company names, locations, UI/navigation text, or full sentences
-- Do NOT include generic phrases, responsibilities, or action verbs
-- Do NOT include domain-specific jargon or certifications
-- Include values-based and cultural competency skills when mentioned
-- Include professional conduct and workplace behavior skills
-
-Good examples:  
-Communication, Teamwork, Leadership, Adaptability, Problem Solving, Time Management, Empathy, Resilience, Attention to Detail, Critical Thinking, Decision-Making, Conflict Resolution, Creativity, Flexibility, Work Ethic, Reliability, Collaboration, Active Listening, Negotiation, Emotional Intelligence, Self-Motivation, Stress Management, Organization, Accountability, Patience, Openness to Feedback, Cultural Sensitivity, Diversity Awareness, Inclusivity, Gender Equity Awareness, Analytical Thinking, Troubleshooting, Mentoring, Change Management, Ethics, Integrity
-
-Bad examples:  
-apply now, sign in, search jobs, Data Analyst, Python, Sydney, Australia, managed a team, responsible for, join us sign in, job ad, career advice, led a project, passionate about technology, project management experience
-
-REMEMBER: Return ONLY the skills as a comma-separated list. NO other text.
-
-Text:  
-{text}"""
-
-        # Domain keywords extraction prompt (from mt1)
-        domain_keywords_prompt = """You are parsing text for industry-specific terms and sector-specific certifications.
-
-Task:  
-From the text below, extract only individual domain-specific keywords, industry jargon, sector-specific methodologies, standards, regulations, certifications, and field-specific concepts.
-
-CRITICAL RULES:
-- Return ONLY a comma-separated list of domain-specific keywords
-- NO explanations, NO commentary, NO reasoning about why you included or excluded items
-- NO quotes around keyword names
-- NO additional text or explanations whatsoever
-- Do NOT include job titles, soft skills, technical skills, company names, locations, UI/navigation text, or full sentences
-- Do NOT include generic phrases, responsibilities, or action verbs
-- Include industry-specific acronyms, regulations, methodologies, and sector terminology
-- Include workplace benefits and HR-related domain terms when relevant
-- Include compliance, governance, and regulatory terms
-
-Good examples:  
-IFRS, HIPAA, GDPR, Six Sigma, Lean, Agile, Scrum, Basel III, SOX, Clinical Trials, EHR, PCI DSS, ISO 9001, Financial Modeling, Equity Valuation, White Card, RSA, NDIS, AHPRA, APRA, AML, KYC, SAP FICO, Epic, Meditech, Salesforce CRM, Clinical Governance, GMP, HACCP, TGA, PBX, RTO, VET, NDIS Worker Screening, NDIS Practice Standards, Family Violence, Gender Equity, Aboriginal and Torres Strait Islander, KPI, Salary Packaging, Portable Long Service Leave, EAP, Regulatory Compliance, Governance Requirements, Workforce Planning, Professional Development, Brief Intervention Services, Men's Referral Service, Perpetrator Accommodation Support, Peak Body
-
-Bad examples:  
-apply now, sign in, search jobs, Data Analyst, Python, Sydney, Australia, managed a team, responsible for, join us sign in, job ad, career advice, led a project, passionate about technology, project management experience, communication, teamwork
-
-REMEMBER: Return ONLY the keywords as a comma-separated list. NO other text.
-
-Text:  
-{text}"""
-
-        # Comprehensive analysis prompt
-        comprehensive_analysis_prompt = """You are a senior CV strategist and hiring consultant. Analyze the CV and Job Description to provide comprehensive insights.
-
-CV Content:
-{cv_content}
-
-Job Description:
-{jd_text}
-
-Provide a detailed analysis covering:
-1. Key strengths and competencies demonstrated in the CV
-2. How well the candidate's skills align with job requirements
-3. Potential gaps and areas for improvement
-4. Transferable skills and experiences
-5. Overall fit assessment
-
-Be specific, actionable, and professional in your analysis."""
-
-        # Extract CV skills using AI
-        logger.info("🔍 [SKILLS_ANALYSIS] Extracting CV technical skills...")
-        cv_technical_response = await ai_service.generate_response(technical_skills_prompt.format(text=cv_content))
-        cv_technical_skills = [skill.strip() for skill in cv_technical_response.content.split(',') if skill.strip()]
+        # Log current AI service status
+        current_status = ai_service.get_current_status()
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Current AI provider: {current_status.get('current_provider')}")
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Current AI model: {current_status.get('current_model')}")
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Provider available: {current_status.get('provider_available')}")
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Model from header: {current_model}")
         
-        logger.info("🔍 [SKILLS_ANALYSIS] Extracting CV soft skills...")
-        cv_soft_response = await ai_service.generate_response(soft_skills_prompt.format(text=cv_content))
-        cv_soft_skills = [skill.strip() for skill in cv_soft_response.content.split(',') if skill.strip()]
+        # Import the enhanced prompt function
+        from app.services.skill_extraction.prompt_templates import get_prompt as get_skill_prompt
+
+        # Extract CV skills using enhanced structured prompt
+        logger.info("🔍 [SKILLS_ANALYSIS] Extracting CV skills with detailed structured analysis...")
         
-        logger.info("🔍 [SKILLS_ANALYSIS] Extracting CV domain keywords...")
-        cv_domain_response = await ai_service.generate_response(domain_keywords_prompt.format(text=cv_content))
-        cv_domain_keywords = [keyword.strip() for keyword in cv_domain_response.content.split(',') if keyword.strip()]
+        # Debug CV content
+        logger.info("=" * 80)
+        logger.info("📄 [CV CONTENT DEBUG]")
+        logger.info("=" * 80)
+        logger.info(f"📄 CV Content Length: {len(cv_content)} characters")
+        logger.info("📄 CV Content Preview (first 500 chars):")
+        logger.info("-" * 40)
+        logger.info(cv_content[:500])
+        logger.info("-" * 40)
+        logger.info("=" * 80)
         
-        # Extract JD skills using AI
-        logger.info("🔍 [SKILLS_ANALYSIS] Extracting JD technical skills...")
-        jd_technical_response = await ai_service.generate_response(technical_skills_prompt.format(text=jd_text))
-        jd_technical_skills = [skill.strip() for skill in jd_technical_response.content.split(',') if skill.strip()]
+        cv_structured_prompt = get_skill_prompt('combined_structured', text=cv_content, document_type="CV")
         
-        logger.info("🔍 [SKILLS_ANALYSIS] Extracting JD soft skills...")
-        jd_soft_response = await ai_service.generate_response(soft_skills_prompt.format(text=jd_text))
-        jd_soft_skills = [skill.strip() for skill in jd_soft_response.content.split(',') if skill.strip()]
+        # Use parameters that encourage detailed responses
+        cv_structured_response = await ai_service.generate_response(
+            prompt=cv_structured_prompt,
+            temperature=0.1,     # Lower temperature for more consistent, detailed responses
+            max_tokens=4000      # Higher token limit to allow for detailed analysis
+        )
+        cv_raw_response = cv_structured_response.content
         
-        logger.info("🔍 [SKILLS_ANALYSIS] Extracting JD domain keywords...")
-        jd_domain_response = await ai_service.generate_response(domain_keywords_prompt.format(text=jd_text))
-        jd_domain_keywords = [keyword.strip() for keyword in jd_domain_response.content.split(',') if keyword.strip()]
+        # Parse the structured response
+        from app.services.skill_extraction.response_parser import SkillExtractionParser
+        cv_parser = SkillExtractionParser()
+        cv_parsed = cv_parser.parse_response(cv_raw_response, "CV")
+        cv_technical_skills = cv_parsed.get('technical_skills', [])
+        cv_soft_skills = cv_parsed.get('soft_skills', [])
+        cv_domain_keywords = cv_parsed.get('domain_keywords', [])
         
-        # Generate comprehensive analysis
-        logger.info("🔍 [SKILLS_ANALYSIS] Generating comprehensive analysis...")
-        cv_analysis_response = await ai_service.generate_response(comprehensive_analysis_prompt.format(cv_content=cv_content, jd_text=jd_text))
-        cv_analysis = cv_analysis_response.content
-        jd_analysis_response = await ai_service.generate_response(comprehensive_analysis_prompt.format(cv_content=jd_text, jd_text=cv_content))
-        jd_analysis = jd_analysis_response.content
+        # Debug CV structured output
+        logger.info("=" * 80)
+        logger.info("📊 [CV STRUCTURED ANALYSIS OUTPUT]")
+        logger.info("=" * 80)
+        logger.info(f"📄 CV Raw Response Length: {len(cv_raw_response)} characters")
+        logger.info("📄 CV Raw Response Preview (first 1000 chars):")
+        logger.info("-" * 40)
+        logger.info(cv_raw_response[:1000])
+        logger.info("-" * 40)
+        logger.info("=" * 80)
+        
+        # Extract JD skills using enhanced structured prompt
+        logger.info("🔍 [SKILLS_ANALYSIS] Extracting JD skills with detailed structured analysis...")
+        jd_structured_prompt = get_skill_prompt('combined_structured', text=jd_text, document_type="Job Description")
+        
+        # Use parameters that encourage detailed responses  
+        jd_structured_response = await ai_service.generate_response(
+            prompt=jd_structured_prompt,
+            temperature=0.1,     # Lower temperature for more consistent, detailed responses
+            max_tokens=4000      # Higher token limit to allow for detailed analysis
+        )
+        jd_raw_response = jd_structured_response.content
+        
+        # Parse the structured response
+        jd_parser = SkillExtractionParser()
+        jd_parsed = jd_parser.parse_response(jd_raw_response, "JD")
+        jd_technical_skills = jd_parsed.get('technical_skills', [])
+        jd_soft_skills = jd_parsed.get('soft_skills', [])
+        jd_domain_keywords = jd_parsed.get('domain_keywords', [])
+        
+        # Debug JD structured output
+        logger.info("=" * 80)
+        logger.info("📊 [JD STRUCTURED ANALYSIS OUTPUT]")
+        logger.info("=" * 80)
+        logger.info(f"📄 JD Raw Response Length: {len(jd_raw_response)} characters")
+        logger.info("📄 JD Raw Response Preview (first 1000 chars):")
+        logger.info("-" * 40)
+        logger.info(jd_raw_response[:1000])
+        logger.info("-" * 40)
+        logger.info("=" * 80)
+        
+        # Generate comprehensive analysis (optional - you can keep this or use the detailed structured analysis)
+        logger.info("🔍 [SKILLS_ANALYSIS] Using structured analysis as comprehensive analysis...")
+        
+        # Use the detailed structured responses as the comprehensive analysis
+        cv_analysis = cv_raw_response
+        jd_analysis = jd_raw_response
         
         # Debug logging
         logger.info(f"✅ [SKILLS_ANALYSIS] CV Technical Skills ({len(cv_technical_skills)}): {cv_technical_skills}")
@@ -677,11 +638,106 @@ Be specific, actionable, and professional in your analysis."""
             },
             "cv_comprehensive_analysis": cv_analysis,
             "jd_comprehensive_analysis": jd_analysis,
+            "expandable_analysis": {
+                "cv_analysis": {
+                    "title": "CV Analysis",
+                    "content": cv_analysis,
+                    "skills_summary": {
+                        "technical": f"{len(cv_technical_skills)} technical skills",
+                        "soft": f"{len(cv_soft_skills)} soft skills", 
+                        "domain": f"{len(cv_domain_keywords)} domain keywords"
+                    }
+                },
+                "jd_analysis": {
+                    "title": "Job Description Analysis", 
+                    "content": jd_analysis,
+                    "skills_summary": {
+                        "technical": f"{len(jd_technical_skills)} technical skills",
+                        "soft": f"{len(jd_soft_skills)} soft skills",
+                        "domain": f"{len(jd_domain_keywords)} domain keywords"
+                    }
+                }
+            },
             "extracted_keywords": list(set(cv_technical_skills + jd_technical_skills + cv_soft_skills + jd_soft_skills + cv_domain_keywords + jd_domain_keywords)),
             "analysis_timestamp": datetime.now().isoformat()
         }
         
         logger.info(f"✅ [SKILLS_ANALYSIS] Analysis completed successfully")
+        
+        # Save results to file (enhanced with detailed responses)
+        try:
+            from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
+            result_saver = SkillExtractionResultSaver()
+            
+            # Get the most recent company folder (created during JD analysis)
+            company_name = None
+            try:
+                from pathlib import Path
+                cv_analysis_dir = Path("cv-analysis")
+                if cv_analysis_dir.exists():
+                    # Find the most recently created company folder (excluding Unknown_Company)
+                    company_folders = []
+                    for company_folder in cv_analysis_dir.iterdir():
+                        if (company_folder.is_dir() and 
+                            company_folder.name != "Unknown_Company" and
+                            list(company_folder.glob("job_info_*.json"))):
+                            company_folders.append(company_folder)
+                    
+                    if company_folders:
+                        # Sort by creation time (most recent first)
+                        most_recent_folder = max(company_folders, key=lambda p: p.stat().st_mtime)
+                        company_name = most_recent_folder.name
+                        logger.info(f"🏢 [COMPANY_DETECTION] Using most recent company folder: {company_name}")
+                    else:
+                        logger.warning(f"⚠️ [COMPANY_DETECTION] No valid company folders found")
+            except Exception as e:
+                logger.warning(f"⚠️ [COMPANY_DETECTION] Failed to detect company folder: {e}")
+            
+            # Prepare data for saving (including the detailed raw responses)
+            cv_skills_data = {
+                "technical_skills": cv_technical_skills,
+                "soft_skills": cv_soft_skills,
+                "domain_keywords": cv_domain_keywords,
+                "comprehensive_analysis": cv_analysis,
+                "raw_response": cv_raw_response  # This now contains the detailed structured analysis
+            }
+            
+            jd_skills_data = {
+                "technical_skills": jd_technical_skills,
+                "soft_skills": jd_soft_skills,
+                "domain_keywords": jd_domain_keywords,
+                "comprehensive_analysis": jd_analysis,
+                "raw_response": jd_raw_response  # This now contains the detailed structured analysis
+            }
+            
+            # Save to file with company name
+            saved_file_path = result_saver.save_analysis_results(
+                cv_skills=cv_skills_data,
+                jd_skills=jd_skills_data,
+                jd_url="preliminary_analysis",  # Don't pass JD text as URL
+                cv_filename=cv_filename,
+                user_id=1,
+                cv_data={"text": cv_content, "filename": cv_filename},
+                jd_data=None,  # Don't pass JD data to avoid re-saving
+                company_name=company_name  # Pass detected company name
+            )
+            
+            logger.info(f"📁 [FILE_SAVE] Results saved to: {saved_file_path}")
+            result["saved_file_path"] = saved_file_path
+            
+        except Exception as e:
+            logger.warning(f"⚠️ [FILE_SAVE] Failed to save results to file: {str(e)}")
+            result["saved_file_path"] = None
+        
+        # Debug final response structure
+        logger.info("=" * 80)
+        logger.info("📤 [FINAL RESPONSE STRUCTURE]")
+        logger.info("=" * 80)
+        logger.info(f"Response keys: {list(result.keys())}")
+        logger.info(f"CV analysis content length: {len(result.get('cv_comprehensive_analysis', ''))}")
+        logger.info(f"JD analysis content length: {len(result.get('jd_comprehensive_analysis', ''))}")
+        logger.info("=" * 80)
+        
         return result
         
     except Exception as e:

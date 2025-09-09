@@ -76,12 +76,12 @@ class DeepSeekProvider(BaseAIProvider):
             # Add any additional parameters
             payload.update(kwargs)
             
-            # Make API call
+            # Make API call with extended read timeout (connect, read)
             response = requests.post(
                 f"{self.base_url}/chat/completions",
                 headers=self.headers,
                 json=payload,
-                timeout=30
+                timeout=(15, 120)
             )
             
             if response.status_code != 200:

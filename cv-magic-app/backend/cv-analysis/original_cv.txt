@@ -1,80 +1,59 @@
 ================================================================================
 ORIGINAL CV TEXT
-CV File: maheshwor_tiwari.pdf
-Extracted: 2025-09-08 14:50:38
-Length: 4864 characters
+CV File: Maheshwor_Tiwari.docx
+Extracted: 2025-09-09 10:09:12
+Length: 3755 characters
 ================================================================================
 
-Maheshwor Tiwari  
-0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220  
-Blogs on Medium  | GitHub  | Dashboard  Portfolio  
-CAREER PROFIL E 
- 
-I hold a PhD in Physics and completed a Master's in Data Science, bringing over three years of experience in Python 
-coding, AI, and machine learning. My expertise encompasses modeling and training AI models, writing efficient Python 
-scripts, designing and deploying robust data pipelines, conducting innovative research, and creating advanced 
-visualiz ations that convert complex data into actionable insights. I am also proficient in SQL, Tableau, and Power BI, building 
-comprehensive dashboards that support data -driven decision -making.  
- 
-TECHNICAL SKILLS  
-• Specialized in Python programming, including data analysis, automation, and machine learning using libraries such 
-as Pandas, NumPy, and scikit -learn.  
-• Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.  
-• Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib.  
-• Experienced with GitHub for version control, Docker for containerization, and Snowflake for cloud data warehousing.  
-• Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data -driven solutions and reporting.  
- 
-EDUCATION  
-Master of Data Science  
-Charles Darwin University, Sydney, Australia GPA   Mar 2023 - Nov 2024  
-PhD in Physics  
-CY Cergy Paris University, Cergy, France  Oct 2018 - Sep 2022  
-Master of Theoretical Physics  
-CY Cergy Paris University, Cergy, France    Sep 2016 - Jun 2018  
- 
-EXPERIENCE   
-Data Analyst         Jul 2024 – Present  
-The Bitrates, Sydney, New South Wales, Australia  
-• Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline 
-efficiency by 30%.  
-• Developed machine learning models in Python for predictive analytics, enabling data -driven business decisions.  
-• Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity.  
-• Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate 
-insights effectively.  
-• Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights.  
-Data Analyst         Mar 2024 – Jun 2024  
-iBuild Building Solutions, Victoria, Australia  
-• Automated data extraction and structuring of population datasets using Python, improving data accuracy and 
-team collaboration.  
-• Analyzed customer support data with Python to optimize response times and enhance operational efficiency.  
-• Developed Python -based solutions to generate actionable insights, meeting strict deadlines for strategic decision -
-making.  
-• Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction 
-and decision -making processes.  
-Software engineer and  Analyst        Jun 2023 - Nov 2023  
-Property Console, Sydney, Australia  
-• Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and 
-operational efficiency.  
-• Collaborated with the development team to enhance analytics capabilities, using Python to improve data 
-processing speed by 25%.  
-• Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision -
-making.  
-• Supported cross -functional teams with Python -driven insights, enabling customer -focused initiatives.  
-Research Assistant         Oct 2018 - Sep 2022  
-CY Cergy Paris University, Cergy -Pontoise, France  
-• Utilized advanced Python programming for computational modeling and solving complex research problems.  
-• Developed Python -based workflows to manage and analyze large datasets across multiple research projects.  
-• Presented Python -enabled research findings at international conferences, demonstrating technical expertise and 
-communication skills.  
-Lecturer and Course Facilitator  
-CY Cergy Paris University, Cergy -Pontoise, France  Sep 2019 - Jun 2022   
-• Led engaging physics tutorials for  master’s students, enhancing understanding and promoting teamwork.  
-• Designed course materials, assignments, and exams, strengthening the learning experience.  
-• Mentored students on projects, collaborated with faculty, and fostered student engagement.  
- 
-Research Intern  
-CY Cergy Paris University, Cergy -Pontoise, France  Feb 2018 - Jun 2018  
-• Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials.  
-• Managed and analysed complex data sets, improving their accuracy and reliability.  
-• Used dashboard using Power BI to present research findings and participated in weekly reviews, improving 
-collaboration and research skills.
+Maheshwor Tiwari
+0414 032 507 | maheshtwari99@gmail.com | Blogs on Medium | GitHub | Dashboard Portfolio
+Residency Status: On student visa; applying for Subclass 485 Temporary Graduate Visa
+
+CAREER PROFILE
+
+Dynamic and detail-oriented Data Analyst with a strong foundation in Python, data analysis, and quantitative problem-solving. Passionate about leveraging computational and analytical expertise to solve complex problems in fast-paced environments. Eager to contribute to Tibra's innovative trading strategies while enhancing skills in financial markets and algorithmic trading systems. Motivated to deepen expertise in proprietary trading technologies.
+
+KEY SKILLS 
+Programming Expertise: Advanced proficiency in Python with hands-on experience in data analysis, machine learning, and automation.
+Quantitative Problem-Solving: Skilled in analysing and optimising large datasets, reducing operational inefficiencies.
+Algorithmic Thinking: Knowledge of data structures, algorithms, and optimisation techniques.
+Analytical Tools: Skilled in SQL and Power BI for creating dashboards, reporting, and data-driven decision-making.
+Project Management: Proven ability to manage end-to-end projects with high precision and tight deadlines.
+Eager Learner: Strong appetite for learning new technologies, including financial market theories.
+EDUCATION 
+
+Master of Data Science		                 Mar 2023 - Oct 2024
+Charles Darwin University, Sydney, Australia, 	GPA - 6.35 /7
+
+Bachelor of Science in Information Technology           GPA - 83%                                                	Jul 2014 – Aug 2018
+Tribhuvan University, Kathmandu, Nepal		                                                                
+
+PROFESSIONAL EXPERIENCE
+
+Data Analyst                                                                                                    	Jan 2024 – Jun 2024 
+iBuild Building Solutions, Victoria, Australia	 
+Analysed datasets of over 100,000 records, ensuring 99% data accuracy and integrity.
+Developed automated reporting systems using Python, streamlining workflows and reducing processing time by 15%.
+Designed Power BI dashboards to improve visibility into key metrics, enhancing operational decision-making.
+Collaborated with cross-functional teams to optimise inventory tracking systems and solve discrepancies in real time.
+Data Insight & Analyst                                                                      	            Apr 2023 - Nov 2023
+Property Console, Sydney, Australia	
+Utilised Python and SQL to identify patterns in large datasets, contributing to strategic business insights.
+Created custom dashboards using Power BI, reducing reporting time by 30%.
+Conducted ad-hoc analyses to uncover actionable insights, improving response times by 20%.
+Delivered clear and concise reports to stakeholders, enabling data-driven decision-making.
+UNIVERSITY PROJECT 
+Thesis: Optimisation of Yolov8n Model for Real-Time Corrosion Detection (Grade: 89/100)
+Reduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.
+Demonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.
+Applied findings to enhance model performance using drones and edge devices.
+Contributed to industrial inspection innovations by improving real-time object detection models.
+Heart Attack Risk Prediction (Grade of 37/40) 	Oct 2024
+Implemented logistic regression, random forests, and deep learning models to predict heart attack risks.
+Addressed imbalanced datasets using undersampling techniques to enhance prediction reliability.
+Presented findings through clear, data-driven visualisations to support decision-making.
+
+CERTIFICATIONS 
+
+SQL, Linkedin Learning
+Google Analytics, Skillshop, Google
