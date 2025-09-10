@@ -152,7 +152,7 @@ Examples of what to look for:
 - Customer service, interpersonal skills, analytical thinking
 - Any personality traits or behavioral skills mentioned
 
-**STRONGLY IMPLIED (very likely based on responsibilities):**  
+**STRONGLY IMPLIED (very likely based on responsibilities):**
 [Look at job responsibilities and infer soft skills that would be required. Provide evidence from the text.]
 
 ## TECHNICAL SKILLS:

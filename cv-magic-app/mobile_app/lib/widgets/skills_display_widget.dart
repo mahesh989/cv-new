@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
+import '../utils/text_formatter.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -477,6 +478,13 @@ class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: widget.baseColor.shade300),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,7 +526,7 @@ class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
                             );
                           }
 
-                          return _FormattedAnalysisText(
+                          return SkillsAnalysisFormattedText(
                             text: widget.analysis,
                             baseColor: widget.baseColor,
                           );
@@ -531,133 +539,5 @@ class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
         ),
       ],
     );
-  }
-}
-
-/// Custom widget to format analysis text with proper styling
-class _FormattedAnalysisText extends StatelessWidget {
-  final String text;
-  final MaterialColor baseColor;
-
-  const _FormattedAnalysisText({
-    required this.text,
-    required this.baseColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SelectableText.rich(
-      _buildFormattedText(),
-      style: TextStyle(
-        fontSize: 13,
-        color: Colors.grey.shade700,
-        height: 1.4,
-      ),
-    );
-  }
-
-  TextSpan _buildFormattedText() {
-    final lines = text.split('\n');
-    final List<TextSpan> spans = [];
-
-    for (final line in lines) {
-      if (line.trim().isEmpty) {
-        spans.add(const TextSpan(text: '\n'));
-        continue;
-      }
-
-      // Handle headings (## and ###)
-      if (line.startsWith('## ')) {
-        spans.add(TextSpan(
-          text: line.substring(3) + '\n',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: baseColor.shade700,
-          ),
-        ));
-      } else if (line.startsWith('### ')) {
-        spans.add(TextSpan(
-          text: line.substring(4) + '\n',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: baseColor.shade600,
-          ),
-        ));
-      }
-      // Handle numbered lists
-      else if (RegExp(r'^\d+\.\s').hasMatch(line)) {
-        spans.add(TextSpan(
-          text: '$line\n',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade700,
-            height: 1.5,
-          ),
-        ));
-      }
-      // Handle bullet points
-      else if (line.startsWith('- ')) {
-        spans.add(TextSpan(
-          text: '• ${line.substring(2)}\n',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade700,
-            height: 1.5,
-          ),
-        ));
-      }
-      // Handle bold text (**text**)
-      else if (line.contains('**')) {
-        spans.add(_parseBoldText(line));
-      }
-      // Regular text
-      else {
-        spans.add(TextSpan(
-          text: line + '\n',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade700,
-            height: 1.4,
-          ),
-        ));
-      }
-    }
-
-    return TextSpan(children: spans);
-  }
-
-  TextSpan _parseBoldText(String line) {
-    final List<TextSpan> spans = [];
-    final parts = line.split('**');
-
-    for (int i = 0; i < parts.length; i++) {
-      if (i % 2 == 0) {
-        // Regular text
-        if (parts[i].isNotEmpty) {
-          spans.add(TextSpan(
-            text: parts[i],
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade700,
-            ),
-          ));
-        }
-      } else {
-        // Bold text
-        spans.add(TextSpan(
-          text: parts[i],
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade800,
-          ),
-        ));
-      }
-    }
-
-    spans.add(const TextSpan(text: '\n'));
-    return TextSpan(children: spans);
   }
 }

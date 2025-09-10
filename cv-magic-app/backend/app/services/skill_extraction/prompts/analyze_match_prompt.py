@@ -146,9 +146,9 @@ ANALYZE_MATCH_PROMPT = """You are a seasoned recruiter with 15+ years of hiring 
 **REALISTIC ODDS:** [X% chance of getting interview if CV tailored well]
 
 **IF PURSUING - STRATEGIC PRIORITIES:**
-1. **[Priority 1]**: [Most critical positioning change]
-2. **[Priority 2]**: [Key skill/experience to highlight]
-3. **[Priority 3]**: [Important gap to address/minimize]
+1. **Priority 1:** [Most critical positioning change]
+2. **Priority 2:** [Key skill/experience to highlight]
+3. **Priority 3:** [Important gap to address/minimize]
 
 **HONEST BOTTOM LINE:** [Straight talk - worth the effort or not?]
 
