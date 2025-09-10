@@ -103,6 +103,33 @@ class SkillExtractionResultSaver:
                 f.write(content)
             
             logger.info(f"💾 Analysis results saved to: {file_path}")
+            
+            # Also save a structured JSON artifact alongside the text file
+            try:
+                json_payload = {
+                    "generated": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                    "cv_filename": cv_filename,
+                    "jd_url": jd_url,
+                    "user_id": user_id,
+                    "company": company_slug,
+                    "cv_skills": {
+                        "technical_skills": cv_skills.get("technical_skills", []),
+                        "soft_skills": cv_skills.get("soft_skills", []),
+                        "domain_keywords": cv_skills.get("domain_keywords", [])
+                    },
+                    "jd_skills": {
+                        "technical_skills": jd_skills.get("technical_skills", []),
+                        "soft_skills": jd_skills.get("soft_skills", []),
+                        "domain_keywords": jd_skills.get("domain_keywords", [])
+                    }
+                }
+                json_filename = f"{company_slug}_skills_analysis.json"
+                json_path = company_folder / json_filename
+                with open(json_path, 'w', encoding='utf-8') as jf:
+                    json.dump(json_payload, jf, ensure_ascii=False, indent=2)
+                logger.info(f"💾 JSON artifact saved to: {json_path}")
+            except Exception as json_err:
+                logger.warning(f"⚠️ Failed to save JSON artifact: {json_err}")
             return str(file_path)
             
         except Exception as e:
@@ -431,6 +458,60 @@ class SkillExtractionResultSaver:
             
         except Exception as e:
             logger.error(f"❌ Failed to append analyze match: {str(e)}")
+            raise e
+
+    def append_preextracted_comparison(self, raw_analysis: str, company_name: str, saved_file_path: Optional[str] = None) -> str:
+        """
+        Append pre-extracted skills comparison output to the existing log file.
+        Mirrors the analyze-match append behavior to keep a single consolidated log.
+        
+        Args:
+            raw_analysis: The raw formatted comparison text
+            company_name: Company name for file path
+        
+        Returns:
+            str: Path to the updated file
+        """
+        try:
+            # Try to infer company from saved_file_path first (most reliable)
+            company_slug = None
+            if saved_file_path:
+                try:
+                    p = Path(saved_file_path)
+                    # Expect structure: cv-analysis/<Company>/<Company>_skills_analysis.txt
+                    if p.parent and p.parent.name:
+                        company_slug = p.parent.name
+                        logger.info(f"🏢 [PREEXTRACTED_COMPARISON] Inferred company from saved_file_path: {company_slug}")
+                except Exception:
+                    pass
+
+            # Fallback to provided company name
+            if not company_slug:
+                company_slug = self._create_company_slug(company_name)
+            if self.base_dir.exists():
+                existing_folders = [f.name for f in self.base_dir.iterdir() if f.is_dir()]
+                for folder in existing_folders:
+                    if folder.lower() == company_slug.lower():
+                        company_slug = folder
+                        break
+            company_folder = self.base_dir / company_slug
+            filename = f"{company_slug}_skills_analysis.txt"
+            file_path = company_folder / filename
+            company_folder.mkdir(parents=True, exist_ok=True)
+
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+
+            with open(file_path, 'a', encoding='utf-8') as f:
+                f.write("\n" + "="*80 + "\n")
+                f.write(f"[{timestamp}] [PREEXTRACTED_SKILLS_COMPARISON] OUTPUT:\n")
+                f.write(raw_analysis)
+                f.write("\n" + "="*80 + "\n")
+
+            logger.info(f"📁 [PREEXTRACTED_COMPARISON] Results appended to: {file_path}")
+            return str(file_path)
+        except Exception as e:
+            logger.error(f"❌ Failed to append pre-extracted skills comparison: {str(e)}")
             raise e
 
 

@@ -89,6 +89,9 @@ class SkillsAnalysisService {
         analyzeMatch: analysisResult.analyzeMatch,
         executionDuration: stopwatch.elapsed,
         isSuccess: true,
+        // carry pre-extracted comparison fields through to the UI
+        preextractedRawOutput: analysisResult.preextractedRawOutput,
+        preextractedCompanyName: analysisResult.preextractedCompanyName,
       );
 
       print(

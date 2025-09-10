@@ -29,6 +29,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
   // State variables
   String? selectedCVFilename;
   bool isLoading = false;
+  // Removed company selection used for JDAnalysisWidget (backend-only focus)
 
   // Job description controllers
   final TextEditingController jdController = TextEditingController();
@@ -64,20 +65,6 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
         title: const Text('CV Magic - Organized'),
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TestAnalyzeMatchWidget(),
-                ),
-              );
-            },
-            tooltip: 'Test Analyze Match Widget',
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -240,6 +227,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
             SkillsDisplayWidget(
               controller: _skillsController,
             ),
+            // JD Analysis UI section removed for backend-only focus
 
             // Loading indicator
             if (isLoading)
@@ -346,4 +334,6 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
     // For now, we'll just update the state
     setState(() {});
   }
+
+  // Company selector removed (backend-only focus)
 }

@@ -47,6 +47,9 @@ class SkillsAnalysisResult {
   final Duration executionDuration;
   final bool isSuccess;
   final String? errorMessage;
+  // New: Pre-extracted comparison raw output (formatted text) and company name
+  final String? preextractedRawOutput;
+  final String? preextractedCompanyName;
 
   SkillsAnalysisResult({
     required this.cvSkills,
@@ -59,6 +62,8 @@ class SkillsAnalysisResult {
     this.executionDuration = Duration.zero,
     this.isSuccess = true,
     this.errorMessage,
+    this.preextractedRawOutput,
+    this.preextractedCompanyName,
   });
 
   factory SkillsAnalysisResult.fromJson(Map<String, dynamic> json) {
@@ -118,24 +123,23 @@ class SkillsAnalysisResult {
           json['analyze_match'] as Map<String, dynamic>);
     }
 
+    // Parse pre-extracted comparison
+    String? preextractedRaw;
+    String? preextractedCompany;
+    if (json['preextracted_skills_comparison'] != null) {
+      final m = json['preextracted_skills_comparison'] as Map<String, dynamic>;
+      preextractedRaw = m['raw_output'] as String?;
+      preextractedCompany = m['company_name'] as String?;
+      debugPrint(
+          '   preextracted_skills_comparison raw length: ${preextractedRaw?.length ?? 0}');
+    }
+
     // Debug final values
     debugPrint(
         '   FINAL cvComprehensiveAnalysis length: ${cvComprehensiveAnalysis?.length ?? 0}');
     debugPrint(
         '   FINAL jdComprehensiveAnalysis length: ${jdComprehensiveAnalysis?.length ?? 0}');
     debugPrint('   FINAL analyzeMatch present: ${analyzeMatch != null}');
-    if (cvComprehensiveAnalysis != null && cvComprehensiveAnalysis.isNotEmpty) {
-      debugPrint(
-          '   CV Analysis preview: ${cvComprehensiveAnalysis.substring(0, cvComprehensiveAnalysis.length > 200 ? 200 : cvComprehensiveAnalysis.length)}');
-    }
-    if (jdComprehensiveAnalysis != null && jdComprehensiveAnalysis.isNotEmpty) {
-      debugPrint(
-          '   JD Analysis preview: ${jdComprehensiveAnalysis.substring(0, jdComprehensiveAnalysis.length > 200 ? 200 : jdComprehensiveAnalysis.length)}');
-    }
-    if (analyzeMatch != null && !analyzeMatch.isEmpty) {
-      debugPrint(
-          '   Analyze Match preview: ${analyzeMatch.rawAnalysis.substring(0, analyzeMatch.rawAnalysis.length > 200 ? 200 : analyzeMatch.rawAnalysis.length)}');
-    }
 
     return SkillsAnalysisResult(
       cvSkills: SkillsData.fromJson(json['cv_skills'] ?? {}),
@@ -148,6 +152,8 @@ class SkillsAnalysisResult {
           : null,
       analyzeMatch: analyzeMatch,
       isSuccess: true,
+      preextractedRawOutput: preextractedRaw,
+      preextractedCompanyName: preextractedCompany,
     );
   }
 
@@ -181,10 +187,19 @@ class SkillsAnalysisResult {
       'analyze_match': analyzeMatch?.toJson(),
       'is_success': isSuccess,
       'error_message': errorMessage,
+      'preextracted_skills_comparison': preextractedRawOutput == null
+          ? null
+          : {
+              'raw_output': preextractedRawOutput,
+              'company_name': preextractedCompanyName,
+            },
     };
   }
 
   bool get isEmpty => cvSkills.isEmpty && jdSkills.isEmpty;
+
+  bool get hasPreextractedComparison =>
+      (preextractedRawOutput != null && preextractedRawOutput!.isNotEmpty);
 }
 
 /// Analyze match result containing recruiter-style assessment

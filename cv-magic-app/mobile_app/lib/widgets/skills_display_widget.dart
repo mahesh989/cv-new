@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
 import '../utils/text_formatter.dart';
+import 'skills_analysis/ai_powered_skills_analysis.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -220,6 +221,20 @@ class SkillsDisplayWidget extends StatelessWidget {
               },
             ),
           ],
+
+          // AI-Powered Skills Analysis (Summary + Table + Details) - AFTER Analyze Match
+          if (controller.result?.hasPreextractedComparison == true)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Builder(
+                builder: (context) {
+                  final raw = controller.result!.preextractedRawOutput!;
+                  final parsed =
+                      SkillsAnalysisAdapters.parsePreextractedRaw(raw);
+                  return AIPoweredSkillsAnalysis(data: parsed);
+                },
+              ),
+            ),
         ],
       ),
     );

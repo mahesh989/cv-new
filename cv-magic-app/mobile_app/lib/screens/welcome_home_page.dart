@@ -71,4 +71,6 @@ class WelcomeHomePage extends StatelessWidget {
       ),
     );
   }
+
+  // Quick actions card was removed for backend-only focus
 }

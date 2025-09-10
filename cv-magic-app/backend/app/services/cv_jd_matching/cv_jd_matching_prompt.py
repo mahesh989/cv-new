@@ -33,23 +33,38 @@ MATCHING GUIDELINES:
 OUTPUT FORMAT:
 Respond with a JSON object only, no additional text:
 {
-    "matched_required_keywords": ["keyword1", "keyword2", ...],
-    "matched_preferred_keywords": ["keyword1", "keyword2", ...],
-    "missed_required_keywords": ["keyword1", "keyword2", ...],
-    "missed_preferred_keywords": ["keyword1", "keyword2", ...],
-    "match_counts": {
-        "matched_required_count": number,
-        "matched_preferred_count": number,
-        "missed_required_count": number,
-        "missed_preferred_count": number,
-        "total_required_keywords": number,
-        "total_preferred_keywords": number
-    },
-    "matching_notes": {
-        "smart_matches_found": ["explanation of smart matches"],
-        "context_analysis": "brief analysis of CV content relevance"
-    }
-}"""
+    "technical_skills": {
+        "matched": [
+            {
+                "jd_skill": "exact JD requirement",
+                "cv_equivalent": "matching CV skill(s)",
+                "reasoning": "brief explanation of match"
+            }
+        ],
+        "missing": [
+            {
+                "jd_skill": "exact JD requirement",
+                "reasoning": "why not found in CV"
+            }
+        ]
+    }},
+    "soft_skills": {
+        "matched": [...],
+        "missing": [...]
+    }},
+    "domain_keywords": {
+        "matched": [...],
+        "missing": [...]
+    }}
+}
+
+**INSTRUCTIONS**:
+- Be intelligent about semantic matching
+- Only mark as MISSING if truly no equivalent skill exists
+- Provide clear, helpful reasoning for each decision
+- Focus on helping candidate understand gaps
+
+"""
 
 CV_JD_MATCHING_USER_PROMPT = """Analyze the following CV content against the job description keywords and determine which keywords are present using intelligent matching.
 

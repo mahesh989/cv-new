@@ -203,10 +203,51 @@ async def preliminary_analysis(
             config_name=config_name,
             user_id=user_id
         )
-        # Trigger JD analysis + CV–JD matching pipeline here as well (fire-and-forget)
+        # Persist inputs for downstream pipeline and trigger JD analysis + CV–JD matching
         try:
-            company_name = _detect_most_recent_company()
-            logger.info(f"🚀 [PIPELINE] (preliminary-analysis) detected company: {company_name}")
+            # Derive company from the actual saved path when available
+            saved_path = result.get("saved_file_path")
+            company_name = None
+            if saved_path:
+                try:
+                    company_name = Path(saved_path).parent.name
+                except Exception:
+                    company_name = None
+
+            # Fallback to detector if we couldn't extract from saved path
+            if not company_name:
+                company_name = _detect_most_recent_company()
+                logger.info(f"🏢 [PIPELINE] (preliminary-analysis) fallback detected company: {company_name}")
+
+            # If we have a company, ensure required files exist for the pipeline
+            if company_name:
+                base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+                company_dir = base_dir / company_name
+                try:
+                    company_dir.mkdir(parents=True, exist_ok=True)
+                except Exception:
+                    # best-effort; continue
+                    pass
+
+                # Save JD text to jd_original.txt for JD analyzer
+                try:
+                    jd_file = company_dir / "jd_original.txt"
+                    with open(jd_file, 'w', encoding='utf-8') as f:
+                        f.write(jd_text or "")
+                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD saved to: {jd_file}")
+                except Exception as e:
+                    logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD file: {e}")
+
+                # Ensure original_cv.txt exists for the matcher
+                try:
+                    cv_file = base_dir / "original_cv.txt"
+                    with open(cv_file, 'w', encoding='utf-8') as f:
+                        f.write(cv_content or "")
+                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) CV saved to: {cv_file}")
+                except Exception as e:
+                    logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save CV file: {e}")
+
+            logger.info(f"🚀 [PIPELINE] (preliminary-analysis) scheduling for company: {company_name}")
             _schedule_post_skill_pipeline(company_name)
         except Exception as e:
             logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to schedule: {e}")
@@ -618,6 +659,64 @@ async def perform_preliminary_skills_analysis(
             result["analyze_match"] = {
                 "error": f"Analyze match failed: {str(e)}",
                 "raw_analysis": None
+            }
+        
+        # NEW STEP: Pre-Extracted Skills Comparison (auto-trigger after Analyze Match)
+        try:
+            if logging_params["enable_detailed_logging"]:
+                logger.info("🔍 [PREEXTRACTED_COMPARISON] Starting pre-extracted skills semantic comparison...")
+
+            # Build input skill lists from the parsed results above
+            pre_cv_skills = {
+                "technical_skills": cv_technical_skills,
+                "soft_skills": cv_soft_skills,
+                "domain_keywords": cv_domain_keywords
+            }
+            pre_jd_skills = {
+                "technical_skills": jd_technical_skills,
+                "soft_skills": jd_soft_skills,
+                "domain_keywords": jd_domain_keywords
+            }
+
+            # Use centralized AI service with the exact provided prompt
+            from app.services.skill_extraction.preextracted_comparator import run_comparison
+            preextracted_output = await run_comparison(
+                ai_service,
+                cv_skills=pre_cv_skills,
+                jd_skills=pre_jd_skills,
+                temperature=ai_params["temperature"],
+                max_tokens=min(ai_params["max_tokens"], 3000)
+            )
+
+            if logging_params["enable_detailed_logging"]:
+                logger.info(f"✅ [PREEXTRACTED_COMPARISON] Completed (length: {len(preextracted_output)} chars)")
+
+            # Append to the same analysis file (same as analyze match)
+            try:
+                pre_file_path = result_saver.append_preextracted_comparison(
+                  preextracted_output,
+                  company_name or "Unknown_Company",
+                  result.get("saved_file_path")
+                )
+                if logging_params["enable_detailed_logging"]:
+                    logger.info(f"📁 [PREEXTRACTED_COMPARISON] Results appended to: {pre_file_path}")
+                result["preextracted_comparison_file_path"] = pre_file_path
+            except Exception as e:
+                if logging_params["enable_detailed_logging"]:
+                    logger.warning(f"⚠️ [PREEXTRACTED_COMPARISON] Failed to append results: {str(e)}")
+                result["preextracted_comparison_file_path"] = None
+
+            # Include raw formatted analysis in response payload
+            result["preextracted_skills_comparison"] = {
+                "raw_output": preextracted_output,
+                "company_name": company_name
+            }
+
+        except Exception as e:
+            logger.error(f"❌ [PREEXTRACTED_COMPARISON] Error: {str(e)}")
+            result["preextracted_skills_comparison"] = {
+                "error": f"Pre-extracted comparison failed: {str(e)}",
+                "raw_output": None
             }
         
         return result
