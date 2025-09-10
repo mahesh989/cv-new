@@ -19,10 +19,64 @@ from app.services.skill_extraction.prompt_templates import get_prompt as get_ski
 from app.services.skill_extraction.response_parser import SkillExtractionParser
 from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
 from app.ai.ai_service import ai_service
+from app.services.jd_analysis import analyze_and_save_company_jd
+from app.services.cv_jd_matching import match_and_save_cv_jd
+from pathlib import Path
+import asyncio
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Skills Analysis"])
 
+
+def _detect_most_recent_company() -> Optional[str]:
+    """Detect the most recent company folder in cv-analysis with a job_info_*.json or jd_original.txt.
+
+    Returns the company folder name or None if not found.
+    """
+    try:
+        base_path = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        if not base_path.exists():
+            return None
+
+        candidates = []
+        for d in base_path.iterdir():
+            if d.is_dir() and d.name != "Unknown_Company":
+                if list(d.glob("job_info_*.json")) or (d / "jd_original.txt").exists():
+                    candidates.append(d)
+
+        if not candidates:
+            return None
+
+        most_recent = max(candidates, key=lambda p: p.stat().st_mtime)
+        return most_recent.name
+    except Exception:
+        return None
+
+
+def _schedule_post_skill_pipeline(company_name: Optional[str]):
+    """Fire-and-forget JD analysis and CV–JD match pipeline for the given company."""
+    if not company_name:
+        logger.warning("⚠️ [PIPELINE] No company detected; skipping JD analysis & CV–JD matching.")
+        return
+
+    logger.info(f"🚀 [PIPELINE] Scheduling JD analysis and CV–JD matching for '{company_name}'...")
+
+    async def _run_pipeline(cname: str):
+        try:
+            logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname}")
+            await analyze_and_save_company_jd(cname, force_refresh=False)
+            logger.info(f"✅ [PIPELINE] JD analysis saved for {cname}")
+
+            logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
+            await match_and_save_cv_jd(cname, cv_file_path=None, force_refresh=False)
+            logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
+        except Exception as e:
+            logger.warning(f"⚠️ [PIPELINE] Background pipeline error for {cname}: {e}")
+
+    try:
+        asyncio.create_task(_run_pipeline(company_name))
+    except Exception as e:
+        logger.warning(f"⚠️ [PIPELINE] Failed to schedule background pipeline: {e}")
 
 @router.post("/skill-extraction/analyze")
 async def analyze_skills(request: Request):
@@ -59,6 +113,10 @@ async def analyze_skills(request: Request):
             user_id=user_id,
             force_refresh=force_refresh
         )
+
+        # Fire-and-forget: run JD analysis and CV–JD matching pipeline in background
+        company_name = _detect_most_recent_company()
+        _schedule_post_skill_pipeline(company_name)
         
         return JSONResponse(content={
             "success": True,
@@ -145,6 +203,13 @@ async def preliminary_analysis(
             config_name=config_name,
             user_id=user_id
         )
+        # Trigger JD analysis + CV–JD matching pipeline here as well (fire-and-forget)
+        try:
+            company_name = _detect_most_recent_company()
+            logger.info(f"🚀 [PIPELINE] (preliminary-analysis) detected company: {company_name}")
+            _schedule_post_skill_pipeline(company_name)
+        except Exception as e:
+            logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to schedule: {e}")
         
         return JSONResponse(content=result)
         

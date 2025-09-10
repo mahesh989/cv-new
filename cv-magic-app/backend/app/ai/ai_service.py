@@ -347,6 +347,159 @@ Job Description:
             temperature=0.3,
             max_tokens=3000
         )
+    
+    async def analyze_job_description(self, job_description: str) -> AIResponse:
+        """
+        Analyze job description to extract required and preferred keywords
+        
+        Args:
+            job_description: Job description text to analyze
+            
+        Returns:
+            AIResponse with keyword analysis
+        """
+        system_prompt = """You are an expert job description analyzer. Your task is to extract keywords and skills from job descriptions and classify them as either "required" or "preferred" based on the language used.
+
+CLASSIFICATION RULES:
+
+REQUIRED KEYWORDS - Extract from text that uses definitive/mandatory language:
+- "Minimum X years"
+- "Experience in/with"
+- "Strong [skill] skills"
+- "Must have"
+- "Required"
+- "Essential"
+- "Necessary"
+- From sections like "Requirements", "Must Have", "Essential Criteria"
+
+PREFERRED KEYWORDS - Extract from text that uses softer/optional language:
+- "Knowledge of"
+- "Appreciation of" 
+- "Understanding of"
+- "Familiarity with"
+- "Nice to have"
+- "Preferred"
+- "Desirable"
+- "Would be an advantage"
+- From sections like "Preferred", "Nice to Have", "Desirable"
+
+EXTRACTION GUIDELINES:
+1. Focus on concrete, actionable keywords (technologies, tools, methodologies, skills)
+2. Extract specific software names, programming languages, frameworks
+3. Include relevant experience levels (e.g., "2+ years", "senior level")
+4. Include both technical and soft skills
+5. Keep keywords concise and matchable
+6. Remove filler words and focus on the core skill/requirement
+
+OUTPUT FORMAT:
+Respond with a JSON object only, no additional text:
+{
+    "required_keywords": ["keyword1", "keyword2", ...],
+    "preferred_keywords": ["keyword1", "keyword2", ...],
+    "all_keywords": ["all_keywords_combined"],
+    "experience_years": number_or_null
+}"""
+        
+        prompt = f"""Analyze the following job description and extract required and preferred keywords/skills:
+
+{job_description}
+
+Remember to classify keywords based on the language context they appear in. Focus on extracting concrete, matchable skills and technologies."""
+        
+        return await self.generate_response(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            temperature=0.3,
+            max_tokens=2000
+        )
+    
+    async def match_cv_against_jd_keywords(
+        self, 
+        cv_content: str, 
+        required_keywords: List[str], 
+        preferred_keywords: List[str]
+    ) -> AIResponse:
+        """
+        Match CV content against job description keywords using AI-powered smart matching
+        
+        Args:
+            cv_content: CV text content to analyze
+            required_keywords: List of required keywords from JD analysis
+            preferred_keywords: List of preferred keywords from JD analysis
+            
+        Returns:
+            AIResponse with matching results
+        """
+        system_prompt = """You are an expert CV-JD matching analyst. Your task is to analyze a CV against job description keywords and determine which keywords are present in the CV content using intelligent matching.
+
+MATCHING RULES:
+
+SMART MATCHING LOGIC:
+1. **Exact Matches**: Direct keyword matches (case-insensitive)
+2. **Synonym Matches**: Related terms and synonyms
+3. **Context Matches**: Keywords found in relevant context
+4. **Skill Variations**: Different forms of the same skill
+5. **Abbreviation Matches**: Full forms and abbreviations
+
+EXAMPLES OF SMART MATCHING:
+- "SQL" matches: "SQL", "sql", "Structured Query Language", "database queries"
+- "Project Management" matches: "project management", "PM", "project coordination", "managed projects"
+- "Communication" matches: "communication", "communicate", "verbal skills", "written communication"
+- "Python" matches: "Python", "python", "Python programming", "Python development"
+- "Data Analysis" matches: "data analysis", "analyzing data", "data analytics", "statistical analysis"
+
+MATCHING GUIDELINES:
+1. **Be Intelligent**: Look for semantic meaning, not just exact text
+2. **Consider Context**: Keywords in relevant sections (experience, skills, education)
+3. **Handle Variations**: Different tenses, forms, and expressions
+4. **Be Thorough**: Check all sections of the CV for keyword presence
+5. **Be Accurate**: Only mark as matched if the skill is genuinely present
+
+OUTPUT FORMAT:
+Respond with a JSON object only, no additional text:
+{
+    "matched_required_keywords": ["keyword1", "keyword2", ...],
+    "matched_preferred_keywords": ["keyword1", "keyword2", ...],
+    "missed_required_keywords": ["keyword1", "keyword2", ...],
+    "missed_preferred_keywords": ["keyword1", "keyword2", ...],
+    "match_counts": {
+        "matched_required_count": number,
+        "matched_preferred_count": number,
+        "missed_required_count": number,
+        "missed_preferred_count": number,
+        "total_required_keywords": number,
+        "total_preferred_keywords": number
+    },
+    "matching_notes": {
+        "smart_matches_found": ["explanation of smart matches"],
+        "context_analysis": "brief analysis of CV content relevance"
+    }
+}"""
+        
+        prompt = f"""Analyze the following CV content against the job description keywords and determine which keywords are present using intelligent matching.
+
+JOB DESCRIPTION KEYWORDS TO MATCH:
+Required Keywords: {required_keywords}
+Preferred Keywords: {preferred_keywords}
+
+CV CONTENT:
+{cv_content}
+
+INSTRUCTIONS:
+1. Go through each required keyword and check if it exists in the CV (using smart matching)
+2. Go through each preferred keyword and check if it exists in the CV (using smart matching)
+3. Separate matched keywords from missed keywords
+4. Provide accurate counts for all categories
+5. Include notes about any smart matches or context analysis
+
+Remember to use intelligent matching - look for semantic meaning, synonyms, variations, and context, not just exact text matches."""
+        
+        return await self.generate_response(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            temperature=0.3,
+            max_tokens=3000
+        )
 
 
 # Global AI service instance
