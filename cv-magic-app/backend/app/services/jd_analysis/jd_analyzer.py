@@ -193,12 +193,17 @@ class JDAnalyzer:
             raise FileNotFoundError(f"Job description file not found: {path}")
         
         try:
-            with open(path, 'r', encoding='utf-8') as file:
-                content = file.read().strip()
-                
+            # Support JSON format with {"text": "..."}
+            if str(path).endswith('.json'):
+                import json
+                with open(path, 'r', encoding='utf-8') as file:
+                    data = json.load(file)
+                content = (data.get('text') or '').strip()
+            else:
+                with open(path, 'r', encoding='utf-8') as file:
+                    content = file.read().strip()
             if not content:
                 raise ValueError(f"Job description file is empty: {path}")
-                
             return content
             
         except Exception as e:
@@ -415,7 +420,7 @@ class JDAnalyzer:
         if not base_path:
             base_path = str(self.base_analysis_path)
         
-        jd_file_path = Path(base_path) / company_name / "jd_original.txt"
+        jd_file_path = Path(base_path) / company_name / "jd_original.json"
         
         return await self.analyze_jd_file(jd_file_path, temperature)
     

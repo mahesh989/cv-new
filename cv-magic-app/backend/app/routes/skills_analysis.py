@@ -41,7 +41,7 @@ def _detect_most_recent_company() -> Optional[str]:
         candidates = []
         for d in base_path.iterdir():
             if d.is_dir() and d.name != "Unknown_Company":
-                if list(d.glob("job_info_*.json")) or (d / "jd_original.txt").exists():
+                if list(d.glob("job_info_*.json")) or (d / "jd_original.json").exists():
                     candidates.append(d)
 
         if not candidates:
@@ -229,21 +229,23 @@ async def preliminary_analysis(
                     # best-effort; continue
                     pass
 
-                # Save JD text to jd_original.txt for JD analyzer
+                # Save JD content to jd_original.json for JD analyzer
                 try:
-                    jd_file = company_dir / "jd_original.txt"
+                    import json
+                    jd_file = company_dir / "jd_original.json"
                     with open(jd_file, 'w', encoding='utf-8') as f:
-                        f.write(jd_text or "")
-                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD saved to: {jd_file}")
+                        json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
                 except Exception as e:
                     logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD file: {e}")
 
-                # Ensure original_cv.txt exists for the matcher
+                # Ensure original_cv.json exists for the matcher
                 try:
-                    cv_file = base_dir / "original_cv.txt"
+                    import json
+                    cv_file = base_dir / "original_cv.json"
                     with open(cv_file, 'w', encoding='utf-8') as f:
-                        f.write(cv_content or "")
-                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) CV saved to: {cv_file}")
+                        json.dump({"text": cv_content or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) CV JSON saved to: {cv_file}")
                 except Exception as e:
                     logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save CV file: {e}")
 

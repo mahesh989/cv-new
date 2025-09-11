@@ -105,11 +105,18 @@ class CVJDMatcher:
             raise FileNotFoundError(f"CV file not found: {path}")
         
         try:
-            with open(path, 'r', encoding='utf-8') as file:
-                content = file.read().strip()
-                if not content:
-                    raise ValueError(f"CV file is empty: {path}")
-                return content
+            # Support JSON format with {"text": "..."}
+            if str(path).endswith('.json'):
+                import json
+                with open(path, 'r', encoding='utf-8') as file:
+                    data = json.load(file)
+                content = (data.get('text') or '').strip()
+            else:
+                with open(path, 'r', encoding='utf-8') as file:
+                    content = file.read().strip()
+            if not content:
+                raise ValueError(f"CV file is empty: {path}")
+            return content
         except Exception as e:
             logger.error(f"Error reading CV file {path}: {e}")
             raise IOError(f"Failed to read CV file: {e}")
@@ -221,7 +228,7 @@ class CVJDMatcher:
         try:
             # Read CV content
             if not cv_file_path:
-                cv_file_path = "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/original_cv.txt"
+                cv_file_path = "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/original_cv.json"
             
             cv_content = self._read_cv_file(cv_file_path)
             logger.info(f"📄 Read CV content from: {cv_file_path}")

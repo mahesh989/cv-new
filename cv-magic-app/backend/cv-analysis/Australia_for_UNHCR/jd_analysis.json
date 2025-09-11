@@ -1,0 +1,59 @@
+{
+  "experience_years": 2,
+  "required_skills": {
+    "technical": [
+      "SQL",
+      "VBA",
+      "SQL data warehouse",
+      "Power BI"
+    ],
+    "soft_skills": [
+      "communication",
+      "project management",
+      "stakeholder management"
+    ],
+    "experience": [
+      "Minimum 2 years’ experience in a similar role"
+    ],
+    "domain_knowledge": [
+      "data models"
+    ]
+  },
+  "preferred_skills": {
+    "technical": [
+      "Tableau"
+    ],
+    "soft_skills": [
+      "customer service"
+    ],
+    "experience": [],
+    "domain_knowledge": [
+      "marketing campaigns",
+      "communication purposes",
+      "clean data"
+    ]
+  },
+  "required_keywords": [
+    "SQL",
+    "VBA",
+    "SQL data warehouse",
+    "Power BI",
+    "communication",
+    "project management",
+    "stakeholder management",
+    "Minimum 2 years’ experience in a similar role",
+    "data models"
+  ],
+  "preferred_keywords": [
+    "Tableau",
+    "customer service",
+    "marketing campaigns",
+    "communication purposes",
+    "clean data"
+  ],
+  "analysis_timestamp": "2025-09-11T18:23:54.062826",
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "company_name": "Australia_for_UNHCR",
+  "metadata": {}
+}

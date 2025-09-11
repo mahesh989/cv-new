@@ -6,7 +6,6 @@ Handles saving skill extraction results to organized file structure
 
 import os
 import re
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -72,64 +71,47 @@ class SkillExtractionResultSaver:
             company_folder = self.base_dir / company_slug
             company_folder.mkdir(parents=True, exist_ok=True)
             
-            # Save original CV text file in root cv-analysis directory if it doesn't exist
+            # Save original CV JSON in root cv-analysis directory if it doesn't exist
             if cv_data and cv_data.get('text'):
-                cv_file_path = self.base_dir / "original_cv.txt"
+                import json
+                cv_file_path = self.base_dir / "original_cv.json"
                 if not cv_file_path.exists():  # Only save if not already exists
+                    cv_json = {
+                        "filename": cv_filename,
+                        "user_id": user_id,
+                        "extracted_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        "length_chars": len(cv_data['text']),
+                        "text": cv_data['text']
+                    }
                     with open(cv_file_path, 'w', encoding='utf-8') as f:
-                        f.write("=" * 80 + "\n")
-                        f.write("ORIGINAL CV TEXT\n")
-                        f.write(f"Filename: {cv_filename}\n")
-                        f.write(f"User ID: {user_id}\n")
-                        f.write(f"Extracted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                        f.write(f"Length: {len(cv_data['text'])} characters\n")
-                        f.write("=" * 80 + "\n\n")
-                        f.write(cv_data['text'])
-                    logger.info(f"💾 CV text saved to: {cv_file_path}")
+                        json.dump(cv_json, f, ensure_ascii=False, indent=2)
+                    logger.info(f"💾 CV JSON saved to: {cv_file_path}")
                 else:
-                    logger.info(f"💾 CV text already exists, skipping save: {cv_file_path}")
+                    logger.info(f"💾 CV JSON already exists, skipping save: {cv_file_path}")
             
             # Skip JD content saving during skills analysis - it's already saved separately
             
-            # Generate skill analysis log filename with company slug
-            filename = f"{company_slug}_skills_analysis.txt"
+            # Generate skill analysis JSON filename with company slug
+            import json
+            filename = f"{company_slug}_skills_analysis.json"
             file_path = company_folder / filename
             
-            # Generate skill analysis content
-            content = self._generate_analysis_content(cv_skills, jd_skills, cv_filename, jd_url, user_id)
-            
-            # Save skill analysis to file
+            # Build structured JSON payload
+            payload = {
+                "generated": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                "cv_filename": cv_filename,
+                "jd_url": jd_url,
+                "user_id": user_id,
+                "company": company_slug,
+                "cv_skills": cv_skills,
+                "jd_skills": jd_skills,
+                "analyze_match_entries": [],
+                "preextracted_comparison_entries": []
+            }
             with open(file_path, 'w', encoding='utf-8') as f:
-                f.write(content)
+                json.dump(payload, f, ensure_ascii=False, indent=2)
             
-            logger.info(f"💾 Analysis results saved to: {file_path}")
-            
-            # Also save a structured JSON artifact alongside the text file
-            try:
-                json_payload = {
-                    "generated": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
-                    "cv_filename": cv_filename,
-                    "jd_url": jd_url,
-                    "user_id": user_id,
-                    "company": company_slug,
-                    "cv_skills": {
-                        "technical_skills": cv_skills.get("technical_skills", []),
-                        "soft_skills": cv_skills.get("soft_skills", []),
-                        "domain_keywords": cv_skills.get("domain_keywords", [])
-                    },
-                    "jd_skills": {
-                        "technical_skills": jd_skills.get("technical_skills", []),
-                        "soft_skills": jd_skills.get("soft_skills", []),
-                        "domain_keywords": jd_skills.get("domain_keywords", [])
-                    }
-                }
-                json_filename = f"{company_slug}_skills_analysis.json"
-                json_path = company_folder / json_filename
-                with open(json_path, 'w', encoding='utf-8') as jf:
-                    json.dump(json_payload, jf, ensure_ascii=False, indent=2)
-                logger.info(f"💾 JSON artifact saved to: {json_path}")
-            except Exception as json_err:
-                logger.warning(f"⚠️ Failed to save JSON artifact: {json_err}")
+            logger.info(f"💾 Analysis results saved (JSON) to: {file_path}")
             return str(file_path)
             
         except Exception as e:
@@ -271,12 +253,15 @@ class SkillExtractionResultSaver:
         try:
             # Enhanced patterns for company name extraction
             patterns = [
+                # Company heritage/establishment patterns
+                r'For\s+over\s+\d+\s+years,\s+([A-Z][a-zA-Z\s&.-]+?)\s+has\s+been',
+                r'In\s+\d+,\s+([A-Z][a-zA-Z\s&.-]+?)\s+combined\s+with',
+                
                 # Brand/division patterns (prioritize parent company)
                 r'Drive\s+is\s+([A-Z][a-zA-Z\s&.-]+?)\'s\s+brand',
                 r'([A-Z][a-zA-Z\s&.-]+?)\s+Entertainment',
                 r'wholly\s+owned\s+by\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+with|\s+is|\s+offers|$)',
                 r'Australia\'s\s+largest\s+media\s+organisation,\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+with|\s+is|\s+offers|$)',
-                r'At\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+our|\s+we|\s+is|\s+offers|$)',
                 
                 # About us/company patterns
                 r'About\s+us\s+at\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
@@ -544,8 +529,8 @@ class SkillExtractionResultSaver:
                 # List files for specific company
                 company_folder = self.base_dir / self._clean_company_name(company_name)
                 if company_folder.exists():
-                    # Look for both old and new filename patterns
-                    files = list(company_folder.glob("*log_output*.txt")) + list(company_folder.glob("*skills_analysis.txt"))
+                    # Look for JSON skills analysis files
+                    files = list(company_folder.glob("*skills_analysis.json"))
                     result["companies"].append({
                         "name": company_name,
                         "folder": str(company_folder),
@@ -558,8 +543,8 @@ class SkillExtractionResultSaver:
                 if self.base_dir.exists():
                     for company_folder in self.base_dir.iterdir():
                         if company_folder.is_dir():
-                            # Look for both old and new filename patterns
-                            files = list(company_folder.glob("*log_output*.txt")) + list(company_folder.glob("*skills_analysis.txt"))
+                            # Look for JSON skills analysis files
+                            files = list(company_folder.glob("*skills_analysis.json"))
                             result["companies"].append({
                                 "name": company_folder.name,
                                 "folder": str(company_folder),
@@ -600,18 +585,43 @@ class SkillExtractionResultSaver:
             # Create company folder path
             company_folder = self.base_dir / company_slug
             
-            # Generate the same filename as used in save_analysis_results
-            filename = f"{company_slug}_skills_analysis.txt"
+            # Use the same JSON filename as used in save_analysis_results
+            import json
+            filename = f"{company_slug}_skills_analysis.json"
             file_path = company_folder / filename
             
             # Ensure directory exists
             company_folder.mkdir(parents=True, exist_ok=True)
             
-            # Append analyze match output to the existing file
-            with open(file_path, 'a', encoding='utf-8') as f:
-                f.write(f"\n[ANALYZE_MATCH] OUTPUT:\n")
-                f.write(raw_analysis)
-                f.write("\n" + "="*80 + "\n")
+            # Append analyze match output to the JSON file
+            try:
+                data = {}
+                if file_path.exists():
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                else:
+                    data = {
+                        "generated": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                        "cv_filename": None,
+                        "jd_url": None,
+                        "user_id": None,
+                        "company": company_slug,
+                        "cv_skills": {},
+                        "jd_skills": {},
+                        "analyze_match_entries": [],
+                        "preextracted_comparison_entries": []
+                    }
+                if "analyze_match_entries" not in data:
+                    data["analyze_match_entries"] = []
+                from datetime import datetime as _dt
+                data["analyze_match_entries"].append({
+                    "timestamp": _dt.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                    "content": raw_analysis
+                })
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to append analyze match to JSON: {e}")
             
             logger.info(f"📁 [ANALYZE_MATCH] Results appended to: {file_path}")
             return str(file_path)
@@ -655,18 +665,41 @@ class SkillExtractionResultSaver:
                         company_slug = folder
                         break
             company_folder = self.base_dir / company_slug
-            filename = f"{company_slug}_skills_analysis.txt"
+            import json
+            filename = f"{company_slug}_skills_analysis.json"
             file_path = company_folder / filename
             company_folder.mkdir(parents=True, exist_ok=True)
 
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
-            with open(file_path, 'a', encoding='utf-8') as f:
-                f.write("\n" + "="*80 + "\n")
-                f.write(f"[{timestamp}] [PREEXTRACTED_SKILLS_COMPARISON] OUTPUT:\n")
-                f.write(raw_analysis)
-                f.write("\n" + "="*80 + "\n")
+            try:
+                data = {}
+                if file_path.exists():
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                else:
+                    data = {
+                        "generated": timestamp,
+                        "cv_filename": None,
+                        "jd_url": None,
+                        "user_id": None,
+                        "company": company_slug,
+                        "cv_skills": {},
+                        "jd_skills": {},
+                        "analyze_match_entries": [],
+                        "preextracted_comparison_entries": []
+                    }
+                if "preextracted_comparison_entries" not in data:
+                    data["preextracted_comparison_entries"] = []
+                data["preextracted_comparison_entries"].append({
+                    "timestamp": timestamp,
+                    "content": raw_analysis
+                })
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to append preextracted comparison to JSON: {e}")
 
             logger.info(f"📁 [PREEXTRACTED_COMPARISON] Results appended to: {file_path}")
             return str(file_path)

@@ -458,6 +458,17 @@ TEXT TO ANALYZE:
         
         # Company name extraction patterns (improved)
         company_patterns = [
+            # Company heritage/establishment patterns
+            r'For\s+over\s+\d+\s+years,\s+([A-Z][a-zA-Z\s&.-]+?)\s+has\s+been',
+            r'In\s+\d+,\s+([A-Z][a-zA-Z\s&.-]+?)\s+combined\s+with',
+            
+            # Brand/division patterns (prioritize parent company)
+            r'Drive\s+is\s+([A-Z][a-zA-Z\s&.-]+?)\'s\s+brand',
+            r'([A-Z][a-zA-Z\s&.-]+?)\s+Entertainment',
+            r'wholly\s+owned\s+by\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+with|\s+is|\s+offers|$)',
+            r'Australia\'s\s+largest\s+media\s+organisation,\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+with|\s+is|\s+offers|$)',
+            
+            # About us/company patterns
             r'About\s+us\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
             r'About\s+the\s+company\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
             r'([A-Z][a-zA-Z\s&.-]+?)\s+Job\s+Summary\s+\1',
@@ -475,8 +486,8 @@ TEXT TO ANALYZE:
             match = re.search(pattern, job_description, re.IGNORECASE)
             if match:
                 company_name = match.group(1).strip()
-                # Filter out invalid company names
-                if (len(company_name) > 3 and len(company_name) < 50 and 
+                # Filter out invalid company names (allow short names like GfK, NIQ)
+                if (len(company_name) >= 2 and len(company_name) < 50 and 
                     not company_name.lower() in ['work', 'job', 'position', 'role', 'applications', 'close', 'posted', 'summary']):
                     job_info["company_name"] = company_name
                     break
@@ -495,6 +506,23 @@ TEXT TO ANALYZE:
                 if len(job_title) > 3 and len(job_title) < 100:
                     job_info["job_title"] = job_title
                     break
+        
+        # Experience extraction patterns
+        experience_patterns = [
+            r'\d+\s*[-–]\s*\d+\s*years?',
+            r'\d+\+\s*years?',
+            r'\d+\s*to\s*\d+\s*years?',
+            r'minimum\s+\d+\s*years?',
+            r'at\s+least\s+\d+\s*years?',
+            r'\d+\s*[-–]\s*\d+\s*years?\s*experience',
+            r'\d+\+\s*years?\s*experience',
+        ]
+        
+        for pattern in experience_patterns:
+            match = re.search(pattern, job_description, re.IGNORECASE)
+            if match:
+                job_info["experience_required"] = match.group(0).strip()
+                break
         
         # Email extraction
         email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', job_description)
@@ -548,19 +576,17 @@ TEXT TO ANALYZE:
             with open(job_info_file, 'w', encoding='utf-8') as f:
                 json.dump(job_info_data, f, indent=2, ensure_ascii=False)
             
-            # Save original job description as text file
-            jd_original_file = company_dir / "jd_original.txt"
+            # Save original job description as JSON file
+            jd_original_file = company_dir / "jd_original.json"
             with open(jd_original_file, 'w', encoding='utf-8') as f:
-                f.write("=" * 80 + "\n")
-                f.write("ORIGINAL JOB DESCRIPTION\n")
-                f.write(f"Company: {job_info['company_name']}\n")
-                f.write(f"Job Title: {job_info['job_title']}\n")
-                f.write(f"Extracted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"Length: {len(job_description)} characters\n")
-                if job_url:
-                    f.write(f"URL: {job_url}\n")
-                f.write("=" * 80 + "\n\n")
-                f.write(job_description)
+                json.dump({
+                    "company": job_info['company_name'],
+                    "job_title": job_info['job_title'],
+                    "extracted_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "length_chars": len(job_description),
+                    "job_url": job_url,
+                    "text": job_description
+                }, f, ensure_ascii=False, indent=2)
             
             return {
                 "success": True,
@@ -587,7 +613,7 @@ TEXT TO ANALYZE:
                 if company_dir.is_dir():
                     # Look for job_info JSON file
                     job_info_files = list(company_dir.glob("job_info_*.json"))
-                    jd_original_files = list(company_dir.glob("jd_original.txt"))
+                    jd_original_files = list(company_dir.glob("jd_original.json"))
                     
                     for job_info_file in job_info_files:
                         try:
