@@ -30,32 +30,20 @@ MATCHING GUIDELINES:
 4. **Be Thorough**: Check all sections of the CV for keyword presence
 5. **Be Accurate**: Only mark as matched if the skill is genuinely present
 
-OUTPUT FORMAT:
-Respond with a JSON object only, no additional text:
+OUTPUT FORMAT (JSON ONLY, NO MARKDOWN, NO PROSE):
+Return EXACTLY this schema, populated from the analysis of the provided CV against the JD keywords:
 {
-    "technical_skills": {
-        "matched": [
-            {
-                "jd_skill": "exact JD requirement",
-                "cv_equivalent": "matching CV skill(s)",
-                "reasoning": "brief explanation of match"
-            }
-        ],
-        "missing": [
-            {
-                "jd_skill": "exact JD requirement",
-                "reasoning": "why not found in CV"
-            }
-        ]
-    }},
-    "soft_skills": {
-        "matched": [...],
-        "missing": [...]
-    }},
-    "domain_keywords": {
-        "matched": [...],
-        "missing": [...]
-    }}
+  "matched_required_keywords": ["..."],
+  "matched_preferred_keywords": ["..."],
+  "missed_required_keywords": ["..."],
+  "missed_preferred_keywords": ["..."],
+  "match_counts": {
+    "total_required_keywords": 0,
+    "total_preferred_keywords": 0,
+    "matched_required_count": 0,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {}
 }
 
 **INSTRUCTIONS**:
@@ -82,7 +70,9 @@ INSTRUCTIONS:
 4. Provide accurate counts for all categories
 5. Include notes about any smart matches or context analysis
 
-Remember to use intelligent matching - look for semantic meaning, synonyms, variations, and context, not just exact text matches."""
+Remember to use intelligent matching - look for semantic meaning, synonyms, variations, and context, not just exact text matches.
+
+Return JSON only. Do NOT include markdown code fences or any text before/after the JSON."""
 
 def get_cv_jd_matching_prompts(
     cv_content: str, 

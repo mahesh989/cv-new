@@ -1,0 +1,90 @@
+{
+  "experience_years": 5,
+  "required_skills": {
+    "technical": [
+      "Power BI",
+      "SQL",
+      "data modeling",
+      "data warehousing",
+      "dimensional modeling",
+      "version control",
+      "documentation",
+      "performance optimization",
+      "role-based access controls",
+      "security measures"
+    ],
+    "soft_skills": [
+      "communication skills",
+      "proactive mindset",
+      "detail-oriented",
+      "collaborative work"
+    ],
+    "experience": [
+      "5+ years experience in data engineering",
+      "Bachelor's degree in computer science or related field"
+    ],
+    "domain_knowledge": [
+      "business intelligence",
+      "data quality",
+      "data accuracy",
+      "data integrity",
+      "data governance",
+      "BI development best practices"
+    ]
+  },
+  "preferred_skills": {
+    "technical": [
+      "Tableau",
+      "Snowflake",
+      "Vector Databases",
+      "RAG"
+    ],
+    "soft_skills": [],
+    "experience": [],
+    "domain_knowledge": [
+      "next-generation architectures",
+      "data loading",
+      "transformation",
+      "performance optimization"
+    ]
+  },
+  "required_keywords": [
+    "Power BI",
+    "SQL",
+    "data modeling",
+    "data warehousing",
+    "dimensional modeling",
+    "version control",
+    "documentation",
+    "performance optimization",
+    "role-based access controls",
+    "security measures",
+    "communication skills",
+    "proactive mindset",
+    "detail-oriented",
+    "collaborative work",
+    "5+ years experience in data engineering",
+    "Bachelor's degree in computer science or related field",
+    "business intelligence",
+    "data quality",
+    "data accuracy",
+    "data integrity",
+    "data governance",
+    "BI development best practices"
+  ],
+  "preferred_keywords": [
+    "Tableau",
+    "Snowflake",
+    "Vector Databases",
+    "RAG",
+    "next-generation architectures",
+    "data loading",
+    "transformation",
+    "performance optimization"
+  ],
+  "analysis_timestamp": "2025-09-11T10:10:13.955728",
+  "ai_model_used": "deepseek/deepseek-chat",
+  "processing_status": "completed",
+  "company_name": "Nine_Entertainment",
+  "metadata": {}
+}

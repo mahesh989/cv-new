@@ -21,15 +21,19 @@ REQUIRED JSON FORMAT:
   "work_type": "string or null"
 }}
 
-IMPORTANT: YOUR RESPONSE MUST BE PARSABLE BY json.loads() WITHOUT ANY MODIFICATION.
+EXTRACTION GUIDELINES:
 
-TEXT TO ANALYZE:
-{job_description}
+1. **Company Name**: Extract the hiring company name
    - Company names in headers, titles, or beginning of job posts
    - Well-known company names (avoid generic terms like "Company", "Organization", "Client")
    - Look in contact information, email domains, or website URLs
    - If multiple companies mentioned, choose the hiring company (not client companies)
    - Use the most formal/complete version if company name appears multiple times
+   - **CRITICAL**: If a brand/division is mentioned, prioritize the parent company
+   - Look for phrases like "owned by", "division of", "brand of", "part of", "wholly owned by"
+   - Examples: "Drive is Nine's brand" → extract "Nine Entertainment", not "Drive"
+   - Examples: "Microsoft Azure team" → extract "Microsoft", not "Azure"
+   - Examples: "Google Cloud division" → extract "Google", not "Google Cloud"
 
 2. **Job Title**: Extract the actual job title/role
    - Look for patterns like "Senior Data Analyst", "Software Engineer", "Marketing Manager"
@@ -69,8 +73,6 @@ TEXT TO ANALYZE:
    - Remote work options
    - Hybrid work arrangements
    - Onsite requirements
-
-}
 
 IMPORTANT: Return ONLY the JSON object. Do not wrap it in markdown code blocks or add any other text.
 

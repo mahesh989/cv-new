@@ -1,0 +1,269 @@
+================================================================================
+SKILL EXTRACTION ANALYSIS RESULTS
+================================================================================
+Generated: 2025-09-11T09:58:41.459
+CV File: Maheshwor_Tiwari.docx
+JD URL: preliminary_analysis
+User ID: 0f4e9ccc-0ad1-4316-90da-96120fd9c985
+================================================================================
+
+================================================================================
+[2025-09-11T09:58:41.459] [CV_CLAUDE_ANALYSIS] OUTPUT:
+## SOFT SKILLS:
+**EXPLICIT (directly stated):**
+- Detail-oriented - "Dynamic and detail-oriented Data Analyst"
+- Problem-solving - "Passionate about leveraging computational and analytical expertise to solve complex problems"
+- Eager to learn - "Eager to contribute to Tibra's innovative trading strategies while enhancing skills"
+- Project management - "Proven ability to manage end-to-end projects with high precision and tight deadlines"
+
+**STRONGLY IMPLIED (very likely based on responsibilities):**
+- Collaboration - "Collaborated with cross-functional teams"
+- Communication - "Delivered clear and concise reports to stakeholders"
+- Analytical thinking - "Utilised Python and SQL to identify patterns in large datasets"
+- Time management - "Reducing processing time by 15%"
+
+## TECHNICAL SKILLS:
+**EXPLICIT (directly stated):**
+- Python - "Advanced proficiency in Python"
+- Data analysis - "Hands-on experience in data analysis"
+- Machine learning - "Hands-on experience in machine learning"
+- Automation - "Hands-on experience in automation"
+- Quantitative problem-solving - "Skilled in analysing and optimising large datasets"
+- Algorithmic thinking - "Knowledge of data structures, algorithms, and optimisation techniques"
+- SQL - "Skilled in SQL"
+- Power BI - "Skilled in Power BI"
+- Project management - "Proven ability to manage end-to-end projects"
+- Financial markets - "Eager to enhance skills in financial markets"
+- Algorithmic trading systems - "Eager to contribute to Tibra's innovative trading strategies"
+- Proprietary trading technologies - "Motivated to deepen expertise in proprietary trading technologies"
+
+**STRONGLY IMPLIED (very likely based on responsibilities):**
+- Data visualization - "Designed Power BI dashboards"
+- Data-driven decision-making - "Delivered clear and concise reports to stakeholders"
+- Inventory tracking systems - "Collaborated with cross-functional teams to optimise inventory tracking systems"
+- Pattern recognition - "Utilised Python and SQL to identify patterns in large datasets"
+- Machine learning model optimization - "Reduced model size by 11.39% and improved inference time by 39.34%"
+
+## DOMAIN KEYWORDS:
+**EXPLICIT:**
+- Financial markets - "Eager to enhance skills in financial markets"
+- Algorithmic trading systems - "Eager to contribute to Tibra's innovative trading strategies"
+- Proprietary trading technologies - "Motivated to deepen expertise in proprietary trading technologies"
+- Industrial inspection - "Contributed to industrial inspection innovations"
+
+**STRONGLY IMPLIED:**
+- Data integrity - "Ensuring 99% data accuracy and integrity"
+- Strategic business insights - "Contributing to strategic business insights"
+- Real-time object detection - "Contributed to industrial inspection innovations by improving real-time object detection models"
+
+**CRITICAL OUTPUT REQUIREMENT:**
+After providing the detailed analysis above, you MUST end your response with EXACTLY these three Python lists (no extra text after them):
+
+SOFT_SKILLS = ["Detail-oriented", "Problem-solving", "Eager to learn", "Project management", "Collaboration", "Communication", "Analytical thinking", "Time management"]
+TECHNICAL_SKILLS = ["Python", "Data analysis", "Machine learning", "Automation", "Quantitative problem-solving", "Algorithmic thinking", "SQL", "Power BI", "Project management", "Financial markets", "Algorithmic trading systems", "Proprietary trading technologies", "Data visualization", "Data-driven decision-making", "Inventory tracking systems", "Pattern recognition", "Machine learning model optimization"]
+DOMAIN_KEYWORDS = ["Financial markets", "Algorithmic trading systems", "Proprietary trading technologies", "Industrial inspection", "Data integrity", "Strategic business insights", "Real-time object detection"]
+================================================================================
+
+================================================================================
+[2025-09-11T09:58:41.459] [JD_CLAUDE_ANALYSIS] OUTPUT:
+## SOFT SKILLS:
+
+**EXPLICIT:**
+- Communication - "Communicating effectively to build relationships with stakeholders at all levels"
+- Teamwork - "Contributing as a team player"
+- Time management - "Meeting weekly and monthly deadlines"
+- Adaptability - "Demonstrate the ability to adapt quickly to changing business needs"
+- Problem-solving - "Converting the data we receive into actionable information"
+- Leadership - "Managing multiple tasks and contributing as a team player"
+
+**STRONGLY IMPLIED:**
+- Analytical thinking
+- Customer service
+- Interpersonal skills
+
+## TECHNICAL SKILLS:
+
+**EXPLICIT:**
+- Excel - "Intermediate/Advanced Excel skills"
+- SQL - "Basic/Intermediate programming skills (SQL, Python)"
+- Python - "Basic/Intermediate programming skills (SQL, Python)"
+- Data modeling - "1–3 years' experience in analytics, data modeling, or data visualization"
+- Data visualization - "1–3 years' experience in analytics, data modeling, or data visualization"
+- Power BI - "Desirable but not essential: Power BI"
+- Tableau - "Desirable but not essential: Tableau"
+
+**STRONGLY IMPLIED:**
+- Data cleansing
+- Working with large data sets
+
+## DOMAIN KEYWORDS:
+
+**EXPLICIT:**
+- Point of Sale data
+- Technical Consumer Goods industry
+- Retailer data
+- Market data
+- Brand and model level
+- Commercial and Operations teams
+
+**STRONGLY IMPLIED:**
+- Consumer behavior
+- Prescriptive data analytics
+- Data accuracy and quality
+
+**CRITICAL OUTPUT REQUIREMENT:**
+
+SOFT_SKILLS = ["Communication", "Teamwork", "Time management", "Adaptability", "Problem-solving", "Leadership"]
+TECHNICAL_SKILLS = ["Excel", "SQL", "Python", "Data modeling", "Data visualization", "Power BI", "Tableau"]
+DOMAIN_KEYWORDS = ["Point of Sale data", "Technical Consumer Goods industry", "Retailer data", "Market data", "Brand and model level", "Commercial and Operations teams"]
+================================================================================
+
+================================================================================
+EXTRACTION SUMMARY
+================================================================================
+
+CV SKILLS EXTRACTED:
+  Soft Skills (8): ['Detail-oriented', 'Problem-solving', 'Eager to learn', 'Project management', 'Collaboration', 'Communication', 'Analytical thinking', 'Time management']
+  Technical Skills (17): ['Python', 'Data analysis', 'Machine learning', 'Automation', 'Quantitative problem-solving', 'Algorithmic thinking', 'SQL', 'Power BI', 'Project management', 'Financial markets', 'Algorithmic trading systems', 'Proprietary trading technologies', 'Data visualization', 'Data-driven decision-making', 'Inventory tracking systems', 'Pattern recognition', 'Machine learning model optimization']
+  Domain Keywords (7): ['Financial markets', 'Algorithmic trading systems', 'Proprietary trading technologies', 'Industrial inspection', 'Data integrity', 'Strategic business insights', 'Real-time object detection']
+
+JD REQUIREMENTS EXTRACTED:
+  Soft Skills (6): ['Communication', 'Teamwork', 'Time management', 'Adaptability', 'Problem-solving', 'Leadership']
+  Technical Skills (7): ['Excel', 'SQL', 'Python', 'Data modeling', 'Data visualization', 'Power BI', 'Tableau']
+  Domain Keywords (6): ['Point of Sale data', 'Technical Consumer Goods industry', 'Retailer data', 'Market data', 'Brand and model level', 'Commercial and Operations teams']
+
+CACHING STATUS:
+  CV Skills: Fresh Analysis
+  JD Skills: Fresh Analysis
+
+================================================================================
+END OF ANALYSIS
+================================================================================
+[ANALYZE_MATCH] OUTPUT:
+**DECISION:** 🟡 STRATEGIC PURSUE
+
+**MARKET REALITY CHECK:**
+- **What they actually need:** Strong foundation in data analysis, programming skills, and some leadership experience.
+- **Flexibility indicators:** Mention of flexible working conditions and desirable but not essential qualifications.
+- **Hard blockers identified:** No legal/regulatory requirements or core platform expertise mentioned.
+- **Hiring urgency signals:** No specific urgency mentioned.
+
+**INTELLIGENT OBSERVATIONS:**
+- **Hidden strengths:** Strong foundation in Python, data analysis, and project management.
+- **Smart connections:** Experience in managing tasks and contributing as a team player.
+- **Growth potential:** Eager learner with a passion for financial markets and algorithmic trading systems.
+- **Positioning opportunities:** Emphasize experience in managing projects and collaborating with cross-functional teams.
+
+**REALISTIC ODDS:** 60-70% chance of getting an interview if CV tailored well.
+
+**IF PURSUING - STRATEGIC PRIORITIES:**
+1. **Priority 1:** Highlight project management experience and collaboration skills.
+2. **Priority 2:** Emphasize passion for financial markets and algorithmic trading systems.
+3. **Priority 3:** Showcase ability to work with large datasets and perform data cleansing.
+
+**HONEST BOTTOM LINE:** Worth pursuing with tailored CV showcasing relevant experience and skills. The role aligns well with the candidate's background and interests.
+================================================================================
+
+================================================================================
+[2025-09-11T09:59:05.673] [PREEXTRACTED_SKILLS_COMPARISON] OUTPUT:
+🎯 OVERALL SUMMARY
+----------------------------------------
+Total Requirements: 26
+Matched: 9
+Missing: 17
+Match Rate: 34.62%
+
+📊 SUMMARY TABLE
+--------------------------------------------------------------------------------
+Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
+Technical Skills            16         7          4          12           25%
+Soft Skills                  6          6          3           3           50%
+Domain Keywords              4          13         2           2           15%
+
+🧠 DETAILED AI ANALYSIS
+--------------------------------------------------------------------------------
+
+🔹 TECHNICAL SKILLS
+  ✅ MATCHED JD REQUIREMENTS (4 items):
+    1. JD Required: 'SQL'
+       → Found in CV: 'SQL'
+       💡 Semantic match
+    2. JD Required: 'Python'
+       → Found in CV: 'Python'
+       💡 Semantic match
+    3. JD Required: 'Data visualization'
+       → Found in CV: 'Data visualization'
+       💡 Semantic match
+    4. JD Required: 'Power BI'
+       → Found in CV: 'Power BI'
+       💡 Semantic match
+  ❌ MISSING FROM CV (12 items):
+    1. JD Requires: 'Excel'
+       💡 No equivalent found
+    2. JD Requires: 'Data modeling'
+       💡 No equivalent found
+    3. JD Requires: 'Tableau'
+       💡 No equivalent found
+    4. JD Requires: 'Data analysis'
+       💡 No direct match, different focus
+    5. JD Requires: 'Machine learning'
+       💡 No direct match, broader term
+    6. JD Requires: 'Automation'
+       💡 No direct match, different focus
+    7. JD Requires: 'Quantitative problem-solving'
+       💡 No direct match, different focus
+    8. JD Requires: 'Algorithmic thinking'
+       💡 No direct match, different focus
+    9. JD Requires: 'Project management'
+       💡 No direct match, different focus
+    10. JD Requires: 'Financial markets'
+       💡 No direct match, different focus
+    11. JD Requires: 'Algorithmic trading systems'
+       💡 No direct match, different focus
+    12. JD Requires: 'Proprietary trading technologies'
+       💡 No direct match, different focus
+
+🔹 SOFT SKILLS
+  ✅ MATCHED JD REQUIREMENTS (3 items):
+    1. JD Required: 'Communication'
+       → Found in CV: 'Communication'
+       💡 Semantic match
+    2. JD Required: 'Time management'
+       → Found in CV: 'Time management'
+       💡 Semantic match
+    3. JD Required: 'Problem-solving'
+       → Found in CV: 'Problem-solving'
+       💡 Semantic match
+  ❌ MISSING FROM CV (3 items):
+    1. JD Requires: 'Teamwork'
+       💡 No direct match, different focus
+    2. JD Requires: 'Adaptability'
+       💡 No direct match, different focus
+    3. JD Requires: 'Leadership'
+       💡 No direct match, different focus
+
+🔹 DOMAIN KEYWORDS
+  ✅ MATCHED JD REQUIREMENTS (2 items):
+    1. JD Required: 'Point of Sale data'
+       → Found in CV: '...'
+       💡 No direct match, different focus
+    2. JD Required: 'Technical Consumer Goods industry'
+       → Found in CV: '...'
+       💡 No direct match, different focus
+  ❌ MISSING FROM CV (2 items):
+    1. JD Requires: 'Retailer data'
+       💡 No direct match, different focus
+    2. JD Requires: 'Market data'
+       💡 No direct match, different focus
+
+📚 INPUT SUMMARY (normalized, truncated if long)
+CV
+- Technical: Python, Data analysis, Machine learning, Automation, Quantitative problem-solving, Algorithmic thinking, SQL, Power BI, Project management, Financial markets, Algorithmic trading systems, Proprietary trading technologies, Data visualization, Data-driven decision-making, Inventory tracking systems, Pattern recognition, Machine learning model optimization
+- Soft: Detail-oriented, Problem-solving, Eager to learn, Collaboration, Communication, Analytical thinking, Time management
+- Domain: Industrial inspection, Data integrity, Strategic business insights, Real-time object detection
+
+JD
+- Technical: Excel, SQL, Python, Data modeling, Data visualization, Power BI, Tableau
+- Soft: Communication, Teamwork, Time management, Adaptability, Problem-solving, Leadership
+- Domain: Point of Sale data, Technical Consumer Goods industry, Retailer data, Market data, Brand and model level, Commercial and Operations teams
+================================================================================

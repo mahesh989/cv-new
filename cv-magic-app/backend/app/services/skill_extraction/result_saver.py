@@ -138,7 +138,7 @@ class SkillExtractionResultSaver:
     
     def _extract_company_name(self, jd_skills: Dict, jd_url: str, jd_data: Optional[Dict] = None) -> str:
         """
-        Extract company name from JD content or URL using same logic as JobExtractionService
+        Extract company name from JD content or URL with improved logic for any company
         
         Args:
             jd_skills: JD skill extraction results
@@ -155,67 +155,46 @@ class SkillExtractionResultSaver:
                 company_from_record = jd_data['record'].company
                 if company_from_record and company_from_record.strip().lower() not in ["unknown", "null", "none", ""]:
                     company_slug = self._create_company_slug(company_from_record)
+                    logger.info(f"🏢 Using company from JD record: {company_from_record} -> {company_slug}")
                     return company_slug
             
-            # First, try to find existing company folder by checking if JD was already processed
+            # Get existing folders for matching
             existing_folders = []
             if self.base_dir.exists():
                 existing_folders = [f.name for f in self.base_dir.iterdir() if f.is_dir()]
             
-            # Try to extract from URL first
-            if "ethicaljobs.com.au/members/" in jd_url:
-                # Extract from ethicaljobs URL pattern
-                match = re.search(r'/members/([^/]+)/', jd_url)
-                if match:
-                    url_company = match.group(1)
+            # STEP 1: Try to extract from URL first (improved for any job site)
+            if jd_url and jd_url != "preliminary_analysis" and jd_url.startswith("http"):
+                url_company = self._extract_company_from_url(jd_url)
+                if url_company and url_company != "Unknown_Company":
                     # Check if this matches any existing folder
                     for folder in existing_folders:
-                        if url_company.lower() in folder.lower() or folder.lower() in url_company.lower():
-                            logger.debug(f"🏢 Found matching existing folder: {folder}")
+                        if self._names_match(url_company, folder):
+                            logger.info(f"🏢 Found matching existing folder: {folder} for URL company: {url_company}")
                             return folder
                     company_name = url_company
-                    logger.debug(f"🏢 Extracted company from URL: {company_name}")
+                    logger.info(f"🏢 Extracted company from URL: {company_name}")
             
-            # Try to extract from JD raw response
+            # STEP 2: Try to extract from JD raw response if URL extraction failed
             raw_response = jd_skills.get('raw_response', '')
             if raw_response and company_name == "Unknown_Company":
-                # Look for common company name patterns (same as JobExtractionService)
-                patterns = [
-                    r'About\s+us\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
-                    r'About\s+the\s+company\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
-                    r'([A-Z][a-zA-Z\s&.-]+?)\s+Job\s+Summary\s+\\1',
-                    r'([A-Z][a-zA-Z\s&.-]+?)\s+Applications\s+close.*?\\1',
-                    r'(?:^|\n)\s*([A-Z][a-zA-Z\s&.-]+?)\s+Job\s+Summary',
-                    r'(?:^|\n)\s*([A-Z][a-zA-Z\s&.-]+?)\s+Applications\s+close',
-                    r'The Glen Centre',
-                    r'Glen Centre',
-                ]
-                
-                for pattern in patterns:
-                    match = re.search(pattern, raw_response, re.IGNORECASE)
-                    if match:
-                        if 'Glen' in pattern:
-                            extracted_name = "The Glen Group"
-                        else:
-                            extracted_name = match.group(1).strip()
-                        
-                        # Check if this matches any existing folder
-                        for folder in existing_folders:
-                            if any(word in folder.lower() for word in extracted_name.lower().split()):
-                                logger.debug(f"🏢 Found matching existing folder: {folder} for extracted name: {extracted_name}")
-                                return folder
-                        
-                        company_name = extracted_name
-                        logger.debug(f"🏢 Extracted company from JD content: {company_name}")
-                        break
+                jd_company = self._extract_company_from_jd_text(raw_response)
+                if jd_company and jd_company != "Unknown_Company":
+                    # Check if this matches any existing folder
+                    for folder in existing_folders:
+                        if self._names_match(jd_company, folder):
+                            logger.info(f"🏢 Found matching existing folder: {folder} for JD company: {jd_company}")
+                            return folder
+                    company_name = jd_company
+                    logger.info(f"🏢 Extracted company from JD content: {company_name}")
             
-            # Clean company name for folder use (same logic as JobExtractionService._create_company_slug)
+            # Clean company name for folder use
             company_slug = self._create_company_slug(company_name)
             
             # Check if this slug matches any existing folder
             for folder in existing_folders:
                 if folder.lower() == company_slug.lower():
-                    logger.debug(f"🏢 Using existing folder: {folder}")
+                    logger.info(f"🏢 Using existing folder: {folder}")
                     return folder
             
             return company_slug
@@ -223,6 +202,187 @@ class SkillExtractionResultSaver:
         except Exception as e:
             logger.warning(f"⚠️ Failed to extract company name: {e}, using 'Unknown_Company'")
             return "Unknown_Company"
+    
+    def _extract_company_from_url(self, jd_url: str) -> str:
+        """Extract company name from various job site URL patterns"""
+        try:
+            # EthicalJobs pattern: https://ethicaljobs.com.au/members/company-name/job/12345
+            if "ethicaljobs.com.au/members/" in jd_url:
+                match = re.search(r'/members/([^/]+)/', jd_url)
+                if match:
+                    return match.group(1).replace('-', ' ').title()
+            
+            # Seek pattern: https://www.seek.com.au/company/company-name/jobs
+            if "seek.com.au/company/" in jd_url:
+                match = re.search(r'/company/([^/]+)/', jd_url)
+                if match:
+                    return match.group(1).replace('-', ' ').title()
+            
+            # Indeed pattern: https://au.indeed.com/company/company-name/jobs
+            if "indeed.com/company/" in jd_url:
+                match = re.search(r'/company/([^/]+)/', jd_url)
+                if match:
+                    return match.group(1).replace('-', ' ').title()
+            
+            # LinkedIn pattern: https://www.linkedin.com/company/company-name/
+            if "linkedin.com/company/" in jd_url:
+                match = re.search(r'/company/([^/]+)/', jd_url)
+                if match:
+                    return match.group(1).replace('-', ' ').title()
+            
+            # Glassdoor pattern: https://www.glassdoor.com/Overview/Working-at-Company-Name-EI_IE123456.11,25.htm
+            if "glassdoor.com" in jd_url and "Working-at-" in jd_url:
+                match = re.search(r'Working-at-([^-]+)', jd_url)
+                if match:
+                    return match.group(1).replace('-', ' ').title()
+            
+            # Generic domain-based extraction: extract from subdomain or path
+            # Example: https://company-name.com/careers or https://careers.company-name.com
+            if jd_url.count('.') >= 2:
+                # Try subdomain extraction (e.g., careers.netflix.com -> netflix)
+                subdomain_match = re.search(r'https?://([^.]+)\.', jd_url)
+                if subdomain_match:
+                    subdomain = subdomain_match.group(1)
+                    if subdomain not in ['www', 'careers', 'jobs', 'work']:
+                        return subdomain.replace('-', ' ').title()
+                
+                # Try path-based extraction for company sites (e.g., company-name.com/careers -> company-name)
+                path_match = re.search(r'https?://[^/]+/([^/]+)/', jd_url)
+                if path_match:
+                    path_part = path_match.group(1)
+                    if path_part not in ['careers', 'jobs', 'work', 'about']:
+                        return path_part.replace('-', ' ').title()
+                
+                # Try domain name extraction (e.g., company-name.com -> company-name)
+                domain_match = re.search(r'https?://(?:www\.)?([^.]+)\.', jd_url)
+                if domain_match:
+                    domain = domain_match.group(1)
+                    if domain not in ['www', 'careers', 'jobs', 'work']:
+                        return domain.replace('-', ' ').title()
+            
+            return "Unknown_Company"
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to extract company from URL: {e}")
+            return "Unknown_Company"
+    
+    def _extract_company_from_jd_text(self, jd_text: str) -> str:
+        """Extract company name from JD text content using improved patterns"""
+        try:
+            # Enhanced patterns for company name extraction
+            patterns = [
+                # Brand/division patterns (prioritize parent company)
+                r'Drive\s+is\s+([A-Z][a-zA-Z\s&.-]+?)\'s\s+brand',
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+Entertainment',
+                r'wholly\s+owned\s+by\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+with|\s+is|\s+offers|$)',
+                r'Australia\'s\s+largest\s+media\s+organisation,\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+with|\s+is|\s+offers|$)',
+                r'At\s+([A-Z][a-zA-Z\s&.-]+?)(?:\s+our|\s+we|\s+is|\s+offers|$)',
+                
+                # About us/company patterns
+                r'About\s+us\s+at\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
+                r'About\s+us\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
+                r'About\s+the\s+company\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
+                r'About\s+([A-Z][a-zA-Z\s&.-]+?)\s+is',
+                
+                # Job title patterns
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+Job\s+Summary',
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+Applications\s+close',
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+is\s+hiring',
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+is\s+seeking',
+                
+                # Header patterns
+                r'(?:^|\n)\s*([A-Z][a-zA-Z\s&.-]+?)\s+Job\s+Summary',
+                r'(?:^|\n)\s*([A-Z][a-zA-Z\s&.-]+?)\s+Applications\s+close',
+                r'(?:^|\n)\s*([A-Z][a-zA-Z\s&.-]+?)\s+is\s+hiring',
+                
+                # Contact/address patterns
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+is\s+an\s+equal\s+opportunity',
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+is\s+committed\s+to',
+                r'([A-Z][a-zA-Z\s&.-]+?)\s+offers\s+competitive',
+                
+                # Specific company patterns
+                r'The Glen Centre',
+                r'Glen Centre',
+                r'UNHCR',
+                r'Australia for UNHCR',
+            ]
+            
+            for pattern in patterns:
+                match = re.search(pattern, jd_text, re.IGNORECASE | re.MULTILINE)
+                if match:
+                    if 'Glen' in pattern:
+                        extracted_name = "The Glen Group"
+                    elif 'UNHCR' in pattern:
+                        extracted_name = "Australia for UNHCR"
+                    else:
+                        extracted_name = match.group(1).strip()
+                    
+                    # Clean up the extracted name
+                    extracted_name = self._clean_company_name(extracted_name)
+                    
+                    if extracted_name and len(extracted_name) > 2:
+                        logger.debug(f"🏢 Extracted company from JD text: {extracted_name}")
+                        return extracted_name
+            
+            return "Unknown_Company"
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to extract company from JD text: {e}")
+            return "Unknown_Company"
+    
+    def _clean_company_name(self, name: str) -> str:
+        """Clean and validate extracted company name"""
+        if not name:
+            return "Unknown_Company"
+        
+        # Remove common prefixes/suffixes
+        name = re.sub(r'^(The|A|An)\s+', '', name, flags=re.IGNORECASE)
+        name = re.sub(r'\s+(Pty|Ltd|Inc|Corp|LLC|GmbH|AG|SA|S\.A\.|Limited|Corporation)\.?$', '', name, flags=re.IGNORECASE)
+        
+        # Remove extra whitespace
+        name = ' '.join(name.split())
+        
+        # Validate length and content
+        if len(name) < 2 or len(name) > 100:
+            return "Unknown_Company"
+        
+        # Check if it's mostly letters and common punctuation
+        if not re.match(r'^[A-Za-z\s&.-]+$', name):
+            return "Unknown_Company"
+        
+        return name
+    
+    def _names_match(self, name1: str, name2: str) -> bool:
+        """Check if two company names are similar enough to be the same company"""
+        if not name1 or not name2:
+            return False
+        
+        # Normalize names for comparison
+        norm1 = re.sub(r'[^\w\s]', '', name1.lower())
+        norm2 = re.sub(r'[^\w\s]', '', name2.lower())
+        
+        # Check for exact match
+        if norm1 == norm2:
+            return True
+        
+        # Check if one name contains the other
+        if norm1 in norm2 or norm2 in norm1:
+            return True
+        
+        # Check for significant word overlap (at least 2 words in common)
+        words1 = set(norm1.split())
+        words2 = set(norm2.split())
+        common_words = words1.intersection(words2)
+        
+        # Remove common words that don't help identify the company
+        common_words.discard('the')
+        common_words.discard('and')
+        common_words.discard('of')
+        common_words.discard('for')
+        common_words.discard('in')
+        common_words.discard('at')
+        
+        return len(common_words) >= 2
     
     def _create_company_slug(self, company_name: str) -> str:
         """

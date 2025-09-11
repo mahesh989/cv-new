@@ -1,0 +1,61 @@
+{
+  "experience_years": 1,
+  "required_skills": {
+    "technical": [
+      "SQL",
+      "Python",
+      "data modelling",
+      "data visualisation"
+    ],
+    "soft_skills": [
+      "communication",
+      "logical thinking",
+      "attention to detail"
+    ],
+    "experience": [
+      "1-3 years' experience in analytics"
+    ],
+    "domain_knowledge": [
+      "Point of Sale data",
+      "Technical Consumer Goods industry"
+    ]
+  },
+  "preferred_skills": {
+    "technical": [
+      "Power BI",
+      "Tableau"
+    ],
+    "soft_skills": [
+      "team player",
+      "adaptability"
+    ],
+    "experience": [
+      "1-2 years' experience managing a small team"
+    ],
+    "domain_knowledge": []
+  },
+  "required_keywords": [
+    "SQL",
+    "Python",
+    "data modelling",
+    "data visualisation",
+    "communication",
+    "logical thinking",
+    "attention to detail",
+    "1-3 years' experience in analytics",
+    "Point of Sale data",
+    "Technical Consumer Goods industry"
+  ],
+  "preferred_keywords": [
+    "Power BI",
+    "Tableau",
+    "team player",
+    "adaptability",
+    "1-2 years' experience managing a small team"
+  ],
+  "analysis_timestamp": "2025-09-11T09:59:07.799294",
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "company_name": "GfK",
+  "metadata": {}
+}

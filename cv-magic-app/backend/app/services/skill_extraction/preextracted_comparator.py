@@ -20,20 +20,87 @@ import json
 import re
 
 
+def _deduplicate_skills(skills_dict: Dict[str, list]) -> Dict[str, list]:
+    """
+    Remove duplicate skills across categories to avoid double counting.
+    Priority: Technical > Soft > Domain (technical skills take precedence)
+    """
+    all_skills = set()
+    deduplicated = {
+        'technical_skills': [],
+        'soft_skills': [],
+        'domain_keywords': []
+    }
+    
+    # Process in priority order: Technical > Soft > Domain
+    for skill in skills_dict.get('technical_skills', []):
+        skill_lower = skill.lower().strip()
+        if skill_lower not in all_skills:
+            deduplicated['technical_skills'].append(skill)
+            all_skills.add(skill_lower)
+    
+    for skill in skills_dict.get('soft_skills', []):
+        skill_lower = skill.lower().strip()
+        if skill_lower not in all_skills:
+            deduplicated['soft_skills'].append(skill)
+            all_skills.add(skill_lower)
+    
+    for skill in skills_dict.get('domain_keywords', []):
+        skill_lower = skill.lower().strip()
+        if skill_lower not in all_skills:
+            deduplicated['domain_keywords'].append(skill)
+            all_skills.add(skill_lower)
+    
+    return deduplicated
+
+
+def _calculate_accurate_totals(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> Dict[str, int]:
+    """
+    Calculate accurate totals without duplication across categories.
+    """
+    cv_dedup = _deduplicate_skills(cv_skills)
+    jd_dedup = _deduplicate_skills(jd_skills)
+    
+    cv_total = (
+        len(cv_dedup['technical_skills']) + 
+        len(cv_dedup['soft_skills']) + 
+        len(cv_dedup['domain_keywords'])
+    )
+    
+    jd_total = (
+        len(jd_dedup['technical_skills']) + 
+        len(jd_dedup['soft_skills']) + 
+        len(jd_dedup['domain_keywords'])
+    )
+    
+    return {
+        'cv_total': cv_total,
+        'jd_total': jd_total
+    }
+
+
 def build_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
     """Return the exact comparison prompt with lists injected verbatim."""
+    
+    # Deduplicate skills to avoid double counting
+    cv_deduplicated = _deduplicate_skills(cv_skills)
+    jd_deduplicated = _deduplicate_skills(jd_skills)
+    
+    # Calculate accurate totals
+    totals = _calculate_accurate_totals(cv_skills, jd_skills)
+    
     return f"""
 Compare these pre-extracted CV skills against pre-extracted JD requirements using intelligent semantic matching.
 
 CV SKILLS:
-Technical: {cv_skills.get('technical_skills', [])}
-Soft: {cv_skills.get('soft_skills', [])}
-Domain: {cv_skills.get('domain_keywords', [])}
+Technical: {cv_deduplicated.get('technical_skills', [])}
+Soft: {cv_deduplicated.get('soft_skills', [])}
+Domain: {cv_deduplicated.get('domain_keywords', [])}
 
 JD REQUIREMENTS:
-Technical: {jd_skills.get('technical_skills', [])}
-Soft: {jd_skills.get('soft_skills', [])}
-Domain: {jd_skills.get('domain_keywords', [])}
+Technical: {jd_deduplicated.get('technical_skills', [])}
+Soft: {jd_deduplicated.get('soft_skills', [])}
+Domain: {jd_deduplicated.get('domain_keywords', [])}
 
 **RULES:**
 - Compare only the provided lists (no external knowledge)
@@ -42,6 +109,8 @@ Domain: {jd_skills.get('domain_keywords', [])}
 - "Data analysis" → "Analytical skills" = ✅ match
 - Only mark as missing if no semantic equivalent exists
 - Provide brief, clear reasoning
+- IMPORTANT: Each skill is counted only once (no duplicates across categories)
+- Calculate totals as: Technical + Soft + Domain (all categories combined)
 
 **OUTPUT FORMAT (TEXT ONLY):**
 🎯 OVERALL SUMMARY
@@ -138,16 +207,22 @@ def _normalize_list(values: List[str], max_items: int = 200) -> List[str]:
 
 
 def _prepare_inputs(cv_skills: Dict[str, list], jd_skills: Dict[str, list], max_items: int = 200) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    """Prepare normalized and truncated inputs for prompt injection."""
+    """Prepare normalized and truncated inputs for prompt injection with deduplication."""
+    
+    # First deduplicate skills across categories
+    cv_deduplicated = _deduplicate_skills(cv_skills)
+    jd_deduplicated = _deduplicate_skills(jd_skills)
+    
+    # Then normalize and truncate
     cv = {
-        "technical_skills": _normalize_list(cv_skills.get("technical_skills", []), max_items),
-        "soft_skills": _normalize_list(cv_skills.get("soft_skills", []), max_items),
-        "domain_keywords": _normalize_list(cv_skills.get("domain_keywords", []), max_items),
+        "technical_skills": _normalize_list(cv_deduplicated.get("technical_skills", []), max_items),
+        "soft_skills": _normalize_list(cv_deduplicated.get("soft_skills", []), max_items),
+        "domain_keywords": _normalize_list(cv_deduplicated.get("domain_keywords", []), max_items),
     }
     jd = {
-        "technical_skills": _normalize_list(jd_skills.get("technical_skills", []), max_items),
-        "soft_skills": _normalize_list(jd_skills.get("soft_skills", []), max_items),
-        "domain_keywords": _normalize_list(jd_skills.get("domain_keywords", []), max_items),
+        "technical_skills": _normalize_list(jd_deduplicated.get("technical_skills", []), max_items),
+        "soft_skills": _normalize_list(jd_deduplicated.get("soft_skills", []), max_items),
+        "domain_keywords": _normalize_list(jd_deduplicated.get("domain_keywords", []), max_items),
     }
     return cv, jd
 
@@ -170,6 +245,7 @@ def build_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) ->
         "- exact: identical string after normalization\n"
         "- synonym: common phrasing variants (e.g., 'data analysis' vs 'analytical skills')\n"
         "- context: closely related phrasing that clearly implies the JD item\n"
+        "- IMPORTANT: Each skill is counted only once (no duplicates across categories)\n"
         "Only mark as missing if no suitable equivalent exists.\n\n"
         "OUTPUT (JSON ONLY, no prose, no markdown):\n"
         "{\n"

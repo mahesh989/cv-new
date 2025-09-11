@@ -99,13 +99,15 @@ def scrape_ethicaljobs(soup: BeautifulSoup) -> str:
 def scrape_generic(soup: BeautifulSoup) -> str:
     """Generic scraper for other job sites"""
     
-    # Remove unwanted elements
+    # Remove unwanted elements (but not body or html)
     for element in soup.find_all(['script', 'style', 'nav', 'footer', 'header', 'aside', 'menu']):
         element.decompose()
 
-    # Remove common navigation and UI elements
+    # Remove common navigation and UI elements (but not body or html)
     for element in soup.find_all(class_=re.compile(r'(nav|menu|breadcrumb|sidebar|footer|header)', re.I)):
-        element.decompose()
+        # Don't remove body or html elements as they contain the main content
+        if element.name not in ['body', 'html']:
+            element.decompose()
 
     # Try to find the main job description content
     priority_selectors = [
