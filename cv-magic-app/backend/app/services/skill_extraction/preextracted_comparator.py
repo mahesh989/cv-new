@@ -22,7 +22,7 @@ import re
 
 def _deduplicate_skills(skills_dict: Dict[str, list]) -> Dict[str, list]:
     """
-    Remove duplicate skills across categories to avoid double counting.
+    Remove duplicate skills across categories using semantic-aware matching.
     Priority: Technical > Soft > Domain (technical skills take precedence)
     """
     all_skills = set()
@@ -32,24 +32,32 @@ def _deduplicate_skills(skills_dict: Dict[str, list]) -> Dict[str, list]:
         'domain_keywords': []
     }
     
+    def _normalize_for_dedup(skill: str) -> str:
+        """Normalize skill for deduplication while preserving important distinctions"""
+        # Remove extra whitespace and convert to lowercase for comparison
+        normalized = re.sub(r'\s+', ' ', skill.strip().lower())
+        # Remove common variations that don't change meaning
+        normalized = re.sub(r'\b(and|&|,)\b', ' ', normalized)
+        return normalized
+    
     # Process in priority order: Technical > Soft > Domain
     for skill in skills_dict.get('technical_skills', []):
-        skill_lower = skill.lower().strip()
-        if skill_lower not in all_skills:
+        skill_normalized = _normalize_for_dedup(skill)
+        if skill_normalized not in all_skills:
             deduplicated['technical_skills'].append(skill)
-            all_skills.add(skill_lower)
+            all_skills.add(skill_normalized)
     
     for skill in skills_dict.get('soft_skills', []):
-        skill_lower = skill.lower().strip()
-        if skill_lower not in all_skills:
+        skill_normalized = _normalize_for_dedup(skill)
+        if skill_normalized not in all_skills:
             deduplicated['soft_skills'].append(skill)
-            all_skills.add(skill_lower)
+            all_skills.add(skill_normalized)
     
     for skill in skills_dict.get('domain_keywords', []):
-        skill_lower = skill.lower().strip()
-        if skill_lower not in all_skills:
+        skill_normalized = _normalize_for_dedup(skill)
+        if skill_normalized not in all_skills:
             deduplicated['domain_keywords'].append(skill)
-            all_skills.add(skill_lower)
+            all_skills.add(skill_normalized)
     
     return deduplicated
 
@@ -173,14 +181,23 @@ Return only this formatted analysis.
 
 
 async def run_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.3, max_tokens: int = 3000) -> str:
-    """Execute the comparison prompt using the centralized AI service and return raw formatted text."""
-    prompt = build_prompt(cv_skills, jd_skills)
-    response = await ai_service.generate_response(
-        prompt=prompt,
-        temperature=temperature,
-        max_tokens=max_tokens
-    )
-    return response.content
+    """Execute the comparison prompt using the centralized AI service and return formatted text."""
+    try:
+        # Use JSON mode for consistent structured output
+        json_result = await run_comparison_json(ai_service, cv_skills, jd_skills, temperature, max_tokens)
+        
+        # Convert JSON result to formatted text for backward compatibility
+        return _format_json_to_text(json_result, cv_skills, jd_skills)
+        
+    except Exception as e:
+        # Fallback to original text-based comparison if JSON fails
+        prompt = build_prompt(cv_skills, jd_skills)
+        response = await ai_service.generate_response(
+            prompt=prompt,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.content
 
 
 # -------------------------
@@ -188,18 +205,41 @@ async def run_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict
 # -------------------------
 
 def _normalize_list(values: List[str], max_items: int = 200) -> List[str]:
-    """Lowercase, strip, dedupe, sort, and truncate to guard tokens deterministically."""
+    """Normalize list while preserving important formatting for proper nouns and brand names."""
     if not values:
         return []
     seen = set()
     normalized: List[str] = []
+    
+    def _preserve_capitalization(skill: str) -> str:
+        """Preserve capitalization for known proper nouns and brand names"""
+        # Common brand names and proper nouns that should maintain capitalization
+        brand_names = {
+            'power bi', 'tableau', 'aws', 'azure', 'gcp', 'kubernetes', 'docker',
+            'postgresql', 'mysql', 'mongodb', 'redis', 'elasticsearch', 'kafka',
+            'react', 'angular', 'vue', 'node.js', 'express.js', 'django', 'flask',
+            'tensorflow', 'pytorch', 'scikit-learn', 'pandas', 'numpy', 'matplotlib',
+            'seaborn', 'plotly', 'jupyter', 'git', 'github', 'gitlab', 'jenkins',
+            'terraform', 'ansible', 'chef', 'puppet', 'splunk', 'datadog', 'newrelic'
+        }
+        
+        # Clean up whitespace but preserve original case for known brands
+        cleaned = re.sub(r"\s+", " ", skill.strip())
+        if cleaned.lower() in brand_names:
+            return cleaned
+        # For other skills, use title case for consistency
+        return cleaned.title()
+    
     for v in values:
         if not isinstance(v, str):
             continue
-        s = re.sub(r"\s+", " ", v.strip().lower())
+        normalized_skill = _preserve_capitalization(v)
+        # Use lowercase for deduplication comparison
+        s = normalized_skill.lower()
         if s and s not in seen:
             seen.add(s)
-            normalized.append(s)
+            normalized.append(normalized_skill)
+    
     normalized.sort()
     if len(normalized) > max_items:
         return normalized[:max_items]
@@ -333,5 +373,81 @@ async def run_comparison_json(
         "domain_keywords": _sort_section(parsed.get("domain_keywords", {})),
     }
     return result
+
+
+def _format_json_to_text(json_result: Dict[str, Any], cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
+    """Convert JSON comparison result to formatted text output for backward compatibility."""
+    
+    # Calculate totals
+    cv_dedup = _deduplicate_skills(cv_skills)
+    jd_dedup = _deduplicate_skills(jd_skills)
+    
+    cv_total = len(cv_dedup['technical_skills']) + len(cv_dedup['soft_skills']) + len(cv_dedup['domain_keywords'])
+    jd_total = len(jd_dedup['technical_skills']) + len(jd_dedup['soft_skills']) + len(jd_dedup['domain_keywords'])
+    
+    # Calculate match statistics
+    total_matched = 0
+    total_missing = 0
+    
+    for category in ['technical_skills', 'soft_skills', 'domain_keywords']:
+        if category in json_result:
+            total_matched += len(json_result[category].get('matched', []))
+            total_missing += len(json_result[category].get('missing', []))
+    
+    match_rate = round((total_matched / (total_matched + total_missing)) * 100) if (total_matched + total_missing) > 0 else 0
+    
+    # Build formatted output
+    output = f"""🎯 OVERALL SUMMARY
+----------------------------------------
+Total Requirements: {total_matched + total_missing}
+Matched: {total_matched}
+Missing: {total_missing}
+Match Rate: {match_rate}%
+
+📊 SUMMARY TABLE
+--------------------------------------------------------------------------------
+Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
+Technical Skills            {len(cv_dedup['technical_skills']):2d}         {len(jd_dedup['technical_skills']):2d}         {len(json_result.get('technical_skills', {}).get('matched', [])):2d}         {len(json_result.get('technical_skills', {}).get('missing', [])):2d}           {round((len(json_result.get('technical_skills', {}).get('matched', [])) / (len(json_result.get('technical_skills', {}).get('matched', [])) + len(json_result.get('technical_skills', {}).get('missing', []))) * 100) if (len(json_result.get('technical_skills', {}).get('matched', [])) + len(json_result.get('technical_skills', {}).get('missing', []))) > 0 else 0):2d}
+Soft Skills                  {len(cv_dedup['soft_skills']):2d}         {len(jd_dedup['soft_skills']):2d}         {len(json_result.get('soft_skills', {}).get('matched', [])):2d}         {len(json_result.get('soft_skills', {}).get('missing', [])):2d}           {round((len(json_result.get('soft_skills', {}).get('matched', [])) / (len(json_result.get('soft_skills', {}).get('matched', [])) + len(json_result.get('soft_skills', {}).get('missing', []))) * 100) if (len(json_result.get('soft_skills', {}).get('matched', [])) + len(json_result.get('soft_skills', {}).get('missing', []))) > 0 else 0):2d}
+Domain Keywords             {len(cv_dedup['domain_keywords']):2d}         {len(jd_dedup['domain_keywords']):2d}         {len(json_result.get('domain_keywords', {}).get('matched', [])):2d}         {len(json_result.get('domain_keywords', {}).get('missing', [])):2d}           {round((len(json_result.get('domain_keywords', {}).get('matched', [])) / (len(json_result.get('domain_keywords', {}).get('matched', [])) + len(json_result.get('domain_keywords', {}).get('missing', []))) * 100) if (len(json_result.get('domain_keywords', {}).get('matched', [])) + len(json_result.get('domain_keywords', {}).get('missing', []))) > 0 else 0):2d}
+
+🧠 DETAILED AI ANALYSIS
+--------------------------------------------------------------------------------
+"""
+    
+    # Add detailed analysis for each category
+    for category_name, category_key in [("TECHNICAL SKILLS", "technical_skills"), ("SOFT SKILLS", "soft_skills"), ("DOMAIN KEYWORDS", "domain_keywords")]:
+        if category_key in json_result:
+            matched = json_result[category_key].get('matched', [])
+            missing = json_result[category_key].get('missing', [])
+            
+            output += f"\n🔹 {category_name}\n"
+            
+            if matched:
+                output += f"  ✅ MATCHED JD REQUIREMENTS ({len(matched)} items):\n"
+                for i, match in enumerate(matched, 1):
+                    output += f"    {i}. JD Required: '{match.get('jd_skill', '')}'\n"
+                    output += f"       → Found in CV: '{match.get('cv_equivalent', '')}'\n"
+                    output += f"       💡 {match.get('reasoning', '')}\n"
+            
+            if missing:
+                output += f"  ❌ MISSING FROM CV ({len(missing)} items):\n"
+                for i, miss in enumerate(missing, 1):
+                    output += f"    {i}. JD Requires: '{miss.get('jd_skill', '')}'\n"
+                    output += f"       💡 {miss.get('reasoning', '')}\n"
+    
+    # Add input summary
+    output += "\n📚 INPUT SUMMARY (normalized, truncated if long)\n"
+    output += "CV\n"
+    output += f"- Technical: {', '.join(cv_dedup['technical_skills'][:10])}{'...' if len(cv_dedup['technical_skills']) > 10 else ''}\n"
+    output += f"- Soft: {', '.join(cv_dedup['soft_skills'][:10])}{'...' if len(cv_dedup['soft_skills']) > 10 else ''}\n"
+    output += f"- Domain: {', '.join(cv_dedup['domain_keywords'][:10])}{'...' if len(cv_dedup['domain_keywords']) > 10 else ''}\n\n"
+    
+    output += "JD\n"
+    output += f"- Technical: {', '.join(jd_dedup['technical_skills'][:10])}{'...' if len(jd_dedup['technical_skills']) > 10 else ''}\n"
+    output += f"- Soft: {', '.join(jd_dedup['soft_skills'][:10])}{'...' if len(jd_dedup['soft_skills']) > 10 else ''}\n"
+    output += f"- Domain: {', '.join(jd_dedup['domain_keywords'][:10])}{'...' if len(jd_dedup['domain_keywords']) > 10 else ''}\n"
+    
+    return output
 
 
