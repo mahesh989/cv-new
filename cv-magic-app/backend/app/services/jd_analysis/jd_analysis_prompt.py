@@ -59,13 +59,11 @@ Respond with a JSON object only, no additional text:
     "required_skills": {
         "technical": ["SQL", "Power BI", "VBA"],
         "soft_skills": ["communication", "project management"],
-        "experience": ["2+ years experience"],
         "domain_knowledge": ["data warehouse", "marketing campaigns"]
     },
     "preferred_skills": {
         "technical": ["Tableau", "Python"],
         "soft_skills": ["leadership"],
-        "experience": ["5+ years preferred"],
         "domain_knowledge": ["machine learning"]
     }
 }"""

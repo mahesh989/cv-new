@@ -96,6 +96,10 @@ class SkillExtractionResultSaver:
             filename = f"{company_slug}_skills_analysis.json"
             file_path = company_folder / filename
             
+            # Clean cv_skills and jd_skills by removing raw_response
+            clean_cv_skills = {k: v for k, v in cv_skills.items() if k != "raw_response"}
+            clean_jd_skills = {k: v for k, v in jd_skills.items() if k != "raw_response"}
+            
             # Build structured JSON payload
             payload = {
                 "generated": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
@@ -103,8 +107,8 @@ class SkillExtractionResultSaver:
                 "jd_url": jd_url,
                 "user_id": user_id,
                 "company": company_slug,
-                "cv_skills": cv_skills,
-                "jd_skills": jd_skills,
+                "cv_skills": clean_cv_skills,
+                "jd_skills": clean_jd_skills,
                 "analyze_match_entries": [],
                 "preextracted_comparison_entries": []
             }

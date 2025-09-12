@@ -674,6 +674,12 @@ async def perform_preliminary_skills_analysis(
             if logging_params["enable_detailed_logging"]:
                 logger.info("🔍 [PREEXTRACTED_COMPARISON] Starting pre-extracted skills semantic comparison...")
 
+            # Validate skill inputs before comparison
+            if not cv_technical_skills and not cv_soft_skills and not cv_domain_keywords:
+                raise ValueError("No CV skills extracted - cannot perform comparison")
+            if not jd_technical_skills and not jd_soft_skills and not jd_domain_keywords:
+                raise ValueError("No JD skills extracted - cannot perform comparison")
+
             # Build input skill lists from the parsed results above
             pre_cv_skills = {
                 "technical_skills": cv_technical_skills,
@@ -710,8 +716,7 @@ async def perform_preliminary_skills_analysis(
                     logger.info(f"📁 [PREEXTRACTED_COMPARISON] Results appended to: {pre_file_path}")
                 result["preextracted_comparison_file_path"] = pre_file_path
             except Exception as e:
-                if logging_params["enable_detailed_logging"]:
-                    logger.warning(f"⚠️ [PREEXTRACTED_COMPARISON] Failed to append results: {str(e)}")
+                logger.error(f"❌ [PREEXTRACTED_COMPARISON] Failed to append results: {str(e)}")
                 result["preextracted_comparison_file_path"] = None
 
             # Include raw formatted analysis in response payload

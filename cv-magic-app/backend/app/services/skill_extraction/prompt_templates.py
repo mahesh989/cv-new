@@ -135,11 +135,12 @@ def get_prompt(key: str, **kwargs) -> str:
 
 CRITICAL INSTRUCTIONS:
 - Extract EVERY skill, tool, technology, and keyword mentioned or strongly implied
-- List each technical skill INDIVIDUALLY (do not group them - e.g., list "Python", "SQL", "Tableau" as separate items, not grouped together)
+- List each skill INDIVIDUALLY with proper capitalization (e.g., "Python", "SQL", "Power BI", "Tableau" as separate items)
 - Provide specific supporting quotes for each extraction
 - Be thorough and comprehensive - don't miss anything
 - Look carefully at every sentence for skills and keywords
 - Extract skills from job titles, responsibilities, achievements, and requirements
+- Preserve original capitalization for proper nouns and brand names
 
 ## SOFT SKILLS:
 

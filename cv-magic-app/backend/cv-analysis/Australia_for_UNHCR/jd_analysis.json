@@ -3,56 +3,71 @@
   "required_skills": {
     "technical": [
       "SQL",
+      "Power BI",
+      "Tableau",
+      "Excel",
       "VBA",
-      "SQL data warehouse",
-      "Power BI"
+      "data warehouse",
+      "relational databases"
     ],
     "soft_skills": [
-      "communication",
       "project management",
-      "stakeholder management"
-    ],
-    "experience": [
-      "Minimum 2 years’ experience in a similar role"
+      "stakeholder management",
+      "communication",
+      "customer service",
+      "analytical skills",
+      "problem-solving"
     ],
     "domain_knowledge": [
-      "data models"
-    ]
+      "data mining",
+      "analytical models",
+      "BI report authoring",
+      "direct marketing campaigns",
+      "segmentation strategies",
+      "multi-channel communication",
+      "donor-centricity",
+      "data governance regulations"
+    ],
+    "experience": []
   },
   "preferred_skills": {
-    "technical": [
-      "Tableau"
-    ],
-    "soft_skills": [
-      "customer service"
-    ],
-    "experience": [],
+    "technical": [],
+    "soft_skills": [],
     "domain_knowledge": [
-      "marketing campaigns",
-      "communication purposes",
-      "clean data"
-    ]
+      "data de-duplication",
+      "clean data maintenance"
+    ],
+    "experience": []
   },
   "required_keywords": [
     "SQL",
-    "VBA",
-    "SQL data warehouse",
     "Power BI",
-    "communication",
+    "Tableau",
+    "Excel",
+    "VBA",
+    "data warehouse",
+    "relational databases",
     "project management",
     "stakeholder management",
-    "Minimum 2 years’ experience in a similar role",
-    "data models"
+    "communication",
+    "customer service",
+    "analytical skills",
+    "problem-solving",
+    "data mining",
+    "analytical models",
+    "BI report authoring",
+    "direct marketing campaigns",
+    "segmentation strategies",
+    "multi-channel communication",
+    "donor-centricity",
+    "data governance regulations"
   ],
   "preferred_keywords": [
-    "Tableau",
-    "customer service",
-    "marketing campaigns",
-    "communication purposes",
-    "clean data"
+    "data de-duplication",
+    "clean data maintenance"
   ],
-  "analysis_timestamp": "2025-09-11T18:23:54.062826",
-  "ai_model_used": "openai/gpt-3.5-turbo",
+  "analysis_timestamp": "2025-09-12T13:52:41.398740",
+  "ai_model_used": "deepseek/deepseek-chat",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",
   "metadata": {}

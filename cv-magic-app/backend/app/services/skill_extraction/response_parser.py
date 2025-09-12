@@ -41,6 +41,11 @@ class SkillExtractionParser:
             technical_skills = SkillExtractionParser._extract_python_list(response_text, "TECHNICAL_SKILLS", document_type)  
             domain_keywords = SkillExtractionParser._extract_python_list(response_text, "DOMAIN_KEYWORDS", document_type)
             
+            # Validate and clean extracted skills
+            soft_skills = SkillExtractionParser._validate_and_clean_skills(soft_skills, "soft_skills", document_type)
+            technical_skills = SkillExtractionParser._validate_and_clean_skills(technical_skills, "technical_skills", document_type)
+            domain_keywords = SkillExtractionParser._validate_and_clean_skills(domain_keywords, "domain_keywords", document_type)
+            
             # Log parsing results
             logger.info(f"📊 [{document_type.upper()}] Parsing completed:")
             logger.info(f"   Soft Skills ({len(soft_skills)}): {soft_skills[:3]}{'...' if len(soft_skills) > 3 else ''}")
@@ -150,3 +155,59 @@ class SkillExtractionParser:
 ================================================================================"""
         
         return formatted_output
+    
+    @staticmethod
+    def _validate_and_clean_skills(skills: List[str], skill_type: str, document_type: str) -> List[str]:
+        """
+        Validate and clean extracted skills with improved error handling
+        
+        Args:
+            skills: List of extracted skills
+            skill_type: Type of skills (soft_skills, technical_skills, domain_keywords)
+            document_type: Type of document for logging
+            
+        Returns:
+            Cleaned and validated list of skills
+        """
+        if not skills:
+            return []
+        
+        cleaned_skills = []
+        invalid_skills = []
+        
+        for skill in skills:
+            if not isinstance(skill, str):
+                invalid_skills.append(str(skill))
+                continue
+                
+            # Clean the skill
+            cleaned_skill = skill.strip()
+            
+            # Skip empty or very short skills
+            if len(cleaned_skill) < 2:
+                invalid_skills.append(cleaned_skill)
+                continue
+                
+            # Skip skills that are too long (likely parsing errors)
+            if len(cleaned_skill) > 100:
+                invalid_skills.append(cleaned_skill)
+                continue
+                
+            # Skip common non-skill words
+            non_skill_words = {
+                'and', 'or', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+                'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after',
+                'above', 'below', 'between', 'among', 'within', 'without', 'upon', 'across'
+            }
+            
+            if cleaned_skill.lower() in non_skill_words:
+                invalid_skills.append(cleaned_skill)
+                continue
+                
+            cleaned_skills.append(cleaned_skill)
+        
+        if invalid_skills:
+            logger.warning(f"⚠️ [{document_type.upper()}] Filtered out {len(invalid_skills)} invalid {skill_type}: {invalid_skills[:5]}{'...' if len(invalid_skills) > 5 else ''}")
+        
+        logger.info(f"✅ [{document_type.upper()}] Validated {skill_type}: {len(cleaned_skills)} valid skills")
+        return cleaned_skills

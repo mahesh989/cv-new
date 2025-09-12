@@ -18,6 +18,9 @@ for the frontend.
 from typing import Dict, List, Tuple, Any
 import json
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _deduplicate_skills(skills_dict: Dict[str, list]) -> Dict[str, list]:
@@ -97,20 +100,40 @@ def build_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
     # Calculate accurate totals
     totals = _calculate_accurate_totals(cv_skills, jd_skills)
     
+    # Get exact counts for each category
+    cv_tech_count = len(cv_deduplicated.get('technical_skills', []))
+    cv_soft_count = len(cv_deduplicated.get('soft_skills', []))
+    cv_domain_count = len(cv_deduplicated.get('domain_keywords', []))
+    jd_tech_count = len(jd_deduplicated.get('technical_skills', []))
+    jd_soft_count = len(jd_deduplicated.get('soft_skills', []))
+    jd_domain_count = len(jd_deduplicated.get('domain_keywords', []))
+    
     return f"""
 Compare these pre-extracted CV skills against pre-extracted JD requirements using intelligent semantic matching.
 
 CV SKILLS:
-Technical: {cv_deduplicated.get('technical_skills', [])}
-Soft: {cv_deduplicated.get('soft_skills', [])}
-Domain: {cv_deduplicated.get('domain_keywords', [])}
+Technical ({cv_tech_count} items): {cv_deduplicated.get('technical_skills', [])}
+Soft ({cv_soft_count} items): {cv_deduplicated.get('soft_skills', [])}
+Domain ({cv_domain_count} items): {cv_deduplicated.get('domain_keywords', [])}
 
 JD REQUIREMENTS:
-Technical: {jd_deduplicated.get('technical_skills', [])}
-Soft: {jd_deduplicated.get('soft_skills', [])}
-Domain: {jd_deduplicated.get('domain_keywords', [])}
+Technical ({jd_tech_count} items): {jd_deduplicated.get('technical_skills', [])}
+Soft ({jd_soft_count} items): {jd_deduplicated.get('soft_skills', [])}
+Domain ({jd_domain_count} items): {jd_deduplicated.get('domain_keywords', [])}
 
-**RULES:**
+**CRITICAL COUNTING RULES:**
+- CV Technical Skills: {cv_tech_count} items
+- CV Soft Skills: {cv_soft_count} items  
+- CV Domain Keywords: {cv_domain_count} items
+- JD Technical Skills: {jd_tech_count} items
+- JD Soft Skills: {jd_soft_count} items
+- JD Domain Keywords: {jd_domain_count} items
+- You CANNOT match more items than exist in the CV
+- If CV has {cv_soft_count} soft skills, you can match AT MOST {cv_soft_count} JD soft skills
+- If CV has {cv_tech_count} technical skills, you can match AT MOST {cv_tech_count} JD technical skills
+- If CV has {cv_domain_count} domain keywords, you can match AT MOST {cv_domain_count} JD domain keywords
+
+**MATCHING RULES:**
 - Compare only the provided lists (no external knowledge)
 - Use semantic matching: "Python programming" → "Python" = ✅ match
 - "Leadership" → "Team leadership" = ✅ match  
@@ -118,22 +141,21 @@ Domain: {jd_deduplicated.get('domain_keywords', [])}
 - Only mark as missing if no semantic equivalent exists
 - Provide brief, clear reasoning
 - IMPORTANT: Each skill is counted only once (no duplicates across categories)
-- Calculate totals as: Technical + Soft + Domain (all categories combined)
 
 **OUTPUT FORMAT (TEXT ONLY):**
 🎯 OVERALL SUMMARY
 ----------------------------------------
-Total Requirements: X
-Matched: Y
-Missing: Z
-Match Rate: P%
+Total Requirements: {jd_tech_count + jd_soft_count + jd_domain_count}
+Matched: [Y - must be ≤ {cv_tech_count + cv_soft_count + cv_domain_count}]
+Missing: [Z]
+Match Rate: [P%]
 
 📊 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
-Technical Skills            TT         JT         MT         MS            RP
-Soft Skills                  TT         JT         MT         MS            RP
-Domain Keywords             TT         JT         MT         MS            RP
+Technical Skills            {cv_tech_count:2d}         {jd_tech_count:2d}         [MT]         [MS]            [RP]
+Soft Skills                  {cv_soft_count:2d}         {jd_soft_count:2d}         [MT]         [MS]            [RP]
+Domain Keywords             {cv_domain_count:2d}         {jd_domain_count:2d}         [MT]         [MS]            [RP]
 
 🧠 DETAILED AI ANALYSIS
 --------------------------------------------------------------------------------
@@ -186,11 +208,24 @@ async def run_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict
         # Use JSON mode for consistent structured output
         json_result = await run_comparison_json(ai_service, cv_skills, jd_skills, temperature, max_tokens)
         
+        # Validate the results are mathematically correct
+        if not _validate_comparison_results(json_result, cv_skills, jd_skills):
+            logger.warning("⚠️ [COMPARISON] JSON results failed validation, falling back to text mode")
+            # Fallback to text-based comparison if validation fails
+            prompt = build_prompt(cv_skills, jd_skills)
+            response = await ai_service.generate_response(
+                prompt=prompt,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            return response.content
+        
         # Convert JSON result to formatted text for backward compatibility
         return _format_json_to_text(json_result, cv_skills, jd_skills)
         
     except Exception as e:
         # Fallback to original text-based comparison if JSON fails
+        logger.warning(f"⚠️ [COMPARISON] JSON mode failed: {e}, falling back to text mode")
         prompt = build_prompt(cv_skills, jd_skills)
         response = await ai_service.generate_response(
             prompt=prompt,
@@ -270,17 +305,31 @@ def _prepare_inputs(cv_skills: Dict[str, list], jd_skills: Dict[str, list], max_
 def build_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
     """Return a strict JSON-only comparison prompt with deterministic guidance."""
     cv, jd = _prepare_inputs(cv_skills, jd_skills)
+    
+    # Get exact counts for validation
+    cv_tech_count = len(cv['technical_skills'])
+    cv_soft_count = len(cv['soft_skills'])
+    cv_domain_count = len(cv['domain_keywords'])
+    jd_tech_count = len(jd['technical_skills'])
+    jd_soft_count = len(jd['soft_skills'])
+    jd_domain_count = len(jd['domain_keywords'])
+    
     return (
         "You are a precise comparator. Compare ONLY the provided pre-extracted lists.\n"
         "Normalize mentally as lowercase and singular where helpful, and use simple semantic equivalence (e.g., 'data analysis' ~ 'analytical skills').\n"
         "DO NOT invent items.\n\n"
         "INPUT LISTS (already normalized and truncated, sorted alphabetically):\n"
-        f"CV.technical_skills = {cv['technical_skills']}\n"
-        f"CV.soft_skills = {cv['soft_skills']}\n"
-        f"CV.domain_keywords = {cv['domain_keywords']}\n\n"
-        f"JD.technical_skills = {jd['technical_skills']}\n"
-        f"JD.soft_skills = {jd['soft_skills']}\n"
-        f"JD.domain_keywords = {jd['domain_keywords']}\n\n"
+        f"CV.technical_skills ({cv_tech_count} items) = {cv['technical_skills']}\n"
+        f"CV.soft_skills ({cv_soft_count} items) = {cv['soft_skills']}\n"
+        f"CV.domain_keywords ({cv_domain_count} items) = {cv['domain_keywords']}\n\n"
+        f"JD.technical_skills ({jd_tech_count} items) = {jd['technical_skills']}\n"
+        f"JD.soft_skills ({jd_soft_count} items) = {jd['soft_skills']}\n"
+        f"JD.domain_keywords ({jd_domain_count} items) = {jd['domain_keywords']}\n\n"
+        "CRITICAL COUNTING CONSTRAINTS:\n"
+        f"- CV has {cv_tech_count} technical skills, {cv_soft_count} soft skills, {cv_domain_count} domain keywords\n"
+        f"- JD has {jd_tech_count} technical skills, {jd_soft_count} soft skills, {jd_domain_count} domain keywords\n"
+        f"- You CANNOT match more than {cv_tech_count} technical skills, {cv_soft_count} soft skills, {cv_domain_count} domain keywords\n"
+        f"- Maximum possible matches: {cv_tech_count + cv_soft_count + cv_domain_count} total\n\n"
         "MATCHING RULES:\n"
         "- exact: identical string after normalization\n"
         "- synonym: common phrasing variants (e.g., 'data analysis' vs 'analytical skills')\n"
@@ -373,6 +422,51 @@ async def run_comparison_json(
         "domain_keywords": _sort_section(parsed.get("domain_keywords", {})),
     }
     return result
+
+
+def _validate_comparison_results(json_result: Dict[str, Any], cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> bool:
+    """
+    Validate that the comparison results are mathematically correct.
+    Returns True if valid, False if invalid.
+    """
+    try:
+        cv_dedup = _deduplicate_skills(cv_skills)
+        jd_dedup = _deduplicate_skills(jd_skills)
+        
+        # Get actual counts
+        cv_tech_count = len(cv_dedup.get('technical_skills', []))
+        cv_soft_count = len(cv_dedup.get('soft_skills', []))
+        cv_domain_count = len(cv_dedup.get('domain_keywords', []))
+        
+        # Check each category
+        for category in ['technical_skills', 'soft_skills', 'domain_keywords']:
+            if category not in json_result:
+                continue
+                
+            matched = json_result[category].get('matched', [])
+            missing = json_result[category].get('missing', [])
+            
+            # Get CV count for this category
+            cv_count = len(cv_dedup.get(category, []))
+            
+            # Validate: matched count cannot exceed CV count
+            if len(matched) > cv_count:
+                logger.warning(f"❌ [VALIDATION] {category}: matched {len(matched)} > CV count {cv_count}")
+                return False
+                
+            # Validate: total (matched + missing) should equal JD count
+            jd_count = len(jd_dedup.get(category, []))
+            total_processed = len(matched) + len(missing)
+            if total_processed != jd_count:
+                logger.warning(f"❌ [VALIDATION] {category}: matched {len(matched)} + missing {len(missing)} = {total_processed} ≠ JD count {jd_count}")
+                return False
+        
+        logger.info("✅ [VALIDATION] Comparison results are mathematically correct")
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ [VALIDATION] Error validating results: {e}")
+        return False
 
 
 def _format_json_to_text(json_result: Dict[str, Any], cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
