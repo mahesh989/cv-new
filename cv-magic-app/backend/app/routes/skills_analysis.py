@@ -70,6 +70,12 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
             await match_and_save_cv_jd(cname, cv_file_path=None, force_refresh=False)
             logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
+
+            # Now run ATS analysis after skill comparison completes
+            logger.info(f"🔍 [PIPELINE] Starting ATS component analysis for {cname}")
+            from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+            ats_result = await modular_ats_orchestrator.run_component_analysis(cname)
+            logger.info(f"✅ [PIPELINE] ATS component analysis completed for {cname}")
         except Exception as e:
             logger.warning(f"⚠️ [PIPELINE] Background pipeline error for {cname}: {e}")
 
@@ -713,6 +719,10 @@ async def perform_preliminary_skills_analysis(
                 "raw_output": preextracted_output,
                 "company_name": company_name
             }
+
+            # Note: ATS analysis moved to run after skill comparison completes
+            # (see _schedule_post_skill_pipeline function)
+            result["ats_analysis"] = {"status": "scheduled_after_skill_comparison"}
 
         except Exception as e:
             logger.error(f"❌ [PREEXTRACTED_COMPARISON] Error: {str(e)}")

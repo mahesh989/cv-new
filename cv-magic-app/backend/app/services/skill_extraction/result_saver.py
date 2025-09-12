@@ -708,5 +708,6 @@ class SkillExtractionResultSaver:
             raise e
 
 
+
 # Global instance
 result_saver = SkillExtractionResultSaver("cv-analysis")

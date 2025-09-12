@@ -4,6 +4,7 @@ Main Skill Extraction Service
 Handles skill extraction from CVs and Job Descriptions with caching and AI integration
 """
 
+import asyncio
 import logging
 import json
 from datetime import datetime
