@@ -105,6 +105,18 @@ class SkillsDisplayWidget extends StatelessWidget {
   }
 
   Widget _buildResultsContent() {
+    // Debug logging
+    debugPrint('🔍 [SKILLS_DISPLAY] _buildResultsContent called');
+    debugPrint('   controller.hasResults: ${controller.hasResults}');
+    debugPrint('   controller.isLoading: ${controller.isLoading}');
+    debugPrint('   controller.result: ${controller.result != null}');
+    if (controller.result != null) {
+      debugPrint('   CV comprehensive analysis length: ${controller.cvComprehensiveAnalysis?.length ?? 0}');
+      debugPrint('   JD comprehensive analysis length: ${controller.jdComprehensiveAnalysis?.length ?? 0}');
+      debugPrint('   CV total skills: ${controller.cvTotalSkills}');
+      debugPrint('   JD total skills: ${controller.jdTotalSkills}');
+    }
+    
     // If no results yet, show loading/progress info
     if (controller.isLoading) {
       return Container(
@@ -153,12 +165,17 @@ class SkillsDisplayWidget extends StatelessWidget {
           if (controller.hasResults) _buildResultsHeader(),
 
           // Side by side comparison - show when we have results
-          if (controller.hasResults)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          if (controller.hasResults) ...[
+            Builder(
+              builder: (context) {
+                debugPrint('🔍 [SKILLS_DISPLAY] Rendering side-by-side comparison');
+                debugPrint('   CV Skills: ${controller.cvTotalSkills}');
+                debugPrint('   JD Skills: ${controller.jdTotalSkills}');
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   // CV Skills Column
                   Expanded(
                     child: _buildSkillsColumn(
@@ -184,9 +201,12 @@ class SkillsDisplayWidget extends StatelessWidget {
                       'jd',
                     ),
                   ),
-                ],
-              ),
+                    ],
+                  ),
+                );
+              },
             ),
+          ],
 
           // Analyze Match Section - Show when we have results or are loading
           if (controller.hasResults || controller.isLoading) ...[
