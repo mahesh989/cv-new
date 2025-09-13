@@ -169,16 +169,19 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
   }
 
   Widget _buildAnalysisButton() {
-    return Consumer<SkillsAnalysisController>(
-      builder: (context, controller, child) {
-        final canAnalyze = _canPerformAnalysis();
-        final buttonText = controller.isLoading
-            ? 'Analyzing...'
-            : controller.hasResults
-                ? 'Re-analyze Skills'
-                : 'Analyze Skills';
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Consumer<SkillsAnalysisController>(
+          builder: (context, controller, child) {
+            final canAnalyze = _canPerformAnalysis();
+            final buttonText = controller.isLoading
+                ? 'Analyzing...'
+                : controller.hasResults
+                    ? 'Re-analyze Skills'
+                    : 'Analyze Skills';
 
-        print('🔍 Button state: canAnalyze=$canAnalyze, isLoading=${controller.isLoading}, hasResults=${controller.hasResults}');
+            print(
+                '🔍 Button state: canAnalyze=$canAnalyze, isLoading=${controller.isLoading}, hasResults=${controller.hasResults}');
 
         return SizedBox(
           width: double.infinity,
@@ -217,6 +220,8 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
             ),
           ),
         );
+          },
+        );
       },
     );
   }
@@ -228,7 +233,8 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
         _jdController.text.trim().length >= 10;
     final canAnalyze = hasCv && hasJd;
 
-    print('🔍 Button check: hasCv=$hasCv, hasJd=$hasJd, canAnalyze=$canAnalyze');
+    print(
+        '🔍 Button check: hasCv=$hasCv, hasJd=$hasJd, canAnalyze=$canAnalyze');
     print('   CV: $_selectedCvFilename');
     print('   JD length: ${_jdController.text.trim().length}');
 
