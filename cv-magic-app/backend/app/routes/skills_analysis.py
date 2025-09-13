@@ -71,37 +71,40 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             await match_and_save_cv_jd(cname, cv_file_path=None, force_refresh=False)
             logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
 
-            # Now run ATS analysis after skill comparison completes
-            logger.info(f"🔍 [PIPELINE] Starting ATS analysis for {cname}")
+            # Now run component analysis after skill comparison completes
+            logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
             try:
-                from app.services.ats.enhanced_ats_orchestrator import EnhancedATSOrchestrator
+                from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
                 
-                # Use EnhancedATSOrchestrator which includes ATSScoreCalculator
-                enhanced_orchestrator = EnhancedATSOrchestrator()
-                
-                # Check if we have the required analysis file
+                # Check if we have the required files
                 base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
-                analysis_file = base_dir / cname / f"{cname}_skills_analysis.json"
+                required_files = {
+                    "cv_file": base_dir / "original_cv.json",
+                    "jd_file": base_dir / cname / "jd_original.json", 
+                    "match_file": base_dir / cname / "cv_jd_match_results.json"
+                }
                 
-                if not analysis_file.exists():
-                    logger.warning(f"⚠️ [PIPELINE] Analysis file not found: {analysis_file}")
-                    logger.info(f"🔄 [PIPELINE] Skipping ATS analysis for {cname} due to missing analysis file")
+                missing_files = [name for name, path in required_files.items() if not path.exists()]
+                if missing_files:
+                    logger.warning(f"⚠️ [PIPELINE] Missing files for component analysis: {missing_files}")
+                    logger.info(f"🔄 [PIPELINE] Skipping component analysis for {cname} due to missing files")
                 else:
-                    # Run enhanced ATS analysis
-                    ats_result = await enhanced_orchestrator.run_enhanced_analysis(cname)
-                    logger.info(f"✅ [PIPELINE] Enhanced ATS analysis completed for {cname}")
+                    # Run component analysis
+                    component_result = await modular_ats_orchestrator.run_component_analysis(cname)
+                    logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
                     
-                    # Log ATS score if available
-                    if hasattr(ats_result, 'final_ats_score'):
-                        logger.info(f"📊 [PIPELINE] Final ATS Score: {ats_result.final_ats_score}/100")
-                        logger.info(f"📊 [PIPELINE] Status: {ats_result.category_status}")
-                    elif isinstance(ats_result, dict) and 'final_ats_score' in ats_result:
-                        logger.info(f"📊 [PIPELINE] Final ATS Score: {ats_result['final_ats_score']}/100")
-                        logger.info(f"📊 [PIPELINE] Status: {ats_result.get('category_status', 'Unknown')}")
+                    # Log extracted scores if available
+                    if isinstance(component_result, dict) and 'extracted_scores' in component_result:
+                        scores = component_result['extracted_scores']
+                        logger.info(f"📊 [PIPELINE] Component scores extracted: {len(scores)} scores")
+                        # Log key scores
+                        for key in ['skills_relevance', 'experience_alignment', 'industry_fit', 'role_seniority', 'technical_depth']:
+                            if key in scores:
+                                logger.info(f"📊 [PIPELINE] {key}: {scores[key]:.1f}")
                     
             except Exception as component_error:
-                logger.error(f"❌ [PIPELINE] Enhanced ATS analysis failed for {cname}: {component_error}")
-                # Don't let ATS analysis failure break the main pipeline
+                logger.error(f"❌ [PIPELINE] Component analysis failed for {cname}: {component_error}")
+                # Don't let component analysis failure break the main pipeline
                 pass
         except Exception as e:
             logger.warning(f"⚠️ [PIPELINE] Background pipeline error for {cname}: {e}")
@@ -804,9 +807,9 @@ async def perform_preliminary_skills_analysis(
                 "company_name": company_name
             }
 
-            # Note: ATS analysis moved to run after skill comparison completes
+            # Note: Component analysis moved to run after skill comparison completes
             # (see _schedule_post_skill_pipeline function)
-            result["ats_analysis"] = {"status": "scheduled_after_skill_comparison"}
+            result["component_analysis"] = {"status": "scheduled_after_skill_comparison"}
 
         except Exception as e:
             logger.error(f"❌ [PREEXTRACTED_COMPARISON] Error: {str(e)}")
