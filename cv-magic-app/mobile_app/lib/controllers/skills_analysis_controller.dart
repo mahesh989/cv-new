@@ -67,6 +67,27 @@ class SkillsAnalysisController extends ChangeNotifier {
   int get cvTotalSkills => cvSkills?.totalSkillsCount ?? 0;
   int get jdTotalSkills => jdSkills?.totalSkillsCount ?? 0;
 
+  // Get analysis results in a format suitable for the simple results widget
+  Map<String, dynamic>? get analysisResults {
+    if (_result == null) return null;
+
+    return {
+      'cv_skills': {
+        'technical_skills': _result!.cvSkills.technicalSkills,
+        'soft_skills': _result!.cvSkills.softSkills,
+        'domain_keywords': _result!.cvSkills.domainKeywords,
+      },
+      'jd_skills': {
+        'technical_skills': _result!.jdSkills.technicalSkills,
+        'soft_skills': _result!.jdSkills.softSkills,
+        'domain_keywords': _result!.jdSkills.domainKeywords,
+      },
+      'match_analysis': _result!.analyzeMatch?.rawAnalysis,
+      'ats_score': _result!.preextractedRawOutput,
+      'recommendations': _result!.cvComprehensiveAnalysis,
+    };
+  }
+
   // Notification methods
   void setNotificationCallback(
       Function(String message, {bool isError}) callback) {
@@ -108,16 +129,11 @@ class SkillsAnalysisController extends ChangeNotifier {
 
       if (cachedResult != null) {
         print('🔍 [CONTROLLER_DEBUG] Found cached results!');
-        print(
-            '🔍 [CONTROLLER_DEBUG] Cached analyzeMatch: ${cachedResult.analyzeMatch != null}');
-        if (cachedResult.analyzeMatch != null) {
-          print(
-              '🔍 [CONTROLLER_DEBUG] Cached analyzeMatch raw analysis length: ${cachedResult.analyzeMatch!.rawAnalysis.length}');
-        }
         _result = cachedResult;
         _executionDuration = Duration.zero; // Cached results are instant
         _setState(SkillsAnalysisState.completed);
         debugPrint('✅ [SKILLS_ANALYSIS] Used cached results');
+        _showNotification('✅ Analysis completed using cached results!');
         return;
       } else {
         print(
@@ -131,8 +147,7 @@ class SkillsAnalysisController extends ChangeNotifier {
       debugPrint('   JD text length: ${jdText.length} chars');
 
       // Show starting notification
-      _showNotification(
-          '🚀 Starting skills analysis and recruiter assessment...');
+      _showNotification('🚀 Starting skills analysis...');
 
       final result = await SkillsAnalysisService.performPreliminaryAnalysis(
         cvFilename: cvFilename,
@@ -141,24 +156,6 @@ class SkillsAnalysisController extends ChangeNotifier {
 
       print('=== CONTROLLER RECEIVED RESULT ===');
       print('Result success: ${result.isSuccess}');
-      print(
-          'CV comprehensive analysis length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
-      print(
-          'JD comprehensive analysis length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
-      print(
-          '🔍 [ANALYZE_MATCH_DEBUG] Analyze match present: ${result.analyzeMatch != null}');
-      if (result.analyzeMatch != null) {
-        print(
-            '🔍 [ANALYZE_MATCH_DEBUG] Raw analysis length: ${result.analyzeMatch!.rawAnalysis.length}');
-        print(
-            '🔍 [ANALYZE_MATCH_DEBUG] Company name: ${result.analyzeMatch!.companyName}');
-        print(
-            '🔍 [ANALYZE_MATCH_DEBUG] Has error: ${result.analyzeMatch!.hasError}');
-        if (result.analyzeMatch!.rawAnalysis.isNotEmpty) {
-          print(
-              '🔍 [ANALYZE_MATCH_DEBUG] First 200 chars: ${result.analyzeMatch!.rawAnalysis.substring(0, result.analyzeMatch!.rawAnalysis.length > 200 ? 200 : result.analyzeMatch!.rawAnalysis.length)}');
-        }
-      }
 
       if (result.isSuccess) {
         _result = result;
@@ -168,43 +165,21 @@ class SkillsAnalysisController extends ChangeNotifier {
         debugPrint('   CV Skills: ${result.cvSkills.totalSkillsCount}');
         debugPrint('   JD Skills: ${result.jdSkills.totalSkillsCount}');
         debugPrint('   Duration: ${result.executionDuration.inSeconds}s');
-        debugPrint(
-            '   CV Comprehensive Analysis Length: ${result.cvComprehensiveAnalysis?.length ?? 0}');
-        debugPrint(
-            '   JD Comprehensive Analysis Length: ${result.jdComprehensiveAnalysis?.length ?? 0}');
-
-        final cvAnalysisPreview = result.cvComprehensiveAnalysis != null
-            ? result.cvComprehensiveAnalysis!.substring(
-                0,
-                result.cvComprehensiveAnalysis!.length > 200
-                    ? 200
-                    : result.cvComprehensiveAnalysis!.length)
-            : "NULL";
-        final jdAnalysisPreview = result.jdComprehensiveAnalysis != null
-            ? result.jdComprehensiveAnalysis!.substring(
-                0,
-                result.jdComprehensiveAnalysis!.length > 200
-                    ? 200
-                    : result.jdComprehensiveAnalysis!.length)
-            : "NULL";
-
-        debugPrint('   CV Comprehensive Analysis Preview: $cvAnalysisPreview');
-        debugPrint('   JD Comprehensive Analysis Preview: $jdAnalysisPreview');
 
         // Show success notification
         _showNotification(
-          'Skills analysis completed! Found ${result.cvSkills.totalSkillsCount} CV skills and ${result.jdSkills.totalSkillsCount} JD skills.',
+          '✅ Analysis completed! Found ${result.cvSkills.totalSkillsCount} CV skills and ${result.jdSkills.totalSkillsCount} JD skills.',
         );
 
         // Show analyze match notification if available
         if (result.analyzeMatch != null && !result.analyzeMatch!.isEmpty) {
           _showNotification(
-            '🎯 Analyze Match completed! Recruiter assessment is ready.',
+            '🎯 Recruiter assessment completed!',
           );
         } else if (result.analyzeMatch != null &&
             result.analyzeMatch!.hasError) {
           _showNotification(
-            '⚠️ Analyze Match failed: ${result.analyzeMatch!.error}',
+            '⚠️ Recruiter assessment failed: ${result.analyzeMatch!.error}',
             isError: true,
           );
         }
@@ -261,10 +236,5 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   void _clearError() {
     _errorMessage = null;
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

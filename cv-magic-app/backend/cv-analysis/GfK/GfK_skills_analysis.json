@@ -1,0 +1,299 @@
+{
+  "generated": "2025-09-13T12:35:54.855",
+  "cv_filename": "M_tiwari_CV_Capgemini.docx",
+  "jd_url": "preliminary_analysis",
+  "user_id": "3ab986e9-e36f-4e3d-bfb5-27ba12550914",
+  "company": "GfK",
+  "cv_skills": {
+    "technical_skills": [
+      "SQL",
+      "Tableau",
+      "Python",
+      "Excel",
+      "Power BI",
+      "Data analysis",
+      "Data visualization",
+      "Automation",
+      "Statistical analysis",
+      "Machine learning",
+      "Deep learning",
+      "Model optimization",
+      "Pruning techniques",
+      "Fine-tuning strategies",
+      "Object detection",
+      "Drones",
+      "Edge devices",
+      "Logistic regression",
+      "Random forests",
+      "Undersampling techniques",
+      "Data-driven visualizations"
+    ],
+    "soft_skills": [
+      "Communication",
+      "Interpersonal skills",
+      "Strong ability to manage and prioritise multiple tasks in dynamic environments",
+      "Problem-solving",
+      "Analytical thinking",
+      "Teamwork"
+    ],
+    "domain_keywords": [
+      "Data Science",
+      "Analytics",
+      "Industrial inspection",
+      "Real-time object detection",
+      "Corrosion detection",
+      "Heart attack risk prediction",
+      "Customer data analysis",
+      "Response strategies",
+      "Decision-making",
+      "User data analysis",
+      "Strategic decision-making",
+      "Reporting time reduction"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication\n- Interpersonal skills\n- Strong ability to manage and prioritise multiple tasks in dynamic environments\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Problem-solving\n- Analytical thinking\n- Teamwork\n\n## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- SQL - \"Advanced SQL skills\"\n- Tableau - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n- Python - \"Proficient in Python\"\n- Excel - \"Proficient in Excel\"\n- Power BI - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data analysis\n- Data visualization\n- Automation\n- Statistical analysis\n- Machine learning\n- Deep learning\n- Model optimization\n- Pruning techniques\n- Fine-tuning strategies\n- Object detection\n- Drones\n- Edge devices\n- Logistic regression\n- Random forests\n- Undersampling techniques\n- Data-driven visualizations\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science\n- Analytics\n- Industrial inspection\n- Real-time object detection\n- Corrosion detection\n- Heart attack risk prediction\n\n**STRONGLY IMPLIED:**\n- Customer data analysis\n- Response strategies\n- Decision-making\n- User data analysis\n- Strategic decision-making\n- Reporting time reduction\n\n**CRITICAL OUTPUT REQUIREMENT:**\nAfter providing the detailed analysis above, you MUST end your response with EXACTLY these three Python lists (no extra text after them):\n\nSOFT_SKILLS = [\"Communication\", \"Interpersonal skills\", \"Strong ability to manage and prioritise multiple tasks in dynamic environments\", \"Problem-solving\", \"Analytical thinking\", \"Teamwork\"]\nTECHNICAL_SKILLS = [\"SQL\", \"Tableau\", \"Python\", \"Excel\", \"Power BI\", \"Data analysis\", \"Data visualization\", \"Automation\", \"Statistical analysis\", \"Machine learning\", \"Deep learning\", \"Model optimization\", \"Pruning techniques\", \"Fine-tuning strategies\", \"Object detection\", \"Drones\", \"Edge devices\", \"Logistic regression\", \"Random forests\", \"Undersampling techniques\", \"Data-driven visualizations\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Analytics\", \"Industrial inspection\", \"Real-time object detection\", \"Corrosion detection\", \"Heart attack risk prediction\", \"Customer data analysis\", \"Response strategies\", \"Decision-making\", \"User data analysis\", \"Strategic decision-making\", \"Reporting time reduction\"]"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Excel",
+      "SQL",
+      "Python",
+      "Data modeling",
+      "Data visualization",
+      "Power BI",
+      "Tableau"
+    ],
+    "soft_skills": [
+      "Communication",
+      "Teamwork",
+      "Adaptability",
+      "Time management",
+      "Problem-solving",
+      "Leadership"
+    ],
+    "domain_keywords": [
+      "Point of Sale data",
+      "Technical Consumer Goods industry",
+      "Retailer data",
+      "Market data",
+      "Brand and model level",
+      "Commercial and Operations teams"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n\n**EXPLICIT:**\n- Communication - \"Communicating effectively to build relationships with stakeholders at all levels\"\n- Teamwork - \"Contributing as a team player\"\n- Adaptability - \"Demonstrate the ability to adapt quickly to changing business needs\"\n- Time management - \"Meeting weekly and monthly deadlines\"\n- Problem-solving - \"Converting the data we receive into actionable information\"\n- Leadership - \"Managing multiple tasks and contributing as a team player\"\n\n**STRONGLY IMPLIED:**\n- Analytical thinking\n- Customer service\n- Interpersonal skills\n\n## TECHNICAL SKILLS:\n\n**EXPLICIT:**\n- Excel - \"Intermediate/Advanced Excel skills\"\n- SQL - \"Basic/Intermediate programming skills (SQL, Python)\"\n- Python - \"Basic/Intermediate programming skills (SQL, Python)\"\n- Data modeling - \"1–3 years' experience in analytics, data modeling, or data visualization\"\n- Data visualization - \"1–3 years' experience in analytics, data modeling, or data visualization\"\n- Power BI - \"Desirable but not essential: Power BI\"\n- Tableau - \"Desirable but not essential: Tableau\"\n\n**STRONGLY IMPLIED:**\n- Data cleansing\n- Working with large data sets\n\n## DOMAIN KEYWORDS:\n\n**EXPLICIT:**\n- Point of Sale data\n- Technical Consumer Goods industry\n- Retailer data\n- Market data\n- Brand and model level\n- Commercial and Operations teams\n\n**STRONGLY IMPLIED:**\n- Consumer behavior\n- Prescriptive data analytics\n- Data quality\n- Data accuracy\n\n**CRITICAL OUTPUT REQUIREMENT:**\nAfter providing the detailed analysis above, you MUST end your response with EXACTLY these three Python lists (no extra text after them):\n\nSOFT_SKILLS = [\"Communication\", \"Teamwork\", \"Adaptability\", \"Time management\", \"Problem-solving\", \"Leadership\"]\nTECHNICAL_SKILLS = [\"Excel\", \"SQL\", \"Python\", \"Data modeling\", \"Data visualization\", \"Power BI\", \"Tableau\"]\nDOMAIN_KEYWORDS = [\"Point of Sale data\", \"Technical Consumer Goods industry\", \"Retailer data\", \"Market data\", \"Brand and model level\", \"Commercial and Operations teams\"]"
+  },
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-09-13T12:35:57.583",
+      "content": "**DECISION:** 🟢 STRONG PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** Strong data analysis skills, basic programming knowledge, team management experience\n- **Flexibility indicators:** Desirable but not essential qualifications listed, flexible working conditions mentioned\n- **Hard blockers identified:** None present\n- **Hiring urgency signals:** No immediate start mentioned, but looking for a junior data analyst\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** Strong data analysis experience, hands-on work with large datasets\n- **Smart connections:** Python and SQL skills can be highlighted for data analysis tasks\n- **Growth potential:** Demonstrated ability to learn and apply new techniques, potential for growth in team management\n- **Positioning opportunities:** Emphasize experience in transforming complex datasets into actionable insights\n\n**REALISTIC ODDS:** 70-80% chance of getting an interview if CV tailored well\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight experience in analysing and interpreting market data\n2. **Priority 2:** Showcase proficiency in Python and SQL for data analysis\n3. **Priority 3:** Emphasize ability to manage and prioritise multiple tasks in dynamic environments\n\n**HONEST BOTTOM LINE:** Worth the effort to tailor the CV to match the job requirements. The candidate has a strong chance of being considered for the role based on their relevant experience and skills."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-09-13T12:35:59.968",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 19\nMatched: 7\nMissing: 12\nMatch Rate: 37%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            21          7          7          0           100\nSoft Skills                   6          6          0          6            0\nDomain Keywords             12          6          0          6            0\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (7 items):\n    1. JD Required: 'Data Modeling'\n       → Found in CV: 'Machine Learning'\n       💡 hierarchical - Machine Learning includes Data Modeling\n    2. JD Required: 'Data Visualization'\n       → Found in CV: 'Data Visualization'\n       💡 exact match\n    3. JD Required: 'Excel'\n       → Found in CV: 'Excel'\n       💡 exact match\n    4. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 exact match\n    5. JD Required: 'Python'\n       → Found in CV: 'Python'\n       💡 exact match\n    6. JD Required: 'Sql'\n       → Found in CV: 'Sql'\n       💡 exact match\n    7. JD Required: 'Tableau'\n       → Found in CV: 'Tableau'\n       💡 exact match\n\n🔹 SOFT SKILLS\n  ❌ MISSING FROM CV (6 items):\n    1. JD Requires: 'Communication'\n       💡 Not accounted for in AI response\n    2. JD Requires: 'Teamwork'\n       💡 Not accounted for in AI response\n    3. JD Requires: 'Adaptability'\n       💡 Not accounted for in AI response\n    4. JD Requires: 'Time management'\n       💡 Not accounted for in AI response\n    5. JD Requires: 'Problem-solving'\n       💡 Not accounted for in AI response\n    6. JD Requires: 'Leadership'\n       💡 Not accounted for in AI response\n\n🔹 DOMAIN KEYWORDS\n  ❌ MISSING FROM CV (6 items):\n    1. JD Requires: 'Point of Sale data'\n       💡 Not accounted for in AI response\n    2. JD Requires: 'Technical Consumer Goods industry'\n       💡 Not accounted for in AI response\n    3. JD Requires: 'Retailer data'\n       💡 Not accounted for in AI response\n    4. JD Requires: 'Market data'\n       💡 Not accounted for in AI response\n    5. JD Requires: 'Brand and model level'\n       💡 Not accounted for in AI response\n    6. JD Requires: 'Commercial and Operations teams'\n       💡 Not accounted for in AI response\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: SQL, Tableau, Python, Excel, Power BI, Data analysis, Data visualization, Automation, Statistical analysis, Machine learning...\n- Soft: Communication, Interpersonal skills, Strong ability to manage and prioritise multiple tasks in dynamic environments, Problem-solving, Analytical thinking, Teamwork\n- Domain: Data Science, Analytics, Industrial inspection, Real-time object detection, Corrosion detection, Heart attack risk prediction, Customer data analysis, Response strategies, Decision-making, User data analysis...\n\nJD\n- Technical: Excel, SQL, Python, Data modeling, Data visualization, Power BI, Tableau\n- Soft: Communication, Teamwork, Adaptability, Time management, Problem-solving, Leadership\n- Domain: Point of Sale data, Technical Consumer Goods industry, Retailer data, Market data, Brand and model level, Commercial and Operations teams\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-09-13T12:36:14.540",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "Python",
+              "cv_evidence": "3+ years, pandas, scikit-learn, multiple projects",
+              "jd_application": "Data analysis and automation tasks",
+              "relevance_score": 95,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Multiple libraries",
+                "Project leadership",
+                "3+ years"
+              ],
+              "synergy_bonus": 10
+            }
+          ],
+          "overall_skills_score": 87,
+          "strength_areas": [
+            "Data Analysis",
+            "Programming"
+          ],
+          "improvement_areas": [
+            "Database Administration",
+            "Cloud Platforms"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": 4,
+            "cv_role_level": "Mid-Senior",
+            "cv_progression": [
+              "Junior Developer",
+              "Senior Developer",
+              "Team Lead"
+            ],
+            "jd_required_years": "3-5 years",
+            "jd_role_level": "Senior",
+            "alignment_score": 85,
+            "experience_gaps": [],
+            "experience_strengths": [
+              "Leadership experience",
+              "Technical progression"
+            ],
+            "quantified_achievements": [
+              "Led team of 5",
+              "Improved performance by 40%"
+            ]
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Science and Analytics",
+            "cv_domain_expertise": [
+              "Data Analysis",
+              "Business Intelligence",
+              "Data Visualization"
+            ],
+            "jd_target_industry": "International Aid and Development",
+            "jd_domain_requirements": [
+              "Data Mining",
+              "Profile Analysis",
+              "Segmentation Strategies"
+            ],
+            "industry_alignment_score": 45,
+            "domain_overlap_percentage": 50,
+            "data_familiarity_score": 65,
+            "stakeholder_fit_score": 40,
+            "business_cycle_alignment": 30,
+            "transferable_strengths": [
+              "SQL Proficiency",
+              "Power BI Dashboard Creation",
+              "Analytical Problem-Solving"
+            ],
+            "industry_gaps": [
+              "Fundraising Analytics",
+              "Non-Profit Sector Experience",
+              "Donor-Centric Strategies"
+            ],
+            "adaptation_timeline": "6-12 months"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_experience_years": 6,
+            "cv_responsibility_scope": "Senior Individual Contributor",
+            "cv_leadership_indicators": 7,
+            "cv_decision_authority": "Project Level",
+            "cv_stakeholder_level": "Department",
+            "jd_required_seniority": "Senior",
+            "jd_leadership_requirements": "Team Leadership Expected",
+            "jd_decision_authority_needed": "Program Level",
+            "jd_stakeholder_level": "Executive",
+            "seniority_score": 75,
+            "experience_match_percentage": 85,
+            "responsibility_fit_percentage": 70,
+            "leadership_readiness_score": 65,
+            "growth_trajectory_score": 80,
+            "seniority_strengths": [
+              "Strong Technical Leadership",
+              "Cross-functional Collaboration"
+            ],
+            "seniority_gaps": [
+              "Direct Report Management",
+              "Executive Stakeholder Management"
+            ],
+            "readiness_assessment": "Stretch Role with Development Support"
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Advanced",
+            "cv_primary_domain": "Machine Learning & Data Science",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "Data Visualization"
+            ],
+            "cv_problem_complexity": 8,
+            "cv_innovation_indicators": [
+              "Published Research"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "Tableau",
+              "Excel"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 90,
+            "core_skills_match_percentage": 85,
+            "technical_stack_fit_percentage": 80,
+            "complexity_readiness_score": 95,
+            "learning_agility_score": 85,
+            "technical_strengths": [
+              "Advanced Analytics",
+              "ML Implementation",
+              "Data Architecture"
+            ],
+            "technical_gaps": [
+              "Tableau Proficiency",
+              "Business Domain Context"
+            ],
+            "overqualification_risk": "Moderate"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 8,
+            "total_preferred_keywords": 4,
+            "matched_required_count": 5,
+            "matched_preferred_count": 1,
+            "missing_required": 3,
+            "missing_preferred": 3
+          },
+          "bonus_breakdown": {
+            "required_bonus": 2.5,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.2,
+            "preferred_penalty": -0.45,
+            "total_bonus": 0.75
+          },
+          "coverage_metrics": {
+            "required_coverage": 62.5,
+            "preferred_coverage": 25.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 87.0,
+        "experience_alignment": 85.0,
+        "industry_fit": 45.0,
+        "domain_overlap_percentage": 50.0,
+        "data_familiarity_score": 65.0,
+        "stakeholder_fit_score": 40.0,
+        "business_cycle_alignment": 30.0,
+        "role_seniority": 75.0,
+        "experience_match_percentage": 85.0,
+        "responsibility_fit_percentage": 70.0,
+        "leadership_readiness_score": 65.0,
+        "growth_trajectory_score": 80.0,
+        "technical_depth": 90.0,
+        "core_skills_match_percentage": 85.0,
+        "technical_stack_fit_percentage": 80.0,
+        "complexity_readiness_score": 95.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": 0.75,
+        "total_bonus": 0.75,
+        "required_bonus": 2.5,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.2,
+        "preferred_penalty": -0.45,
+        "required_coverage": 62.5,
+        "preferred_coverage": 25.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ]
+}

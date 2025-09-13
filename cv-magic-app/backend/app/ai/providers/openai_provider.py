@@ -17,7 +17,9 @@ class OpenAIProvider(BaseAIProvider):
     
     def __init__(self, api_key: str, model_name: str = "gpt-4o-mini"):
         super().__init__(api_key, model_name)
-        self.client = openai.OpenAI(api_key=api_key)
+        # Increase timeout for nano models (GPT-5-nano) that may take longer to respond
+        timeout = 900.0 if model_name in ["gpt-5-nano"] or model_name.startswith("o3") else 60.0
+        self.client = openai.OpenAI(api_key=api_key, timeout=timeout)
     
     def _get_provider_name(self) -> str:
         """Return the provider name"""
@@ -53,12 +55,17 @@ class OpenAIProvider(BaseAIProvider):
             # Add user prompt
             messages.append({"role": "user", "content": prompt})
             
-            # Prepare request parameters
+            # Map custom model names to actual OpenAI model names and set special parameters
+            actual_model = self.model_name
             request_params = {
-                "model": self.model_name,
+                "model": actual_model,
                 "messages": messages,
                 "temperature": temperature,
             }
+            
+            # Add service_tier for nano models (GPT-5-nano and O3 models)
+            if self.model_name in ["gpt-5-nano"] or self.model_name.startswith("o3"):
+                request_params["service_tier"] = "flex"
             
             if max_tokens:
                 request_params["max_tokens"] = max_tokens
@@ -99,7 +106,8 @@ class OpenAIProvider(BaseAIProvider):
             "gpt-4o",
             "gpt-4o-mini", 
             "gpt-4-turbo",
-            "gpt-3.5-turbo"
+            "gpt-3.5-turbo",
+            "gpt-5-nano"
         ]
     
     def get_model_info(self, model_name: str) -> Dict[str, Any]:
@@ -132,6 +140,13 @@ class OpenAIProvider(BaseAIProvider):
                 "max_tokens": 16384,
                 "input_cost_per_1k": 0.001,
                 "output_cost_per_1k": 0.002
+            },
+            "gpt-5-nano": {
+                "name": "GPT-5 Nano",
+                "description": "Latest nano model with flexible service tier for optimized performance",
+                "max_tokens": 200000,
+                "input_cost_per_1k": 5e-05,
+                "output_cost_per_1k": 0.0002
             }
         }
         

@@ -72,10 +72,37 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
 
             # Now run ATS analysis after skill comparison completes
-            logger.info(f"🔍 [PIPELINE] Starting ATS component analysis for {cname}")
-            from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
-            ats_result = await modular_ats_orchestrator.run_component_analysis(cname)
-            logger.info(f"✅ [PIPELINE] ATS component analysis completed for {cname}")
+            logger.info(f"🔍 [PIPELINE] Starting ATS analysis for {cname}")
+            try:
+                from app.services.ats.enhanced_ats_orchestrator import EnhancedATSOrchestrator
+                
+                # Use EnhancedATSOrchestrator which includes ATSScoreCalculator
+                enhanced_orchestrator = EnhancedATSOrchestrator()
+                
+                # Check if we have the required analysis file
+                base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+                analysis_file = base_dir / cname / f"{cname}_skills_analysis.json"
+                
+                if not analysis_file.exists():
+                    logger.warning(f"⚠️ [PIPELINE] Analysis file not found: {analysis_file}")
+                    logger.info(f"🔄 [PIPELINE] Skipping ATS analysis for {cname} due to missing analysis file")
+                else:
+                    # Run enhanced ATS analysis
+                    ats_result = await enhanced_orchestrator.run_enhanced_analysis(cname)
+                    logger.info(f"✅ [PIPELINE] Enhanced ATS analysis completed for {cname}")
+                    
+                    # Log ATS score if available
+                    if hasattr(ats_result, 'final_ats_score'):
+                        logger.info(f"📊 [PIPELINE] Final ATS Score: {ats_result.final_ats_score}/100")
+                        logger.info(f"📊 [PIPELINE] Status: {ats_result.category_status}")
+                    elif isinstance(ats_result, dict) and 'final_ats_score' in ats_result:
+                        logger.info(f"📊 [PIPELINE] Final ATS Score: {ats_result['final_ats_score']}/100")
+                        logger.info(f"📊 [PIPELINE] Status: {ats_result.get('category_status', 'Unknown')}")
+                    
+            except Exception as component_error:
+                logger.error(f"❌ [PIPELINE] Enhanced ATS analysis failed for {cname}: {component_error}")
+                # Don't let ATS analysis failure break the main pipeline
+                pass
         except Exception as e:
             logger.warning(f"⚠️ [PIPELINE] Background pipeline error for {cname}: {e}")
 
@@ -365,6 +392,56 @@ async def list_analysis_files(company_name: Optional[str] = None):
         return JSONResponse(
             status_code=500,
             content={"error": f"Failed to list analysis files: {str(e)}"}
+        )
+
+
+@router.post("/trigger-component-analysis/{company}")
+async def trigger_component_analysis(company: str):
+    """Manually trigger component analysis for a specific company (for testing/debugging)"""
+    try:
+        logger.info(f"🔧 [MANUAL] Triggering component analysis for company: {company}")
+        
+        from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+        
+        # Check if required files exist
+        base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        required_files = {
+            "cv_file": base_dir / "original_cv.json",
+            "jd_file": base_dir / company / "jd_original.json", 
+            "match_file": base_dir / company / "cv_jd_match_results.json"
+        }
+        
+        missing_files = {k: str(v) for k, v in required_files.items() if not v.exists()}
+        if missing_files:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": "Missing required files for component analysis",
+                    "missing_files": missing_files,
+                    "company": company
+                }
+            )
+        
+        # Run component analysis
+        result = await modular_ats_orchestrator.run_component_analysis(company)
+        
+        return JSONResponse(content={
+            "success": True,
+            "message": f"Component analysis completed for {company}",
+            "company": company,
+            "extracted_scores": result.get("extracted_scores", {}),
+            "timestamp": result.get("timestamp"),
+            "total_scores": len(result.get("extracted_scores", {}))
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ [MANUAL] Component analysis failed for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Component analysis failed: {str(e)}",
+                "company": company
+            }
         )
 
 
@@ -693,8 +770,8 @@ async def perform_preliminary_skills_analysis(
             }
 
             # Use centralized AI service with the exact provided prompt
-            from app.services.skill_extraction.preextracted_comparator import run_comparison
-            preextracted_output = await run_comparison(
+            from app.services.skill_extraction.preextracted_comparator import execute_skills_semantic_comparison
+            preextracted_output = await execute_skills_semantic_comparison(
                 ai_service,
                 cv_skills=pre_cv_skills,
                 jd_skills=pre_jd_skills,

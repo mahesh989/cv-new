@@ -1815,11 +1815,41 @@ Return ONLY the JSON object in the required format.
             
             print(f"✅ [VALIDATION] Final result: {final_validation['processed_count']}/{total_jd_requirements} requirements processed")
             
-            return {
-                "comparison_result": result,
-                "raw_response": result_text,
-                "validation": final_validation
-            }
+            # Extract company name for modular ATS analysis
+            company_name = "Company"  # Default fallback
+            if jd_text := payload.get('jd_text'):
+                from .analysis_results_saver import AnalysisResultsSaver
+                saver = AnalysisResultsSaver()
+                company_name = saver.extract_company_name(jd_text)
+            
+            # Trigger modular ATS component analysis after skill comparison completes
+            try:
+                print(f"🔍 [MODULAR ATS] Starting modular component analysis after skill comparison...")
+                # Import the modular ATS orchestrator
+                import sys
+                import os
+                sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'cv-magic-app', 'backend'))
+                from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+                
+                # Run the modular ATS analysis
+                ats_result = await modular_ats_orchestrator.run_component_analysis(company_name)
+                print(f"✅ [MODULAR ATS] Component analysis completed and saved to component_analysis_entries")
+                
+                return {
+                    "comparison_result": result,
+                    "raw_response": result_text,
+                    "validation": final_validation,
+                    "ats_analysis": ats_result
+                }
+            except Exception as e:
+                print(f"❌ [MODULAR ATS] Modular ATS component analysis failed: {e}")
+                # Return skill comparison results even if ATS analysis fails
+                return {
+                    "comparison_result": result,
+                    "raw_response": result_text,
+                    "validation": final_validation,
+                    "ats_analysis": {"error": str(e)}
+                }
         except json.JSONDecodeError as e:
             return {
                 "error": f"Failed to parse JSON: {e}",
@@ -1864,11 +1894,34 @@ async def compare_skills_llm(request: Request):
         # Convert to the format expected by frontend
         formatted_result = _convert_to_frontend_format(result)
         
-        return {
-            "comparison_result": formatted_result,
-            "enhanced_reasoning": True,
-            "ai_powered": True
-        }
+        # Trigger modular ATS component analysis after skill comparison completes
+        try:
+            print(f"🔍 [MODULAR ATS] Starting modular component analysis after skill comparison...")
+            # Import the modular ATS orchestrator
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'cv-magic-app', 'backend'))
+            from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+            
+            # Run the modular ATS analysis
+            ats_result = await modular_ats_orchestrator.run_component_analysis(company_name)
+            print(f"✅ [MODULAR ATS] Component analysis completed and saved to component_analysis_entries")
+            
+            return {
+                "comparison_result": formatted_result,
+                "enhanced_reasoning": True,
+                "ai_powered": True,
+                "ats_analysis": ats_result
+            }
+        except Exception as e:
+            print(f"❌ [MODULAR ATS] Modular ATS component analysis failed: {e}")
+            # Return skill comparison results even if ATS analysis fails
+            return {
+                "comparison_result": formatted_result,
+                "enhanced_reasoning": True,
+                "ai_powered": True,
+                "ats_analysis": {"error": str(e)}
+            }
         
     except Exception as e:
         print(f"❌ [API] Error in enhanced skill comparison: {e}")

@@ -198,6 +198,37 @@ class SkillsAnalysisResult {
 
   bool get isEmpty => cvSkills.isEmpty && jdSkills.isEmpty;
 
+  /// Create a copy of this result with updated fields
+  SkillsAnalysisResult copyWith({
+    SkillsData? cvSkills,
+    SkillsData? jdSkills,
+    String? cvComprehensiveAnalysis,
+    String? jdComprehensiveAnalysis,
+    Map<String, dynamic>? expandableAnalysis,
+    List<String>? extractedKeywords,
+    AnalyzeMatchResult? analyzeMatch,
+    Duration? executionDuration,
+    bool? isSuccess,
+    String? errorMessage,
+    String? preextractedRawOutput,
+    String? preextractedCompanyName,
+  }) {
+    return SkillsAnalysisResult(
+      cvSkills: cvSkills ?? this.cvSkills,
+      jdSkills: jdSkills ?? this.jdSkills,
+      cvComprehensiveAnalysis: cvComprehensiveAnalysis ?? this.cvComprehensiveAnalysis,
+      jdComprehensiveAnalysis: jdComprehensiveAnalysis ?? this.jdComprehensiveAnalysis,
+      expandableAnalysis: expandableAnalysis ?? this.expandableAnalysis,
+      extractedKeywords: extractedKeywords ?? this.extractedKeywords,
+      analyzeMatch: analyzeMatch ?? this.analyzeMatch,
+      executionDuration: executionDuration ?? this.executionDuration,
+      isSuccess: isSuccess ?? this.isSuccess,
+      errorMessage: errorMessage ?? this.errorMessage,
+      preextractedRawOutput: preextractedRawOutput ?? this.preextractedRawOutput,
+      preextractedCompanyName: preextractedCompanyName ?? this.preextractedCompanyName,
+    );
+  }
+
   bool get hasPreextractedComparison =>
       (preextractedRawOutput != null && preextractedRawOutput!.isNotEmpty);
 }

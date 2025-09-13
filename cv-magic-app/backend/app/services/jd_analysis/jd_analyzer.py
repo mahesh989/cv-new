@@ -166,12 +166,76 @@ class JDAnalysisResult:
         }
 
 
+class RequirementsExtractor:
+    """Centralized requirements extractor for consistent counting across all analysis components"""
+    
+    def __init__(self):
+        self.REQUIREMENT_INDICATORS = {
+            "required": [
+                "required", "must have", "essential", "mandatory", 
+                "minimum", "necessary", "needed", "expect", "strong",
+                "experience in", "experience with", "proficient", "skilled"
+            ],
+            "preferred": [
+                "preferred", "desirable", "nice to have", "bonus",
+                "advantage", "plus", "ideal", "would be great",
+                "knowledge of", "appreciation of", "understanding of",
+                "familiarity with"
+            ]
+        }
+    
+    def get_unified_requirement_counts(self, jd_analysis_result: 'JDAnalysisResult') -> Dict[str, int]:
+        """Get consistent requirement counts from JD analysis result"""
+        if not jd_analysis_result:
+            return {"total_required": 0, "total_preferred": 0}
+            
+        # Count from the merged keyword lists (which come from categories)
+        required_count = len(jd_analysis_result.required_keywords)
+        preferred_count = len(jd_analysis_result.preferred_keywords)
+        
+        logger.info(f"[REQUIREMENTS] Unified counts - Required: {required_count}, Preferred: {preferred_count}")
+        
+        return {
+            "total_required": required_count,
+            "total_preferred": preferred_count,
+            "breakdown": {
+                "required_technical": len(jd_analysis_result.required_skills.get('technical', [])),
+                "required_soft": len(jd_analysis_result.required_skills.get('soft_skills', [])),
+                "required_domain": len(jd_analysis_result.required_skills.get('domain_knowledge', [])),
+                "preferred_technical": len(jd_analysis_result.preferred_skills.get('technical', [])),
+                "preferred_soft": len(jd_analysis_result.preferred_skills.get('soft_skills', [])),
+                "preferred_domain": len(jd_analysis_result.preferred_skills.get('domain_knowledge', []))
+            }
+        }
+    
+    def validate_consistency(self, jd_analysis_result: 'JDAnalysisResult', match_counts: Dict[str, int]) -> bool:
+        """Validate that match counts are consistent with JD analysis"""
+        unified_counts = self.get_unified_requirement_counts(jd_analysis_result)
+        
+        jd_required = unified_counts["total_required"]
+        jd_preferred = unified_counts["total_preferred"]
+        
+        match_required = match_counts.get("total_required_keywords", 0)
+        match_preferred = match_counts.get("total_preferred_keywords", 0)
+        
+        if jd_required != match_required or jd_preferred != match_preferred:
+            logger.warning(
+                f"[REQUIREMENTS] Inconsistency detected! "
+                f"JD Analysis: {jd_required}R/{jd_preferred}P, "
+                f"Match Counts: {match_required}R/{match_preferred}P"
+            )
+            return False
+        
+        return True
+
+
 class JDAnalyzer:
     """Job Description Analyzer using centralized AI system"""
     
     def __init__(self):
         self.ai_service = ai_service
         self.base_analysis_path = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        self.requirements_extractor = RequirementsExtractor()
     
     def _read_jd_file(self, file_path: Union[str, Path]) -> str:
         """

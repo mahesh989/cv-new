@@ -20,6 +20,7 @@ from app.services.ats.components import (
 )
 from app.services.ats.components.batched_analyzer import BatchedAnalyzer
 from app.services.ats.requirement_bonus_calculator import RequirementBonusCalculator
+from app.services.jd_analysis.jd_analyzer import RequirementsExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ class ComponentAssembler:
         self.technical_analyzer = TechnicalAnalyzer()
         self.batched_analyzer = BatchedAnalyzer()  # New batched analyzer for performance
         self.bonus_calculator = RequirementBonusCalculator()
+        self.requirements_extractor = RequirementsExtractor()
 
     def _read_cv_text(self) -> str:
         """Read CV text from the standard location."""
@@ -260,16 +262,11 @@ class ComponentAssembler:
         # Industry fit - include detailed scores
         if "industry_analysis" in component_results["industry"]:
             industry_analysis = component_results["industry"]["industry_analysis"]
-            if "industry_alignment_score" in industry_analysis:
-                scores["industry_fit"] = float(industry_analysis["industry_alignment_score"])
-            if "domain_overlap_percentage" in industry_analysis:
-                scores["domain_overlap_percentage"] = float(industry_analysis["domain_overlap_percentage"])
-            if "data_familiarity_score" in industry_analysis:
-                scores["data_familiarity_score"] = float(industry_analysis["data_familiarity_score"])
-            if "stakeholder_fit_score" in industry_analysis:
-                scores["stakeholder_fit_score"] = float(industry_analysis["stakeholder_fit_score"])
-            if "business_cycle_alignment" in industry_analysis:
-                scores["business_cycle_alignment"] = float(industry_analysis["business_cycle_alignment"])
+            scores["industry_fit"] = float(industry_analysis.get("industry_alignment_score", 0.0))
+            scores["domain_overlap_percentage"] = float(industry_analysis.get("domain_overlap_percentage", 0.0))
+            scores["data_familiarity_score"] = float(industry_analysis.get("data_familiarity_score", 0.0))
+            scores["stakeholder_fit_score"] = float(industry_analysis.get("stakeholder_fit_score", 0.0))
+            scores["business_cycle_alignment"] = float(industry_analysis.get("business_cycle_alignment", 0.0))
         
         # Role seniority - include detailed scores
         if "seniority_analysis" in component_results["seniority"]:

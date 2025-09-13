@@ -1,0 +1,48 @@
+{
+  "company_name": "GfK",
+  "cv_analysis_timestamp": "2025-09-13T12:36:04.576019",
+  "matched_required_keywords": [
+    "SQL",
+    "Python",
+    "data modelling",
+    "data visualisation",
+    "communication"
+  ],
+  "matched_preferred_keywords": [
+    "Power BI"
+  ],
+  "missed_required_keywords": [
+    "logical thinking",
+    "attention to detail",
+    "consumer goods industry"
+  ],
+  "missed_preferred_keywords": [
+    "Tableau",
+    "team player",
+    "adaptability"
+  ],
+  "match_counts": {
+    "total_required_keywords": 8,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 5,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "SQL": "Found in the Career Profile and Education sections where the candidate mentions advanced SQL skills and a certification in SQL.",
+    "Python": "Found in the Career Profile where the candidate mentions proficiency in Python.",
+    "data modelling": "Not explicitly mentioned in the CV.",
+    "data visualisation": "Found in the Career Profile where the candidate mentions strong experience in Power BI for data visualization.",
+    "communication": "Found in the Career Profile where the candidate mentions excellent interpersonal and communication skills.",
+    "Power BI": "Found in the Career Profile under Key Skills and Professional Experience sections.",
+    "logical thinking": "Not explicitly mentioned in the CV.",
+    "attention to detail": "Not explicitly mentioned in the CV.",
+    "consumer goods industry": "Not explicitly mentioned in the CV.",
+    "Tableau": "Not mentioned in the CV.",
+    "team player": "Not explicitly mentioned in the CV.",
+    "adaptability": "Not explicitly mentioned in the CV."
+  },
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "metadata": {}
+}

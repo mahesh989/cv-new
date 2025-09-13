@@ -15,8 +15,7 @@ import '../modules/cv/cv_preview_module.dart';
 import '../widgets/job_input.dart';
 import '../services/api_service.dart';
 import '../controllers/skills_analysis_controller.dart';
-import '../widgets/skills_display_widget.dart';
-import '../widgets/test_analyze_match_widget.dart';
+import '../widgets/simple_results_widget.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   const CVMagicOrganizedPage({super.key});
@@ -42,6 +41,9 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
   void initState() {
     super.initState();
     _skillsController = SkillsAnalysisController();
+
+    // Set notification callback for real-time progress updates
+    _skillsController.setNotificationCallback(_showSnackBar);
 
     // Add listener to jdController to debug changes
     jdController.addListener(() {
@@ -137,8 +139,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
                     SizedBox(
                       width: double.infinity,
                       child: ListenableBuilder(
-                        listenable:
-                            Listenable.merge([_skillsController, jdController]),
+                        listenable: _skillsController,
                         builder: (context, _) {
                           final canAnalyze = selectedCVFilename != null &&
                               jdController.text.trim().isNotEmpty;
@@ -223,8 +224,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
             ),
             const SizedBox(height: 16),
 
-            // Skills Analysis Results
-            SkillsDisplayWidget(
+            // Simple Results Display (no progress bars)
+            SimpleResultsWidget(
               controller: _skillsController,
             ),
             // JD Analysis UI section removed for backend-only focus
@@ -289,6 +290,14 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
     print('🔍 [DEBUG] jdController.text: "${jdController.text}"');
     print(
         '🔍 [DEBUG] jdController.text.trim().isEmpty: ${jdController.text.trim().isEmpty}');
+    print(
+        '🔍 [DEBUG] _skillsController.isLoading: ${_skillsController.isLoading}');
+
+    // Prevent multiple simultaneous calls
+    if (_skillsController.isLoading) {
+      print('⚠️ [DEBUG] Analysis already in progress, ignoring duplicate call');
+      return;
+    }
 
     if (selectedCVFilename == null || jdController.text.trim().isEmpty) {
       print('❌ [DEBUG] Cannot analyze - missing CV or JD');

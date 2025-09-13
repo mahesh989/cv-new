@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
-import '../utils/text_formatter.dart';
-import 'skills_analysis/ai_powered_skills_analysis.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -18,54 +16,15 @@ class SkillsDisplayWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        if (controller.isLoading) {
-          return _buildLoadingState();
-        }
-
+        // Main content based on state
         if (controller.hasError) {
           return _buildErrorState();
-        }
-
-        if (!controller.hasResults) {
+        } else if (!controller.hasResults && !controller.isLoading) {
           return _buildEmptyState();
+        } else {
+          return _buildResultsContent();
         }
-
-        return _buildResultsContent();
       },
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Column(
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            'Analyzing Skills...',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.blue.shade700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Extracting skills from CV and Job Description using AI',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.blue.shade600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 
@@ -146,6 +105,41 @@ class SkillsDisplayWidget extends StatelessWidget {
   }
 
   Widget _buildResultsContent() {
+    // If no results yet, show loading/progress info
+    if (controller.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue.shade200),
+        ),
+        child: Column(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Processing analysis...',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.blue.shade700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Results will appear as each step completes',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blue.shade600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
@@ -156,83 +150,121 @@ class SkillsDisplayWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with execution info
-          _buildResultsHeader(),
+          if (controller.hasResults) _buildResultsHeader(),
 
-          // Side by side comparison
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // CV Skills Column
-                Expanded(
-                  child: _buildSkillsColumn(
-                    'CV Skills (${controller.cvTotalSkills})',
-                    controller.cvTechnicalSkills,
-                    controller.cvSoftSkills,
-                    controller.cvDomainKeywords,
-                    controller.cvComprehensiveAnalysis,
-                    Colors.blue,
-                    'cv',
+          // Side by side comparison - show when we have results
+          if (controller.hasResults)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // CV Skills Column
+                  Expanded(
+                    child: _buildSkillsColumn(
+                      'CV Skills (${controller.cvTotalSkills})',
+                      controller.cvTechnicalSkills,
+                      controller.cvSoftSkills,
+                      controller.cvDomainKeywords,
+                      controller.cvComprehensiveAnalysis,
+                      Colors.blue,
+                      'cv',
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // JD Skills Column
-                Expanded(
-                  child: _buildSkillsColumn(
-                    'JD Skills (${controller.jdTotalSkills})',
-                    controller.jdTechnicalSkills,
-                    controller.jdSoftSkills,
-                    controller.jdDomainKeywords,
-                    controller.jdComprehensiveAnalysis,
-                    Colors.green,
-                    'jd',
+                  const SizedBox(width: 16),
+                  // JD Skills Column
+                  Expanded(
+                    child: _buildSkillsColumn(
+                      'JD Skills (${controller.jdTotalSkills})',
+                      controller.jdTechnicalSkills,
+                      controller.jdSoftSkills,
+                      controller.jdDomainKeywords,
+                      controller.jdComprehensiveAnalysis,
+                      Colors.green,
+                      'jd',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Analyze Match Section - Always show during loading or when we have results
-          if (controller.isLoading || controller.hasResults) ...[
+          // Analyze Match Section - Show when we have results or are loading
+          if (controller.hasResults || controller.isLoading) ...[
             Builder(
               builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget');
+                debugPrint(
+                    '🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget (incremental)');
                 debugPrint('   hasAnalyzeMatch: ${controller.hasAnalyzeMatch}');
                 debugPrint('   isLoading: ${controller.isLoading}');
-                debugPrint('   hasResults: ${controller.hasResults}');
                 debugPrint(
                     '   analyzeMatch: ${controller.analyzeMatch != null}');
+
+                // Show loading state if we're still processing analyze match
+                final isAnalyzeMatchInProgress = controller.isLoading;
+
                 return AnalyzeMatchWidget(
                   analyzeMatch: controller.analyzeMatch,
-                  isLoading: controller.isLoading,
+                  isLoading: isAnalyzeMatchInProgress,
                 );
-              },
-            ),
-          ] else ...[
-            Builder(
-              builder: (context) {
-                debugPrint(
-                    '🔍 [SKILLS_DISPLAY] NOT rendering AnalyzeMatchWidget');
-                debugPrint('   hasAnalyzeMatch: ${controller.hasAnalyzeMatch}');
-                debugPrint('   isLoading: ${controller.isLoading}');
-                debugPrint('   hasResults: ${controller.hasResults}');
-                return const SizedBox.shrink();
               },
             ),
           ],
 
-          // AI-Powered Skills Analysis (Summary + Table + Details) - AFTER Analyze Match
+          // AI-Powered Skills Analysis - Show when we have preextracted results
           if (controller.result?.hasPreextractedComparison == true)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Builder(
-                builder: (context) {
-                  final raw = controller.result!.preextractedRawOutput!;
-                  final parsed =
-                      SkillsAnalysisAdapters.parsePreextractedRaw(raw);
-                  return AIPoweredSkillsAnalysis(data: parsed);
-                },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.psychology,
+                          color: Colors.green.shade700,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'AI Skills Comparison',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      controller.result!.preextractedRawOutput!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                        height: 1.4,
+                      ),
+                    ),
+                    if (controller.result!.preextractedCompanyName != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Company: ${controller.result!.preextractedCompanyName}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.green.shade600,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
         ],
@@ -541,9 +573,13 @@ class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
                             );
                           }
 
-                          return SkillsAnalysisFormattedText(
-                            text: widget.analysis,
-                            baseColor: widget.baseColor,
+                          return Text(
+                            widget.analysis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              height: 1.4,
+                            ),
                           );
                         },
                       ),

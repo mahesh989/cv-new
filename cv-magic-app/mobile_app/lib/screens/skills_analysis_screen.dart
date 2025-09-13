@@ -236,6 +236,7 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     }
 
     try {
+      // Perform standard analysis
       await _controller.performAnalysis(
         cvFilename: _selectedCvFilename!,
         jdText: _jdController.text.trim(),

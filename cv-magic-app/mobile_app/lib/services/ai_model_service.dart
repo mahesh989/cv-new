@@ -155,6 +155,8 @@ class AIModelService extends ChangeNotifier {
         return 'deepseek-coder';
       case 'deepseek-reasoner':
         return 'deepseek-reasoner';
+      case 'gpt-5-nano':
+        return 'gpt-5-nano';
       default:
         return modelId; // fallback to original ID
     }

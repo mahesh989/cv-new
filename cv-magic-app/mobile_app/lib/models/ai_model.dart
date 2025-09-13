@@ -157,6 +157,18 @@ class AIModelsConfig {
       icon: Icons.psychology_alt_rounded,
       capabilities: ['Reasoning', 'Analysis', 'Problem Solving'],
     ),
+    'gpt-5-nano': AIModel(
+      id: 'gpt-5-nano',
+      name: 'GPT-5 Nano',
+      provider: 'OpenAI',
+      description: 'Latest nano model with flexible service tier',
+      speed: 'Very Fast',
+      cost: 'Very Low',
+      color: AppTheme.primaryNeon,
+      icon: Icons.bolt_rounded,
+      isRecommended: true,
+      capabilities: ['Text', 'Code', 'Analysis', 'Fast Processing', 'Flexible'],
+    ),
   };
 
   // Default model

@@ -90,6 +90,15 @@ class AIConfig:
                     max_tokens=16384,
                     input_cost_per_1k=0.001,
                     output_cost_per_1k=0.002
+                ),
+                "gpt-5-nano": ModelConfig(
+                    provider="openai",
+                    model="gpt-5-nano",
+                    name="GPT-5 Nano",
+                    description="Latest nano model with flexible service tier for optimized performance",
+                    max_tokens=200000,
+                    input_cost_per_1k=0.00005,
+                    output_cost_per_1k=0.0002
                 )
             },
             "anthropic": {
