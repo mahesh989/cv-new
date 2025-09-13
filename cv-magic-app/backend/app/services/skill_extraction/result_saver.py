@@ -32,7 +32,9 @@ class SkillExtractionResultSaver:
         user_id: int,
         cv_data: Optional[Dict] = None,
         jd_data: Optional[Dict] = None,
-        company_name: Optional[str] = None
+        company_name: Optional[str] = None,
+        cv_comprehensive_analysis: Optional[str] = None,
+        jd_comprehensive_analysis: Optional[str] = None
     ) -> str:
         """
         Save skill extraction results to organized file structure
@@ -109,6 +111,8 @@ class SkillExtractionResultSaver:
                 "company": company_slug,
                 "cv_skills": clean_cv_skills,
                 "jd_skills": clean_jd_skills,
+                "cv_comprehensive_analysis": cv_comprehensive_analysis,
+                "jd_comprehensive_analysis": jd_comprehensive_analysis,
                 "analyze_match_entries": [],
                 "preextracted_comparison_entries": []
             }

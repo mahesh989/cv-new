@@ -25,6 +25,17 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     super.initState();
     _controller = SkillsAnalysisController();
     _controller.setNotificationCallback(_showSnackBar);
+
+    // Listen to JD controller changes to update button state
+    _jdController.addListener(() {
+      print(
+          '🔍 [DEBUG] JD Controller changed - length: ${_jdController.text.length}');
+      print(
+          '🔍 [DEBUG] Button state - canAnalyze: ${_canPerformAnalysis()}, isAnalyzing: ${_controller.isLoading}');
+      setState(() {
+        // This will trigger a rebuild and update the button state
+      });
+    });
   }
 
   @override
@@ -213,10 +224,18 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
   }
 
   bool _canPerformAnalysis() {
-    return _selectedCvFilename != null &&
-        _selectedCvFilename!.isNotEmpty &&
-        _jdController.text.trim().isNotEmpty &&
+    final hasCv =
+        _selectedCvFilename != null && _selectedCvFilename!.isNotEmpty;
+    final hasJd = _jdController.text.trim().isNotEmpty &&
         _jdController.text.trim().length >= 50;
+    final canAnalyze = hasCv && hasJd;
+
+    print(
+        '🔍 [DEBUG] _canPerformAnalysis: hasCv=$hasCv, hasJd=$hasJd, canAnalyze=$canAnalyze');
+    print('   CV: $_selectedCvFilename');
+    print('   JD length: ${_jdController.text.trim().length}');
+
+    return canAnalyze;
   }
 
   Future<void> _performAnalysis() async {

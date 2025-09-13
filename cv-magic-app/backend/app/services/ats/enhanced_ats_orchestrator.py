@@ -397,6 +397,105 @@ class EnhancedATSOrchestrator:
                 confidence_score=0.0
             )
     
+    async def run_enhanced_analysis(self, company_name: str) -> Dict[str, Any]:
+        """
+        Run enhanced ATS analysis for a specific company and save results to the analysis file
+        
+        Args:
+            company_name: Company name to analyze
+            
+        Returns:
+            Dictionary with ATS analysis results
+        """
+        try:
+            logger.info(f"[Enhanced ATS] Starting analysis for company: {company_name}")
+            
+            # Define paths
+            base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+            company_dir = base_dir / company_name
+            analysis_file = company_dir / f"{company_name}_skills_analysis.json"
+            cv_file = base_dir / "original_cv.txt"  # CV file is in the main directory
+            jd_file = company_dir / "jd_original.json"
+            
+            # Check if required files exist
+            if not analysis_file.exists():
+                logger.error(f"[Enhanced ATS] Analysis file not found: {analysis_file}")
+                return {"error": "Analysis file not found"}
+            
+            if not cv_file.exists():
+                logger.error(f"[Enhanced ATS] CV file not found: {cv_file}")
+                return {"error": "CV file not found"}
+            
+            if not jd_file.exists():
+                logger.error(f"[Enhanced ATS] JD file not found: {jd_file}")
+                return {"error": "JD file not found"}
+            
+            # Read existing analysis data
+            with open(analysis_file, 'r') as f:
+                existing_analysis = json.load(f)
+            
+            # Read CV content
+            with open(cv_file, 'r') as f:
+                cv_content = f.read()
+            
+            # Read JD content
+            with open(jd_file, 'r') as f:
+                jd_data = json.load(f)
+                job_description = jd_data.get('text', '')
+            
+            # Run enhanced ATS analysis
+            results = self.analyze_cv_job_fit(
+                cv_content=cv_content,
+                job_description=job_description,
+                company_info=company_name,
+                current_industry="Data Science and Analytics"  # Default, could be extracted
+            )
+            
+            # Convert results to dictionary for JSON serialization
+            ats_results_dict = self.export_results_json(results)
+            
+            # Add ATS results to existing analysis
+            if 'ats_analysis' not in existing_analysis:
+                existing_analysis['ats_analysis'] = {}
+            
+            existing_analysis['ats_analysis'] = {
+                "timestamp": results.analysis_version,
+                "final_ats_score": results.final_ats_score,
+                "category_status": results.ats_breakdown.category_status,
+                "recommendation": results.ats_breakdown.recommendation,
+                "technical_skills_match_rate": results.ats_breakdown.technical_skills_match_rate,
+                "soft_skills_match_rate": results.ats_breakdown.soft_skills_match_rate,
+                "domain_keywords_match_rate": results.ats_breakdown.domain_keywords_match_rate,
+                "cat1_score": results.ats_breakdown.cat1_score,
+                "cat2_score": results.ats_breakdown.cat2_score,
+                "bonus_points": results.ats_breakdown.bonus_points,
+                "technical_missing_count": results.ats_breakdown.technical_missing_count,
+                "soft_missing_count": results.ats_breakdown.soft_missing_count,
+                "domain_missing_count": results.ats_breakdown.domain_missing_count,
+                "key_strengths": results.key_strengths,
+                "critical_gaps": results.critical_gaps,
+                "improvement_recommendations": results.improvement_recommendations,
+                "overall_assessment": results.overall_assessment,
+                "processing_time_ms": results.processing_time_ms,
+                "confidence_score": results.confidence_score,
+                "analysis_version": results.analysis_version
+            }
+            
+            # Save updated analysis back to file
+            with open(analysis_file, 'w') as f:
+                json.dump(existing_analysis, f, indent=2, default=str)
+            
+            logger.info(f"[Enhanced ATS] ATS analysis saved to {analysis_file}")
+            logger.info(f"[Enhanced ATS] Final ATS Score: {results.final_ats_score:.1f}/100 ({results.ats_breakdown.category_status})")
+            
+            return ats_results_dict
+            
+        except Exception as e:
+            logger.error(f"[Enhanced ATS] Error in run_enhanced_analysis: {e}")
+            import traceback
+            traceback.print_exc()
+            return {"error": str(e)}
+
     def export_results_json(self, results: EnhancedATSResults, output_path: Optional[Path] = None) -> Dict[str, Any]:
         """Export results to JSON format"""
         

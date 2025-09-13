@@ -688,6 +688,8 @@ async def perform_preliminary_skills_analysis(
                     jd_url="preliminary_analysis",
                     cv_filename=cv_filename,
                     user_id=user_id,
+                    cv_comprehensive_analysis=cv_analysis,
+                    jd_comprehensive_analysis=jd_analysis,
                     cv_data={"text": cv_content, "filename": cv_filename},
                     jd_data=None,
                     company_name=company_name
