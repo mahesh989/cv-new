@@ -30,8 +30,10 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     _jdController.addListener(() {
       print(
           '🔍 [DEBUG] JD Controller changed - length: ${_jdController.text.length}');
+      print('🔍 [DEBUG] JD Controller text: "${_jdController.text}"');
       print(
           '🔍 [DEBUG] Button state - canAnalyze: ${_canPerformAnalysis()}, isAnalyzing: ${_controller.isLoading}');
+      print('🔍 [DEBUG] Selected CV: $_selectedCvFilename');
       setState(() {
         // This will trigger a rebuild and update the button state
       });
@@ -91,9 +93,12 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
               CVSelectionModule(
                 selectedCVFilename: _selectedCvFilename,
                 onCVSelected: (filename) {
+                  print('🔍 [DEBUG] CV Selected: $filename');
                   setState(() {
                     _selectedCvFilename = filename;
                   });
+                  print(
+                      '🔍 [DEBUG] CV Selection - canAnalyze: ${_canPerformAnalysis()}');
                   _controller
                       .clearResults(); // Clear previous results when CV changes
                 },
