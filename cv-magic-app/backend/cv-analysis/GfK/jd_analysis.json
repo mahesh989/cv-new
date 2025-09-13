@@ -2,19 +2,20 @@
   "experience_years": 1,
   "required_skills": {
     "technical": [
+      "Excel",
       "SQL",
-      "Python",
-      "data modelling",
-      "data visualisation"
+      "Python"
     ],
     "soft_skills": [
       "communication",
+      "team player",
       "logical thinking",
-      "attention to detail"
+      "critical thinking"
     ],
     "domain_knowledge": [
-      "Point of Sale data",
-      "consumer goods industry"
+      "data modelling",
+      "data visualisation",
+      "market data analysis"
     ],
     "experience": []
   },
@@ -24,31 +25,30 @@
       "Tableau"
     ],
     "soft_skills": [
-      "team player",
-      "adaptability"
+      "leadership"
     ],
     "domain_knowledge": [],
     "experience": []
   },
   "required_keywords": [
+    "Excel",
     "SQL",
     "Python",
+    "communication",
+    "team player",
+    "logical thinking",
+    "critical thinking",
     "data modelling",
     "data visualisation",
-    "communication",
-    "logical thinking",
-    "attention to detail",
-    "Point of Sale data",
-    "consumer goods industry"
+    "market data analysis"
   ],
   "preferred_keywords": [
     "Power BI",
     "Tableau",
-    "team player",
-    "adaptability"
+    "leadership"
   ],
-  "analysis_timestamp": "2025-09-13T13:16:19.275420",
-  "ai_model_used": "openai/gpt-3.5-turbo",
+  "analysis_timestamp": "2025-09-13T15:56:02.937541",
+  "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "company_name": "GfK",
   "metadata": {}
