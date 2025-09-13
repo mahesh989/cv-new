@@ -317,6 +317,7 @@ class ATSResult {
   final String categoryStatus;
   final String recommendation;
   final ATSBreakdown breakdown;
+  final List<String> recommendations;
 
   ATSResult({
     required this.timestamp,
@@ -324,15 +325,25 @@ class ATSResult {
     required this.categoryStatus,
     required this.recommendation,
     required this.breakdown,
+    this.recommendations = const [],
   });
 
   factory ATSResult.fromJson(Map<String, dynamic> json) {
+    // Handle recommendations field
+    List<String> recommendations = [];
+    if (json['recommendations'] != null) {
+      if (json['recommendations'] is List) {
+        recommendations = List<String>.from(json['recommendations']);
+      }
+    }
+    
     return ATSResult(
       timestamp: json['timestamp'] as String? ?? '',
       finalATSScore: (json['final_ats_score'] as num?)?.toDouble() ?? 0.0,
       categoryStatus: json['category_status'] as String? ?? '',
       recommendation: json['recommendation'] as String? ?? '',
       breakdown: ATSBreakdown.fromJson(json['breakdown'] as Map<String, dynamic>? ?? {}),
+      recommendations: recommendations,
     );
   }
 
@@ -343,6 +354,7 @@ class ATSResult {
       'category_status': categoryStatus,
       'recommendation': recommendation,
       'breakdown': breakdown.toJson(),
+      'recommendations': recommendations,
     };
   }
 }

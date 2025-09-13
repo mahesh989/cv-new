@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
-import 'ats_score_widget.dart';
+import 'ats_score_widget_pie_integrated.dart';
 import '../utils/preextracted_parser.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
@@ -376,8 +376,191 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
           
-          // ATS Score Widget - Show when available
-          ATSScoreWidget(controller: controller),
+          // Component Analysis - Show when available
+          if (controller.hasComponentAnalysis) ...[
+            Builder(
+              builder: (context) {
+                debugPrint('🔍 [SKILLS_DISPLAY] Rendering Component Analysis');
+                debugPrint('   hasComponentAnalysis: ${controller.hasComponentAnalysis}');
+                debugPrint('   skillsRelevanceScore: ${controller.skillsRelevanceScore}');
+                debugPrint('   experienceAlignmentScore: ${controller.experienceAlignmentScore}');
+                debugPrint('   industryFitScore: ${controller.industryFitScore}');
+                debugPrint('   roleSeniorityScore: ${controller.roleSeniorityScore}');
+                debugPrint('   technicalDepthScore: ${controller.technicalDepthScore}');
+                
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.purple.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.analytics_outlined,
+                              color: Colors.purple.shade700,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '📊 COMPONENT ANALYSIS',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Detailed analysis across 5 key dimensions',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.purple.shade600,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Component scores grid
+                        _buildComponentScoreCard('🛠️ Skills Relevance', controller.skillsRelevanceScore, Colors.blue),
+                        const SizedBox(height: 8),
+                        _buildComponentScoreCard('👤 Experience Alignment', controller.experienceAlignmentScore, Colors.green),
+                        const SizedBox(height: 8),
+                        _buildComponentScoreCard('🏢 Industry Fit', controller.industryFitScore, Colors.orange),
+                        const SizedBox(height: 8),
+                        _buildComponentScoreCard('📈 Role Seniority', controller.roleSeniorityScore, Colors.teal),
+                        const SizedBox(height: 8),
+                        _buildComponentScoreCard('🔧 Technical Depth', controller.technicalDepthScore, Colors.indigo),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+          
+          // ATS Score Widget with Pie Chart - Show when available
+          if (controller.hasATSResult) ...[
+            Builder(
+              builder: (context) {
+                debugPrint('🔍 [SKILLS_DISPLAY] Rendering ATSScoreWidgetWithPieChart');
+                debugPrint('   hasATSResult: ${controller.hasATSResult}');
+                debugPrint('   atsScore: ${controller.atsScore}');
+                
+                return ATSScoreWidgetWithPieChart(
+                  controller: controller,
+                );
+              },
+            ),
+          ],
+          
+          // AI Recommendations - Show when ATS result includes recommendations
+          if (controller.hasATSResult && controller.atsResult?.recommendations != null && controller.atsResult!.recommendations.isNotEmpty) ...[
+            Builder(
+              builder: (context) {
+                debugPrint('🔍 [SKILLS_DISPLAY] Rendering AI Recommendations');
+                final recommendations = controller.atsResult!.recommendations;
+                debugPrint('   recommendations count: ${recommendations.length}');
+                
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.amber.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.lightbulb_outline,
+                              color: Colors.amber.shade700,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '💡 AI RECOMMENDATIONS',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Personalized suggestions to improve your ATS score',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.amber.shade600,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Recommendations list
+                        ...recommendations.take(8).map((recommendation) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 4),
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.shade600,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  recommendation,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade700,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )).toList(),
+                        
+                        if (recommendations.length > 8) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            '... and ${recommendations.length - 8} more recommendations available',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.amber.shade600,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -543,6 +726,61 @@ class SkillsDisplayWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // Helper method for building component score cards
+  Widget _buildComponentScoreCard(String title, double score, MaterialColor color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.shade200),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: color.shade700,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getScoreBackgroundColor(score),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${score.toStringAsFixed(1)}',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: _getScoreTextColor(score),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Helper methods for score coloring
+  Color _getScoreBackgroundColor(double score) {
+    if (score >= 80) return Colors.green.shade100;
+    if (score >= 60) return Colors.orange.shade100;
+    return Colors.red.shade100;
+  }
+  
+  Color _getScoreTextColor(double score) {
+    if (score >= 80) return Colors.green.shade700;
+    if (score >= 60) return Colors.orange.shade700;
+    return Colors.red.shade700;
   }
 
   // Note: _buildExpandableAnalysis and _buildFormattedText methods removed

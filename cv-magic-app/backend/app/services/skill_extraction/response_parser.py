@@ -28,7 +28,9 @@ class SkillExtractionParser:
             Dictionary containing extracted skills and metadata
         """
         logger.info(f"🔍 [{document_type.upper()}] Starting response parsing...")
-        logger.debug(f"🔍 [{document_type.upper()}] Raw response preview: {response_text[:500]}...")
+        logger.info(f"🔍 [{document_type.upper()}] Raw response preview: {response_text[:500]}...")
+        if document_type.upper() == "CV":
+            logger.info(f"🔍 [{document_type.upper()}] FULL CV RESPONSE: {response_text}")
         
         # Initialize skill lists
         soft_skills = []

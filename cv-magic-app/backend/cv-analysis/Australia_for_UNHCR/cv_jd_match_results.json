@@ -1,65 +1,42 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-13T17:25:31.077148",
+  "cv_analysis_timestamp": "2025-09-13T20:51:37.628147",
   "matched_required_keywords": [
     "SQL",
+    "VBA",
+    "SQL data warehouse",
     "Power BI",
-    "Excel",
-    "project management",
     "communication",
-    "customer service"
+    "project management",
+    "data warehouse"
   ],
   "matched_preferred_keywords": [
-    "Tableau",
-    "analytical thinking"
+    "Tableau"
   ],
-  "missed_required_keywords": [
-    "VBA",
-    "data warehouse",
-    "stakeholder management",
-    "data mining",
-    "marketing campaigns",
-    "analytical models"
-  ],
+  "missed_required_keywords": [],
   "missed_preferred_keywords": [
-    "data issues",
-    "de-duplication",
-    "best practice guidelines"
+    "stakeholder management",
+    "marketing campaigns",
+    "communication purposes",
+    "governing regulations"
   ],
   "match_counts": {
-    "total_required_keywords": 11,
-    "total_preferred_keywords": 6,
-    "matched_required_count": 6,
-    "matched_preferred_count": 2
+    "total_required_keywords": 7,
+    "total_preferred_keywords": 5,
+    "matched_required_count": 7,
+    "matched_preferred_count": 1
   },
   "matching_notes": {
-    "matched_required_keywords": {
-      "SQL": "Matched as it is explicitly mentioned in the CV.",
-      "Power BI": "Matched as it is explicitly mentioned in the CV.",
-      "Excel": "Matched as it is mentioned in the technical skills section.",
-      "project management": "Contextually matched as the CV discusses project-related tasks and decision-making.",
-      "communication": "Matched in the context of presenting findings and collaborating with teams.",
-      "customer service": "Matched in the context of analyzing customer support data."
-    },
-    "missed_required_keywords": {
-      "VBA": "Not mentioned in the CV.",
-      "data warehouse": "Not explicitly stated, though Snowflake is mentioned, it is not directly referred to as a data warehouse.",
-      "stakeholder management": "Not mentioned in the CV.",
-      "data mining": "Not mentioned in the CV.",
-      "marketing campaigns": "Not mentioned in the CV.",
-      "analytical models": "Not explicitly stated, though related concepts are discussed."
-    },
-    "matched_preferred_keywords": {
-      "Tableau": "Matched as it is explicitly mentioned in the CV.",
-      "analytical thinking": "Contextually matched through the discussion of data analysis and model development."
-    },
-    "missed_preferred_keywords": {
-      "data issues": "Not mentioned in the CV.",
-      "de-duplication": "Not mentioned in the CV.",
-      "best practice guidelines": "Not mentioned in the CV."
-    }
+    "SQL": "Found in the technical skills section where the candidate mentions proficiency in SQL for querying, modeling, and managing complex relational databases.",
+    "VBA": "Not explicitly mentioned in the CV content.",
+    "SQL data warehouse": "Not explicitly mentioned in the CV content, but the candidate's experience with Snowflake for cloud data warehousing may imply familiarity with SQL data warehouse concepts.",
+    "Power BI": "Found in the technical skills section where the candidate mentions building comprehensive dashboards using Power BI.",
+    "communication": "Found in the career profile where the candidate mentions creating advanced visualizations that convert complex data into actionable insights.",
+    "project management": "Found in the career profile where the candidate mentions supporting data-driven decision-making through comprehensive dashboards.",
+    "data warehouse": "Found in the technical skills section where the candidate mentions experience with Snowflake for cloud data warehousing.",
+    "Tableau": "Found in the technical skills section where the candidate mentions creating interactive dashboards and visualizations using Tableau."
   },
-  "ai_model_used": "openai/gpt-4o-mini",
+  "ai_model_used": "openai/gpt-3.5-turbo",
   "processing_status": "completed",
   "cv_file_path": "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/original_cv.json",
   "metadata": {}
