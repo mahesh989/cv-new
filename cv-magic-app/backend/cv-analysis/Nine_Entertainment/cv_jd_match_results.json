@@ -1,0 +1,46 @@
+{
+  "company_name": "Nine_Entertainment",
+  "cv_analysis_timestamp": "2025-09-13T15:15:01.221370",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "communication",
+    "data engineering"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau",
+    "Snowflake"
+  ],
+  "missed_required_keywords": [
+    "data modelling",
+    "data warehousing",
+    "business intelligence"
+  ],
+  "missed_preferred_keywords": [
+    "Vector Databases",
+    "RAG"
+  ],
+  "match_counts": {
+    "total_required_keywords": 7,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 4,
+    "matched_preferred_count": 2
+  },
+  "matching_notes": {
+    "SQL": "Matched as it is explicitly mentioned in the CV.",
+    "Power BI": "Matched as it is explicitly mentioned in the CV.",
+    "communication": "Matched in the context of presenting research findings and mentoring students.",
+    "data engineering": "Matched in the context of designing and implementing data pipelines.",
+    "data modelling": "Missed; no equivalent term or context found in the CV.",
+    "data warehousing": "Missed; while Snowflake is mentioned, the specific term 'data warehousing' is not used.",
+    "business intelligence": "Missed; although related tools are mentioned, this specific term is not present.",
+    "Tableau": "Matched as it is explicitly mentioned in the CV.",
+    "Snowflake": "Matched as it is explicitly mentioned in the CV.",
+    "Vector Databases": "Missed; no equivalent term or context found in the CV.",
+    "RAG": "Missed; no equivalent term or context found in the CV."
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "metadata": {}
+}
