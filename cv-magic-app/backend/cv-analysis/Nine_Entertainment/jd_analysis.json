@@ -1,50 +1,51 @@
 {
-  "experience_years": 5,
+  "experience_years": 1,
   "required_skills": {
     "technical": [
+      "Excel",
       "SQL",
-      "Power BI"
+      "Python"
     ],
     "soft_skills": [
-      "communication"
+      "communication",
+      "analytical ability",
+      "attention to detail",
+      "team player",
+      "adaptability"
     ],
     "domain_knowledge": [
-      "data engineering",
       "data modelling",
-      "data warehousing",
-      "business intelligence"
+      "data visualisation"
     ],
     "experience": []
   },
   "preferred_skills": {
     "technical": [
-      "Tableau",
-      "Snowflake"
+      "Power BI",
+      "Tableau"
     ],
     "soft_skills": [],
-    "domain_knowledge": [
-      "Vector Databases",
-      "RAG"
-    ],
+    "domain_knowledge": [],
     "experience": []
   },
   "required_keywords": [
+    "Excel",
     "SQL",
-    "Power BI",
+    "Python",
     "communication",
-    "data engineering",
+    "analytical ability",
+    "attention to detail",
+    "team player",
+    "adaptability",
     "data modelling",
-    "data warehousing",
-    "business intelligence"
+    "data visualisation"
   ],
   "preferred_keywords": [
-    "Tableau",
-    "Snowflake",
-    "Vector Databases",
-    "RAG"
+    "Power BI",
+    "Tableau"
   ],
-  "analysis_timestamp": "2025-09-13T15:14:55.228798",
-  "ai_model_used": "openai/gpt-4o-mini",
+  "analysis_timestamp": "2025-09-13T16:37:37.249692",
+  "ai_model_used": "openai/gpt-4o",
   "processing_status": "completed",
   "company_name": "Nine_Entertainment",
   "metadata": {}

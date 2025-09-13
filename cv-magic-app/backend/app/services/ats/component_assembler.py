@@ -21,6 +21,7 @@ from app.services.ats.components import (
 from app.services.ats.components.batched_analyzer import BatchedAnalyzer
 from app.services.ats.requirement_bonus_calculator import RequirementBonusCalculator
 from app.services.jd_analysis.jd_analyzer import RequirementsExtractor
+from app.services.ats.ats_score_calculator import ATSScoreCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class ComponentAssembler:
         self.batched_analyzer = BatchedAnalyzer()  # New batched analyzer for performance
         self.bonus_calculator = RequirementBonusCalculator()
         self.requirements_extractor = RequirementsExtractor()
+        self.ats_calculator = ATSScoreCalculator()
 
     def _read_cv_text(self) -> str:
         """Read CV text from the standard location."""
@@ -356,6 +358,83 @@ class ComponentAssembler:
         
         logger.info("[ASSEMBLER] Results saved to: %s", file_path)
 
+    async def _run_ats_calculation(self, company: str, extracted_scores: Dict[str, float]) -> Dict[str, Any]:
+        """Run ATS score calculation and save results."""
+        try:
+            # Read preextracted comparison data
+            file_path = self.base_dir / company / f"{company}_skills_analysis.json"
+            if not file_path.exists():
+                logger.warning("[ASSEMBLER] Skills analysis file not found for ATS calculation")
+                return {"error": "Skills analysis file not found"}
+            
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            # Get the latest preextracted comparison entry
+            preextracted_entries = data.get("preextracted_comparison_entries", [])
+            if not preextracted_entries:
+                logger.warning("[ASSEMBLER] No preextracted comparison found for ATS calculation")
+                return {"error": "No preextracted comparison data"}
+            
+            latest_preextracted = preextracted_entries[-1]
+            preextracted_data = {"content": latest_preextracted.get("content", "")}
+            
+            # Calculate ATS score
+            ats_breakdown = self.ats_calculator.calculate_ats_score(
+                preextracted_data=preextracted_data,
+                component_analysis={},  # Not used in current implementation
+                extracted_scores=extracted_scores
+            )
+            
+            # Convert to dictionary for saving
+            ats_result = {
+                "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                "final_ats_score": ats_breakdown.final_ats_score,
+                "category_status": ats_breakdown.category_status,
+                "recommendation": ats_breakdown.recommendation,
+                "breakdown": {
+                    "category1": {
+                        "score": ats_breakdown.cat1_score,
+                        "technical_skills_match_rate": ats_breakdown.technical_skills_match_rate,
+                        "domain_keywords_match_rate": ats_breakdown.domain_keywords_match_rate,
+                        "soft_skills_match_rate": ats_breakdown.soft_skills_match_rate,
+                        "missing_counts": {
+                            "technical": ats_breakdown.technical_missing_count,
+                            "domain": ats_breakdown.domain_missing_count,
+                            "soft": ats_breakdown.soft_missing_count
+                        }
+                    },
+                    "category2": {
+                        "score": ats_breakdown.cat2_score,
+                        "core_competency_avg": ats_breakdown.core_competency_avg,
+                        "experience_seniority_avg": ats_breakdown.experience_seniority_avg,
+                        "potential_ability_avg": ats_breakdown.potential_ability_avg,
+                        "company_fit_avg": ats_breakdown.company_fit_avg
+                    },
+                    "ats1_score": ats_breakdown.ats1_score,
+                    "bonus_points": ats_breakdown.bonus_points
+                }
+            }
+            
+            # Save ATS results to the analysis file
+            if "ats_calculation_entries" not in data:
+                data["ats_calculation_entries"] = []
+            
+            data["ats_calculation_entries"].append(ats_result)
+            
+            # Save back to file
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            
+            logger.info("[ASSEMBLER] ATS calculation completed. Score: %.1f/100 (%s)", 
+                       ats_breakdown.final_ats_score, ats_breakdown.category_status)
+            
+            return ats_result
+            
+        except Exception as e:
+            logger.error("[ASSEMBLER] ATS calculation failed: %s", e)
+            return {"error": str(e)}
+
     async def assemble_analysis(self, company: str) -> Dict[str, Any]:
         """
         Assemble complete ATS component analysis for a company.
@@ -383,12 +462,17 @@ class ComponentAssembler:
             # Save results
             self._save_results(company, component_results, scores)
             
+            # Run ATS calculation after component analysis
+            logger.info("[ASSEMBLER] Starting ATS score calculation...")
+            ats_result = await self._run_ats_calculation(company, scores)
+            
             # Prepare return result
             result = {
                 "company": company,
                 "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
                 "component_results": component_results,
                 "extracted_scores": scores,
+                "ats_results": ats_result,
                 "status": "success"
             }
             

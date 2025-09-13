@@ -1,45 +1,46 @@
 {
   "company_name": "Nine_Entertainment",
-  "cv_analysis_timestamp": "2025-09-13T15:15:01.221370",
+  "cv_analysis_timestamp": "2025-09-13T16:37:40.698497",
   "matched_required_keywords": [
+    "Excel",
     "SQL",
-    "Power BI",
+    "Python",
     "communication",
-    "data engineering"
+    "analytical ability",
+    "adaptability",
+    "data visualisation"
   ],
   "matched_preferred_keywords": [
-    "Tableau",
-    "Snowflake"
+    "Power BI",
+    "Tableau"
   ],
   "missed_required_keywords": [
-    "data modelling",
-    "data warehousing",
-    "business intelligence"
+    "attention to detail",
+    "team player",
+    "data modelling"
   ],
-  "missed_preferred_keywords": [
-    "Vector Databases",
-    "RAG"
-  ],
+  "missed_preferred_keywords": [],
   "match_counts": {
-    "total_required_keywords": 7,
-    "total_preferred_keywords": 4,
-    "matched_required_count": 4,
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 2,
+    "matched_required_count": 7,
     "matched_preferred_count": 2
   },
   "matching_notes": {
-    "SQL": "Matched as it is explicitly mentioned in the CV.",
-    "Power BI": "Matched as it is explicitly mentioned in the CV.",
-    "communication": "Matched in the context of presenting research findings and mentoring students.",
-    "data engineering": "Matched in the context of designing and implementing data pipelines.",
-    "data modelling": "Missed; no equivalent term or context found in the CV.",
-    "data warehousing": "Missed; while Snowflake is mentioned, the specific term 'data warehousing' is not used.",
-    "business intelligence": "Missed; although related tools are mentioned, this specific term is not present.",
-    "Tableau": "Matched as it is explicitly mentioned in the CV.",
-    "Snowflake": "Matched as it is explicitly mentioned in the CV.",
-    "Vector Databases": "Missed; no equivalent term or context found in the CV.",
-    "RAG": "Missed; no equivalent term or context found in the CV."
+    "Excel": "Mentioned under technical skills for data-driven solutions and reporting.",
+    "SQL": "Proficient in SQL for querying, modeling, and managing complex relational databases.",
+    "Python": "Extensive experience in Python programming mentioned throughout the CV.",
+    "communication": "Demonstrated through presenting research findings and providing feedback.",
+    "analytical ability": "Implied through data analysis and problem-solving tasks.",
+    "adaptability": "Mentioned in the context of refining prompts and improving model adaptability.",
+    "data visualisation": "Skills in creating visualizations using Tableau, Power BI, and Matplotlib.",
+    "Power BI": "Explicitly mentioned under technical skills and experience.",
+    "Tableau": "Explicitly mentioned under technical skills and experience.",
+    "attention to detail": "Not explicitly mentioned or implied in the CV.",
+    "team player": "Not explicitly mentioned; collaboration is mentioned but not teamwork.",
+    "data modelling": "Not explicitly mentioned; SQL skills imply some modeling but not explicitly data modeling."
   },
-  "ai_model_used": "openai/gpt-4o-mini",
+  "ai_model_used": "openai/gpt-4o",
   "processing_status": "completed",
   "cv_file_path": "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/original_cv.json",
   "metadata": {}

@@ -23,9 +23,76 @@ from app.services.jd_analysis import analyze_and_save_company_jd
 from app.services.cv_jd_matching import match_and_save_cv_jd
 from pathlib import Path
 import asyncio
+import json
+import re
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Skills Analysis"])
+
+
+def _extract_match_rates_from_content(content: str) -> dict:
+    """Extract match rates from preextracted comparison content"""
+    rates = {
+        "technical_skills": 0,
+        "soft_skills": 0,
+        "domain_keywords": 0,
+        "overall": 0
+    }
+    
+    try:
+        # Extract overall match rate (new format)
+        overall_match = re.search(r"Match Rate:\s*(\d+(?:\.\d+)?)%", content)
+        if overall_match:
+            rates["overall"] = int(float(overall_match.group(1)))
+        
+        # Extract from table format
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            if "Category" in line and "Match Rate" in line:
+                # Found header, check next lines for data
+                for j in range(i+1, min(i+10, len(lines))):
+                    data_line = lines[j].strip()
+                    if data_line:
+                        # Try to parse table row
+                        parts = [p.strip() for p in data_line.split()]
+                        if len(parts) >= 6:  # Category, CV Total, JD Total, Matched, Missing, Match Rate
+                            try:
+                                category = parts[0].lower()
+                                match_rate = float(parts[-1]) if parts[-1].replace('.', '').isdigit() else 0
+                                
+                                if "technical" in category:
+                                    rates["technical_skills"] = int(match_rate)
+                                elif "soft" in category:
+                                    rates["soft_skills"] = int(match_rate)
+                                elif "domain" in category:
+                                    rates["domain_keywords"] = int(match_rate)
+                            except:
+                                pass
+        
+        # Legacy format support
+        if rates["technical_skills"] == 0:
+            tech_match = re.search(r"Technical Skills Match Rate:\s*(\d+)%", content)
+            if tech_match:
+                rates["technical_skills"] = int(tech_match.group(1))
+        
+        if rates["soft_skills"] == 0:
+            soft_match = re.search(r"Soft Skills Match Rate:\s*(\d+)%", content)
+            if soft_match:
+                rates["soft_skills"] = int(soft_match.group(1))
+        
+        if rates["domain_keywords"] == 0:
+            domain_match = re.search(r"Domain Keywords Match Rate:\s*(\d+)%", content)
+            if domain_match:
+                rates["domain_keywords"] = int(domain_match.group(1))
+        
+        # If overall not found, calculate it
+        if rates["overall"] == 0 and any([rates["technical_skills"], rates["soft_skills"], rates["domain_keywords"]]):
+            rates["overall"] = int((rates["technical_skills"] + rates["soft_skills"] + rates["domain_keywords"]) / 3)
+    
+    except Exception as e:
+        logger.warning(f"Failed to extract match rates: {e}")
+    
+    return rates
 
 
 def _detect_most_recent_company() -> Optional[str]:
@@ -448,6 +515,78 @@ async def trigger_component_analysis(company: str):
         )
 
 
+@router.post("/trigger-complete-pipeline/{company}")
+async def trigger_complete_pipeline(company: str):
+    """Manually trigger the complete analysis pipeline for a company (JD analysis → CV-JD matching → Component analysis → ATS calculation)"""
+    try:
+        logger.info(f"🚀 [MANUAL] Triggering complete pipeline for company: {company}")
+        
+        results = {
+            "company": company,
+            "steps": []
+        }
+        
+        # Step 1: JD Analysis
+        try:
+            logger.info(f"🔧 [MANUAL] Step 1: JD Analysis for {company}")
+            await analyze_and_save_company_jd(company, force_refresh=True)
+            results["steps"].append({"step": "jd_analysis", "status": "success"})
+        except Exception as e:
+            logger.error(f"❌ [MANUAL] JD Analysis failed: {e}")
+            results["steps"].append({"step": "jd_analysis", "status": "failed", "error": str(e)})
+            
+        # Step 2: CV-JD Matching
+        try:
+            logger.info(f"🔧 [MANUAL] Step 2: CV-JD Matching for {company}")
+            await match_and_save_cv_jd(company, cv_file_path=None, force_refresh=True)
+            results["steps"].append({"step": "cv_jd_matching", "status": "success"})
+        except Exception as e:
+            logger.error(f"❌ [MANUAL] CV-JD Matching failed: {e}")
+            results["steps"].append({"step": "cv_jd_matching", "status": "failed", "error": str(e)})
+            
+        # Step 3: Component Analysis (includes ATS calculation)
+        try:
+            logger.info(f"🔧 [MANUAL] Step 3: Component Analysis for {company}")
+            from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+            component_result = await modular_ats_orchestrator.run_component_analysis(company)
+            
+            if isinstance(component_result, dict) and 'extracted_scores' in component_result:
+                results["steps"].append({
+                    "step": "component_analysis", 
+                    "status": "success",
+                    "scores_count": len(component_result.get('extracted_scores', {}))
+                })
+                
+                # Check if ATS was calculated
+                if 'ats_results' in component_result:
+                    results["steps"].append({
+                        "step": "ats_calculation",
+                        "status": "success",
+                        "final_score": component_result['ats_results'].get('final_ats_score')
+                    })
+            else:
+                results["steps"].append({"step": "component_analysis", "status": "success"})
+        except Exception as e:
+            logger.error(f"❌ [MANUAL] Component Analysis failed: {e}")
+            results["steps"].append({"step": "component_analysis", "status": "failed", "error": str(e)})
+        
+        # Check final status
+        all_success = all(step.get("status") == "success" for step in results["steps"])
+        results["overall_status"] = "success" if all_success else "partial_failure"
+        
+        return JSONResponse(content=results)
+        
+    except Exception as e:
+        logger.error(f"❌ [MANUAL] Complete pipeline failed for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Pipeline failed: {str(e)}",
+                "company": company
+            }
+        )
+
+
 @router.get("/skills-analysis/configs")
 async def list_analysis_configs():
     """List available analysis configurations"""
@@ -465,6 +604,143 @@ async def list_analysis_configs():
         return JSONResponse(
             status_code=500,
             content={"error": f"Failed to list configurations: {str(e)}"}
+        )
+
+
+@router.get("/analysis-results")
+async def list_companies_with_results():
+    """List all companies that have analysis results"""
+    try:
+        base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        
+        if not base_dir.exists():
+            return JSONResponse(content={
+                "success": True,
+                "companies": []
+            })
+        
+        companies = []
+        for company_dir in base_dir.iterdir():
+            if company_dir.is_dir() and company_dir.name != "Unknown_Company":
+                analysis_file = company_dir / f"{company_dir.name}_skills_analysis.json"
+                if analysis_file.exists():
+                    # Get basic info about the analysis
+                    try:
+                        with open(analysis_file, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        
+                        # Check what analyses are available
+                        analyses_available = {
+                            "skills": bool(data.get("cv_skills") or data.get("jd_skills")),
+                            "preextracted_comparison": bool(data.get("preextracted_comparison_entries")),
+                            "component_analysis": bool(data.get("component_analysis_entries")),
+                            "ats_calculation": bool(data.get("ats_calculation_entries"))
+                        }
+                        
+                        # Get latest ATS score if available
+                        ats_score = None
+                        ats_entries = data.get("ats_calculation_entries", [])
+                        if ats_entries:
+                            ats_score = ats_entries[-1].get("final_ats_score")
+                        
+                        companies.append({
+                            "name": company_dir.name,
+                            "analyses_available": analyses_available,
+                            "ats_score": ats_score,
+                            "last_modified": analysis_file.stat().st_mtime
+                        })
+                    except Exception as e:
+                        logger.warning(f"Failed to read analysis for {company_dir.name}: {e}")
+        
+        # Sort by last modified time (most recent first)
+        companies.sort(key=lambda x: x["last_modified"], reverse=True)
+        
+        return JSONResponse(content={
+            "success": True,
+            "companies": companies,
+            "total": len(companies)
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ [API] Failed to list companies with results: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to list companies: {str(e)}"}
+        )
+
+
+@router.get("/analysis-results/{company}")
+async def get_analysis_results(company: str):
+    """Get complete analysis results for a company (skills, components, ATS) for frontend display"""
+    try:
+        logger.info(f"📊 [API] Fetching analysis results for company: {company}")
+        
+        # Build file path
+        base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        analysis_file = base_dir / company / f"{company}_skills_analysis.json"
+        
+        if not analysis_file.exists():
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"No analysis found for company: {company}"}
+            )
+        
+        # Read analysis data
+        with open(analysis_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Extract latest entries from each analysis type
+        result = {
+            "company": company,
+            "skills_analysis": {
+                "cv_skills": data.get("cv_skills", {}),
+                "jd_skills": data.get("jd_skills", {})
+            },
+            "preextracted_comparison": None,
+            "component_analysis": None,
+            "ats_score": None
+        }
+        
+        # Get latest preextracted comparison
+        preextracted_entries = data.get("preextracted_comparison_entries", [])
+        if preextracted_entries:
+            latest = preextracted_entries[-1]
+            # Parse the content to extract match rates
+            content = latest.get("content", "")
+            result["preextracted_comparison"] = {
+                "timestamp": latest.get("timestamp"),
+                "model_used": latest.get("model_used"),
+                "raw_content": content,
+                # Extract match rates from content using regex
+                "match_rates": _extract_match_rates_from_content(content)
+            }
+        
+        # Get latest component analysis
+        component_entries = data.get("component_analysis_entries", [])
+        if component_entries:
+            latest = component_entries[-1]
+            result["component_analysis"] = {
+                "timestamp": latest.get("timestamp"),
+                "extracted_scores": latest.get("extracted_scores", {}),
+                "component_details": latest.get("component_analyses", {})
+            }
+        
+        # Get latest ATS calculation
+        ats_entries = data.get("ats_calculation_entries", [])
+        if ats_entries:
+            latest = ats_entries[-1]
+            result["ats_score"] = latest
+        
+        return JSONResponse(content={
+            "success": True,
+            "data": result
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ [API] Failed to get analysis results for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to retrieve analysis results: {str(e)}"}
         )
 
 

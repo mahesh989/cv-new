@@ -1,8 +1,8 @@
 ================================================================================
 ORIGINAL CV TEXT
-CV File: maheshwor_tiwari.pdf
-Extracted: 2025-09-13 15:54:45
-Length: 4864 characters
+CV File: Maheshwor Tiwari CV.pdf
+Extracted: 2025-09-13 16:41:24
+Length: 5917 characters
 ================================================================================
 
 Maheshwor Tiwari  
@@ -17,6 +17,9 @@ visualiz ations that convert complex data into actionable insights. I am also pr
 comprehensive dashboards that support data -driven decision -making.  
  
 TECHNICAL SKILLS  
+ 
+• Proficient in AI model evaluation and prompt engineering within RLHF workflows, assessing truthfulness , instructions , 
+and adaptability, while refining prompts to enhance model performance using platforms like Feather and Hubstaff  
 • Specialized in Python programming, including data analysis, automation, and machine learning using libraries such 
 as Pandas, NumPy, and scikit -learn.  
 • Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.  
@@ -33,6 +36,16 @@ Master of Theoretical Physics
 CY Cergy Paris University, Cergy, France    Sep 2016 - Jun 2018  
  
 EXPERIENCE   
+AI Data Trainer & Evaluator          Jul 2024 – Present  
+• Completed 50+ hours of AI model evaluation on projects like Colosseum V2 and Hard Colosseum V2, ensuring 
+high-quality AI responses by assessing correctness, instruction following, hallucination detection, formatting, and 
+comprehensiveness using Feather for task execution and Hubstaff for time tracking.  
+• Reviewed, rated, and ranked AI -generated responses, identifying areas for improvement and refining model 
+outputs to enhance user experience.  
+• Developed and iterated on prompts to test AI performance, challenging responses to uncover failure points and 
+improve model adaptability.  
+• Provided detailed feedback and justifications to guide AI model training, ensuring alignment with project -specific 
+guidelines and human expectations.  
 Data Analyst         Jul 2024 – Present  
 The Bitrates, Sydney, New South Wales, Australia  
 • Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline 
