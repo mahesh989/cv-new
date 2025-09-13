@@ -10,6 +10,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
+from app.core.model_dependency import get_request_model
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +103,9 @@ class SkillExtractionResultSaver:
             clean_cv_skills = {k: v for k, v in cv_skills.items() if k != "raw_response"}
             clean_jd_skills = {k: v for k, v in jd_skills.items() if k != "raw_response"}
             
+            # Get the current model used for this request
+            current_model = get_request_model() or "unknown"
+            
             # Build structured JSON payload
             payload = {
                 "generated": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
@@ -109,6 +113,7 @@ class SkillExtractionResultSaver:
                 "jd_url": jd_url,
                 "user_id": user_id,
                 "company": company_slug,
+                "model_used": current_model,  # Track which model was used
                 "cv_skills": clean_cv_skills,
                 "jd_skills": clean_jd_skills,
                 "cv_comprehensive_analysis": cv_comprehensive_analysis,
@@ -622,8 +627,10 @@ class SkillExtractionResultSaver:
                 if "analyze_match_entries" not in data:
                     data["analyze_match_entries"] = []
                 from datetime import datetime as _dt
+                current_model = get_request_model() or "unknown"
                 data["analyze_match_entries"].append({
                     "timestamp": _dt.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                    "model_used": current_model,
                     "content": raw_analysis
                 })
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -700,8 +707,10 @@ class SkillExtractionResultSaver:
                     }
                 if "preextracted_comparison_entries" not in data:
                     data["preextracted_comparison_entries"] = []
+                current_model = get_request_model() or "unknown"
                 data["preextracted_comparison_entries"].append({
                     "timestamp": timestamp,
+                    "model_used": current_model,
                     "content": raw_analysis
                 })
                 with open(file_path, 'w', encoding='utf-8') as f:

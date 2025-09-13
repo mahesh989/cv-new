@@ -10,6 +10,7 @@ from app.ai.ai_config import ai_config
 from app.ai.base_provider import BaseAIProvider, AIResponse
 from app.ai.providers import OpenAIProvider, AnthropicProvider, DeepSeekProvider
 import logging
+from app.core.model_dependency import get_request_model
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +198,22 @@ class AIServiceManager:
         Returns:
             AIResponse object
         """
+        # Check if there's a request-specific model set
+        request_model_id = get_request_model()
+        if request_model_id:
+            # Ensure we're using the request-specific model
+            logger.debug(f"Using request-specific model: {request_model_id}")
+            # The model should already be switched by the dependency
+            # but let's make sure the provider is correctly set
+            current_provider_name = self.config.get_current_provider()
+            provider = self._providers.get(current_provider_name)
+            if provider and provider.model_name != request_model_id:
+                # Need to ensure the model is correctly set
+                model_config = self.config.get_model_config()
+                if model_config and model_config.model == request_model_id:
+                    provider.model_name = request_model_id
+                    logger.debug(f"Updated provider model to match request: {request_model_id}")
+        
         # Determine which provider to use
         if provider_name:
             provider = self.get_provider(provider_name)
@@ -206,6 +223,9 @@ class AIServiceManager:
             provider = self.get_current_provider()
             if not provider:
                 raise Exception("No available AI provider")
+        
+        # Log the actual model being used
+        logger.info(f"Generating response with provider: {provider.provider_name}, model: {provider.model_name}")
         
         # Generate response
         return await provider.generate_response(
