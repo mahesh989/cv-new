@@ -111,12 +111,14 @@ class SkillsDisplayWidget extends StatelessWidget {
     debugPrint('   controller.isLoading: ${controller.isLoading}');
     debugPrint('   controller.result: ${controller.result != null}');
     if (controller.result != null) {
-      debugPrint('   CV comprehensive analysis length: ${controller.cvComprehensiveAnalysis?.length ?? 0}');
-      debugPrint('   JD comprehensive analysis length: ${controller.jdComprehensiveAnalysis?.length ?? 0}');
+      debugPrint(
+          '   CV comprehensive analysis length: ${controller.cvComprehensiveAnalysis?.length ?? 0}');
+      debugPrint(
+          '   JD comprehensive analysis length: ${controller.jdComprehensiveAnalysis?.length ?? 0}');
       debugPrint('   CV total skills: ${controller.cvTotalSkills}');
       debugPrint('   JD total skills: ${controller.jdTotalSkills}');
     }
-    
+
     // If no results yet, show loading/progress info
     if (controller.isLoading) {
       return Container(
@@ -168,7 +170,8 @@ class SkillsDisplayWidget extends StatelessWidget {
           if (controller.hasResults) ...[
             Builder(
               builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] Rendering side-by-side comparison');
+                debugPrint(
+                    '🔍 [SKILLS_DISPLAY] Rendering side-by-side comparison');
                 debugPrint('   CV Skills: ${controller.cvTotalSkills}');
                 debugPrint('   JD Skills: ${controller.jdTotalSkills}');
                 return Padding(
@@ -176,31 +179,31 @@ class SkillsDisplayWidget extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  // CV Skills Column
-                  Expanded(
-                    child: _buildSkillsColumn(
-                      'CV Skills (${controller.cvTotalSkills})',
-                      controller.cvTechnicalSkills,
-                      controller.cvSoftSkills,
-                      controller.cvDomainKeywords,
-                      controller.cvComprehensiveAnalysis,
-                      Colors.blue,
-                      'cv',
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // JD Skills Column
-                  Expanded(
-                    child: _buildSkillsColumn(
-                      'JD Skills (${controller.jdTotalSkills})',
-                      controller.jdTechnicalSkills,
-                      controller.jdSoftSkills,
-                      controller.jdDomainKeywords,
-                      controller.jdComprehensiveAnalysis,
-                      Colors.green,
-                      'jd',
-                    ),
-                  ),
+                      // CV Skills Column
+                      Expanded(
+                        child: _buildSkillsColumn(
+                          'CV Skills (${controller.cvTotalSkills})',
+                          controller.cvTechnicalSkills,
+                          controller.cvSoftSkills,
+                          controller.cvDomainKeywords,
+                          controller.cvComprehensiveAnalysis,
+                          Colors.blue,
+                          'cv',
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // JD Skills Column
+                      Expanded(
+                        child: _buildSkillsColumn(
+                          'JD Skills (${controller.jdTotalSkills})',
+                          controller.jdTechnicalSkills,
+                          controller.jdSoftSkills,
+                          controller.jdDomainKeywords,
+                          controller.jdComprehensiveAnalysis,
+                          Colors.green,
+                          'jd',
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -472,143 +475,149 @@ class SkillsDisplayWidget extends StatelessWidget {
     debugPrint(
         '   Analysis preview: ${analysis.substring(0, analysis.length > 100 ? 100 : analysis.length)}');
 
-    return _ExpandableAnalysisWidget(
-      analysis: analysis,
-      baseColor: baseColor,
-      type: type,
-    );
-  }
-}
+    bool isExpanded = false;
 
-class _ExpandableAnalysisWidget extends StatefulWidget {
-  final String analysis;
-  final MaterialColor baseColor;
-  final String type;
-
-  const _ExpandableAnalysisWidget({
-    required this.analysis,
-    required this.baseColor,
-    required this.type,
-  });
-
-  @override
-  State<_ExpandableAnalysisWidget> createState() =>
-      _ExpandableAnalysisWidgetState();
-}
-
-class _ExpandableAnalysisWidgetState extends State<_ExpandableAnalysisWidget> {
-  bool isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              debugPrint(
-                  '📝 [UI_DEBUG] Expand button clicked for ${widget.type}. Current state: $isExpanded');
-              setState(() => isExpanded = !isExpanded);
-              debugPrint('📝 [UI_DEBUG] New expand state: $isExpanded');
-            },
-            icon: Icon(
-              isExpanded ? Icons.expand_less : Icons.expand_more,
-              size: 20,
-            ),
-            label: Text(
-              isExpanded ? 'Hide Analysis' : 'Show Detailed Analysis',
-              style: const TextStyle(fontSize: 14),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: widget.baseColor.shade100,
-              foregroundColor: widget.baseColor.shade700,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: widget.baseColor.shade300),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    isExpanded = !isExpanded;
+                  });
+                },
+                icon: Icon(
+                  isExpanded ? Icons.expand_less : Icons.expand_more,
+                  size: 16,
+                ),
+                label: Text(
+                  isExpanded
+                      ? 'Hide Full AI Analysis'
+                      : 'Show Full AI Analysis',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: baseColor.shade100,
+                  foregroundColor: baseColor.shade900,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
             ),
+            if (isExpanded) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: _buildFormattedText(analysis),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  /// Build formatted text that handles markdown-style formatting
+  Widget _buildFormattedText(String text) {
+    final spans = <TextSpan>[];
+    final lines = text.split('\n');
+
+    for (final line in lines) {
+      if (line.trim().isEmpty) {
+        spans.add(const TextSpan(text: '\n'));
+        continue;
+      }
+
+      // Handle headers (##)
+      if (line.startsWith('##')) {
+        final headerText = line.replaceFirst('##', '').trim();
+        spans.add(TextSpan(
+          text: '$headerText\n',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+            fontFamily: 'monospace',
           ),
-        ),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          height: isExpanded ? null : 0,
-          child: isExpanded
-              ? Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: widget.baseColor.shade300),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.psychology,
-                            size: 16,
-                            color: widget.baseColor.shade600,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'AI Detailed Analysis',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: widget.baseColor.shade700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Builder(
-                        builder: (context) {
-                          debugPrint(
-                              '📝 [UI_DEBUG] Rendering analysis text for ${widget.type}');
-                          debugPrint(
-                              '   Analysis content: ${widget.analysis.isEmpty ? "EMPTY" : "${widget.analysis.length} chars"}');
+        ));
+        continue;
+      }
 
-                          if (widget.analysis.isEmpty) {
-                            return Text(
-                              "No detailed analysis available",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade700,
-                                height: 1.4,
-                              ),
-                            );
-                          }
+      // Handle bold text (**text**)
+      if (line.contains('**')) {
+        final regex = RegExp(r'\*\*(.*?)\*\*');
+        int lastIndex = 0;
+        final lineSpans = <TextSpan>[];
 
-                          return Text(
-                            widget.analysis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                              height: 1.4,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                )
-              : const SizedBox.shrink(),
+        for (final match in regex.allMatches(line)) {
+          // Add text before the match
+          if (match.start > lastIndex) {
+            lineSpans.add(TextSpan(
+              text: line.substring(lastIndex, match.start),
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.4,
+                fontFamily: 'monospace',
+              ),
+            ));
+          }
+          // Add the bold text (without the ** markers)
+          lineSpans.add(TextSpan(
+            text: match.group(1),
+            style: const TextStyle(
+              fontSize: 12,
+              height: 1.4,
+              fontFamily: 'monospace',
+              fontWeight: FontWeight.bold,
+            ),
+          ));
+          lastIndex = match.end;
+        }
+        // Add remaining text after the last match
+        if (lastIndex < line.length) {
+          lineSpans.add(TextSpan(
+            text: line.substring(lastIndex),
+            style: const TextStyle(
+              fontSize: 12,
+              height: 1.4,
+              fontFamily: 'monospace',
+            ),
+          ));
+        }
+        spans.addAll(lineSpans);
+        spans.add(const TextSpan(text: '\n'));
+        continue;
+      }
+
+      // Regular text
+      spans.add(TextSpan(
+        text: '$line\n',
+        style: const TextStyle(
+          fontSize: 12,
+          height: 1.4,
+          fontFamily: 'monospace',
         ),
-      ],
+      ));
+    }
+
+    return RichText(
+      text: TextSpan(children: spans),
     );
   }
 }
+
