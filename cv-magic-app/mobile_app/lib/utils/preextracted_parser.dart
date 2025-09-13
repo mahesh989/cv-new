@@ -5,6 +5,7 @@ import '../models/preextracted_comparison.dart';
 class PreextractedParser {
   static PreextractedComparisonResult parse(String text) {
     developer.log('[PreextractedParser] Parsing text length=${text.length}');
+    developer.log('[PreextractedParser] Raw text: ${text.substring(0, text.length > 500 ? 500 : text.length)}...');
 
     final lines = text.split(RegExp(r'\r?\n'));
 
@@ -128,13 +129,19 @@ class PreextractedParser {
   }
 
   static int _numFrom(String line) {
-    final m = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(line);
-    return m == null ? 0 : double.tryParse(m.group(1)!)?.round() ?? 0;
+    // Handle both regular numbers and numbers in square brackets like [15]
+    final m = RegExp(r'\[?(\d+(?:\.\d+)?)\]?').firstMatch(line);
+    final result = m == null ? 0 : double.tryParse(m.group(1)!)?.round() ?? 0;
+    developer.log('[PreextractedParser] _numFrom("$line") = $result');
+    return result;
   }
 
   static double _percentFrom(String line) {
-    final m = RegExp(r'(\d+(?:\.\d+)?)%').firstMatch(line);
-    return m == null ? 0.0 : double.tryParse(m.group(1)!) ?? 0.0;
+    // Handle both regular percentages and percentages in square brackets like [78.95%]
+    final m = RegExp(r'\[?(\d+(?:\.\d+)?)%?\]?').firstMatch(line);
+    final result = m == null ? 0.0 : double.tryParse(m.group(1)!) ?? 0.0;
+    developer.log('[PreextractedParser] _percentFrom("$line") = $result');
+    return result;
   }
 
   static CategorySummary? _parseCategoryLine(String line) {
@@ -206,12 +213,19 @@ class PreextractedParser {
 
   static int _intOrZero(String s) {
     if (s.trim() == '-') return 0;
-    return int.tryParse(s.replaceAll('%', '')) ?? 0;
+    // Handle square brackets like [5]
+    final cleaned = s.replaceAll('%', '').replaceAll('[', '').replaceAll(']', '');
+    final result = int.tryParse(cleaned) ?? 0;
+    developer.log('[PreextractedParser] _intOrZero("$s") = $result');
+    return result;
   }
 
   static double _doubleOrZero(String s) {
-    final cleaned = s.replaceAll('%', '');
-    return double.tryParse(cleaned) ?? 0.0;
+    // Handle square brackets like [71.43%]
+    final cleaned = s.replaceAll('%', '').replaceAll('[', '').replaceAll(']', '');
+    final result = double.tryParse(cleaned) ?? 0.0;
+    developer.log('[PreextractedParser] _doubleOrZero("$s") = $result');
+    return result;
   }
 
   static MatchedItem? _parseMatchedLine(String line) {

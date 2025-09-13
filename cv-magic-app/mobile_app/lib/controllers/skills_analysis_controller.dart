@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import '../models/skills_analysis_model.dart';
 import '../services/skills_analysis_service.dart';
 
@@ -12,12 +13,18 @@ enum SkillsAnalysisState {
 
 /// Controller for managing skills analysis operations and state
 class SkillsAnalysisController extends ChangeNotifier {
-  SkillsAnalysisState _state = SkillsAnalysisState.idle;
   SkillsAnalysisResult? _result;
-  String? _errorMessage;
   String? _currentCvFilename;
   String? _currentJdText;
+  String? _errorMessage;
+  SkillsAnalysisState _state = SkillsAnalysisState.idle;
   Duration _executionDuration = Duration.zero;
+  
+  // Progressive display state
+  SkillsAnalysisResult? _fullResult; // Complete result from API
+  bool _showAnalyzeMatch = false;
+  bool _showPreextractedComparison = false;
+  Timer? _progressiveTimer;
 
   // Notification callbacks
   Function(String message, {bool isError})? _onNotification;
@@ -36,6 +43,10 @@ class SkillsAnalysisController extends ChangeNotifier {
       _state == SkillsAnalysisState.completed && _result != null;
   bool get hasError => _state == SkillsAnalysisState.error;
   bool get isEmpty => _result?.isEmpty ?? true;
+  
+  // Progressive display getters
+  bool get showAnalyzeMatch => _showAnalyzeMatch;
+  bool get showPreextractedComparison => _showPreextractedComparison;
 
   // CV Skills getters
   SkillsData? get cvSkills => _result?.cvSkills;
@@ -158,31 +169,14 @@ class SkillsAnalysisController extends ChangeNotifier {
       print('Result success: ${result.isSuccess}');
 
       if (result.isSuccess) {
-        _result = result;
-        _executionDuration = result.executionDuration;
-        _setState(SkillsAnalysisState.completed);
         debugPrint('✅ [SKILLS_ANALYSIS] Analysis completed successfully');
         debugPrint('   CV Skills: ${result.cvSkills.totalSkillsCount}');
         debugPrint('   JD Skills: ${result.jdSkills.totalSkillsCount}');
         debugPrint('   Duration: ${result.executionDuration.inSeconds}s');
 
-        // Show success notification
-        _showNotification(
-          '✅ Analysis completed! Found ${result.cvSkills.totalSkillsCount} CV skills and ${result.jdSkills.totalSkillsCount} JD skills.',
-        );
-
-        // Show analyze match notification if available
-        if (result.analyzeMatch != null && !result.analyzeMatch!.isEmpty) {
-          _showNotification(
-            '🎯 Recruiter assessment completed!',
-          );
-        } else if (result.analyzeMatch != null &&
-            result.analyzeMatch!.hasError) {
-          _showNotification(
-            '⚠️ Recruiter assessment failed: ${result.analyzeMatch!.error}',
-            isError: true,
-          );
-        }
+        // Store full result and start progressive display
+        _fullResult = result;
+        _startProgressiveDisplay();
       } else {
         _setError(result.errorMessage ?? 'Unknown error occurred');
       }
@@ -204,6 +198,11 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   /// Clear all results and reset to idle state
   void clearResults() {
+    _progressiveTimer?.cancel();
+    _progressiveTimer = null;
+    _fullResult = null;
+    _showAnalyzeMatch = false;
+    _showPreextractedComparison = false;
     _result = null;
     _currentCvFilename = null;
     _currentJdText = null;
@@ -236,5 +235,96 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   void _clearError() {
     _errorMessage = null;
+  }
+  
+  /// Start progressive display of results
+  void _startProgressiveDisplay() {
+    if (_fullResult == null) return;
+    
+    // Reset progressive state
+    _showAnalyzeMatch = false;
+    _showPreextractedComparison = false;
+    
+    // Step 1: Show skills immediately (side-by-side display)
+    _result = SkillsAnalysisResult(
+      cvSkills: _fullResult!.cvSkills,
+      jdSkills: _fullResult!.jdSkills,
+      cvComprehensiveAnalysis: _fullResult!.cvComprehensiveAnalysis,
+      jdComprehensiveAnalysis: _fullResult!.jdComprehensiveAnalysis,
+      expandableAnalysis: _fullResult!.expandableAnalysis,
+      extractedKeywords: _fullResult!.extractedKeywords,
+      executionDuration: _fullResult!.executionDuration,
+      isSuccess: true,
+      // Don't show these yet
+      analyzeMatch: null,
+      preextractedRawOutput: null,
+      preextractedCompanyName: null,
+    );
+    
+    _setState(SkillsAnalysisState.completed);
+    _showNotification(
+      '✅ Skills extracted! Found ${_fullResult!.cvSkills.totalSkillsCount} CV skills and ${_fullResult!.jdSkills.totalSkillsCount} JD skills.',
+    );
+    
+    // Step 2: Show analyze match loading immediately, then results after 10 seconds
+    if (_fullResult?.analyzeMatch != null) {
+      // Immediately show loading state and notification
+      _showAnalyzeMatch = true;
+      notifyListeners();
+      _showNotification('📎 Starting recruiter assessment analysis...');
+      
+      Timer(Duration(seconds: 10), () {
+        // Show analyze match results
+        _result = _result!.copyWith(
+          analyzeMatch: _fullResult!.analyzeMatch,
+        );
+        notifyListeners();
+        _showNotification('🎯 Recruiter assessment completed!');
+        
+        // Step 3: Immediately show preextracted comparison loading
+        if (_fullResult?.preextractedRawOutput != null) {
+          _showPreextractedComparison = true;
+          notifyListeners();
+          _showNotification('📈 Starting skills comparison analysis...');
+          
+          Timer(Duration(seconds: 10), () {
+            // Show preextracted comparison results
+            _result = _result!.copyWith(
+              preextractedRawOutput: _fullResult!.preextractedRawOutput,
+              preextractedCompanyName: _fullResult!.preextractedCompanyName,
+            );
+            notifyListeners();
+            _showNotification('📊 Skills comparison analysis completed!');
+            
+            // Final step: Analysis fully complete
+            Timer(Duration(seconds: 1), () {
+              _executionDuration = _fullResult!.executionDuration;
+              notifyListeners();
+            });
+          });
+        }
+      });
+    } else {
+      // No analyze match, go directly to preextracted comparison
+      if (_fullResult?.preextractedRawOutput != null) {
+        _showPreextractedComparison = true;
+        notifyListeners();
+        _showNotification('📈 Starting skills comparison analysis...');
+        
+        Timer(Duration(seconds: 10), () {
+          _result = _result!.copyWith(
+            preextractedRawOutput: _fullResult!.preextractedRawOutput,
+            preextractedCompanyName: _fullResult!.preextractedCompanyName,
+          );
+          notifyListeners();
+          _showNotification('📊 Skills comparison analysis completed!');
+          
+          Timer(Duration(seconds: 1), () {
+            _executionDuration = _fullResult!.executionDuration;
+            notifyListeners();
+          });
+        });
+      }
+    }
   }
 }

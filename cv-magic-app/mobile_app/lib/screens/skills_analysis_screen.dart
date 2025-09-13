@@ -183,43 +183,46 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
             print(
                 '🔍 Button state: canAnalyze=$canAnalyze, isLoading=${controller.isLoading}, hasResults=${controller.hasResults}');
 
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed:
-                canAnalyze && !controller.isLoading ? _performAnalysis : null,
-            icon: controller.isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Icon(
-                    controller.hasResults ? Icons.refresh : Icons.analytics,
-                    size: 20,
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: canAnalyze && !controller.isLoading
+                    ? _performAnalysis
+                    : null,
+                icon: controller.isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Icon(
+                        controller.hasResults ? Icons.refresh : Icons.analytics,
+                        size: 20,
+                      ),
+                label: Text(
+                  buttonText,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: canAnalyze
+                      ? (controller.hasResults
+                          ? Colors.orange
+                          : AppTheme.primaryNeon)
+                      : Colors.grey,
+                  foregroundColor: canAnalyze ? Colors.black : Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-            label: Text(
-              buttonText,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: canAnalyze
-                  ? (controller.hasResults
-                      ? Colors.orange
-                      : AppTheme.primaryNeon)
-                  : Colors.grey,
-              foregroundColor: canAnalyze ? Colors.black : Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                  elevation: canAnalyze ? 2 : 0,
+                ),
               ),
-              elevation: canAnalyze ? 2 : 0,
-            ),
-          ),
-        );
+            );
           },
         );
       },

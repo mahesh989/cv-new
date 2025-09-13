@@ -118,8 +118,18 @@ class _CvPageState extends State<CvPage> with AutomaticKeepAliveClientMixin {
   void _onJDTextChanged() {
     final currentText = jdController.text.trim();
     debugPrint(
+      '🔍 [DEBUG] CV Magic: jdController changed - length: ${currentText.length}',
+    );
+    debugPrint(
       '[CVPage] JD text changed: "${currentText.substring(0, currentText.length > 50 ? 50 : currentText.length)}..."',
     );
+    
+    // Always trigger setState to ensure the ModularAnalysisWidget gets updated
+    setState(() {
+      // This triggers a rebuild of the entire widget tree,
+      // including the ModularAnalysisWidget with the new jdText
+    });
+    
     if (currentText.isNotEmpty) {
       // Debounce the keyword loading to avoid too many calls
       Future.delayed(const Duration(milliseconds: 500), () {

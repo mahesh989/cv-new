@@ -15,7 +15,7 @@ import '../modules/cv/cv_preview_module.dart';
 import '../widgets/job_input.dart';
 import '../services/api_service.dart';
 import '../controllers/skills_analysis_controller.dart';
-import '../widgets/simple_results_widget.dart';
+import '../widgets/skills_display_widget.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   const CVMagicOrganizedPage({super.key});
@@ -45,10 +45,17 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
 
-    // Add listener to jdController to debug changes
+    // Add listener to jdController to debug changes and trigger rebuilds
     jdController.addListener(() {
       print(
           '🔍 [DEBUG] CV Magic: jdController changed - length: ${jdController.text.length}');
+      
+      // Force a rebuild of the widget to update button state
+      if (mounted) {
+        setState(() {
+          // This rebuild will update the AnimatedBuilder and button state
+        });
+      }
     });
   }
 
@@ -138,20 +145,24 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      child: ListenableBuilder(
-                        listenable: _skillsController,
+                      child: AnimatedBuilder(
+                        animation: Listenable.merge([_skillsController, jdController]),
                         builder: (context, _) {
                           final canAnalyze = selectedCVFilename != null &&
                               jdController.text.trim().isNotEmpty;
                           final isAnalyzing = _skillsController.isLoading;
 
-                          // Debug logging
-                          print(
-                              '🔍 [DEBUG] Button state - canAnalyze: $canAnalyze, isAnalyzing: $isAnalyzing');
-                          print(
-                              '🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
-                          print(
-                              '🔍 [DEBUG] jdController.text.length: ${jdController.text.length}');
+                          // Comprehensive debug logging
+                          print('=== BUTTON STATE CHECK ===');
+                          print('🔍 [DEBUG] Button state - canAnalyze: $canAnalyze, isAnalyzing: $isAnalyzing');
+                          print('🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
+                          print('🔍 [DEBUG] selectedCVFilename != null: ${selectedCVFilename != null}');
+                          print('🔍 [DEBUG] jdController.text.length: ${jdController.text.length}');
+                          print('🔍 [DEBUG] jdController.text.trim().length: ${jdController.text.trim().length}');
+                          print('🔍 [DEBUG] jdController.text.trim().isEmpty: ${jdController.text.trim().isEmpty}');
+                          print('🔍 [DEBUG] jdController.text.trim().isNotEmpty: ${jdController.text.trim().isNotEmpty}');
+                          print('🔍 [DEBUG] _skillsController.isLoading: ${_skillsController.isLoading}');
+                          print('=== END BUTTON CHECK ===');
 
                           return ElevatedButton.icon(
                             onPressed: (canAnalyze && !isAnalyzing)
@@ -224,8 +235,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
             ),
             const SizedBox(height: 16),
 
-            // Simple Results Display (no progress bars)
-            SimpleResultsWidget(
+            // Skills Display with Side-by-Side Layout and Expandable Analysis
+            SkillsDisplayWidget(
               controller: _skillsController,
             ),
             // JD Analysis UI section removed for backend-only focus

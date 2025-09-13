@@ -116,9 +116,16 @@ class _ModularAnalysisWidgetState extends State<ModularAnalysisWidget> {
 
   Widget _buildActionButton() {
     final isAnyRunning = _orchestrator.isRunning;
+    final canAnalyze = widget.cvFilename.isNotEmpty && widget.jdText.isNotEmpty;
+    
+    debugPrint(
+      '🔍 [DEBUG] Button state - canAnalyze: $canAnalyze, isAnalyzing: $isAnyRunning',
+    );
+    debugPrint('🔍 [DEBUG] selectedCVFilename: ${widget.cvFilename}');
+    debugPrint('🔍 [DEBUG] jdController.text.length: ${widget.jdText.length}');
 
     return ElevatedButton.icon(
-      onPressed: isAnyRunning ? null : _executeAnalysis,
+      onPressed: (isAnyRunning || !canAnalyze) ? null : _executeAnalysis,
       icon: isAnyRunning
           ? const SizedBox(
               width: 16,
@@ -129,10 +136,13 @@ class _ModularAnalysisWidgetState extends State<ModularAnalysisWidget> {
       label: Text(
         isAnyRunning
             ? 'Running Full Analysis...'
-            : 'Preliminary Analysis + Skill Comparison',
+            : canAnalyze
+                ? 'Preliminary Analysis + Skill Comparison'
+                : 'Please provide CV and JD text first',
       ),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
+        backgroundColor: canAnalyze ? null : Colors.grey,
       ),
     );
   }
@@ -233,12 +243,20 @@ class _ModularAnalysisWidgetState extends State<ModularAnalysisWidget> {
   }
 
   Future<void> _executeAnalysis() async {
+    debugPrint('[MODULAR_ANALYSIS] _executeAnalysis called with:');
+    debugPrint('  cvFilename: "${widget.cvFilename}"');
+    debugPrint('  jdText length: ${widget.jdText.length}');
+    debugPrint('  cvFilename.isEmpty: ${widget.cvFilename.isEmpty}');
+    debugPrint('  jdText.isEmpty: ${widget.jdText.isEmpty}');
+    
     if (widget.cvFilename.isEmpty || widget.jdText.isEmpty) {
       NotificationService.showError('Please provide CV and JD text first');
+      debugPrint('[MODULAR_ANALYSIS] Blocked execution - missing CV or JD');
       return;
     }
 
     try {
+      debugPrint('[MODULAR_ANALYSIS] Starting orchestrator.executeAllSteps...');
       await _orchestrator.executeAllSteps(
         cvFilename: widget.cvFilename,
         jdText: widget.jdText,

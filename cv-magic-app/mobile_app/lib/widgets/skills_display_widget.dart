@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
+import 'skills_analysis/ai_powered_skills_analysis.dart';
+import '../utils/preextracted_parser.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -119,8 +121,8 @@ class SkillsDisplayWidget extends StatelessWidget {
       debugPrint('   JD total skills: ${controller.jdTotalSkills}');
     }
 
-    // If no results yet, show loading/progress info
-    if (controller.isLoading) {
+    // Show loading only if we have no results at all yet
+    if (controller.isLoading && controller.result == null) {
       return Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -133,7 +135,7 @@ class SkillsDisplayWidget extends StatelessWidget {
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(
-              'Processing analysis...',
+              'Starting analysis...',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -142,7 +144,7 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Results will appear as each step completes',
+              'Results will appear progressively as each step completes',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.blue.shade600,
@@ -163,11 +165,51 @@ class SkillsDisplayWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with execution info
-          if (controller.hasResults) _buildResultsHeader(),
+          // Header with execution info - show as soon as any results are available
+          if (controller.result != null && 
+              (controller.cvTotalSkills > 0 || controller.jdTotalSkills > 0 || 
+               controller.hasAnalyzeMatch || controller.result?.hasPreextractedComparison == true)) 
+            _buildResultsHeader(),
 
-          // Side by side comparison - show when we have results
-          if (controller.hasResults) ...[
+          // Progressive loading indicator - show when analysis is still running but we have partial results
+          if (controller.isLoading && controller.result != null) ...[
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.orange.shade600),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Analysis continuing... More results will appear below',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+
+          // Side by side comparison - show as soon as skills data is available
+          if (controller.result != null && 
+              (controller.cvTotalSkills > 0 || controller.jdTotalSkills > 0)) ...[
             Builder(
               builder: (context) {
                 debugPrint(
@@ -211,19 +253,21 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // Analyze Match Section - Show when we have results or are loading
-          if (controller.hasResults || controller.isLoading) ...[
+          // Analyze Match Section - Show based on progressive state
+          if (controller.showAnalyzeMatch || controller.hasAnalyzeMatch) ...[
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget (incremental)');
+                    '🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget (progressive)');
+                debugPrint('   showAnalyzeMatch: ${controller.showAnalyzeMatch}');
                 debugPrint('   hasAnalyzeMatch: ${controller.hasAnalyzeMatch}');
                 debugPrint('   isLoading: ${controller.isLoading}');
                 debugPrint(
                     '   analyzeMatch: ${controller.analyzeMatch != null}');
 
-                // Show loading state if we're still processing analyze match
-                final isAnalyzeMatchInProgress = controller.isLoading;
+                // Show loading state if analyze match should show but isn't available yet
+                // This happens when showAnalyzeMatch is true but the actual data isn't loaded yet
+                final isAnalyzeMatchInProgress = controller.showAnalyzeMatch && !controller.hasAnalyzeMatch;
 
                 return AnalyzeMatchWidget(
                   analyzeMatch: controller.analyzeMatch,
@@ -233,9 +277,53 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // AI-Powered Skills Analysis - Show when we have preextracted results
-          if (controller.result?.hasPreextractedComparison == true)
-            Padding(
+          // AI-Powered Skills Analysis - Show based on progressive state
+          if (controller.showPreextractedComparison || controller.result?.hasPreextractedComparison == true) ...[
+            Builder(
+              builder: (context) {
+                debugPrint('🔍 [SKILLS_DISPLAY] Rendering AIPoweredSkillsAnalysis');
+                debugPrint('   showPreextractedComparison: ${controller.showPreextractedComparison}');
+                debugPrint('   hasPreextractedComparison: ${controller.result?.hasPreextractedComparison}');
+                debugPrint('   preextractedRawOutput length: ${controller.result?.preextractedRawOutput?.length ?? 0}');
+                
+                // Show loading state if comparison should show but isn't available yet
+                if (controller.showPreextractedComparison && controller.result?.hasPreextractedComparison != true) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange.shade600),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Generating skills comparison analysis...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                
+                return Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Container(
                 width: double.infinity,
@@ -245,51 +333,47 @@ class SkillsDisplayWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.green.shade200),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.psychology,
-                          color: Colors.green.shade700,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'AI Skills Comparison',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
+                child: Builder(
+                  builder: (context) {
+                    // Parse the raw output into structured data for table display
+                    final parsedData = PreextractedParser.parse(
                       controller.result!.preextractedRawOutput!,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                        height: 1.4,
-                      ),
-                    ),
-                    if (controller.result!.preextractedCompanyName != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'Company: ${controller.result!.preextractedCompanyName}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.green.shade600,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ],
+                    );
+                    
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Use the proper table widget instead of plain text
+                        AIPoweredSkillsAnalysis(data: parsedData),
+                        
+                        // Show company info if available
+                        if (controller.result!.preextractedCompanyName != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Company: ${controller.result!.preextractedCompanyName}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
+            );
+              },
             ),
+          ],
         ],
       ),
     );
@@ -407,15 +491,8 @@ class SkillsDisplayWidget extends StatelessWidget {
           const SizedBox(height: 12),
         ],
 
-        // Expandable Comprehensive Analysis
-        if (comprehensiveAnalysis != null &&
-            comprehensiveAnalysis.isNotEmpty) ...[
-          _buildExpandableAnalysis(
-            comprehensiveAnalysis,
-            baseColor,
-            type,
-          ),
-        ],
+        // Detailed AI analysis hidden from frontend per requirements
+        // (comprehensiveAnalysis expandable sections removed)
       ],
     );
   }
@@ -464,160 +541,6 @@ class SkillsDisplayWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildExpandableAnalysis(
-    String analysis,
-    MaterialColor baseColor,
-    String type,
-  ) {
-    // Debug logging
-    debugPrint('🔍 [UI_DEBUG] Building expandable analysis for $type');
-    debugPrint('   Analysis length: ${analysis.length}');
-    debugPrint(
-        '   Analysis preview: ${analysis.substring(0, analysis.length > 100 ? 100 : analysis.length)}');
-
-    bool isExpanded = false;
-
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    isExpanded = !isExpanded;
-                  });
-                },
-                icon: Icon(
-                  isExpanded ? Icons.expand_less : Icons.expand_more,
-                  size: 16,
-                ),
-                label: Text(
-                  isExpanded
-                      ? 'Hide Full AI Analysis'
-                      : 'Show Full AI Analysis',
-                  style: const TextStyle(fontSize: 12),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: baseColor.shade100,
-                  foregroundColor: baseColor.shade900,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
-            if (isExpanded) ...[
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: _buildFormattedText(analysis),
-              ),
-            ],
-          ],
-        );
-      },
-    );
-  }
-
-  /// Build formatted text that handles markdown-style formatting
-  Widget _buildFormattedText(String text) {
-    final spans = <TextSpan>[];
-    final lines = text.split('\n');
-
-    for (final line in lines) {
-      if (line.trim().isEmpty) {
-        spans.add(const TextSpan(text: '\n'));
-        continue;
-      }
-
-      // Handle headers (##)
-      if (line.startsWith('##')) {
-        final headerText = line.replaceFirst('##', '').trim();
-        spans.add(TextSpan(
-          text: '$headerText\n',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
-            fontFamily: 'monospace',
-          ),
-        ));
-        continue;
-      }
-
-      // Handle bold text (**text**)
-      if (line.contains('**')) {
-        final regex = RegExp(r'\*\*(.*?)\*\*');
-        int lastIndex = 0;
-        final lineSpans = <TextSpan>[];
-
-        for (final match in regex.allMatches(line)) {
-          // Add text before the match
-          if (match.start > lastIndex) {
-            lineSpans.add(TextSpan(
-              text: line.substring(lastIndex, match.start),
-              style: const TextStyle(
-                fontSize: 12,
-                height: 1.4,
-                fontFamily: 'monospace',
-              ),
-            ));
-          }
-          // Add the bold text (without the ** markers)
-          lineSpans.add(TextSpan(
-            text: match.group(1),
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.4,
-              fontFamily: 'monospace',
-              fontWeight: FontWeight.bold,
-            ),
-          ));
-          lastIndex = match.end;
-        }
-        // Add remaining text after the last match
-        if (lastIndex < line.length) {
-          lineSpans.add(TextSpan(
-            text: line.substring(lastIndex),
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.4,
-              fontFamily: 'monospace',
-            ),
-          ));
-        }
-        spans.addAll(lineSpans);
-        spans.add(const TextSpan(text: '\n'));
-        continue;
-      }
-
-      // Regular text
-      spans.add(TextSpan(
-        text: '$line\n',
-        style: const TextStyle(
-          fontSize: 12,
-          height: 1.4,
-          fontFamily: 'monospace',
-        ),
-      ));
-    }
-
-    return RichText(
-      text: TextSpan(children: spans),
-    );
-  }
+  // Note: _buildExpandableAnalysis and _buildFormattedText methods removed
+  // as detailed AI analysis is now hidden from frontend per requirements
 }
-

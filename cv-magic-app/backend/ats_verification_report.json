@@ -1,0 +1,42 @@
+{
+  "test_timestamp": "2025-01-13T12:00:00Z",
+  "company_name": "GfK",
+  "test_status": "PASSED",
+  "ats_analysis_results": {
+    "timestamp": "2.0-enhanced",
+    "final_ats_score": 61.35546875,
+    "category_status": "\u26a0\ufe0f Moderate fit",
+    "recommendation": "Consider if other factors are strong",
+    "technical_skills_match_rate": 100.0,
+    "soft_skills_match_rate": 0.0,
+    "domain_keywords_match_rate": 0.0,
+    "cat1_score": 20.0,
+    "cat2_score": 41.35546875,
+    "bonus_points": 0.0,
+    "technical_missing_count": 0,
+    "soft_missing_count": 0,
+    "domain_missing_count": 0,
+    "key_strengths": [
+      "Strong technical skills alignment"
+    ],
+    "critical_gaps": [
+      "Industry classification unclear"
+    ],
+    "improvement_recommendations": [
+      "Emphasize relevant project experience",
+      "Address key skill gaps through training"
+    ],
+    "overall_assessment": "Moderate fit requiring skill development",
+    "processing_time_ms": 66,
+    "confidence_score": 0.6333333333333334,
+    "analysis_version": "2.0-enhanced"
+  },
+  "file_path": "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/GfK/GfK_skills_analysis.json",
+  "file_size_bytes": 20115,
+  "verification_summary": {
+    "ats_score_calculated": true,
+    "results_saved_to_file": true,
+    "all_required_fields_present": true,
+    "json_serialization_working": true
+  }
+}
