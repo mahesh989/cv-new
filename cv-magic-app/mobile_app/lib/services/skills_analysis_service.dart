@@ -198,4 +198,61 @@ class SkillsAnalysisService {
       return null;
     }
   }
+
+  /// Poll for complete analysis results (component analysis + ATS)
+  static Future<Map<String, dynamic>?> getCompleteAnalysisResults(String company) async {
+    try {
+      print('📊 [POLLING] Checking for complete results for company: $company');
+      
+      final result = await APIService.makeAuthenticatedCall(
+        endpoint: '/analysis-results/$company',
+        method: 'GET',
+      );
+      
+      if (result['success'] == true && result['data'] != null) {
+        final data = result['data'] as Map<String, dynamic>;
+        print('📊 [POLLING] Component analysis present: ${data.containsKey("component_analysis")}');
+        print('📊 [POLLING] ATS score present: ${data.containsKey("ats_score")}');
+        
+        if (data.containsKey('component_analysis') && data.containsKey('ats_score')) {
+          print('✅ [POLLING] Complete results found!');
+          return data;
+        } else {
+          print('⏳ [POLLING] Still waiting for complete results...');
+          return null;
+        }
+      }
+      
+      return null;
+    } catch (e) {
+      print('❌ [POLLING] Error getting complete results: $e');
+      return null;
+    }
+  }
+
+  /// Wait for complete analysis results with polling
+  static Future<Map<String, dynamic>?> waitForCompleteResults(String company, {int maxWaitTimeSeconds = 30}) async {
+    print('🔄 [POLLING] Starting polling for complete results...');
+    
+    const pollInterval = Duration(seconds: 2);
+    final maxAttempts = maxWaitTimeSeconds ~/ 2;
+    
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      print('🔄 [POLLING] Attempt $attempt/$maxAttempts');
+      
+      final completeResults = await getCompleteAnalysisResults(company);
+      if (completeResults != null) {
+        print('✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
+        return completeResults;
+      }
+      
+      if (attempt < maxAttempts) {
+        print('⏳ [POLLING] Waiting ${pollInterval.inSeconds}s before next attempt...');
+        await Future.delayed(pollInterval);
+      }
+    }
+    
+    print('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
+    return null;
+  }
 }

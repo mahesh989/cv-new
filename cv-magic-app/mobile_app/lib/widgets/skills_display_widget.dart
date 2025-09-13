@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
+import 'ats_score_widget.dart';
 import '../utils/preextracted_parser.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
@@ -374,6 +375,9 @@ class SkillsDisplayWidget extends StatelessWidget {
               },
             ),
           ],
+          
+          // ATS Score Widget - Show when available
+          ATSScoreWidget(controller: controller),
         ],
       ),
     );

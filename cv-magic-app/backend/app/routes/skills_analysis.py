@@ -129,52 +129,90 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
     logger.info(f"🚀 [PIPELINE] Scheduling JD analysis and CV–JD matching for '{company_name}'...")
 
     async def _run_pipeline(cname: str):
+        """Run the complete analysis pipeline with error recovery"""
+        pipeline_results = {
+            "jd_analysis": False,
+            "cv_jd_matching": False,
+            "component_analysis": False
+        }
+        
+        # Step 1: JD Analysis
         try:
             logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname}")
             await analyze_and_save_company_jd(cname, force_refresh=False)
             logger.info(f"✅ [PIPELINE] JD analysis saved for {cname}")
+            pipeline_results["jd_analysis"] = True
+        except Exception as e:
+            logger.error(f"❌ [PIPELINE] JD analysis failed for {cname}: {e}")
+            # Continue with next steps even if this fails
 
+        # Step 2: CV-JD Matching
+        try:
             logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
             await match_and_save_cv_jd(cname, cv_file_path=None, force_refresh=False)
             logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
-
-            # Now run component analysis after skill comparison completes
-            logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
-            try:
-                from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
-                
-                # Check if we have the required files
-                base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
-                required_files = {
-                    "cv_file": base_dir / "original_cv.json",
-                    "jd_file": base_dir / cname / "jd_original.json", 
-                    "match_file": base_dir / cname / "cv_jd_match_results.json"
-                }
-                
-                missing_files = [name for name, path in required_files.items() if not path.exists()]
-                if missing_files:
-                    logger.warning(f"⚠️ [PIPELINE] Missing files for component analysis: {missing_files}")
-                    logger.info(f"🔄 [PIPELINE] Skipping component analysis for {cname} due to missing files")
-                else:
-                    # Run component analysis
-                    component_result = await modular_ats_orchestrator.run_component_analysis(cname)
-                    logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
-                    
-                    # Log extracted scores if available
-                    if isinstance(component_result, dict) and 'extracted_scores' in component_result:
-                        scores = component_result['extracted_scores']
-                        logger.info(f"📊 [PIPELINE] Component scores extracted: {len(scores)} scores")
-                        # Log key scores
-                        for key in ['skills_relevance', 'experience_alignment', 'industry_fit', 'role_seniority', 'technical_depth']:
-                            if key in scores:
-                                logger.info(f"📊 [PIPELINE] {key}: {scores[key]:.1f}")
-                    
-            except Exception as component_error:
-                logger.error(f"❌ [PIPELINE] Component analysis failed for {cname}: {component_error}")
-                # Don't let component analysis failure break the main pipeline
-                pass
+            pipeline_results["cv_jd_matching"] = True
         except Exception as e:
-            logger.warning(f"⚠️ [PIPELINE] Background pipeline error for {cname}: {e}")
+            logger.error(f"❌ [PIPELINE] CV-JD matching failed for {cname}: {e}")
+            # Log detailed error for debugging
+            import traceback
+            logger.error(f"[PIPELINE] CV-JD matching traceback: {traceback.format_exc()}")
+            # Continue with component analysis even if matching fails
+
+        # Step 3: Component Analysis (includes ATS calculation)
+        try:
+            logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
+            from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+            
+            # Check if we have the minimum required files
+            base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+            cv_file = base_dir / "original_cv.json"
+            jd_file = base_dir / cname / "jd_original.json"
+            skills_file = base_dir / cname / f"{cname}_skills_analysis.json"
+            
+            # We can run component analysis if we have CV, JD, and skills analysis
+            if cv_file.exists() and jd_file.exists() and skills_file.exists():
+                logger.info(f"📄 [PIPELINE] Required files found, proceeding with component analysis")
+                component_result = await modular_ats_orchestrator.run_component_analysis(cname)
+                logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
+                pipeline_results["component_analysis"] = True
+                
+                # Log extracted scores if available
+                if isinstance(component_result, dict) and 'extracted_scores' in component_result:
+                    scores = component_result['extracted_scores']
+                    logger.info(f"📊 [PIPELINE] Component scores extracted: {len(scores)} scores")
+                    # Log key scores
+                    for key in ['skills_relevance', 'experience_alignment', 'industry_fit', 'role_seniority', 'technical_depth']:
+                        if key in scores:
+                            logger.info(f"📊 [PIPELINE] {key}: {scores[key]:.1f}")
+                
+                # Check if ATS was calculated
+                if isinstance(component_result, dict) and 'ats_results' in component_result:
+                    final_score = component_result['ats_results'].get('final_ats_score')
+                    logger.info(f"🎯 [PIPELINE] ATS Score calculated: {final_score}")
+            else:
+                missing = []
+                if not cv_file.exists(): missing.append("CV")
+                if not jd_file.exists(): missing.append("JD")
+                if not skills_file.exists(): missing.append("Skills")
+                logger.warning(f"⚠️ [PIPELINE] Missing files for component analysis: {missing}")
+                logger.info(f"🔄 [PIPELINE] Skipping component analysis for {cname} due to missing files")
+                
+        except Exception as component_error:
+            logger.error(f"❌ [PIPELINE] Component analysis failed for {cname}: {component_error}")
+            import traceback
+            logger.error(f"[PIPELINE] Component analysis traceback: {traceback.format_exc()}")
+        
+        # Log pipeline summary
+        successful_steps = [step for step, success in pipeline_results.items() if success]
+        failed_steps = [step for step, success in pipeline_results.items() if not success]
+        
+        logger.info(f"📋 [PIPELINE] Pipeline summary for {cname}:")
+        logger.info(f"   ✅ Successful: {successful_steps}")
+        if failed_steps:
+            logger.info(f"   ❌ Failed: {failed_steps}")
+        else:
+            logger.info(f"   🎉 All steps completed successfully!")
 
     try:
         asyncio.create_task(_run_pipeline(company_name))

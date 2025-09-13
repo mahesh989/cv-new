@@ -87,40 +87,57 @@ class ATSScoreCalculator:
             
             # Extract data from the structured content
             lines = content.split('\n')
+            import re
+            
+            # Look for the table format with match rates
             for line in lines:
-                if "Technical Skills" in line and "Match Rate" in line:
-                    # Extract match rate percentage
-                    import re
-                    match = re.search(r'(\d+)', line)
-                    if match:
-                        tech_rate = float(match.group(1))
+                # Parse table rows for match rates and missing counts
+                # Format: Category    CV Total  JD Total   Matched   Missing  Match Rate (%)
+                if "Technical Skills" in line and not "TECHNICAL SKILLS" in line:
+                    # Split by whitespace and get the values
+                    parts = line.split()
+                    if len(parts) >= 6:
+                        try:
+                            # The last value is the match rate
+                            tech_rate = float(parts[-1])
+                            # The second to last is missing count
+                            tech_missing = int(parts[-2])
+                        except (ValueError, IndexError):
+                            pass
                 
-                elif "Soft Skills" in line and "Match Rate" in line:
-                    match = re.search(r'(\d+)', line)
-                    if match:
-                        soft_rate = float(match.group(1))
+                elif "Soft Skills" in line and not "SOFT SKILLS" in line:
+                    parts = line.split()
+                    if len(parts) >= 6:
+                        try:
+                            soft_rate = float(parts[-1])
+                            soft_missing = int(parts[-2])
+                        except (ValueError, IndexError):
+                            pass
                 
-                elif "Domain Keywords" in line and "Match Rate" in line:
-                    match = re.search(r'(\d+)', line)
-                    if match:
-                        domain_rate = float(match.group(1))
+                elif "Domain Keywords" in line and not "DOMAIN KEYWORDS" in line:
+                    parts = line.split()
+                    if len(parts) >= 6:
+                        try:
+                            domain_rate = float(parts[-1])
+                            domain_missing = int(parts[-2])
+                        except (ValueError, IndexError):
+                            pass
                 
-                elif "MISSING FROM CV" in line and "Technical" in line:
-                    match = re.search(r'(\d+) items', line)
+                # Also check for missing items in the detailed analysis section
+                elif "❌ MISSING FROM CV" in line:
+                    match = re.search(r'\((\d+) items\)', line)
                     if match:
-                        tech_missing = int(match.group(1))
-                
-                elif "MISSING FROM CV" in line and "Soft" in line:
-                    match = re.search(r'(\d+) items', line)
-                    if match:
-                        soft_missing = int(match.group(1))
-                
-                elif "MISSING FROM CV" in line and "Domain" in line:
-                    match = re.search(r'(\d+) items', line)
-                    if match:
-                        domain_missing = int(match.group(1))
+                        count = int(match.group(1))
+                        # Determine which category based on context
+                        if "TECHNICAL" in content[max(0, content.find(line)-100):content.find(line)]:
+                            tech_missing = max(tech_missing, count)  # Use max in case we already parsed from table
+                        elif "SOFT" in content[max(0, content.find(line)-100):content.find(line)]:
+                            soft_missing = max(soft_missing, count)
+                        elif "DOMAIN" in content[max(0, content.find(line)-100):content.find(line)]:
+                            domain_missing = max(domain_missing, count)
             
             logger.info(f"[ATS] Match rates - Tech: {tech_rate}%, Domain: {domain_rate}%, Soft: {soft_rate}%")
+            logger.info(f"[ATS] Missing counts - Tech: {tech_missing}, Domain: {domain_missing}, Soft: {soft_missing}")
             return tech_rate, domain_rate, soft_rate, tech_missing, soft_missing, domain_missing
             
         except Exception as e:

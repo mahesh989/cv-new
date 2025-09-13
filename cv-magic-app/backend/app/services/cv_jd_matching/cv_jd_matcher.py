@@ -8,6 +8,7 @@ using AI-powered smart matching logic.
 import os
 import json
 import logging
+import asyncio
 from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
 from datetime import datetime
@@ -207,7 +208,8 @@ class CVJDMatcher:
         company_name: str,
         cv_file_path: Optional[str] = None,
         jd_analysis_data: Optional[Dict[str, Any]] = None,
-        temperature: float = 0.3
+        temperature: float = 0.3,
+        max_retries: int = 3
     ) -> CVJDMatchResult:
         """
         Match CV content against job description keywords
@@ -254,22 +256,45 @@ class CVJDMatcher:
                 preferred_keywords=preferred_keywords
             )
             
-            # Call AI service
-            response = await self.ai_service.generate_response(
-                prompt=user_prompt,
-                system_prompt=system_prompt,
-                temperature=temperature,
-                max_tokens=3000
-            )
+            # Retry logic for AI service calls
+            last_error = None
+            for attempt in range(max_retries):
+                try:
+                    # Call AI service
+                    response = await self.ai_service.generate_response(
+                        prompt=user_prompt,
+                        system_prompt=system_prompt,
+                        temperature=temperature,
+                        max_tokens=3000
+                    )
+                    
+                    # Parse response
+                    result = self._parse_ai_response(response)
+                    result.company_name = company_name
+                    result.cv_file_path = cv_file_path
+                    
+                    logger.info(f"✅ CV-JD matching completed. Found {len(result.matched_required_keywords)} matched required keywords")
+                    
+                    return result
+                    
+                except json.JSONDecodeError as e:
+                    last_error = e
+                    logger.warning(f"⚠️ Attempt {attempt + 1}/{max_retries} failed - JSON parsing error: {e}")
+                    if attempt < max_retries - 1:
+                        logger.info(f"🔄 Retrying CV-JD matching...")
+                        await asyncio.sleep(1)  # Brief delay before retry
+                    continue
+                    
+                except Exception as e:
+                    last_error = e
+                    logger.warning(f"⚠️ Attempt {attempt + 1}/{max_retries} failed: {e}")
+                    if attempt < max_retries - 1:
+                        logger.info(f"🔄 Retrying CV-JD matching...")
+                        await asyncio.sleep(1)  # Brief delay before retry
+                    continue
             
-            # Parse response
-            result = self._parse_ai_response(response)
-            result.company_name = company_name
-            result.cv_file_path = cv_file_path
-            
-            logger.info(f"✅ CV-JD matching completed. Found {len(result.matched_required_keywords)} matched required keywords")
-            
-            return result
+            # If all retries failed, raise the last error
+            raise Exception(f"Failed after {max_retries} attempts: {last_error}")
             
         except FileNotFoundError:
             raise
