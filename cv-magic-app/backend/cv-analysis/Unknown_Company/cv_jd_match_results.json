@@ -1,0 +1,44 @@
+{
+  "company_name": "Unknown_Company",
+  "cv_analysis_timestamp": "2025-09-14T18:08:40.882247",
+  "matched_required_keywords": [
+    "SQL",
+    "VBA",
+    "SQL data warehouse",
+    "Power BI",
+    "communication",
+    "project management",
+    "data warehouse"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau"
+  ],
+  "missed_required_keywords": [
+    "marketing campaigns"
+  ],
+  "missed_preferred_keywords": [
+    "stakeholder management",
+    "communication purposes",
+    "clean data"
+  ],
+  "match_counts": {
+    "total_required_keywords": 7,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 7,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "SQL": "Found in the technical skills section where the candidate mentions proficiency in SQL for querying, modeling, and managing complex relational databases.",
+    "VBA": "Not found in the CV content.",
+    "SQL data warehouse": "Found indirectly through the mention of Snowflake for cloud data warehousing.",
+    "Power BI": "Found in the technical skills section where the candidate mentions proficiency in Power BI and building comprehensive dashboards.",
+    "communication": "Found in the career profile where the candidate mentions creating advanced visualizations that convert complex data into actionable insights.",
+    "project management": "Found in the career profile where the candidate mentions building comprehensive dashboards that support data-driven decision-making.",
+    "data warehouse": "Found indirectly through the mention of Snowflake for cloud data warehousing.",
+    "Tableau": "Found in the technical skills section where the candidate mentions being skilled in creating interactive dashboards and visualizations using Tableau."
+  },
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "metadata": {}
+}

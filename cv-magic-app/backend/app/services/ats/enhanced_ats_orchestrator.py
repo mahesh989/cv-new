@@ -488,17 +488,6 @@ class EnhancedATSOrchestrator:
             logger.info(f"[Enhanced ATS] ATS analysis saved to {analysis_file}")
             logger.info(f"[Enhanced ATS] Final ATS Score: {results.final_ats_score:.1f}/100 ({results.ats_breakdown.category_status})")
             
-            # Generate recommendation input file after ATS calculation
-            try:
-                from ...utils.recommendation_input_generator import generate_recommendation_input_after_ats
-                recommendation_file = generate_recommendation_input_after_ats(company, existing_analysis)
-                if recommendation_file:
-                    logger.info(f"✅ [Enhanced ATS] Recommendation input generated: {recommendation_file}")
-                else:
-                    logger.warning(f"⚠️ [Enhanced ATS] Failed to generate recommendation input for {company}")
-            except Exception as e:
-                logger.warning(f"⚠️ [Enhanced ATS] Recommendation input generation failed: {e}")
-            
             return ats_results_dict
             
         except Exception as e:

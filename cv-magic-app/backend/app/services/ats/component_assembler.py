@@ -429,17 +429,6 @@ class ComponentAssembler:
             logger.info("[ASSEMBLER] ATS calculation completed. Score: %.1f/100 (%s)", 
                        ats_breakdown.final_ats_score, ats_breakdown.category_status)
             
-            # Generate recommendation input file after ATS calculation
-            try:
-                from ...utils.recommendation_input_generator import generate_recommendation_input_after_ats
-                recommendation_file = generate_recommendation_input_after_ats(company, data)
-                if recommendation_file:
-                    logger.info(f"✅ [ASSEMBLER] Recommendation input generated: {recommendation_file}")
-                else:
-                    logger.warning(f"⚠️ [ASSEMBLER] Failed to generate recommendation input for {company}")
-            except Exception as e:
-                logger.warning(f"⚠️ [ASSEMBLER] Recommendation input generation failed: {e}")
-            
             return ats_result
             
         except Exception as e:

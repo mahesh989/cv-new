@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/skills_analysis_model.dart';
 import '../services/skills_analysis_service.dart';
-import '../widgets/progressive_analysis/progressive_analysis_controller.dart';
-import '../widgets/progressive_analysis/progressive_analysis_phase.dart';
 
 /// States for skills analysis
 enum SkillsAnalysisState {
@@ -28,10 +26,6 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool _showPreextractedComparison = false;
   Timer? _progressiveTimer;
 
-  // Progressive analysis controller
-  final ProgressiveAnalysisController _progressiveController =
-      ProgressiveAnalysisController();
-
   // Notification callbacks
   Function(String message, {bool isError})? _onNotification;
 
@@ -53,10 +47,6 @@ class SkillsAnalysisController extends ChangeNotifier {
   // Progressive display getters
   bool get showAnalyzeMatch => _showAnalyzeMatch;
   bool get showPreextractedComparison => _showPreextractedComparison;
-
-  // Progressive analysis controller getter
-  ProgressiveAnalysisController get progressiveController =>
-      _progressiveController;
 
   // CV Skills getters
   SkillsData? get cvSkills => _result?.cvSkills;
@@ -267,14 +257,13 @@ class SkillsAnalysisController extends ChangeNotifier {
     _errorMessage = null;
   }
 
-  /// Start progressive display of results using new system
+  /// Start progressive display of results
   void _startProgressiveDisplay() {
     if (_fullResult == null) return;
 
     // Reset progressive state
     _showAnalyzeMatch = false;
     _showPreextractedComparison = false;
-    _progressiveController.reset();
 
     // Step 1: Show skills immediately (side-by-side display)
     _result = SkillsAnalysisResult(
@@ -293,61 +282,65 @@ class SkillsAnalysisController extends ChangeNotifier {
     );
 
     _setState(SkillsAnalysisState.completed);
-
-    // Start skills extraction phase immediately
-    final skillsPhase =
-        ProgressiveAnalysisConfig.getPhaseById('skills_extraction')!;
-    _progressiveController.startPhase(skillsPhase);
-    _progressiveController.completePhase(skillsPhase, variables: {
-      'cvCount': _fullResult!.cvSkills.totalSkillsCount.toString(),
-      'jdCount': _fullResult!.jdSkills.totalSkillsCount.toString(),
-    });
-
-    // Determine which phases to show
-    final activePhases = ProgressiveAnalysisConfig.getActivePhases(
-      hasAnalyzeMatch: _fullResult?.analyzeMatch != null,
-      hasPreextractedComparison: _fullResult?.preextractedRawOutput != null,
-      hasATSResult: true, // Always show ATS phase now
+    _showNotification(
+      '✅ Skills extracted! Found ${_fullResult!.cvSkills.totalSkillsCount} CV skills and ${_fullResult!.jdSkills.totalSkillsCount} JD skills.',
     );
 
-    // Start progressive analysis with delays
-    _progressiveController.startProgressiveAnalysis(
-      activePhases,
-      onPhaseStart: (phase) {
-        switch (phase.id) {
-          case 'analyze_match':
-            _showAnalyzeMatch = true;
-            notifyListeners();
-            break;
-          case 'skills_comparison':
-            _showPreextractedComparison = true;
-            notifyListeners();
-            break;
-          case 'ats_analysis':
-            // ATS phase will be handled in polling
-            break;
-        }
-      },
-      onPhaseComplete: (phase) {
-        switch (phase.id) {
-          case 'analyze_match':
-            _result = _result!.copyWith(
-              analyzeMatch: _fullResult!.analyzeMatch,
-            );
-            notifyListeners();
-            break;
-          case 'skills_comparison':
+    // Step 2: Show analyze match loading immediately, then results after 10 seconds
+    if (_fullResult?.analyzeMatch != null) {
+      // Immediately show loading state and notification
+      _showAnalyzeMatch = true;
+      notifyListeners();
+      _showNotification('📎 Starting recruiter assessment analysis...');
+
+      Timer(Duration(seconds: 10), () {
+        // Show analyze match results
+        _result = _result!.copyWith(
+          analyzeMatch: _fullResult!.analyzeMatch,
+        );
+        notifyListeners();
+        _showNotification('🎯 Recruiter assessment completed!');
+
+        // Step 3: Immediately show preextracted comparison loading
+        if (_fullResult?.preextractedRawOutput != null) {
+          _showPreextractedComparison = true;
+          notifyListeners();
+          _showNotification('📈 Starting skills comparison analysis...');
+
+          Timer(Duration(seconds: 10), () {
+            // Show preextracted comparison results
             _result = _result!.copyWith(
               preextractedRawOutput: _fullResult!.preextractedRawOutput,
               preextractedCompanyName: _fullResult!.preextractedCompanyName,
             );
             notifyListeners();
-            // Start polling for ATS results after skills comparison
+            _showNotification('📊 Skills comparison analysis completed!');
+
+            // Step 4: Start polling for component analysis and ATS results
             _startPollingForCompleteResults();
-            break;
+          });
         }
-      },
-    );
+      });
+    } else {
+      // No analyze match, go directly to preextracted comparison
+      if (_fullResult?.preextractedRawOutput != null) {
+        _showPreextractedComparison = true;
+        notifyListeners();
+        _showNotification('📈 Starting skills comparison analysis...');
+
+        Timer(Duration(seconds: 10), () {
+          _result = _result!.copyWith(
+            preextractedRawOutput: _fullResult!.preextractedRawOutput,
+            preextractedCompanyName: _fullResult!.preextractedCompanyName,
+          );
+          notifyListeners();
+          _showNotification('📊 Skills comparison analysis completed!');
+
+          // Step 4: Start polling for component analysis and ATS results
+          _startPollingForCompleteResults();
+        });
+      }
+    }
   }
 
   /// Start polling for component analysis and ATS calculation results
@@ -360,17 +353,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     }
 
     print('🔄 [POLLING] Starting polling for complete results...');
-
-    // Start ATS analysis phase with 10-second delay for consistency
-    final atsPhase = ProgressiveAnalysisConfig.getPhaseById('ats_analysis')!;
-    _progressiveController.startPhaseWithDelay(
-      atsPhase,
-      delaySeconds: 0, // Start immediately, but show loading for 10 seconds
-      onComplete: () {
-        // ATS phase completed, now show the actual results
-        _showATSResults();
-      },
-    );
+    _showNotification(
+        '🔧 Running advanced analysis (component analysis & ATS calculation)...');
 
     try {
       final completeResults =
@@ -395,58 +379,34 @@ class SkillsAnalysisController extends ChangeNotifier {
           print('🎯 [POLLING] ATS result parsed: ${atsResult.finalATSScore}');
         }
 
-        // Store results for later display
-        _componentAnalysis = componentAnalysis;
-        _atsResult = atsResult;
+        // Update the result with component analysis and ATS data
+        _result = _result!.copyWith(
+          componentAnalysis: componentAnalysis,
+          atsResult: atsResult,
+        );
 
-        // Results will be displayed when ATS phase completes
+        notifyListeners();
+
+        if (atsResult != null) {
+          _showNotification(
+              '🎯 ATS Score: ${atsResult.finalATSScore.toStringAsFixed(1)}/100 (${atsResult.categoryStatus})');
+        } else {
+          _showNotification('✅ Advanced analysis completed!');
+        }
+
+        _finishAnalysis();
       } else {
         print('⚠️ [POLLING] Polling timed out, analysis incomplete');
-        _progressiveController.completePhase(atsPhase, variables: {
-          'score': 'N/A',
-          'status': 'Timed out',
-        });
+        _showNotification(
+            '⚠️ Advanced analysis timed out - basic analysis complete');
         _finishAnalysis();
       }
     } catch (e) {
       print('❌ [POLLING] Error during polling: $e');
-      _progressiveController.completePhase(atsPhase, variables: {
-        'score': 'N/A',
-        'status': 'Failed',
-      });
+      _showNotification(
+          '⚠️ Advanced analysis failed - basic analysis complete');
       _finishAnalysis();
     }
-  }
-
-  // Store results temporarily
-  ComponentAnalysisResult? _componentAnalysis;
-  ATSResult? _atsResult;
-
-  /// Show ATS results after phase completion
-  void _showATSResults() {
-    // Update the result with component analysis and ATS data
-    _result = _result!.copyWith(
-      componentAnalysis: _componentAnalysis,
-      atsResult: _atsResult,
-    );
-
-    notifyListeners();
-
-    // Complete the ATS phase with actual results
-    final atsPhase = ProgressiveAnalysisConfig.getPhaseById('ats_analysis')!;
-    if (_atsResult != null) {
-      _progressiveController.completePhase(atsPhase, variables: {
-        'score': _atsResult!.finalATSScore.toStringAsFixed(1),
-        'status': _atsResult!.categoryStatus,
-      });
-    } else {
-      _progressiveController.completePhase(atsPhase, variables: {
-        'score': 'N/A',
-        'status': 'Not available',
-      });
-    }
-
-    _finishAnalysis();
   }
 
   /// Finish the analysis process

@@ -15,26 +15,21 @@
       "customer service"
     ],
     "domain_knowledge": [
-      "data warehouse",
       "data mining",
-      "direct marketing campaigns",
-      "donor-centricity"
+      "data warehouse",
+      "marketing campaigns",
+      "data models"
     ],
     "experience": []
   },
   "preferred_skills": {
-    "technical": [
-      "data models",
-      "business intelligence tools"
-    ],
-    "soft_skills": [
-      "analytical thinking",
-      "problem-solving"
-    ],
+    "technical": [],
+    "soft_skills": [],
     "domain_knowledge": [
       "data issues",
       "de-duplication",
-      "communication regulations"
+      "data governance",
+      "best practice guidelines"
     ],
     "experience": []
   },
@@ -48,21 +43,18 @@
     "stakeholder management",
     "communication",
     "customer service",
-    "data warehouse",
     "data mining",
-    "direct marketing campaigns",
-    "donor-centricity"
+    "data warehouse",
+    "marketing campaigns",
+    "data models"
   ],
   "preferred_keywords": [
-    "data models",
-    "business intelligence tools",
-    "analytical thinking",
-    "problem-solving",
     "data issues",
     "de-duplication",
-    "communication regulations"
+    "data governance",
+    "best practice guidelines"
   ],
-  "analysis_timestamp": "2025-09-14T15:37:58.767374",
+  "analysis_timestamp": "2025-09-14T18:11:17.140701",
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",
