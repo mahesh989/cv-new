@@ -1,62 +1,40 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-14T18:11:22.976945",
+  "cv_analysis_timestamp": "2025-09-14T18:32:52.472668",
   "matched_required_keywords": [
     "SQL",
-    "Power BI",
-    "Tableau",
-    "Excel",
-    "project management",
-    "communication",
-    "customer service"
-  ],
-  "matched_preferred_keywords": [],
-  "missed_required_keywords": [
     "VBA",
-    "stakeholder management",
-    "data mining",
-    "data warehouse",
-    "marketing campaigns",
-    "data models"
+    "SQL data warehouse",
+    "Power BI",
+    "communication",
+    "project management",
+    "data warehouse"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau"
+  ],
+  "missed_required_keywords": [
+    "stakeholder management"
   ],
   "missed_preferred_keywords": [
-    "data issues",
-    "de-duplication",
-    "data governance",
-    "best practice guidelines"
+    "customer service",
+    "marketing campaigns",
+    "communication purposes",
+    "governing regulations"
   ],
   "match_counts": {
-    "total_required_keywords": 12,
-    "total_preferred_keywords": 4,
+    "total_required_keywords": 8,
+    "total_preferred_keywords": 5,
     "matched_required_count": 7,
-    "matched_preferred_count": 0
+    "matched_preferred_count": 1
   },
   "matching_notes": {
-    "matched_required_keywords": {
-      "SQL": "Found in the technical skills section as proficient in SQL for querying and managing databases.",
-      "Power BI": "Mentioned in the experience section where dashboards were created to present research findings.",
-      "Tableau": "Referenced in the technical skills and experience sections for creating dashboards.",
-      "Excel": "Noted in the technical skills for data-driven solutions and reporting.",
-      "project management": "Contextually matched through experience in managing projects and deadlines.",
-      "communication": "Inferred from the context of presenting research findings and mentoring students.",
-      "customer service": "Matched through analysis of customer support data to optimize response times."
-    },
-    "missed_required_keywords": {
-      "VBA": "Not mentioned in any context.",
-      "stakeholder management": "No direct reference or context found.",
-      "data mining": "Not explicitly mentioned or implied.",
-      "data warehouse": "While Snowflake is mentioned, it does not explicitly match the term 'data warehouse'.",
-      "marketing campaigns": "No reference to marketing or related activities.",
-      "data models": "Not mentioned or implied in the CV."
-    },
-    "missed_preferred_keywords": {
-      "data issues": "No mention of data issues or related context.",
-      "de-duplication": "Not referenced in any context.",
-      "data governance": "No mention or relevant context found.",
-      "best practice guidelines": "Not mentioned in any context."
-    }
+    "stakeholder management": "Not explicitly mentioned in the CV content.",
+    "Tableau": "The candidate mentions proficiency in Tableau in the Technical Skills section, matching the preferred keyword.",
+    "communication": "The candidate mentions 'communication' in the Technical Skills section, matching the required keyword.",
+    "project management": "The candidate mentions 'project management' in the Technical Skills section, matching the required keyword."
   },
-  "ai_model_used": "openai/gpt-4o-mini",
+  "ai_model_used": "openai/gpt-3.5-turbo",
   "processing_status": "completed",
   "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
   "metadata": {}
