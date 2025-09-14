@@ -26,6 +26,8 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool _showPreextractedComparison = false;
   bool _showATSLoading = false;
   bool _showATSResults = false;
+  bool _showRecommendationLoading = false;
+  bool _showRecommendationResults = false;
   Timer? _progressiveTimer;
 
   // Notification callbacks
@@ -51,6 +53,8 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool get showPreextractedComparison => _showPreextractedComparison;
   bool get showATSLoading => _showATSLoading;
   bool get showATSResults => _showATSResults;
+  bool get showRecommendationLoading => _showRecommendationLoading;
+  bool get showRecommendationResults => _showRecommendationResults;
 
   // CV Skills getters
   SkillsData? get cvSkills => _result?.cvSkills;
@@ -229,6 +233,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     _showPreextractedComparison = false;
     _showATSLoading = false;
     _showATSResults = false;
+    _showRecommendationLoading = false;
+    _showRecommendationResults = false;
     _result = null;
     _currentCvFilename = null;
     _currentJdText = null;
@@ -272,6 +278,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     _showPreextractedComparison = false;
     _showATSLoading = false;
     _showATSResults = false;
+    _showRecommendationLoading = false;
+    _showRecommendationResults = false;
 
     // Step 1: Show skills immediately (side-by-side display)
     _result = SkillsAnalysisResult(
@@ -423,7 +431,53 @@ class SkillsAnalysisController extends ChangeNotifier {
               _showNotification('✅ ATS Analysis completed!');
             }
             
-            _finishAnalysis();
+            // Step 6: Fetch AI Recommendations from backend endpoint
+            print('🔍 [RECOMMENDATION_DEBUG] Fetching AI recommendations from backend...');
+            final company = _fullResult?.preextractedCompanyName;
+            if (company != null && company.isNotEmpty) {
+              // Immediately show Recommendations loading state and notification
+              _showRecommendationLoading = true;
+              notifyListeners();
+              _showNotification('💡 Fetching personalized recommendations...');
+              print('   _showRecommendationLoading set to true');
+
+              Timer(Duration(seconds: 10), () async {
+                print('✅ [RECOMMENDATION_DEBUG] 10s timer completed, fetching from backend...');
+                
+                // Fetch AI recommendations from the backend endpoint
+                try {
+                  final aiRecommendations = await SkillsAnalysisService.getAIRecommendations(company);
+                  
+                  if (aiRecommendations != null && aiRecommendations.isNotEmpty) {
+                    print('✅ [RECOMMENDATION_DEBUG] Successfully fetched ${aiRecommendations.length} recommendations from backend');
+                    
+                    // Update the ATS result with the fetched recommendations
+                    if (_fullResult?.atsResult != null) {
+                      final updatedAtsResult = _fullResult!.atsResult!.copyWithRecommendations(aiRecommendations);
+                      _fullResult = _fullResult!.copyWith(atsResult: updatedAtsResult);
+                      _result = _result!.copyWith(atsResult: updatedAtsResult);
+                    }
+                    
+                    // Show Recommendations results
+                    _showRecommendationResults = true;
+                    notifyListeners();
+                    _showNotification('✨ AI Recommendations ready! ${aiRecommendations.length} personalized suggestions.');
+                    print('   _showRecommendationResults set to true');
+                  } else {
+                    print('⚠️ [RECOMMENDATION_DEBUG] No recommendations fetched from backend');
+                    _showNotification('⚠️ AI Recommendations not available at this time');
+                  }
+                } catch (e) {
+                  print('❌ [RECOMMENDATION_DEBUG] Error fetching recommendations: $e');
+                  _showNotification('⚠️ Failed to fetch AI Recommendations');
+                }
+                
+                _finishAnalysis();
+              });
+            } else {
+              print('❌ [RECOMMENDATION_DEBUG] No company name available for fetching recommendations');
+              _finishAnalysis();
+            }
           });
         } else {
           _showNotification('✅ Advanced analysis completed!');

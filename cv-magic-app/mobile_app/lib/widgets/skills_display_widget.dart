@@ -450,108 +450,168 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // AI Recommendations - Show when ATS result includes recommendations
-          if (controller.hasATSResult &&
-              controller.atsResult?.recommendations != null &&
-              controller.atsResult!.recommendations.isNotEmpty) ...[
+          // AI Recommendations - Show with progressive loading (Phase 6)
+          if (controller.showRecommendationLoading || controller.showRecommendationResults) ...[
             Builder(
               builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] Rendering AI Recommendations');
-                final recommendations = controller.atsResult!.recommendations;
+                // Debug: Check if recommendations section should show
+                debugPrint('🔍 [SKILLS_DISPLAY] Checking recommendations section condition...');
+                debugPrint('   controller.showRecommendationLoading: ${controller.showRecommendationLoading}');
+                debugPrint('   controller.showRecommendationResults: ${controller.showRecommendationResults}');
+                debugPrint('   Condition result: ${controller.showRecommendationLoading || controller.showRecommendationResults}');
+                
                 debugPrint(
-                    '   recommendations count: ${recommendations.length}');
+                    '🔍 [SKILLS_DISPLAY] Rendering Recommendations section (progressive)');
+                debugPrint('   showRecommendationLoading: ${controller.showRecommendationLoading}');
+                debugPrint('   showRecommendationResults: ${controller.showRecommendationResults}');
+                debugPrint('   hasATSResult: ${controller.hasATSResult}');
+                if (controller.hasATSResult) {
+                  debugPrint('   atsResult.recommendations != null: ${controller.atsResult?.recommendations != null}');
+                  debugPrint('   atsResult.recommendations.isNotEmpty: ${controller.atsResult?.recommendations.isNotEmpty}');
+                  debugPrint('   atsResult.recommendations length: ${controller.atsResult?.recommendations.length}');
+                }
 
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.amber.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.lightbulb_outline,
-                              color: Colors.amber.shade700,
-                              size: 24,
+                // Show loading state if Recommendations should show but results aren't available yet
+                if (controller.showRecommendationLoading && !controller.showRecommendationResults) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.orange.shade600),
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '💡 AI RECOMMENDATIONS',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.amber.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Personalized suggestions to improve your ATS score',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.amber.shade600,
-                            fontStyle: FontStyle.italic,
                           ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Recommendations list
-                        ...recommendations
-                            .take(8)
-                            .map((recommendation) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 8),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        margin: const EdgeInsets.only(top: 4),
-                                        width: 6,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber.shade600,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          recommendation,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey.shade700,
-                                            height: 1.4,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ))
-                            .toList(),
-
-                        if (recommendations.length > 8) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(width: 12),
                           Text(
-                            '... and ${recommendations.length - 8} more recommendations available',
+                            'Generating personalized recommendations...',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Show actual Recommendations when available
+                if (controller.showRecommendationResults &&
+                    controller.hasATSResult &&
+                    controller.atsResult?.recommendations != null &&
+                    controller.atsResult!.recommendations.isNotEmpty) {
+                  
+                  final recommendations = controller.atsResult!.recommendations;
+                  debugPrint('   recommendations count: ${recommendations.length}');
+
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.amber.shade200),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.lightbulb_outline,
+                                color: Colors.amber.shade700,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '💡 AI RECOMMENDATIONS',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amber.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Personalized suggestions to improve your ATS score',
+                            style: TextStyle(
+                              fontSize: 14,
                               color: Colors.amber.shade600,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
+                          const SizedBox(height: 16),
+
+                          // Recommendations list
+                          ...recommendations
+                              .take(8)
+                              .map((recommendation) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 4),
+                                          width: 6,
+                                          height: 6,
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber.shade600,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            recommendation,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade700,
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ))
+                              .toList(),
+
+                          if (recommendations.length > 8) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              '... and ${recommendations.length - 8} more recommendations available',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.amber.shade600,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
+
+                return const SizedBox.shrink();
               },
             ),
           ],

@@ -1,0 +1,383 @@
+{
+  "generated": "2025-09-14T20:05:21.899",
+  "cv_filename": "M_tiwari_CV_Capgemini.docx",
+  "jd_url": "preliminary_analysis",
+  "user_id": "ed0ba8ee-9d1f-4a33-b20a-cb120ba6ffb3",
+  "company": "Nine_Entertainment",
+  "model_used": "gpt-4o-mini",
+  "cv_skills": {
+    "technical_skills": [
+      "SQL",
+      "Tableau",
+      "Python",
+      "Power BI",
+      "Excel",
+      "Data Analysis",
+      "Statistical Analysis",
+      "Logistic Regression",
+      "Random Forests",
+      "Deep Learning",
+      "Data Visualization",
+      "Ad-hoc Analysis",
+      "Data Discrepancies",
+      "Undersampling Techniques",
+      "Drones",
+      "Edge Devices"
+    ],
+    "soft_skills": [
+      "Communication",
+      "Time Management",
+      "Analytical Thinking",
+      "Problem-solving",
+      "Detail-oriented",
+      "Results-driven"
+    ],
+    "domain_keywords": [
+      "Data Science",
+      "Analytics",
+      "Customer Insights",
+      "Industrial Inspection",
+      "Healthcare",
+      "Real-Time Detection",
+      "User Data"
+    ],
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- SQL - \"specializing in SQL\"\n- Tableau - \"specializing in Tableau\"\n- Python - \"specializing in Python\"\n- Power BI - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n- Excel - \"Proficient in Python and Excel for data analysis and automation\"\n- Data Analysis - \"Ability to uncover insights through analysis of large and diverse datasets\"\n- Statistical Analysis - \"Identified patterns and insights of user data through statistical analysis\"\n- Logistic Regression - \"Implemented logistic regression\"\n- Random Forests - \"Implemented random forests\"\n- Deep Learning - \"Implemented deep learning models\"\n- Data Visualization - \"creating interactive dashboards using Power BI and Excel\"\n- Ad-hoc Analysis - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Data Discrepancies - \"identifying and addressing data discrepancies\"\n- Undersampling Techniques - \"Addressed imbalanced datasets using undersampling techniques\"\n- Drones - \"enhance model performance using drones\"\n- Edge Devices - \"enhance model performance using edge devices\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Integrity - \"ensuring 99% accuracy and integrity\"\n- Dashboard Creation - \"Developed Power BI dashboards\"\n- Reporting - \"reducing reporting time by 30%\"\n- Model Optimization - \"Optimisation of Yolov8n Model for Real-Time Corrosion Detection\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent interpersonal and communication skills to work effectively with stakeholders\"\n- Time Management - \"Strong ability to manage and prioritise multiple tasks in dynamic environments\"\n- Analytical Thinking - \"Adept at transforming complex datasets into actionable insights\"\n- Problem-solving - \"Conducted ad-hoc analyses to uncover actionable insights\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Detail-oriented - \"ensuring 99% accuracy and integrity\"\n- Results-driven - \"contributing impactful solutions to data-driven projects\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Dynamic Data Science Professional\"\n- Analytics - \"hands-on experience in analytics\"\n- Customer Insights - \"analyse customer text data and identify top 20 queries\"\n- Industrial Inspection - \"Contributed to industrial inspection innovations\"\n- Healthcare - \"Heart Attack Risk Prediction\"\n\n**STRONGLY IMPLIED:**\n- Real-Time Detection - \"for Real-Time Corrosion Detection\"\n- User Data - \"Identified patterns and insights of user data\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Time Management\", \"Analytical Thinking\", \"Problem-solving\", \"Detail-oriented\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"SQL\", \"Tableau\", \"Python\", \"Power BI\", \"Excel\", \"Data Analysis\", \"Statistical Analysis\", \"Logistic Regression\", \"Random Forests\", \"Deep Learning\", \"Data Visualization\", \"Ad-hoc Analysis\", \"Data Discrepancies\", \"Undersampling Techniques\", \"Drones\", \"Edge Devices\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Analytics\", \"Customer Insights\", \"Industrial Inspection\", \"Healthcare\", \"Real-Time Detection\", \"User Data\"]\n```"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Data Engineering",
+      "Data Modelling",
+      "Business Intelligence",
+      "SQL",
+      "Power BI",
+      "Data Warehousing",
+      "Dimensional Modelling",
+      "ETL",
+      "Data Quality",
+      "Data Integrity",
+      "Self-Service Reporting",
+      "Reporting",
+      "Tableau",
+      "Snowflake",
+      "Vector Databases",
+      "RAG",
+      "Data Transformation",
+      "Data Pipelines",
+      "Version Control",
+      "Documentation",
+      "Role-Based Access Controls",
+      "Security Measures"
+    ],
+    "soft_skills": [
+      "Communication",
+      "Detail-Oriented",
+      "Proactive",
+      "Collaboration",
+      "Analytical Thinking",
+      "Problem-Solving"
+    ],
+    "domain_keywords": [
+      "Automotive",
+      "Data Operations",
+      "Insights",
+      "Reporting Assets",
+      "Governance Standards",
+      "Business Decision-Making",
+      "Visualisation Trends"
+    ],
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Engineering - \"5+ years of experience in data engineering\"\n- Data Modelling - \"strong focus on data modelling\"\n- Business Intelligence - \"focus on business intelligence\"\n- SQL - \"Write advanced SQL queries\"\n- Power BI - \"Build and maintain Power BI dashboards\"\n- Data Warehousing - \"understanding of data warehousing principles\"\n- Dimensional Modelling - \"dimensional modelling\"\n- ETL - \"collaborate with ETL Engineers\"\n- Data Quality - \"ensure high standards of data quality\"\n- Data Integrity - \"focus on data accuracy and integrity\"\n- Self-Service Reporting - \"develop and manage self-service reporting capabilities\"\n- Reporting - \"support reporting and analytics needs\"\n- Tableau - \"building and maintaining reports and dashboards with Tableau\"\n- Snowflake - \"performance optimization in a modern environment such as Snowflake\"\n- Vector Databases - \"Experience with next-generation architectures such as Vector Databases\"\n- RAG - \"Experience with next-generation architectures such as RAG\"\n- Data Transformation - \"data loading, transformation, and performance optimization\"\n- Data Pipelines - \"ensure reliable pipelines feed into BI reporting layers\"\n- Version Control - \"best practices for BI development including version control\"\n- Documentation - \"best practices for BI development including documentation\"\n- Role-Based Access Controls - \"Implement role-based access controls\"\n- Security Measures - \"security measures to safeguard sensitive data\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills to translate business needs\"\n- Detail-Oriented - \"A proactive, detail-oriented mindset\"\n- Proactive - \"A proactive, detail-oriented mindset\"\n- Collaboration - \"work collaboratively with Technology squads\"\n- Analytical Thinking - \"translate complex datasets into compelling visual stories\"\n- Problem-Solving - \"understand requirements and translate them into BI solutions\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Automotive - \"automotive enthusiast\"\n- Data Operations - \"at the heart of our data operations\"\n- Insights - \"support teams with data, reporting and insights\"\n- Reporting Assets - \"high standards of data quality, accuracy, and consistency across reporting assets\"\n- Governance Standards - \"ensuring data integrity and governance standards\"\n- Business Decision-Making - \"deliver clear, actionable insights for business decision-making\"\n- Visualisation Trends - \"stay up to date with BI/visualisation trends\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Detail-Oriented\", \"Proactive\", \"Collaboration\", \"Analytical Thinking\", \"Problem-Solving\"]\nTECHNICAL_SKILLS = [\"Data Engineering\", \"Data Modelling\", \"Business Intelligence\", \"SQL\", \"Power BI\", \"Data Warehousing\", \"Dimensional Modelling\", \"ETL\", \"Data Quality\", \"Data Integrity\", \"Self-Service Reporting\", \"Reporting\", \"Tableau\", \"Snowflake\", \"Vector Databases\", \"RAG\", \"Data Transformation\", \"Data Pipelines\", \"Version Control\", \"Documentation\", \"Role-Based Access Controls\", \"Security Measures\"]\nDOMAIN_KEYWORDS = [\"Automotive\", \"Data Operations\", \"Insights\", \"Reporting Assets\", \"Governance Standards\", \"Business Decision-Making\", \"Visualisation Trends\"]\n```"
+  },
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- SQL - \"specializing in SQL\"\n- Tableau - \"specializing in Tableau\"\n- Python - \"specializing in Python\"\n- Power BI - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n- Excel - \"Proficient in Python and Excel for data analysis and automation\"\n- Data Analysis - \"Ability to uncover insights through analysis of large and diverse datasets\"\n- Statistical Analysis - \"Identified patterns and insights of user data through statistical analysis\"\n- Logistic Regression - \"Implemented logistic regression\"\n- Random Forests - \"Implemented random forests\"\n- Deep Learning - \"Implemented deep learning models\"\n- Data Visualization - \"creating interactive dashboards using Power BI and Excel\"\n- Ad-hoc Analysis - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Data Discrepancies - \"identifying and addressing data discrepancies\"\n- Undersampling Techniques - \"Addressed imbalanced datasets using undersampling techniques\"\n- Drones - \"enhance model performance using drones\"\n- Edge Devices - \"enhance model performance using edge devices\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Integrity - \"ensuring 99% accuracy and integrity\"\n- Dashboard Creation - \"Developed Power BI dashboards\"\n- Reporting - \"reducing reporting time by 30%\"\n- Model Optimization - \"Optimisation of Yolov8n Model for Real-Time Corrosion Detection\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent interpersonal and communication skills to work effectively with stakeholders\"\n- Time Management - \"Strong ability to manage and prioritise multiple tasks in dynamic environments\"\n- Analytical Thinking - \"Adept at transforming complex datasets into actionable insights\"\n- Problem-solving - \"Conducted ad-hoc analyses to uncover actionable insights\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Detail-oriented - \"ensuring 99% accuracy and integrity\"\n- Results-driven - \"contributing impactful solutions to data-driven projects\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Dynamic Data Science Professional\"\n- Analytics - \"hands-on experience in analytics\"\n- Customer Insights - \"analyse customer text data and identify top 20 queries\"\n- Industrial Inspection - \"Contributed to industrial inspection innovations\"\n- Healthcare - \"Heart Attack Risk Prediction\"\n\n**STRONGLY IMPLIED:**\n- Real-Time Detection - \"for Real-Time Corrosion Detection\"\n- User Data - \"Identified patterns and insights of user data\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Time Management\", \"Analytical Thinking\", \"Problem-solving\", \"Detail-oriented\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"SQL\", \"Tableau\", \"Python\", \"Power BI\", \"Excel\", \"Data Analysis\", \"Statistical Analysis\", \"Logistic Regression\", \"Random Forests\", \"Deep Learning\", \"Data Visualization\", \"Ad-hoc Analysis\", \"Data Discrepancies\", \"Undersampling Techniques\", \"Drones\", \"Edge Devices\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Analytics\", \"Customer Insights\", \"Industrial Inspection\", \"Healthcare\", \"Real-Time Detection\", \"User Data\"]\n```",
+  "jd_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Engineering - \"5+ years of experience in data engineering\"\n- Data Modelling - \"strong focus on data modelling\"\n- Business Intelligence - \"focus on business intelligence\"\n- SQL - \"Write advanced SQL queries\"\n- Power BI - \"Build and maintain Power BI dashboards\"\n- Data Warehousing - \"understanding of data warehousing principles\"\n- Dimensional Modelling - \"dimensional modelling\"\n- ETL - \"collaborate with ETL Engineers\"\n- Data Quality - \"ensure high standards of data quality\"\n- Data Integrity - \"focus on data accuracy and integrity\"\n- Self-Service Reporting - \"develop and manage self-service reporting capabilities\"\n- Reporting - \"support reporting and analytics needs\"\n- Tableau - \"building and maintaining reports and dashboards with Tableau\"\n- Snowflake - \"performance optimization in a modern environment such as Snowflake\"\n- Vector Databases - \"Experience with next-generation architectures such as Vector Databases\"\n- RAG - \"Experience with next-generation architectures such as RAG\"\n- Data Transformation - \"data loading, transformation, and performance optimization\"\n- Data Pipelines - \"ensure reliable pipelines feed into BI reporting layers\"\n- Version Control - \"best practices for BI development including version control\"\n- Documentation - \"best practices for BI development including documentation\"\n- Role-Based Access Controls - \"Implement role-based access controls\"\n- Security Measures - \"security measures to safeguard sensitive data\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills to translate business needs\"\n- Detail-Oriented - \"A proactive, detail-oriented mindset\"\n- Proactive - \"A proactive, detail-oriented mindset\"\n- Collaboration - \"work collaboratively with Technology squads\"\n- Analytical Thinking - \"translate complex datasets into compelling visual stories\"\n- Problem-Solving - \"understand requirements and translate them into BI solutions\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Automotive - \"automotive enthusiast\"\n- Data Operations - \"at the heart of our data operations\"\n- Insights - \"support teams with data, reporting and insights\"\n- Reporting Assets - \"high standards of data quality, accuracy, and consistency across reporting assets\"\n- Governance Standards - \"ensuring data integrity and governance standards\"\n- Business Decision-Making - \"deliver clear, actionable insights for business decision-making\"\n- Visualisation Trends - \"stay up to date with BI/visualisation trends\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Detail-Oriented\", \"Proactive\", \"Collaboration\", \"Analytical Thinking\", \"Problem-Solving\"]\nTECHNICAL_SKILLS = [\"Data Engineering\", \"Data Modelling\", \"Business Intelligence\", \"SQL\", \"Power BI\", \"Data Warehousing\", \"Dimensional Modelling\", \"ETL\", \"Data Quality\", \"Data Integrity\", \"Self-Service Reporting\", \"Reporting\", \"Tableau\", \"Snowflake\", \"Vector Databases\", \"RAG\", \"Data Transformation\", \"Data Pipelines\", \"Version Control\", \"Documentation\", \"Role-Based Access Controls\", \"Security Measures\"]\nDOMAIN_KEYWORDS = [\"Automotive\", \"Data Operations\", \"Insights\", \"Reporting Assets\", \"Governance Standards\", \"Business Decision-Making\", \"Visualisation Trends\"]\n```",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-09-14T20:05:35.740",
+      "model_used": "gpt-4o-mini",
+      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n---\n\n**MARKET REALITY CHECK:**\n\n- **What they actually need:** The core must-haves for this role include strong SQL skills, experience with data modeling, and the ability to create effective Power BI dashboards. The JD suggests a preference for candidates with 5+ years of experience, but given the nature of the role and the company, they may be open to candidates with less experience if they demonstrate strong potential and relevant skills.\n\n- **Flexibility indicators:** The job description includes a variety of responsibilities and mentions \"nice-to-haves,\" which indicates some flexibility. The emphasis on collaboration and the mention of \"self-service reporting capabilities\" suggest they value adaptability and a willingness to learn.\n\n- **Hard blockers identified:** The primary hard blocker is the 5+ years of experience requirement. However, Maheshwor has relevant experience (2 years) and strong skills in SQL and Power BI, which may mitigate this concern if he can demonstrate significant impact in his previous roles.\n\n- **Hiring urgency signals:** The job description does not explicitly indicate urgency, but the detailed nature of the responsibilities suggests they are looking for someone who can hit the ground running. This could imply a need for a quicker hire, potentially allowing for some flexibility in experience requirements.\n\n---\n\n**INTELLIGENT OBSERVATIONS:**\n\n- **Hidden strengths:** Maheshwor's experience with data analysis, particularly his work with large datasets and the development of dashboards, aligns well with the role's requirements. His academic background in data science, including a thesis on model optimization, showcases his technical skills and problem-solving abilities.\n\n- **Smart connections:** His proficiency in SQL and Power BI directly matches the job's core requirements. Additionally, his experience in Python and Excel for data analysis can be positioned as complementary skills that enhance his candidacy.\n\n- **Growth potential:** Maheshwor is currently pursuing a Master's in Data Science, which indicates a commitment to continuous learning. His recent projects demonstrate his ability to apply theoretical knowledge in practical settings, which is a strong indicator of his potential to grow into the role.\n\n- **Positioning opportunities:** Highlighting his project work, particularly the Heart Attack Risk Prediction project, can showcase his analytical skills and ability to handle complex data challenges. Emphasizing his success in improving reporting times and accuracy in previous roles can also strengthen his application.\n\n---\n\n**REALISTIC ODDS:** 60% chance of getting an interview if the CV is tailored well to emphasize relevant experience and skills while addressing the experience gap.\n\n---\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n\n1. **Priority 1:** Emphasize relevant experience in data analysis and dashboard creation, particularly the impact of his work at iBuild and Property Console. Highlight specific achievements, such as the accuracy rates and time reductions in reporting.\n\n2. **Priority 2:** Address the experience gap by framing his 2 years of experience as highly relevant and impactful, potentially positioning his academic work and projects as equivalent to practical experience.\n\n3. **Priority 3:** Highlight his adaptability and willingness to learn new tools and technologies, particularly in relation to the \"nice-to-haves\" mentioned in the JD, such as experience with Tableau or modern data environments.\n\n---\n\n**HONEST BOTTOM LINE:** Maheshwor has a solid foundation and relevant skills that align with the job requirements, making him a viable candidate despite the experience gap. With strategic positioning and a tailored CV, he stands a good chance of being considered for the role. The effort to pursue this opportunity is worth it, especially given the potential for flexibility in hiring practices."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-09-14T20:05:52.687",
+      "model_used": "gpt-4o-mini",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 35\nMatched: 18\nMissing: 20\nMatch Rate: 47%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            16         22         11         13           46\nSoft Skills                   6          6          4          3           57\nDomain Keywords              7          7          3          4           43\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (11 items):\n    1. JD Required: 'Business Intelligence'\n       → Found in CV: 'Data Science'\n       💡 domain context - related fields\n    2. JD Required: 'Data Analysis'\n       → Found in CV: 'Data Analysis'\n       💡 exact match\n    3. JD Required: 'Data Engineering'\n       → Found in CV: 'Python'\n       💡 hierarchical - Python is often used in data engineering\n    4. JD Required: 'Data Modelling'\n       → Found in CV: 'Statistical Analysis'\n       💡 hierarchical - statistical analysis is part of data modeling\n    5. JD Required: 'Data Quality'\n       → Found in CV: 'Data Discrepancies'\n       💡 synonym match - both relate to ensuring data accuracy\n    6. JD Required: 'Data Transformation'\n       → Found in CV: 'Data Analysis'\n       💡 hierarchical - data transformation involves data analysis\n    7. JD Required: 'Data Warehousing'\n       → Found in CV: 'SQL'\n       💡 hierarchical - SQL is essential for data warehousing\n    8. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 exact match\n    9. JD Required: 'Reporting'\n       → Found in CV: 'Data Visualization'\n       💡 synonym match - both involve presenting data insights\n    10. JD Required: 'SQL'\n       → Found in CV: 'Sql'\n       💡 exact match\n    11. JD Required: 'Tableau'\n       → Found in CV: 'Tableau'\n       💡 exact match\n  ❌ MISSING FROM CV (13 items):\n    1. JD Requires: 'Business Decision-Making'\n       💡 no CV equivalent found\n    2. JD Requires: 'Data Integrity'\n       💡 no CV equivalent found\n    3. JD Requires: 'Data Pipelines'\n       💡 no CV equivalent found\n    4. JD Requires: 'Dimensional Modelling'\n       💡 no CV equivalent found\n    5. JD Requires: 'Documentation'\n       💡 no CV equivalent found\n    6. JD Requires: 'Etl'\n       💡 no CV equivalent found\n    7. JD Requires: 'Rag'\n       💡 no CV equivalent found\n    8. JD Requires: 'Role-Based Access Controls'\n       💡 no CV equivalent found\n    9. JD Requires: 'Security Measures'\n       💡 no CV equivalent found\n    10. JD Requires: 'Self-Service Reporting'\n       💡 no CV equivalent found\n    11. JD Requires: 'Snowflake'\n       💡 no CV equivalent found\n    12. JD Requires: 'Vector Databases'\n       💡 no CV equivalent found\n    13. JD Requires: 'Version Control'\n       💡 no CV equivalent found\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (4 items):\n    1. JD Required: 'Analytical Thinking'\n       → Found in CV: 'Analytical Thinking'\n       💡 exact match\n    2. JD Required: 'Communication'\n       → Found in CV: 'Communication'\n       💡 exact match\n    3. JD Required: 'Detail-Oriented'\n       → Found in CV: 'Detail-Oriented'\n       💡 exact match\n    4. JD Required: 'Problem-Solving'\n       → Found in CV: 'Problem-Solving'\n       💡 exact match\n  ❌ MISSING FROM CV (3 items):\n    1. JD Requires: 'Collaboration'\n       💡 no CV equivalent found\n    2. JD Requires: 'Proactive'\n       💡 no CV equivalent found\n    3. JD Requires: 'Time Management'\n       💡 no CV equivalent found\n\n🔹 DOMAIN KEYWORDS\n  ✅ MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Analytics'\n       → Found in CV: 'Analytics'\n       💡 exact match\n    2. JD Required: 'Insights'\n       → Found in CV: 'Customer Insights'\n       💡 synonym match - both relate to understanding user data\n    3. JD Required: 'Reporting Assets'\n       → Found in CV: 'Data Visualization'\n       💡 domain context - both involve presenting data insights\n  ❌ MISSING FROM CV (4 items):\n    1. JD Requires: 'Automotive'\n       💡 no CV equivalent found\n    2. JD Requires: 'Data Operations'\n       💡 no CV equivalent found\n    3. JD Requires: 'Governance Standards'\n       💡 no CV equivalent found\n    4. JD Requires: 'Visualisation Trends'\n       💡 no CV equivalent found\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: SQL, Tableau, Python, Power BI, Excel, Data Analysis, Statistical Analysis, Logistic Regression, Random Forests, Deep Learning...\n- Soft: Communication, Time Management, Analytical Thinking, Problem-solving, Detail-oriented, Results-driven\n- Domain: Data Science, Analytics, Customer Insights, Industrial Inspection, Healthcare, Real-Time Detection, User Data\n\nJD\n- Technical: Data Engineering, Data Modelling, Business Intelligence, SQL, Power BI, Data Warehousing, Dimensional Modelling, ETL, Data Quality, Data Integrity...\n- Soft: Communication, Detail-Oriented, Proactive, Collaboration, Analytical Thinking, Problem-Solving\n- Domain: Automotive, Data Operations, Insights, Reporting Assets, Governance Standards, Business Decision-Making, Visualisation Trends\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-09-14T20:06:30.017",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "SQL",
+              "cv_evidence": "Advanced SQL skills, proficient in writing and interpreting complex queries for analytics tasks.",
+              "jd_application": "Write advanced SQL queries and optimise datasets for reporting and visualisation performance.",
+              "relevance_score": 90,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Complex queries",
+                "Data integrity",
+                "Analytics tasks"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Power BI",
+              "cv_evidence": "Strong experience in Power BI for dashboard creation and data visualisation.",
+              "jd_application": "Build and maintain Power BI dashboards and reports to deliver clear, actionable insights.",
+              "relevance_score": 88,
+              "skill_level": "Intermediate",
+              "depth_indicators": [
+                "Dashboard creation",
+                "Data visualisation",
+                "Reporting"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Communication",
+              "cv_evidence": "Excellent interpersonal and communication skills to work effectively with stakeholders.",
+              "jd_application": "Excellent communication skills to translate business needs into technical data solutions.",
+              "relevance_score": 85,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Stakeholder engagement",
+                "Clear reporting",
+                "Presentation skills"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Data Engineering",
+              "cv_evidence": "Experience in data analysis and ensuring data accuracy and integrity.",
+              "jd_application": "Design and maintain flexible, scalable, and efficient data models that support reporting and analytics needs.",
+              "relevance_score": 75,
+              "skill_level": "Intermediate",
+              "depth_indicators": [
+                "Data modelling",
+                "Data integrity",
+                "Reporting"
+              ],
+              "synergy_bonus": 0
+            }
+          ],
+          "overall_skills_score": 87,
+          "strength_areas": [
+            "Data Analysis",
+            "Programming"
+          ],
+          "improvement_areas": [
+            "Database Administration",
+            "Cloud Platforms"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": 2,
+            "cv_role_level": "Entry-Level",
+            "cv_progression": [],
+            "jd_required_years": "5+ years",
+            "jd_role_level": "Senior",
+            "alignment_score": 60,
+            "experience_gaps": [
+              "Lack of required years of experience (5+ years)",
+              "No demonstrated leadership or management experience",
+              "Limited scope of responsibility compared to JD requirements"
+            ],
+            "experience_strengths": [
+              "Strong SQL and Power BI skills",
+              "Experience in data analysis and visualization",
+              "Ability to communicate insights effectively"
+            ],
+            "quantified_achievements": [
+              "Ensured 99% accuracy in datasets",
+              "Reduced reporting time by 30%"
+            ]
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Science and Analytics",
+            "cv_domain_expertise": [
+              "Data Analysis",
+              "Business Intelligence",
+              "Data Visualization"
+            ],
+            "jd_target_industry": "Automotive Media and Business Intelligence",
+            "jd_domain_requirements": [
+              "Data Engineering",
+              "Data Modeling",
+              "Business Intelligence Reporting"
+            ],
+            "industry_alignment_score": 70,
+            "domain_overlap_percentage": 65,
+            "data_familiarity_score": 75,
+            "stakeholder_fit_score": 60,
+            "business_cycle_alignment": 50,
+            "transferable_strengths": [
+              "SQL Proficiency",
+              "Power BI Dashboard Creation",
+              "Analytical Problem-Solving"
+            ],
+            "industry_gaps": [
+              "5+ years of experience in data engineering",
+              "Deep understanding of data warehousing principles",
+              "Experience with automotive industry data"
+            ],
+            "adaptation_timeline": "3-6 months"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_experience_years": 2,
+            "cv_responsibility_scope": "Individual Contributor",
+            "cv_leadership_indicators": 2,
+            "cv_decision_authority": "Task Level",
+            "cv_stakeholder_level": "Team",
+            "jd_required_seniority": "Senior",
+            "jd_leadership_requirements": "Team Leadership Expected",
+            "jd_decision_authority_needed": "Program Level",
+            "jd_stakeholder_level": "Executive",
+            "seniority_score": 40,
+            "experience_match_percentage": 30,
+            "responsibility_fit_percentage": 25,
+            "leadership_readiness_score": 20,
+            "growth_trajectory_score": 50,
+            "seniority_strengths": [
+              "Strong Technical Skills",
+              "Data Visualization Expertise"
+            ],
+            "seniority_gaps": [
+              "Years of Experience",
+              "Leadership Experience",
+              "Strategic Decision-Making"
+            ],
+            "readiness_assessment": "Limited Fit, Significant Development Required"
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Intermediate",
+            "cv_primary_domain": "Data Analytics & Visualization",
+            "cv_core_competencies": [
+              "SQL",
+              "Power BI",
+              "Python",
+              "Data Analysis"
+            ],
+            "cv_problem_complexity": 6,
+            "cv_innovation_indicators": [
+              "Thesis on Model Optimization",
+              "Dashboard Development"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "SQL",
+              "Power BI",
+              "Data Modeling",
+              "Data Visualization"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 75,
+            "core_skills_match_percentage": 80,
+            "technical_stack_fit_percentage": 75,
+            "complexity_readiness_score": 80,
+            "learning_agility_score": 80,
+            "technical_strengths": [
+              "Data Visualization",
+              "SQL Proficiency",
+              "Analytical Skills"
+            ],
+            "technical_gaps": [
+              "Experience with Data Warehousing",
+              "Advanced Data Modeling"
+            ],
+            "overqualification_risk": "Low"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 8,
+            "total_preferred_keywords": 3,
+            "matched_required_count": 4,
+            "matched_preferred_count": 1,
+            "missing_required": 4,
+            "missing_preferred": 2
+          },
+          "bonus_breakdown": {
+            "required_bonus": 2.0,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.2,
+            "preferred_penalty": -0.3,
+            "total_bonus": 0.4
+          },
+          "coverage_metrics": {
+            "required_coverage": 50.0,
+            "preferred_coverage": 33.33
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 87.0,
+        "experience_alignment": 60.0,
+        "industry_fit": 70.0,
+        "domain_overlap_percentage": 65.0,
+        "data_familiarity_score": 75.0,
+        "stakeholder_fit_score": 60.0,
+        "business_cycle_alignment": 50.0,
+        "role_seniority": 40.0,
+        "experience_match_percentage": 30.0,
+        "responsibility_fit_percentage": 25.0,
+        "leadership_readiness_score": 20.0,
+        "growth_trajectory_score": 50.0,
+        "technical_depth": 75.0,
+        "core_skills_match_percentage": 80.0,
+        "technical_stack_fit_percentage": 75.0,
+        "complexity_readiness_score": 80.0,
+        "learning_agility_score": 80.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": 0.4,
+        "total_bonus": 0.4,
+        "required_bonus": 2.0,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.2,
+        "preferred_penalty": -0.3,
+        "required_coverage": 50.0,
+        "preferred_coverage": 33.33
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-09-14T20:06:30.024",
+      "final_ats_score": 56.175,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally rejected",
+      "breakdown": {
+        "category1": {
+          "score": 19.9,
+          "technical_skills_match_rate": 46.0,
+          "domain_keywords_match_rate": 43.0,
+          "soft_skills_match_rate": 57.0,
+          "missing_counts": {
+            "technical": 13,
+            "domain": 4,
+            "soft": 3
+          }
+        },
+        "category2": {
+          "score": 35.875,
+          "core_competency_avg": 76.25,
+          "experience_seniority_avg": 35.0,
+          "potential_ability_avg": 67.5,
+          "company_fit_avg": 61.25
+        },
+        "ats1_score": 55.775,
+        "bonus_points": 0.4
+      }
+    }
+  ]
+}

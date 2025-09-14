@@ -255,4 +255,81 @@ class SkillsAnalysisService {
     print('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
     return null;
   }
+
+  /// Fetch AI recommendations for a specific company
+  static Future<List<String>?> getAIRecommendations(String company) async {
+    try {
+      print('🤖 [AI_RECOMMENDATIONS] Fetching AI recommendations for company: $company');
+      
+      final result = await APIService.makeAuthenticatedCall(
+        endpoint: '/api/ai-recommendations/company/$company',
+        method: 'GET',
+      );
+      
+      print('🤖 [AI_RECOMMENDATIONS] Response received: ${result.keys.toList()}');
+      
+      if (result['success'] == true && result['recommendation_content'] != null) {
+        print('🤖 [AI_RECOMMENDATIONS] Response keys: ${result.keys.toList()}');
+        
+        // Extract recommendation content directly from the response
+        final recommendationContent = result['recommendation_content'] as String?;
+        if (recommendationContent != null && recommendationContent.isNotEmpty) {
+          // Parse the recommendation content to extract individual recommendations
+          final recommendations = _parseRecommendationsFromContent(recommendationContent);
+          print('🤖 [AI_RECOMMENDATIONS] Parsed ${recommendations.length} recommendations');
+          return recommendations;
+        } else {
+          print('⚠️ [AI_RECOMMENDATIONS] No recommendation content found');
+          return null;
+        }
+      } else {
+        print('⚠️ [AI_RECOMMENDATIONS] No AI recommendations found or API error');
+        return null;
+      }
+    } catch (e) {
+      print('❌ [AI_RECOMMENDATIONS] Error fetching AI recommendations: $e');
+      return null;
+    }
+  }
+
+  /// Parse recommendations from AI content string
+  static List<String> _parseRecommendationsFromContent(String content) {
+    final recommendations = <String>[];
+    
+    // Split content by lines and look for bullet points or numbered items
+    final lines = content.split('\n');
+    
+    for (final line in lines) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) continue;
+      
+      // Look for common bullet point patterns
+      if (trimmed.startsWith('•') || 
+          trimmed.startsWith('-') || 
+          trimmed.startsWith('*') ||
+          RegExp(r'^\d+\.').hasMatch(trimmed)) {
+        // Remove bullet point markers and add to recommendations
+        final cleanedLine = trimmed
+            .replaceFirst(RegExp(r'^[•\-\*]\s*'), '')
+            .replaceFirst(RegExp(r'^\d+\.\s*'), '')
+            .trim();
+        if (cleanedLine.isNotEmpty && cleanedLine.length > 10) {
+          recommendations.add(cleanedLine);
+        }
+      }
+    }
+    
+    // If no bullet points found, try to split by sentences
+    if (recommendations.isEmpty) {
+      final sentences = content.split(RegExp(r'[.!?]\s+'));
+      for (final sentence in sentences) {
+        final trimmed = sentence.trim();
+        if (trimmed.isNotEmpty && trimmed.length > 20 && !trimmed.endsWith(':')) {
+          recommendations.add(trimmed + '.');
+        }
+      }
+    }
+    
+    return recommendations.take(8).toList(); // Limit to 8 recommendations max
+  }
 }

@@ -349,13 +349,22 @@ class ATSResult {
   });
 
   factory ATSResult.fromJson(Map<String, dynamic> json) {
-    // Handle recommendations field
+    // Handle recommendations field - try both 'recommendations' and 'improvement_recommendations'
     List<String> recommendations = [];
-    if (json['recommendations'] != null) {
-      if (json['recommendations'] is List) {
-        recommendations = List<String>.from(json['recommendations']);
-      }
+    
+    // First try the 'recommendations' field
+    if (json['recommendations'] != null && json['recommendations'] is List) {
+      recommendations = List<String>.from(json['recommendations']);
     }
+    // If not found, try 'improvement_recommendations' field (backend uses this)
+    else if (json['improvement_recommendations'] != null && json['improvement_recommendations'] is List) {
+      recommendations = List<String>.from(json['improvement_recommendations']);
+    }
+    
+    debugPrint('🔍 [ATS_MODEL] Parsing recommendations...');
+    debugPrint('   json has recommendations: ${json['recommendations'] != null}');
+    debugPrint('   json has improvement_recommendations: ${json['improvement_recommendations'] != null}');
+    debugPrint('   final recommendations length: ${recommendations.length}');
     
     return ATSResult(
       timestamp: json['timestamp'] as String? ?? '',
@@ -364,6 +373,18 @@ class ATSResult {
       recommendation: json['recommendation'] as String? ?? '',
       breakdown: ATSBreakdown.fromJson(json['breakdown'] as Map<String, dynamic>? ?? {}),
       recommendations: recommendations,
+    );
+  }
+  
+  /// Create a copy of this ATSResult with updated recommendations
+  ATSResult copyWithRecommendations(List<String> newRecommendations) {
+    return ATSResult(
+      timestamp: timestamp,
+      finalATSScore: finalATSScore,
+      categoryStatus: categoryStatus,
+      recommendation: recommendation,
+      breakdown: breakdown,
+      recommendations: newRecommendations,
     );
   }
 
