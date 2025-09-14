@@ -4,6 +4,8 @@ import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
 import 'ats_score_widget_with_progress_bars.dart';
 import '../utils/preextracted_parser.dart';
+import 'progressive_analysis/progressive_loading_widget.dart';
+import 'progressive_analysis/progressive_analysis_phase.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -125,34 +127,8 @@ class SkillsDisplayWidget extends StatelessWidget {
     // Show loading only if we have no results at all yet
     if (controller.isLoading && controller.result == null) {
       return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.shade200),
-        ),
-        child: Column(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              'Starting analysis...',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.blue.shade700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Results will appear progressively as each step completes',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.blue.shade600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        child: MainLoadingWidget(
+          message: 'Starting analysis...',
         ),
       );
     }
@@ -174,41 +150,38 @@ class SkillsDisplayWidget extends StatelessWidget {
                   controller.result?.hasPreextractedComparison == true))
             _buildResultsHeader(),
 
-          // Progressive loading indicator - show when analysis is still running but we have partial results
+          // Progressive loading indicators - show when analysis is still running but we have partial results
           if (controller.isLoading && controller.result != null) ...[
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.shade200),
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.orange.shade600),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Analysis continuing... More results will appear below',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.orange.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+            // Show loading for analyze match phase
+            if (controller.progressiveController
+                .isPhaseLoading('analyze_match')) ...[
+              ProgressiveLoadingWidget(
+                message: ProgressiveAnalysisConfig.getPhaseById('analyze_match')
+                        ?.loadingMessage ??
+                    'Starting recruiter assessment analysis...',
               ),
-            ),
+            ],
+
+            // Show loading for skills comparison phase
+            if (controller.progressiveController
+                .isPhaseLoading('skills_comparison')) ...[
+              ProgressiveLoadingWidget(
+                message:
+                    ProgressiveAnalysisConfig.getPhaseById('skills_comparison')
+                            ?.loadingMessage ??
+                        'Generating skills comparison analysis...',
+              ),
+            ],
+
+            // Show loading for ATS analysis phase
+            if (controller.progressiveController
+                .isPhaseLoading('ats_analysis')) ...[
+              ProgressiveLoadingWidget(
+                message: ProgressiveAnalysisConfig.getPhaseById('ats_analysis')
+                        ?.loadingMessage ??
+                    'Generating ATS score analysis...',
+              ),
+            ],
           ],
 
           // Side by side comparison - show as soon as skills data is available
@@ -301,39 +274,12 @@ class SkillsDisplayWidget extends StatelessWidget {
                 // Show loading state if comparison should show but isn't available yet
                 if (controller.showPreextractedComparison &&
                     controller.result?.hasPreextractedComparison != true) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.orange.shade600),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Generating skills comparison analysis...',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  return ProgressiveLoadingWidget(
+                    message: ProgressiveAnalysisConfig.getPhaseById(
+                                'skills_comparison')
+                            ?.loadingMessage ??
+                        'Generating skills comparison analysis...',
+                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                   );
                 }
 

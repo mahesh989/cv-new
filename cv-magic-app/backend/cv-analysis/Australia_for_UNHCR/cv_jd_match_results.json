@@ -1,67 +1,61 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-14T15:11:44.501027",
+  "cv_analysis_timestamp": "2025-09-14T15:38:05.741579",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
+    "Tableau",
     "Excel",
-    "analytical thinking",
-    "problem-solving",
-    "communication",
-    "customer service"
+    "communication"
   ],
   "matched_preferred_keywords": [
-    "Tableau"
+    "analytical thinking",
+    "problem-solving"
   ],
   "missed_required_keywords": [
     "VBA",
-    "data warehouse",
     "project management",
     "stakeholder management",
+    "customer service",
+    "data warehouse",
     "data mining",
-    "marketing campaigns",
-    "donor-centricity",
-    "segmentation strategies"
+    "direct marketing campaigns",
+    "donor-centricity"
   ],
   "missed_preferred_keywords": [
+    "data models",
+    "business intelligence tools",
     "data issues",
     "de-duplication",
-    "best practice guidelines"
+    "communication regulations"
   ],
   "match_counts": {
-    "total_required_keywords": 14,
-    "total_preferred_keywords": 3,
-    "matched_required_count": 7,
-    "matched_preferred_count": 1
+    "total_required_keywords": 12,
+    "total_preferred_keywords": 5,
+    "matched_required_count": 5,
+    "matched_preferred_count": 2
   },
   "matching_notes": {
-    "matched_required": {
-      "SQL": "Matched as 'SQL' in the technical skills section.",
-      "Power BI": "Matched as 'Power BI' in the technical skills section and also mentioned in the experience section.",
-      "Excel": "Matched as 'Excel' in the technical skills section.",
-      "analytical thinking": "Contextually matched through references to data analysis and problem-solving.",
-      "problem-solving": "Contextually matched through references to developing solutions and optimizing processes.",
-      "communication": "Matched through references to presenting findings and communicating insights.",
-      "customer service": "Contextually matched through references to enhancing customer satisfaction and insights."
-    },
-    "missed_required": {
-      "VBA": "Not mentioned in any form.",
-      "data warehouse": "Mentioned Snowflake but not explicitly as 'data warehouse'.",
-      "project management": "No direct mention or context indicating project management skills.",
-      "stakeholder management": "No mention of managing stakeholders.",
-      "data mining": "Not explicitly mentioned.",
-      "marketing campaigns": "Not mentioned.",
-      "donor-centricity": "Not mentioned.",
-      "segmentation strategies": "Not mentioned."
-    },
-    "matched_preferred": {
-      "Tableau": "Matched as 'Tableau' in the technical skills section."
-    },
-    "missed_preferred": {
-      "data issues": "Not mentioned.",
-      "de-duplication": "Not mentioned.",
-      "best practice guidelines": "Not mentioned."
-    }
+    "SQL": "Matched as it is explicitly mentioned in the CV.",
+    "Power BI": "Matched as it is explicitly mentioned in the CV.",
+    "Tableau": "Matched as it is explicitly mentioned in the CV.",
+    "Excel": "Matched as it is explicitly mentioned in the CV.",
+    "communication": "Matched in the context of presenting findings and collaborating.",
+    "VBA": "Missing; no mention of VBA or its equivalent.",
+    "project management": "Missing; no direct reference to project management skills.",
+    "stakeholder management": "Missing; no mention of managing stakeholders.",
+    "customer service": "Missing; no reference to customer service experience.",
+    "data warehouse": "Missing; no mention of data warehousing concepts.",
+    "data mining": "Missing; no reference to data mining techniques.",
+    "direct marketing campaigns": "Missing; no mention of direct marketing.",
+    "donor-centricity": "Missing; no reference to donor-centricity.",
+    "analytical thinking": "Matched in the context of data analysis and problem-solving.",
+    "problem-solving": "Matched in the context of developing solutions and improving processes.",
+    "data models": "Missing; no mention of data modeling.",
+    "business intelligence tools": "Missing; while tools are mentioned, the specific term is not used.",
+    "data issues": "Missing; no reference to data issues.",
+    "de-duplication": "Missing; no mention of de-duplication processes.",
+    "communication regulations": "Missing; no mention of communication regulations."
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
