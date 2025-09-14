@@ -1,14 +1,24 @@
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 import '../base/analysis_step_controller.dart';
 import '../base/step_result.dart';
 import '../base/step_config.dart';
 import '../../services/keyword_cache_service.dart';
 import '../../services/enhanced_ats_service.dart';
 import '../../services/api_service.dart';
+import '../../utils/notification_service.dart';
 
 /// Controller for Step 4: Enhanced ATS Score
 /// Calculates comprehensive ATS score with detailed breakdown
 class EnhancedATSController extends AnalysisStepController {
+  // Timer for the 10-second rule display
+  Timer? _displayTimer;
+  
+  // State for progressive display
+  bool _isShowingCountdown = false;
+  int _countdownSeconds = 10;
+  bool _isProcessing = false;
+  
   EnhancedATSController()
       : super(
           const StepConfig(
@@ -38,6 +48,10 @@ class EnhancedATSController extends AnalysisStepController {
       debugPrint('[ENHANCED_ATS] Starting Enhanced ATS calculation...');
       debugPrint('   CV: $cvFilename');
       debugPrint('   JD text length: ${jdText.length} chars');
+      
+      // Start the 10-second countdown display with animation
+      _startCountdownDisplay();
+      NotificationService.showInfo('🚀 Starting Enhanced ATS analysis...');
 
       // Get CV text from preliminary results
       final cvText = await _getCVTextFromSession(inputData);
@@ -71,6 +85,14 @@ class EnhancedATSController extends AnalysisStepController {
       debugPrint('   CV text length: ${cvText.length} chars');
       debugPrint('   Skill comparison keys: ${skillComparison.keys.toList()}');
 
+      // Set processing state
+      _isProcessing = true;
+      notifyListeners();
+      NotificationService.showInfo('🔄 Processing ATS compatibility check...');
+      
+      // Wait for the countdown to complete before showing results
+      await _waitForCountdownCompletion();
+      
       // Calculate Enhanced ATS Score
       final atsResults = await EnhancedATSService.calculateEnhancedATSScore(
         cvText: cvText,
@@ -87,9 +109,15 @@ class EnhancedATSController extends AnalysisStepController {
       );
 
       completeExecution(result);
+      _stopCountdownDisplay();
 
       // Cache the results
       await saveToCache(cvFilename, jdText);
+      
+      // Show success notification with score
+      final overallScore = atsResults['overall_ats_score']?.toDouble() ?? 0.0;
+      final scoreCategory = atsResults['score_category'] ?? 'Unknown';
+      NotificationService.showSuccess('✅ Enhanced ATS Score: ${overallScore.toStringAsFixed(1)}/100 ($scoreCategory)');
 
       debugPrint(
           '[ENHANCED_ATS] Enhanced ATS calculation completed successfully');
@@ -97,6 +125,9 @@ class EnhancedATSController extends AnalysisStepController {
     } catch (e) {
       final errorMessage = 'Enhanced ATS calculation failed: $e';
       debugPrint('❌ [ENHANCED_ATS] $errorMessage');
+      
+      _stopCountdownDisplay();
+      NotificationService.showError('❌ Enhanced ATS analysis failed: $e');
 
       final result = StepResult.failure(
         stepId: config.stepId,
@@ -194,6 +225,58 @@ class EnhancedATSController extends AnalysisStepController {
     }
   }
 
+  // ==================== COUNTDOWN & ANIMATION METHODS ====================
+  
+  /// Start the 10-second countdown display with animation
+  void _startCountdownDisplay() {
+    _isShowingCountdown = true;
+    _countdownSeconds = 10;
+    _isProcessing = false;
+    notifyListeners();
+    
+    _displayTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdownSeconds > 0) {
+        _countdownSeconds--;
+        notifyListeners();
+        
+        // Show progress notification every few seconds
+        if (_countdownSeconds == 7) {
+          NotificationService.showInfo('⚡ Analyzing ATS compatibility...');
+        } else if (_countdownSeconds == 4) {
+          NotificationService.showInfo('📊 Calculating comprehensive score...');
+        } else if (_countdownSeconds == 1) {
+          NotificationService.showInfo('🎯 Finalizing ATS analysis...');
+        }
+      } else {
+        timer.cancel();
+        _isShowingCountdown = false;
+        notifyListeners();
+      }
+    });
+  }
+  
+  /// Stop the countdown display
+  void _stopCountdownDisplay() {
+    _displayTimer?.cancel();
+    _displayTimer = null;
+    _isShowingCountdown = false;
+    _isProcessing = false;
+    notifyListeners();
+  }
+  
+  /// Wait for countdown completion before proceeding
+  Future<void> _waitForCountdownCompletion() async {
+    while (_isShowingCountdown) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+  
+  @override
+  void dispose() {
+    _stopCountdownDisplay();
+    super.dispose();
+  }
+
   // ==================== CONVENIENCE GETTERS ====================
 
   /// Get the overall ATS score
@@ -248,4 +331,15 @@ class EnhancedATSController extends AnalysisStepController {
     final score = baseScores['overall_base_score'];
     return score is num ? score.toDouble() : null;
   }
+  
+  // ==================== UI STATE GETTERS ====================
+  
+  /// Whether the countdown is currently being displayed
+  bool get isShowingCountdown => _isShowingCountdown;
+  
+  /// Current countdown seconds remaining
+  int get countdownSeconds => _countdownSeconds;
+  
+  /// Whether the ATS analysis is currently processing
+  bool get isProcessing => _isProcessing;
 }

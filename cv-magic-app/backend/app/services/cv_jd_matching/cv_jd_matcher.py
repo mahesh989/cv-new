@@ -137,7 +137,7 @@ class CVJDMatcher:
             FileNotFoundError: If analysis file doesn't exist
         """
         if not base_path:
-            base_path = "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis"
+            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
         
         analysis_file = Path(base_path) / company_name / "jd_analysis.json"
         if not analysis_file.exists():
@@ -149,6 +149,40 @@ class CVJDMatcher:
         except Exception as e:
             logger.error(f"Error reading JD analysis file {analysis_file}: {e}")
             raise IOError(f"Failed to read JD analysis file: {e}")
+    
+    def _clean_json_response(self, content: str) -> str:
+        """
+        Clean and fix common JSON formatting issues in AI responses
+        """
+        import re
+        
+        # Remove any text before the first {
+        content = re.sub(r'^[^{]*', '', content)
+        
+        # Remove any text after the last }
+        content = re.sub(r'}[^}]*$', '}', content)
+        
+        # Fix common issues:
+        # 1. Convert single quotes to double quotes for keys
+        content = re.sub(r"'([^']*)':", r'"\1":', content)
+        
+        # 2. Convert single quotes to double quotes for string values
+        content = re.sub(r":\s*'([^']*)'", r': "\1"', content)
+        
+        # 3. Convert single quotes to double quotes in arrays
+        content = re.sub(r"\[\s*'([^']*)'", r'["\1"', content)
+        content = re.sub(r",\s*'([^']*)'", r', "\1"', content)
+        
+        # 4. Remove trailing commas before closing braces/brackets
+        content = re.sub(r',(\s*[}\]])', r'\1', content)
+        
+        # 5. Fix missing quotes around keys (if any remain)
+        content = re.sub(r'(\w+):', r'"\1":', content)
+        
+        # 6. Clean up whitespace and newlines
+        content = re.sub(r'\s+', ' ', content)
+        
+        return content.strip()
     
     def _parse_ai_response(self, response: AIResponse) -> CVJDMatchResult:
         """
@@ -198,7 +232,26 @@ class CVJDMatcher:
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse AI response as JSON: {e}")
             logger.error(f"Response content: {response.content}")
-            raise ValueError(f"AI response is not valid JSON: {e}")
+            
+            # Try to fix common JSON issues
+            try:
+                cleaned_content = self._clean_json_response(response.content)
+                data = json.loads(cleaned_content)
+                logger.info("✅ Successfully fixed and parsed malformed JSON response")
+                
+                # Ensure all required fields exist
+                for field in ['matched_required_keywords', 'matched_preferred_keywords', 
+                             'missed_required_keywords', 'missed_preferred_keywords', 'matching_notes']:
+                    if field not in data:
+                        data[field] = [] if 'keywords' in field else {}
+                
+                result = CVJDMatchResult(data)
+                result.ai_model_used = f"{response.provider}/{response.model}"
+                return result
+                
+            except Exception as fix_error:
+                logger.error(f"Failed to fix JSON response: {fix_error}")
+                raise ValueError(f"AI response is not valid JSON: {e}")
         except Exception as e:
             logger.error(f"Error parsing AI response: {e}")
             raise ValueError(f"Failed to parse matching result: {e}")
@@ -230,7 +283,7 @@ class CVJDMatcher:
         try:
             # Read CV content
             if not cv_file_path:
-                cv_file_path = "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis/original_cv.json"
+                cv_file_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json"
             
             cv_content = self._read_cv_file(cv_file_path)
             logger.info(f"📄 Read CV content from: {cv_file_path}")
@@ -315,7 +368,7 @@ class CVJDMatcher:
             Path to saved file
         """
         if not base_path:
-            base_path = "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis"
+            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
         
         # Create company directory if it doesn't exist
         company_dir = Path(base_path) / company_name
@@ -347,7 +400,7 @@ class CVJDMatcher:
             CVJDMatchResult if found, None otherwise
         """
         if not base_path:
-            base_path = "/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis"
+            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
         
         result_file = Path(base_path) / company_name / "cv_jd_match_results.json"
         

@@ -411,7 +411,7 @@ class EnhancedATSOrchestrator:
             logger.info(f"[Enhanced ATS] Starting analysis for company: {company_name}")
             
             # Define paths
-            base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+            base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
             company_dir = base_dir / company_name
             analysis_file = company_dir / f"{company_name}_skills_analysis.json"
             cv_file = base_dir / "original_cv.txt"  # CV file is in the main directory

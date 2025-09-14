@@ -19,7 +19,7 @@ class SkillsAnalysisController extends ChangeNotifier {
   String? _errorMessage;
   SkillsAnalysisState _state = SkillsAnalysisState.idle;
   Duration _executionDuration = Duration.zero;
-  
+
   // Progressive display state
   SkillsAnalysisResult? _fullResult; // Complete result from API
   bool _showAnalyzeMatch = false;
@@ -43,7 +43,7 @@ class SkillsAnalysisController extends ChangeNotifier {
       _state == SkillsAnalysisState.completed && _result != null;
   bool get hasError => _state == SkillsAnalysisState.error;
   bool get isEmpty => _result?.isEmpty ?? true;
-  
+
   // Progressive display getters
   bool get showAnalyzeMatch => _showAnalyzeMatch;
   bool get showPreextractedComparison => _showPreextractedComparison;
@@ -77,16 +77,20 @@ class SkillsAnalysisController extends ChangeNotifier {
   // Skill counts for UI display
   int get cvTotalSkills => cvSkills?.totalSkillsCount ?? 0;
   int get jdTotalSkills => jdSkills?.totalSkillsCount ?? 0;
-  
-  // Component Analysis getters
+
+  // Component Analysis getters (used by ATS widgets)
   ComponentAnalysisResult? get componentAnalysis => _result?.componentAnalysis;
   bool get hasComponentAnalysis => _result?.componentAnalysis != null;
-  double get skillsRelevanceScore => _result?.componentAnalysis?.skillsRelevance ?? 0.0;
-  double get experienceAlignmentScore => _result?.componentAnalysis?.experienceAlignment ?? 0.0;
+  double get skillsRelevanceScore =>
+      _result?.componentAnalysis?.skillsRelevance ?? 0.0;
+  double get experienceAlignmentScore =>
+      _result?.componentAnalysis?.experienceAlignment ?? 0.0;
   double get industryFitScore => _result?.componentAnalysis?.industryFit ?? 0.0;
-  double get roleSeniorityScore => _result?.componentAnalysis?.roleSeniority ?? 0.0;
-  double get technicalDepthScore => _result?.componentAnalysis?.technicalDepth ?? 0.0;
-  
+  double get roleSeniorityScore =>
+      _result?.componentAnalysis?.roleSeniority ?? 0.0;
+  double get technicalDepthScore =>
+      _result?.componentAnalysis?.technicalDepth ?? 0.0;
+
   // ATS Result getters
   ATSResult? get atsResult => _result?.atsResult;
   bool get hasATSResult => _result?.atsResult != null;
@@ -252,15 +256,15 @@ class SkillsAnalysisController extends ChangeNotifier {
   void _clearError() {
     _errorMessage = null;
   }
-  
+
   /// Start progressive display of results
   void _startProgressiveDisplay() {
     if (_fullResult == null) return;
-    
+
     // Reset progressive state
     _showAnalyzeMatch = false;
     _showPreextractedComparison = false;
-    
+
     // Step 1: Show skills immediately (side-by-side display)
     _result = SkillsAnalysisResult(
       cvSkills: _fullResult!.cvSkills,
@@ -276,19 +280,19 @@ class SkillsAnalysisController extends ChangeNotifier {
       preextractedRawOutput: null,
       preextractedCompanyName: null,
     );
-    
+
     _setState(SkillsAnalysisState.completed);
     _showNotification(
       '✅ Skills extracted! Found ${_fullResult!.cvSkills.totalSkillsCount} CV skills and ${_fullResult!.jdSkills.totalSkillsCount} JD skills.',
     );
-    
+
     // Step 2: Show analyze match loading immediately, then results after 10 seconds
     if (_fullResult?.analyzeMatch != null) {
       // Immediately show loading state and notification
       _showAnalyzeMatch = true;
       notifyListeners();
       _showNotification('📎 Starting recruiter assessment analysis...');
-      
+
       Timer(Duration(seconds: 10), () {
         // Show analyze match results
         _result = _result!.copyWith(
@@ -296,25 +300,25 @@ class SkillsAnalysisController extends ChangeNotifier {
         );
         notifyListeners();
         _showNotification('🎯 Recruiter assessment completed!');
-        
+
         // Step 3: Immediately show preextracted comparison loading
         if (_fullResult?.preextractedRawOutput != null) {
           _showPreextractedComparison = true;
           notifyListeners();
           _showNotification('📈 Starting skills comparison analysis...');
-          
-            Timer(Duration(seconds: 10), () {
-              // Show preextracted comparison results
-              _result = _result!.copyWith(
-                preextractedRawOutput: _fullResult!.preextractedRawOutput,
-                preextractedCompanyName: _fullResult!.preextractedCompanyName,
-              );
-              notifyListeners();
-              _showNotification('📊 Skills comparison analysis completed!');
-              
-              // Step 4: Start polling for component analysis and ATS results
-              _startPollingForCompleteResults();
-            });
+
+          Timer(Duration(seconds: 10), () {
+            // Show preextracted comparison results
+            _result = _result!.copyWith(
+              preextractedRawOutput: _fullResult!.preextractedRawOutput,
+              preextractedCompanyName: _fullResult!.preextractedCompanyName,
+            );
+            notifyListeners();
+            _showNotification('📊 Skills comparison analysis completed!');
+
+            // Step 4: Start polling for component analysis and ATS results
+            _startPollingForCompleteResults();
+          });
         }
       });
     } else {
@@ -323,7 +327,7 @@ class SkillsAnalysisController extends ChangeNotifier {
         _showPreextractedComparison = true;
         notifyListeners();
         _showNotification('📈 Starting skills comparison analysis...');
-        
+
         Timer(Duration(seconds: 10), () {
           _result = _result!.copyWith(
             preextractedRawOutput: _fullResult!.preextractedRawOutput,
@@ -331,14 +335,14 @@ class SkillsAnalysisController extends ChangeNotifier {
           );
           notifyListeners();
           _showNotification('📊 Skills comparison analysis completed!');
-          
+
           // Step 4: Start polling for component analysis and ATS results
           _startPollingForCompleteResults();
         });
       }
     }
   }
-  
+
   /// Start polling for component analysis and ATS calculation results
   void _startPollingForCompleteResults() async {
     final company = _fullResult?.preextractedCompanyName;
@@ -347,57 +351,64 @@ class SkillsAnalysisController extends ChangeNotifier {
       _finishAnalysis();
       return;
     }
-    
+
     print('🔄 [POLLING] Starting polling for complete results...');
-    _showNotification('🔧 Running advanced analysis (component analysis & ATS calculation)...');
-    
+    _showNotification(
+        '🔧 Running advanced analysis (component analysis & ATS calculation)...');
+
     try {
-      final completeResults = await SkillsAnalysisService.waitForCompleteResults(company);
-      
+      final completeResults =
+          await SkillsAnalysisService.waitForCompleteResults(company);
+
       if (completeResults != null) {
         print('✅ [POLLING] Complete results obtained!');
-        
+
         // Parse component analysis
         ComponentAnalysisResult? componentAnalysis;
         if (completeResults['component_analysis'] != null) {
-          componentAnalysis = ComponentAnalysisResult.fromJson(completeResults['component_analysis']);
-          print('📊 [POLLING] Component analysis parsed: ${componentAnalysis.extractedScores.length} scores');
+          componentAnalysis = ComponentAnalysisResult.fromJson(
+              completeResults['component_analysis']);
+          print(
+              '📊 [POLLING] Component analysis parsed: ${componentAnalysis.extractedScores.length} scores');
         }
-        
+
         // Parse ATS result
         ATSResult? atsResult;
         if (completeResults['ats_score'] != null) {
           atsResult = ATSResult.fromJson(completeResults['ats_score']);
           print('🎯 [POLLING] ATS result parsed: ${atsResult.finalATSScore}');
         }
-        
+
         // Update the result with component analysis and ATS data
         _result = _result!.copyWith(
           componentAnalysis: componentAnalysis,
           atsResult: atsResult,
         );
-        
+
         notifyListeners();
-        
+
         if (atsResult != null) {
-          _showNotification('🎯 ATS Score: ${atsResult.finalATSScore.toStringAsFixed(1)}/100 (${atsResult.categoryStatus})');
+          _showNotification(
+              '🎯 ATS Score: ${atsResult.finalATSScore.toStringAsFixed(1)}/100 (${atsResult.categoryStatus})');
         } else {
           _showNotification('✅ Advanced analysis completed!');
         }
-        
+
         _finishAnalysis();
       } else {
         print('⚠️ [POLLING] Polling timed out, analysis incomplete');
-        _showNotification('⚠️ Advanced analysis timed out - basic analysis complete');
+        _showNotification(
+            '⚠️ Advanced analysis timed out - basic analysis complete');
         _finishAnalysis();
       }
     } catch (e) {
       print('❌ [POLLING] Error during polling: $e');
-      _showNotification('⚠️ Advanced analysis failed - basic analysis complete');
+      _showNotification(
+          '⚠️ Advanced analysis failed - basic analysis complete');
       _finishAnalysis();
     }
   }
-  
+
   /// Finish the analysis process
   void _finishAnalysis() {
     _executionDuration = _fullResult?.executionDuration ?? Duration.zero;

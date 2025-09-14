@@ -101,7 +101,7 @@ def _detect_most_recent_company() -> Optional[str]:
     Returns the company folder name or None if not found.
     """
     try:
-        base_path = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        base_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         if not base_path.exists():
             return None
 
@@ -165,7 +165,7 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
             
             # Check if we have the minimum required files
-            base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+            base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
             cv_file = base_dir / "original_cv.json"
             jd_file = base_dir / cname / "jd_original.json"
             skills_file = base_dir / cname / f"{cname}_skills_analysis.json"
@@ -362,7 +362,7 @@ async def preliminary_analysis(
 
             # If we have a company, ensure required files exist for the pipeline
             if company_name:
-                base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+                base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
                 company_dir = base_dir / company_name
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)
@@ -512,7 +512,7 @@ async def trigger_component_analysis(company: str):
         from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
         
         # Check if required files exist
-        base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         required_files = {
             "cv_file": base_dir / "original_cv.json",
             "jd_file": base_dir / company / "jd_original.json", 
@@ -649,7 +649,7 @@ async def list_analysis_configs():
 async def list_companies_with_results():
     """List all companies that have analysis results"""
     try:
-        base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         
         if not base_dir.exists():
             return JSONResponse(content={
@@ -714,7 +714,7 @@ async def get_analysis_results(company: str):
         logger.info(f"📊 [API] Fetching analysis results for company: {company}")
         
         # Build file path
-        base_dir = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         analysis_file = base_dir / company / f"{company}_skills_analysis.json"
         
         if not analysis_file.exists():

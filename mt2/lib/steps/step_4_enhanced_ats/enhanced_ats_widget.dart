@@ -24,6 +24,9 @@ class EnhancedATSWidget extends AnalysisStepWidget {
     debugPrint(
         '   Detailed Breakdown: ${atsController.detailedBreakdown != null ? 'Available' : 'Not Available'}');
     debugPrint('   ATS Results Keys: ${atsResults.keys.toList()}');
+    debugPrint('   Is Showing Countdown: ${atsController.isShowingCountdown}');
+    debugPrint('   Countdown Seconds: ${atsController.countdownSeconds}');
+    debugPrint('   Is Processing: ${atsController.isProcessing}');
 
     return Container(
       decoration: BoxDecoration(
@@ -38,14 +41,26 @@ class EnhancedATSWidget extends AnalysisStepWidget {
           _buildHeader(),
           const SizedBox(height: 20),
 
+          // Countdown Display (10-second rule)
+          if (atsController.isShowingCountdown) ...[
+            _buildCountdownDisplay(atsController),
+            const SizedBox(height: 20),
+          ],
+          
+          // Processing Animation
+          if (atsController.isProcessing && !atsController.isShowingCountdown) ...[
+            _buildProcessingAnimation(),
+            const SizedBox(height: 20),
+          ],
+
           // Overall Score Section
-          if (atsController.overallScore != null) ...[
+          if (atsController.overallScore != null && !atsController.isShowingCountdown && !atsController.isProcessing) ...[
             _buildOverallScoreSection(atsController),
             const SizedBox(height: 24),
           ],
 
           // Score Breakdown Section
-          if (atsResults.isNotEmpty) ...[
+          if (atsResults.isNotEmpty && !atsController.isShowingCountdown && !atsController.isProcessing) ...[
             _buildScoreBreakdown(atsResults),
           ],
         ],
@@ -640,6 +655,93 @@ class EnhancedATSWidget extends AnalysisStepWidget {
       missingReqs: missingReqs,
       bgColor: bgColor,
       textColor: textColor,
+    );
+  }
+  
+  /// Build countdown display (10-second rule) - consistent style
+  Widget _buildCountdownDisplay(EnhancedATSController controller) {
+    // Get the appropriate message based on countdown time
+    String getMessage() {
+      if (controller.countdownSeconds >= 8) {
+        return 'Generating enhanced ATS analysis...';
+      } else if (controller.countdownSeconds >= 5) {
+        return 'Analyzing ATS compatibility...';
+      } else if (controller.countdownSeconds >= 2) {
+        return 'Calculating comprehensive score...';
+      } else {
+        return 'Finalizing ATS results...';
+      }
+    }
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange.shade200),
+      ),
+      child: Row(
+        children: [
+          // Consistent circular progress indicator
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange.shade600),
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Status message with consistent styling
+          Expanded(
+            child: Text(
+              getMessage(),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.orange.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// Build processing animation - consistent style
+  Widget _buildProcessingAnimation() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Row(
+        children: [
+          // Consistent circular progress indicator
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Processing message with consistent styling
+          Expanded(
+            child: Text(
+              'Generating comprehensive ATS report...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.blue.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

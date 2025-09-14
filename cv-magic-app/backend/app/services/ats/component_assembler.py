@@ -30,7 +30,7 @@ class ComponentAssembler:
     """Assembles individual component analyses into unified results."""
 
     def __init__(self, base_dir: Optional[Path] = None):
-        self.base_dir: Path = base_dir or Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        self.base_dir: Path = base_dir or Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         
         # Initialize analyzers
         self.skills_analyzer = SkillsAnalyzer()

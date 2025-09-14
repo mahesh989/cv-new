@@ -167,9 +167,11 @@ class SkillsDisplayWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with execution info - show as soon as any results are available
-          if (controller.result != null && 
-              (controller.cvTotalSkills > 0 || controller.jdTotalSkills > 0 || 
-               controller.hasAnalyzeMatch || controller.result?.hasPreextractedComparison == true)) 
+          if (controller.result != null &&
+              (controller.cvTotalSkills > 0 ||
+                  controller.jdTotalSkills > 0 ||
+                  controller.hasAnalyzeMatch ||
+                  controller.result?.hasPreextractedComparison == true))
             _buildResultsHeader(),
 
           // Progressive loading indicator - show when analysis is still running but we have partial results
@@ -190,7 +192,8 @@ class SkillsDisplayWidget extends StatelessWidget {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.orange.shade600),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.orange.shade600),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -209,8 +212,9 @@ class SkillsDisplayWidget extends StatelessWidget {
           ],
 
           // Side by side comparison - show as soon as skills data is available
-          if (controller.result != null && 
-              (controller.cvTotalSkills > 0 || controller.jdTotalSkills > 0)) ...[
+          if (controller.result != null &&
+              (controller.cvTotalSkills > 0 ||
+                  controller.jdTotalSkills > 0)) ...[
             Builder(
               builder: (context) {
                 debugPrint(
@@ -260,7 +264,8 @@ class SkillsDisplayWidget extends StatelessWidget {
               builder: (context) {
                 debugPrint(
                     '🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget (progressive)');
-                debugPrint('   showAnalyzeMatch: ${controller.showAnalyzeMatch}');
+                debugPrint(
+                    '   showAnalyzeMatch: ${controller.showAnalyzeMatch}');
                 debugPrint('   hasAnalyzeMatch: ${controller.hasAnalyzeMatch}');
                 debugPrint('   isLoading: ${controller.isLoading}');
                 debugPrint(
@@ -268,7 +273,8 @@ class SkillsDisplayWidget extends StatelessWidget {
 
                 // Show loading state if analyze match should show but isn't available yet
                 // This happens when showAnalyzeMatch is true but the actual data isn't loaded yet
-                final isAnalyzeMatchInProgress = controller.showAnalyzeMatch && !controller.hasAnalyzeMatch;
+                final isAnalyzeMatchInProgress =
+                    controller.showAnalyzeMatch && !controller.hasAnalyzeMatch;
 
                 return AnalyzeMatchWidget(
                   analyzeMatch: controller.analyzeMatch,
@@ -279,16 +285,22 @@ class SkillsDisplayWidget extends StatelessWidget {
           ],
 
           // AI-Powered Skills Analysis - Show based on progressive state
-          if (controller.showPreextractedComparison || controller.result?.hasPreextractedComparison == true) ...[
+          if (controller.showPreextractedComparison ||
+              controller.result?.hasPreextractedComparison == true) ...[
             Builder(
               builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] Rendering AIPoweredSkillsAnalysis');
-                debugPrint('   showPreextractedComparison: ${controller.showPreextractedComparison}');
-                debugPrint('   hasPreextractedComparison: ${controller.result?.hasPreextractedComparison}');
-                debugPrint('   preextractedRawOutput length: ${controller.result?.preextractedRawOutput?.length ?? 0}');
-                
+                debugPrint(
+                    '🔍 [SKILLS_DISPLAY] Rendering AIPoweredSkillsAnalysis');
+                debugPrint(
+                    '   showPreextractedComparison: ${controller.showPreextractedComparison}');
+                debugPrint(
+                    '   hasPreextractedComparison: ${controller.result?.hasPreextractedComparison}');
+                debugPrint(
+                    '   preextractedRawOutput length: ${controller.result?.preextractedRawOutput?.length ?? 0}');
+
                 // Show loading state if comparison should show but isn't available yet
-                if (controller.showPreextractedComparison && controller.result?.hasPreextractedComparison != true) {
+                if (controller.showPreextractedComparison &&
+                    controller.result?.hasPreextractedComparison != true) {
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     child: Container(
@@ -306,7 +318,8 @@ class SkillsDisplayWidget extends StatelessWidget {
                             height: 16,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange.shade600),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.orange.shade600),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -323,154 +336,87 @@ class SkillsDisplayWidget extends StatelessWidget {
                     ),
                   );
                 }
-                
-                return Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green.shade200),
-                ),
-                child: Builder(
-                  builder: (context) {
-                    // Parse the raw output into structured data for table display
-                    final parsedData = PreextractedParser.parse(
-                      controller.result!.preextractedRawOutput!,
-                    );
-                    
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Use the proper table widget instead of plain text
-                        AIPoweredSkillsAnalysis(data: parsedData),
-                        
-                        // Show company info if available
-                        if (controller.result!.preextractedCompanyName != null) ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'Company: ${controller.result!.preextractedCompanyName}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.green.shade700,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    );
-                  },
-                ),
-              ),
-            );
-              },
-            ),
-          ],
-          
-          // Component Analysis - Show when available
-          if (controller.hasComponentAnalysis) ...[
-            Builder(
-              builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] Rendering Component Analysis');
-                debugPrint('   hasComponentAnalysis: ${controller.hasComponentAnalysis}');
-                debugPrint('   skillsRelevanceScore: ${controller.skillsRelevanceScore}');
-                debugPrint('   experienceAlignmentScore: ${controller.experienceAlignmentScore}');
-                debugPrint('   industryFitScore: ${controller.industryFitScore}');
-                debugPrint('   roleSeniorityScore: ${controller.roleSeniorityScore}');
-                debugPrint('   technicalDepthScore: ${controller.technicalDepthScore}');
-                
+
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.purple.shade50,
+                      color: Colors.green.shade50,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.purple.shade200),
+                      border: Border.all(color: Colors.green.shade200),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                    child: Builder(
+                      builder: (context) {
+                        // Parse the raw output into structured data for table display
+                        final parsedData = PreextractedParser.parse(
+                          controller.result!.preextractedRawOutput!,
+                        );
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.analytics_outlined,
-                              color: Colors.purple.shade700,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '📊 COMPONENT ANALYSIS',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple.shade700,
+                            // Use the proper table widget instead of plain text
+                            AIPoweredSkillsAnalysis(data: parsedData),
+
+                            // Show company info if available
+                            if (controller.result!.preextractedCompanyName !=
+                                null) ...[
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'Company: ${controller.result!.preextractedCompanyName}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.green.shade700,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Detailed analysis across 5 key dimensions',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.purple.shade600,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Component scores grid
-                        _buildComponentScoreCard('🛠️ Skills Relevance', controller.skillsRelevanceScore, Colors.blue),
-                        const SizedBox(height: 8),
-                        _buildComponentScoreCard('👤 Experience Alignment', controller.experienceAlignmentScore, Colors.green),
-                        const SizedBox(height: 8),
-                        _buildComponentScoreCard('🏢 Industry Fit', controller.industryFitScore, Colors.orange),
-                        const SizedBox(height: 8),
-                        _buildComponentScoreCard('📈 Role Seniority', controller.roleSeniorityScore, Colors.teal),
-                        const SizedBox(height: 8),
-                        _buildComponentScoreCard('🔧 Technical Depth', controller.technicalDepthScore, Colors.indigo),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 );
               },
             ),
           ],
-          
+
           // Enhanced ATS Score Widget with Pie Chart and Progress Bars - Show when available
           if (controller.hasATSResult) ...[
             Builder(
               builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] Rendering ATSScoreWidgetWithProgressBars');
+                debugPrint(
+                    '🔍 [SKILLS_DISPLAY] Rendering ATSScoreWidgetWithProgressBars');
                 debugPrint('   hasATSResult: ${controller.hasATSResult}');
                 debugPrint('   atsScore: ${controller.atsScore}');
-                
+
                 return ATSScoreWidgetWithProgressBars(
                   controller: controller,
                 );
               },
             ),
           ],
-          
+
           // AI Recommendations - Show when ATS result includes recommendations
-          if (controller.hasATSResult && controller.atsResult?.recommendations != null && controller.atsResult!.recommendations.isNotEmpty) ...[
+          if (controller.hasATSResult &&
+              controller.atsResult?.recommendations != null &&
+              controller.atsResult!.recommendations.isNotEmpty) ...[
             Builder(
               builder: (context) {
                 debugPrint('🔍 [SKILLS_DISPLAY] Rendering AI Recommendations');
                 final recommendations = controller.atsResult!.recommendations;
-                debugPrint('   recommendations count: ${recommendations.length}');
-                
+                debugPrint(
+                    '   recommendations count: ${recommendations.length}');
+
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                   child: Container(
@@ -512,37 +458,41 @@ class SkillsDisplayWidget extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Recommendations list
-                        ...recommendations.take(8).map((recommendation) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 4),
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade600,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  recommendation,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade700,
-                                    height: 1.4,
+                        ...recommendations
+                            .take(8)
+                            .map((recommendation) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 4),
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.shade600,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          recommendation,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey.shade700,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )).toList(),
-                        
+                                ))
+                            .toList(),
+
                         if (recommendations.length > 8) ...[
                           const SizedBox(height: 8),
                           Text(
@@ -726,61 +676,6 @@ class SkillsDisplayWidget extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  // Helper method for building component score cards
-  Widget _buildComponentScoreCard(String title, double score, MaterialColor color) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: color.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.shade200),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: color.shade700,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _getScoreBackgroundColor(score),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${score.toStringAsFixed(1)}',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: _getScoreTextColor(score),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  // Helper methods for score coloring
-  Color _getScoreBackgroundColor(double score) {
-    if (score >= 80) return Colors.green.shade100;
-    if (score >= 60) return Colors.orange.shade100;
-    return Colors.red.shade100;
-  }
-  
-  Color _getScoreTextColor(double score) {
-    if (score >= 80) return Colors.green.shade700;
-    if (score >= 60) return Colors.orange.shade700;
-    return Colors.red.shade700;
   }
 
   // Note: _buildExpandableAnalysis and _buildFormattedText methods removed

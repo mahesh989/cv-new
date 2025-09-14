@@ -19,7 +19,6 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
     }
 
     final atsResult = controller.atsResult!;
-    final hasComponentAnalysis = controller.hasComponentAnalysis;
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -89,19 +88,6 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
               ),
             ),
 
-            // Additional Component Analysis Scores (if available)
-            if (hasComponentAnalysis) ...[
-              const SizedBox(height: 20),
-              Text(
-                'Additional Component Scores',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              _buildAdditionalScores(),
-            ],
-
             // Categorized Progress Bars - Main Feature
             const SizedBox(height: 24),
             _buildCategorizedProgressBars(atsResult),
@@ -134,49 +120,6 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
               fontSize: 48,
               fontWeight: FontWeight.bold,
               color: _getScoreColor(atsResult.finalATSScore),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdditionalScores() {
-    return Column(
-      children: [
-        _buildScoreRow(
-            'Industry Fit', controller.industryFitScore, Icons.business),
-        _buildScoreRow(
-            'Role Seniority', controller.roleSeniorityScore, Icons.trending_up),
-        _buildScoreRow('Technical Depth', controller.technicalDepthScore,
-            Icons.engineering),
-      ],
-    );
-  }
-
-  Widget _buildScoreRow(String label, double score, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-          SizedBox(
-            width: 60,
-            child: Text(
-              score.toStringAsFixed(1),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: _getScoreColor(score),
-              ),
-              textAlign: TextAlign.right,
             ),
           ),
         ],

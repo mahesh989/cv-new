@@ -1,0 +1,70 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-14T15:11:44.501027",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "analytical thinking",
+    "problem-solving",
+    "communication",
+    "customer service"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau"
+  ],
+  "missed_required_keywords": [
+    "VBA",
+    "data warehouse",
+    "project management",
+    "stakeholder management",
+    "data mining",
+    "marketing campaigns",
+    "donor-centricity",
+    "segmentation strategies"
+  ],
+  "missed_preferred_keywords": [
+    "data issues",
+    "de-duplication",
+    "best practice guidelines"
+  ],
+  "match_counts": {
+    "total_required_keywords": 14,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 7,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "matched_required": {
+      "SQL": "Matched as 'SQL' in the technical skills section.",
+      "Power BI": "Matched as 'Power BI' in the technical skills section and also mentioned in the experience section.",
+      "Excel": "Matched as 'Excel' in the technical skills section.",
+      "analytical thinking": "Contextually matched through references to data analysis and problem-solving.",
+      "problem-solving": "Contextually matched through references to developing solutions and optimizing processes.",
+      "communication": "Matched through references to presenting findings and communicating insights.",
+      "customer service": "Contextually matched through references to enhancing customer satisfaction and insights."
+    },
+    "missed_required": {
+      "VBA": "Not mentioned in any form.",
+      "data warehouse": "Mentioned Snowflake but not explicitly as 'data warehouse'.",
+      "project management": "No direct mention or context indicating project management skills.",
+      "stakeholder management": "No mention of managing stakeholders.",
+      "data mining": "Not explicitly mentioned.",
+      "marketing campaigns": "Not mentioned.",
+      "donor-centricity": "Not mentioned.",
+      "segmentation strategies": "Not mentioned."
+    },
+    "matched_preferred": {
+      "Tableau": "Matched as 'Tableau' in the technical skills section."
+    },
+    "missed_preferred": {
+      "data issues": "Not mentioned.",
+      "de-duplication": "Not mentioned.",
+      "best practice guidelines": "Not mentioned."
+    }
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "metadata": {}
+}

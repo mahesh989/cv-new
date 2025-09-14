@@ -234,7 +234,7 @@ class JDAnalyzer:
     
     def __init__(self):
         self.ai_service = ai_service
-        self.base_analysis_path = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        self.base_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         self.requirements_extractor = RequirementsExtractor()
     
     def _read_jd_file(self, file_path: Union[str, Path]) -> str:
