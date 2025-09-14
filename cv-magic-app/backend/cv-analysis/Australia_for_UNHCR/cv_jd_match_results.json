@@ -1,6 +1,6 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-14T18:32:52.472668",
+  "cv_analysis_timestamp": "2025-09-14T19:19:02.525200",
   "matched_required_keywords": [
     "SQL",
     "VBA",
@@ -13,26 +13,30 @@
   "matched_preferred_keywords": [
     "Tableau"
   ],
-  "missed_required_keywords": [
-    "stakeholder management"
-  ],
+  "missed_required_keywords": [],
   "missed_preferred_keywords": [
-    "customer service",
+    "stakeholder management",
     "marketing campaigns",
-    "communication purposes",
-    "governing regulations"
+    "communication purposes"
   ],
   "match_counts": {
-    "total_required_keywords": 8,
-    "total_preferred_keywords": 5,
+    "total_required_keywords": 7,
+    "total_preferred_keywords": 4,
     "matched_required_count": 7,
     "matched_preferred_count": 1
   },
   "matching_notes": {
-    "stakeholder management": "Not explicitly mentioned in the CV content.",
-    "Tableau": "The candidate mentions proficiency in Tableau in the Technical Skills section, matching the preferred keyword.",
-    "communication": "The candidate mentions 'communication' in the Technical Skills section, matching the required keyword.",
-    "project management": "The candidate mentions 'project management' in the Technical Skills section, matching the required keyword."
+    "SQL": "Found in the CV under Technical Skills section where the candidate mentions proficiency in SQL for querying, modeling, and managing complex relational databases.",
+    "VBA": "Not explicitly mentioned in the CV.",
+    "SQL data warehouse": "Not explicitly mentioned in the CV, but the candidate's experience with Snowflake for cloud data warehousing could be considered relevant.",
+    "Power BI": "Found in the CV under Technical Skills and Experience sections where the candidate mentions building comprehensive dashboards using Power BI.",
+    "communication": "Found in the CV under Career Profile where the candidate mentions creating advanced visualizations that convert complex data into actionable insights.",
+    "project management": "Found in the CV under Career Profile where the candidate mentions building comprehensive dashboards that support data-driven decision-making.",
+    "data warehouse": "Found in the CV under Technical Skills where the candidate mentions experience with Snowflake for cloud data warehousing.",
+    "Tableau": "Found in the CV under Technical Skills section where the candidate mentions creating interactive dashboards and visualizations using Tableau.",
+    "stakeholder management": "Not explicitly mentioned in the CV.",
+    "marketing campaigns": "Not explicitly mentioned in the CV.",
+    "communication purposes": "Not explicitly mentioned in the CV."
   },
   "ai_model_used": "openai/gpt-3.5-turbo",
   "processing_status": "completed",

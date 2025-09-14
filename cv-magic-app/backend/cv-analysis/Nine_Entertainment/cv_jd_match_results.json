@@ -1,0 +1,46 @@
+{
+  "company_name": "Nine_Entertainment",
+  "cv_analysis_timestamp": "2025-09-14T19:04:01.571467",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "communication",
+    "data engineering"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau",
+    "Snowflake"
+  ],
+  "missed_required_keywords": [
+    "data modelling",
+    "data warehousing",
+    "business intelligence"
+  ],
+  "missed_preferred_keywords": [
+    "Vector Databases",
+    "RAG"
+  ],
+  "match_counts": {
+    "total_required_keywords": 7,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 4,
+    "matched_preferred_count": 2
+  },
+  "matching_notes": {
+    "SQL": "Matched as it is mentioned directly in the CV.",
+    "Power BI": "Matched as it is mentioned directly in the CV.",
+    "communication": "Matched in the context of presenting research findings and mentoring students.",
+    "data engineering": "Matched in the context of building data pipelines and automating data processes.",
+    "data modelling": "Missed; no equivalent term found in the CV.",
+    "data warehousing": "Missed; no equivalent term found in the CV.",
+    "business intelligence": "Missed; no equivalent term found in the CV.",
+    "Tableau": "Matched as it is mentioned directly in the CV.",
+    "Snowflake": "Matched as it is mentioned directly in the CV.",
+    "Vector Databases": "Missed; no equivalent term found in the CV.",
+    "RAG": "Missed; no equivalent term found in the CV."
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "metadata": {}
+}

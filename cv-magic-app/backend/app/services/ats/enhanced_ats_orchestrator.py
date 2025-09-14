@@ -488,6 +488,18 @@ class EnhancedATSOrchestrator:
             logger.info(f"[Enhanced ATS] ATS analysis saved to {analysis_file}")
             logger.info(f"[Enhanced ATS] Final ATS Score: {results.final_ats_score:.1f}/100 ({results.ats_breakdown.category_status})")
             
+            # Create recommendation file after ATS analysis is completed
+            try:
+                from ..ats_recommendation_service import ats_recommendation_service
+                recommendation_created = ats_recommendation_service.create_recommendation_file(company_name)
+                
+                if recommendation_created:
+                    logger.info(f"[Enhanced ATS] Recommendation file created for {company_name}")
+                else:
+                    logger.warning(f"[Enhanced ATS] Failed to create recommendation file for {company_name}")
+            except Exception as e:
+                logger.error(f"[Enhanced ATS] Error creating recommendation file for {company_name}: {e}")
+            
             return ats_results_dict
             
         except Exception as e:

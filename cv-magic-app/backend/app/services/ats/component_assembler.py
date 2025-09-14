@@ -429,6 +429,18 @@ class ComponentAssembler:
             logger.info("[ASSEMBLER] ATS calculation completed. Score: %.1f/100 (%s)", 
                        ats_breakdown.final_ats_score, ats_breakdown.category_status)
             
+            # Create recommendation file after ATS calculation is completed
+            try:
+                from app.services.ats_recommendation_service import ats_recommendation_service
+                recommendation_created = ats_recommendation_service.create_recommendation_file(company)
+                
+                if recommendation_created:
+                    logger.info("[ASSEMBLER] Recommendation file created for %s", company)
+                else:
+                    logger.warning("[ASSEMBLER] Failed to create recommendation file for %s", company)
+            except Exception as e:
+                logger.error("[ASSEMBLER] Error creating recommendation file for %s: %s", company, e)
+            
             return ats_result
             
         except Exception as e:

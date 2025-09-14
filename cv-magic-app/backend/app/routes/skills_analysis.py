@@ -5,7 +5,7 @@ Extracted from main.py to provide better organization and maintainability
 """
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
@@ -621,6 +621,280 @@ async def trigger_complete_pipeline(company: str):
             content={
                 "error": f"Pipeline failed: {str(e)}",
                 "company": company
+            }
+        )
+
+
+@router.post("/create-recommendation-file/{company}")
+async def create_recommendation_file(company: str, force_update: bool = False):
+    """Manually create or update a recommendation file for a company"""
+    try:
+        from app.services.ats_recommendation_service import ats_recommendation_service
+        
+        logger.info(f"🔧 [MANUAL] Creating recommendation file for company: {company}")
+        
+        # Check if company has ATS data first
+        companies_with_ats = ats_recommendation_service.list_companies_with_ats_data()
+        if company not in companies_with_ats:
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "No ATS calculation data found for this company",
+                    "company": company,
+                    "companies_with_ats": companies_with_ats
+                }
+            )
+        
+        # Create/update the recommendation file
+        success = ats_recommendation_service.update_existing_recommendation(company, force_update)
+        
+        if success:
+            recommendation_file = ats_recommendation_service.get_recommendation_file_path(company)
+            return JSONResponse(content={
+                "success": True,
+                "message": f"Recommendation file created/updated for {company}",
+                "company": company,
+                "file_path": str(recommendation_file),
+                "force_update": force_update
+            })
+        else:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": "Failed to create recommendation file or no update needed",
+                    "company": company,
+                    "force_update": force_update
+                }
+            )
+    
+    except Exception as e:
+        logger.error(f"❌ [MANUAL] Failed to create recommendation file for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Failed to create recommendation file: {str(e)}",
+                "company": company
+            }
+        )
+
+
+@router.post("/batch-create-recommendations")
+async def batch_create_recommendations(companies: Optional[List[str]] = None, force_update: bool = False):
+    """Batch create recommendation files for multiple companies"""
+    try:
+        from app.services.ats_recommendation_service import ats_recommendation_service
+        
+        logger.info(f"🔧 [BATCH] Creating recommendation files - Force update: {force_update}")
+        
+        # Process companies
+        results = ats_recommendation_service.batch_create_recommendations(companies, force_update)
+        
+        successful_count = sum(1 for success in results.values() if success)
+        total_count = len(results)
+        
+        return JSONResponse(content={
+            "success": True,
+            "message": f"Batch recommendation creation completed",
+            "results": results,
+            "summary": {
+                "successful": successful_count,
+                "total": total_count,
+                "failed": total_count - successful_count
+            },
+            "force_update": force_update
+        })
+    
+    except Exception as e:
+        logger.error(f"❌ [BATCH] Batch recommendation creation failed: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Batch creation failed: {str(e)}"
+            }
+        )
+
+
+@router.get("/recommendation-files")
+async def list_recommendation_files():
+    """List all companies with recommendation files"""
+    try:
+        from app.services.ats_recommendation_service import ats_recommendation_service
+        
+        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        companies_with_recommendations = []
+        
+        if base_dir.exists():
+            for company_dir in base_dir.iterdir():
+                if company_dir.is_dir() and company_dir.name != "Unknown_Company":
+                    recommendation_file = ats_recommendation_service.get_recommendation_file_path(company_dir.name)
+                    
+                    if recommendation_file.exists():
+                        # Get file info
+                        stat_info = recommendation_file.stat()
+                        
+                        # Read the recommendation data
+                        try:
+                            with open(recommendation_file, 'r', encoding='utf-8') as f:
+                                recommendation_data = json.load(f)
+                            
+                            ats_entries = recommendation_data.get("ats_calculation_entries", [])
+                            latest_entry = ats_entries[-1] if ats_entries else {}
+                            
+                            companies_with_recommendations.append({
+                                "company": company_dir.name,
+                                "file_path": str(recommendation_file),
+                                "file_size": stat_info.st_size,
+                                "last_modified": stat_info.st_mtime,
+                                "ats_score": latest_entry.get("final_ats_score"),
+                                "category_status": latest_entry.get("category_status"),
+                                "recommendation": latest_entry.get("recommendation")
+                            })
+                            
+                        except Exception as e:
+                            logger.warning(f"Could not read recommendation file for {company_dir.name}: {e}")
+                            companies_with_recommendations.append({
+                                "company": company_dir.name,
+                                "file_path": str(recommendation_file),
+                                "file_size": stat_info.st_size,
+                                "last_modified": stat_info.st_mtime,
+                                "error": "Could not read file contents"
+                            })
+        
+        return JSONResponse(content={
+            "success": True,
+            "companies_with_recommendations": companies_with_recommendations,
+            "total_count": len(companies_with_recommendations)
+        })
+    
+    except Exception as e:
+        logger.error(f"❌ Failed to list recommendation files: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Failed to list recommendation files: {str(e)}"
+            }
+        )
+
+
+@router.post("/create-ai-prompt/{company}")
+async def create_ai_recommendation_prompt(company: str):
+    """Create AI recommendation prompt file for a company"""
+    try:
+        from app.services.ats_recommendation_service import ats_recommendation_service
+        
+        logger.info(f"🤖 [AI PROMPT] Creating AI recommendation prompt for: {company}")
+        
+        # Check if recommendation file exists
+        recommendation_file = ats_recommendation_service.get_recommendation_file_path(company)
+        if not recommendation_file.exists():
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "Recommendation file not found for this company",
+                    "company": company,
+                    "recommendation_file": str(recommendation_file),
+                    "suggestion": "Create recommendation file first using /create-recommendation-file endpoint"
+                }
+            )
+        
+        # Create AI prompt file
+        try:
+            import sys
+            from pathlib import Path
+            backend_path = Path(__file__).parent.parent.parent
+            sys.path.append(str(backend_path))
+            
+            from prompt.ai_recommendation_prompt_template import create_company_prompt_file
+            prompt_file_path = create_company_prompt_file(company, str(recommendation_file))
+            
+            return JSONResponse(content={
+                "success": True,
+                "message": f"AI recommendation prompt created for {company}",
+                "company": company,
+                "prompt_file_path": prompt_file_path,
+                "recommendation_file_path": str(recommendation_file)
+            })
+            
+        except Exception as e:
+            logger.error(f"❌ [AI PROMPT] Failed to create prompt for {company}: {str(e)}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "error": f"Failed to create AI prompt: {str(e)}",
+                    "company": company
+                }
+            )
+    
+    except Exception as e:
+        logger.error(f"❌ [AI PROMPT] Error in create_ai_recommendation_prompt for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"API error: {str(e)}",
+                "company": company
+            }
+        )
+
+
+@router.get("/ai-prompt-files")
+async def list_ai_prompt_files():
+    """List all AI recommendation prompt files"""
+    try:
+        from pathlib import Path
+        
+        prompt_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/prompt")
+        prompt_files = []
+        
+        if prompt_dir.exists():
+            for prompt_file in prompt_dir.glob("*_prompt_recommendation.py"):
+                # Extract company name from filename
+                company_name = prompt_file.stem.replace("_prompt_recommendation", "")
+                
+                # Get file info
+                stat_info = prompt_file.stat()
+                
+                # Try to extract ATS score from file content
+                try:
+                    with open(prompt_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # Look for ATS Score comment line
+                    ats_score = "N/A"
+                    for line in content.split('\n'):
+                        if line.strip().startswith("# ATS Score:"):
+                            ats_score = line.split(":")[1].strip()
+                            break
+                    
+                    prompt_files.append({
+                        "company": company_name,
+                        "file_path": str(prompt_file),
+                        "file_size": stat_info.st_size,
+                        "last_modified": stat_info.st_mtime,
+                        "ats_score": ats_score
+                    })
+                    
+                except Exception as e:
+                    logger.warning(f"Could not read prompt file for {company_name}: {e}")
+                    prompt_files.append({
+                        "company": company_name,
+                        "file_path": str(prompt_file),
+                        "file_size": stat_info.st_size,
+                        "last_modified": stat_info.st_mtime,
+                        "error": "Could not read file contents"
+                    })
+        
+        return JSONResponse(content={
+            "success": True,
+            "prompt_files": prompt_files,
+            "total_count": len(prompt_files)
+        })
+    
+    except Exception as e:
+        logger.error(f"❌ Failed to list AI prompt files: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Failed to list AI prompt files: {str(e)}"
             }
         )
 

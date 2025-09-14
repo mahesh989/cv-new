@@ -1,67 +1,35 @@
 {
-  "generated": "2025-09-14T18:32:45.524",
+  "generated": "2025-09-14T19:18:52.879",
   "cv_filename": "maheshwor_tiwari.pdf",
   "jd_url": "preliminary_analysis",
-  "user_id": "e49de6df-d060-4121-a448-edc48f1541c0",
+  "user_id": "18e9ca7c-1650-4abd-9c5d-c0899989980d",
   "company": "Australia_for_UNHCR",
   "model_used": "gpt-3.5-turbo",
   "cv_skills": {
     "technical_skills": [],
     "soft_skills": [],
     "domain_keywords": [],
-    "comprehensive_analysis": "**SOFT SKILLS:**\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Problem-solving\n\n**TECHNICAL SKILLS:**\n- Python\n- Pandas\n- NumPy\n- scikit-learn\n- SQL\n- PostgreSQL\n- MySQL\n- Tableau\n- Power BI\n- Matplotlib\n- GitHub\n- Docker\n- Snowflake\n- Visual Studio Code\n- Google Analytics\n- Excel\n\n**DOMAIN KEYWORDS:**\n- Data Analysis\n- Machine Learning\n- AI\n- Data Pipelines\n- Data Visualization\n- Predictive Analytics\n- Cloud Data Warehousing\n- Version Control\n- Data Cleaning\n- Automation\n- Computational Modeling\n- Research Analysis\n- Physics\n- Data Science\n- Research Projects\n- Customer Behavior Insights\n- Population Datasets\n- Operational Efficiency\n- Dynamic Dashboards\n- Strategic Decision-making\n- Key Metrics Tracking\n- Analytics Capabilities\n- Data Preprocessing\n- Cross-functional Teams\n- Research Findings\n- Course Facilitation\n- Student Engagement"
+    "comprehensive_analysis": "**SOFT SKILLS:**\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Problem-solving\n\n**TECHNICAL SKILLS:**\n- Python\n- Pandas\n- NumPy\n- scikit-learn\n- SQL\n- PostgreSQL\n- MySQL\n- Tableau\n- Power BI\n- Matplotlib\n- GitHub\n- Docker\n- Snowflake\n- Visual Studio Code\n- Google Analytics\n- Excel\n\n**DOMAIN KEYWORDS:**\n- Data Analysis\n- Machine Learning\n- AI\n- Data Pipelines\n- Data Visualization\n- Predictive Analytics\n- Cloud Data Warehousing\n- Version Control\n- Containerization\n- Computational Modeling"
   },
   "jd_skills": {
-    "technical_skills": [
-      "Data Analyst",
-      "Data mining",
-      "Data selections",
-      "SQL",
-      "Excel",
-      "VBA",
-      "Business intelligence tools (Power BI, Tableau)",
-      "Database knowledge",
-      "Querying and extracting data",
-      "Data warehouse",
-      "Project management",
-      "Marketing campaigns",
-      "Clean data maintenance"
-    ],
-    "soft_skills": [
-      "Communication",
-      "Collaboration",
-      "Problem-solving",
-      "Detail-oriented",
-      "Analytical Thinking",
-      "Strong stakeholder management skills",
-      "Excellent communication and customer service skills"
-    ],
-    "domain_keywords": [
-      "Fundraising",
-      "Business Intelligence",
-      "Direct marketing campaigns",
-      "Multi-channel communication",
-      "Donor-centricity",
-      "Data warehouse enhancements",
-      "Evidence-based decision making",
-      "Refugee support",
-      "Humanitarian emergencies"
-    ],
-    "comprehensive_analysis": "## SOFT SKILLS:\n\n**EXPLICIT:**\n- Communication\n- Collaboration\n- Problem-solving\n- Detail-oriented\n- Analytical Thinking\n- Strong stakeholder management skills\n- Excellent communication and customer service skills\n\n**STRONGLY IMPLIED:**\n- Leadership\n- Teamwork\n- Adaptability\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n\n**EXPLICIT:**\n- Data Analyst\n- Data mining\n- Data selections\n- SQL\n- Excel\n- VBA\n- Business intelligence tools (Power BI, Tableau)\n- Database knowledge\n- Querying and extracting data\n- Data warehouse\n- Project management\n- Marketing campaigns\n- Clean data maintenance\n\n**STRONGLY IMPLIED:**\n- Spreadsheets\n- Analytical models\n- BI report authoring\n- Segmentation strategies\n- Data extraction\n- Data analysis\n- Data modeling\n- Data warehouse administration\n- Report creation\n- Data visualization\n\n## DOMAIN KEYWORDS:\n\n**EXPLICIT:**\n- Fundraising\n- Business Intelligence\n- Direct marketing campaigns\n- Multi-channel communication\n- Donor-centricity\n- Data warehouse enhancements\n- Evidence-based decision making\n- Refugee support\n- Humanitarian emergencies\n- Stakeholder satisfaction\n\n**STRONGLY IMPLIED:**\n- Nonprofit sector\n- Refugee assistance\n- Business decision-making\n- Program needs evaluation\n- Inclusive workforce cultures\n- Diversity and equal opportunity\n\n**CRITICAL OUTPUT REQUIREMENT:**\n\nSOFT_SKILLS = [\"Communication\", \"Collaboration\", \"Problem-solving\", \"Detail-oriented\", \"Analytical Thinking\", \"Strong stakeholder management skills\", \"Excellent communication and customer service skills\"]\nTECHNICAL_SKILLS = [\"Data Analyst\", \"Data mining\", \"Data selections\", \"SQL\", \"Excel\", \"VBA\", \"Business intelligence tools (Power BI, Tableau)\", \"Database knowledge\", \"Querying and extracting data\", \"Data warehouse\", \"Project management\", \"Marketing campaigns\", \"Clean data maintenance\"]\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Business Intelligence\", \"Direct marketing campaigns\", \"Multi-channel communication\", \"Donor-centricity\", \"Data warehouse enhancements\", \"Evidence-based decision making\", \"Refugee support\", \"Humanitarian emergencies\"]"
+    "technical_skills": [],
+    "soft_skills": [],
+    "domain_keywords": [],
+    "comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Negotiation\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n- Data Analysis\n- Data Mining\n- Business Intelligence\n- Power BI\n- SQL\n- Excel\n- Spreadsheets\n- VBA\n- Data Models\n- SQL Data Warehouse\n- Database Knowledge\n- Tableau\n- Project Management\n- Stakeholder Management\n- Data Extraction\n- Marketing Campaigns\n- Clean Data\n- Communication Purposes\n- De-duplication\n\n## DOMAIN KEYWORDS:\n- Fundraising\n- Business Decision-making\n- Direct Marketing Campaigns\n- Multi-channel Communication\n- Donor-centricity\n- Data Warehouse\n- Business Requirements\n- Project Management Framework\n- Evidence-based Decision Making\n- Refugees\n- Humanitarian Emergencies\n- Business Intelligence Unit\n- Data Requirements\n- Segmented Data Selections\n- Analytical Models\n- BI Report Authoring\n- Segmentation Strategies\n- Data Warehouse Administration\n- Program Needs\n- Data Selections\n- Data Warehouse Enhancements\n- Internal Stakeholders\n- External Stakeholders\n- Report Creation\n- Data Mining\n- Project Management\n- Inclusive Work Environment\n- Employee Assistance Program\n- Learning and Development\n- Diversity and Inclusion\n\n**Soft Skills:**\n- \"Our people are collaborative and inclusive team players\"\n- \"A highly motivated, organised and detail-oriented Data Analyst\"\n- \"Strong analytical and problem-solving skills\"\n- \"Strong project management skills\"\n- \"Excellent communication and customer service skills\"\n\n**Technical Skills:**\n- \"Experience building models in spreadsheets\"\n- \"Comfortable writing formulas and VBA in Excel\"\n- \"Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment\"\n- \"Strong SQL coding skills and database knowledge\"\n- \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- \"Hands-on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse\"\n- \"Experience extracting data for marketing campaigns with knowledge of how to best utilize data to optimize campaign outcomes\"\n- \"An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines\"\n- \"An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data\"\n\n**Domain Keywords:**\n- \"Business Intelligence Unit\"\n- \"Data Requirements\"\n- \"Segmented Data Selections\"\n- \"Analytical Models\"\n- \"BI Report Authoring\"\n- \"Segmentation Strategies\"\n- \"Data Warehouse Administration\"\n- \"Program Needs\"\n- \"Data Selections\"\n- \"Data Warehouse Enhancements\"\n- \"Internal Stakeholders\"\n- \"External Stakeholders\"\n- \"Report Creation\"\n- \"Data Mining\"\n- \"Project Management\"\n- \"Inclusive Work Environment\"\n- \"Employee Assistance Program\"\n- \"Learning and Development\"\n- \"Diversity and Inclusion\""
   },
-  "cv_comprehensive_analysis": "**SOFT SKILLS:**\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Problem-solving\n\n**TECHNICAL SKILLS:**\n- Python\n- Pandas\n- NumPy\n- scikit-learn\n- SQL\n- PostgreSQL\n- MySQL\n- Tableau\n- Power BI\n- Matplotlib\n- GitHub\n- Docker\n- Snowflake\n- Visual Studio Code\n- Google Analytics\n- Excel\n\n**DOMAIN KEYWORDS:**\n- Data Analysis\n- Machine Learning\n- AI\n- Data Pipelines\n- Data Visualization\n- Predictive Analytics\n- Cloud Data Warehousing\n- Version Control\n- Data Cleaning\n- Automation\n- Computational Modeling\n- Research Analysis\n- Physics\n- Data Science\n- Research Projects\n- Customer Behavior Insights\n- Population Datasets\n- Operational Efficiency\n- Dynamic Dashboards\n- Strategic Decision-making\n- Key Metrics Tracking\n- Analytics Capabilities\n- Data Preprocessing\n- Cross-functional Teams\n- Research Findings\n- Course Facilitation\n- Student Engagement",
-  "jd_comprehensive_analysis": "## SOFT SKILLS:\n\n**EXPLICIT:**\n- Communication\n- Collaboration\n- Problem-solving\n- Detail-oriented\n- Analytical Thinking\n- Strong stakeholder management skills\n- Excellent communication and customer service skills\n\n**STRONGLY IMPLIED:**\n- Leadership\n- Teamwork\n- Adaptability\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n\n**EXPLICIT:**\n- Data Analyst\n- Data mining\n- Data selections\n- SQL\n- Excel\n- VBA\n- Business intelligence tools (Power BI, Tableau)\n- Database knowledge\n- Querying and extracting data\n- Data warehouse\n- Project management\n- Marketing campaigns\n- Clean data maintenance\n\n**STRONGLY IMPLIED:**\n- Spreadsheets\n- Analytical models\n- BI report authoring\n- Segmentation strategies\n- Data extraction\n- Data analysis\n- Data modeling\n- Data warehouse administration\n- Report creation\n- Data visualization\n\n## DOMAIN KEYWORDS:\n\n**EXPLICIT:**\n- Fundraising\n- Business Intelligence\n- Direct marketing campaigns\n- Multi-channel communication\n- Donor-centricity\n- Data warehouse enhancements\n- Evidence-based decision making\n- Refugee support\n- Humanitarian emergencies\n- Stakeholder satisfaction\n\n**STRONGLY IMPLIED:**\n- Nonprofit sector\n- Refugee assistance\n- Business decision-making\n- Program needs evaluation\n- Inclusive workforce cultures\n- Diversity and equal opportunity\n\n**CRITICAL OUTPUT REQUIREMENT:**\n\nSOFT_SKILLS = [\"Communication\", \"Collaboration\", \"Problem-solving\", \"Detail-oriented\", \"Analytical Thinking\", \"Strong stakeholder management skills\", \"Excellent communication and customer service skills\"]\nTECHNICAL_SKILLS = [\"Data Analyst\", \"Data mining\", \"Data selections\", \"SQL\", \"Excel\", \"VBA\", \"Business intelligence tools (Power BI, Tableau)\", \"Database knowledge\", \"Querying and extracting data\", \"Data warehouse\", \"Project management\", \"Marketing campaigns\", \"Clean data maintenance\"]\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Business Intelligence\", \"Direct marketing campaigns\", \"Multi-channel communication\", \"Donor-centricity\", \"Data warehouse enhancements\", \"Evidence-based decision making\", \"Refugee support\", \"Humanitarian emergencies\"]",
+  "cv_comprehensive_analysis": "**SOFT SKILLS:**\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Problem-solving\n\n**TECHNICAL SKILLS:**\n- Python\n- Pandas\n- NumPy\n- scikit-learn\n- SQL\n- PostgreSQL\n- MySQL\n- Tableau\n- Power BI\n- Matplotlib\n- GitHub\n- Docker\n- Snowflake\n- Visual Studio Code\n- Google Analytics\n- Excel\n\n**DOMAIN KEYWORDS:**\n- Data Analysis\n- Machine Learning\n- AI\n- Data Pipelines\n- Data Visualization\n- Predictive Analytics\n- Cloud Data Warehousing\n- Version Control\n- Containerization\n- Computational Modeling",
+  "jd_comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Negotiation\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n- Data Analysis\n- Data Mining\n- Business Intelligence\n- Power BI\n- SQL\n- Excel\n- Spreadsheets\n- VBA\n- Data Models\n- SQL Data Warehouse\n- Database Knowledge\n- Tableau\n- Project Management\n- Stakeholder Management\n- Data Extraction\n- Marketing Campaigns\n- Clean Data\n- Communication Purposes\n- De-duplication\n\n## DOMAIN KEYWORDS:\n- Fundraising\n- Business Decision-making\n- Direct Marketing Campaigns\n- Multi-channel Communication\n- Donor-centricity\n- Data Warehouse\n- Business Requirements\n- Project Management Framework\n- Evidence-based Decision Making\n- Refugees\n- Humanitarian Emergencies\n- Business Intelligence Unit\n- Data Requirements\n- Segmented Data Selections\n- Analytical Models\n- BI Report Authoring\n- Segmentation Strategies\n- Data Warehouse Administration\n- Program Needs\n- Data Selections\n- Data Warehouse Enhancements\n- Internal Stakeholders\n- External Stakeholders\n- Report Creation\n- Data Mining\n- Project Management\n- Inclusive Work Environment\n- Employee Assistance Program\n- Learning and Development\n- Diversity and Inclusion\n\n**Soft Skills:**\n- \"Our people are collaborative and inclusive team players\"\n- \"A highly motivated, organised and detail-oriented Data Analyst\"\n- \"Strong analytical and problem-solving skills\"\n- \"Strong project management skills\"\n- \"Excellent communication and customer service skills\"\n\n**Technical Skills:**\n- \"Experience building models in spreadsheets\"\n- \"Comfortable writing formulas and VBA in Excel\"\n- \"Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment\"\n- \"Strong SQL coding skills and database knowledge\"\n- \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- \"Hands-on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse\"\n- \"Experience extracting data for marketing campaigns with knowledge of how to best utilize data to optimize campaign outcomes\"\n- \"An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines\"\n- \"An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data\"\n\n**Domain Keywords:**\n- \"Business Intelligence Unit\"\n- \"Data Requirements\"\n- \"Segmented Data Selections\"\n- \"Analytical Models\"\n- \"BI Report Authoring\"\n- \"Segmentation Strategies\"\n- \"Data Warehouse Administration\"\n- \"Program Needs\"\n- \"Data Selections\"\n- \"Data Warehouse Enhancements\"\n- \"Internal Stakeholders\"\n- \"External Stakeholders\"\n- \"Report Creation\"\n- \"Data Mining\"\n- \"Project Management\"\n- \"Inclusive Work Environment\"\n- \"Employee Assistance Program\"\n- \"Learning and Development\"\n- \"Diversity and Inclusion\"",
   "analyze_match_entries": [
     {
-      "timestamp": "2025-09-14T18:32:48.134",
+      "timestamp": "2025-09-14T19:18:55.418",
       "model_used": "gpt-3.5-turbo",
-      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** Strong analytical and problem-solving skills, experience with data mining and BI tools\n- **Flexibility indicators:** Willingness to consider candidates with 2+ years of experience, open to diverse backgrounds\n- **Hard blockers identified:** Lack of specific experience in VBA and SQL data warehouse maintenance\n- **Hiring urgency signals:** 15-month contract position suggests some urgency\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** PhD in Physics shows strong analytical abilities, experience in Python for data analysis is a strong match\n- **Smart connections:** Experience with Python scripts for data cleaning and analysis aligns well with data mining requirements\n- **Growth potential:** Demonstrated ability to learn new tools and technologies, potential to quickly pick up VBA and SQL skills\n\n**REALISTIC ODDS:** 60% chance of getting an interview if CV tailored well\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight experience with Python for data cleaning and analysis, showcase ability to build analytical models\n2. **Priority 2:** Emphasize strong project management skills and stakeholder management experience\n3. **Priority 3:** Address lack of specific VBA and SQL data warehouse maintenance experience by showcasing ability to quickly learn new tools\n\n**HONEST BOTTOM LINE:** With the right positioning and tailoring of the CV to emphasize relevant skills and experiences, pursuing this opportunity strategically could lead to a successful outcome. It's worth the effort to showcase transferable skills and potential for growth in this role."
+      "content": "**DECISION:** 🟢 STRONG PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** Strong analytical and problem-solving skills, experience with data mining and BI tools, SQL expertise\n- **Flexibility indicators:** Willingness to consider candidates with 2 years of experience, focus on stakeholder management and communication skills\n- **Hard blockers identified:** None apparent\n- **Hiring urgency signals:** Immediate need for a Data Analyst, competitive salary offered\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** PhD in Physics showcases strong analytical abilities, experience with Python and data analysis aligns well with the role\n- **Smart connections:** Proficiency in SQL and data visualization tools, experience with data pipelines and machine learning\n- **Growth potential:** Demonstrated ability to learn new technologies and adapt to different roles\n\n**REALISTIC ODDS:** 70-80% chance of getting an interview if CV tailored well\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight experience with data mining and BI tools, showcase SQL skills\n2. **Priority 2:** Emphasize stakeholder management and communication abilities\n3. **Priority 3:** Connect Python programming skills to data-driven decision-making\n\n**HONEST BOTTOM LINE:** This candidate has a strong chance of success for the Data Analyst role at Australia for UNHCR. With the right positioning and tailoring of the CV, they are likely to secure an interview and potentially land the job. It's worth the effort to pursue this opportunity."
     }
   ],
   "preextracted_comparison_entries": [],
   "component_analysis_entries": [
     {
-      "timestamp": "2025-09-14T18:33:00.868",
+      "timestamp": "2025-09-14T19:19:11.310",
       "component_analyses": {
         "skills": {
           "skills_analysis": [
@@ -214,23 +182,23 @@
         },
         "requirement_bonus": {
           "match_counts": {
-            "total_required_keywords": 8,
-            "total_preferred_keywords": 5,
+            "total_required_keywords": 7,
+            "total_preferred_keywords": 4,
             "matched_required_count": 7,
             "matched_preferred_count": 1,
-            "missing_required": 1,
-            "missing_preferred": 4
+            "missing_required": 0,
+            "missing_preferred": 3
           },
           "bonus_breakdown": {
             "required_bonus": 3.0,
             "required_penalty": 0.0,
             "preferred_bonus": 0.2,
-            "preferred_penalty": -0.6,
-            "total_bonus": 2.6
+            "preferred_penalty": -0.45,
+            "total_bonus": 2.75
           },
           "coverage_metrics": {
-            "required_coverage": 87.5,
-            "preferred_coverage": 20.0
+            "required_coverage": 100.0,
+            "preferred_coverage": 25.0
           }
         }
       },
@@ -253,14 +221,14 @@
         "complexity_readiness_score": 95.0,
         "learning_agility_score": 85.0,
         "jd_problem_complexity": 6.0,
-        "requirement_bonus": 2.6,
-        "total_bonus": 2.6,
+        "requirement_bonus": 2.75,
+        "total_bonus": 2.75,
         "required_bonus": 3.0,
         "required_penalty": 0.0,
         "preferred_bonus": 0.2,
-        "preferred_penalty": -0.6,
-        "required_coverage": 87.5,
-        "preferred_coverage": 20.0
+        "preferred_penalty": -0.45,
+        "required_coverage": 100.0,
+        "preferred_coverage": 25.0
       },
       "analysis_type": "modular_component_analysis"
     }

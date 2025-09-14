@@ -9,8 +9,7 @@
     ],
     "soft_skills": [
       "communication",
-      "project management",
-      "stakeholder management"
+      "project management"
     ],
     "domain_knowledge": [
       "data warehouse"
@@ -22,12 +21,11 @@
       "Tableau"
     ],
     "soft_skills": [
-      "customer service"
+      "stakeholder management"
     ],
     "domain_knowledge": [
       "marketing campaigns",
-      "communication purposes",
-      "governing regulations"
+      "communication purposes"
     ],
     "experience": []
   },
@@ -38,17 +36,15 @@
     "Power BI",
     "communication",
     "project management",
-    "stakeholder management",
     "data warehouse"
   ],
   "preferred_keywords": [
     "Tableau",
-    "customer service",
+    "stakeholder management",
     "marketing campaigns",
-    "communication purposes",
-    "governing regulations"
+    "communication purposes"
   ],
-  "analysis_timestamp": "2025-09-14T18:32:50.053336",
+  "analysis_timestamp": "2025-09-14T19:18:57.263164",
   "ai_model_used": "openai/gpt-3.5-turbo",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",
