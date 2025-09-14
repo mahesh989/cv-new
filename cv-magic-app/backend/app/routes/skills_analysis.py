@@ -899,6 +899,182 @@ async def list_ai_prompt_files():
         )
 
 
+@router.post("/generate-ai-recommendation/{company}")
+async def generate_ai_recommendation(company: str, force_regenerate: bool = False):
+    """Generate AI recommendation for a specific company"""
+    try:
+        from app.services.ai_recommendation_generator import ai_recommendation_generator
+        
+        logger.info(f"🤖 [API] Generating AI recommendation for: {company}")
+        
+        # Check if prompt file exists
+        prompt_file = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/prompt/{company}_prompt_recommendation.py")
+        if not prompt_file.exists():
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "Prompt file not found for this company",
+                    "company": company,
+                    "prompt_file": str(prompt_file),
+                    "suggestion": "Create recommendation and prompt files first"
+                }
+            )
+        
+        # Generate AI recommendation
+        success = await ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate)
+        
+        if success:
+            ai_file = ai_recommendation_generator.get_ai_recommendation_path(company)
+            ai_info = ai_recommendation_generator.get_ai_recommendation_info(company)
+            
+            return JSONResponse(content={
+                "success": True,
+                "message": f"AI recommendation generated for {company}",
+                "company": company,
+                "ai_file_path": str(ai_file),
+                "file_info": ai_info,
+                "force_regenerate": force_regenerate
+            })
+        else:
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "error": "Failed to generate AI recommendation",
+                    "company": company
+                }
+            )
+    
+    except Exception as e:
+        logger.error(f"❌ [API] Error generating AI recommendation for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"API error: {str(e)}",
+                "company": company
+            }
+        )
+
+
+@router.post("/batch-generate-ai-recommendations")
+async def batch_generate_ai_recommendations(
+    companies: Optional[List[str]] = None, 
+    force_regenerate: bool = False,
+    max_concurrent: int = 2
+):
+    """Generate AI recommendations for multiple companies in batch"""
+    try:
+        from app.services.ai_recommendation_generator import ai_recommendation_generator
+        
+        logger.info(f"🚀 [BATCH API] Starting batch AI recommendation generation")
+        logger.info(f"   Companies: {companies or 'All with prompts'}")
+        logger.info(f"   Force regenerate: {force_regenerate}")
+        logger.info(f"   Max concurrent: {max_concurrent}")
+        
+        # Generate recommendations
+        results = await ai_recommendation_generator.batch_generate_recommendations(
+            companies=companies,
+            force_regenerate=force_regenerate,
+            max_concurrent=max_concurrent
+        )
+        
+        successful_count = sum(1 for success in results.values() if success)
+        total_count = len(results)
+        
+        return JSONResponse(content={
+            "success": True,
+            "message": f"Batch AI recommendation generation completed",
+            "results": results,
+            "summary": {
+                "successful": successful_count,
+                "total": total_count,
+                "failed": total_count - successful_count,
+                "success_rate": f"{(successful_count/total_count*100):.1f}%" if total_count > 0 else "0%"
+            },
+            "settings": {
+                "force_regenerate": force_regenerate,
+                "max_concurrent": max_concurrent
+            }
+        })
+    
+    except Exception as e:
+        logger.error(f"❌ [BATCH API] Batch AI recommendation generation failed: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Batch generation failed: {str(e)}"
+            }
+        )
+
+
+@router.get("/ai-recommendation-files")
+async def list_ai_recommendation_files():
+    """List all AI recommendation files"""
+    try:
+        from app.services.ai_recommendation_generator import ai_recommendation_generator
+        
+        companies_with_ai = ai_recommendation_generator.list_companies_with_ai_recommendations()
+        ai_files_info = []
+        
+        for company in companies_with_ai:
+            ai_info = ai_recommendation_generator.get_ai_recommendation_info(company)
+            if ai_info:
+                ai_files_info.append(ai_info)
+        
+        return JSONResponse(content={
+            "success": True,
+            "ai_recommendation_files": ai_files_info,
+            "total_count": len(ai_files_info)
+        })
+    
+    except Exception as e:
+        logger.error(f"❌ Failed to list AI recommendation files: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Failed to list AI recommendation files: {str(e)}"
+            }
+        )
+
+
+@router.get("/ai-recommendation/{company}")
+async def get_ai_recommendation(company: str):
+    """Get AI recommendation content for a specific company"""
+    try:
+        from app.services.ai_recommendation_generator import ai_recommendation_generator
+        
+        ai_file = ai_recommendation_generator.get_ai_recommendation_path(company)
+        
+        if not ai_file.exists():
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "AI recommendation not found for this company",
+                    "company": company,
+                    "ai_file_path": str(ai_file)
+                }
+            )
+        
+        # Read AI recommendation content
+        with open(ai_file, 'r', encoding='utf-8') as f:
+            ai_data = json.load(f)
+        
+        return JSONResponse(content={
+            "success": True,
+            "company": company,
+            "ai_recommendation": ai_data
+        })
+    
+    except Exception as e:
+        logger.error(f"❌ Failed to get AI recommendation for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Failed to get AI recommendation: {str(e)}",
+                "company": company
+            }
+        )
+
+
 @router.get("/skills-analysis/configs")
 async def list_analysis_configs():
     """List available analysis configurations"""

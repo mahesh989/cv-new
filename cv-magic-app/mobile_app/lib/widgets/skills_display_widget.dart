@@ -390,18 +390,62 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // Enhanced ATS Score Widget with Pie Chart and Progress Bars - Show when available
-          if (controller.hasATSResult) ...[
+          // Enhanced ATS Score Widget with Pie Chart and Progress Bars - Show with progressive loading
+          if (controller.showATSLoading || controller.showATSResults) ...[
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering ATSScoreWidgetWithProgressBars');
+                    '🔍 [SKILLS_DISPLAY] Rendering ATS section (progressive)');
+                debugPrint('   showATSLoading: ${controller.showATSLoading}');
+                debugPrint('   showATSResults: ${controller.showATSResults}');
                 debugPrint('   hasATSResult: ${controller.hasATSResult}');
-                debugPrint('   atsScore: ${controller.atsScore}');
 
-                return ATSScoreWidgetWithProgressBars(
-                  controller: controller,
-                );
+                // Show loading state if ATS should show but results aren't available yet
+                if (controller.showATSLoading && !controller.showATSResults) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.orange.shade600),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Generating enhanced ATS analysis...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Show actual ATS results when available
+                if (controller.showATSResults && controller.hasATSResult) {
+                  return ATSScoreWidgetWithProgressBars(
+                    controller: controller,
+                  );
+                }
+
+                return const SizedBox.shrink();
               },
             ),
           ],

@@ -1,44 +1,57 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-14T19:19:02.525200",
+  "cv_analysis_timestamp": "2025-09-14T19:49:19.670341",
   "matched_required_keywords": [
     "SQL",
-    "VBA",
-    "SQL data warehouse",
     "Power BI",
-    "communication",
-    "project management",
-    "data warehouse"
+    "Excel",
+    "communication"
   ],
   "matched_preferred_keywords": [
     "Tableau"
   ],
-  "missed_required_keywords": [],
-  "missed_preferred_keywords": [
+  "missed_required_keywords": [
+    "VBA",
+    "data warehouse",
+    "project management",
     "stakeholder management",
-    "marketing campaigns",
-    "communication purposes"
+    "customer service",
+    "data mining",
+    "direct marketing campaigns",
+    "segmentation strategies",
+    "data models"
+  ],
+  "missed_preferred_keywords": [
+    "data issues",
+    "de-duplication",
+    "best practice guidelines"
   ],
   "match_counts": {
-    "total_required_keywords": 7,
-    "total_preferred_keywords": 4,
-    "matched_required_count": 7,
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 4,
     "matched_preferred_count": 1
   },
   "matching_notes": {
-    "SQL": "Found in the CV under Technical Skills section where the candidate mentions proficiency in SQL for querying, modeling, and managing complex relational databases.",
-    "VBA": "Not explicitly mentioned in the CV.",
-    "SQL data warehouse": "Not explicitly mentioned in the CV, but the candidate's experience with Snowflake for cloud data warehousing could be considered relevant.",
-    "Power BI": "Found in the CV under Technical Skills and Experience sections where the candidate mentions building comprehensive dashboards using Power BI.",
-    "communication": "Found in the CV under Career Profile where the candidate mentions creating advanced visualizations that convert complex data into actionable insights.",
-    "project management": "Found in the CV under Career Profile where the candidate mentions building comprehensive dashboards that support data-driven decision-making.",
-    "data warehouse": "Found in the CV under Technical Skills where the candidate mentions experience with Snowflake for cloud data warehousing.",
-    "Tableau": "Found in the CV under Technical Skills section where the candidate mentions creating interactive dashboards and visualizations using Tableau.",
-    "stakeholder management": "Not explicitly mentioned in the CV.",
-    "marketing campaigns": "Not explicitly mentioned in the CV.",
-    "communication purposes": "Not explicitly mentioned in the CV."
+    "SQL": "Matched as it is explicitly mentioned in the CV.",
+    "Power BI": "Matched as it is explicitly mentioned in the CV.",
+    "Excel": "Matched as it is mentioned in the technical skills section.",
+    "communication": "Matched in the context of presenting research findings and collaborating with teams.",
+    "Tableau": "Matched as it is explicitly mentioned in the CV.",
+    "VBA": "Not mentioned in any form.",
+    "data warehouse": "Not explicitly mentioned; related technologies like Snowflake are mentioned but do not match directly.",
+    "project management": "Not mentioned; no context indicating project management experience.",
+    "stakeholder management": "Not mentioned; no context indicating experience with stakeholders.",
+    "customer service": "Not mentioned; although customer behavior insights are discussed, it does not directly indicate customer service experience.",
+    "data mining": "Not mentioned; related terms not found.",
+    "direct marketing campaigns": "Not mentioned; no related context.",
+    "segmentation strategies": "Not mentioned; no related context.",
+    "data models": "Not mentioned; related terms not found.",
+    "data issues": "Not mentioned; no related context.",
+    "de-duplication": "Not mentioned; no related context.",
+    "best practice guidelines": "Not mentioned; no related context."
   },
-  "ai_model_used": "openai/gpt-3.5-turbo",
+  "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
   "metadata": {}

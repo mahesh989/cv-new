@@ -24,6 +24,8 @@ class SkillsAnalysisController extends ChangeNotifier {
   SkillsAnalysisResult? _fullResult; // Complete result from API
   bool _showAnalyzeMatch = false;
   bool _showPreextractedComparison = false;
+  bool _showATSLoading = false;
+  bool _showATSResults = false;
   Timer? _progressiveTimer;
 
   // Notification callbacks
@@ -47,6 +49,8 @@ class SkillsAnalysisController extends ChangeNotifier {
   // Progressive display getters
   bool get showAnalyzeMatch => _showAnalyzeMatch;
   bool get showPreextractedComparison => _showPreextractedComparison;
+  bool get showATSLoading => _showATSLoading;
+  bool get showATSResults => _showATSResults;
 
   // CV Skills getters
   SkillsData? get cvSkills => _result?.cvSkills;
@@ -223,6 +227,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     _fullResult = null;
     _showAnalyzeMatch = false;
     _showPreextractedComparison = false;
+    _showATSLoading = false;
+    _showATSResults = false;
     _result = null;
     _currentCvFilename = null;
     _currentJdText = null;
@@ -264,6 +270,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     // Reset progressive state
     _showAnalyzeMatch = false;
     _showPreextractedComparison = false;
+    _showATSLoading = false;
+    _showATSResults = false;
 
     // Step 1: Show skills immediately (side-by-side display)
     _result = SkillsAnalysisResult(
@@ -379,22 +387,48 @@ class SkillsAnalysisController extends ChangeNotifier {
           print('🎯 [POLLING] ATS result parsed: ${atsResult.finalATSScore}');
         }
 
-        // Update the result with component analysis and ATS data
-        _result = _result!.copyWith(
+        // Store the complete results for progressive reveal
+        _fullResult = _fullResult!.copyWith(
           componentAnalysis: componentAnalysis,
           atsResult: atsResult,
         );
 
+        // Update result with component analysis first (component analysis can show immediately)
+        _result = _result!.copyWith(
+          componentAnalysis: componentAnalysis,
+        );
         notifyListeners();
 
+        // Step 5: Show ATS loading immediately, then results after 10 seconds
         if (atsResult != null) {
-          _showNotification(
-              '🎯 ATS Score: ${atsResult.finalATSScore.toStringAsFixed(1)}/100 (${atsResult.categoryStatus})');
+          // Immediately show ATS loading state and notification
+          _showATSLoading = true;
+          notifyListeners();
+          _showNotification('⚡ Generating enhanced ATS analysis...');
+
+          Timer(Duration(seconds: 10), () {
+            // Show ATS results after 10-second delay
+            _showATSResults = true;
+            _result = _result!.copyWith(
+              atsResult: _fullResult!.atsResult,
+            );
+            notifyListeners();
+            
+            // Use the stored ATS result from _fullResult for notification
+            final finalAtsResult = _fullResult!.atsResult;
+            if (finalAtsResult != null) {
+              _showNotification(
+                  '🎯 ATS Score: ${finalAtsResult.finalATSScore.toStringAsFixed(1)}/100 (${finalAtsResult.categoryStatus})');
+            } else {
+              _showNotification('✅ ATS Analysis completed!');
+            }
+            
+            _finishAnalysis();
+          });
         } else {
           _showNotification('✅ Advanced analysis completed!');
+          _finishAnalysis();
         }
-
-        _finishAnalysis();
       } else {
         print('⚠️ [POLLING] Polling timed out, analysis incomplete');
         _showNotification(

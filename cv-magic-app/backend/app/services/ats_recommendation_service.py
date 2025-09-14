@@ -281,6 +281,62 @@ class ATSRecommendationService:
                 from prompt.ai_recommendation_prompt_template import create_company_prompt_file
                 prompt_file_path = create_company_prompt_file(company, str(recommendation_file))
                 logger.info(f"Successfully created AI recommendation prompt: {prompt_file_path}")
+                
+                # Trigger AI recommendation generation after prompt file creation
+                try:
+                    from .ai_recommendation_generator import ai_recommendation_generator
+                    
+                    logger.info(f"🤖 [TRIGGER] Starting AI recommendation generation for {company}")
+                    
+                    # Schedule AI generation as a background task (if event loop exists)
+                    try:
+                        import asyncio
+                        loop = asyncio.get_event_loop()
+                        if loop and loop.is_running():
+                            # Create background task without blocking
+                            async def background_ai_generation():
+                                try:
+                                    success = await ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate=False)
+                                    if success:
+                                        logger.info(f"✅ [TRIGGER] AI recommendation generated successfully for {company}")
+                                    else:
+                                        logger.warning(f"⚠️ [TRIGGER] AI recommendation generation failed for {company}")
+                                except Exception as e:
+                                    logger.error(f"❌ [TRIGGER] AI recommendation generation error for {company}: {e}")
+                            
+                            # Schedule as background task
+                            asyncio.create_task(background_ai_generation())
+                            logger.info(f"📋 [TRIGGER] AI generation scheduled as background task for {company}")
+                        else:
+                            # Fallback to thread-based execution if no event loop
+                            def run_ai_generation():
+                                new_loop = asyncio.new_event_loop()
+                                asyncio.set_event_loop(new_loop)
+                                try:
+                                    success = new_loop.run_until_complete(
+                                        ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate=False)
+                                    )
+                                    if success:
+                                        logger.info(f"✅ [TRIGGER] AI recommendation generated successfully for {company}")
+                                    else:
+                                        logger.warning(f"⚠️ [TRIGGER] AI recommendation generation failed for {company}")
+                                except Exception as e:
+                                    logger.error(f"❌ [TRIGGER] AI recommendation generation error for {company}: {e}")
+                                finally:
+                                    new_loop.close()
+                            
+                            import threading
+                            ai_thread = threading.Thread(target=run_ai_generation, daemon=True)
+                            ai_thread.start()
+                            logger.info(f"🧵 [TRIGGER] AI generation started in background thread for {company}")
+                    except Exception as loop_e:
+                        logger.error(f"Error with event loop handling for {company}: {loop_e}")
+                        # Final fallback - just log that it should be run manually
+                        logger.info(f"🔄 [TRIGGER] AI generation should be run manually for {company}")
+                    
+                except Exception as e:
+                    logger.error(f"Error triggering AI recommendation generation for {company}: {e}")
+                    
             except Exception as e:
                 logger.error(f"Error creating AI recommendation prompt for {company}: {e}")
             
