@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
-import 'ats_score_widget_pie_integrated.dart';
+import 'ats_score_widget_with_progress_bars.dart';
 import '../utils/preextracted_parser.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
@@ -448,15 +448,15 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
           
-          // ATS Score Widget with Pie Chart - Show when available
+          // Enhanced ATS Score Widget with Pie Chart and Progress Bars - Show when available
           if (controller.hasATSResult) ...[
             Builder(
               builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] Rendering ATSScoreWidgetWithPieChart');
+                debugPrint('🔍 [SKILLS_DISPLAY] Rendering ATSScoreWidgetWithProgressBars');
                 debugPrint('   hasATSResult: ${controller.hasATSResult}');
                 debugPrint('   atsScore: ${controller.atsScore}');
                 
-                return ATSScoreWidgetWithPieChart(
+                return ATSScoreWidgetWithProgressBars(
                   controller: controller,
                 );
               },

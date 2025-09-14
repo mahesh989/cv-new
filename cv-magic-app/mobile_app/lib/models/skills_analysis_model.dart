@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../utils/skills_extractor.dart';
 
 /// Data models for skills analysis results
 class SkillsData {
@@ -160,9 +161,28 @@ class SkillsAnalysisResult {
       debugPrint('   ats_score parsed successfully');
     }
 
+    // Parse CV skills with fallback extraction
+    SkillsData cvSkills = SkillsData.fromJson(json['cv_skills'] ?? {});
+    
+    // If cv_skills is empty but we have comprehensive analysis, extract skills from text
+    if (cvSkills.isEmpty && cvComprehensiveAnalysis != null && cvComprehensiveAnalysis.trim().isNotEmpty) {
+      debugPrint('🔧 [MODEL_DEBUG] cv_skills is empty, attempting fallback extraction from comprehensive analysis');
+      cvSkills = SkillsExtractor.extractFromComprehensiveAnalysis(cvComprehensiveAnalysis);
+      debugPrint('   Fallback extracted CV skills: ${cvSkills.totalSkillsCount}');
+    }
+    
+    // Parse JD skills (normally these are fine, but add same fallback just in case)
+    SkillsData jdSkills = SkillsData.fromJson(json['jd_skills'] ?? {});
+    
+    if (jdSkills.isEmpty && jdComprehensiveAnalysis != null && jdComprehensiveAnalysis.trim().isNotEmpty) {
+      debugPrint('🔧 [MODEL_DEBUG] jd_skills is empty, attempting fallback extraction from comprehensive analysis');
+      jdSkills = SkillsExtractor.extractFromComprehensiveAnalysis(jdComprehensiveAnalysis);
+      debugPrint('   Fallback extracted JD skills: ${jdSkills.totalSkillsCount}');
+    }
+
     return SkillsAnalysisResult(
-      cvSkills: SkillsData.fromJson(json['cv_skills'] ?? {}),
-      jdSkills: SkillsData.fromJson(json['jd_skills'] ?? {}),
+      cvSkills: cvSkills,
+      jdSkills: jdSkills,
       cvComprehensiveAnalysis: cvComprehensiveAnalysis,
       jdComprehensiveAnalysis: jdComprehensiveAnalysis,
       expandableAnalysis: expandableAnalysis,
