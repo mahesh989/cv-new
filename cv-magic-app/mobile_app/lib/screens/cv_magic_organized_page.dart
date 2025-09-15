@@ -18,7 +18,12 @@ import '../controllers/skills_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
-  const CVMagicOrganizedPage({super.key});
+  final VoidCallback? onNavigateToCVGeneration;
+  
+  const CVMagicOrganizedPage({
+    super.key,
+    this.onNavigateToCVGeneration,
+  });
 
   @override
   State<CVMagicOrganizedPage> createState() => _CVMagicOrganizedPageState();
@@ -359,12 +364,15 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
   void _navigateToCVGeneration() {
     debugPrint('🚀 CV Magic: Navigate to CV Generation tab requested');
     
-    // Show feedback to user
-    _showSnackBar('🚀 Please switch to CV Generation tab manually for now');
-    
-    // TODO: Implement proper tab switching via parent widget or state management
-    // For now, users need to manually tap the CV Generation tab
-    debugPrint('TODO: Implement navigation to CV Generation tab (index 2)');
+    if (widget.onNavigateToCVGeneration != null) {
+      // Use the callback to navigate to CV Generation tab
+      widget.onNavigateToCVGeneration!();
+      _showSnackBar('🚀 Navigating to CV Generation tab...');
+    } else {
+      // Fallback message if callback not provided
+      _showSnackBar('🚀 Please switch to CV Generation tab manually');
+      debugPrint('No navigation callback provided');
+    }
   }
 
   Future<void> _refreshCVList() async {
