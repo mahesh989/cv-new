@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     opacity: _fadeAnimation,
                     child: SlideTransition(
                       position: _slideAnimation,
-                      child: _buildTabContent(),
+                      child: _buildTabContentWithKeepAlive(),
                     ),
                   );
                 },
@@ -182,6 +182,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildTabContentWithKeepAlive() {
+    // Use IndexedStack to preserve state of all tabs
+    return IndexedStack(
+      index: _currentIndex,
+      children: [
+        _welcomeHomePage,        // Index 0: Home
+        _cvMagicPage,           // Index 1: CV Magic
+        _cvGenerationScreen,    // Index 2: CV Generation
+      ],
+    );
+  }
+
+  // Keep the old method for reference/fallback if needed
   Widget _buildTabContent() {
     switch (_currentIndex) {
       case 0:

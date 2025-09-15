@@ -24,7 +24,7 @@ class CVMagicOrganizedPage extends StatefulWidget {
   State<CVMagicOrganizedPage> createState() => _CVMagicOrganizedPageState();
 }
 
-class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
+class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with AutomaticKeepAliveClientMixin {
   // State variables
   String? selectedCVFilename;
   bool isLoading = false;
@@ -68,7 +68,11 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       appBar: AppBar(
         title: const Text('CV Magic - Organized'),
