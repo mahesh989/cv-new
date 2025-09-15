@@ -9,15 +9,17 @@ import '../utils/preextracted_parser.dart';
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
   final SkillsAnalysisController controller;
+  final String? cvFilename;
+  final String? jobDescription;
+  final VoidCallback? onNavigateToCVGeneration;
 
   const SkillsDisplayWidget({
     super.key,
     required this.controller,
+    this.cvFilename,
+    this.jobDescription,
+    this.onNavigateToCVGeneration,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
         // Main content based on state
@@ -504,6 +506,7 @@ class SkillsDisplayWidget extends StatelessWidget {
                   return AIRecommendationsWidget(
                     aiRecommendation: controller.result!.aiRecommendation,
                     isLoading: false,
+                    onGenerateCV: onNavigateToCVGeneration,
                   );
                 }
 

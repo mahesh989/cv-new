@@ -238,6 +238,9 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
             // Skills Display with Side-by-Side Layout and Expandable Analysis
             SkillsDisplayWidget(
               controller: _skillsController,
+              cvFilename: selectedCVFilename,
+              jobDescription: jdController.text.trim().isNotEmpty ? jdController.text.trim() : null,
+              onNavigateToCVGeneration: _navigateToCVGeneration,
             ),
             // JD Analysis UI section removed for backend-only focus
 
@@ -347,6 +350,17 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> {
         ),
       );
     }
+  }
+
+  void _navigateToCVGeneration() {
+    debugPrint('🚀 CV Magic: Navigate to CV Generation tab requested');
+    
+    // Show feedback to user
+    _showSnackBar('🚀 Please switch to CV Generation tab manually for now');
+    
+    // TODO: Implement proper tab switching via parent widget or state management
+    // For now, users need to manually tap the CV Generation tab
+    debugPrint('TODO: Implement navigation to CV Generation tab (index 2)');
   }
 
   Future<void> _refreshCVList() async {

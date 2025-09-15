@@ -6,11 +6,13 @@ import '../models/skills_analysis_model.dart';
 class AIRecommendationsWidget extends StatelessWidget {
   final AIRecommendationResult? aiRecommendation;
   final bool isLoading;
+  final VoidCallback? onGenerateCV;
 
   const AIRecommendationsWidget({
     super.key,
     this.aiRecommendation,
     this.isLoading = false,
+    this.onGenerateCV,
   });
 
   @override
@@ -375,7 +377,7 @@ class AIRecommendationsWidget extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: _navigateToCVGeneration,
+              onPressed: onGenerateCV ?? _navigateToCVGeneration,
               icon: const Icon(Icons.auto_awesome, color: Colors.white),
               label: const Text(
                 'Generate New CV',
