@@ -97,6 +97,10 @@ class AIRecommendationsWidget extends StatelessWidget {
               // Recommendation Content (Markdown)
               _buildMarkdownContent(),
               
+              // Generate New CV Button
+              const SizedBox(height: 24),
+              _buildGenerateNewCVButton(),
+              
               // Footer with generation info
               if (aiRecommendation!.generatedAt != null ||
                   aiRecommendation!.modelInfo != null) ...[ 
@@ -303,6 +307,117 @@ class AIRecommendationsWidget extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildGenerateNewCVButton() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.green.shade50,
+            Colors.blue.shade50,
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF667EEA).withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green.shade400, Colors.blue.shade400],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.rocket_launch,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ready to Generate Your CV?',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Use these AI recommendations to create an optimized CV',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _navigateToCVGeneration,
+              icon: const Icon(Icons.auto_awesome, color: Colors.white),
+              label: const Text(
+                'Generate New CV',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade600,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToCVGeneration() {
+    debugPrint('🚀 Navigate to CV Generation tab pressed!');
+    
+    // Find the context and navigate to CV Generation tab (index 2)
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      // Get the HomeScreen state and switch to CV Generation tab
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('🚀 Navigating to CV Generation tab...'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      
+      // For now, just show a message. In a full implementation, you'd use
+      // a proper navigation method or state management to switch tabs.
+      debugPrint('TODO: Implement tab switching to CV Generation (index 2)');
+    }
+  }
+
+  // Global navigator key reference (you'd normally get this from your app)
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   String _formatDate(String dateString) {
     try {

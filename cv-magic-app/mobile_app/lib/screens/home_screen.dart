@@ -5,6 +5,7 @@ import '../utils/responsive_utils.dart';
 import '../widgets/mobile_bottom_nav.dart';
 import 'welcome_home_page.dart';
 import 'cv_magic_organized_page.dart';
+import 'cv_generation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onLogout;
@@ -25,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   final CVMagicOrganizedPage _cvMagicPage = const CVMagicOrganizedPage();
+  final CVGenerationScreen _cvGenerationScreen = const CVGenerationScreen();
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
@@ -37,6 +39,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     TabData(
       icon: Icons.description_rounded,
       label: 'CV Magic',
+      gradient: AppTheme.primaryGradient,
+      color: AppTheme.primaryTeal,
+    ),
+    TabData(
+      icon: Icons.auto_awesome,
+      label: 'CV Generation',
       gradient: AppTheme.primaryGradient,
       color: AppTheme.primaryTeal,
     ),
@@ -180,6 +188,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         return _welcomeHomePage;
       case 1:
         return _cvMagicPage;
+      case 2:
+        return _cvGenerationScreen;
       default:
         return const Center(
           child: Text('Tab content coming soon!'),
