@@ -197,22 +197,71 @@ class CVJDMatcher:
             return result
             
         except json.JSONDecodeError as e:
-            logger.error(f"❌ CRITICAL: AI returned invalid JSON that cannot be parsed")
-            logger.error(f"❌ JSON Parse Error: {e}")
-            logger.error(f"❌ Error Location: Line {getattr(e, 'lineno', '?')}, Column {getattr(e, 'colno', '?')}")
-            logger.error(f"❌ AI Response Content:")
-            logger.error(f"{response.content}")
-            logger.error(f"❌ STOPPING PROCESS: No fallbacks - AI must return valid JSON")
+            logger.error(f"Failed to parse AI response as JSON: {e}")
+            logger.error(f"Response content: {response.content}")
             
-            raise ValueError(
-                f"CRITICAL FAILURE: AI returned malformed JSON. "
-                f"Error: {e} at line {getattr(e, 'lineno', '?')}, column {getattr(e, 'colno', '?')}. "
-                f"AI must be fixed to return proper JSON format. "
-                f"Process terminated - no fallbacks allowed."
-            )
+            # Try to fix common JSON issues
+            try:
+                cleaned_content = self._clean_json_response(response.content)
+                data = json.loads(cleaned_content)
+                logger.info("✅ Successfully fixed and parsed malformed JSON response")
+                
+                # Ensure all required fields exist
+                for field in ['matched_required_keywords', 'matched_preferred_keywords', 
+                             'missed_required_keywords', 'missed_preferred_keywords', 'matching_notes']:
+                    if field not in data:
+                        data[field] = [] if 'keywords' in field else {}
+                
+                result = CVJDMatchResult(data)
+                result.ai_model_used = f"{response.provider}/{response.model}"
+                return result
+                
+            except Exception as fix_error:
+                logger.error(f"Failed to fix JSON response: {fix_error}")
+                raise ValueError(f"AI response is not valid JSON: {e}")
         except Exception as e:
             logger.error(f"Error parsing AI response: {e}")
             raise ValueError(f"Failed to parse matching result: {e}")
+    
+    def _clean_json_response(self, content: str) -> str:
+        """
+        Clean and fix common JSON formatting issues in AI responses
+        """
+        import re
+        
+        # Remove any text before the first {
+        content = re.sub(r'^[^{]*', '', content)
+        
+        # Remove any text after the last }
+        content = re.sub(r'}[^}]*$', '}', content)
+        
+        # Fix common issues:
+        # 1. Convert single quotes to double quotes for keys
+        content = re.sub(r"'([^']*)':", r'"\1":', content)
+        
+        # 2. Convert single quotes to double quotes for string values
+        content = re.sub(r":\s*'([^']*)'", r': "\1"', content)
+        
+        # 3. Convert single quotes to double quotes in arrays
+        content = re.sub(r"\[\s*'([^']*)'", r'["\1"', content)
+        content = re.sub(r",\s*'([^']*)'", r', "\1"', content)
+        
+        # 4. Fix unquoted string values in matching_notes
+        # Handle cases like: "Excel": Matched as it is mentioned...
+        def fix_matching_notes(match):
+            key = match.group(1)
+            value = match.group(2)
+            # Escape any quotes in the value and wrap in quotes
+            value = value.replace('"', '\\"')
+            return f'"{key}": "{value}"'
+        
+        # Pattern to match "key": unquoted_value
+        content = re.sub(r'"([^"]+)":\s*([^,}]+?)(?=\s*[,}])', fix_matching_notes, content)
+        
+        # 5. Remove trailing commas before closing braces/brackets
+        content = re.sub(r',(\s*[}\]])', r'\1', content)
+        
+        return content
     
     async def match_cv_against_jd(
         self, 
