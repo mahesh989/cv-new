@@ -451,21 +451,63 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // AI Recommendations - Show below ATS score
-          if (controller.result?.aiRecommendation != null) ...[
+          // AI Recommendations - Show with progressive loading
+          if (controller.showAIRecommendationLoading || controller.showAIRecommendationResults) ...[
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering AIRecommendationsWidget');
-                debugPrint(
-                    '   aiRecommendation available: ${controller.result?.aiRecommendation != null}');
-                debugPrint(
-                    '   aiRecommendation content length: ${controller.result?.aiRecommendation?.content.length ?? 0}');
+                    '🔍 [SKILLS_DISPLAY] Rendering AI Recommendations section (progressive)');
+                debugPrint('   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
+                debugPrint('   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
+                debugPrint('   hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
 
-                return AIRecommendationsWidget(
-                  aiRecommendation: controller.result!.aiRecommendation,
-                  isLoading: false,
-                );
+                // Show loading state if AI recommendations should show but results aren't available yet
+                if (controller.showAIRecommendationLoading && !controller.showAIRecommendationResults) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.orange.shade600),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Generating AI recommendations...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Show actual AI recommendations when available
+                if (controller.showAIRecommendationResults && controller.result?.aiRecommendation != null) {
+                  return AIRecommendationsWidget(
+                    aiRecommendation: controller.result!.aiRecommendation,
+                    isLoading: false,
+                  );
+                }
+
+                return const SizedBox.shrink();
               },
             ),
           ],

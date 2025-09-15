@@ -26,6 +26,8 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool _showPreextractedComparison = false;
   bool _showATSLoading = false;
   bool _showATSResults = false;
+  bool _showAIRecommendationLoading = false;
+  bool _showAIRecommendationResults = false;
   Timer? _progressiveTimer;
 
   // Notification callbacks
@@ -51,6 +53,8 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool get showPreextractedComparison => _showPreextractedComparison;
   bool get showATSLoading => _showATSLoading;
   bool get showATSResults => _showATSResults;
+  bool get showAIRecommendationLoading => _showAIRecommendationLoading;
+  bool get showAIRecommendationResults => _showAIRecommendationResults;
 
   // CV Skills getters
   SkillsData? get cvSkills => _result?.cvSkills;
@@ -420,7 +424,6 @@ class SkillsAnalysisController extends ChangeNotifier {
             _showATSResults = true;
             _result = _result!.copyWith(
               atsResult: _fullResult!.atsResult,
-              aiRecommendation: _fullResult!.aiRecommendation,
             );
             notifyListeners();
 
@@ -433,7 +436,26 @@ class SkillsAnalysisController extends ChangeNotifier {
               _showNotification('✅ ATS Analysis completed!');
             }
 
-            _finishAnalysis();
+            // Step 6: Show AI Recommendation loading immediately after ATS results
+            if (_fullResult!.aiRecommendation != null) {
+              _showAIRecommendationLoading = true;
+              notifyListeners();
+              _showNotification('🤖 Generating AI recommendations...');
+
+              Timer(Duration(seconds: 10), () {
+                // Show AI recommendations after another 10-second delay
+                _showAIRecommendationResults = true;
+                _result = _result!.copyWith(
+                  aiRecommendation: _fullResult!.aiRecommendation,
+                );
+                notifyListeners();
+                _showNotification('✅ AI recommendations completed!');
+
+                _finishAnalysis();
+              });
+            } else {
+              _finishAnalysis();
+            }
           });
         } else {
           _showNotification('✅ Advanced analysis completed!');
