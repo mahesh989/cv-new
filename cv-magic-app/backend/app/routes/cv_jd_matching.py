@@ -240,7 +240,7 @@ async def get_match_percentage(
     """
     try:
         # Verify authentication
-        await verify_token(credentials.credentials)
+        verify_token(credentials.credentials)
         
         logger.info(f"📊 Getting match percentage for company: {company_name}")
         
@@ -305,7 +305,7 @@ async def delete_cv_jd_match_results(
     """
     try:
         # Verify authentication
-        await verify_token(credentials.credentials)
+        verify_token(credentials.credentials)
         
         logger.info(f"🗑️ Deleting CV-JD match results for company: {company_name}")
         

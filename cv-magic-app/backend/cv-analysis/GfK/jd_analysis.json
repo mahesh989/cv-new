@@ -10,9 +10,11 @@
       "communication",
       "team player",
       "logical thinking",
-      "critical thinking"
+      "critical thinking",
+      "attention to detail"
     ],
     "domain_knowledge": [
+      "data analytics",
       "data modelling",
       "data visualisation",
       "market data analysis"
@@ -38,6 +40,8 @@
     "team player",
     "logical thinking",
     "critical thinking",
+    "attention to detail",
+    "data analytics",
     "data modelling",
     "data visualisation",
     "market data analysis"
@@ -47,7 +51,7 @@
     "Tableau",
     "leadership"
   ],
-  "analysis_timestamp": "2025-09-15T14:04:30.079525",
+  "analysis_timestamp": "2025-09-15T15:08:24.393093",
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "company_name": "GfK",

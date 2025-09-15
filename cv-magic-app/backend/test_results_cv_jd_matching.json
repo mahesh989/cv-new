@@ -1,0 +1,93 @@
+{
+  "success": false,
+  "total_tests": 6,
+  "passed_tests": 2,
+  "success_rate": 33.33333333333333,
+  "timestamp": "2025-09-15T14:46:26.876731",
+  "test_results": [
+    {
+      "test_name": "File Setup",
+      "status": "PASS",
+      "details": "Created test files: /Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/test_cv.json, /Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
+      "timestamp": "2025-09-15T14:46:26.730385",
+      "data": null
+    },
+    {
+      "test_name": "Authentication",
+      "status": "PASS",
+      "details": "Successfully obtained auth token",
+      "timestamp": "2025-09-15T14:46:26.749775",
+      "data": null
+    },
+    {
+      "test_name": "Authentication Required",
+      "status": "PASS",
+      "details": "Correctly rejected unauthenticated request",
+      "timestamp": "2025-09-15T14:46:26.751668",
+      "data": null
+    },
+    {
+      "test_name": "Preliminary Analysis API",
+      "status": "FAIL",
+      "details": "HTTP 404: {\"error\":\"CV file 'test_cv.pdf' not found. Please upload the CV file first.\",\"suggestions\":[\"Check if the CV file exists in the uploads folder\",\"Verify the filename is correct\",\"Upload the CV file using the CV upload feature\",\"Check if the file was uploaded successfully\"],\"filename\":\"test_cv.pdf\"}",
+      "timestamp": "2025-09-15T14:46:26.834849",
+      "data": null
+    },
+    {
+      "test_name": "CV Skill Extraction",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-09-15T14:46:26.842731",
+      "data": null
+    },
+    {
+      "test_name": "JD Skill Extraction",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-09-15T14:46:26.851438",
+      "data": null
+    },
+    {
+      "test_name": "CV-JD Matching Analysis",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-09-15T14:46:26.860211",
+      "data": null
+    },
+    {
+      "test_name": "Error Handling - Missing CV filename",
+      "status": "PASS",
+      "details": "Correctly returned status 400",
+      "timestamp": "2025-09-15T14:46:26.862707",
+      "data": null
+    },
+    {
+      "test_name": "Error Handling - Missing JD text",
+      "status": "PASS",
+      "details": "Correctly returned status 400",
+      "timestamp": "2025-09-15T14:46:26.865140",
+      "data": null
+    },
+    {
+      "test_name": "Error Handling - Empty JD text",
+      "status": "PASS",
+      "details": "Correctly returned status 400",
+      "timestamp": "2025-09-15T14:46:26.868936",
+      "data": null
+    },
+    {
+      "test_name": "Error Handling - Non-existent CV file",
+      "status": "PASS",
+      "details": "Correctly returned status 404",
+      "timestamp": "2025-09-15T14:46:26.876566",
+      "data": null
+    },
+    {
+      "test_name": "Error Handling Overall",
+      "status": "PASS",
+      "details": "Passed 4/4 error handling tests",
+      "timestamp": "2025-09-15T14:46:26.876701",
+      "data": null
+    }
+  ]
+}

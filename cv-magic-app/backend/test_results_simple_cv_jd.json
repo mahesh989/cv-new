@@ -1,0 +1,51 @@
+{
+  "success": true,
+  "total_tests": 3,
+  "passed_tests": 3,
+  "success_rate": 100.0,
+  "timestamp": "2025-09-15T14:48:48.008934",
+  "test_results": [
+    {
+      "test_name": "Authentication",
+      "status": "PASS",
+      "details": "Successfully obtained auth token",
+      "timestamp": "2025-09-15T14:48:47.995222",
+      "data": null
+    },
+    {
+      "test_name": "CV-JD Matching Status",
+      "status": "PASS",
+      "details": "Successfully retrieved CV-JD matching status",
+      "timestamp": "2025-09-15T14:48:48.000484",
+      "data": {
+        "company": "GfK",
+        "cv_exists": true,
+        "jd_exists": true,
+        "match_exists": true
+      }
+    },
+    {
+      "test_name": "CV-JD Match Results",
+      "status": "PASS",
+      "details": "Successfully retrieved CV-JD match results",
+      "timestamp": "2025-09-15T14:48:48.004725",
+      "data": {
+        "matched_required": 6,
+        "matched_preferred": 2,
+        "total_required": 10,
+        "total_preferred": 3
+      }
+    },
+    {
+      "test_name": "Match Percentage",
+      "status": "PASS",
+      "details": "Successfully retrieved match percentages",
+      "timestamp": "2025-09-15T14:48:48.008806",
+      "data": {
+        "overall_match": 61.53846153846154,
+        "required_match": 60.0,
+        "preferred_match": 66.66666666666666
+      }
+    }
+  ]
+}
