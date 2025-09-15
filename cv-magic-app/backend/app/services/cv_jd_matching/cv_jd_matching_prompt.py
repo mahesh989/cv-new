@@ -30,21 +30,33 @@ MATCHING GUIDELINES:
 4. **Be Thorough**: Check all sections of the CV for keyword presence
 5. **Be Accurate**: Only mark as matched if the skill is genuinely present
 
-OUTPUT FORMAT (JSON ONLY, NO MARKDOWN, NO PROSE):
-Return EXACTLY this schema, populated from the analysis of the provided CV against the JD keywords:
+OUTPUT FORMAT - CRITICAL: RETURN ONLY VALID JSON:
+
+⚠️  IMPORTANT: ALL STRING VALUES MUST BE ENCLOSED IN DOUBLE QUOTES
+⚠️  CRITICAL: NO UNQUOTED TEXT IN VALUES - EVERYTHING MUST BE QUOTED
+⚠️  REQUIRED: Use this EXACT schema with properly quoted string values:
+
 {
-  "matched_required_keywords": ["..."],
-  "matched_preferred_keywords": ["..."],
-  "missed_required_keywords": ["..."],
-  "missed_preferred_keywords": ["..."],
+  "matched_required_keywords": ["keyword1", "keyword2"],
+  "matched_preferred_keywords": ["keyword1", "keyword2"],
+  "missed_required_keywords": ["keyword1", "keyword2"],
+  "missed_preferred_keywords": ["keyword1", "keyword2"],
   "match_counts": {
-    "total_required_keywords": 0,
-    "total_preferred_keywords": 0,
-    "matched_required_count": 0,
-    "matched_preferred_count": 0
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 6,
+    "matched_preferred_count": 2
   },
-  "matching_notes": {}
+  "matching_notes": {
+    "Excel": "Found in technical skills section",
+    "SQL": "Mentioned multiple times in experience",
+    "Python": "Explicitly listed and used in projects"
+  }
 }
+
+🚨 ABSOLUTELY CRITICAL: All values in matching_notes MUST be surrounded by double quotes.
+🚨 DO NOT write: "Excel": Found in skills (WRONG - will break JSON parsing)
+🚨 ALWAYS write: "Excel": "Found in skills" (CORRECT - proper JSON format)
 
 **INSTRUCTIONS**:
 - Be intelligent about semantic matching
@@ -72,7 +84,14 @@ INSTRUCTIONS:
 
 Remember to use intelligent matching - look for semantic meaning, synonyms, variations, and context, not just exact text matches.
 
-Return JSON only. Do NOT include markdown code fences or any text before/after the JSON."""
+🚨 CRITICAL JSON FORMATTING REQUIREMENTS:
+1. Return ONLY valid JSON - no markdown, no code blocks, no additional text
+2. ALL string values MUST be enclosed in double quotes
+3. In matching_notes section, values MUST be quoted strings like: "Excel": "Found in skills"
+4. DO NOT use unquoted text in values - this will break JSON parsing
+5. Test your JSON mentally before responding - it must be parseable
+
+Return ONLY the JSON response."""
 
 def get_cv_jd_matching_prompts(
     cv_content: str, 

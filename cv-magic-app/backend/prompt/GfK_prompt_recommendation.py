@@ -5,7 +5,7 @@ Generated automatically from comprehensive analysis data
 
 # Company: GfK
 # Generated: Unknown
-# ATS Score: 75.725
+# ATS Score: 66.5125
 
 AI_RECOMMENDATION_PROMPT = """
 # Strategic CV Optimization Recommendations Generator
@@ -19,24 +19,24 @@ AI_RECOMMENDATION_PROMPT = """
 ## 📊 Comprehensive Analysis Data
 
 ### Current ATS Performance
-- **Final ATS Score:** 75.725/100
-- **Category Status:** ✅ Good fit
-- **Recommendation:** Worth an interview
+- **Final ATS Score:** 66.5125/100
+- **Category Status:** ⚠️ Moderate fit
+- **Recommendation:** Consider if other factors are strong
 
 ### Skills Match Summary
 🎯 OVERALL SUMMARY
 ----------------------------------------
-Total Requirements: 24
-Matched: 14
-Missing: 10
-Match Rate: 58%
+Total Requirements: 26
+Matched: 12
+Missing: 14
+Match Rate: 46%
 
 📊 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
-Technical Skills            28          9          9          1           90
-Soft Skills                   9          9          5          4           56
-Domain Keywords             12          6          0          5            0
+Technical Skills            20         11          9          2           82
+Soft Skills                   7          9          3          6           33
+Domain Keywords              8          6          0          6            0
 
 🧠 DETAILED AI ANALYSIS
 --------------------------------------------------------------------------------
@@ -46,11 +46,11 @@ Domain Keywords             12          6          0          5            0
        → Found in CV: 'Data Analytics'
        💡 synonym match
     2. JD Required: 'Data Cleansing'
-       → Found in CV: 'Data Cleaning'
-       💡 synonym match
-    3. JD Required: 'Data Modelling'
-       → Found in CV: 'Data Pipeline'
-       💡 hierarchical match - data mo...
+       → Found in CV: 'Data Discrepancies'
+       💡 related concept in data quality
+    3. JD Required: 'Data Quality'
+       → Found in CV: 'Data Integrity'
+       💡 synony...
 
 ### Strategic Assessment
 **DECISION:** 🟡 STRATEGIC PURSUE
@@ -58,44 +58,49 @@ Domain Keywords             12          6          0          5            0
 ---
 
 **MARKET REALITY CHECK:**
-- **What they actually need:** The job description emphasizes the need for data analysis skills, experience with data cleansing, and some programming capabilities (SQL, Python). While they mention light leadership experience, the core requirements are more focused on analytical skills and data handling, which Maheshwor possesses.
-- **Flexibility indicators:** The role is described as suitable for a "junior data analyst," indicating that they may be open to candidates who are slightly below the ideal experience level. The mention of a flexible working environment and the emphasis on a self-motivated candidate suggest that they may be willing to overlook some specific experience if the candidate shows potential.
-- **Hard blockers identified:** There are no clear hard blockers in Maheshwor's profile. He has the necessary programming skills and experience in data analysis. However, he lacks the explicit 1-2 years of team management experience mentioned in the JD.
-- **Hiring urgency signals:** The job description does not explicitly indicate urgency, but the mention of supporting the Insights and Customer Success teams suggests they may be looking to fill this role promptly to enhance their operational capabilities.
+
+- **What they actually need:** The core must-haves for this role include strong analytical skills, proficiency in SQL and Excel, and the ability to communicate effectively with stakeholders. While they mention light leadership experience, it seems they are more focused on data analysis capabilities and stakeholder interaction, which Maheshwor possesses.
+  
+- **Flexibility indicators:** The job description indicates a preference for candidates with light leadership experience but does not strictly require it. The emphasis on being a "junior data analyst" suggests they may be willing to consider candidates who are slightly below the ideal experience level. The mention of a flexible working environment also suggests a company culture that values adaptability and may be open to training.
+
+- **Hard blockers identified:** There are no hard blockers present in Maheshwor's profile. He has relevant experience in data analysis and tools like SQL and Power BI, which are essential for the role.
+
+- **Hiring urgency signals:** The job description does not explicitly state urgency, but the fact that they are looking for someone to support key business questions implies they may be looking to fill the role promptly.
 
 ---
 
 **INTELLIGENT OBSERVATIONS:**
-- **Hidden strengths:** Maheshwor's PhD and Master's in Data Science provide him with a strong analytical foundation, which is likely to be valued. His experience in bu...
+
+- **Hidden strengths:** Maheshwor has a strong academic background in Data Science and relevant hands-on experience in data analysis and visualization tools. His ability to mana...
 
 ### Component Analysis Scores
 - **Skills Relevance:** 87.0/100
-- **Experience Alignment:** 85.0/100
-- **Industry Fit:** 75.0/100
-- **Role Seniority:** 75.0/100
+- **Experience Alignment:** 75.0/100
+- **Industry Fit:** 70.0/100
+- **Role Seniority:** 80.0/100
 - **Technical Depth:** 90.0/100
 
 ### Detailed Skill Breakdown
 **CV Skills Analysis:**
 ## TECHNICAL SKILLS:
 **EXPLICIT (directly stated):**
-- Python
-- Pandas
-- Numpy
-- Scikit-Learn
 - Sql
-- Postgresql
-- Mysql
 - Tableau
+- Python
 - Power Bi
-- Matplotlib
-- Docker
-- Snowflake
-- Github
-- Visual Studio Code
-- Google Analytics
 - Excel
-- Seaborn
+- Data Analysis
+- Statistical Analysis
+- Logistic Regression
+- Random Forests
+- Deep Learning
+- Data Visualization
+- Ad-Hoc Analysis
+- Data Discrepancies
+- Undersampling Techniques
+- Data-Driven Visualisations
+- Dashboard Creation
+- Data Integrity
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Data Cleaning
@@ -110,11 +115,11 @@ Domain Keywords             12          6          0          5            0
 
 ## SOFT SKILLS:
 **EXPLICIT (directly stated):**
+- Interpersonal Skills
 - Communication
-- Teamwork
-- Mentoring
-- Collaboration
-- Engagement
+- Time Management
+- Problem-Solving
+- Analytical Thinking
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Problem-solving
@@ -125,15 +130,13 @@ Domain Keywords             12          6          0          5            0
 ## DOMAIN KEYWORDS:
 **EXPLICIT:**
 - Data Science
-- Physics
-- Ai
-- Machine Learning
-- Data-Driven Decision-Making
-- Research
-- Customer Behavior Insights
-- Operational Efficiency
-- Predictive Analytics
-- Data Accuracy
+- Data Analytics
+- Customer Insights
+- Industrial Inspection
+- Healthcare
+- Strategic Decision-Making
+- Cross-Functional Expertise
+- Data-Driven Projects
 
 **STRONGLY IMPLIED:**
 - Predictive Analytics
@@ -141,9 +144,9 @@ Domain Keywords             12          6          0          5            0
 - Strategic Decision-making
 
 ```python
-SOFT_SKILLS = ['Communication', 'Teamwork', 'Mentoring', 'Collaboration', 'Engagement', 'Problem-solving', 'Adaptability', 'Time Management', 'Detail-oriented']
-TECHNICAL_SKILLS = ['Python', 'Pandas', 'NumPy', 'scikit-learn', 'SQL', 'PostgreSQL', 'MySQL', 'Tableau', 'Power BI', 'Matplotlib', 'Docker', 'Snowflake', 'GitHub', 'Visual Studio Code', 'Google Analytics', 'Excel', 'Seaborn', 'Data Cleaning', 'Data Preprocessing', 'Machine Learning', 'Predictive Analytics', 'Data Pipeline', 'Data Visualization', 'Data Extraction', 'Data Analysis', 'Reporting', 'Computational Modeling', 'Workflow Development']
-DOMAIN_KEYWORDS = ['Data Science', 'Physics', 'AI', 'Machine Learning', 'Data-driven Decision-making', 'Research', 'Customer Behavior Insights', 'Operational Efficiency', 'Predictive Analytics', 'Data Accuracy', 'Customer Satisfaction', 'Strategic Decision-making']
+SOFT_SKILLS = ['Interpersonal Skills', 'Communication', 'Time Management', 'Problem-solving', 'Analytical Thinking', 'Detail-oriented', 'Results-driven']
+TECHNICAL_SKILLS = ['SQL', 'Tableau', 'Python', 'Power BI', 'Excel', 'Data Analysis', 'Statistical Analysis', 'Logistic Regression', 'Random Forests', 'Deep Learning', 'Data Visualization', 'Ad-hoc Analysis', 'Data Discrepancies', 'Undersampling Techniques', 'Data-driven Visualisations', 'Dashboard Creation', 'Data Integrity', 'Model Optimization', 'Pruning Techniques', 'Fine-tuning Strategies']
+DOMAIN_KEYWORDS = ['Data Science', 'Data Analytics', 'Customer Insights', 'Industrial Inspection', 'Healthcare', 'Strategic Decision-making', 'Cross-functional Expertise', 'Data-driven Projects']
 ```
 
 **JD Requirements Analysis:**
@@ -152,12 +155,14 @@ DOMAIN_KEYWORDS = ['Data Science', 'Physics', 'AI', 'Machine Learning', 'Data-dr
 - Excel
 - Sql
 - Python
+- Data Cleansing
 - Data Modelling
 - Data Visualisation
 - Power Bi
 - Tableau
-- Data Cleansing
 - Data Analysis
+- Data Quality
+- Data Accuracy
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Analytical Models
@@ -169,11 +174,11 @@ DOMAIN_KEYWORDS = ['Data Science', 'Physics', 'AI', 'Machine Learning', 'Data-dr
 ## SOFT SKILLS:
 **EXPLICIT (directly stated):**
 - Communication
-- Leadership
 - Team Player
-- Adaptability
-- Detail-Oriented
 - Self-Motivated
+- Adaptability
+- Attention To Detail
+- Leadership
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Teamwork
@@ -182,34 +187,34 @@ DOMAIN_KEYWORDS = ['Data Science', 'Physics', 'AI', 'Machine Learning', 'Data-dr
 
 ## DOMAIN KEYWORDS:
 **EXPLICIT:**
-- Data Analytics
 - Technical Consumer Goods
 - Market Research
-- Retailer Data
 - Consumer Insights
+- Retail
 - Client Service
+- Stakeholder Management
 
 **STRONGLY IMPLIED:**
 - Campaign Outcomes
 - Business Intelligence
 
 ```python
-SOFT_SKILLS = ['Communication', 'Leadership', 'Team Player', 'Adaptability', 'Detail-oriented', 'Self-motivated', 'Problem-solving', 'Time Management', 'Organization']
-TECHNICAL_SKILLS = ['Excel', 'SQL', 'Python', 'Data Modelling', 'Data Visualisation', 'Power BI', 'Tableau', 'Data Cleansing', 'Data Analysis']
-DOMAIN_KEYWORDS = ['Data Analytics', 'Technical Consumer Goods', 'Market Research', 'Retailer Data', 'Consumer Insights', 'Client Service']
+SOFT_SKILLS = ['Communication', 'Team Player', 'Self-Motivated', 'Adaptability', 'Attention to Detail', 'Leadership', 'Problem-Solving', 'Time Management', 'Organization']
+TECHNICAL_SKILLS = ['Excel', 'SQL', 'Python', 'Data Cleansing', 'Data Modelling', 'Data Visualisation', 'Power BI', 'Tableau', 'Data Analysis', 'Data Quality', 'Data Accuracy']
+DOMAIN_KEYWORDS = ['Technical Consumer Goods', 'Market Research', 'Consumer Insights', 'Retail', 'Client Service', 'Stakeholder Management']
 ```
 
 ### Category Breakdown
-- **Category 1 (Skills Matching):** 26.4/40
-  - Technical Skills Match: 90.0%
-  - Soft Skills Match: 56.0%
+- **Category 1 (Skills Matching):** 21.349999999999998/40
+  - Technical Skills Match: 82.0%
+  - Soft Skills Match: 33.0%
   - Domain Keywords Match: 0.0%
 
-- **Category 2 (Experience & Competency):** 47.575/60
-  - Core Competency: 83.75%
+- **Category 2 (Experience & Competency):** 46.7625/60
+  - Core Competency: 82.5%
   - Experience/Seniority: 76.0%
-  - Potential/Ability: 80.0%
-  - Company Fit: 68.75%
+  - Potential/Ability: 78.75%
+  - Company Fit: 61.25%
 
 ---
 
@@ -236,23 +241,23 @@ Generate a comprehensive strategic report covering:
 ### 1. Missing Keywords Analysis
 Focus on the lowest-scoring categories from the analysis:
 - **Critical Gaps:** Highest-impact missing JD keywords (prioritize 0.0% domain match)
-- **Technical Gaps:** Missing technical skills with 90.0% current match
-- **Soft Skills Gaps:** Missing soft skills with 56.0% current match
+- **Technical Gaps:** Missing technical skills with 82.0% current match
+- **Soft Skills Gaps:** Missing soft skills with 33.0% current match
 
 ### 2. ATS Score Optimization Strategy
 Current ATS breakdown shows specific improvement areas:
-- **Category 1 Improvements:** Target the 1 missing technical skills
-- **Category 2 Enhancement:** Address the 68.75% company fit score
-- **Bonus Points:** Optimize for the current 1.75 bonus points
+- **Category 1 Improvements:** Target the 2 missing technical skills
+- **Category 2 Enhancement:** Address the 61.25% company fit score
+- **Bonus Points:** Optimize for the current -1.6 bonus points
 
 ### 3. Industry Transition Strategy
-Based on 75.0/100 industry fit score:
+Based on 70.0/100 industry fit score:
 - **Transferable Strengths:** Leverage existing skills for new domain
 - **Domain Knowledge Gaps:** Address industry-specific terminology
 - **Adaptation Timeline:** Realistic skill development plan
 
 ### 4. Experience & Seniority Positioning
-Current seniority score: 75.0/100
+Current seniority score: 80.0/100
 - **Leadership Indicators:** How to highlight existing leadership experience
 - **Responsibility Scope:** Reframe current roles for target seniority
 - **Growth Trajectory:** Position career progression strategically
@@ -270,7 +275,7 @@ Technical depth score: 90.0/100
 # 🎯 CV Tailoring Strategy Report for GfK
 
 ## 📊 Executive Summary
-- **Current ATS Score:** 75.725/100 (✅ Good fit)
+- **Current ATS Score:** 66.5125/100 (⚠️ Moderate fit)
 - **Key Strengths:** [Top 3-4 highest-scoring areas]
 - **Critical Gaps:** [Top 3-4 lowest-scoring areas requiring immediate attention]
 - **Success Probability:** [Based on strategic assessment and component scores]
@@ -289,24 +294,24 @@ Technical depth score: 90.0/100
 **Critical Missing Keywords (0% domain match):**
 - [Specific domain keywords to integrate with injection points]
 
-**Technical Skills Enhancement (90.0% current match):**
+**Technical Skills Enhancement (82.0% current match):**
 - [Technical keywords to add/emphasize]
 
-**Soft Skills Optimization (56.0% current match):**
+**Soft Skills Optimization (33.0% current match):**
 - [Soft skills to highlight with evidence]
 
 ## 🎪 Experience Reframing Strategy
-**Industry Transition Focus (75.0/100 current fit):**
+**Industry Transition Focus (70.0/100 current fit):**
 - [How to reframe existing experience for target industry]
 
-**Seniority Positioning (75.0/100 current match):**
+**Seniority Positioning (80.0/100 current match):**
 - [Leadership and responsibility indicators to emphasize]
 
 **Technical Depth Showcase (90.0/100 current score):**
 - [Technical achievements and complexity indicators]
 
 ## 📈 ATS Score Improvement Roadmap
-**Target Score:** [Realistic target based on current 75.725]
+**Target Score:** [Realistic target based on current 66.5125]
 
 **High-Impact Changes (Expected +10-15 points):**
 - [Top 3 recommendations with highest ROI]

@@ -54,6 +54,8 @@ class SkillsAnalysisResult {
   // New: Component analysis and ATS calculation results
   final ComponentAnalysisResult? componentAnalysis;
   final ATSResult? atsResult;
+  // New: AI recommendation content
+  final AIRecommendationResult? aiRecommendation;
 
   SkillsAnalysisResult({
     required this.cvSkills,
@@ -70,6 +72,7 @@ class SkillsAnalysisResult {
     this.preextractedCompanyName,
     this.componentAnalysis,
     this.atsResult,
+    this.aiRecommendation,
   });
 
   factory SkillsAnalysisResult.fromJson(Map<String, dynamic> json) {
@@ -150,34 +153,53 @@ class SkillsAnalysisResult {
     // Parse component analysis and ATS results (from polling response)
     ComponentAnalysisResult? componentAnalysis;
     ATSResult? atsResult;
-    
+
     if (json['component_analysis'] != null) {
-      componentAnalysis = ComponentAnalysisResult.fromJson(json['component_analysis'] as Map<String, dynamic>);
+      componentAnalysis = ComponentAnalysisResult.fromJson(
+          json['component_analysis'] as Map<String, dynamic>);
       debugPrint('   component_analysis parsed successfully');
     }
-    
+
     if (json['ats_score'] != null) {
       atsResult = ATSResult.fromJson(json['ats_score'] as Map<String, dynamic>);
       debugPrint('   ats_score parsed successfully');
     }
 
+    // Parse AI recommendation content
+    AIRecommendationResult? aiRecommendation;
+    if (json['ai_recommendation'] != null) {
+      aiRecommendation = AIRecommendationResult.fromJson(
+          json['ai_recommendation'] as Map<String, dynamic>);
+      debugPrint('   ai_recommendation parsed successfully');
+    }
+
     // Parse CV skills with fallback extraction
     SkillsData cvSkills = SkillsData.fromJson(json['cv_skills'] ?? {});
-    
+
     // If cv_skills is empty but we have comprehensive analysis, extract skills from text
-    if (cvSkills.isEmpty && cvComprehensiveAnalysis != null && cvComprehensiveAnalysis.trim().isNotEmpty) {
-      debugPrint('🔧 [MODEL_DEBUG] cv_skills is empty, attempting fallback extraction from comprehensive analysis');
-      cvSkills = SkillsExtractor.extractFromComprehensiveAnalysis(cvComprehensiveAnalysis);
-      debugPrint('   Fallback extracted CV skills: ${cvSkills.totalSkillsCount}');
+    if (cvSkills.isEmpty &&
+        cvComprehensiveAnalysis != null &&
+        cvComprehensiveAnalysis.trim().isNotEmpty) {
+      debugPrint(
+          '🔧 [MODEL_DEBUG] cv_skills is empty, attempting fallback extraction from comprehensive analysis');
+      cvSkills = SkillsExtractor.extractFromComprehensiveAnalysis(
+          cvComprehensiveAnalysis);
+      debugPrint(
+          '   Fallback extracted CV skills: ${cvSkills.totalSkillsCount}');
     }
-    
+
     // Parse JD skills (normally these are fine, but add same fallback just in case)
     SkillsData jdSkills = SkillsData.fromJson(json['jd_skills'] ?? {});
-    
-    if (jdSkills.isEmpty && jdComprehensiveAnalysis != null && jdComprehensiveAnalysis.trim().isNotEmpty) {
-      debugPrint('🔧 [MODEL_DEBUG] jd_skills is empty, attempting fallback extraction from comprehensive analysis');
-      jdSkills = SkillsExtractor.extractFromComprehensiveAnalysis(jdComprehensiveAnalysis);
-      debugPrint('   Fallback extracted JD skills: ${jdSkills.totalSkillsCount}');
+
+    if (jdSkills.isEmpty &&
+        jdComprehensiveAnalysis != null &&
+        jdComprehensiveAnalysis.trim().isNotEmpty) {
+      debugPrint(
+          '🔧 [MODEL_DEBUG] jd_skills is empty, attempting fallback extraction from comprehensive analysis');
+      jdSkills = SkillsExtractor.extractFromComprehensiveAnalysis(
+          jdComprehensiveAnalysis);
+      debugPrint(
+          '   Fallback extracted JD skills: ${jdSkills.totalSkillsCount}');
     }
 
     return SkillsAnalysisResult(
@@ -195,6 +217,7 @@ class SkillsAnalysisResult {
       preextractedCompanyName: preextractedCompany,
       componentAnalysis: componentAnalysis,
       atsResult: atsResult,
+      aiRecommendation: aiRecommendation,
     );
   }
 
@@ -216,6 +239,7 @@ class SkillsAnalysisResult {
       errorMessage: errorMessage,
       componentAnalysis: null,
       atsResult: null,
+      aiRecommendation: null,
     );
   }
 
@@ -238,6 +262,7 @@ class SkillsAnalysisResult {
             },
       'component_analysis': componentAnalysis?.toJson(),
       'ats_score': atsResult?.toJson(),
+      'ai_recommendation': aiRecommendation?.toJson(),
     };
   }
 
@@ -259,22 +284,28 @@ class SkillsAnalysisResult {
     String? preextractedCompanyName,
     ComponentAnalysisResult? componentAnalysis,
     ATSResult? atsResult,
+    AIRecommendationResult? aiRecommendation,
   }) {
     return SkillsAnalysisResult(
       cvSkills: cvSkills ?? this.cvSkills,
       jdSkills: jdSkills ?? this.jdSkills,
-      cvComprehensiveAnalysis: cvComprehensiveAnalysis ?? this.cvComprehensiveAnalysis,
-      jdComprehensiveAnalysis: jdComprehensiveAnalysis ?? this.jdComprehensiveAnalysis,
+      cvComprehensiveAnalysis:
+          cvComprehensiveAnalysis ?? this.cvComprehensiveAnalysis,
+      jdComprehensiveAnalysis:
+          jdComprehensiveAnalysis ?? this.jdComprehensiveAnalysis,
       expandableAnalysis: expandableAnalysis ?? this.expandableAnalysis,
       extractedKeywords: extractedKeywords ?? this.extractedKeywords,
       analyzeMatch: analyzeMatch ?? this.analyzeMatch,
       executionDuration: executionDuration ?? this.executionDuration,
       isSuccess: isSuccess ?? this.isSuccess,
       errorMessage: errorMessage ?? this.errorMessage,
-      preextractedRawOutput: preextractedRawOutput ?? this.preextractedRawOutput,
-      preextractedCompanyName: preextractedCompanyName ?? this.preextractedCompanyName,
+      preextractedRawOutput:
+          preextractedRawOutput ?? this.preextractedRawOutput,
+      preextractedCompanyName:
+          preextractedCompanyName ?? this.preextractedCompanyName,
       componentAnalysis: componentAnalysis ?? this.componentAnalysis,
       atsResult: atsResult ?? this.atsResult,
+      aiRecommendation: aiRecommendation ?? this.aiRecommendation,
     );
   }
 
@@ -337,7 +368,6 @@ class ATSResult {
   final String categoryStatus;
   final String recommendation;
   final ATSBreakdown breakdown;
-  final List<String> recommendations;
 
   ATSResult({
     required this.timestamp,
@@ -345,46 +375,16 @@ class ATSResult {
     required this.categoryStatus,
     required this.recommendation,
     required this.breakdown,
-    this.recommendations = const [],
   });
 
   factory ATSResult.fromJson(Map<String, dynamic> json) {
-    // Handle recommendations field - try both 'recommendations' and 'improvement_recommendations'
-    List<String> recommendations = [];
-    
-    // First try the 'recommendations' field
-    if (json['recommendations'] != null && json['recommendations'] is List) {
-      recommendations = List<String>.from(json['recommendations']);
-    }
-    // If not found, try 'improvement_recommendations' field (backend uses this)
-    else if (json['improvement_recommendations'] != null && json['improvement_recommendations'] is List) {
-      recommendations = List<String>.from(json['improvement_recommendations']);
-    }
-    
-    debugPrint('🔍 [ATS_MODEL] Parsing recommendations...');
-    debugPrint('   json has recommendations: ${json['recommendations'] != null}');
-    debugPrint('   json has improvement_recommendations: ${json['improvement_recommendations'] != null}');
-    debugPrint('   final recommendations length: ${recommendations.length}');
-    
     return ATSResult(
       timestamp: json['timestamp'] as String? ?? '',
       finalATSScore: (json['final_ats_score'] as num?)?.toDouble() ?? 0.0,
       categoryStatus: json['category_status'] as String? ?? '',
       recommendation: json['recommendation'] as String? ?? '',
-      breakdown: ATSBreakdown.fromJson(json['breakdown'] as Map<String, dynamic>? ?? {}),
-      recommendations: recommendations,
-    );
-  }
-  
-  /// Create a copy of this ATSResult with updated recommendations
-  ATSResult copyWithRecommendations(List<String> newRecommendations) {
-    return ATSResult(
-      timestamp: timestamp,
-      finalATSScore: finalATSScore,
-      categoryStatus: categoryStatus,
-      recommendation: recommendation,
-      breakdown: breakdown,
-      recommendations: newRecommendations,
+      breakdown: ATSBreakdown.fromJson(
+          json['breakdown'] as Map<String, dynamic>? ?? {}),
     );
   }
 
@@ -395,7 +395,6 @@ class ATSResult {
       'category_status': categoryStatus,
       'recommendation': recommendation,
       'breakdown': breakdown.toJson(),
-      'recommendations': recommendations,
     };
   }
 }
@@ -416,8 +415,10 @@ class ATSBreakdown {
 
   factory ATSBreakdown.fromJson(Map<String, dynamic> json) {
     return ATSBreakdown(
-      category1: ATSCategory1.fromJson(json['category1'] as Map<String, dynamic>? ?? {}),
-      category2: ATSCategory2.fromJson(json['category2'] as Map<String, dynamic>? ?? {}),
+      category1: ATSCategory1.fromJson(
+          json['category1'] as Map<String, dynamic>? ?? {}),
+      category2: ATSCategory2.fromJson(
+          json['category2'] as Map<String, dynamic>? ?? {}),
       ats1Score: (json['ats1_score'] as num?)?.toDouble() ?? 0.0,
       bonusPoints: (json['bonus_points'] as num?)?.toDouble() ?? 0.0,
     );
@@ -453,9 +454,12 @@ class ATSCategory1 {
     final missingCounts = json['missing_counts'] as Map<String, dynamic>? ?? {};
     return ATSCategory1(
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
-      technicalSkillsMatchRate: (json['technical_skills_match_rate'] as num?)?.toDouble() ?? 0.0,
-      domainKeywordsMatchRate: (json['domain_keywords_match_rate'] as num?)?.toDouble() ?? 0.0,
-      softSkillsMatchRate: (json['soft_skills_match_rate'] as num?)?.toDouble() ?? 0.0,
+      technicalSkillsMatchRate:
+          (json['technical_skills_match_rate'] as num?)?.toDouble() ?? 0.0,
+      domainKeywordsMatchRate:
+          (json['domain_keywords_match_rate'] as num?)?.toDouble() ?? 0.0,
+      softSkillsMatchRate:
+          (json['soft_skills_match_rate'] as num?)?.toDouble() ?? 0.0,
       missingCounts: {
         'technical': missingCounts['technical'] as int? ?? 0,
         'domain': missingCounts['domain'] as int? ?? 0,
@@ -494,9 +498,12 @@ class ATSCategory2 {
   factory ATSCategory2.fromJson(Map<String, dynamic> json) {
     return ATSCategory2(
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
-      coreCompetencyAvg: (json['core_competency_avg'] as num?)?.toDouble() ?? 0.0,
-      experienceSeniorityAvg: (json['experience_seniority_avg'] as num?)?.toDouble() ?? 0.0,
-      potentialAbilityAvg: (json['potential_ability_avg'] as num?)?.toDouble() ?? 0.0,
+      coreCompetencyAvg:
+          (json['core_competency_avg'] as num?)?.toDouble() ?? 0.0,
+      experienceSeniorityAvg:
+          (json['experience_seniority_avg'] as num?)?.toDouble() ?? 0.0,
+      potentialAbilityAvg:
+          (json['potential_ability_avg'] as num?)?.toDouble() ?? 0.0,
       companyFitAvg: (json['company_fit_avg'] as num?)?.toDouble() ?? 0.0,
     );
   }
@@ -527,7 +534,7 @@ class ComponentAnalysisResult {
   factory ComponentAnalysisResult.fromJson(Map<String, dynamic> json) {
     final scoresMap = json['extracted_scores'] as Map<String, dynamic>? ?? {};
     final extractedScores = <String, double>{};
-    
+
     // Convert all score values to doubles
     scoresMap.forEach((key, value) {
       if (value is num) {
@@ -538,7 +545,8 @@ class ComponentAnalysisResult {
     return ComponentAnalysisResult(
       timestamp: json['timestamp'] as String? ?? '',
       extractedScores: extractedScores,
-      componentDetails: json['component_details'] as Map<String, dynamic>? ?? {},
+      componentDetails:
+          json['component_details'] as Map<String, dynamic>? ?? {},
     );
   }
 
@@ -552,8 +560,41 @@ class ComponentAnalysisResult {
 
   // Get key scores for display
   double get skillsRelevance => extractedScores['skills_relevance'] ?? 0.0;
-  double get experienceAlignment => extractedScores['experience_alignment'] ?? 0.0;
+  double get experienceAlignment =>
+      extractedScores['experience_alignment'] ?? 0.0;
   double get industryFit => extractedScores['industry_fit'] ?? 0.0;
   double get roleSeniority => extractedScores['role_seniority'] ?? 0.0;
   double get technicalDepth => extractedScores['technical_depth'] ?? 0.0;
+}
+
+/// AI Recommendation Result containing markdown content and metadata
+class AIRecommendationResult {
+  final String content;
+  final String? generatedAt;
+  final Map<String, dynamic>? modelInfo;
+
+  AIRecommendationResult({
+    required this.content,
+    this.generatedAt,
+    this.modelInfo,
+  });
+
+  factory AIRecommendationResult.fromJson(Map<String, dynamic> json) {
+    return AIRecommendationResult(
+      content: json['content'] as String? ?? '',
+      generatedAt: json['generated_at'] as String?,
+      modelInfo: json['model_info'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'content': content,
+      'generated_at': generatedAt,
+      'model_info': modelInfo,
+    };
+  }
+
+  bool get isEmpty => content.trim().isEmpty;
+  bool get hasContent => content.trim().isNotEmpty;
 }

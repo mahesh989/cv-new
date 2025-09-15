@@ -1219,6 +1219,23 @@ async def get_analysis_results(company: str):
             latest = ats_entries[-1]
             result["ats_score"] = latest
         
+        # Get AI recommendation content if available
+        ai_recommendation_file = base_dir / company / f"{company}_ai_recommendation.json"
+        if ai_recommendation_file.exists():
+            try:
+                with open(ai_recommendation_file, 'r', encoding='utf-8') as f:
+                    ai_data = json.load(f)
+                result["ai_recommendation"] = {
+                    "content": ai_data.get("recommendation_content"),
+                    "generated_at": ai_data.get("generated_at"),
+                    "model_info": ai_data.get("ai_model_info", {})
+                }
+            except Exception as e:
+                logger.warning(f"Failed to load AI recommendation for {company}: {e}")
+                result["ai_recommendation"] = None
+        else:
+            result["ai_recommendation"] = None
+        
         return JSONResponse(content={
             "success": True,
             "data": result

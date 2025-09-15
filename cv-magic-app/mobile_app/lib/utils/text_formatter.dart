@@ -367,26 +367,6 @@ class SkillsAnalysisFormattedText extends StatelessWidget {
   }
 }
 
-/// Specialized widget for AI recommendations text formatting
-class RecommendationFormattedText extends StatelessWidget {
-  final String text;
-
-  const RecommendationFormattedText({
-    super.key,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FormattedTextWidget(
-      text: text,
-      fontSize: 14,
-      isAnalyzeMatch: false, // Uses general markdown formatting
-      lineHeight: 1.6,
-    );
-  }
-}
-
 class SkillsAnalysisAdapters {
   static PreextractedComparisonResult parsePreextractedRaw(String raw) {
     // ignore: avoid_print

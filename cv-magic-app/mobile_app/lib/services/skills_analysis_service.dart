@@ -216,6 +216,8 @@ class SkillsAnalysisService {
             '📊 [POLLING] Component analysis present: ${data.containsKey("component_analysis")}');
         print(
             '📊 [POLLING] ATS score present: ${data.containsKey("ats_score")}');
+        print(
+            '📊 [POLLING] AI recommendation present: ${data.containsKey("ai_recommendation")}');
 
         if (data.containsKey('component_analysis') &&
             data.containsKey('ats_score')) {
@@ -261,47 +263,5 @@ class SkillsAnalysisService {
 
     print('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
     return null;
-  }
-
-  /// Fetch AI recommendations for a specific company
-  /// Returns the full markdown content from the backend
-  static Future<String?> getAIRecommendations(String company) async {
-    try {
-      print(
-          '🤖 [AI_RECOMMENDATIONS] Fetching AI recommendations for company: $company');
-
-      final result = await APIService.makeAuthenticatedCall(
-        endpoint: '/ai-recommendations/company/$company',
-        method: 'GET',
-      );
-
-      print(
-          '🤖 [AI_RECOMMENDATIONS] Response received: ${result.keys.toList()}');
-
-      if (result['success'] == true &&
-          result['recommendation_content'] != null) {
-        print('🤖 [AI_RECOMMENDATIONS] Response keys: ${result.keys.toList()}');
-
-        // Extract recommendation content directly from the response
-        final recommendationContent =
-            result['recommendation_content'] as String?;
-        if (recommendationContent != null && recommendationContent.isNotEmpty) {
-          // Return the full markdown content for proper rendering
-          print(
-              '🤖 [AI_RECOMMENDATIONS] Returning full recommendation content (${recommendationContent.length} characters)');
-          return recommendationContent;
-        } else {
-          print('⚠️ [AI_RECOMMENDATIONS] No recommendation content found');
-          return null;
-        }
-      } else {
-        print(
-            '⚠️ [AI_RECOMMENDATIONS] No AI recommendations found or API error');
-        return null;
-      }
-    } catch (e) {
-      print('❌ [AI_RECOMMENDATIONS] Error fetching AI recommendations: $e');
-      return null;
-    }
   }
 }

@@ -150,64 +150,6 @@ class CVJDMatcher:
             logger.error(f"Error reading JD analysis file {analysis_file}: {e}")
             raise IOError(f"Failed to read JD analysis file: {e}")
     
-    def _clean_json_response(self, content: str) -> str:
-        """
-        Clean and fix common JSON formatting issues in AI responses
-        """
-        import re
-        
-        try:
-            # Remove any text before the first {
-            content = re.sub(r'^[^{]*', '', content)
-            
-            # Remove any text after the last }
-            content = re.sub(r'}[^}]*$', '}', content)
-            
-            # First, try to fix the most common issue: unquoted values in matching_notes
-            # Pattern: "key": unquoted text that should be quoted
-            def fix_unquoted_value(match):
-                key = match.group(1)
-                value = match.group(2).strip()
-                
-                # If value is already quoted, leave it alone
-                if value.startswith('"') and value.endswith('"'):
-                    return f'"{key}": {value}'
-                
-                # Quote the value and escape internal quotes
-                escaped_value = value.replace('"', '\\"').replace('\n', ' ').replace('\r', ' ')
-                return f'"{key}": "{escaped_value}"'
-            
-            # Apply the fix to unquoted values (this handles the main error from logs)
-            # Look for pattern: "key": unquoted_text followed by comma or closing brace
-            content = re.sub(r'"([^"]+)":\s*([^,}"\n]+?)(?=\s*[,}])', fix_unquoted_value, content, flags=re.DOTALL)
-            
-            # Handle other common JSON issues:
-            # 1. Convert single quotes to double quotes for keys
-            content = re.sub(r"'([^']*)':", r'"\1":', content)
-            
-            # 2. Convert single quotes to double quotes for string values
-            content = re.sub(r":\s*'([^']*)'", r': "\1"', content)
-            
-            # 3. Convert single quotes to double quotes in arrays
-            content = re.sub(r"\[\s*'([^']*)'", r'["\1"', content)
-            content = re.sub(r",\s*'([^']*)'", r', "\1"', content)
-            
-            # 4. Remove trailing commas before closing braces/brackets
-            content = re.sub(r',(\s*[}\]])', r'\1', content)
-            
-            # 5. Fix missing quotes around keys (if any remain)
-            content = re.sub(r'([a-zA-Z_][a-zA-Z0-9_]*):', r'"\1":', content)
-            
-            # 6. Clean up excessive whitespace but preserve basic structure
-            content = re.sub(r'\n\s*', '\n', content)
-            content = re.sub(r'\s+', ' ', content)
-            
-            return content.strip()
-            
-        except Exception as e:
-            logger.warning(f"Error in _clean_json_response: {e}")
-            # If cleaning fails, return original content
-            return content
     
     def _parse_ai_response(self, response: AIResponse) -> CVJDMatchResult:
         """
@@ -255,29 +197,19 @@ class CVJDMatcher:
             return result
             
         except json.JSONDecodeError as e:
-            logger.error(f"❌ CRITICAL: Failed to parse AI response as JSON: {e}")
-            logger.error(f"❌ Response content: {response.content}")
+            logger.error(f"❌ CRITICAL: AI returned invalid JSON that cannot be parsed")
+            logger.error(f"❌ JSON Parse Error: {e}")
+            logger.error(f"❌ Error Location: Line {getattr(e, 'lineno', '?')}, Column {getattr(e, 'colno', '?')}")
+            logger.error(f"❌ AI Response Content:")
+            logger.error(f"{response.content}")
+            logger.error(f"❌ STOPPING PROCESS: No fallbacks - AI must return valid JSON")
             
-            # Try to fix common JSON issues ONE TIME ONLY
-            try:
-                cleaned_content = self._clean_json_response(response.content)
-                data = json.loads(cleaned_content)
-                logger.info("✅ Successfully fixed and parsed malformed JSON response")
-                
-                # Ensure all required fields exist
-                for field in ['matched_required_keywords', 'matched_preferred_keywords', 
-                             'missed_required_keywords', 'missed_preferred_keywords', 'matching_notes']:
-                    if field not in data:
-                        data[field] = [] if 'keywords' in field else {}
-                
-                result = CVJDMatchResult(data)
-                result.ai_model_used = f"{response.provider}/{response.model}"
-                return result
-                
-            except Exception as fix_error:
-                logger.error(f"❌ CRITICAL: JSON fix attempt failed: {fix_error}")
-                logger.error(f"❌ STOPPING PROCESS: Cannot parse AI response as valid JSON")
-                raise ValueError(f"CRITICAL ERROR: AI response is not valid JSON and cannot be fixed. Original error: {e}, Fix error: {fix_error}")
+            raise ValueError(
+                f"CRITICAL FAILURE: AI returned malformed JSON. "
+                f"Error: {e} at line {getattr(e, 'lineno', '?')}, column {getattr(e, 'colno', '?')}. "
+                f"AI must be fixed to return proper JSON format. "
+                f"Process terminated - no fallbacks allowed."
+            )
         except Exception as e:
             logger.error(f"Error parsing AI response: {e}")
             raise ValueError(f"Failed to parse matching result: {e}")
@@ -357,9 +289,10 @@ class CVJDMatcher:
                     return result
                     
                 except json.JSONDecodeError as e:
-                    logger.error(f"❌ CRITICAL: JSON parsing failed on attempt {attempt + 1}: {e}")
+                    logger.error(f"❌ CRITICAL: JSON parsing failed immediately: {e}")
                     logger.error(f"❌ STOPPING PROCESS: No retries for JSON parsing errors")
-                    raise e  # Stop immediately, don't retry
+                    # Re-raise the exception to trigger the main error handling
+                    raise
                     
                 except Exception as e:
                     last_error = e

@@ -1,51 +1,40 @@
 {
   "company_name": "GfK",
-  "cv_analysis_timestamp": "2025-09-15T15:08:33.195064",
+  "cv_analysis_timestamp": "2025-09-15T15:59:29.332007",
   "matched_required_keywords": [
     "Excel",
     "SQL",
     "Python",
     "communication",
-    "data analytics",
-    "data visualisation",
-    "market data analysis"
+    "data visualisation"
   ],
   "matched_preferred_keywords": [
-    "Power BI",
-    "Tableau"
+    "Power BI"
   ],
   "missed_required_keywords": [
     "team player",
     "logical thinking",
     "critical thinking",
-    "attention to detail",
-    "data modelling"
+    "data modelling",
+    "market data analysis"
   ],
   "missed_preferred_keywords": [
+    "Tableau",
     "leadership"
   ],
   "match_counts": {
-    "total_required_keywords": 11,
+    "total_required_keywords": 10,
     "total_preferred_keywords": 3,
-    "matched_required_count": 7,
-    "matched_preferred_count": 2
+    "matched_required_count": 5,
+    "matched_preferred_count": 1
   },
   "matching_notes": {
-    "Excel": "Matched as it is explicitly mentioned in the technical skills section.",
-    "SQL": "Matched as it is explicitly mentioned in the technical skills section.",
-    "Python": "Matched as it is explicitly mentioned multiple times throughout the CV.",
-    "communication": "Matched in the context of presenting research findings and collaborating with teams.",
-    "data analytics": "Matched in the context of analyzing data for decision-making.",
-    "data visualisation": "Matched in the context of creating dashboards and visualizations.",
-    "market data analysis": "Matched in the context of analyzing customer support data.",
-    "team player": "Missed as there is no explicit mention of being a team player, though teamwork is implied in collaboration.",
-    "logical thinking": "Missed as there is no explicit mention of logical thinking.",
-    "critical thinking": "Missed as there is no explicit mention of critical thinking.",
-    "attention to detail": "Missed as there is no explicit mention of attention to detail.",
-    "data modelling": "Missed as there is no explicit mention of data modeling, though related skills in SQL and Python are present.",
-    "Power BI": "Matched as it is explicitly mentioned in the technical skills and experience sections.",
-    "Tableau": "Matched as it is explicitly mentioned in the technical skills and experience sections.",
-    "leadership": "Missed as there is no explicit mention of leadership skills, though mentoring is mentioned."
+    "Excel": "Found in key skills section as proficient for data analysis and automation",
+    "SQL": "Mentioned multiple times in experience and education",
+    "Python": "Explicitly listed and used in projects",
+    "communication": "Described as excellent interpersonal skills for stakeholder engagement",
+    "data visualisation": "Found in context of Power BI and dashboard creation",
+    "Power BI": "Mentioned in skills and experience for dashboard creation"
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",

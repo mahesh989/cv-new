@@ -3,8 +3,8 @@ import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
 import 'ats_score_widget_with_progress_bars.dart';
+import 'ai_recommendations_widget.dart';
 import '../utils/preextracted_parser.dart';
-import '../utils/text_formatter.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -451,137 +451,21 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // AI Recommendations - Show with progressive loading (Phase 6)
-          if (controller.showRecommendationLoading ||
-              controller.showRecommendationResults) ...[
+          // AI Recommendations - Show below ATS score
+          if (controller.result?.aiRecommendation != null) ...[
             Builder(
               builder: (context) {
-                // Debug: Check if recommendations section should show
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Checking recommendations section condition...');
+                    '🔍 [SKILLS_DISPLAY] Rendering AIRecommendationsWidget');
                 debugPrint(
-                    '   controller.showRecommendationLoading: ${controller.showRecommendationLoading}');
+                    '   aiRecommendation available: ${controller.result?.aiRecommendation != null}');
                 debugPrint(
-                    '   controller.showRecommendationResults: ${controller.showRecommendationResults}');
-                debugPrint(
-                    '   Condition result: ${controller.showRecommendationLoading || controller.showRecommendationResults}');
+                    '   aiRecommendation content length: ${controller.result?.aiRecommendation?.content.length ?? 0}');
 
-                debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering Recommendations section (progressive)');
-                debugPrint(
-                    '   showRecommendationLoading: ${controller.showRecommendationLoading}');
-                debugPrint(
-                    '   showRecommendationResults: ${controller.showRecommendationResults}');
-                debugPrint('   hasATSResult: ${controller.hasATSResult}');
-                if (controller.hasATSResult) {
-                  debugPrint(
-                      '   atsResult.recommendations != null: ${controller.atsResult?.recommendations != null}');
-                  debugPrint(
-                      '   atsResult.recommendations.isNotEmpty: ${controller.atsResult?.recommendations.isNotEmpty}');
-                  debugPrint(
-                      '   atsResult.recommendations length: ${controller.atsResult?.recommendations.length}');
-                }
-
-                // Show loading state if Recommendations should show but results aren't available yet
-                if (controller.showRecommendationLoading &&
-                    !controller.showRecommendationResults) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.orange.shade600),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Generating personalized recommendations...',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                // Show actual Recommendations when available
-                if (controller.showRecommendationResults &&
-                    controller.hasATSResult &&
-                    controller.atsResult?.recommendations != null &&
-                    controller.atsResult!.recommendations.isNotEmpty) {
-                  final recommendations = controller.atsResult!.recommendations;
-                  debugPrint(
-                      '   recommendations count: ${recommendations.length}');
-
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amber.shade200),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.lightbulb_outline,
-                                color: Colors.amber.shade700,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '💡 AI RECOMMENDATIONS',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.amber.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Personalized suggestions to improve your ATS score',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.amber.shade600,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Direct display of full recommendation content (like Analyze Match)
-                          _buildFullRecommendationContent(
-                              recommendations.first),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                return const SizedBox.shrink();
+                return AIRecommendationsWidget(
+                  aiRecommendation: controller.result!.aiRecommendation,
+                  isLoading: false,
+                );
               },
             ),
           ],
@@ -754,20 +638,4 @@ class SkillsDisplayWidget extends StatelessWidget {
 
   // Note: _buildExpandableAnalysis and _buildFormattedText methods removed
   // as detailed AI analysis is now hidden from frontend per requirements
-
-  /// Build full recommendation content using direct display (like Analyze Match)
-  Widget _buildFullRecommendationContent(String content) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.amber.shade200),
-      ),
-      child: RecommendationFormattedText(
-        text: content,
-      ),
-    );
-  }
 }
