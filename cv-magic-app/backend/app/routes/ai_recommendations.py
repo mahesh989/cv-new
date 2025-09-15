@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 logger = logging.getLogger(__name__)
 
 # Create router
-router = APIRouter(prefix="/api", tags=["ai-recommendations"])
+router = APIRouter(prefix="", tags=["ai-recommendations"])
 
 @router.get("/ai-recommendations/latest")
 async def get_latest_ai_recommendations():

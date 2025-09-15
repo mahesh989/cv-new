@@ -446,14 +446,14 @@ class SkillsAnalysisController extends ChangeNotifier {
                 
                 // Fetch AI recommendations from the backend endpoint
                 try {
-                  final aiRecommendations = await SkillsAnalysisService.getAIRecommendations(company);
+                  final aiRecommendationContent = await SkillsAnalysisService.getAIRecommendations(company);
                   
-                  if (aiRecommendations != null && aiRecommendations.isNotEmpty) {
-                    print('✅ [RECOMMENDATION_DEBUG] Successfully fetched ${aiRecommendations.length} recommendations from backend');
+                  if (aiRecommendationContent != null && aiRecommendationContent.isNotEmpty) {
+                    print('✅ [RECOMMENDATION_DEBUG] Successfully fetched recommendation content from backend (${aiRecommendationContent.length} characters)');
                     
-                    // Update the ATS result with the fetched recommendations
+                    // Update the ATS result with the fetched recommendations as a single markdown content
                     if (_fullResult?.atsResult != null) {
-                      final updatedAtsResult = _fullResult!.atsResult!.copyWithRecommendations(aiRecommendations);
+                      final updatedAtsResult = _fullResult!.atsResult!.copyWithRecommendations([aiRecommendationContent]);
                       _fullResult = _fullResult!.copyWith(atsResult: updatedAtsResult);
                       _result = _result!.copyWith(atsResult: updatedAtsResult);
                     }
@@ -461,7 +461,7 @@ class SkillsAnalysisController extends ChangeNotifier {
                     // Show Recommendations results
                     _showRecommendationResults = true;
                     notifyListeners();
-                    _showNotification('✨ AI Recommendations ready! ${aiRecommendations.length} personalized suggestions.');
+                    _showNotification('✨ AI Recommendations ready! Comprehensive CV tailoring strategy.');
                     print('   _showRecommendationResults set to true');
                   } else {
                     print('⚠️ [RECOMMENDATION_DEBUG] No recommendations fetched from backend');

@@ -200,21 +200,25 @@ class SkillsAnalysisService {
   }
 
   /// Poll for complete analysis results (component analysis + ATS)
-  static Future<Map<String, dynamic>?> getCompleteAnalysisResults(String company) async {
+  static Future<Map<String, dynamic>?> getCompleteAnalysisResults(
+      String company) async {
     try {
       print('📊 [POLLING] Checking for complete results for company: $company');
-      
+
       final result = await APIService.makeAuthenticatedCall(
         endpoint: '/analysis-results/$company',
         method: 'GET',
       );
-      
+
       if (result['success'] == true && result['data'] != null) {
         final data = result['data'] as Map<String, dynamic>;
-        print('📊 [POLLING] Component analysis present: ${data.containsKey("component_analysis")}');
-        print('📊 [POLLING] ATS score present: ${data.containsKey("ats_score")}');
-        
-        if (data.containsKey('component_analysis') && data.containsKey('ats_score')) {
+        print(
+            '📊 [POLLING] Component analysis present: ${data.containsKey("component_analysis")}');
+        print(
+            '📊 [POLLING] ATS score present: ${data.containsKey("ats_score")}');
+
+        if (data.containsKey('component_analysis') &&
+            data.containsKey('ats_score')) {
           print('✅ [POLLING] Complete results found!');
           return data;
         } else {
@@ -222,7 +226,7 @@ class SkillsAnalysisService {
           return null;
         }
       }
-      
+
       return null;
     } catch (e) {
       print('❌ [POLLING] Error getting complete results: $e');
@@ -231,105 +235,73 @@ class SkillsAnalysisService {
   }
 
   /// Wait for complete analysis results with polling
-  static Future<Map<String, dynamic>?> waitForCompleteResults(String company, {int maxWaitTimeSeconds = 30}) async {
+  static Future<Map<String, dynamic>?> waitForCompleteResults(String company,
+      {int maxWaitTimeSeconds = 30}) async {
     print('🔄 [POLLING] Starting polling for complete results...');
-    
+
     const pollInterval = Duration(seconds: 2);
     final maxAttempts = maxWaitTimeSeconds ~/ 2;
-    
+
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       print('🔄 [POLLING] Attempt $attempt/$maxAttempts');
-      
+
       final completeResults = await getCompleteAnalysisResults(company);
       if (completeResults != null) {
-        print('✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
+        print(
+            '✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
         return completeResults;
       }
-      
+
       if (attempt < maxAttempts) {
-        print('⏳ [POLLING] Waiting ${pollInterval.inSeconds}s before next attempt...');
+        print(
+            '⏳ [POLLING] Waiting ${pollInterval.inSeconds}s before next attempt...');
         await Future.delayed(pollInterval);
       }
     }
-    
+
     print('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
     return null;
   }
 
   /// Fetch AI recommendations for a specific company
-  static Future<List<String>?> getAIRecommendations(String company) async {
+  /// Returns the full markdown content from the backend
+  static Future<String?> getAIRecommendations(String company) async {
     try {
-      print('🤖 [AI_RECOMMENDATIONS] Fetching AI recommendations for company: $company');
-      
+      print(
+          '🤖 [AI_RECOMMENDATIONS] Fetching AI recommendations for company: $company');
+
       final result = await APIService.makeAuthenticatedCall(
-        endpoint: '/api/ai-recommendations/company/$company',
+        endpoint: '/ai-recommendations/company/$company',
         method: 'GET',
       );
-      
-      print('🤖 [AI_RECOMMENDATIONS] Response received: ${result.keys.toList()}');
-      
-      if (result['success'] == true && result['recommendation_content'] != null) {
+
+      print(
+          '🤖 [AI_RECOMMENDATIONS] Response received: ${result.keys.toList()}');
+
+      if (result['success'] == true &&
+          result['recommendation_content'] != null) {
         print('🤖 [AI_RECOMMENDATIONS] Response keys: ${result.keys.toList()}');
-        
+
         // Extract recommendation content directly from the response
-        final recommendationContent = result['recommendation_content'] as String?;
+        final recommendationContent =
+            result['recommendation_content'] as String?;
         if (recommendationContent != null && recommendationContent.isNotEmpty) {
-          // Parse the recommendation content to extract individual recommendations
-          final recommendations = _parseRecommendationsFromContent(recommendationContent);
-          print('🤖 [AI_RECOMMENDATIONS] Parsed ${recommendations.length} recommendations');
-          return recommendations;
+          // Return the full markdown content for proper rendering
+          print(
+              '🤖 [AI_RECOMMENDATIONS] Returning full recommendation content (${recommendationContent.length} characters)');
+          return recommendationContent;
         } else {
           print('⚠️ [AI_RECOMMENDATIONS] No recommendation content found');
           return null;
         }
       } else {
-        print('⚠️ [AI_RECOMMENDATIONS] No AI recommendations found or API error');
+        print(
+            '⚠️ [AI_RECOMMENDATIONS] No AI recommendations found or API error');
         return null;
       }
     } catch (e) {
       print('❌ [AI_RECOMMENDATIONS] Error fetching AI recommendations: $e');
       return null;
     }
-  }
-
-  /// Parse recommendations from AI content string
-  static List<String> _parseRecommendationsFromContent(String content) {
-    final recommendations = <String>[];
-    
-    // Split content by lines and look for bullet points or numbered items
-    final lines = content.split('\n');
-    
-    for (final line in lines) {
-      final trimmed = line.trim();
-      if (trimmed.isEmpty) continue;
-      
-      // Look for common bullet point patterns
-      if (trimmed.startsWith('•') || 
-          trimmed.startsWith('-') || 
-          trimmed.startsWith('*') ||
-          RegExp(r'^\d+\.').hasMatch(trimmed)) {
-        // Remove bullet point markers and add to recommendations
-        final cleanedLine = trimmed
-            .replaceFirst(RegExp(r'^[•\-\*]\s*'), '')
-            .replaceFirst(RegExp(r'^\d+\.\s*'), '')
-            .trim();
-        if (cleanedLine.isNotEmpty && cleanedLine.length > 10) {
-          recommendations.add(cleanedLine);
-        }
-      }
-    }
-    
-    // If no bullet points found, try to split by sentences
-    if (recommendations.isEmpty) {
-      final sentences = content.split(RegExp(r'[.!?]\s+'));
-      for (final sentence in sentences) {
-        final trimmed = sentence.trim();
-        if (trimmed.isNotEmpty && trimmed.length > 20 && !trimmed.endsWith(':')) {
-          recommendations.add(trimmed + '.');
-        }
-      }
-    }
-    
-    return recommendations.take(8).toList(); // Limit to 8 recommendations max
   }
 }

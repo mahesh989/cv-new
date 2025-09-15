@@ -135,7 +135,7 @@ app.include_router(job_analysis_router)  # Job analysis routes
 app.include_router(skills_analysis_router)  # Skills analysis routes
 app.include_router(jd_analysis_router)  # Job description analysis routes
 app.include_router(cv_jd_matching_router)  # CV-JD matching routes
-app.include_router(ai_recommendations_router)  # AI recommendations routes
+app.include_router(ai_recommendations_router, prefix="/api")  # AI recommendations routes
 
 
 # Root endpoint

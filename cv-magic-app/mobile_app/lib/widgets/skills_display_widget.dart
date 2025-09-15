@@ -4,6 +4,7 @@ import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
 import 'ats_score_widget_with_progress_bars.dart';
 import '../utils/preextracted_parser.dart';
+import '../utils/text_formatter.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
 class SkillsDisplayWidget extends StatelessWidget {
@@ -451,28 +452,39 @@ class SkillsDisplayWidget extends StatelessWidget {
           ],
 
           // AI Recommendations - Show with progressive loading (Phase 6)
-          if (controller.showRecommendationLoading || controller.showRecommendationResults) ...[
+          if (controller.showRecommendationLoading ||
+              controller.showRecommendationResults) ...[
             Builder(
               builder: (context) {
                 // Debug: Check if recommendations section should show
-                debugPrint('🔍 [SKILLS_DISPLAY] Checking recommendations section condition...');
-                debugPrint('   controller.showRecommendationLoading: ${controller.showRecommendationLoading}');
-                debugPrint('   controller.showRecommendationResults: ${controller.showRecommendationResults}');
-                debugPrint('   Condition result: ${controller.showRecommendationLoading || controller.showRecommendationResults}');
-                
+                debugPrint(
+                    '🔍 [SKILLS_DISPLAY] Checking recommendations section condition...');
+                debugPrint(
+                    '   controller.showRecommendationLoading: ${controller.showRecommendationLoading}');
+                debugPrint(
+                    '   controller.showRecommendationResults: ${controller.showRecommendationResults}');
+                debugPrint(
+                    '   Condition result: ${controller.showRecommendationLoading || controller.showRecommendationResults}');
+
                 debugPrint(
                     '🔍 [SKILLS_DISPLAY] Rendering Recommendations section (progressive)');
-                debugPrint('   showRecommendationLoading: ${controller.showRecommendationLoading}');
-                debugPrint('   showRecommendationResults: ${controller.showRecommendationResults}');
+                debugPrint(
+                    '   showRecommendationLoading: ${controller.showRecommendationLoading}');
+                debugPrint(
+                    '   showRecommendationResults: ${controller.showRecommendationResults}');
                 debugPrint('   hasATSResult: ${controller.hasATSResult}');
                 if (controller.hasATSResult) {
-                  debugPrint('   atsResult.recommendations != null: ${controller.atsResult?.recommendations != null}');
-                  debugPrint('   atsResult.recommendations.isNotEmpty: ${controller.atsResult?.recommendations.isNotEmpty}');
-                  debugPrint('   atsResult.recommendations length: ${controller.atsResult?.recommendations.length}');
+                  debugPrint(
+                      '   atsResult.recommendations != null: ${controller.atsResult?.recommendations != null}');
+                  debugPrint(
+                      '   atsResult.recommendations.isNotEmpty: ${controller.atsResult?.recommendations.isNotEmpty}');
+                  debugPrint(
+                      '   atsResult.recommendations length: ${controller.atsResult?.recommendations.length}');
                 }
 
                 // Show loading state if Recommendations should show but results aren't available yet
-                if (controller.showRecommendationLoading && !controller.showRecommendationResults) {
+                if (controller.showRecommendationLoading &&
+                    !controller.showRecommendationResults) {
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     child: Container(
@@ -514,9 +526,9 @@ class SkillsDisplayWidget extends StatelessWidget {
                     controller.hasATSResult &&
                     controller.atsResult?.recommendations != null &&
                     controller.atsResult!.recommendations.isNotEmpty) {
-                  
                   final recommendations = controller.atsResult!.recommendations;
-                  debugPrint('   recommendations count: ${recommendations.length}');
+                  debugPrint(
+                      '   recommendations count: ${recommendations.length}');
 
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -560,51 +572,9 @@ class SkillsDisplayWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
 
-                          // Recommendations list
-                          ...recommendations
-                              .take(8)
-                              .map((recommendation) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          margin: const EdgeInsets.only(top: 4),
-                                          width: 6,
-                                          height: 6,
-                                          decoration: BoxDecoration(
-                                            color: Colors.amber.shade600,
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            recommendation,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey.shade700,
-                                              height: 1.4,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ))
-                              .toList(),
-
-                          if (recommendations.length > 8) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              '... and ${recommendations.length - 8} more recommendations available',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.amber.shade600,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ],
+                          // Direct display of full recommendation content (like Analyze Match)
+                          _buildFullRecommendationContent(
+                              recommendations.first),
                         ],
                       ),
                     ),
@@ -784,4 +754,20 @@ class SkillsDisplayWidget extends StatelessWidget {
 
   // Note: _buildExpandableAnalysis and _buildFormattedText methods removed
   // as detailed AI analysis is now hidden from frontend per requirements
+
+  /// Build full recommendation content using direct display (like Analyze Match)
+  Widget _buildFullRecommendationContent(String content) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.amber.shade200),
+      ),
+      child: RecommendationFormattedText(
+        text: content,
+      ),
+    );
+  }
 }
