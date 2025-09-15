@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String _userName = 'User';
 
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
-  final CVMagicOrganizedPage _cvMagicPage = const CVMagicOrganizedPage();
+  late final CVMagicOrganizedPage _cvMagicPage;
   final CVGenerationScreen _cvGenerationScreen = const CVGenerationScreen();
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
@@ -54,6 +54,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _loadUserInfo();
+
+    // Initialize CV Magic page with navigation callback
+    _cvMagicPage = CVMagicOrganizedPage(
+      onNavigateToCVGeneration: _navigateToCVGenerationTab,
+    );
 
     _animationController = AnimationController(
       duration: AppTheme.normalAnimation,
@@ -141,6 +146,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void _navigateToCVGenerationTab() {
+    debugPrint('🚀 HomeScreen: Navigating to CV Generation tab (index 2)');
+    _onTabTapped(2); // Switch to CV Generation tab (index 2)
   }
 
   @override
