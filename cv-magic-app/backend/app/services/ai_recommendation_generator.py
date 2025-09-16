@@ -80,7 +80,7 @@ class AIRecommendationGenerator:
     def _get_output_file_path(self, company: str) -> Path:
         """Get the output file path for AI recommendation"""
         company_dir = self.base_dir / company
-        return company_dir / f"{company}_ai_recommendation.json"
+        return company_dir / f"{company}_ai_recommendation.txt"
     
     def _load_ai_prompt(self, company: str) -> Optional[str]:
         """
@@ -153,45 +153,26 @@ class AIRecommendationGenerator:
             logger.error(f"Error executing AI prompt: {e}")
             return None
     
-    def _structure_ai_response(self, ai_response: AIResponse, company: str) -> Dict[str, Any]:
+    def _structure_ai_response(self, ai_response: AIResponse, company: str) -> str:
         """
-        Structure the AI response into a standardized format
+        Structure the AI response - now returns only the recommendation content
         
         Args:
             ai_response: Raw AI response
             company: Company name
             
         Returns:
-            Structured response dictionary
+            Just the recommendation content string
         """
-        return {
-            "company": company,
-            "generated_at": datetime.now().isoformat(),
-            "ai_model_info": {
-                "provider": ai_response.provider,
-                "model": ai_response.model,
-                "tokens_used": ai_response.tokens_used,
-                "cost": ai_response.cost
-            },
-            "recommendation_content": ai_response.content,
-            "raw_ai_response": {
-                "content": ai_response.content,
-                "metadata": ai_response.metadata
-            },
-            "generation_info": {
-                "service_version": "1.0",
-                "generation_method": "centralized_ai_service",
-                "prompt_version": "template_v1"
-            }
-        }
+        return ai_response.content
     
-    def _save_ai_recommendation(self, company: str, structured_response: Dict[str, Any]) -> bool:
+    def _save_ai_recommendation(self, company: str, recommendation_content: str) -> bool:
         """
-        Save the structured AI recommendation as JSON file
+        Save the AI recommendation content as text file
         
         Args:
             company: Company name
-            structured_response: Structured response data
+            recommendation_content: The recommendation content string
             
         Returns:
             True if successful, False otherwise
@@ -201,10 +182,10 @@ class AIRecommendationGenerator:
             company_dir = self.base_dir / company
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save to JSON file
-            output_file = self._get_output_file_path(company)
+            # Save to text file (change extension from .json to .txt or .md)
+            output_file = company_dir / f"{company}_ai_recommendation.txt"
             with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(structured_response, f, indent=2, ensure_ascii=False)
+                f.write(recommendation_content)
             
             file_size = output_file.stat().st_size / 1024
             logger.info(f"💾 [AI GENERATOR] Saved AI recommendation: {output_file} ({file_size:.1f}KB)")
@@ -238,7 +219,7 @@ class AIRecommendationGenerator:
             
             for company_dir in self.base_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    ai_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
+                    ai_file = company_dir / f"{company_dir.name}_ai_recommendation.txt"
                     if ai_file.exists():
                         companies.append(company_dir.name)
             
@@ -335,18 +316,17 @@ class AIRecommendationGenerator:
             # Get file stats
             stat_info = ai_file.stat()
             
-            # Try to read basic info from file
+            # Read content length from text file
             with open(ai_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+                content = f.read()
             
             return {
                 "company": company,
                 "file_path": str(ai_file),
                 "file_size": stat_info.st_size,
                 "last_modified": stat_info.st_mtime,
-                "generated_at": data.get("generated_at"),
-                "ai_model_info": data.get("ai_model_info", {}),
-                "has_content": bool(data.get("recommendation_content"))
+                "content_length": len(content),
+                "has_content": bool(content.strip())
             }
             
         except Exception as e:

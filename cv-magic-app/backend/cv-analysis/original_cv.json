@@ -1,4 +1,120 @@
 {
-  "text": "Maheshwor Tiwari\n0414 032 507 | maheshtwari99@gmail.com | Blogs on Medium | GitHub | Dashboard Portfolio\nResidency Status: On student visa; applying for Subclass 485 Temporary Graduate Visa\n\nCAREER PROFILE\n\nDynamic and detail-oriented Data Analyst with a strong foundation in Python, data analysis, and quantitative problem-solving. Passionate about leveraging computational and analytical expertise to solve complex problems in fast-paced environments. Eager to contribute to Tibra's innovative trading strategies while enhancing skills in financial markets and algorithmic trading systems. Motivated to deepen expertise in proprietary trading technologies.\n\nKEY SKILLS \nProgramming Expertise: Advanced proficiency in Python with hands-on experience in data analysis, machine learning, and automation.\nQuantitative Problem-Solving: Skilled in analysing and optimising large datasets, reducing operational inefficiencies.\nAlgorithmic Thinking: Knowledge of data structures, algorithms, and optimisation techniques.\nAnalytical Tools: Skilled in SQL and Power BI for creating dashboards, reporting, and data-driven decision-making.\nProject Management: Proven ability to manage end-to-end projects with high precision and tight deadlines.\nEager Learner: Strong appetite for learning new technologies, including financial market theories.\nEDUCATION \n\nMaster of Data Science\t\t                 Mar 2023 - Oct 2024\nCharles Darwin University, Sydney, Australia, \tGPA - 6.35 /7\n\nBachelor of Science in Information Technology           GPA - 83%                                                \tJul 2014 – Aug 2018\nTribhuvan University, Kathmandu, Nepal\t\t                                                                \n\nPROFESSIONAL EXPERIENCE\n\nData Analyst                                                                                                    \tJan 2024 – Jun 2024 \niBuild Building Solutions, Victoria, Australia\t \nAnalysed datasets of over 100,000 records, ensuring 99% data accuracy and integrity.\nDeveloped automated reporting systems using Python, streamlining workflows and reducing processing time by 15%.\nDesigned Power BI dashboards to improve visibility into key metrics, enhancing operational decision-making.\nCollaborated with cross-functional teams to optimise inventory tracking systems and solve discrepancies in real time.\nData Insight & Analyst                                                                      \t            Apr 2023 - Nov 2023\nProperty Console, Sydney, Australia\t\nUtilised Python and SQL to identify patterns in large datasets, contributing to strategic business insights.\nCreated custom dashboards using Power BI, reducing reporting time by 30%.\nConducted ad-hoc analyses to uncover actionable insights, improving response times by 20%.\nDelivered clear and concise reports to stakeholders, enabling data-driven decision-making.\nUNIVERSITY PROJECT \nThesis: Optimisation of Yolov8n Model for Real-Time Corrosion Detection (Grade: 89/100)\nReduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.\nDemonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.\nApplied findings to enhance model performance using drones and edge devices.\nContributed to industrial inspection innovations by improving real-time object detection models.\nHeart Attack Risk Prediction (Grade of 37/40) \tOct 2024\nImplemented logistic regression, random forests, and deep learning models to predict heart attack risks.\nAddressed imbalanced datasets using undersampling techniques to enhance prediction reliability.\nPresented findings through clear, data-driven visualisations to support decision-making.\n\nCERTIFICATIONS \n\nSQL, Linkedin Learning\nGoogle Analytics, Skillshop, Google",
-  "saved_at": "2025-09-15T18:32:57.899097"
+  "personal_information": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "location": "Sydney, Australia",
+    "linkedin": "",
+    "portfolio_links": {
+      "blogs": "Medium Blog Available",
+      "github": "GitHub Profile Available",
+      "dashboard_portfolio": "Dashboard Portfolio Available",
+      "website": ""
+    }
+  },
+  "career_profile": {
+    "summary": "Dynamic Data Science Professional with over 2 years of hands-on experience in analytics, specializing in SQL, Tableau, and Python. Adept at transforming complex datasets into actionable insights to drive strategic decision-making. Enthusiastic about exploring diverse industries, gaining cross-functional expertise, and contributing impactful solutions to data-driven projects. Skilled in leveraging data to inform business strategies and deliver measurable outcomes."
+  },
+  "technical_skills": [
+    "Advanced SQL skills, proficient in writing and interpreting complex queries for analytics tasks.",
+    "Strong experience in Power BI for dashboard creation and data visualisation.",
+    "Proficient in Python and Excel for data analysis and automation.",
+    "Ability to uncover insights through analysis of large and diverse datasets.",
+    "Excellent interpersonal and communication skills to work effectively with stakeholders.",
+    "Strong ability to manage and prioritise multiple tasks in dynamic environments."
+  ],
+  "education": [
+    {
+      "degree": "Master of Data Science",
+      "institution": "Charles Darwin University",
+      "location": "Sydney, Australia",
+      "duration": "Mar 2023 - Oct 2024",
+      "additional_info": "",
+      "gpa": "6.35 /7",
+      "honors": "",
+      "relevant_coursework": []
+    },
+    {
+      "degree": "Bachelor of Science in Information Technology",
+      "institution": "Tribhuvan University",
+      "location": "Kathmandu, Nepal",
+      "duration": "Jul 2014 – Aug 2018",
+      "additional_info": "",
+      "gpa": "",
+      "honors": "",
+      "relevant_coursework": []
+    }
+  ],
+  "experience": [
+    {
+      "position": "Data Analyst",
+      "company": "iBuild Building Solutions",
+      "location": "Victoria, Australia",
+      "duration": "Jan 2024 – Jun 2024",
+      "employment_type": "",
+      "achievements": [
+        "Analysed datasets exceeding 100,000 records, ensuring 99% accuracy and integrity.",
+        "Developed Power BI dashboards to analyse customer text data and identify top 20 queries, enhancing response strategies and decision-making.",
+        "Conducted ad-hoc analyses to uncover actionable insights from customer datasets, improving response times.",
+        "Ensured 99% accuracy in datasets by identifying and addressing data discrepancies."
+      ],
+      "responsibilities": []
+    },
+    {
+      "position": "Data Insight & Analyst",
+      "company": "Property Console",
+      "location": "Sydney, Australia",
+      "duration": "Mar 2023 - Nov 2023",
+      "employment_type": "",
+      "achievements": [
+        "Identified patterns and insights of user data through statistical analysis to inform strategic decision-making.",
+        "Created interactive dashboards using Power BI and Excel, reducing reporting time by 30%.",
+        "Delivered high-quality insights and reports to stakeholders in a clear and concise manner.",
+        "UNIVERSITY PROJECT (MACHINE LEARNING AND ARTIFICIAL INTELLIGENCE)",
+        "Heart Attack Risk Prediction (Grade of 37/40) \tOct 2024",
+        "Implemented logistic regression, random forests, and deep learning models to predict heart attack risks.",
+        "Addressed imbalanced datasets using undersampling techniques to enhance prediction reliability.",
+        "Presented findings through clear, data-driven visualisations to support decision-making."
+      ],
+      "responsibilities": []
+    }
+  ],
+  "projects": [],
+  "certifications": [
+    {
+      "name": "SQL",
+      "issuing_organization": "Linkedin Learning",
+      "date_obtained": "",
+      "expiry_date": "",
+      "status": "Active",
+      "description": "",
+      "credential_id": "",
+      "url": ""
+    },
+    {
+      "name": "Google Analytics",
+      "issuing_organization": "Skillshop, Google",
+      "date_obtained": "",
+      "expiry_date": "",
+      "status": "Active",
+      "description": "",
+      "credential_id": "",
+      "url": ""
+    }
+  ],
+  "soft_skills": [],
+  "domain_expertise": [],
+  "languages": [],
+  "awards": [],
+  "publications": [],
+  "volunteer_work": [],
+  "professional_memberships": [],
+  "unknown_sections": {},
+  "saved_at": "2025-09-16T10:56:08.739028",
+  "metadata": {
+    "source_filename": "M_tiwari_CV_Capgemini.docx",
+    "processed_at": "2025-09-16T10:56:08.739019",
+    "processing_version": "2.0",
+    "content_type": "structured_cv"
+  }
 }

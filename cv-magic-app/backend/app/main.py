@@ -17,6 +17,7 @@ from app.routes.auth import router as auth_router
 from app.routes.ai import router as ai_router
 from app.routes.cv_simple import router as cv_router
 from app.routes.cv_organized import router as cv_organized_router
+from app.routes.cv_structured import router as cv_structured_router
 from app.routes.job_description import router as job_router
 from app.routes.skills_analysis import router as skills_analysis_router
 from app.routes.jd_analysis import router as jd_analysis_router
@@ -130,6 +131,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(cv_router)
 app.include_router(cv_organized_router)  # New organized CV routes
+app.include_router(cv_structured_router)  # New structured CV routes
 app.include_router(job_router)  # Job description routes
 app.include_router(job_analysis_router)  # Job analysis routes
 app.include_router(skills_analysis_router)  # Skills analysis routes

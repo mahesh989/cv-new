@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import JSONResponse
 
 from ..services.cv_processor import cv_processor
+from ..services.enhanced_cv_upload_service import enhanced_cv_upload_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
@@ -25,42 +26,66 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("/upload")
-async def upload_cv(cv: UploadFile = File(...)):
-    """Upload a CV file with improved validation and processing"""
+async def upload_cv(cv: UploadFile = File(...), auto_structure: bool = True):
+    """Upload a CV file with automatic structured processing"""
     
     if not cv.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     
-    # Validate file extension
-    file_extension = Path(cv.filename).suffix.lower()
-    if file_extension not in ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unsupported file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
-        )
-    
     try:
-        # Read and validate file size
-        file_content = await cv.read()
-        if len(file_content) > MAX_FILE_SIZE:
-            raise HTTPException(
-                status_code=400, 
-                detail="File too large. Maximum size is 10MB"
+        # Use the enhanced upload service for automatic structured processing
+        if auto_structure:
+            logger.info(f"Uploading {cv.filename} with structured processing...")
+            result = await enhanced_cv_upload_service.upload_and_process_cv(
+                cv_file=cv
+                # Always saves as original_cv.json (replaces existing)
             )
-        
-        # Save file to upload directory
-        file_path = UPLOAD_DIR / cv.filename
-        with open(file_path, "wb") as buffer:
-            buffer.write(file_content)
-        
-        logger.info(f"CV uploaded successfully: {cv.filename} ({len(file_content)} bytes)")
-        
-        return JSONResponse(content={
-            "message": "CV uploaded successfully",
-            "filename": cv.filename,
-            "size": len(file_content),
-            "type": file_extension[1:].upper()  # Remove dot and uppercase
-        })
+            
+            logger.info(f"✅ {cv.filename} uploaded and processed into structured format")
+            
+            return JSONResponse(content={
+                "message": "CV uploaded and processed successfully",
+                "filename": result['filename'],
+                "size": result['file_size'],
+                "type": result['file_type'],
+                "structured_processing": True,
+                "structured_cv_path": result['structured_cv_path'],
+                "sections_found": result['sections_found'],
+                "unknown_sections": result['unknown_sections'],
+                "validation_report": result['validation_report'],
+                "processing_timestamp": result['processing_timestamp']
+            })
+        else:
+            # Fallback to basic upload without structured processing
+            file_extension = Path(cv.filename).suffix.lower()
+            if file_extension not in ALLOWED_EXTENSIONS:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+                )
+            
+            # Read and validate file size
+            file_content = await cv.read()
+            if len(file_content) > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="File too large. Maximum size is 10MB"
+                )
+            
+            # Save file to upload directory
+            file_path = UPLOAD_DIR / cv.filename
+            with open(file_path, "wb") as buffer:
+                buffer.write(file_content)
+            
+            logger.info(f"CV uploaded successfully: {cv.filename} ({len(file_content)} bytes)")
+            
+            return JSONResponse(content={
+                "message": "CV uploaded successfully",
+                "filename": cv.filename,
+                "size": len(file_content),
+                "type": file_extension[1:].upper(),
+                "structured_processing": False
+            })
         
     except Exception as e:
         logger.error(f"Error uploading CV: {str(e)}")
@@ -106,8 +131,8 @@ async def list_cvs():
 
 
 @router.get("/content/{filename}")
-async def get_cv_content(filename: str):
-    """Get CV text content with improved extraction"""
+async def get_cv_content(filename: str, auto_structure: bool = True):
+    """Get CV content with automatic structured processing"""
     
     try:
         file_path = UPLOAD_DIR / filename
@@ -127,9 +152,49 @@ async def get_cv_content(filename: str):
         # Get file metadata
         stat = file_path.stat()
         
+        # Automatically process into structured format if requested
+        structured_cv = None
+        processing_info = None
+        
+        if auto_structure:
+            try:
+                logger.info(f"Auto-processing {filename} into structured format...")
+                processing_result = await enhanced_cv_upload_service.process_existing_cv(
+                    filename=filename
+                    # Always saves as original_cv.json (replaces existing)
+                )
+                
+                if processing_result['success']:
+                    # Load the structured CV (always from original_cv.json)
+                    structured_cv = enhanced_cv_upload_service.load_structured_cv()
+                    
+                    processing_info = {
+                        "structured_processing": True,
+                        "structured_cv_path": processing_result['structured_cv_path'],
+                        "validation_report": processing_result['validation_report'],
+                        "sections_found": processing_result['sections_found'],
+                        "unknown_sections": processing_result.get('unknown_sections', []),
+                        "processing_timestamp": processing_result['processing_timestamp']
+                    }
+                    
+                    logger.info(f"✅ {filename} processed into structured format successfully")
+                else:
+                    logger.warning(f"⚠️ Failed to process {filename} into structured format")
+                    processing_info = {
+                        "structured_processing": False,
+                        "error": "Failed to process into structured format"
+                    }
+                    
+            except Exception as e:
+                logger.error(f"Error during auto-processing {filename}: {str(e)}")
+                processing_info = {
+                    "structured_processing": False,
+                    "error": str(e)
+                }
+        
         logger.info(f"CV content extracted: {filename} ({len(result['text'])} characters)")
         
-        return JSONResponse(content={
+        response_content = {
             "filename": filename,
             "content": result['text'],
             "metadata": result.get('metadata', {}),
@@ -143,7 +208,17 @@ async def get_cv_content(filename: str):
                 "character_count": len(result['text']),
                 "word_count": len(result['text'].split())
             }
-        })
+        }
+        
+        # Add structured processing info if available
+        if processing_info:
+            response_content["processing_info"] = processing_info
+            
+        # Add structured CV data if available
+        if structured_cv:
+            response_content["structured_cv"] = structured_cv
+        
+        return JSONResponse(content=response_content)
         
     except HTTPException:
         raise
