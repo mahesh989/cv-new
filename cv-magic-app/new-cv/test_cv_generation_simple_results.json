@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-09-16T11:17:46.520864",
+  "test_type": "simplified_cv_generation",
+  "total_tests": 5,
+  "passed": 4,
+  "partial": 0,
+  "failed": 1,
+  "success_rate": 80.0,
+  "results": [
+    {
+      "test": "CV Parsing",
+      "status": "PASS",
+      "details": "Successfully parsed CV with 2 experiences, 4 skill categories",
+      "data": {
+        "experience_count": 2,
+        "skills_count": 4
+      }
+    },
+    {
+      "test": "JSON Parsing Methods",
+      "status": "PASS",
+      "details": "Passed 3/3 JSON parsing tests",
+      "data": {
+        "passed": 3,
+        "total": 3
+      }
+    },
+    {
+      "test": "Service Initialization",
+      "status": "PASS",
+      "details": "Service initialized successfully. Framework loaded: True, Available methods: 5/5",
+      "data": {
+        "framework_loaded": true,
+        "framework_length": 5757,
+        "available_methods": [
+          "_extract_and_parse_json",
+          "_validate_tailored_json",
+          "_create_fallback_tailored_cv",
+          "_build_system_prompt",
+          "save_tailored_cv"
+        ]
+      }
+    },
+    {
+      "test": "Fallback CV Creation",
+      "status": "FAIL",
+      "details": "Fallback CV creation failed: cannot import name 'SkillCategory' from 'app.tailored_cv.models' (/Users/mahesh/Documents/Github/cv-new/cv-magic-app/new-cv/../backend/app/tailored_cv/models/__init__.py)",
+      "data": null
+    },
+    {
+      "test": "File Operations",
+      "status": "PASS",
+      "details": "Successfully saved and loaded test CV file: test_cv_20250916_211746.json",
+      "data": {
+        "file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/new-cv/test_output/test_cv_20250916_211746.json"
+      }
+    }
+  ]
+}

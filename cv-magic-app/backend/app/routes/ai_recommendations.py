@@ -13,6 +13,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
+from app.services.ai_recommendation_generator import ai_recommendation_generator
+
 logger = logging.getLogger(__name__)
 
 # Create router
@@ -177,4 +179,78 @@ async def list_available_ai_recommendations():
         return JSONResponse(
             status_code=500,
             content={"error": f"Failed to list AI recommendations: {str(e)}"}
+        )
+
+
+@router.post("/ai-recommendations/convert-txt-to-json")
+async def convert_txt_to_json():
+    """
+    Convert all existing TXT recommendation files to JSON format
+    
+    Returns:
+        JSON response with conversion results
+    """
+    try:
+        logger.info("🔄 [AI_RECOMMENDATIONS] Starting TXT to JSON conversion")
+        
+        # Convert all TXT files to JSON
+        conversion_results = ai_recommendation_generator.batch_convert_txt_to_json()
+        
+        successful_count = sum(1 for success in conversion_results.values() if success)
+        total_count = len(conversion_results)
+        
+        return JSONResponse(content={
+            "success": True,
+            "message": f"Conversion completed: {successful_count}/{total_count} files converted",
+            "conversion_results": conversion_results,
+            "successful_count": successful_count,
+            "total_count": total_count
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ [AI_RECOMMENDATIONS] Error converting TXT to JSON: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to convert TXT to JSON: {str(e)}"}
+        )
+
+
+@router.post("/ai-recommendations/convert-txt-to-json/{company}")
+async def convert_company_txt_to_json(company: str):
+    """
+    Convert TXT recommendation file to JSON format for a specific company
+    
+    Args:
+        company: Company name
+        
+    Returns:
+        JSON response with conversion result
+    """
+    try:
+        logger.info(f"🔄 [AI_RECOMMENDATIONS] Converting TXT to JSON for: {company}")
+        
+        # Convert TXT file to JSON for the specific company
+        success = ai_recommendation_generator.convert_txt_to_json(company)
+        
+        if success:
+            return JSONResponse(content={
+                "success": True,
+                "message": f"Successfully converted TXT to JSON for {company}",
+                "company": company
+            })
+        else:
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "success": False,
+                    "error": f"Failed to convert TXT to JSON for {company}. TXT file may not exist.",
+                    "company": company
+                }
+            )
+        
+    except Exception as e:
+        logger.error(f"❌ [AI_RECOMMENDATIONS] Error converting TXT to JSON for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to convert TXT to JSON for {company}: {str(e)}"}
         )

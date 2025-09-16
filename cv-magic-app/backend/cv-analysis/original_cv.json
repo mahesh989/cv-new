@@ -13,15 +13,15 @@
     }
   },
   "career_profile": {
-    "summary": "Dynamic Data Science Professional with over 2 years of hands-on experience in analytics, specializing in SQL, Tableau, and Python. Adept at transforming complex datasets into actionable insights to drive strategic decision-making. Enthusiastic about exploring diverse industries, gaining cross-functional expertise, and contributing impactful solutions to data-driven projects. Skilled in leveraging data to inform business strategies and deliver measurable outcomes."
+    "summary": "Dynamic and detail-oriented Data Analyst with a strong foundation in Python, data analysis, and quantitative problem-solving. Passionate about leveraging computational and analytical expertise to solve complex problems in fast-paced environments. Eager to contribute to Tibra's innovative trading strategies while enhancing skills in financial markets and algorithmic trading systems. Motivated to deepen expertise in proprietary trading technologies."
   },
   "technical_skills": [
-    "Advanced SQL skills, proficient in writing and interpreting complex queries for analytics tasks.",
-    "Strong experience in Power BI for dashboard creation and data visualisation.",
-    "Proficient in Python and Excel for data analysis and automation.",
-    "Ability to uncover insights through analysis of large and diverse datasets.",
-    "Excellent interpersonal and communication skills to work effectively with stakeholders.",
-    "Strong ability to manage and prioritise multiple tasks in dynamic environments."
+    "Advanced proficiency in Python with hands-on experience in data analysis, machine learning, and automation.",
+    "Skilled in analysing and optimising large datasets, reducing operational inefficiencies.",
+    "Knowledge of data structures, algorithms, and optimisation techniques.",
+    "Skilled in SQL and Power BI for creating dashboards, reporting, and data-driven decision-making.",
+    "Proven ability to manage end-to-end projects with high precision and tight deadlines.",
+    "Strong appetite for learning new technologies, including financial market theories."
   ],
   "education": [
     {
@@ -35,7 +35,7 @@
       "relevant_coursework": []
     },
     {
-      "degree": "Bachelor of Science in Information Technology",
+      "degree": "Bachelor of Science in Information Technology           GPA - 83%",
       "institution": "Tribhuvan University",
       "location": "Kathmandu, Nepal",
       "duration": "Jul 2014 – Aug 2018",
@@ -53,10 +53,10 @@
       "duration": "Jan 2024 – Jun 2024",
       "employment_type": "",
       "achievements": [
-        "Analysed datasets exceeding 100,000 records, ensuring 99% accuracy and integrity.",
-        "Developed Power BI dashboards to analyse customer text data and identify top 20 queries, enhancing response strategies and decision-making.",
-        "Conducted ad-hoc analyses to uncover actionable insights from customer datasets, improving response times.",
-        "Ensured 99% accuracy in datasets by identifying and addressing data discrepancies."
+        "Analysed datasets of over 100,000 records, ensuring 99% data accuracy and integrity.",
+        "Developed automated reporting systems using Python, streamlining workflows and reducing processing time by 15%.",
+        "Designed Power BI dashboards to improve visibility into key metrics, enhancing operational decision-making.",
+        "Collaborated with cross-functional teams to optimise inventory tracking systems and solve discrepancies in real time."
       ],
       "responsibilities": []
     },
@@ -64,22 +64,51 @@
       "position": "Data Insight & Analyst",
       "company": "Property Console",
       "location": "Sydney, Australia",
-      "duration": "Mar 2023 - Nov 2023",
+      "duration": "Apr 2023 - Nov 2023",
       "employment_type": "",
       "achievements": [
-        "Identified patterns and insights of user data through statistical analysis to inform strategic decision-making.",
-        "Created interactive dashboards using Power BI and Excel, reducing reporting time by 30%.",
-        "Delivered high-quality insights and reports to stakeholders in a clear and concise manner.",
-        "UNIVERSITY PROJECT (MACHINE LEARNING AND ARTIFICIAL INTELLIGENCE)",
-        "Heart Attack Risk Prediction (Grade of 37/40) \tOct 2024",
-        "Implemented logistic regression, random forests, and deep learning models to predict heart attack risks.",
-        "Addressed imbalanced datasets using undersampling techniques to enhance prediction reliability.",
-        "Presented findings through clear, data-driven visualisations to support decision-making."
+        "Utilised Python and SQL to identify patterns in large datasets, contributing to strategic business insights.",
+        "Created custom dashboards using Power BI, reducing reporting time by 30%.",
+        "Conducted ad-hoc analyses to uncover actionable insights, improving response times by 20%.",
+        "Delivered clear and concise reports to stakeholders, enabling data-driven decision-making."
       ],
       "responsibilities": []
     }
   ],
-  "projects": [],
+  "projects": [
+    {
+      "name": "Thesis",
+      "duration": "Mar 2023 - Oct 2024",
+      "company": "Charles Darwin University",
+      "description": "Optimisation of Yolov8n Model for Real-Time Corrosion Detection Reduced model size by 11.39% and improved inference time by 39.34% with pruning techniques. Demonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision. Applied findings to enhance model performance using drones and edge devices. Contributed to industrial inspection innovations by improving real-time object detection models.",
+      "technologies": [
+        "YOLOv8",
+        "YOLO",
+        "Pruning",
+        "Object Detection",
+        "Fine-tuning"
+      ],
+      "achievements": [
+        "Grade: 89/100"
+      ],
+      "url": ""
+    },
+    {
+      "name": "Heart Attack Risk Prediction",
+      "duration": "Oct 2024",
+      "company": "Charles Darwin University",
+      "description": "Implemented logistic regression, random forests, and deep learning models to predict heart attack risks. Addressed imbalanced datasets using undersampling techniques to enhance prediction reliability. Presented findings through clear, data-driven visualisations to support decision-making.",
+      "technologies": [
+        "Deep Learning",
+        "Logistic Regression",
+        "Random Forest"
+      ],
+      "achievements": [
+        "Grade: 37/40"
+      ],
+      "url": ""
+    }
+  ],
   "certifications": [
     {
       "name": "SQL",
@@ -110,10 +139,10 @@
   "volunteer_work": [],
   "professional_memberships": [],
   "unknown_sections": {},
-  "saved_at": "2025-09-16T10:56:08.739028",
+  "saved_at": "2025-09-16T23:01:09.605712",
   "metadata": {
-    "source_filename": "M_tiwari_CV_Capgemini.docx",
-    "processed_at": "2025-09-16T10:56:08.739019",
+    "source_filename": "Maheshwor_Tiwari.docx",
+    "processed_at": "2025-09-16T23:01:09.605697",
     "processing_version": "2.0",
     "content_type": "structured_cv"
   }

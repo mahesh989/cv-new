@@ -5,7 +5,7 @@ Generated automatically from comprehensive analysis data
 
 # Company: Australia_for_UNHCR
 # Generated: Unknown
-# ATS Score: 54.5125
+# ATS Score: 56.8125
 
 AI_RECOMMENDATION_PROMPT = """
 # Strategic CV Optimization Recommendations Generator
@@ -19,58 +19,59 @@ AI_RECOMMENDATION_PROMPT = """
 ## 📊 Comprehensive Analysis Data
 
 ### Current ATS Performance
-- **Final ATS Score:** 54.5125/100
+- **Final ATS Score:** 56.8125/100
 - **Category Status:** ❌ Poor fit
 - **Recommendation:** Generally rejected
 
 ### Skills Match Summary
 🎯 OVERALL SUMMARY
 ----------------------------------------
-Total Requirements: 30
-Matched: 10
-Missing: 20
-Match Rate: 33%
+Total Requirements: 28
+Matched: 8
+Missing: 18
+Match Rate: 31%
 
 📊 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
-Technical Skills            18         14          6          8           43
-Soft Skills                   5          7          4          3           57
-Domain Keywords              7          9          0          9            0
+Technical Skills            26         13          5          6           45
+Soft Skills                   8          8          3          5           38
+Domain Keywords             14          7          0          7            0
 
 🧠 DETAILED AI ANALYSIS
 --------------------------------------------------------------------------------
 🔹 TECHNICAL SKILLS
-  ✅ MATCHED JD REQUIREMENTS (6 items):
-    1. JD Required: 'Analytical Models'
-       → Found in CV: 'Data Analysis'
-       💡 synonym match - analytical models relate to data analysis
-    2. JD Required: 'Data Analysis'
-       → Found in CV: 'Data Analysis'
+  ✅ MATCHED JD REQUIREMENTS (5 items):
+    1. JD Required: 'Data Extraction'
+       → Found in CV: 'Sql'
+       💡 hierarchical - SQL enables data extraction
+    2. JD Required: 'Power BI'
+       → Found in CV: 'Power BI'
        💡 exact match
-    3. JD Required: 'Data Mining'
-       → Found in CV: 'Machine Lea...
+    3. JD Required: 'Reporting'
+       → Found in CV: 'Data Visualization'
+       💡 synonym - both involve...
 
 ### Strategic Assessment
 **DECISION:** 🟡 STRATEGIC PURSUE
 
+---
+
 **MARKET REALITY CHECK:**
-- **What they actually need:** The core requirements for this role include strong SQL skills, experience with Power BI (or similar BI tools), and the ability to work with data for marketing campaigns. The job description emphasizes stakeholder management and communication skills, which are critical for the role. While they list a minimum of 2 years of experience, many organizations are willing to consider candidates with less experience if they demonstrate strong potential and relevant skills.
-  
-- **Flexibility indicators:** The organization is a non-profit, which often means they are more flexible with their hiring criteria, especially if they find a candidate who aligns well with their mission and values. The language used in the JD suggests they are looking for a "highly motivated" individual, indicating they may prioritize cultural fit and potential over strict experience requirements.
 
-- **Hard blockers identified:** There are no explicit hard blockers in Maheshwor's CV. However, he lacks direct experience in fundraising data analysis and may not have the 2 years of experience specified in the JD.
+- **What they actually need:** The job description emphasizes strong SQL skills, experience with Power BI or similar tools, and stakeholder management abilities. While they list a minimum of 2 years’ experience, many organizations are open to candidates with relevant internships or project experience, especially in the non-profit sector where passion and adaptability can be prioritized over strict experience requirements.
 
-- **Hiring urgency signals:** The job was posted in March 2025, and while it is a contract position, there are no immediate urgency indicators suggesting they are desperate to fill the role quickly.
+- **Flexibility indicators:** The organization is a non-profit, which often means they may be more flexible on experience if the candidate demonstrates strong analytical skills and a commitment to the mission. The emphasis on collaboration and inclusivity suggests they value cultural fit and potential over a strict checklist of qualifications.
 
-**INTELLIGENT OBSERVATIONS:**
-- **Hidden strengths:** Maheshwor has strong analytical skills, demonstrated through his...
+- **Hard blockers identified:** The requirement for 2 years of experience in a similar role could be a barrier, but Maheshwor has relevant internships and project work that may be considered sufficient by the hiring team. The lack of extensive experience in Excel VBA could also be a concern, but it may not be a deal-breaker if he can demonstrate strong Excel skills.
+
+- **Hiring urgency signals:** The job is a full-time contract position, which may indicate a need for immediate support, but the non-profit sector often has a slower hiring process due to budget considerations. However, the urgency implied by the contract nature could lead to a more flexib...
 
 ### Component Analysis Scores
 - **Skills Relevance:** 87.0/100
-- **Experience Alignment:** 60.0/100
+- **Experience Alignment:** 70.0/100
 - **Industry Fit:** 45.0/100
-- **Role Seniority:** 50.0/100
+- **Role Seniority:** 60.0/100
 - **Technical Depth:** 90.0/100
 
 ### Detailed Skill Breakdown
@@ -79,21 +80,21 @@ Domain Keywords              7          9          0          9            0
 **EXPLICIT (directly stated):**
 - Python
 - Sql
+- Tableau
 - Power Bi
-- Machine Learning
-- Automation
-- Data Analysis
-- Data Structures
-- Algorithms
-- Optimisation Techniques
-- Reporting
-- Drones
-- Edge Devices
+- Excel
+- Etl
+- Data Visualization
+- Data Management
+- Geospatial Analysis
+- Predictive Models
+- Time-Series Analysis
 - Logistic Regression
 - Random Forests
 - Deep Learning
-- Undersampling Techniques
-- Data Visualization
+- Data Warehousing
+- Data Engineering
+- Data Lake Warehouse
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Data Cleaning
@@ -108,11 +109,11 @@ Domain Keywords              7          9          0          9            0
 
 ## SOFT SKILLS:
 **EXPLICIT (directly stated):**
-- Detail-Oriented
 - Problem-Solving
-- Eager Learner
-- Collaboration
+- Adaptability
 - Communication
+- Team Collaboration
+- Organizational Skills
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Problem-solving
@@ -122,13 +123,16 @@ Domain Keywords              7          9          0          9            0
 
 ## DOMAIN KEYWORDS:
 **EXPLICIT:**
-- Financial Markets
-- Algorithmic Trading
-- Data Integrity
-- Operational Decision-Making
-- Strategic Business Insights
-- Industrial Inspection
-- Real-Time Object Detection
+- Data Analysis
+- Data Engineering
+- Data Visualization
+- Project Management
+- Market Research
+- Financial Records
+- Procurement Data
+- Client Acquisition
+- Resource Allocation
+- Risk Prediction
 
 **STRONGLY IMPLIED:**
 - Predictive Analytics
@@ -136,27 +140,25 @@ Domain Keywords              7          9          0          9            0
 - Strategic Decision-making
 
 ```python
-SOFT_SKILLS = ['Detail-oriented', 'Problem-solving', 'Eager Learner', 'Collaboration', 'Communication']
-TECHNICAL_SKILLS = ['Python', 'SQL', 'Power BI', 'Machine Learning', 'Automation', 'Data Analysis', 'Data Structures', 'Algorithms', 'Optimisation Techniques', 'Reporting', 'Drones', 'Edge Devices', 'Logistic Regression', 'Random Forests', 'Deep Learning', 'Undersampling Techniques', 'Data Visualization', 'Dashboard Creation']
-DOMAIN_KEYWORDS = ['Financial Markets', 'Algorithmic Trading', 'Data Integrity', 'Operational Decision-Making', 'Strategic Business Insights', 'Industrial Inspection', 'Real-Time Object Detection']
-```
+SOFT_SKILLS = ['Problem-Solving', 'Adaptability', 'Communication', 'Team Collaboration', 'Organizational Skills', 'Analytical Thinking', 'Critical Thinking', 'Results-Driven']
+TECHNICAL_SKILLS = ['Python', 'SQL', 'Tableau', 'Power BI', 'Excel', 'ETL', 'Data Visualization', 'Data Management', 'Geospatial Analysis', 'Predictive Models', 'Time-Series Analysis', 'Logistic Regression', 'Random Forests', 'Deep Learning', 'Data Warehousing', 'Data Engineering', 'Data Lake Warehouse', 'Google Analytics', 'Automated Checks', 'Dynamic Dashboards', 'Data Aggregation', 'Cost Trend Analysis', 'Inventory Management', 'Data Validation Workflows', 'Reporting Efficiency', 'Market Forecasting']
+DOMAIN_KEYWORDS = ['Data Analysis', 'Data Engineering', 'Data Visualization', 'Project Management', 'Market Research', 'Financial Records', 'Proc...
 
 **JD Requirements Analysis:**
 ## TECHNICAL SKILLS:
 **EXPLICIT (directly stated):**
 - Data Mining
-- Data Analysis
-- Data Warehouse
+- Analysis
+- Reporting
+- Power Bi
 - Sql
 - Excel
-- Power Bi
 - Tableau
-- Reporting
+- Data Warehouse
 - Project Management
 - Data Extraction
-- Segmentation
-- Analytical Models
-- Bulk Communications
+- Data Segmentation
+- Communication
 - Customer Service
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
@@ -171,8 +173,8 @@ DOMAIN_KEYWORDS = ['Financial Markets', 'Algorithmic Trading', 'Data Integrity',
 - Collaborative
 - Organised
 - Detail-Oriented
+- Analytical
 - Problem-Solving
-- Motivated
 - Stakeholder Management
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
@@ -183,33 +185,33 @@ DOMAIN_KEYWORDS = ['Financial Markets', 'Algorithmic Trading', 'Data Integrity',
 ## DOMAIN KEYWORDS:
 **EXPLICIT:**
 - Fundraising
-- Non-Profit
+- Not For Profit (Nfp)
 - International Aid And Development
 - Marketing Campaigns
+- Communication Purposes
+- Data Issues
 - Donor-Centricity
-- Humanitarian Emergencies
-- Refugees
 
 **STRONGLY IMPLIED:**
 - Campaign Outcomes
 - Business Intelligence
 
 ```python
-SOFT_SKILLS = ['Collaborative', 'Organised', 'Detail-oriented', 'Problem-solving', 'Motivated', 'Stakeholder Management', 'Communication']
-TECHNICAL_SKILLS = ['Data Mining', 'Data Analysis', 'Data Warehouse', 'SQL', 'Excel', 'Power BI', 'Tableau', 'Reporting', 'Project Management', 'Data Extraction', 'Segmentation', 'Analytical Models', 'Bulk Communications', 'Customer Service']
-DOMAIN_KEYWORDS = ['Fundraising', 'Non-Profit', 'International Aid and Development', 'Marketing Campaigns', 'Donor-Centricity', 'Humanitarian Emergencies', 'Refugees', 'Data Governance', 'Clean Data']
+SOFT_SKILLS = ['Collaborative', 'Organised', 'Detail-oriented', 'Analytical', 'Problem-solving', 'Stakeholder Management', 'Self-motivated', 'Results-driven']
+TECHNICAL_SKILLS = ['Data Mining', 'Analysis', 'Reporting', 'Power BI', 'SQL', 'Excel', 'Tableau', 'Data Warehouse', 'Project Management', 'Data Extraction', 'Data Segmentation', 'Communication', 'Customer Service']
+DOMAIN_KEYWORDS = ['Fundraising', 'Not For Profit (NFP)', 'International Aid and Development', 'Marketing Campaigns', 'Communication Purposes', 'Data Issues', 'Donor-centricity']
 ```
 
 ### Category Breakdown
-- **Category 1 (Skills Matching):** 17.15/40
-  - Technical Skills Match: 43.0%
-  - Soft Skills Match: 57.0%
+- **Category 1 (Skills Matching):** 14.7/40
+  - Technical Skills Match: 45.0%
+  - Soft Skills Match: 38.0%
   - Domain Keywords Match: 0.0%
 
-- **Category 2 (Experience & Competency):** 38.7625/60
+- **Category 2 (Experience & Competency):** 40.8125/60
   - Core Competency: 80.0%
-  - Experience/Seniority: 46.0%
-  - Potential/Ability: 75.0%
+  - Experience/Seniority: 55.0%
+  - Potential/Ability: 77.5%
   - Company Fit: 41.25%
 
 ---
@@ -237,14 +239,14 @@ Generate a comprehensive strategic report covering:
 ### 1. Missing Keywords Analysis
 Focus on the lowest-scoring categories from the analysis:
 - **Critical Gaps:** Highest-impact missing JD keywords (prioritize 0.0% domain match)
-- **Technical Gaps:** Missing technical skills with 43.0% current match
-- **Soft Skills Gaps:** Missing soft skills with 57.0% current match
+- **Technical Gaps:** Missing technical skills with 45.0% current match
+- **Soft Skills Gaps:** Missing soft skills with 38.0% current match
 
 ### 2. ATS Score Optimization Strategy
 Current ATS breakdown shows specific improvement areas:
-- **Category 1 Improvements:** Target the 8 missing technical skills
+- **Category 1 Improvements:** Target the 6 missing technical skills
 - **Category 2 Enhancement:** Address the 41.25% company fit score
-- **Bonus Points:** Optimize for the current -1.4 bonus points
+- **Bonus Points:** Optimize for the current 1.3 bonus points
 
 ### 3. Industry Transition Strategy
 Based on 45.0/100 industry fit score:
@@ -253,7 +255,7 @@ Based on 45.0/100 industry fit score:
 - **Adaptation Timeline:** Realistic skill development plan
 
 ### 4. Experience & Seniority Positioning
-Current seniority score: 50.0/100
+Current seniority score: 60.0/100
 - **Leadership Indicators:** How to highlight existing leadership experience
 - **Responsibility Scope:** Reframe current roles for target seniority
 - **Growth Trajectory:** Position career progression strategically
@@ -271,7 +273,7 @@ Technical depth score: 90.0/100
 # 🎯 CV Tailoring Strategy Report for Australia_for_UNHCR
 
 ## 📊 Executive Summary
-- **Current ATS Score:** 54.5125/100 (❌ Poor fit)
+- **Current ATS Score:** 56.8125/100 (❌ Poor fit)
 - **Key Strengths:** [Top 3-4 highest-scoring areas]
 - **Critical Gaps:** [Top 3-4 lowest-scoring areas requiring immediate attention]
 - **Success Probability:** [Based on strategic assessment and component scores]
@@ -290,24 +292,24 @@ Technical depth score: 90.0/100
 **Critical Missing Keywords (0% domain match):**
 - [Specific domain keywords to integrate with injection points]
 
-**Technical Skills Enhancement (43.0% current match):**
+**Technical Skills Enhancement (45.0% current match):**
 - [Technical keywords to add/emphasize]
 
-**Soft Skills Optimization (57.0% current match):**
+**Soft Skills Optimization (38.0% current match):**
 - [Soft skills to highlight with evidence]
 
 ## 🎪 Experience Reframing Strategy
 **Industry Transition Focus (45.0/100 current fit):**
 - [How to reframe existing experience for target industry]
 
-**Seniority Positioning (50.0/100 current match):**
+**Seniority Positioning (60.0/100 current match):**
 - [Leadership and responsibility indicators to emphasize]
 
 **Technical Depth Showcase (90.0/100 current score):**
 - [Technical achievements and complexity indicators]
 
 ## 📈 ATS Score Improvement Roadmap
-**Target Score:** [Realistic target based on current 54.5125]
+**Target Score:** [Realistic target based on current 56.8125]
 
 **High-Impact Changes (Expected +10-15 points):**
 - [Top 3 recommendations with highest ROI]

@@ -80,7 +80,7 @@ class AIRecommendationGenerator:
     def _get_output_file_path(self, company: str) -> Path:
         """Get the output file path for AI recommendation"""
         company_dir = self.base_dir / company
-        return company_dir / f"{company}_ai_recommendation.txt"
+        return company_dir / f"{company}_ai_recommendation.json"
     
     def _load_ai_prompt(self, company: str) -> Optional[str]:
         """
@@ -153,26 +153,40 @@ class AIRecommendationGenerator:
             logger.error(f"Error executing AI prompt: {e}")
             return None
     
-    def _structure_ai_response(self, ai_response: AIResponse, company: str) -> str:
+    def _structure_ai_response(self, ai_response: AIResponse, company: str) -> Dict[str, Any]:
         """
-        Structure the AI response - now returns only the recommendation content
+        Structure the AI response as JSON data
         
         Args:
             ai_response: Raw AI response
             company: Company name
             
         Returns:
-            Just the recommendation content string
+            Structured JSON data with recommendation content and metadata
         """
-        return ai_response.content
+        return {
+            "company": company,
+            "generated_at": datetime.now().isoformat(),
+            "recommendation_content": ai_response.content,
+            "ai_model_info": {
+                "provider": ai_response.provider,
+                "model": ai_response.model,
+                "cost": ai_response.cost,
+                "tokens_used": ai_response.tokens_used
+            },
+            "metadata": {
+                "content_length": len(ai_response.content),
+                "format_version": "1.0"
+            }
+        }
     
-    def _save_ai_recommendation(self, company: str, recommendation_content: str) -> bool:
+    def _save_ai_recommendation(self, company: str, recommendation_data: Dict[str, Any]) -> bool:
         """
-        Save the AI recommendation content as text file
+        Save the AI recommendation data as JSON file
         
         Args:
             company: Company name
-            recommendation_content: The recommendation content string
+            recommendation_data: The structured recommendation data
             
         Returns:
             True if successful, False otherwise
@@ -182,10 +196,10 @@ class AIRecommendationGenerator:
             company_dir = self.base_dir / company
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save to text file (change extension from .json to .txt or .md)
-            output_file = company_dir / f"{company}_ai_recommendation.txt"
+            # Save to JSON file
+            output_file = company_dir / f"{company}_ai_recommendation.json"
             with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(recommendation_content)
+                json.dump(recommendation_data, f, indent=2, ensure_ascii=False)
             
             file_size = output_file.stat().st_size / 1024
             logger.info(f"💾 [AI GENERATOR] Saved AI recommendation: {output_file} ({file_size:.1f}KB)")
@@ -219,7 +233,7 @@ class AIRecommendationGenerator:
             
             for company_dir in self.base_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    ai_file = company_dir / f"{company_dir.name}_ai_recommendation.txt"
+                    ai_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
                     if ai_file.exists():
                         companies.append(company_dir.name)
             
@@ -316,22 +330,119 @@ class AIRecommendationGenerator:
             # Get file stats
             stat_info = ai_file.stat()
             
-            # Read content length from text file
+            # Read content from JSON file
             with open(ai_file, 'r', encoding='utf-8') as f:
-                content = f.read()
+                data = json.load(f)
             
             return {
                 "company": company,
                 "file_path": str(ai_file),
                 "file_size": stat_info.st_size,
                 "last_modified": stat_info.st_mtime,
-                "content_length": len(content),
-                "has_content": bool(content.strip())
+                "content_length": len(data.get("recommendation_content", "")),
+                "has_content": bool(data.get("recommendation_content", "").strip()),
+                "generated_at": data.get("generated_at"),
+                "ai_model": data.get("ai_model_info", {}).get("model")
             }
             
         except Exception as e:
             logger.error(f"Error getting AI recommendation info for {company}: {e}")
             return None
+
+
+    def convert_txt_to_json(self, company: str) -> bool:
+        """
+        Convert existing TXT recommendation file to JSON format
+        
+        Args:
+            company: Company name
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            company_dir = self.base_dir / company
+            txt_file = company_dir / f"{company}_ai_recommendation.txt"
+            json_file = company_dir / f"{company}_ai_recommendation.json"
+            
+            if not txt_file.exists():
+                logger.error(f"TXT file not found: {txt_file}")
+                return False
+            
+            # Read the TXT content
+            with open(txt_file, 'r', encoding='utf-8') as f:
+                txt_content = f.read()
+            
+            # Structure the data as JSON
+            json_data = {
+                "company": company,
+                "generated_at": datetime.fromtimestamp(txt_file.stat().st_mtime).isoformat(),
+                "recommendation_content": txt_content,
+                "ai_model_info": {
+                    "provider": "unknown",  # Not available from TXT file
+                    "model": "unknown",     # Not available from TXT file
+                    "cost": 0.0,           # Not available from TXT file
+                    "tokens_used": 0       # Not available from TXT file
+                },
+                "metadata": {
+                    "content_length": len(txt_content),
+                    "format_version": "1.0",
+                    "converted_from_txt": True
+                }
+            }
+            
+            # Save as JSON
+            with open(json_file, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f, indent=2, ensure_ascii=False)
+            
+            file_size = json_file.stat().st_size / 1024
+            logger.info(f"✅ [AI GENERATOR] Converted TXT to JSON: {json_file} ({file_size:.1f}KB)")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error converting TXT to JSON for {company}: {e}")
+            return False
+    
+    def batch_convert_txt_to_json(self) -> Dict[str, bool]:
+        """
+        Convert all existing TXT recommendation files to JSON format
+        
+        Returns:
+            Dictionary mapping company names to conversion success status
+        """
+        results = {}
+        
+        try:
+            if not self.base_dir.exists():
+                return results
+            
+            for company_dir in self.base_dir.iterdir():
+                if company_dir.is_dir() and company_dir.name != "Unknown_Company":
+                    txt_file = company_dir / f"{company_dir.name}_ai_recommendation.txt"
+                    json_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
+                    
+                    # Only convert if TXT exists and JSON doesn't exist (or is older)
+                    if txt_file.exists():
+                        should_convert = not json_file.exists()
+                        if json_file.exists():
+                            # Convert if TXT is newer than JSON
+                            should_convert = txt_file.stat().st_mtime > json_file.stat().st_mtime
+                        
+                        if should_convert:
+                            success = self.convert_txt_to_json(company_dir.name)
+                            results[company_dir.name] = success
+                        else:
+                            logger.info(f"Skipping {company_dir.name} - JSON file is up to date")
+            
+            successful_count = sum(1 for success in results.values() if success)
+            logger.info(f"✅ [AI GENERATOR] Batch TXT to JSON conversion complete: {successful_count}/{len(results)} successful")
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error in batch TXT to JSON conversion: {e}")
+            return results
 
 
 # Global instance
