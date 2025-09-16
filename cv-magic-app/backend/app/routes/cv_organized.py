@@ -9,8 +9,12 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import os
+import logging
 
 from ..modules.cv import cv_upload_service, cv_selection_service, cv_preview_service
+from ..services.enhanced_cv_upload_service import enhanced_cv_upload_service
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/cv", tags=["CV Management"])
 
@@ -47,7 +51,7 @@ async def get_cv_preview(filename: str, max_length: int = 500):
 
 @router.post("/save-for-analysis/{filename}")
 async def save_cv_for_analysis(filename: str):
-    """Save selected CV as original_cv.txt in cv-analysis folder"""
+    """Save selected CV as both original_cv.txt and original_cv.json in cv-analysis folder"""
     try:
         # Get CV content
         cv_content_result = cv_preview_service.get_cv_content(filename)
@@ -59,10 +63,10 @@ async def save_cv_for_analysis(filename: str):
         analysis_dir = "cv-analysis"
         os.makedirs(analysis_dir, exist_ok=True)
         
-        # Save as original_cv.txt
-        filepath = os.path.join(analysis_dir, "original_cv.txt")
+        # Save as original_cv.txt (for backward compatibility)
+        txt_filepath = os.path.join(analysis_dir, "original_cv.txt")
         
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(txt_filepath, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
             f.write("ORIGINAL CV TEXT\n")
             f.write(f"CV File: {filename}\n")
@@ -71,11 +75,37 @@ async def save_cv_for_analysis(filename: str):
             f.write("=" * 80 + "\n\n")
             f.write(cv_content_result['content'])
         
+        logger.info(f"CV saved as text: {txt_filepath}")
+        
+        # Process and save as structured original_cv.json (REQUIRED for CV tailoring)
+        try:
+            logger.info(f"Processing {filename} for structured CV format...")
+            processing_result = await enhanced_cv_upload_service.process_existing_cv(
+                filename=filename
+                # This will save as original_cv.json automatically
+            )
+            
+            structured_success = processing_result.get('success', False)
+            structured_path = processing_result.get('structured_cv_path', 'Not saved')
+            
+            if structured_success:
+                logger.info(f"✅ CV saved as structured JSON: {structured_path}")
+            else:
+                logger.warning(f"⚠️ Failed to save structured CV: {processing_result.get('error', 'Unknown error')}")
+            
+        except Exception as e:
+            logger.error(f"Error saving structured CV: {str(e)}")
+            structured_success = False
+            structured_path = f"Error: {str(e)}"
+        
         return JSONResponse(content={
             "message": "CV saved for analysis successfully",
             "filename": filename,
-            "saved_path": filepath,
-            "content_length": len(cv_content_result['content'])
+            "txt_path": txt_filepath,
+            "structured_path": structured_path,
+            "structured_success": structured_success,
+            "content_length": len(cv_content_result['content']),
+            "note": "Both original_cv.txt and original_cv.json have been saved for analysis and CV tailoring"
         })
         
     except Exception as e:

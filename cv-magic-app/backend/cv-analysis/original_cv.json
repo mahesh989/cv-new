@@ -81,6 +81,12 @@
       "duration": "Mar 2023 - Oct 2024",
       "company": "Charles Darwin University",
       "description": "Optimisation of Yolov8n Model for Real-Time Corrosion Detection Reduced model size by 11.39% and improved inference time by 39.34% with pruning techniques. Demonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision. Applied findings to enhance model performance using drones and edge devices. Contributed to industrial inspection innovations by improving real-time object detection models.",
+      "bullet_points": [
+        "Reduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.",
+        "Demonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.",
+        "Applied findings to enhance model performance using drones and edge devices.",
+        "Contributed to industrial inspection innovations by improving real-time object detection models."
+      ],
       "technologies": [
         "YOLOv8",
         "YOLO",
@@ -98,6 +104,11 @@
       "duration": "Oct 2024",
       "company": "Charles Darwin University",
       "description": "Implemented logistic regression, random forests, and deep learning models to predict heart attack risks. Addressed imbalanced datasets using undersampling techniques to enhance prediction reliability. Presented findings through clear, data-driven visualisations to support decision-making.",
+      "bullet_points": [
+        "Implemented logistic regression, random forests, and deep learning models to predict heart attack risks.",
+        "Addressed imbalanced datasets using undersampling techniques to enhance prediction reliability.",
+        "Presented findings through clear, data-driven visualisations to support decision-making."
+      ],
       "technologies": [
         "Deep Learning",
         "Logistic Regression",
@@ -139,10 +150,10 @@
   "volunteer_work": [],
   "professional_memberships": [],
   "unknown_sections": {},
-  "saved_at": "2025-09-16T23:01:09.605712",
+  "saved_at": "2025-09-16T23:20:11.553645",
   "metadata": {
     "source_filename": "Maheshwor_Tiwari.docx",
-    "processed_at": "2025-09-16T23:01:09.605697",
+    "processed_at": "2025-09-16T23:20:11.553636",
     "processing_version": "2.0",
     "content_type": "structured_cv"
   }

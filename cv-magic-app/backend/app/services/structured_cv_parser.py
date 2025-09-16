@@ -268,10 +268,16 @@ class StructuredCVParser:
                     "duration": str(item.get("duration", "")).strip(),
                     "company": str(item.get("company", "")).strip(),
                     "description": str(item.get("description", "")).strip(),
+                    "bullet_points": [],
                     "technologies": [],
                     "achievements": [],
                     "url": str(item.get("url", "")).strip()
                 }
+                
+                # Handle bullet_points
+                bullet_points = item.get("bullet_points", [])
+                if isinstance(bullet_points, list):
+                    project_entry["bullet_points"] = [str(b).strip() for b in bullet_points if str(b).strip()]
                 
                 # Handle technologies
                 technologies = item.get("technologies", [])
@@ -645,6 +651,48 @@ class StructuredCVParser:
         
         return ""
 
+    def _extract_bullet_points_from_text(self, text: str) -> List[str]:
+        """Extract bullet points from text, handling various bullet styles"""
+        import re
+        
+        bullet_points = []
+        lines = text.split('\n')
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Check for bullet point patterns
+            bullet_patterns = [
+                r'^[•\-*]\s+(.+)',  # • - * bullets
+                r'^\d+\.\s+(.+)',  # numbered lists
+                r'^[a-z]\)\s+(.+)', # lettered lists a) b) c)
+                r'^[A-Z]\)\s+(.+)', # lettered lists A) B) C)
+            ]
+            
+            is_bullet = False
+            for pattern in bullet_patterns:
+                match = re.match(pattern, line)
+                if match:
+                    bullet_points.append(match.group(1).strip())
+                    is_bullet = True
+                    break
+            
+            # If not a bullet but contains key action words, might be an implicit bullet
+            if not is_bullet and len(line) > 20:
+                action_words = [
+                    'implemented', 'developed', 'created', 'built', 'designed', 'analyzed', 'optimized', 
+                    'enhanced', 'reduced', 'improved', 'achieved', 'addressed', 'presented', 'demonstrated',
+                    'applied', 'contributed', 'utilized', 'established', 'managed', 'led', 'coordinated',
+                    'researched', 'investigated', 'evaluated', 'tested', 'deployed', 'maintained',
+                    'configured', 'integrated', 'collaborated', 'facilitated', 'streamlined'
+                ]
+                if any(word in line.lower() for word in action_words):
+                    bullet_points.append(line)
+        
+        return bullet_points
+
     def _text_to_experience_array(self, text: str) -> List[Dict[str, Any]]:
         """Convert experience text to structured array with enhanced parsing"""
         import re
@@ -758,6 +806,7 @@ class StructuredCVParser:
                     "duration": "",
                     "company": "",
                     "description": "",
+                    "bullet_points": [],
                     "technologies": [],
                     "achievements": [],
                     "url": ""
@@ -829,12 +878,35 @@ class StructuredCVParser:
                         description_parts.append(next_line)
                         i += 1
                 
-                # Add description parts to the project
+                # Process description parts to extract bullet points and description
                 if description_parts:
+                    combined_text = "\n".join(description_parts)
+                    
+                    # Extract bullet points using the helper method
+                    project_entry["bullet_points"] = self._extract_bullet_points_from_text(combined_text)
+                    
+                    # For description, combine non-bullet lines or use a summary
+                    non_bullet_lines = []
+                    for part in description_parts:
+                        line = part.strip()
+                        # Skip lines that are clearly bullet points
+                        if not (line.startswith('•') or line.startswith('-') or line.startswith('*') or 
+                                line.startswith('1.') or line.startswith('2.') or line.startswith('3.')):
+                            if len(line) > 0:
+                                non_bullet_lines.append(line)
+                    
+                    # Build description from non-bullet content
                     if project_entry["description"]:
-                        project_entry["description"] += " " + " ".join(description_parts)
+                        if non_bullet_lines:
+                            project_entry["description"] += " " + " ".join(non_bullet_lines)
                     else:
-                        project_entry["description"] = " ".join(description_parts)
+                        if non_bullet_lines:
+                            project_entry["description"] = " ".join(non_bullet_lines)
+                        elif project_entry["bullet_points"]:
+                            # If no separate description but we have bullet points, use first bullet as description
+                            project_entry["description"] = project_entry["bullet_points"][0][:100] + "..."
+                        else:
+                            project_entry["description"] = " ".join(description_parts)
                 
                 # Extract technologies from description
                 tech_keywords = [
