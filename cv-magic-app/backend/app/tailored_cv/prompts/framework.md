@@ -20,7 +20,7 @@ Name | Phone | Email | LinkedIn | Location
 Company, Title, Location | Duration
 • [Impact statements - max 4 bullets per role]
 
-## Projects
+## Projects (OPTIONAL - include only if available and relevant)
 **Project Name** - Context
 • Challenge/approach and quantified outcomes
 
@@ -57,7 +57,7 @@ Category: tools, tools | Category: tools, tools [single paragraph, ATS-optimized
 1. **Critical Missing Keywords (Priority 1):**
    - Extract all 0% match keywords from recommendations
    - Integrate naturally into experience descriptions and skills section
-   - Example: If recommendations identify "Data Intelligence" as missing, weave into relevant project descriptions
+   - Example: If recommendations identify "Data Intelligence" as missing, weave into relevant experience bullets or project descriptions (if projects section exists)
 
 2. **Technical Skills Enhancement (Priority 2):**
    - **Transferable Skills:** If CV has foundational skill and JD requires specific variant, include the specific tool (e.g., SQL → PostgreSQL, Python → Python/Pandas, Cloud → AWS/Azure)
@@ -78,7 +78,7 @@ Category: tools, tools | Category: tools, tools [single paragraph, ATS-optimized
 ### **Keyword Integration Strategy**
 - **Skills Section:** Primary keyword clusters, comma-separated by category
 - **Experience Bullets:** Natural embedding within achievement context
-- **Projects:** Technical keyword emphasis with outcomes
+- **Projects (if available):** Technical keyword emphasis with outcomes
 - **No keyword stuffing:** Maintain professional readability
 
 ### **Psychological Triggers Integration**

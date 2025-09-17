@@ -180,22 +180,47 @@ class CVTailoringService:
         experience_level = self._calculate_experience_level(cv)
         
         # Determine section ordering based on experience level
+        # Projects section will be included only if CV has projects
+        base_sections_entry = ["contact", "education", "experience", "skills"]
+        base_sections_mid = ["contact", "experience", "skills", "education"]
+        base_sections_senior = ["contact", "experience", "skills", "education"]
+        
+        # Add projects section if available
+        if cv.projects and len(cv.projects) > 0:
+            if experience_level == ExperienceLevel.ENTRY_LEVEL:
+                section_order = ["contact", "education", "experience", "projects", "skills"]
+            elif experience_level == ExperienceLevel.MID_LEVEL:
+                section_order = ["contact", "experience", "projects", "skills", "education"]
+            else:  # Senior level
+                section_order = ["contact", "experience", "skills", "projects", "education"]
+        else:
+            if experience_level == ExperienceLevel.ENTRY_LEVEL:
+                section_order = base_sections_entry
+                education_strategy = "education_first"
+            elif experience_level == ExperienceLevel.MID_LEVEL:
+                section_order = base_sections_mid
+                education_strategy = "education_minimal"
+            else:  # Senior level
+                section_order = base_sections_senior
+                education_strategy = "education_last"
+        
+        # Set education strategy
         if experience_level == ExperienceLevel.ENTRY_LEVEL:
-            section_order = ["contact", "education", "experience", "projects", "skills"]
             education_strategy = "education_first"
         elif experience_level == ExperienceLevel.MID_LEVEL:
-            section_order = ["contact", "experience", "projects", "skills", "education"]
             education_strategy = "education_minimal"
-        else:  # Senior level
-            section_order = ["contact", "experience", "skills", "projects", "education"]
+        else:
             education_strategy = "education_last"
         
         # Determine keyword placement strategy
         keyword_placement = {
             "skills": recommendations.critical_gaps[:5],  # Top critical skills in skills section
             "experience": recommendations.technical_enhancements,  # Technical enhancements in experience
-            "projects": recommendations.keyword_integration[:3],  # Key integrations in projects
         }
+        
+        # Add projects keyword placement only if projects exist
+        if cv.projects and len(cv.projects) > 0:
+            keyword_placement["projects"] = recommendations.keyword_integration[:3]  # Key integrations in projects
         
         # Identify quantification targets
         quantification_targets = []
@@ -207,9 +232,12 @@ class CVTailoringService:
         # Plan impact enhancements
         impact_enhancements = {
             "experience": recommendations.technical_enhancements,
-            "projects": recommendations.soft_skill_improvements,
             "skills": recommendations.missing_technical_skills
         }
+        
+        # Add projects impact enhancements only if projects exist
+        if cv.projects and len(cv.projects) > 0:
+            impact_enhancements["projects"] = recommendations.soft_skill_improvements
         
         return OptimizationStrategy(
             section_order=section_order,
@@ -365,6 +393,12 @@ The exact JSON structure must be:
     {
       "category": "enhanced category name",
       "skills": ["skills from original CV plus recommended additions", ...]
+    }
+  ],
+  "projects": [  // OPTIONAL - include only if original CV has projects
+    {
+      "name": "EXACT project name from provided CV",
+      "bullets": ["enhanced project bullet with quantified impact", ...]
     }
   ],
   "optimization_notes": {
