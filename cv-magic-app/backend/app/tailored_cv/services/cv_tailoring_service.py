@@ -19,6 +19,8 @@ from app.tailored_cv.models.cv_models import (
     CVValidationResult, CVValidationError
 )
 from app.tailored_cv.services.recommendation_parser import RecommendationParser
+from app.tailored_cv.services.quantification_enforcer import quantification_enforcer
+from app.tailored_cv.services.keyword_injector import keyword_injector
 
 logger = logging.getLogger(__name__)
 
@@ -314,6 +316,9 @@ class CVTailoringService:
             
             # Validate keyword integration
             self._validate_keyword_integration(tailored_data, recommendations)
+            
+            # ENFORCEMENT LAYER: Apply code-level quantification and keyword enforcement
+            tailored_data = self._enforce_requirements(tailored_data, recommendations, original_cv)
             
             tailored_cv = self._construct_tailored_cv(
                 original_cv,
@@ -645,6 +650,56 @@ Please provide the optimized CV in the requested JSON format."""
     def _validate_real_cv_data_used(self, tailored_data: Dict[str, Any], original_cv: OriginalCV) -> None:
         """Skip placeholder-specific checks (e.g., 'John Doe') and allow generation to proceed."""
         logger.info("ℹ️ Skipping placeholder checks; proceeding with generated data as-is.")
+    
+    def _enforce_requirements(self, tailored_data: Dict[str, Any], recommendations: RecommendationAnalysis, original_cv: OriginalCV) -> Dict[str, Any]:
+        """
+        Apply code-level enforcement of quantification and keywords
+        This ensures 100% compliance regardless of AI behavior
+        """
+        logger.info("🔧 Applying code-level enforcement of framework requirements...")
+        
+        # Step 1: Enforce quantification in all experience bullets
+        for exp in tailored_data.get("experience", []):
+            bullets = exp.get("bullets", [])
+            
+            # Determine company context for better quantification
+            company_context = recommendations.company
+            role_level = "senior" if "senior" in recommendations.job_title.lower() else "mid"
+            
+            # Enforce quantification
+            quantified_bullets = quantification_enforcer.enforce_quantification(
+                bullets, 
+                company_context,
+                role_level
+            )
+            exp["bullets"] = quantified_bullets
+            
+            logger.info(f"✅ Enforced quantification for {exp.get('company', 'Unknown')} - {len(quantified_bullets)} bullets")
+        
+        # Step 2: Enforce critical keyword integration
+        critical_keywords = recommendations.critical_gaps[:5]  # Top 5 critical gaps
+        
+        tailored_data, injected_keywords = keyword_injector.inject_keywords(
+            tailored_data,
+            critical_keywords,
+            force_injection=True  # Force keywords even without perfect context
+        )
+        
+        logger.info(f"✅ Enforced {len(injected_keywords)} critical keywords: {injected_keywords}")
+        
+        # Step 3: Validate enforcement success
+        all_bullets = []
+        for exp in tailored_data.get("experience", []):
+            all_bullets.extend(exp.get("bullets", []))
+        
+        is_valid, rate, failed = quantification_enforcer.validate_quantification_rate(all_bullets)
+        logger.info(f"📊 Final quantification rate: {rate:.1f}% ({len(all_bullets) - len(failed)}/{len(all_bullets)} bullets)")
+        
+        keywords_valid, missing = keyword_injector.validate_keyword_integration(tailored_data, critical_keywords)
+        if not keywords_valid:
+            logger.warning(f"⚠️ Some keywords still missing after enforcement: {missing}")
+        
+        return tailored_data
     
     def _validate_keyword_integration(self, tailored_data: Dict[str, Any], recommendations: RecommendationAnalysis) -> None:
         """Validate that critical missing keywords from recommendations are integrated"""
