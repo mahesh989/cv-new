@@ -425,12 +425,13 @@ class RecommendationParser:
         Uses comprehensive parser to handle all sections properly
         """
         # Import the structured parser
-        from app.services.structured_cv_parser import structured_cv_parser
+        from app.services.structured_cv_parser import enhanced_cv_parser
         
         # If the data looks like raw text, parse it first
         if 'text' in structured_data and isinstance(structured_data.get('text'), str):
             # This is raw text format, parse it
-            parsed_cv = structured_cv_parser.parse_cv_content(structured_data['text'])
+            import asyncio
+            parsed_cv = asyncio.run(enhanced_cv_parser.parse_cv_content(structured_data['text']))
             structured_data = parsed_cv
         
         personal_info = structured_data.get('personal_information', {})
@@ -534,9 +535,24 @@ class RecommendationParser:
             'total_years_experience': total_years
         }
         
-        # Add projects if available
+        # Convert projects if available
         if structured_data.get('projects'):
-            result['projects'] = structured_data['projects']
+            projects = []
+            for proj in structured_data['projects']:
+                # Convert description array to bullets (for compatibility with Project model)
+                bullets = proj.get('description', [])
+                if not bullets:
+                    bullets = [proj.get('context', 'Project details not available')]
+                
+                projects.append({
+                    'name': proj.get('name', ''),
+                    'context': proj.get('context', ''),
+                    'technologies': proj.get('technologies', []),
+                    'bullets': bullets,  # This is what the Project model expects
+                    'url': proj.get('url', ''),
+                    'duration': proj.get('duration', '')
+                })
+            result['projects'] = projects
         
         # Add languages if available
         if structured_data.get('languages'):

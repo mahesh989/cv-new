@@ -21,7 +21,9 @@
       "Tableau",
       "Snowflake"
     ],
-    "soft_skills": [],
+    "soft_skills": [
+      "detail-oriented"
+    ],
     "domain_knowledge": [
       "Vector Databases",
       "RAG"
@@ -40,10 +42,11 @@
   "preferred_keywords": [
     "Tableau",
     "Snowflake",
+    "detail-oriented",
     "Vector Databases",
     "RAG"
   ],
-  "analysis_timestamp": "2025-09-17T09:10:13.395757",
+  "analysis_timestamp": "2025-09-17T11:35:57.870861",
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "company_name": "Nine_Entertainment",

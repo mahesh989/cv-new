@@ -11,20 +11,20 @@
       "dashboard_portfolio": "Dashboard Portfolio",
       "website": ""
     },
-    "residency_status": "",
+    "residency_status": "On student visa; applying for Subclass 485 Temporary Graduate Visa",
     "open_to": ""
   },
   "career_profile": {
-    "summary": "Dynamic Data Science Professional with over 2 years of hands-on experience in analytics, specializing in SQL, Tableau, and Python. Adept at transforming complex datasets into actionable insights to drive strategic decision-making. Enthusiastic about exploring diverse industries, gaining cross-functional expertise, and contributing impactful solutions to data-driven projects. Skilled in leveraging data to inform business strategies and deliver measurable outcomes."
+    "summary": "Dynamic and detail-oriented Data Analyst with a strong foundation in Python, data analysis, and quantitative problem-solving. Passionate about leveraging computational and analytical expertise to solve complex problems in fast-paced environments. Eager to contribute to Tibra's innovative trading strategies while enhancing skills in financial markets and algorithmic trading systems. Motivated to deepen expertise in proprietary trading technologies."
   },
   "skills": {
     "technical_skills": [
-      "Advanced SQL skills, proficient in writing and interpreting complex queries for analytics tasks.",
-      "Strong experience in Power BI for dashboard creation and data visualisation.",
-      "Proficient in Python and Excel for data analysis and automation.",
-      "Ability to uncover insights through analysis of large and diverse datasets.",
-      "Excellent interpersonal and communication skills to work effectively with stakeholders.",
-      "Strong ability to manage and prioritise multiple tasks in dynamic environments."
+      "Programming Expertise: Advanced proficiency in Python with hands-on experience in data analysis, machine learning, and automation.",
+      "Quantitative Problem-Solving: Skilled in analysing and optimising large datasets, reducing operational inefficiencies.",
+      "Algorithmic Thinking: Knowledge of data structures, algorithms, and optimisation techniques.",
+      "Analytical Tools: Skilled in SQL and Power BI for creating dashboards, reporting, and data-driven decision-making.",
+      "Project Management: Proven ability to manage end-to-end projects with high precision and tight deadlines.",
+      "Eager Learner: Strong appetite for learning new technologies, including financial market theories."
     ],
     "key_skills": [],
     "soft_skills": [],
@@ -44,7 +44,7 @@
       "degree": "Bachelor of Science in Information Technology",
       "institution": "Tribhuvan University",
       "year": "Jul 2014 – Aug 2018",
-      "gpa": "",
+      "gpa": "GPA - 83%",
       "relevant_courses": [],
       "honors": "",
       "location": "Kathmandu, Nepal"
@@ -57,10 +57,10 @@
       "duration": "Jan 2024 – Jun 2024",
       "location": "Victoria, Australia",
       "responsibilities": [
-        "Analysed datasets exceeding 100,000 records, ensuring 99% accuracy and integrity.",
-        "Developed Power BI dashboards to analyse customer text data and identify top 20 queries, enhancing response strategies and decision-making.",
-        "Conducted ad-hoc analyses to uncover actionable insights from customer datasets, improving response times.",
-        "Ensured 99% accuracy in datasets by identifying and addressing data discrepancies."
+        "Analysed datasets of over 100,000 records, ensuring 99% data accuracy and integrity.",
+        "Developed automated reporting systems using Python, streamlining workflows and reducing processing time by 15%.",
+        "Designed Power BI dashboards to improve visibility into key metrics, enhancing operational decision-making.",
+        "Collaborated with cross-functional teams to optimise inventory tracking systems and solve discrepancies in real time."
       ],
       "achievements": [],
       "technologies": []
@@ -68,18 +68,33 @@
     {
       "title": "Data Insight & Analyst",
       "company": "Property Console",
-      "duration": "Mar 2023 - Nov 2023",
+      "duration": "Apr 2023 - Nov 2023",
       "location": "Sydney, Australia",
       "responsibilities": [
-        "Identified patterns and insights of user data through statistical analysis to inform strategic decision-making.",
-        "Created interactive dashboards using Power BI and Excel, reducing reporting time by 30%.",
-        "Delivered high-quality insights and reports to stakeholders in a clear and concise manner."
+        "Utilised Python and SQL to identify patterns in large datasets, contributing to strategic business insights.",
+        "Created custom dashboards using Power BI, reducing reporting time by 30%.",
+        "Conducted ad-hoc analyses to uncover actionable insights, improving response times by 20%.",
+        "Delivered clear and concise reports to stakeholders, enabling data-driven decision-making."
       ],
       "achievements": [],
       "technologies": []
     }
   ],
   "projects": [
+    {
+      "name": "Thesis: Optimisation of Yolov8n Model for Real-Time Corrosion Detection",
+      "description": [
+        "Reduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.",
+        "Demonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.",
+        "Applied findings to enhance model performance using drones and edge devices.",
+        "Contributed to industrial inspection innovations by improving real-time object detection models."
+      ],
+      "technologies": [],
+      "duration": "",
+      "role": "",
+      "achievements": [],
+      "url": ""
+    },
     {
       "name": "Heart Attack Risk Prediction",
       "description": [
@@ -105,20 +120,19 @@
   "professional_memberships": [],
   "unknown_sections": {},
   "original_sections": {
-    "raw_cv_text": "Maheshwor Tiwari\n0414 032 507 | maheshtwari99@gmail.com | Blogs on Medium | GitHub | Dashboard Portfolio\n\nCAREER PROFILE\n\nDynamic Data Science Professional with over 2 years of hands-on experience in analytics, specializing in SQL, Tableau, and Python. Adept at transforming complex datasets into actionable insights to drive strategic decision-making. Enthusiastic about exploring diverse industries, gaining cross-functional expertise, and contributing impactful solutions to data-driven projects. Skilled in leveraging data to inform business strategies and deliver measurable outcomes.\n\nKEY SKILLS \n\nAdvanced SQL skills, proficient in writing and interpreting complex queries for analytics tasks.\nStrong experience in Power BI for dashboard creation and data visualisation.\nProficient in Python and Excel for data analysis and automation.\nAbility to uncover insights through analysis of large and diverse datasets.\nExcellent interpersonal and communication skills to work effectively with stakeholders.\nStrong ability to manage and prioritise multiple tasks in dynamic environments.\n\nEDUCATION \n\nMaster of Data Science\t\t            Mar 2023 - Oct 2024\nCharles Darwin University, Sydney, Australia, \tGPA - 6.35 /7\nThesis: Optimisation of Yolov8n Model for Real-Time Corrosion Detection (Grade: 89/100)\nReduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.\nDemonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.\nApplied findings to enhance model performance using drones and edge devices.\nContributed to industrial inspection innovations by improving real-time object detection models.\nBachelor of Science in Information Technology                                                      \tJul 2014 – Aug 2018\nTribhuvan University, Kathmandu, Nepal\t\t                                                                \n\nPROFESSIONAL EXPERIENCE\n\nData Analyst                                                                           ...",
     "section_headers_found": [
-      "CAREER PROFILE",
+      "EDUCATION",
       "CERTIFICATIONS",
       "PROFESSIONAL EXPERIENCE",
-      "EDUCATION",
-      "KEY SKILLS"
+      "KEY SKILLS",
+      "CAREER PROFILE"
     ],
     "parsing_approach": "content_preserving"
   },
-  "saved_at": "2025-09-17T10:58:47.950139",
+  "saved_at": "2025-09-17T11:40:12.436324",
   "metadata": {
-    "source_filename": "M_tiwari_CV_Capgemini.docx",
-    "processed_at": "2025-09-17T10:58:47.950508",
+    "source_filename": "Maheshwor_Tiwari.docx",
+    "processed_at": "2025-09-17T11:40:12.436466",
     "processing_version": "2.0",
     "content_type": "structured_cv"
   }

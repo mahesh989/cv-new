@@ -5,7 +5,7 @@ Generated automatically from comprehensive analysis data
 
 # Company: Nine_Entertainment
 # Generated: Unknown
-# ATS Score: 61.7875
+# ATS Score: 62.0
 
 AI_RECOMMENDATION_PROMPT = """
 # Strategic CV Optimization Recommendations Generator
@@ -19,84 +19,92 @@ AI_RECOMMENDATION_PROMPT = """
 ## 📊 Comprehensive Analysis Data
 
 ### Current ATS Performance
-- **Final ATS Score:** 61.7875/100
+- **Final ATS Score:** 62.0/100
 - **Category Status:** ⚠️ Moderate fit
 - **Recommendation:** Consider if other factors are strong
 
 ### Skills Match Summary
 🎯 OVERALL SUMMARY
 ----------------------------------------
-Total Requirements: 38
-Matched: 22
-Missing: 15
-Match Rate: 59%
+Total Requirements: 37
+Matched: 12
+Missing: 25
+Match Rate: 32%
 
 📊 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
-Technical Skills            15         25         15          8           65
-Soft Skills                   6          7          5          3           62
-Domain Keywords              7          6          2          4           33
+Technical Skills            28         24          8         16           33
+Soft Skills                   9          7          4          3           57
+Domain Keywords              9          6          0          6            0
 
 🧠 DETAILED AI ANALYSIS
 --------------------------------------------------------------------------------
 🔹 TECHNICAL SKILLS
-  ✅ MATCHED JD REQUIREMENTS (15 items):
+  ✅ MATCHED JD REQUIREMENTS (8 items):
     1. JD Required: 'Data Aggregation'
        → Found in CV: 'Data Analysis'
-       💡 hierarchical match - data aggregation is part of data analysis
-    2. JD Required: 'Data Engineering'
-       → Found in CV: 'Data Analysis'
-       💡 synonym match - data engineering involves data analysis
-    3. JD Requir...
+       💡 synonym match - both involve collecting and analyzing data
+    2. JD Required: 'Data Integrity'
+       → Found in CV: 'Data Integrity'
+       💡 exact match - identical skills
+    3. JD Required: 'Data Pipelines'
+       → F...
 
 ### Strategic Assessment
 **DECISION:** 🟡 STRATEGIC PURSUE
 
 ---
 
-**MARKET REALITY CHECK:**
+### MARKET REALITY CHECK:
 
-- **What they actually need:** The role requires a strong foundation in data engineering and business intelligence, particularly in SQL and Power BI. While the JD specifies 5+ years of experience, companies often consider candidates with relevant skills and potential, especially if they can demonstrate adaptability and a willingness to learn.
-  
-- **Flexibility indicators:** The job description includes "nice-to-haves" such as experience with Tableau and next-generation architectures, which suggests that the company may be open to candidates who can demonstrate strong foundational skills and a willingness to learn these additional tools. The emphasis on collaboration and communication also indicates they value cultural fit and teamwork.
+- **What they actually need:** 
+  - The core requirements for this role include strong SQL skills, experience in data modeling, and the ability to create and maintain BI dashboards (particularly in Power BI). The JD suggests a preference for 5+ years of experience, but given the current market conditions and the nature of the role, they may be open to candidates with less experience if they demonstrate strong technical skills and adaptability.
 
-- **Hard blockers identified:** The primary hard blocker is the requirement for 5+ years of experience in data engineering, which Maheshwor does not meet. However, he has relevant experience in data analysis and visualization, which could be leveraged.
+- **Flexibility indicators:** 
+  - The job description has a mix of strict requirements and more flexible language, such as "nice-to-haves" and a focus on collaboration and communication skills. The mention of flexible work options and a commitment to diversity indicates a willingness to consider a broader range of candidates.
 
-- **Hiring urgency signals:** The job description does not explicitly indicate urgency, but the detailed nature of the requirements suggests they are looking for someone who can hit the ground running. This could imply a need for a quick hire, which may lead to flexibility in candidate selection.
+- **Hard blockers identified:** 
+  - The primary hard blocker is the requirement for 5+ years of experience in data engineering, particularly in designing data models and working within a data warehouse environment. However, Maheshwor has relevant experience in data analysis and Python, which could mitigate this if framed correctly.
+
+- **Hiring urgency signals:** 
+  - The urgency is implied through the detailed description of responsibilities and the emphasis on collaboration with various teams, suggesting they are looking to fill this role relatively quickly.
 
 ---
 
-**INTELLIGENT OBSERVATIONS:**
+### INTELLIGENT OBSERVATIONS:
 
-- **Hidden strengths:** Maheshwor's strong SQL skills, experience with Power BI, and ability to a...
+- **Hidden strengths:** 
+  - Maheshwor’s PhD in Phy...
 
 ### Component Analysis Scores
-- **Skills Relevance:** 87.0/100
-- **Experience Alignment:** 60.0/100
+- **Skills Relevance:** 86.0/100
+- **Experience Alignment:** 70.0/100
 - **Industry Fit:** 70.0/100
-- **Role Seniority:** 40.0/100
+- **Role Seniority:** 75.0/100
 - **Technical Depth:** 90.0/100
 
 ### Detailed Skill Breakdown
 **CV Skills Analysis:**
 ## TECHNICAL SKILLS:
 **EXPLICIT (directly stated):**
+- Python
+- Ai
+- Machine Learning
+- Data Pipelines
 - Sql
 - Tableau
-- Python
 - Power Bi
+- Pandas
+- Numpy
+- Scikit-Learn
+- Matplotlib
+- Github
+- Docker
+- Snowflake
+- Visual Studio Code
+- Google Analytics
 - Excel
-- Data Analysis
-- Statistical Analysis
-- Logistic Regression
-- Random Forests
-- Deep Learning
-- Data Visualization
-- Ad-Hoc Analysis
-- Data Discrepancies
-- Undersampling Techniques
-- Data-Driven Visualisations
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Data Cleaning
@@ -112,10 +120,10 @@ Domain Keywords              7          6          2          4           33
 ## SOFT SKILLS:
 **EXPLICIT (directly stated):**
 - Communication
-- Time Management
-- Analytical Thinking
-- Problem-Solving
-- Detail-Oriented
+- Teamwork
+- Collaboration
+- Mentoring
+- Engagement
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Problem-solving
@@ -126,12 +134,14 @@ Domain Keywords              7          6          2          4           33
 ## DOMAIN KEYWORDS:
 **EXPLICIT:**
 - Data Science
-- Data Analytics
-- Machine Learning
-- Real-Time Corrosion Detection
-- Industrial Inspection
-- Customer Insights
-- User Data
+- Physics
+- Research
+- Customer Behavior
+- Operational Efficiency
+- Strategic Decision-Making
+- Data-Driven Decision-Making
+- Population Datasets
+- Customer Support Data
 
 **STRONGLY IMPLIED:**
 - Predictive Analytics
@@ -139,9 +149,9 @@ Domain Keywords              7          6          2          4           33
 - Strategic Decision-making
 
 ```python
-SOFT_SKILLS = ['Communication', 'Time Management', 'Analytical Thinking', 'Problem-solving', 'Detail-oriented', 'Results-driven']
-TECHNICAL_SKILLS = ['SQL', 'Tableau', 'Python', 'Power BI', 'Excel', 'Data Analysis', 'Statistical Analysis', 'Logistic Regression', 'Random Forests', 'Deep Learning', 'Data Visualization', 'Ad-hoc Analysis', 'Data Discrepancies', 'Undersampling Techniques', 'Data-driven Visualisations']
-DOMAIN_KEYWORDS = ['Data Science', 'Data Analytics', 'Machine Learning', 'Real-Time Corrosion Detection', 'Industrial Inspection', 'Customer Insights', 'User Data']
+SOFT_SKILLS = ['Communication', 'Teamwork', 'Collaboration', 'Mentoring', 'Engagement', 'Problem-solving', 'Adaptability', 'Time Management', 'Detail-oriented']
+TECHNICAL_SKILLS = ['Python', 'AI', 'Machine Learning', 'Data Pipelines', 'SQL', 'Tableau', 'Power BI', 'Pandas', 'NumPy', 'scikit-learn', 'Matplotlib', 'GitHub', 'Docker', 'Snowflake', 'Visual Studio Code', 'Google Analytics', 'Excel', 'Seaborn', 'Data Cleaning', 'Data Preprocessing', 'Predictive Analytics', 'Automation', 'Data Analysis', 'Reporting', 'Data Accuracy', 'Data Integrity', 'Computational Modeling', 'Workflow Management']
+DOMAIN_KEYWORDS = ['Data Science', 'Physics', 'Research', 'Customer Behavior', 'Operational Efficiency', 'Strategic Decision-making', 'Data-driven Decision-making', 'Population Datasets', 'Customer Support Data']
 ```
 
 **JD Requirements Analysis:**
@@ -151,18 +161,18 @@ DOMAIN_KEYWORDS = ['Data Science', 'Data Analytics', 'Machine Learning', 'Real-T
 - Data Modelling
 - Sql
 - Power Bi
-- Data Warehouse
-- Data Warehousing Principles
+- Data Warehousing
 - Dimensional Modelling
 - Etl
 - Data Quality
 - Reporting
 - Data Integrity
-- Data Transformation
 - Tableau
 - Snowflake
-- Version Control
-- Security Measures
+- Vector Databases
+- Rag
+- Data Transformation
+- Data Visualization
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Analytical Models
@@ -176,9 +186,9 @@ DOMAIN_KEYWORDS = ['Data Science', 'Data Analytics', 'Machine Learning', 'Real-T
 - Communication
 - Detail-Oriented
 - Proactive
+- Results-Driven
 - Collaboration
 - Problem-Solving
-- Analytical Thinking
 
 **STRONGLY IMPLIED (very likely based on responsibilities):**
 - Teamwork
@@ -199,21 +209,21 @@ DOMAIN_KEYWORDS = ['Data Science', 'Data Analytics', 'Machine Learning', 'Real-T
 - Business Intelligence
 
 ```python
-SOFT_SKILLS = ['Communication', 'Detail-oriented', 'Proactive', 'Collaboration', 'Problem-solving', 'Analytical Thinking', 'Results-driven']
-TECHNICAL_SKILLS = ['Data Engineering', 'Data Modelling', 'SQL', 'Power BI', 'Data Warehouse', 'Data Warehousing Principles', 'Dimensional Modelling', 'ETL', 'Data Quality', 'Reporting', 'Data Integrity', 'Data Transformation', 'Tableau', 'Snowflake', 'Version Control', 'Security Measures', 'Data Visualization', 'Self-Service Reporting', 'Data Pipelines', 'Performance Optimisation', 'Data Aggregation', 'Data Insights', 'BI Solutions', 'Visual Stories', 'BI Development']
+SOFT_SKILLS = ['Communication', 'Detail-Oriented', 'Proactive', 'Results-Driven', 'Collaboration', 'Problem-Solving', 'Analytical Thinking']
+TECHNICAL_SKILLS = ['Data Engineering', 'Data Modelling', 'SQL', 'Power BI', 'Data Warehousing', 'Dimensional Modelling', 'ETL', 'Data Quality', 'Reporting', 'Data Integrity', 'Tableau', 'Snowflake', 'Vector Databases', 'RAG', 'Data Transformation', 'Data Visualization', 'Self-Service Reporting', 'Version Control', 'Documentation', 'Role-Based Access Control', 'Security Measures', 'Data Pipelines', 'Performance Optimization', 'Data Aggregation']
 DOMAIN_KEYWORDS = ['Business Intelligence', 'Automotive', 'Media', 'Insights Delivery', 'Data Operations', 'Reporting Assets']
 ```
 
 ### Category Breakdown
-- **Category 1 (Skills Matching):** 23.950000000000003/40
-  - Technical Skills Match: 65.0%
-  - Soft Skills Match: 62.0%
-  - Domain Keywords Match: 33.0%
+- **Category 1 (Skills Matching):** 15.149999999999999/40
+  - Technical Skills Match: 33.0%
+  - Soft Skills Match: 57.0%
+  - Domain Keywords Match: 0.0%
 
-- **Category 2 (Experience & Competency):** 37.9375/60
-  - Core Competency: 82.5%
-  - Experience/Seniority: 35.0%
-  - Potential/Ability: 72.5%
+- **Category 2 (Experience & Competency):** 46.6/60
+  - Core Competency: 83.75%
+  - Experience/Seniority: 73.0%
+  - Potential/Ability: 80.0%
   - Company Fit: 61.25%
 
 ---
@@ -240,15 +250,15 @@ Generate a comprehensive strategic report covering:
 
 ### 1. Missing Keywords Analysis
 Focus on the lowest-scoring categories from the analysis:
-- **Critical Gaps:** Highest-impact missing JD keywords (prioritize 33.0% domain match)
-- **Technical Gaps:** Missing technical skills with 65.0% current match
-- **Soft Skills Gaps:** Missing soft skills with 62.0% current match
+- **Critical Gaps:** Highest-impact missing JD keywords (prioritize 0.0% domain match)
+- **Technical Gaps:** Missing technical skills with 33.0% current match
+- **Soft Skills Gaps:** Missing soft skills with 57.0% current match
 
 ### 2. ATS Score Optimization Strategy
 Current ATS breakdown shows specific improvement areas:
-- **Category 1 Improvements:** Target the 8 missing technical skills
+- **Category 1 Improvements:** Target the 16 missing technical skills
 - **Category 2 Enhancement:** Address the 61.25% company fit score
-- **Bonus Points:** Optimize for the current -0.1 bonus points
+- **Bonus Points:** Optimize for the current 0.25 bonus points
 
 ### 3. Industry Transition Strategy
 Based on 70.0/100 industry fit score:
@@ -257,7 +267,7 @@ Based on 70.0/100 industry fit score:
 - **Adaptation Timeline:** Realistic skill development plan
 
 ### 4. Experience & Seniority Positioning
-Current seniority score: 40.0/100
+Current seniority score: 75.0/100
 - **Leadership Indicators:** How to highlight existing leadership experience
 - **Responsibility Scope:** Reframe current roles for target seniority
 - **Growth Trajectory:** Position career progression strategically
@@ -275,7 +285,7 @@ Technical depth score: 90.0/100
 # 🎯 CV Tailoring Strategy Report for Nine_Entertainment
 
 ## 📊 Executive Summary
-- **Current ATS Score:** 61.7875/100 (⚠️ Moderate fit)
+- **Current ATS Score:** 62.0/100 (⚠️ Moderate fit)
 - **Key Strengths:** [Top 3-4 highest-scoring areas]
 - **Critical Gaps:** [Top 3-4 lowest-scoring areas requiring immediate attention]
 - **Success Probability:** [Based on strategic assessment and component scores]
@@ -294,24 +304,24 @@ Technical depth score: 90.0/100
 **Critical Missing Keywords (0% domain match):**
 - [Specific domain keywords to integrate with injection points]
 
-**Technical Skills Enhancement (65.0% current match):**
+**Technical Skills Enhancement (33.0% current match):**
 - [Technical keywords to add/emphasize]
 
-**Soft Skills Optimization (62.0% current match):**
+**Soft Skills Optimization (57.0% current match):**
 - [Soft skills to highlight with evidence]
 
 ## 🎪 Experience Reframing Strategy
 **Industry Transition Focus (70.0/100 current fit):**
 - [How to reframe existing experience for target industry]
 
-**Seniority Positioning (40.0/100 current match):**
+**Seniority Positioning (75.0/100 current match):**
 - [Leadership and responsibility indicators to emphasize]
 
 **Technical Depth Showcase (90.0/100 current score):**
 - [Technical achievements and complexity indicators]
 
 ## 📈 ATS Score Improvement Roadmap
-**Target Score:** [Realistic target based on current 61.7875]
+**Target Score:** [Realistic target based on current 62.0]
 
 **High-Impact Changes (Expected +10-15 points):**
 - [Top 3 recommendations with highest ROI]
