@@ -131,8 +131,8 @@ async def list_cvs():
 
 
 @router.get("/content/{filename}")
-async def get_cv_content(filename: str, auto_structure: bool = True):
-    """Get CV content with automatic structured processing"""
+async def get_cv_content(filename: str, auto_structure: bool = False):
+    """Get CV content with optional structured processing"""
     
     try:
         file_path = UPLOAD_DIR / filename
@@ -140,7 +140,7 @@ async def get_cv_content(filename: str, auto_structure: bool = True):
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
         
-        # Extract text using improved processor
+        # Extract text using improved processor (fast operation)
         result = cv_processor.extract_text_from_file(file_path)
         
         if not result['success']:
@@ -151,46 +151,6 @@ async def get_cv_content(filename: str, auto_structure: bool = True):
         
         # Get file metadata
         stat = file_path.stat()
-        
-        # Automatically process into structured format if requested
-        structured_cv = None
-        processing_info = None
-        
-        if auto_structure:
-            try:
-                logger.info(f"Auto-processing {filename} into structured format...")
-                processing_result = await enhanced_cv_upload_service.process_existing_cv(
-                    filename=filename
-                    # Always saves as original_cv.json (replaces existing)
-                )
-                
-                if processing_result['success']:
-                    # Load the structured CV (always from original_cv.json)
-                    structured_cv = enhanced_cv_upload_service.load_structured_cv()
-                    
-                    processing_info = {
-                        "structured_processing": True,
-                        "structured_cv_path": processing_result['structured_cv_path'],
-                        "validation_report": processing_result['validation_report'],
-                        "sections_found": processing_result['sections_found'],
-                        "unknown_sections": processing_result.get('unknown_sections', []),
-                        "processing_timestamp": processing_result['processing_timestamp']
-                    }
-                    
-                    logger.info(f"✅ {filename} processed into structured format successfully")
-                else:
-                    logger.warning(f"⚠️ Failed to process {filename} into structured format")
-                    processing_info = {
-                        "structured_processing": False,
-                        "error": "Failed to process into structured format"
-                    }
-                    
-            except Exception as e:
-                logger.error(f"Error during auto-processing {filename}: {str(e)}")
-                processing_info = {
-                    "structured_processing": False,
-                    "error": str(e)
-                }
         
         logger.info(f"CV content extracted: {filename} ({len(result['text'])} characters)")
         
@@ -210,13 +170,42 @@ async def get_cv_content(filename: str, auto_structure: bool = True):
             }
         }
         
-        # Add structured processing info if available
-        if processing_info:
-            response_content["processing_info"] = processing_info
-            
-        # Add structured CV data if available
-        if structured_cv:
-            response_content["structured_cv"] = structured_cv
+        # Only do structured processing if explicitly requested
+        if auto_structure:
+            try:
+                logger.info(f"Auto-processing {filename} into structured format...")
+                processing_result = await enhanced_cv_upload_service.process_existing_cv(
+                    filename=filename
+                )
+                
+                if processing_result['success']:
+                    structured_cv = enhanced_cv_upload_service.load_structured_cv()
+                    
+                    response_content["processing_info"] = {
+                        "structured_processing": True,
+                        "structured_cv_path": processing_result['structured_cv_path'],
+                        "validation_report": processing_result['validation_report'],
+                        "sections_found": processing_result['sections_found'],
+                        "unknown_sections": processing_result.get('unknown_sections', []),
+                        "processing_timestamp": processing_result['processing_timestamp']
+                    }
+                    
+                    if structured_cv:
+                        response_content["structured_cv"] = structured_cv
+                        
+                    logger.info(f"✅ {filename} processed into structured format successfully")
+                else:
+                    response_content["processing_info"] = {
+                        "structured_processing": False,
+                        "error": "Failed to process into structured format"
+                    }
+                    
+            except Exception as e:
+                logger.error(f"Error during structured processing {filename}: {str(e)}")
+                response_content["processing_info"] = {
+                    "structured_processing": False,
+                    "error": str(e)
+                }
         
         return JSONResponse(content=response_content)
         
@@ -225,6 +214,48 @@ async def get_cv_content(filename: str, auto_structure: bool = True):
     except Exception as e:
         logger.error(f"Error extracting CV content: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error extracting CV content: {str(e)}")
+
+
+@router.post("/process-structured/{filename}")
+async def process_cv_structured(filename: str):
+    """Process CV into structured format and save as original_cv.json"""
+    
+    try:
+        file_path = UPLOAD_DIR / filename
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="CV file not found")
+        
+        logger.info(f"Processing {filename} into structured format...")
+        
+        # Process into structured format
+        processing_result = await enhanced_cv_upload_service.process_existing_cv(
+            filename=filename
+        )
+        
+        if processing_result['success']:
+            logger.info(f"✅ {filename} processed and saved as original_cv.json")
+            
+            return JSONResponse(content={
+                "success": True,
+                "message": "CV processed into structured format successfully",
+                "filename": filename,
+                "structured_cv_path": processing_result['structured_cv_path'],
+                "sections_found": processing_result['sections_found'],
+                "validation_report": processing_result['validation_report'],
+                "processing_timestamp": processing_result['processing_timestamp']
+            })
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to process CV into structured format"
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing structured CV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing structured CV: {str(e)}")
 
 
 @router.get("/preview/{filename}")
