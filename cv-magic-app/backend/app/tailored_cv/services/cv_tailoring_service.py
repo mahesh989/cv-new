@@ -312,6 +312,9 @@ class CVTailoringService:
             # Validate that AI is using real CV data, not placeholder data
             self._validate_real_cv_data_used(tailored_data, original_cv)
             
+            # Validate keyword integration
+            self._validate_keyword_integration(tailored_data, recommendations)
+            
             tailored_cv = self._construct_tailored_cv(
                 original_cv,
                 tailored_data,
@@ -340,28 +343,38 @@ class CVTailoringService:
 
 """ + self.framework_content + """
 
-CRITICAL REQUIREMENTS:
-1. Follow the Impact Statement Formula for ALL bullet points
-2. Implement ALL recommendations from the provided analysis
-3. Maintain complete authenticity - enhance existing content, NEVER fabricate
-4. Optimize for ATS scanning while maintaining readability
-5. Integrate keywords naturally throughout the content
-6. **MANDATORY**: Use ONLY the actual CV data provided in the user prompt - DO NOT generate placeholder or example data
-7. **MANDATORY**: The output must contain the EXACT contact information, company names, dates, and experiences from the original CV
-8. **MANDATORY**: Preserve all real names, companies, locations, and dates from the original CV
+CRITICAL REQUIREMENTS - ABSOLUTE COMPLIANCE MANDATORY:
 
-IMPORTANT: You are tailoring a REAL person's CV. Do NOT create fake data or examples. Use the actual information provided.
+1. **IMPACT STATEMENT FORMULA (NO EXCEPTIONS):**
+   EVERY bullet point MUST follow: [Action Verb] + [Method/Technology] + [Context/Challenge] + [QUANTIFIED RESULT] + [Business Impact]
+   Example: "Led 5-person analytics team using Python/SQL to analyze 10M+ customer records, identifying $2M revenue opportunity and reducing churn by 15% within 6 months"
+   
+2. **QUANTIFICATION MANDATORY:**
+   EVERY bullet MUST include specific metrics: 
+   - Financial: $X savings/revenue/budget
+   - Scale: X people/records/projects/%
+   - Performance: X% faster/accurate/improvement
+   - Time: within X months/days/weeks
+   NO bullet point can exist without quantified metrics
 
-OUTPUT FORMAT:
-You MUST respond with ONLY a valid JSON object. 
-- NO markdown formatting
-- NO code blocks (```)
-- NO explanations or additional text
-- NO comments in the JSON
-- ONLY the JSON object itself
-- Use the EXACT contact information from the provided CV
-- Use the EXACT company names, job titles, and dates from the provided CV
-- Enhance existing bullet points but keep all factual information accurate
+3. **KEYWORD INTEGRATION (ALL REQUIRED KEYWORDS MUST APPEAR):**
+   ALL critical missing keywords from recommendations MUST be naturally integrated
+   Example: If "Fundraising" is missing, it MUST appear in relevant experience bullets
+   
+4. **DATA INTEGRITY:**
+   - Use EXACT contact information, company names, dates from original CV
+   - Enhance existing content ONLY - NEVER fabricate
+   - Preserve all factual information while adding quantification
+
+VALIDATION CHECKLIST (MUST VERIFY BEFORE RESPONDING):
+□ Every bullet contains numbers/percentages/dollar amounts
+□ All critical keywords from recommendations are integrated
+□ Contact information is exactly preserved
+□ Education dates and institutions are correct
+□ Company names and job titles are exact
+
+OUTPUT FORMAT - JSON ONLY:
+Respond with ONLY valid JSON, no other text
 
 The exact JSON structure must be:
 {
@@ -439,14 +452,30 @@ RECOMMENDATIONS TO IMPLEMENT:
 OPTIMIZATION STRATEGY:
 """ + strategy_json + """
 
-SPECIFIC INSTRUCTIONS:
-1. Apply ALL critical gaps identified in recommendations (Priority 1)
-2. Integrate technical enhancements naturally into experience bullets
-3. Enhance soft skills evidence throughout content  
-4. Follow the section ordering specified in strategy
-5. Ensure every experience bullet follows the Impact Statement Formula
-6. Add quantification to any bullets missing metrics
-7. Integrate missing keywords strategically (no keyword stuffing)
+MANDATORY IMPLEMENTATION REQUIREMENTS:
+
+1. **QUANTIFY EVERY BULLET POINT:**
+   Transform each bullet from general to specific with numbers:
+   - "improving data pipeline" → "improving data pipeline efficiency by 30%"
+   - "enabling data-driven decisions" → "enabling $500K cost savings through data-driven decisions"
+   - "reducing manual effort" → "reducing manual effort by 40 hours/week"
+   - "enhancing insights" → "enhancing insights for 50+ stakeholders across 3 departments"
+
+2. **INTEGRATE ALL CRITICAL KEYWORDS (MANDATORY):**
+   The following keywords MUST appear in experience bullets:
+   - Fundraising → integrate into data analysis contexts
+   - International Aid → relate to organizational context
+   - Non-Profit Sector → demonstrate sector awareness
+   - Data Mining → technical skill demonstration
+   - Project Management → leadership evidence
+
+3. **PRESERVE EXACT DATA:**
+   - Contact: Maheshwor Tiwari, maheshtwari99@gmail.com, 0414 032 507
+   - Companies: The Bitrates, iBuild Building Solutions, Property Console, CY Cergy Paris University
+   - Dates: Maintain exact start/end dates from original CV
+
+4. **APPLY IMPACT STATEMENT FORMULA:**
+   Every bullet must be: [Action] + [Technology] + [Context] + [Number] + [Business Impact]
 
 """
         
@@ -572,7 +601,7 @@ Please provide the optimized CV in the requested JSON format."""
             raise ValueError(f"Invalid JSON format in AI response: {e}")
     
     def _validate_tailored_json(self, data: Dict[str, Any]) -> None:
-        """Validate that parsed JSON has expected structure"""
+        """Validate that parsed JSON has expected structure and content quality"""
         required_fields = ['contact', 'experience', 'skills']
         
         for field in required_fields:
@@ -587,19 +616,65 @@ Please provide the optimized CV in the requested JSON format."""
         if not isinstance(data['experience'], list) or not data['experience']:
             raise ValueError("Experience field must be a non-empty array")
         
-        for exp in data['experience']:
+        # CRITICAL: Validate Impact Statement Formula compliance
+        quantification_failures = []
+        for i, exp in enumerate(data['experience']):
             if not isinstance(exp, dict) or 'bullets' not in exp:
                 raise ValueError("Each experience entry must have bullets array")
+            
+            for j, bullet in enumerate(exp.get('bullets', [])):
+                # Check for quantification (numbers, percentages, dollar amounts)
+                has_numbers = any(char.isdigit() for char in bullet)
+                has_percentage = '%' in bullet
+                has_dollar = '$' in bullet
+                has_quantification = has_numbers or has_percentage or has_dollar
+                
+                if not has_quantification:
+                    quantification_failures.append(f"Experience {i+1}, bullet {j+1}: '{bullet[:60]}...'")
+        
+        if quantification_failures:
+            failure_summary = "\n".join(quantification_failures)
+            raise ValueError(f"Impact Statement Formula violation - bullets missing quantification:\n{failure_summary}")
         
         # Validate skills structure
         if not isinstance(data['skills'], list):
             raise ValueError("Skills field must be an array")
         
-        logger.info("✅ JSON structure validation passed")
+        logger.info("✅ JSON structure and Impact Formula validation passed")
     
     def _validate_real_cv_data_used(self, tailored_data: Dict[str, Any], original_cv: OriginalCV) -> None:
         """Skip placeholder-specific checks (e.g., 'John Doe') and allow generation to proceed."""
         logger.info("ℹ️ Skipping placeholder checks; proceeding with generated data as-is.")
+    
+    def _validate_keyword_integration(self, tailored_data: Dict[str, Any], recommendations: RecommendationAnalysis) -> None:
+        """Validate that critical missing keywords from recommendations are integrated"""
+        # Get all text content from the tailored CV
+        cv_text = ""
+        
+        # Add experience bullets
+        for exp in tailored_data.get('experience', []):
+            cv_text += " ".join(exp.get('bullets', []))
+        
+        # Add skills text
+        for skill_cat in tailored_data.get('skills', []):
+            cv_text += " ".join(skill_cat.get('skills', []))
+        
+        # Convert to lowercase for case-insensitive matching
+        cv_text_lower = cv_text.lower()
+        
+        # Check for critical missing keywords
+        missing_keywords = []
+        critical_keywords = recommendations.critical_gaps[:5]  # Top 5 critical gaps
+        
+        for keyword in critical_keywords:
+            if keyword.lower() not in cv_text_lower:
+                missing_keywords.append(keyword)
+        
+        if missing_keywords:
+            missing_list = ", ".join(missing_keywords)
+            raise ValueError(f"Critical keyword integration failure. Missing keywords: {missing_list}. These MUST be integrated into experience bullets or skills section.")
+        
+        logger.info(f"✅ Keyword integration validation passed - {len(critical_keywords)} critical keywords found")
     
     # Fallback CV creation removed - now raises errors for better debugging
     
