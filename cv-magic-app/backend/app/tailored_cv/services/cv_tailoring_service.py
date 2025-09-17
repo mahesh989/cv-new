@@ -114,6 +114,15 @@ class CVTailoringService:
         Returns:
             CVValidationResult with validation status and issues
         """
+        logger.info(f"🔍 [DEBUG] Validating CV structure:")
+        logger.info(f"- CV object type: {type(cv)}")
+        logger.info(f"- CV attributes: {dir(cv)}")
+        
+        # Debug print CV data
+        if hasattr(cv, 'model_dump'):
+            cv_data = cv.model_dump()
+            logger.info(f"- CV data: {json.dumps(cv_data, indent=2)}")
+        
         errors = []
         warnings = []
         suggestions = []
@@ -269,18 +278,23 @@ class CVTailoringService:
         strategy: OptimizationStrategy,
         custom_instructions: Optional[str] = None
     ) -> TailoredCV:
-        """
-        Generate tailored CV using AI service
+        """Generate tailored CV using AI service"""
+        import uuid
+        request_id = str(uuid.uuid4())[:8]
+        logger.info(f"[{request_id}] 🎯 Starting CV tailoring for {recommendations.company} with strategy: {strategy.education_strategy}")
         
-        Args:
-            original_cv: Original CV data
-            recommendations: Recommendation analysis
-            strategy: Optimization strategy
-            custom_instructions: Optional custom instructions
-            
-        Returns:
-            TailoredCV with optimized content
-        """
+        # Log initial stats
+        logger.info(f"[{request_id}] Initial stats:")
+        logger.info(f"[{request_id}] - Experience entries: {len(original_cv.experience)}")
+        logger.info(f"[{request_id}] - Total bullets: {sum(len(exp.bullets) for exp in original_cv.experience)}")
+        logger.info(f"[{request_id}] - Skills categories: {len(original_cv.skills)}")
+        logger.info(f"[{request_id}] - Total skills: {sum(len(cat.skills) for cat in original_cv.skills)}")
+        
+        # Log critical gaps
+        if recommendations.critical_gaps:
+            logger.info(f"[{request_id}] Critical gaps to address: {', '.join(recommendations.critical_gaps[:5])}")
+            logger.info(f"[{request_id}] Technical enhancements needed: {', '.join(recommendations.technical_enhancements[:5])}")
+        
         # Prepare the comprehensive prompt
         system_prompt = self._build_system_prompt()
         user_prompt = self._build_user_prompt(
@@ -291,12 +305,10 @@ class CVTailoringService:
         )
         
         # Generate response using AI service with retry logic
-        logger.info("🤖 Generating tailored CV using AI service...")
+        logger.info(f"[{request_id}] 🤖 Generating tailored CV using AI service...")
         
         max_attempts = 5  # Increase attempts from 3 to 5
         for attempt in range(max_attempts):
-            logger.info(f"Attempt {attempt + 1}/{max_attempts}")
-            
             # Use progressively lower temperature for more consistent results
             if attempt == 0:
                 temperature = 0.3
@@ -307,6 +319,10 @@ class CVTailoringService:
             else:
                 temperature = 0.05  # Very low temperature for final attempts
             
+            logger.info(f"[{request_id}] Attempt {attempt + 1}/{max_attempts} with temp={temperature}")
+            logger.info(f"[{request_id}] - System prompt length: {len(system_prompt)}")
+            logger.info(f"[{request_id}] - User prompt length: {len(user_prompt)}")
+            
             ai_response = await ai_service.generate_response(
                 prompt=user_prompt,
                 system_prompt=system_prompt,
@@ -314,24 +330,30 @@ class CVTailoringService:
                 max_tokens=4000
             )
             
+            # Log AI response stats
+            logger.info(f"[{request_id}] AI response stats:")
+            logger.info(f"[{request_id}] - Content length: {len(ai_response.content)}")
+            logger.info(f"[{request_id}] - First 300 chars: {ai_response.content[:300].replace(chr(10), ' ')}...")
+            
             # Try to parse and validate
             try:
                 tailored_data = self._extract_and_parse_json(ai_response.content)
-                self._validate_tailored_json(tailored_data)
+                self._validate_tailored_json(tailored_data, request_id=request_id)
                 self._validate_real_cv_data_used(tailored_data, original_cv)
-                self._validate_keyword_integration(tailored_data, recommendations)
+                self._validate_keyword_integration(tailored_data, recommendations, request_id=request_id)
                 
                 # If we get here, validation passed
-                logger.info(f"✅ AI generation successful on attempt {attempt + 1}")
+                logger.info(f"[{request_id}] ✅ AI generation successful on attempt {attempt + 1}")
                 break
                 
             except (ValueError, json.JSONDecodeError) as e:
-                logger.warning(f"Attempt {attempt + 1} failed validation: {e}")
+                logger.warning(f"[{request_id}] Attempt {attempt + 1} failed validation: {e}")
                 if attempt == max_attempts - 1:
                     raise Exception(f"AI failed to generate compliant CV after {max_attempts} attempts: {str(e)}")
                 else:
                     # Add more specific instructions for next attempt
                     user_prompt = self._add_correction_instructions(user_prompt, str(e))
+                    logger.info(f"[{request_id}] 🔁 Added correction instructions and retrying...")
                     continue
         
         # Build tailored CV from validated data
@@ -351,7 +373,21 @@ class CVTailoringService:
 
 ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
 
-1. EVERY BULLET MUST HAVE NUMBERS:
+1. CONTACT INFORMATION RULES:
+   - COPY ALL contact fields EXACTLY from the original CV's personal_information or contact section
+   - NEVER leave any contact field empty or null
+   - If a field exists in the original CV, you MUST include it with its exact value
+   - Format for contact section:
+     "contact": {
+       "name": "EXACT name from CV",
+       "phone": "EXACT phone from CV (no whitespace-only values)",
+       "email": "EXACT email from CV",
+       "location": "EXACT location from CV",
+       "linkedin": "EXACT LinkedIn from CV or empty string",
+       "website": "EXACT website from CV or empty string"
+     }
+
+2. EVERY BULLET MUST HAVE NUMBERS:
    Transform EVERY bullet point to include quantification.
    
    BAD: "Improved data pipeline efficiency"
@@ -360,15 +396,24 @@ ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
    BAD: "Led team to deliver projects"
    GOOD: "Led 8-person team to deliver 5 projects worth $1.2M in 6 months"
 
-2. ALL KEYWORDS MUST APPEAR:
-   If recommendations say "Fundraising" is missing - ADD IT to relevant bullets.
-   If recommendations say "International Aid" is missing - ADD IT to relevant bullets.
-   Every keyword in critical_gaps MUST appear in the final CV.
+2. KEYWORD INTEGRATION RULES:
+   - ONLY add keywords that have semantic matches or clear evidence in the original CV
+   - NEVER add keywords that cannot be reasonably inferred from existing experience
+   - Look for synonyms and related terms in the original CV before adding keywords
+   
+   CORRECT APPROACH:
+   Original: "Analyzed customer support data to improve response strategies"
+   If 'customer service' is a missing keyword: OK to enhance as it's semantically present
+   
+   INCORRECT APPROACH:
+   Original: "Analyzed data for business insights"
+   DON'T ADD: "fundraising" or "humanitarian aid" if there's no related experience
+   
+   VALIDATION RULES:
+   - For each keyword you plan to add, identify the specific experience or skill in the original CV that justifies it
+   - If you cannot find semantic evidence in the CV, DO NOT add the keyword
 
-3. PRESERVE EXACT DATA:
-   - Name: Use EXACT name from original CV
-   - Email: Use EXACT email from original CV  
-   - Phone: Use EXACT phone from original CV
+4. PRESERVE EXACT DATA:
    - Companies: Use EXACT company names
    - Dates: Use EXACT dates
 
@@ -462,14 +507,40 @@ OPTIMIZATION STRATEGY:
 
 YOUR TASK - TRANSFORM THIS CV:
 
-1. ADD NUMBERS TO EVERY BULLET:
-   Look at each bullet point. If it has no numbers, ADD THEM:
+0. CONTACT INFORMATION HANDLING:
+   You MUST first copy ALL contact information from the original CV.
+   Look for fields in both 'personal_information' and 'contact' sections.
+   Example from original CV data above:
+   "contact": {
+     "name": "COPY EXACT NAME",
+     "phone": "COPY EXACT PHONE (if whitespace/null, use '')",
+     "email": "COPY EXACT EMAIL",
+     "location": "COPY EXACT LOCATION",
+     "linkedin": "COPY EXACT LINKEDIN (if null, use '')",
+     "website": "COPY EXACT WEBSITE (if null, use '')"
+   }
+
+1. QUANTIFICATION RULES:
+   Add realistic numbers based ONLY on evidence from the original CV:
    
-   Original: "Designed and implemented Python scripts for data cleaning"
-   Transform to: "Designed and implemented 15+ Python scripts for data cleaning, processing 500K records daily, reducing errors by 45%"
+   CORRECT APPROACH:
+   Original: "Developed Python scripts for data cleaning"
+   Look for:
+   - Scale hints in the CV (team size, project scope)
+   - Timeframe from employment dates
+   - Technology constraints (what's realistic for the tools mentioned)
+   Good: "Developed 3-5 Python scripts for data cleaning, processing 50K records weekly"
    
-   Original: "Developed machine learning models"
-   Transform to: "Developed 5 machine learning models achieving 92% accuracy, predicting outcomes for 10K+ customers monthly"
+   INCORRECT APPROACH:
+   Bad: "Processed 10M records daily" (unrealistic without evidence)
+   Bad: "Improved efficiency by 95%" (suspiciously high)
+   Bad: "Led team of 50 engineers" (no evidence of such scale)
+   
+   QUANTIFICATION GUIDELINES:
+   - Use conservative numbers when uncertain
+   - Numbers should match the role level and company size
+   - Prefer ranges (3-5, 20-30%) over exact numbers when uncertain
+   - Ensure numbers are consistent across all bullets
 
 2. ADD THESE MISSING KEYWORDS TO BULLETS:
    Look at critical_gaps in recommendations. For EACH keyword listed:
@@ -500,11 +571,22 @@ YOUR TASK - TRANSFORM THIS CV:
         
         prompt += """
 CRITICAL REMINDERS:
+- First, EXACTLY copy ALL contact information fields
 - Use ONLY existing experiences - enhance and reframe, NEVER fabricate
-- Every bullet must include quantified metrics
-- Integrate all missing technical and soft skills naturally
-- Maintain professional tone and authenticity
-- Target 80+ ATS score optimization
+- Add REALISTIC numbers based on CV evidence
+- ONLY integrate keywords with semantic matches in original CV
+- If a recommended keyword has no CV evidence, DO NOT ADD IT
+- Use conservative estimates when adding metrics
+- Maintain consistency in scale across all quantification
+- Numbers should reflect actual role scope and company size
+- Never return whitespace-only or null values - use empty string '' instead
+
+REALISTIC METRICS EXAMPLES:
+- Team size: 2-8 people (not 50+)
+- Data processing: thousands to low millions (not billions)
+- Improvement %: 15-40% (not 95%)
+- Project counts: 3-10 (not 100+)
+- Timeframes: Match employment duration
 
 Please provide the optimized CV in the requested JSON format."""
         
@@ -517,6 +599,29 @@ Please provide the optimized CV in the requested JSON format."""
         recommendations: RecommendationAnalysis,
         strategy: OptimizationStrategy
     ) -> TailoredCV:
+        # Enhanced skills extraction from experience
+        extracted_skills = self._extract_skills_from_experience(original_cv.experience)
+        
+        # Skills categorization helper
+        def categorize_skill(skill: str) -> str:
+            technical_indicators = ['python', 'sql', 'tableau', 'bi', 'docker', 'git', 'analytics', 'data']
+            soft_indicators = ['communication', 'leadership', 'collaboration', 'teamwork', 'mentoring', 'presenting']
+            skill_lower = skill.lower()
+            
+            if any(ind in skill_lower for ind in technical_indicators):
+                return 'Technical Skills'
+            elif any(ind in skill_lower for ind in soft_indicators):
+                return 'Soft Skills'
+            return 'Domain Expertise'
+        
+        # Group extracted skills by category
+        categorized_skills = {}
+        for skill in extracted_skills:
+            category = categorize_skill(skill)
+            if category not in categorized_skills:
+                categorized_skills[category] = set()
+            categorized_skills[category].add(skill)
+        
         """Construct TailoredCV object from AI-generated content"""
         
         # Extract optimization notes and applied enhancements
@@ -651,13 +756,19 @@ Please provide the optimized CV in the requested JSON format."""
             logger.error(f"JSON parsing failed. Content: {content[:1000]}...")
             raise ValueError(f"Invalid JSON format in AI response: {e}")
     
-    def _validate_tailored_json(self, data: Dict[str, Any]) -> None:
+    def _validate_tailored_json(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
         """Validate that parsed JSON has expected structure and content quality"""
         required_fields = ['contact', 'experience', 'skills']
         
+        # Log validation start
+        logger.info(f"[{request_id}] 🔍 Starting JSON validation")
+        
         for field in required_fields:
             if field not in data:
+                logger.error(f"[{request_id}] ❌ Missing required field: {field}")
                 raise ValueError(f"Required field '{field}' missing from AI response")
+            else:
+                logger.debug(f"[{request_id}] ✓ Found field: {field}")
         
         # Validate contact structure
         if not isinstance(data['contact'], dict):
@@ -761,34 +872,54 @@ FIX: Output ONLY valid JSON!
         """Skip placeholder-specific checks (e.g., 'John Doe') and allow generation to proceed."""
         logger.info("ℹ️ Skipping placeholder checks; proceeding with generated data as-is.")
     
-    def _validate_keyword_integration(self, tailored_data: Dict[str, Any], recommendations: RecommendationAnalysis) -> None:
+    def _validate_keyword_integration(self, tailored_data: Dict[str, Any], recommendations: RecommendationAnalysis, request_id: str = 'debug') -> None:
         """Validate that critical missing keywords from recommendations are integrated"""
+        # Log validation start
+        logger.info(f"[{request_id}] 🔍 Starting keyword integration validation")
+        
         # Get all text content from the tailored CV
         cv_text = ""
         
-        # Add experience bullets
-        for exp in tailored_data.get('experience', []):
-            cv_text += " ".join(exp.get('bullets', []))
+        # Add experience bullets with logging
+        logger.info(f"[{request_id}] Scanning experience bullets:")
+        for i, exp in enumerate(tailored_data.get('experience', [])):
+            bullets = exp.get('bullets', [])
+            logger.info(f"[{request_id}] - Experience {i+1}: {len(bullets)} bullets")
+            cv_text += " ".join(bullets)
         
-        # Add skills text
-        for skill_cat in tailored_data.get('skills', []):
-            cv_text += " ".join(skill_cat.get('skills', []))
+        # Add skills text with logging
+        logger.info(f"[{request_id}] Scanning skills:")
+        for i, skill_cat in enumerate(tailored_data.get('skills', [])):
+            skills = skill_cat.get('skills', [])
+            logger.info(f"[{request_id}] - Category {i+1}: {len(skills)} skills")
+            cv_text += " ".join(skills)
         
         # Convert to lowercase for case-insensitive matching
         cv_text_lower = cv_text.lower()
         
-        # Filter out non-keyword entries from critical_gaps (e.g., category labels with percentages)
+        # Define keyword variations
+        keyword_variations = {
+            'results-driven': ['results driven', 'results-driven', 'results oriented', 'results-oriented', 'drive results'],
+            'analytical': ['analysis', 'analytics', 'analyze', 'analytical'],
+            'innovative': ['innovation', 'innovate', 'innovating'],
+            'strategic': ['strategy', 'strategies', 'strategically'],
+            'leadership': ['leader', 'led', 'leading'],
+            'collaborative': ['collaboration', 'collaborate', 'collaborating', 'team'],
+            'customer-focused': ['customer focused', 'customer-focused', 'customer centric', 'customer-centric'],
+        }
+        
+        # Filter out non-keyword entries from critical_gaps
         valid_keywords = []
-        for keyword in recommendations.critical_gaps[:10]:  # Check up to 10 gaps
+        for keyword in recommendations.critical_gaps[:10]:
             # Skip entries that look like category labels or statistics
             if '(' in keyword and '%' in keyword:
                 logger.debug(f"Skipping non-keyword entry in critical_gaps: {keyword}")
                 continue
-            # Skip entries that are too long to be keywords (likely descriptions)
+            # Skip entries that are too long to be keywords
             if len(keyword) > 50:
                 logger.debug(f"Skipping overly long entry in critical_gaps: {keyword[:50]}...")
                 continue
-            # Skip entries that contain numbers with decimal points (likely scores)
+            # Skip entries that contain special chars
             if any(c in keyword for c in [':', '=', '\n']):
                 logger.debug(f"Skipping non-keyword with special chars: {keyword}")
                 continue
@@ -797,20 +928,51 @@ FIX: Output ONLY valid JSON!
         # Only validate if we have actual keywords to check
         if not valid_keywords:
             logger.warning("⚠️ No valid keywords found in critical_gaps - using fallback keyword list")
-            # Use the actual missing keywords from the recommendations instead
+            # Use the actual missing keywords from the recommendations
             valid_keywords = (recommendations.missing_keywords + 
                             recommendations.missing_technical_skills + 
                             recommendations.missing_soft_skills)[:5]
         
-        # Check for critical missing keywords
+        # Check for critical missing keywords with variations
         missing_keywords = []
         for keyword in valid_keywords:
-            if keyword.lower() not in cv_text_lower:
+            keyword_lower = keyword.lower()
+            
+            # Check for keyword and its variations
+            found = False
+            
+            # Direct match
+            if keyword_lower in cv_text_lower:
+                found = True
+                continue
+            
+            # Check variations if available
+            for base_keyword, variations in keyword_variations.items():
+                if keyword_lower.replace('-', ' ') in variations:
+                    # If the keyword is a known type, check all its variations
+                    if any(var in cv_text_lower for var in variations):
+                        found = True
+                        break
+            
+            # Handle compound keywords (e.g., "data analysis")
+            if not found and ' ' in keyword_lower:
+                parts = keyword_lower.split()
+                if all(part in cv_text_lower for part in parts):
+                    found = True
+            
+            if not found:
+                # Add to missing only if no variations were found
                 missing_keywords.append(keyword)
         
-        if missing_keywords:
+        # Only fail if more than 50% of keywords are missing
+        if missing_keywords and len(missing_keywords) > len(valid_keywords) * 0.5:
             missing_list = ", ".join(missing_keywords)
             raise ValueError(f"Critical keyword integration failure. Missing keywords: {missing_list}. These MUST be integrated into experience bullets or skills section.")
+        elif missing_keywords:
+            # Just warn if some keywords are missing but not too many
+            logger.warning(f"⚠️ Some keywords not found but within acceptable range: {', '.join(missing_keywords)}")
+        
+        logger.info(f"✅ Keyword integration validation passed - {len(valid_keywords) - len(missing_keywords)}/{len(valid_keywords)} critical keywords found")
         
         logger.info(f"✅ Keyword integration validation passed - {len(valid_keywords)} critical keywords found")
     
@@ -1047,8 +1209,18 @@ FIX: Output ONLY valid JSON!
             if not original_cv_path.exists():
                 raise FileNotFoundError(f"Original CV not found at {original_cv_path}")
             
+            # Debug logging for CV loading
+            logger.info(f"🔍 [DEBUG] Loading original CV from {original_cv_path}")
+            with open(original_cv_path, 'r') as f:
+                raw_cv_data = json.load(f)
+            logger.info(f"- Raw CV data keys: {list(raw_cv_data.keys())}")
+            logger.info(f"- Format type: {'text only' if 'text' in raw_cv_data else 'structured'}")
+            
             cv_data = RecommendationParser.load_original_cv(str(original_cv_path))
+            logger.info(f"- Parsed CV data keys: {list(cv_data.keys() if isinstance(cv_data, dict) else [])}")
+            
             original_cv = OriginalCV(**cv_data)
+            logger.info(f"- Final CV object attributes: {dir(original_cv)}")
             
             # Load recommendation
             if not company_folder.exists():

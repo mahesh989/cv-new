@@ -1,0 +1,53 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-17T20:55:21.746163",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "Tableau",
+    "project management",
+    "communication",
+    "customer service"
+  ],
+  "matched_preferred_keywords": [
+    "data extraction",
+    "analytical thinking"
+  ],
+  "missed_required_keywords": [
+    "VBA",
+    "stakeholder management",
+    "data warehouse",
+    "data mining",
+    "marketing campaigns",
+    "data models"
+  ],
+  "missed_preferred_keywords": [
+    "data querying",
+    "problem-solving",
+    "data de-duplication",
+    "data governance",
+    "campaign optimization"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 5,
+    "matched_required_count": 7,
+    "matched_preferred_count": 2
+  },
+  "matching_notes": {
+    "SQL": "Proficient in SQL for querying and managing databases",
+    "Power BI": "Used Power BI to present research findings",
+    "Excel": "Adept at leveraging Excel for data-driven solutions",
+    "Tableau": "Skilled in creating visualizations using Tableau",
+    "project management": "Experience in managing projects through data-driven decision-making",
+    "communication": "Demonstrated communication skills in presenting findings",
+    "customer service": "Analyzed customer support data to enhance operational efficiency",
+    "data extraction": "Automated data extraction using Python",
+    "analytical thinking": "Developed solutions that required analytical thinking"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "metadata": {}
+}

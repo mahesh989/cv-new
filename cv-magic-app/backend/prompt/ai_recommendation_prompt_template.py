@@ -96,10 +96,14 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
 
 ## 🎯 Strategic Constraints & Guidelines
 
-### Evidence-Based Approach
-- **No Fabrication:** Only reframe or highlight existing CV experiences
-- **Transferable Skills:** Infer soft skills if logically supported by evidence
-- **Risk Assessment:** Each recommendation must include risk evaluation
+### Constraints
+- **No Fabrication:** Only reframe or highlight existing CV experiences. Do not invent new ones.
+- **Transferable Skills:** Soft skills can be inferred if logically supported (e.g., teaching → communication; leading tutorials → team management).
+- **Evidence Required:** Each recommendation must include:
+  - Basis (CV evidence)
+  - Integration (how to add naturally)
+  - Validation (how to defend if asked)
+  - Risk (likelihood of challenge)
 
 ### Validation Requirements
 For each recommendation provide:
@@ -130,6 +134,8 @@ Current ATS breakdown shows specific improvement areas:
 Based on {extracted_scores.get('industry_fit', 0)}/100 industry fit score:
 - **Transferable Strengths:** Leverage existing skills for new domain
 - **Domain Knowledge Gaps:** Address industry-specific terminology
+- **Soft/Transferable Skills:** Suggested inferences following the Evidence Required format
+- **Skills Gap Mitigation:** Show transferable skills, learning trajectory, and foundational strengths for missing requirements. Note risks (e.g., avoid claiming tools not used)
 - **Adaptation Timeline:** Realistic skill development plan
 
 ### 4. Experience & Seniority Positioning
@@ -150,12 +156,6 @@ Technical depth score: {extracted_scores.get('technical_depth', 0)}/100
 
 # 🎯 CV Tailoring Strategy Report for {company}
 
-## 📊 Executive Summary
-- **Current ATS Score:** {final_ats_score}/100 ({category_status})
-- **Key Strengths:** [Top 3-4 highest-scoring areas]
-- **Critical Gaps:** [Top 3-4 lowest-scoring areas requiring immediate attention]
-- **Success Probability:** [Based on strategic assessment and component scores]
-
 ## 🔍 Priority Gap Analysis
 **Immediate Action Required (Low Scores):**
 - [List areas with scores below 50]
@@ -163,18 +163,24 @@ Technical depth score: {extracted_scores.get('technical_depth', 0)}/100
 **Optimization Opportunities (Medium Scores):**
 - [List areas with scores 50-75]
 
-**Strength Amplification (High Scores):**
-- [List areas with scores above 75]
-
-## 🛠️ Keyword Integration Strategy
-**Critical Missing Keywords (0% domain match):**
-- [Specific domain keywords to integrate with injection points]
+## 🔑 Keyword Integration Strategy
+**Critical Missing Keywords ({ats_breakdown.get('category1', {}).get('domain_keywords_match_rate', 0)}% domain match):**
+- **Emphasize:** Matched domain keywords already present
+- **Safe to Add:** Missing but defensible domain keywords
+- **Avoid:** Risky domain keywords not supported
+- **Alternatives:** Semantic equivalents for missing domain terms
 
 **Technical Skills Enhancement ({ats_breakdown.get('category1', {}).get('technical_skills_match_rate', 0)}% current match):**
-- [Technical keywords to add/emphasize]
+- **Emphasize:** Current technical skills that match JD requirements
+- **Safe to Add:** Missing technical keywords that can be defensibly claimed
+- **Avoid:** Technical skills without any supporting evidence
+- **Alternatives:** Related technical terms or foundational skills
 
 **Soft Skills Optimization ({ats_breakdown.get('category1', {}).get('soft_skills_match_rate', 0)}% current match):**
-- [Soft skills to highlight with evidence]
+- **Emphasize:** Soft skills with clear CV evidence
+- **Safe to Add:** Transferable soft skills logically inferred from experience
+- **Avoid:** Soft skills claims without supporting examples
+- **Alternatives:** Evidence-based soft skill demonstrations
 
 ## 🎪 Experience Reframing Strategy
 **Industry Transition Focus ({extracted_scores.get('industry_fit', 0)}/100 current fit):**
@@ -186,18 +192,9 @@ Technical depth score: {extracted_scores.get('technical_depth', 0)}/100
 **Technical Depth Showcase ({extracted_scores.get('technical_depth', 0)}/100 current score):**
 - [Technical achievements and complexity indicators]
 
-## 📈 ATS Score Improvement Roadmap
-**Target Score:** [Realistic target based on current {final_ats_score}]
-
-**High-Impact Changes (Expected +10-15 points):**
-- [Top 3 recommendations with highest ROI]
-
-**Medium-Impact Changes (Expected +5-10 points):**
-- [Secondary optimizations]
-
-**Fine-Tuning (Expected +2-5 points):**
-- [Final polish recommendations]
-
+## ⚠️ Strategic Warnings
+- **Don't Oversell:** Skills not to claim + risks
+- **Don't Undersell:** Strengths/advantages to highlight
 
 ---
 

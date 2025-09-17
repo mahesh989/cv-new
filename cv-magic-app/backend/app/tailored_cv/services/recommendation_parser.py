@@ -328,6 +328,10 @@ class RecommendationParser:
         """
         Load and parse the original CV file
         
+        Detailed logging has been added to track the CV loading and conversion process,
+        helping identify any potential formatting or content issues early.
+        
+        
         Args:
             cv_path: Path to the original_cv.json file
             
@@ -335,21 +339,41 @@ class RecommendationParser:
             Structured CV data
         """
         try:
+            logger.info(f"📂 Loading CV from: {cv_path}")
             with open(cv_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+            
+            # Log the detected format and structure
+            logger.info(f"📋 CV format check:")
+            logger.info(f"  - Top-level keys: {list(data.keys())}")
+            logger.info(f"  - Has metadata: {'metadata' in data}")
+            if 'metadata' in data:
+                logger.info(f"  - Source file: {data['metadata'].get('source_filename')}")
+                logger.info(f"  - Processing version: {data['metadata'].get('processing_version')}")
             
             # Check if this is already structured CV data or raw text
             if 'personal_information' in data:
                 # Already structured format
-                logger.info("✅ Loaded structured CV data")
+                logger.info("✅ Detected structured CV format")
+                logger.info(f"📊 Structure overview:")
+                logger.info(f"  - Skills sections: {list(data.get('skills', {}).keys())}")
+                logger.info(f"  - Experience entries: {len(data.get('experience', []))}")
+                logger.info(f"  - Education entries: {len(data.get('education', []))}")
+                logger.info(f"  - Projects: {len(data.get('projects', []))}")
+                
                 return RecommendationParser._convert_structured_to_model_format(data)
             elif 'text' in data:
                 # Raw text format - parse it
+                logger.info("📝 Detected raw text format")
                 cv_text = data.get('text', '')
+                logger.info(f"  - Text length: {len(cv_text)} characters")
                 structured_cv = RecommendationParser._parse_cv_text(cv_text)
-                logger.info("✅ Loaded and parsed raw text CV")
+                logger.info("✅ Successfully parsed raw text CV")
                 return structured_cv
             else:
+                logger.error(f"❌ Unknown CV format detected")
+                logger.error(f"  - Expected: 'personal_information' or 'text' key")
+                logger.error(f"  - Found keys: {list(data.keys())}")
                 raise ValueError(f"Unknown CV file format. Expected 'personal_information' or 'text' key, got: {list(data.keys())}")
             
         except Exception as e:
@@ -517,124 +541,175 @@ class RecommendationParser:
     def _convert_structured_to_model_format(structured_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert structured CV data to the format expected by CV models
-        Uses comprehensive parser to handle all sections properly
+        Handles the new structured format with personal_information and detailed sections
         """
-        # Import the structured parser
-        from app.services.structured_cv_parser import enhanced_cv_parser
+        logger.info("🔄 Starting structured CV conversion")
+        logger.info("📊 Input data validation:")
         
-        # If the data looks like raw text, parse it first
-        if 'text' in structured_data and isinstance(structured_data.get('text'), str):
-            # This is raw text format, parse it
-            import asyncio
-            parsed_cv = asyncio.run(enhanced_cv_parser.parse_cv_content(structured_data['text']))
-            structured_data = parsed_cv
-        
+        # Convert personal_information to contact format
+        logger.info("👤 Converting contact information")
         personal_info = structured_data.get('personal_information', {})
-        
-        # Convert contact information
         contact = {
             'name': personal_info.get('name', ''),
             'email': personal_info.get('email', ''),
             'phone': personal_info.get('phone', ''),
             'location': personal_info.get('location', '')
         }
+        logger.info(f"  - Source fields: {list(personal_info.keys())}")
+        logger.info(f"  - Mapped fields: {list(contact.keys())}")
+        logger.info(f"  - Contact completeness: {sum(1 for v in contact.values() if v) / len(contact) * 100:.1f}%")
         
-        # Convert education
-        education = []
-        for edu in structured_data.get('education', []):
-            education.append({
-                'institution': edu.get('institution', ''),
-                'degree': edu.get('degree', ''),
-                'location': edu.get('location', ''),
-                'graduation_date': edu.get('duration', '').split(' - ')[-1] if edu.get('duration') else ''
-            })
-        
-        # Convert experience
+        # Convert experience entries
+        logger.info("💼 Converting experience entries")
         experience = []
-        for exp in structured_data.get('experience', []):
-            # Convert achievements to bullets format
-            bullets = exp.get('achievements', []) + exp.get('responsibilities', [])
-            
-            # Parse dates more carefully
+        source_experience = structured_data.get('experience', [])
+        logger.info(f"  - Found {len(source_experience)} experience entries")
+        
+        for idx, exp in enumerate(source_experience, 1):
+            logger.info(f"  - Processing experience {idx}/{len(source_experience)}")
+            # Parse duration into start/end dates
             duration = exp.get('duration', '')
-            if ' – ' in duration:
-                parts = duration.split(' – ')
-                start_date = parts[0].strip()
-                end_date = parts[1].strip() if len(parts) > 1 else 'Present'
-            elif ' - ' in duration:
-                parts = duration.split(' - ')
-                start_date = parts[0].strip()
-                end_date = parts[1].strip() if len(parts) > 1 else 'Present'
-            else:
-                start_date = duration
-                end_date = 'Present'
+            dates = duration.split('–') if '–' in duration else duration.split('-')
             
-            experience.append({
-                'company': exp.get('company', ''),
-                'title': exp.get('position', ''),
+            start_date = dates[0].strip() if dates else ''
+            end_date = dates[1].strip() if len(dates) > 1 else 'Present'
+            
+            bullets = exp.get('responsibilities', []) + exp.get('achievements', [])
+            experience_entry = {
+                'company': exp.get('company', '').split(',')[0],  # Remove location part if present
+                'title': exp.get('title', ''),
                 'location': exp.get('location', ''),
                 'start_date': start_date,
                 'end_date': end_date,
                 'bullets': bullets
-            })
+            }
+            logger.info(f"    • Company: {experience_entry['company']}")
+            logger.info(f"    • Title: {experience_entry['title']}")
+            logger.info(f"    • Duration: {start_date} to {end_date}")
+            logger.info(f"    • Bullets: {len(bullets)}")
+            if experience_entry['bullets']:  # Only add if we have content
+                experience.append(experience_entry)
         
-        # Convert skills - handle both list and grouped format
+        logger.info(f"Converted {len(experience)} experience entries")
+        
+        # Convert skills to category-based format
+        logger.info("🔧 Converting skills section")
+        skills_data = structured_data.get('skills', {})
+        logger.info(f"  - Source skill categories: {list(skills_data.keys())}")
         skills = []
-        technical_skills = structured_data.get('technical_skills', [])
-        if technical_skills:
-            # Clean and process skills
-            cleaned_skills = []
-            for skill in technical_skills:
-                if isinstance(skill, str):
-                    # Remove common prefixes and clean up
-                    cleaned = skill.replace('Advanced ', '').replace('Strong experience in ', '')
-                    cleaned = cleaned.replace('Proficient in ', '').replace('Experience with ', '')
-                    # Take the main skill (before 'for' or 'and')
-                    if ' for ' in cleaned:
-                        cleaned = cleaned.split(' for ')[0]
-                    cleaned_skills.append(cleaned.strip())
-            
-            if cleaned_skills:
-                skills.append({
-                    'category': 'Technical Skills',
-                    'skills': cleaned_skills
-                })
         
-        # Add soft skills if available
-        soft_skills = structured_data.get('soft_skills', [])
+        # Technical skills
+        logger.info("  - Processing technical skills:")
+        tech_skills = []
+        for skill in skills_data.get('technical_skills', []):
+            # Extract the main skill from the descriptive text
+            # e.g., "Advanced SQL skills, proficient in..." -> "SQL"
+            if 'SQL' in skill:
+                tech_skills.append('SQL')
+            if 'Power BI' in skill:
+                tech_skills.append('Power BI')
+            if 'Python' in skill:
+                tech_skills.append('Python')
+            if 'Excel' in skill:
+                tech_skills.append('Excel')
+            if 'data analysis' in skill.lower():
+                tech_skills.append('Data Analysis')
+        
+        if tech_skills:
+            tech_skills = list(set(tech_skills))  # Remove duplicates
+            skills.append({
+                'category': 'Technical Skills',
+                'skills': tech_skills
+            })
+            logger.info(f"    • Extracted {len(tech_skills)} unique technical skills")
+            logger.info(f"    • Skills: {', '.join(tech_skills)}")
+        
+        # Soft skills
+        soft_skills = [
+            skill.split(',')[0]  # Take the main skill part
+            for skill in skills_data.get('soft_skills', [])
+        ]
         if soft_skills:
             skills.append({
                 'category': 'Soft Skills',
                 'skills': soft_skills
             })
         
-        # Add domain expertise if available
-        domain_expertise = structured_data.get('domain_expertise', [])
-        if domain_expertise:
+        # Domain expertise
+        domain_skills = [
+            skill.split(',')[0]  # Take the main skill part
+            for skill in skills_data.get('domain_expertise', [])
+        ]
+        if domain_skills:
             skills.append({
                 'category': 'Domain Expertise',
-                'skills': domain_expertise
+                'skills': domain_skills
             })
         
-        # Calculate years of experience
-        total_years = len(experience) * 2 if experience else 0  # Rough estimate
-        if structured_data.get('total_years_experience'):
-            total_years = structured_data['total_years_experience']
+        # If no explicit soft/domain skills, extract from key_skills
+        if not soft_skills and not domain_skills:
+            key_skills = []
+            for skill in skills_data.get('key_skills', []):
+                if any(term in skill.lower() for term in ['communication', 'interpersonal', 'teamwork', 'leadership']):
+                    soft_skills.append(skill.split(',')[0])
+                else:
+                    key_skills.append(skill.split(',')[0])
+            
+            if soft_skills:
+                skills.append({
+                    'category': 'Soft Skills',
+                    'skills': list(set(soft_skills))  # Remove duplicates
+                })
+            if key_skills:
+                skills.append({
+                    'category': 'Key Skills',
+                    'skills': list(set(key_skills))  # Remove duplicates
+                })
         
-        # Build the complete model format
-        result = {
+        logger.info(f"Converted {len(skills)} skill categories")
+        
+        # Validate we have the minimum required sections
+        logger.info("✅ Conversion complete - Validating output")
+        validation_issues = []
+        
+        if not experience:
+            msg = "No experience entries were converted"
+            validation_issues.append(msg)
+            logger.error(f"❌ {msg}")
+        else:
+            logger.info(f"✓ Experience: {len(experience)} entries")
+        
+        if not skills:
+            msg = "No skill categories were converted"
+            validation_issues.append(msg)
+            logger.error(f"❌ {msg}")
+        else:
+            logger.info(f"✓ Skills: {len(skills)} categories")
+            for cat in skills:
+                logger.info(f"  • {cat['category']}: {len(cat['skills'])} skills")
+        
+        if validation_issues:
+            logger.warning(f"⚠️ Validation found {len(validation_issues)} issues")
+        else:
+            logger.info("✨ Validation passed - All required sections present")
+        
+        converted_data = {
             'contact': contact,
-            'education': education,
             'experience': experience,
             'skills': skills,
-            'total_years_experience': total_years
+            'education': structured_data.get('education', [])
         }
         
-        # Convert projects if available
+        logger.info("📤 Returning converted CV data:")
+        logger.info(f"  - Contact fields: {list(contact.keys())}")
+        logger.info(f"  - Experience entries: {len(experience)}")
+        logger.info(f"  - Skill categories: {len(skills)}")
+        logger.info(f"  - Education entries: {len(converted_data['education'])}")
+        
+        # Handle projects if available
         if structured_data.get('projects'):
             projects = []
             for proj in structured_data['projects']:
-                # Convert description array to bullets (for compatibility with Project model)
                 bullets = proj.get('description', [])
                 if not bullets:
                     bullets = [proj.get('context', 'Project details not available')]
@@ -643,18 +718,17 @@ class RecommendationParser:
                     'name': proj.get('name', ''),
                     'context': proj.get('context', ''),
                     'technologies': proj.get('technologies', []),
-                    'bullets': bullets,  # This is what the Project model expects
+                    'bullets': bullets,
                     'url': proj.get('url', ''),
                     'duration': proj.get('duration', '')
                 })
-            result['projects'] = projects
+            converted_data['projects'] = projects
+            logger.info(f"  - Added {len(projects)} projects")
         
-        # Add languages if available
-        if structured_data.get('languages'):
-            result['languages'] = structured_data['languages']
+        # Add additional sections if available
+        for section in ['languages', 'certifications']:
+            if structured_data.get(section):
+                converted_data[section] = structured_data[section]
+                logger.info(f"  - Added {section} section")
         
-        # Add certifications if available
-        if structured_data.get('certifications'):
-            result['certifications'] = structured_data['certifications']
-        
-        return result
+        return converted_data

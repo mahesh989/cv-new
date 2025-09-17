@@ -271,16 +271,17 @@ class ATSRecommendationService:
             
             logger.info(f"Successfully created recommendation file: {recommendation_file}")
             
-            # Also create the AI recommendation prompt file
+            # Create the AI recommendation prompt file in company directory
             try:
-                import sys
-                from pathlib import Path
-                backend_path = Path(__file__).parent.parent.parent
-                sys.path.append(str(backend_path))
+                # Generate prompt content using recommendation data
+                prompt_content = self._create_ai_recommendation_prompt(recommendation_data)
                 
-                from prompt.ai_recommendation_prompt_template import create_company_prompt_file
-                prompt_file_path = create_company_prompt_file(company, str(recommendation_file))
-                logger.info(f"Successfully created AI recommendation prompt: {prompt_file_path}")
+                # Save prompt to company directory
+                prompt_file = company_dir / f"{company}_prompt_recommendation.py"
+                with open(prompt_file, 'w', encoding='utf-8') as f:
+                    f.write(prompt_content)
+                    
+                logger.info(f"Successfully created AI recommendation prompt: {prompt_file}")
                 
                 # Trigger AI recommendation generation after prompt file creation
                 try:
@@ -372,6 +373,52 @@ class ATSRecommendationService:
         recommendation_file = self.get_recommendation_file_path(company)
         return recommendation_file.exists()
     
+    def _create_ai_recommendation_prompt(self, recommendation_data: Dict[str, Any]) -> str:
+        """Create a dynamic prompt module for AI recommendation generation
+        
+        Args:
+            recommendation_data: The extracted ATS recommendation data
+            
+        Returns:
+            String content for the prompt module
+        """
+        # Extract relevant data for the prompt
+        company = recommendation_data.get('company', '')
+        required_skills = recommendation_data.get('required_skills', {})
+        preferred_skills = recommendation_data.get('preferred_skills', {})
+        experience_years = recommendation_data.get('experience_years', 0)
+        
+        # Format the prompt template as a valid Python module string
+        prompt_content = f'''"""
+Dynamic AI Recommendation Prompt for {company}
+
+This module provides the AI prompt template for generating CV recommendations.
+"""
+
+def get_prompt() -> str:
+    """Generate the AI recommendation prompt"""
+    return """
+Analyze this job requirement data and provide specific CV optimization recommendations:
+
+COMPANY REQUIREMENTS:
+- Required Technical Skills: {list(required_skills.get('technical', []))}
+- Required Soft Skills: {list(required_skills.get('soft_skills', []))}
+- Preferred Technical Skills: {list(preferred_skills.get('technical', []))}
+- Preferred Soft Skills: {list(preferred_skills.get('soft_skills', []))}
+- Experience Required: {experience_years} years
+
+PROVIDE RECOMMENDATIONS FOR:
+1. Skills to Emphasize
+2. Experience Highlights
+3. CV Structure Optimization
+4. Keywords to Include
+5. Formatting Suggestions
+
+Format your response as structured recommendations with clear sections and bullet points.
+"""
+'''
+        return prompt_content
+
     def update_existing_recommendation(self, company: str, force_update: bool = False) -> bool:
         """
         Update an existing recommendation file if needed

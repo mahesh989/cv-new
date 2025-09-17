@@ -112,32 +112,41 @@ class AIRecommendationGenerator:
             Prompt content or None if not found
         """
         try:
-            prompt_file = self.prompt_dir / f"{company}_prompt_recommendation.py"
-            
+            # Prefer company-specific prompt under cv-analysis/{company}
+            company_dir = self.base_dir / company
+            prompt_file = company_dir / f"{company}_prompt_recommendation.py"
+
+            # Fallback to legacy global prompt directory if company-specific not found
             if not prompt_file.exists():
-                logger.error(f"Prompt file not found: {prompt_file}")
-                return None
+                legacy_prompt_file = self.prompt_dir / f"{company}_prompt_recommendation.py"
+                if legacy_prompt_file.exists():
+                    prompt_file = legacy_prompt_file
+                else:
+                    logger.error(f"Prompt file not found in either location. Tried: {prompt_file} and {legacy_prompt_file}")
+                    return None
             
             # Import the prompt module dynamically
             import sys
             import importlib.util
             
-            # Add the prompt directory to Python path
-            if str(self.prompt_dir) not in sys.path:
-                sys.path.append(str(self.prompt_dir))
+            # Add the prompt file's parent directory to Python path
+            prompt_parent = str(prompt_file.parent)
+            if prompt_parent not in sys.path:
+                sys.path.append(prompt_parent)
             
             # Load the module
-            spec = importlib.util.spec_from_file_location(f"{company}_prompt_recommendation", prompt_file)
+            module_name = f"{company}_prompt_recommendation"
+            spec = importlib.util.spec_from_file_location(module_name, prompt_file)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
             
             # Get the prompt content
             if hasattr(module, 'get_prompt'):
                 prompt_content = module.get_prompt()
-                logger.info(f"📋 [AI GENERATOR] Loaded AI prompt for {company} ({len(prompt_content)} characters)")
+                logger.info(f"📋 [AI GENERATOR] Loaded AI prompt for {company} from {prompt_file} ({len(prompt_content)} characters)")
                 return prompt_content
             else:
-                logger.error(f"Prompt module for {company} does not have get_prompt() function")
+                logger.error(f"Prompt module for {company} at {prompt_file} does not have get_prompt() function")
                 return None
                 
         except Exception as e:
