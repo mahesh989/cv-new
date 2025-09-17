@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../core/theme/app_theme.dart';
 
 class CVGenerationScreen extends StatefulWidget {
@@ -74,6 +76,98 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     );
   }
 
+  String? tailoredCVContent;
+  bool _isLoadingCV = false;
+  String? selectedCompany = 'Australia_for_UNHCR'; // TODO: Make this dynamic
+
+  Future<void> _loadTailoredCV() async {
+    setState(() {
+      _isLoadingCV = true;
+      _isGenerating = true;
+      tailoredCVContent = null; // Reset content before loading
+    });
+
+    try {
+      // Try to load the company-specific tailored CV
+      final response = await http.get(
+        Uri.parse('http://localhost:8000/api/cv/read-tailored-cv/$selectedCompany'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          tailoredCVContent = data['content'] ?? 'No content available';
+        });
+      } else {
+        setState(() {
+          tailoredCVContent = 'Failed to load tailored CV. Status: ${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        tailoredCVContent = 'Error loading tailored CV: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoadingCV = false;
+        _isGenerating = false;
+      });
+    }
+  }
+
+  Widget _buildCVPreview() {
+    if (_isLoadingCV) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (tailoredCVContent == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.description, color: AppTheme.primaryTeal),
+              const SizedBox(width: 8),
+              Text(
+                'Tailored CV Preview',
+                style: AppTheme.headingSmall.copyWith(
+                  color: AppTheme.primaryTeal,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 400),
+            child: SingleChildScrollView(
+              child: Text(
+                tailoredCVContent!,
+                style: const TextStyle(
+                  fontFamily: 'Courier',
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCVGenerationCard() {
     return AppTheme.createCard(
       child: Column(
@@ -135,15 +229,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
             child: ElevatedButton(
               onPressed: _isGenerating
                   ? null
-                  : () {
-                      // TODO: Implement tailored CV generation
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Tailored CV generation will be implemented soon'),
-                          backgroundColor: Colors.orange,
-                        ),
-                      );
+                  : () async {
+                      await _loadTailoredCV();
                     },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -196,6 +283,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
                     ),
             ),
           ),
+          const SizedBox(height: 20),
+          if (tailoredCVContent != null) _buildCVPreview(),
         ],
       ),
     );
