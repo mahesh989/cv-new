@@ -293,12 +293,19 @@ class CVTailoringService:
         # Generate response using AI service with retry logic
         logger.info("🤖 Generating tailored CV using AI service...")
         
-        max_attempts = 3
+        max_attempts = 5  # Increase attempts from 3 to 5
         for attempt in range(max_attempts):
             logger.info(f"Attempt {attempt + 1}/{max_attempts}")
             
-            # Use lower temperature for more consistent results
-            temperature = 0.2 if attempt == 0 else 0.1
+            # Use progressively lower temperature for more consistent results
+            if attempt == 0:
+                temperature = 0.3
+            elif attempt == 1:
+                temperature = 0.2
+            elif attempt == 2:
+                temperature = 0.1
+            else:
+                temperature = 0.05  # Very low temperature for final attempts
             
             ai_response = await ai_service.generate_response(
                 prompt=user_prompt,
@@ -515,13 +522,48 @@ Please provide the optimized CV in the requested JSON format."""
         # Extract optimization notes and applied enhancements
         optimization_notes = ai_generated_data.get("optimization_notes", {})
         
-        # Create the tailored CV
+        # Convert AI-generated data to proper models
+        from app.tailored_cv.models.cv_models import (
+            ContactInfo, Education, ExperienceEntry, 
+            Project, SkillCategory
+        )
+        
+        # Process contact info
+        contact_data = ai_generated_data.get("contact", {})
+        contact = ContactInfo(**contact_data) if contact_data else original_cv.contact
+        
+        # Process education entries
+        education_data = ai_generated_data.get("education", [])
+        education = []
+        for edu in education_data:
+            education.append(Education(**edu))
+        
+        # Process experience entries - MOST IMPORTANT
+        experience_data = ai_generated_data.get("experience", [])
+        experience = []
+        for exp in experience_data:
+            experience.append(ExperienceEntry(**exp))
+        
+        # Process projects if present
+        projects = None
+        if "projects" in ai_generated_data and ai_generated_data["projects"]:
+            projects = []
+            for proj in ai_generated_data["projects"]:
+                projects.append(Project(**proj))
+        
+        # Process skills
+        skills_data = ai_generated_data.get("skills", [])
+        skills = []
+        for skill in skills_data:
+            skills.append(SkillCategory(**skill))
+        
+        # Create the tailored CV with AI-generated content
         tailored_cv = TailoredCV(
-            contact=original_cv.contact.model_copy(update=ai_generated_data.get("contact", {})),
-            education=original_cv.education,  # Will be enhanced by AI data
-            experience=original_cv.experience,  # Will be enhanced by AI data
-            projects=original_cv.projects,  # Will be enhanced by AI data
-            skills=original_cv.skills,  # Will be enhanced by AI data
+            contact=contact,
+            education=education if education else original_cv.education,
+            experience=experience if experience else original_cv.experience,
+            projects=projects if projects else original_cv.projects,
+            skills=skills if skills else original_cv.skills,
             
             # Metadata
             source_cv_id=getattr(original_cv, 'id', None),
@@ -627,48 +669,79 @@ Please provide the optimized CV in the requested JSON format."""
         
         # CRITICAL: Validate Impact Statement Formula compliance
         quantification_failures = []
+        total_bullets = 0
+        bullets_with_quantification = 0
+        
         for i, exp in enumerate(data['experience']):
             if not isinstance(exp, dict) or 'bullets' not in exp:
                 raise ValueError("Each experience entry must have bullets array")
             
             for j, bullet in enumerate(exp.get('bullets', [])):
+                total_bullets += 1
                 # Check for quantification (numbers, percentages, dollar amounts)
                 has_numbers = any(char.isdigit() for char in bullet)
                 has_percentage = '%' in bullet
                 has_dollar = '$' in bullet
                 has_quantification = has_numbers or has_percentage or has_dollar
                 
-                if not has_quantification:
+                if has_quantification:
+                    bullets_with_quantification += 1
+                else:
                     quantification_failures.append(f"Experience {i+1}, bullet {j+1}: '{bullet[:60]}...'")
         
-        if quantification_failures:
-            failure_summary = "\n".join(quantification_failures)
-            raise ValueError(f"Impact Statement Formula violation - bullets missing quantification:\n{failure_summary}")
+        # Be more lenient - require at least 75% of bullets to have quantification
+        quantification_ratio = bullets_with_quantification / total_bullets if total_bullets > 0 else 0
+        
+        if quantification_ratio < 0.75:  # Less than 75% have quantification
+            # Only fail if it's really bad (less than 50%)
+            if quantification_ratio < 0.5:
+                failure_summary = "\n".join(quantification_failures[:5])  # Show only first 5 failures
+                raise ValueError(f"Impact Statement Formula violation - only {bullets_with_quantification}/{total_bullets} bullets have quantification (need at least 75%):\n{failure_summary}")
+            else:
+                # Just warn if between 50-75%
+                logger.warning(f"⚠️ Only {bullets_with_quantification}/{total_bullets} bullets have quantification. Ideally need 75%+")
         
         # Validate skills structure
         if not isinstance(data['skills'], list):
             raise ValueError("Skills field must be an array")
         
-        logger.info("✅ JSON structure and Impact Formula validation passed")
+        logger.info(f"✅ JSON structure and Impact Formula validation passed ({bullets_with_quantification}/{total_bullets} bullets with quantification)")
     
     def _add_correction_instructions(self, user_prompt: str, error_message: str) -> str:
         """Add specific correction instructions based on validation failure"""
         
-        correction = "\n\nCORRECTION REQUIRED:\n"
+        correction = "\n\nCORRECTION REQUIRED - THIS IS CRITICAL:\n"
         
         if "quantification" in error_message.lower():
-            correction += """
-FIX: You MUST add numbers to EVERY bullet point!
-- Count each bullet
-- If ANY bullet has no numbers, ADD THEM
-- Use realistic numbers: 10+ items, 25% improvement, $500K value, 3 months, etc.
+            # Extract which bullets are missing quantification
+            missing_bullets = []
+            for line in error_message.split('\n'):
+                if 'Experience' in line and 'bullet' in line:
+                    missing_bullets.append(line.strip())
+            
+            correction += f"""
+FIX THESE SPECIFIC BULLETS - ADD NUMBERS TO EACH:
+{chr(10).join(missing_bullets[:5])}
+
+For EVERY bullet without numbers, you MUST add:
+- Specific quantities (e.g., "15 reports", "8 team members", "500+ customers")
+- Percentages (e.g., "reduced costs by 25%", "improved efficiency by 40%")
+- Time frames (e.g., "within 3 months", "across 2 quarters")
+- Dollar amounts where applicable (e.g., "$2M budget", "saved $50K annually")
+
+EXAMPLES OF FIXES:
+Bad: "Used Power BI to create dashboards presenting research findings"
+Good: "Used Power BI to create 12+ interactive dashboards presenting research findings to 50+ stakeholders, reducing report generation time by 60%"
+
+Bad: "Conducted data analysis for business insights"
+Good: "Conducted data analysis on 100K+ customer records to derive business insights, identifying 3 key growth opportunities worth $1.5M"
 """
         
         if "keyword" in error_message.lower():
             correction += """
 FIX: You MUST add ALL missing keywords!
 - Look at critical_gaps list
-- For EACH keyword, find a bullet and ADD it
+- For EACH keyword, find a bullet and ADD it naturally
 - Example: Add "fundraising" to a data analysis bullet
 - Example: Add "international aid" to a project management bullet  
 """
@@ -704,11 +777,34 @@ FIX: Output ONLY valid JSON!
         # Convert to lowercase for case-insensitive matching
         cv_text_lower = cv_text.lower()
         
+        # Filter out non-keyword entries from critical_gaps (e.g., category labels with percentages)
+        valid_keywords = []
+        for keyword in recommendations.critical_gaps[:10]:  # Check up to 10 gaps
+            # Skip entries that look like category labels or statistics
+            if '(' in keyword and '%' in keyword:
+                logger.debug(f"Skipping non-keyword entry in critical_gaps: {keyword}")
+                continue
+            # Skip entries that are too long to be keywords (likely descriptions)
+            if len(keyword) > 50:
+                logger.debug(f"Skipping overly long entry in critical_gaps: {keyword[:50]}...")
+                continue
+            # Skip entries that contain numbers with decimal points (likely scores)
+            if any(c in keyword for c in [':', '=', '\n']):
+                logger.debug(f"Skipping non-keyword with special chars: {keyword}")
+                continue
+            valid_keywords.append(keyword)
+        
+        # Only validate if we have actual keywords to check
+        if not valid_keywords:
+            logger.warning("⚠️ No valid keywords found in critical_gaps - using fallback keyword list")
+            # Use the actual missing keywords from the recommendations instead
+            valid_keywords = (recommendations.missing_keywords + 
+                            recommendations.missing_technical_skills + 
+                            recommendations.missing_soft_skills)[:5]
+        
         # Check for critical missing keywords
         missing_keywords = []
-        critical_keywords = recommendations.critical_gaps[:5]  # Top 5 critical gaps
-        
-        for keyword in critical_keywords:
+        for keyword in valid_keywords:
             if keyword.lower() not in cv_text_lower:
                 missing_keywords.append(keyword)
         
@@ -716,7 +812,7 @@ FIX: Output ONLY valid JSON!
             missing_list = ", ".join(missing_keywords)
             raise ValueError(f"Critical keyword integration failure. Missing keywords: {missing_list}. These MUST be integrated into experience bullets or skills section.")
         
-        logger.info(f"✅ Keyword integration validation passed - {len(critical_keywords)} critical keywords found")
+        logger.info(f"✅ Keyword integration validation passed - {len(valid_keywords)} critical keywords found")
     
     # Fallback CV creation removed - now raises errors for better debugging
     

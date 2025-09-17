@@ -68,25 +68,20 @@ class RecommendationParser:
         current_ats_score = RecommendationParser._extract_ats_score(content)
         target_ats_score = RecommendationParser._extract_target_score(content)
         
-        # Extract missing keywords
-        missing_technical_skills = RecommendationParser._extract_section_items(
-            content, "Technical Skills Enhancement"
-        )
-        missing_soft_skills = RecommendationParser._extract_section_items(
-            content, "Soft Skills Optimization"
-        )
-        missing_keywords = RecommendationParser._extract_section_items(
-            content, "Critical Missing Keywords"
-        )
+        # Extract missing keywords - improved extraction
+        missing_technical_skills = RecommendationParser._extract_technical_skills(content)
+        missing_soft_skills = RecommendationParser._extract_soft_skills(content)
+        missing_keywords = RecommendationParser._extract_domain_keywords(content)
         
         # Extract enhancement recommendations
         technical_enhancements = RecommendationParser._extract_high_impact_changes(content)
         keyword_integration = missing_keywords + missing_technical_skills
         
-        # Extract priority gaps
-        critical_gaps = RecommendationParser._extract_section_items(
-            content, "Immediate Action Required"
-        )
+        # Extract priority gaps - use actual keyword gaps instead of category labels
+        # Critical gaps should contain actual keywords, not category descriptions
+        critical_gaps = missing_keywords + missing_technical_skills[:3] + missing_soft_skills[:3]
+        
+        # Extract improvement recommendations from sections
         important_gaps = RecommendationParser._extract_section_items(
             content, "Optimization Opportunities"
         )
@@ -153,6 +148,16 @@ class RecommendationParser:
             # Extract bullet points
             bullet_points = re.findall(r'^[-•]\s*(.+)$', section_content, re.MULTILINE)
             items.extend([item.strip() for item in bullet_points if item.strip()])
+        
+        # Special handling for extracting quoted keywords
+        if "Keywords" in section_title or "Skills" in section_title:
+            # Extract keywords in quotes from the content
+            quoted_keywords = re.findall(r'"([^"]+)"', section_content if match else content)
+            # Filter out non-keyword items (e.g., sentences or descriptions)
+            keywords_only = [kw for kw in quoted_keywords if len(kw) < 50 and not any(c in kw for c in ['.', ':', '%'])]
+            items.extend(keywords_only)
+            # Remove duplicates while preserving order
+            items = list(dict.fromkeys(items))
         
         return items
     
@@ -227,6 +232,96 @@ class RecommendationParser:
                 alignment.append('collaborative approach')
         
         return alignment
+    
+    @staticmethod
+    def _extract_technical_skills(content: str) -> List[str]:
+        """Extract missing technical skills from recommendation content"""
+        skills = []
+        
+        # Look for Technical Skills Enhancement section
+        match = re.search(r'Technical Skills Enhancement[^:]*:.*?Keywords to Emphasize[^:]*:([^#]*?)(?=\n\*\*|\n##|$)', 
+                         content, re.DOTALL | re.IGNORECASE)
+        if match:
+            section_content = match.group(1)
+            # Extract keywords in quotes
+            quoted_skills = re.findall(r'"([^"]+)"', section_content)
+            # Clean up extracted skills - remove trailing punctuation
+            for skill in quoted_skills:
+                clean_skill = skill.strip().rstrip('.,;:')
+                if len(clean_skill) < 50 and clean_skill:
+                    skills.append(clean_skill)
+        
+        # Also look for VBA, Data Warehouse, etc. mentioned explicitly
+        technical_keywords = ['VBA', 'Data Warehouse', 'DWH', 'Data Modelling', 'Querying', 
+                             'Data Extraction', 'Analytical Models', 'Segmentation Strategies']
+        for keyword in technical_keywords:
+            if keyword in content and keyword not in [s.rstrip('.,;:') for s in skills]:
+                skills.append(keyword)
+        
+        # Remove duplicates while preserving order
+        return list(dict.fromkeys(skills))
+    
+    @staticmethod
+    def _extract_soft_skills(content: str) -> List[str]:
+        """Extract missing soft skills from recommendation content"""
+        skills = []
+        
+        # Look for Soft Skills Optimization section
+        match = re.search(r'Soft Skills Optimization[^:]*:.*?Soft Skills to Highlight[^:]*:([^#]*?)(?=\n\*\*|\n##|$)', 
+                         content, re.DOTALL | re.IGNORECASE)
+        if match:
+            section_content = match.group(1)
+            # Extract keywords in quotes
+            quoted_skills = re.findall(r'"([^"]+)"', section_content)
+            # Clean up extracted skills - remove trailing punctuation
+            for skill in quoted_skills:
+                clean_skill = skill.strip().rstrip('.,;:')
+                if len(clean_skill) < 50 and clean_skill:
+                    skills.append(clean_skill)
+        
+        # Also look for specific soft skills mentioned
+        soft_keywords = ['Collaborative', 'Detail-oriented', 'Motivated', 'Analytical', 
+                        'Inclusive', 'Organised', 'Results-Driven', 'Stakeholder Management']
+        for keyword in soft_keywords:
+            if keyword in content and keyword not in [s.rstrip('.,;:') for s in skills]:
+                skills.append(keyword)
+        
+        # Remove duplicates while preserving order
+        return list(dict.fromkeys(skills))
+    
+    @staticmethod
+    def _extract_domain_keywords(content: str) -> List[str]:
+        """Extract missing domain keywords from recommendation content"""
+        keywords = []
+        
+        # Look for Critical Missing Keywords section and Integration Points
+        patterns = [
+            r'Critical Missing Keywords[^:]*:.*?Integration Points[^:]*:([^#]*?)(?=\n\*\*|\n##|$)',
+            r'Domain Keywords[^:]*:.*?Add[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+            if match:
+                section_content = match.group(1)
+                # Extract keywords in quotes
+                quoted_keywords = re.findall(r'"([^"]+)"', section_content)
+                # Clean up extracted keywords - remove trailing punctuation
+                for kw in quoted_keywords:
+                    clean_kw = kw.strip().rstrip('.,;:')
+                    if len(clean_kw) < 50 and clean_kw:
+                        keywords.append(clean_kw)
+        
+        # Also look for specific domain keywords mentioned
+        domain_keywords = ['International Aid', 'Fundraising', 'Not For Profit', 'NFP', 
+                          'Humanitarian Aid', 'Business Intelligence', 'Direct Marketing Campaigns', 
+                          'Donor-Centricity', 'Refugee Support']
+        for keyword in domain_keywords:
+            if keyword in content and keyword not in [k.rstrip('.,;:') for k in keywords]:
+                keywords.append(keyword)
+        
+        # Remove duplicates while preserving order
+        return list(dict.fromkeys(keywords))
     
     @staticmethod
     def load_original_cv(cv_path: str) -> Dict[str, Any]:
