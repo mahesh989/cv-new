@@ -19,8 +19,6 @@ from app.tailored_cv.models.cv_models import (
     CVValidationResult, CVValidationError
 )
 from app.tailored_cv.services.recommendation_parser import RecommendationParser
-from app.tailored_cv.services.quantification_enforcer import quantification_enforcer
-from app.tailored_cv.services.keyword_injector import keyword_injector
 
 logger = logging.getLogger(__name__)
 
@@ -292,94 +290,92 @@ class CVTailoringService:
             custom_instructions
         )
         
-        # Generate response using AI service
+        # Generate response using AI service with retry logic
         logger.info("🤖 Generating tailored CV using AI service...")
-        ai_response = await ai_service.generate_response(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.3,  # Lower temperature for consistent optimization
-            max_tokens=4000
-        )
         
-        # Parse AI response into TailoredCV
-        try:
-            logger.info(f"AI response content preview: {ai_response.content[:500]}...")
+        max_attempts = 3
+        for attempt in range(max_attempts):
+            logger.info(f"Attempt {attempt + 1}/{max_attempts}")
             
-            # Extract and parse JSON from AI response
-            tailored_data = self._extract_and_parse_json(ai_response.content)
+            # Use lower temperature for more consistent results
+            temperature = 0.2 if attempt == 0 else 0.1
             
-            # Validate the parsed JSON structure
-            self._validate_tailored_json(tailored_data)
-            
-            # Validate that AI is using real CV data, not placeholder data
-            self._validate_real_cv_data_used(tailored_data, original_cv)
-            
-            # Validate keyword integration
-            self._validate_keyword_integration(tailored_data, recommendations)
-            
-            # ENFORCEMENT LAYER: Apply code-level quantification and keyword enforcement
-            tailored_data = self._enforce_requirements(tailored_data, recommendations, original_cv)
-            
-            tailored_cv = self._construct_tailored_cv(
-                original_cv,
-                tailored_data,
-                recommendations,
-                strategy
+            ai_response = await ai_service.generate_response(
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                max_tokens=4000
             )
-            return tailored_cv
-        except ValueError as e:
-            # JSON parsing failed in _extract_and_parse_json
-            logger.error(f"Failed to extract valid JSON from AI response: {e}")
-            logger.error(f"AI response content: {ai_response.content[:1000]}")
-            raise Exception(f"AI failed to generate valid JSON response: {str(e)}")
-        except json.JSONDecodeError as e:
-            # Additional JSON parsing failure catch
-            logger.error(f"JSON decoding failed: {e}")
-            logger.error(f"AI response content: {ai_response.content[:1000]}")
-            raise Exception(f"AI response contains invalid JSON: {str(e)}")
-        except Exception as e:
-            logger.error(f"Unexpected error processing AI response: {e}")
-            logger.error(f"AI response content: {ai_response.content[:1000]}")
-            raise Exception(f"Failed to process AI response: {str(e)}")
+            
+            # Try to parse and validate
+            try:
+                tailored_data = self._extract_and_parse_json(ai_response.content)
+                self._validate_tailored_json(tailored_data)
+                self._validate_real_cv_data_used(tailored_data, original_cv)
+                self._validate_keyword_integration(tailored_data, recommendations)
+                
+                # If we get here, validation passed
+                logger.info(f"✅ AI generation successful on attempt {attempt + 1}")
+                break
+                
+            except (ValueError, json.JSONDecodeError) as e:
+                logger.warning(f"Attempt {attempt + 1} failed validation: {e}")
+                if attempt == max_attempts - 1:
+                    raise Exception(f"AI failed to generate compliant CV after {max_attempts} attempts: {str(e)}")
+                else:
+                    # Add more specific instructions for next attempt
+                    user_prompt = self._add_correction_instructions(user_prompt, str(e))
+                    continue
+        
+        # Build tailored CV from validated data
+        tailored_cv = self._construct_tailored_cv(
+            original_cv,
+            tailored_data,
+            recommendations,
+            strategy
+        )
+        return tailored_cv
     
     def _build_system_prompt(self) -> str:
         """Build the system prompt with framework content"""
-        return """You are an expert CV optimization specialist. Your task is to tailor CVs based on the STREAMLINED CV OPTIMIZATION FRAMEWORK and specific job recommendations.
+        return """You are an expert CV optimization specialist. You MUST follow the STREAMLINED CV OPTIMIZATION FRAMEWORK exactly.
 
 """ + self.framework_content + """
 
-CRITICAL REQUIREMENTS - ABSOLUTE COMPLIANCE MANDATORY:
+ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
 
-1. **IMPACT STATEMENT FORMULA (NO EXCEPTIONS):**
-   EVERY bullet point MUST follow: [Action Verb] + [Method/Technology] + [Context/Challenge] + [QUANTIFIED RESULT] + [Business Impact]
-   Example: "Led 5-person analytics team using Python/SQL to analyze 10M+ customer records, identifying $2M revenue opportunity and reducing churn by 15% within 6 months"
+1. EVERY BULLET MUST HAVE NUMBERS:
+   Transform EVERY bullet point to include quantification.
    
-2. **QUANTIFICATION MANDATORY:**
-   EVERY bullet MUST include specific metrics: 
-   - Financial: $X savings/revenue/budget
-   - Scale: X people/records/projects/%
-   - Performance: X% faster/accurate/improvement
-   - Time: within X months/days/weeks
-   NO bullet point can exist without quantified metrics
-
-3. **KEYWORD INTEGRATION (ALL REQUIRED KEYWORDS MUST APPEAR):**
-   ALL critical missing keywords from recommendations MUST be naturally integrated
-   Example: If "Fundraising" is missing, it MUST appear in relevant experience bullets
+   BAD: "Improved data pipeline efficiency"
+   GOOD: "Improved data pipeline efficiency by 35%, processing 2M records daily"
    
-4. **DATA INTEGRITY:**
-   - Use EXACT contact information, company names, dates from original CV
-   - Enhance existing content ONLY - NEVER fabricate
-   - Preserve all factual information while adding quantification
+   BAD: "Led team to deliver projects"
+   GOOD: "Led 8-person team to deliver 5 projects worth $1.2M in 6 months"
 
-VALIDATION CHECKLIST (MUST VERIFY BEFORE RESPONDING):
-□ Every bullet contains numbers/percentages/dollar amounts
-□ All critical keywords from recommendations are integrated
-□ Contact information is exactly preserved
-□ Education dates and institutions are correct
-□ Company names and job titles are exact
+2. ALL KEYWORDS MUST APPEAR:
+   If recommendations say "Fundraising" is missing - ADD IT to relevant bullets.
+   If recommendations say "International Aid" is missing - ADD IT to relevant bullets.
+   Every keyword in critical_gaps MUST appear in the final CV.
 
-OUTPUT FORMAT - JSON ONLY:
-Respond with ONLY valid JSON, no other text
+3. PRESERVE EXACT DATA:
+   - Name: Use EXACT name from original CV
+   - Email: Use EXACT email from original CV  
+   - Phone: Use EXACT phone from original CV
+   - Companies: Use EXACT company names
+   - Dates: Use EXACT dates
+
+4. JSON OUTPUT RULES:
+   - Output ONLY valid JSON
+   - NO markdown, NO explanations, NO comments
+   - Start with { and end with }
+   - Use proper JSON structure
+
+VERIFY BEFORE RESPONDING:
+✓ Count bullets - do they ALL have numbers?
+✓ Search for keywords - are they ALL present?
+✓ Check names/dates - are they EXACTLY preserved?
+✓ Valid JSON - proper format with no extra text?
 
 The exact JSON structure must be:
 {
@@ -457,30 +453,38 @@ RECOMMENDATIONS TO IMPLEMENT:
 OPTIMIZATION STRATEGY:
 """ + strategy_json + """
 
-MANDATORY IMPLEMENTATION REQUIREMENTS:
+YOUR TASK - TRANSFORM THIS CV:
 
-1. **QUANTIFY EVERY BULLET POINT:**
-   Transform each bullet from general to specific with numbers:
-   - "improving data pipeline" → "improving data pipeline efficiency by 30%"
-   - "enabling data-driven decisions" → "enabling $500K cost savings through data-driven decisions"
-   - "reducing manual effort" → "reducing manual effort by 40 hours/week"
-   - "enhancing insights" → "enhancing insights for 50+ stakeholders across 3 departments"
+1. ADD NUMBERS TO EVERY BULLET:
+   Look at each bullet point. If it has no numbers, ADD THEM:
+   
+   Original: "Designed and implemented Python scripts for data cleaning"
+   Transform to: "Designed and implemented 15+ Python scripts for data cleaning, processing 500K records daily, reducing errors by 45%"
+   
+   Original: "Developed machine learning models"
+   Transform to: "Developed 5 machine learning models achieving 92% accuracy, predicting outcomes for 10K+ customers monthly"
 
-2. **INTEGRATE ALL CRITICAL KEYWORDS (MANDATORY):**
-   The following keywords MUST appear in experience bullets:
-   - Fundraising → integrate into data analysis contexts
-   - International Aid → relate to organizational context
-   - Non-Profit Sector → demonstrate sector awareness
-   - Data Mining → technical skill demonstration
-   - Project Management → leadership evidence
+2. ADD THESE MISSING KEYWORDS TO BULLETS:
+   Look at critical_gaps in recommendations. For EACH keyword listed:
+   - Find a relevant bullet point
+   - Add the keyword naturally
+   
+   Example: If "Fundraising" is in critical_gaps:
+   Change: "Analyzed customer data to improve outcomes"
+   To: "Analyzed customer data to improve fundraising campaign outcomes, increasing donations by 35%"
 
-3. **PRESERVE EXACT DATA:**
-   - Contact: Maheshwor Tiwari, maheshtwari99@gmail.com, 0414 032 507
-   - Companies: The Bitrates, iBuild Building Solutions, Property Console, CY Cergy Paris University
-   - Dates: Maintain exact start/end dates from original CV
-
-4. **APPLY IMPACT STATEMENT FORMULA:**
-   Every bullet must be: [Action] + [Technology] + [Context] + [Number] + [Business Impact]
+3. USE EXACT INFORMATION:
+   Copy these EXACTLY from the original CV:
+   - Name, Email, Phone (from contact section)
+   - All company names (from experience section)
+   - All dates (from experience and education)
+   
+4. EXAMPLE OF GOOD OUTPUT:
+   "bullets": [
+     "Led team of 8 analysts using Python/SQL to analyze 2M+ donor records for fundraising optimization, increasing donations by 40% ($3M annually)",
+     "Developed 10+ Tableau dashboards tracking international aid distribution across 15 countries, improving efficiency by 35%",
+     "Managed data pipeline processing 100K+ records daily for non-profit sector clients, reducing processing time by 60%"
+   ]
 
 """
         
@@ -647,59 +651,42 @@ Please provide the optimized CV in the requested JSON format."""
         
         logger.info("✅ JSON structure and Impact Formula validation passed")
     
+    def _add_correction_instructions(self, user_prompt: str, error_message: str) -> str:
+        """Add specific correction instructions based on validation failure"""
+        
+        correction = "\n\nCORRECTION REQUIRED:\n"
+        
+        if "quantification" in error_message.lower():
+            correction += """
+FIX: You MUST add numbers to EVERY bullet point!
+- Count each bullet
+- If ANY bullet has no numbers, ADD THEM
+- Use realistic numbers: 10+ items, 25% improvement, $500K value, 3 months, etc.
+"""
+        
+        if "keyword" in error_message.lower():
+            correction += """
+FIX: You MUST add ALL missing keywords!
+- Look at critical_gaps list
+- For EACH keyword, find a bullet and ADD it
+- Example: Add "fundraising" to a data analysis bullet
+- Example: Add "international aid" to a project management bullet  
+"""
+        
+        if "json" in error_message.lower():
+            correction += """
+FIX: Output ONLY valid JSON!
+- Start with {
+- End with }
+- NO markdown, NO ```, NO explanations
+- ONLY the JSON structure
+"""
+        
+        return user_prompt + correction
+    
     def _validate_real_cv_data_used(self, tailored_data: Dict[str, Any], original_cv: OriginalCV) -> None:
         """Skip placeholder-specific checks (e.g., 'John Doe') and allow generation to proceed."""
         logger.info("ℹ️ Skipping placeholder checks; proceeding with generated data as-is.")
-    
-    def _enforce_requirements(self, tailored_data: Dict[str, Any], recommendations: RecommendationAnalysis, original_cv: OriginalCV) -> Dict[str, Any]:
-        """
-        Apply code-level enforcement of quantification and keywords
-        This ensures 100% compliance regardless of AI behavior
-        """
-        logger.info("🔧 Applying code-level enforcement of framework requirements...")
-        
-        # Step 1: Enforce quantification in all experience bullets
-        for exp in tailored_data.get("experience", []):
-            bullets = exp.get("bullets", [])
-            
-            # Determine company context for better quantification
-            company_context = recommendations.company
-            role_level = "senior" if "senior" in recommendations.job_title.lower() else "mid"
-            
-            # Enforce quantification
-            quantified_bullets = quantification_enforcer.enforce_quantification(
-                bullets, 
-                company_context,
-                role_level
-            )
-            exp["bullets"] = quantified_bullets
-            
-            logger.info(f"✅ Enforced quantification for {exp.get('company', 'Unknown')} - {len(quantified_bullets)} bullets")
-        
-        # Step 2: Enforce critical keyword integration
-        critical_keywords = recommendations.critical_gaps[:5]  # Top 5 critical gaps
-        
-        tailored_data, injected_keywords = keyword_injector.inject_keywords(
-            tailored_data,
-            critical_keywords,
-            force_injection=True  # Force keywords even without perfect context
-        )
-        
-        logger.info(f"✅ Enforced {len(injected_keywords)} critical keywords: {injected_keywords}")
-        
-        # Step 3: Validate enforcement success
-        all_bullets = []
-        for exp in tailored_data.get("experience", []):
-            all_bullets.extend(exp.get("bullets", []))
-        
-        is_valid, rate, failed = quantification_enforcer.validate_quantification_rate(all_bullets)
-        logger.info(f"📊 Final quantification rate: {rate:.1f}% ({len(all_bullets) - len(failed)}/{len(all_bullets)} bullets)")
-        
-        keywords_valid, missing = keyword_injector.validate_keyword_integration(tailored_data, critical_keywords)
-        if not keywords_valid:
-            logger.warning(f"⚠️ Some keywords still missing after enforcement: {missing}")
-        
-        return tailored_data
     
     def _validate_keyword_integration(self, tailored_data: Dict[str, Any], recommendations: RecommendationAnalysis) -> None:
         """Validate that critical missing keywords from recommendations are integrated"""
