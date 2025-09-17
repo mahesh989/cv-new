@@ -285,6 +285,18 @@ class AIServiceManager:
             "available_providers": self.get_available_providers()
         }
     
+    def get_current_model_name(self) -> str:
+        """Get the current model name"""
+        current_provider = self.get_current_provider()
+        if current_provider:
+            return current_provider.model_name
+        return self.config.get_current_model_name() or "unknown"
+    
+    @property
+    def current_model(self) -> str:
+        """Property to get the current model name for backward compatibility"""
+        return self.get_current_model_name()
+    
     async def analyze_cv_content(self, cv_text: str) -> AIResponse:
         """
         Analyze CV content to extract skills and information

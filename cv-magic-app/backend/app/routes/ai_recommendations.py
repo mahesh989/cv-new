@@ -254,3 +254,95 @@ async def convert_company_txt_to_json(company: str):
             status_code=500,
             content={"error": f"Failed to convert TXT to JSON for {company}: {str(e)}"}
         )
+
+
+@router.post("/ai-recommendations/generate-and-tailor/{company}")
+async def generate_ai_recommendation_and_tailor_cv(company: str):
+    """
+    Generate AI recommendation for a company and automatically trigger CV tailoring
+    
+    This endpoint generates AI recommendations and then immediately triggers
+    CV tailoring using the generated recommendations.
+    
+    Args:
+        company: Company name
+        
+    Returns:
+        JSON response with both AI recommendation and CV tailoring results
+    """
+    try:
+        logger.info(f"🚀 [AI_RECOMMENDATIONS] Starting AI generation and CV tailoring for: {company}")
+        
+        # Step 1: Generate AI recommendation
+        ai_success = await ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate=True)
+        
+        if not ai_success:
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": f"Failed to generate AI recommendations for {company}",
+                    "ai_recommendation_success": False,
+                    "cv_tailoring_success": False
+                }
+            )
+        
+        logger.info(f"✅ [AI_RECOMMENDATIONS] AI recommendation generated for {company}")
+        
+        # Note: CV tailoring should be automatically triggered by the AI generator
+        # Let's give it a moment and then check for the tailored CV file
+        import asyncio
+        await asyncio.sleep(2)  # Give time for CV tailoring to complete
+        
+        # Check if tailored CV was created
+        cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        tailored_cv_file = cv_analysis_path / "tailored_cv.json"
+        company_tailored_files = list((cv_analysis_path / company).glob("tailored_cv_*.json"))
+        
+        cv_tailoring_success = tailored_cv_file.exists() or len(company_tailored_files) > 0
+        
+        # Get the latest AI recommendation
+        ai_file_path = cv_analysis_path / company / f"{company}_ai_recommendation.json"
+        ai_recommendation_data = None
+        if ai_file_path.exists():
+            with open(ai_file_path, 'r', encoding='utf-8') as f:
+                ai_recommendation_data = json.load(f)
+        
+        # Get tailored CV info
+        tailored_cv_info = None
+        if tailored_cv_file.exists():
+            tailored_cv_info = {
+                "file_path": str(tailored_cv_file),
+                "created_at": tailored_cv_file.stat().st_mtime,
+                "file_size": tailored_cv_file.stat().st_size
+            }
+        elif company_tailored_files:
+            latest_company_file = max(company_tailored_files, key=lambda p: p.stat().st_mtime)
+            tailored_cv_info = {
+                "file_path": str(latest_company_file),
+                "created_at": latest_company_file.stat().st_mtime,
+                "file_size": latest_company_file.stat().st_size
+            }
+        
+        return JSONResponse(content={
+            "success": True,
+            "message": f"AI recommendation and CV tailoring completed for {company}",
+            "company": company,
+            "ai_recommendation_success": ai_success,
+            "cv_tailoring_success": cv_tailoring_success,
+            "ai_recommendation_file": str(ai_file_path) if ai_file_path.exists() else None,
+            "ai_recommendation_data": ai_recommendation_data,
+            "tailored_cv_info": tailored_cv_info,
+            "workflow_status": "complete" if ai_success and cv_tailoring_success else "partial"
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ [AI_RECOMMENDATIONS] Error in generate and tailor workflow for {company}: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": f"Failed to complete AI recommendation and CV tailoring workflow: {str(e)}",
+                "company": company
+            }
+        )

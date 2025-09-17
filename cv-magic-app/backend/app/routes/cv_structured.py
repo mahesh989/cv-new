@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Query
 from fastapi.responses import JSONResponse
 
 from ..services.enhanced_cv_upload_service import enhanced_cv_upload_service
-from ..services.structured_cv_parser import structured_cv_parser
+from ..services.structured_cv_parser import enhanced_cv_parser
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cv-structured", tags=["Structured CV Processing"])
@@ -177,7 +177,7 @@ async def validate_structured_cv(
         if not cv_data:
             raise HTTPException(status_code=404, detail="Structured CV not found for validation")
         
-        validation_report = structured_cv_parser.validate_cv_structure(cv_data)
+        validation_report = enhanced_cv_parser.validate_cv_structure(cv_data)
         
         return JSONResponse(content={
             "status": "success",

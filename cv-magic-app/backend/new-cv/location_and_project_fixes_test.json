@@ -37,7 +37,7 @@
       "year": "Mar 2023 - Oct 2024",
       "gpa": "GPA - 6.35 /7",
       "relevant_courses": [],
-      "honors": "",
+      "honors": "Thesis: Optimisation of Yolov8n Model for Real-Time Corrosion Detection (Grade: 89/100)\nReduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.\nDemonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.\nApplied findings to enhance model performance using drones and edge devices.\nContributed to industrial inspection innovations by improving real-time object detection models.",
       "location": "Sydney, Australia"
     },
     {
@@ -82,11 +82,7 @@
   "projects": [
     {
       "name": "Heart Attack Risk Prediction",
-      "description": [
-        "Implemented logistic regression, random forests, and deep learning models to predict heart attack risks.",
-        "Addressed imbalanced datasets using undersampling techniques to enhance prediction reliability.",
-        "Presented findings through clear, data-driven visualisations to support decision-making."
-      ],
+      "description": "Implemented logistic regression, random forests, and deep learning models to predict heart attack risks.\nAddressed imbalanced datasets using undersampling techniques to enhance prediction reliability.\nPresented findings through clear, data-driven visualisations to support decision-making.",
       "technologies": [],
       "duration": "Oct 2024",
       "role": "",
@@ -105,21 +101,29 @@
   "professional_memberships": [],
   "unknown_sections": {},
   "original_sections": {
-    "raw_cv_text": "Maheshwor Tiwari\n0414 032 507 | maheshtwari99@gmail.com | Blogs on Medium | GitHub | Dashboard Portfolio\n\nCAREER PROFILE\n\nDynamic Data Science Professional with over 2 years of hands-on experience in analytics, specializing in SQL, Tableau, and Python. Adept at transforming complex datasets into actionable insights to drive strategic decision-making. Enthusiastic about exploring diverse industries, gaining cross-functional expertise, and contributing impactful solutions to data-driven projects. Skilled in leveraging data to inform business strategies and deliver measurable outcomes.\n\nKEY SKILLS \n\nAdvanced SQL skills, proficient in writing and interpreting complex queries for analytics tasks.\nStrong experience in Power BI for dashboard creation and data visualisation.\nProficient in Python and Excel for data analysis and automation.\nAbility to uncover insights through analysis of large and diverse datasets.\nExcellent interpersonal and communication skills to work effectively with stakeholders.\nStrong ability to manage and prioritise multiple tasks in dynamic environments.\n\nEDUCATION \n\nMaster of Data Science\t\t            Mar 2023 - Oct 2024\nCharles Darwin University, Sydney, Australia, \tGPA - 6.35 /7\nThesis: Optimisation of Yolov8n Model for Real-Time Corrosion Detection (Grade: 89/100)\nReduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.\nDemonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.\nApplied findings to enhance model performance using drones and edge devices.\nContributed to industrial inspection innovations by improving real-time object detection models.\nBachelor of Science in Information Technology                                                      \tJul 2014 – Aug 2018\nTribhuvan University, Kathmandu, Nepal\t\t                                                                \n\nPROFESSIONAL EXPERIENCE\n\nData Analyst                                                                           ...",
+    "raw_cv_text": "\nMaheshwor Tiwari\n0414 032 507 | maheshtwari99@gmail.com | Blogs on Medium | GitHub | Dashboard Portfolio\n\nCAREER PROFILE\n\nDynamic Data Science Professional with over 2 years of hands-on experience in analytics, specializing in SQL, Tableau, and Python. Adept at transforming complex datasets into actionable insights to drive strategic decision-making. Enthusiastic about exploring diverse industries, gaining cross-functional expertise, and contributing impactful solutions to data-driven projects. Skilled in leveraging data to inform business strategies and deliver measurable outcomes.\n\nKEY SKILLS \n\nAdvanced SQL skills, proficient in writing and interpreting complex queries for analytics tasks.\nStrong experience in Power BI for dashboard creation and data visualisation.\nProficient in Python and Excel for data analysis and automation.\nAbility to uncover insights through analysis of large and diverse datasets.\nExcellent interpersonal and communication skills to work effectively with stakeholders.\nStrong ability to manage and prioritise multiple tasks in dynamic environments.\n\nEDUCATION \n\nMaster of Data Science\t\t            Mar 2023 - Oct 2024\nCharles Darwin University, Sydney, Australia, \tGPA - 6.35 /7\nThesis: Optimisation of Yolov8n Model for Real-Time Corrosion Detection (Grade: 89/100)\nReduced model size by 11.39% and improved inference time by 39.34% with pruning techniques.\nDemonstrated fine-tuning strategies achieving a minimal 7.43% drop in detection precision.\nApplied findings to enhance model performance using drones and edge devices.\nContributed to industrial inspection innovations by improving real-time object detection models.\nBachelor of Science in Information Technology                                                      \tJul 2014 – Aug 2018\nTribhuvan University, Kathmandu, Nepal\t\t                                                                \n\nPROFESSIONAL EXPERIENCE\n\nData Analyst                                                                          ...",
     "section_headers_found": [
-      "CAREER PROFILE",
+      "KEY SKILLS",
       "CERTIFICATIONS",
       "PROFESSIONAL EXPERIENCE",
-      "EDUCATION",
-      "KEY SKILLS"
+      "CAREER PROFILE",
+      "PROJECTS",
+      "EDUCATION"
     ],
     "parsing_approach": "content_preserving"
   },
-  "saved_at": "2025-09-17T10:58:47.950139",
+  "saved_at": "2025-09-17T10:52:54.351071",
   "metadata": {
-    "source_filename": "M_tiwari_CV_Capgemini.docx",
-    "processed_at": "2025-09-17T10:58:47.950508",
-    "processing_version": "2.0",
-    "content_type": "structured_cv"
+    "parsing_version": "4.0_content_preserving",
+    "content_hash": "12aad011d0c14e2a",
+    "parsing_notes": [
+      "Content-preserving parser used - maintains original formatting"
+    ],
+    "quality_score": 82,
+    "completeness_score": 63,
+    "source_file": "",
+    "processed_at": "2025-09-17T10:52:54.351100",
+    "ai_model_used": "gpt-4o",
+    "content_preservation": "enabled"
   }
 }

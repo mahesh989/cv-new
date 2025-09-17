@@ -1,21 +1,24 @@
 """
-Structured CV Parser Service
+LLM-Based Structured CV Parser
 
-This service handles parsing and saving CVs in the structured format,
-with robust error handling for missing information and unknown sections.
+This service uses the centralized AI system to parse CV content from original_cv.txt
+into a structured JSON format (original_cv.json) with comprehensive sections and metadata.
 """
 
 import logging
 import json
+import os
 from datetime import datetime
 from typing import Dict, Any, Optional, List, Union
 from pathlib import Path
 
+from ..ai.ai_service import ai_service
+
 logger = logging.getLogger(__name__)
 
 
-class StructuredCVParser:
-    """Parser for structured CV format with comprehensive error handling"""
+class LLMStructuredCVParser:
+    """LLM-based parser for converting CV text into structured format"""
 
     def __init__(self):
         self.default_structure = self._get_default_structure()
@@ -29,35 +32,55 @@ class StructuredCVParser:
                 "email": "",
                 "location": "",
                 "linkedin": "",
+                "github": "",
                 "portfolio_links": {
                     "blogs": "",
-                    "github": "",
                     "dashboard_portfolio": "",
                     "website": ""
-                }
+                },
+                "residency_status": "",
+                "open_to": ""
             },
             "career_profile": {
                 "summary": ""
             },
-            "technical_skills": [],
+            "skills": {
+                "technical_skills": [],
+                "key_skills": [],
+                "soft_skills": [],
+                "domain_expertise": []
+            },
             "education": [],
             "experience": [],
             "projects": [],
             "certifications": [],
-            "soft_skills": [],
-            "domain_expertise": [],
             "languages": [],
             "awards": [],
             "publications": [],
             "volunteer_work": [],
             "professional_memberships": [],
-            "unknown_sections": {},  # For handling unknown sections
-            "saved_at": ""
+            "unknown_sections": {},
+            "original_sections": {
+                "section_headers_found": [],
+                "parsing_approach": "content_preserving"
+            },
+            "saved_at": "",
+            "metadata": {
+                "parsing_version": "4.0_content_preserving",
+                "content_hash": "",
+                "parsing_notes": [],
+                "quality_score": 0,
+                "completeness_score": 0,
+                "source_file": "",
+                "processed_at": "",
+                "ai_model_used": "",
+                "content_preservation": "enabled"
+            }
         }
 
-    def parse_cv_content(self, cv_data: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
+    async def parse_cv_content(self, cv_data: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Parse CV content from various formats into structured format
+        Parse CV content using LLM into structured format
         
         Args:
             cv_data: CV data as string (raw text) or dictionary (structured)
@@ -66,919 +89,332 @@ class StructuredCVParser:
             Structured CV dictionary with all sections
         """
         try:
-            # If input is string, try to parse as JSON first, then as raw text
-            if isinstance(cv_data, str):
-                try:
-                    parsed_data = json.loads(cv_data)
-                    return self._parse_structured_data(parsed_data)
-                except json.JSONDecodeError:
-                    # If JSON parsing fails, treat as raw text
-                    return self._parse_raw_text(cv_data)
+            # If input is already a dictionary, validate and return
+            if isinstance(cv_data, dict) and "personal_information" in cv_data:
+                logger.info("CV data is already in structured format")
+                return cv_data
             
-            # If input is already a dictionary
-            elif isinstance(cv_data, dict):
-                return self._parse_structured_data(cv_data)
+            # Convert to string if needed
+            cv_text = str(cv_data)
             
-            else:
-                logger.warning(f"Unsupported CV data type: {type(cv_data)}")
-                return self._get_empty_structure()
-                
+            # Use LLM to parse the CV content
+            structured_cv = await self._parse_with_llm(cv_text)
+            
+            # Add original content preservation (without raw text)
+            structured_cv["original_sections"]["section_headers_found"] = self._extract_section_headers(cv_text)
+            
+            # Add metadata
+            structured_cv["saved_at"] = datetime.now().isoformat()
+            structured_cv["metadata"]["processed_at"] = datetime.now().isoformat()
+            structured_cv["metadata"]["content_hash"] = self._generate_content_hash(cv_text)
+            structured_cv["metadata"]["quality_score"] = self._calculate_quality_score(structured_cv)
+            structured_cv["metadata"]["completeness_score"] = self._calculate_completeness_score(structured_cv)
+            structured_cv["metadata"]["parsing_notes"].append("Content-preserving parser used - maintains original formatting")
+            
+            return structured_cv
+            
         except Exception as e:
-            logger.error(f"Error parsing CV content: {e}")
-            return self._get_empty_structure()
+            logger.error(f"Error parsing CV content with LLM: {e}")
+            # Return empty structure with error info
+            empty_structure = self._get_empty_structure()
+            empty_structure["parsing_error"] = str(e)
+            empty_structure["original_text"] = cv_text[:1000] + "..." if len(cv_text) > 1000 else cv_text
+            return empty_structure
 
-    def _parse_structured_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse already structured CV data with validation and error handling"""
-        result = self._get_empty_structure()
-        
+    async def _parse_with_llm(self, cv_text: str) -> Dict[str, Any]:
+        """Use LLM to parse CV text into structured format"""
         try:
-            # Handle personal information
-            result["personal_information"] = self._parse_personal_information(
-                data.get("personal_information", {})
+            # Create the parsing prompt
+            parsing_prompt = self._create_parsing_prompt(cv_text)
+            
+            # Get response from AI service
+            ai_response = await ai_service.generate_response(
+                prompt=parsing_prompt,
+                system_prompt="You are an expert CV parser that preserves original content structure. Your primary goal is to maintain the exact formatting, bullet points, and descriptions as they appear in the original CV while organizing them into the specified JSON structure. Do NOT break down, summarize, or restructure the original content - preserve it exactly as written.",
+                max_tokens=4000,
+                temperature=0.1
             )
             
-            # Handle career profile
-            result["career_profile"] = self._parse_career_profile(
-                data.get("career_profile", {})
-            )
-            
-            # Handle technical skills
-            result["technical_skills"] = self._parse_technical_skills(
-                data.get("technical_skills", [])
-            )
-            
-            # Handle education
-            result["education"] = self._parse_education(
-                data.get("education", [])
-            )
-            
-            # Handle experience
-            result["experience"] = self._parse_experience(
-                data.get("experience", [])
-            )
-            
-            # Handle projects
-            result["projects"] = self._parse_projects(
-                data.get("projects", [])
-            )
-            
-            # Handle certifications
-            result["certifications"] = self._parse_certifications(
-                data.get("certifications", [])
-            )
-            
-            # Handle simple arrays
-            result["soft_skills"] = self._parse_simple_array(data.get("soft_skills", []))
-            result["domain_expertise"] = self._parse_simple_array(data.get("domain_expertise", []))
-            result["awards"] = self._parse_simple_array(data.get("awards", []))
-            result["publications"] = self._parse_simple_array(data.get("publications", []))
-            result["volunteer_work"] = self._parse_simple_array(data.get("volunteer_work", []))
-            result["professional_memberships"] = self._parse_simple_array(data.get("professional_memberships", []))
-            
-            # Handle languages
-            result["languages"] = self._parse_languages(data.get("languages", []))
-            
-            # Handle unknown sections
-            result["unknown_sections"] = self._parse_unknown_sections(data, result)
-            
-            # Preserve metadata if it exists
-            if "metadata" in data:
-                result["metadata"] = data["metadata"]
-            
-            # Set timestamp
-            result["saved_at"] = data.get("saved_at", datetime.now().isoformat())
-            
-            logger.info("Successfully parsed structured CV data")
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error parsing structured data: {e}")
-            return self._get_empty_structure()
-    
-    # Helper methods for structured data parsing
-    def _parse_personal_information(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse personal information with error handling"""
-        default_personal = self.default_structure["personal_information"].copy()
-        
-        if not isinstance(data, dict):
-            return default_personal
-        
-        # Safely extract each field
-        default_personal["name"] = str(data.get("name", "")).strip()
-        default_personal["phone"] = str(data.get("phone", "")).strip()
-        default_personal["email"] = str(data.get("email", "")).strip()
-        default_personal["location"] = str(data.get("location", "")).strip()
-        default_personal["linkedin"] = str(data.get("linkedin", "")).strip()
-        
-        # Handle portfolio links
-        portfolio_links = data.get("portfolio_links", {})
-        if isinstance(portfolio_links, dict):
-            default_personal["portfolio_links"]["blogs"] = str(portfolio_links.get("blogs", "")).strip()
-            default_personal["portfolio_links"]["github"] = str(portfolio_links.get("github", "")).strip()
-            default_personal["portfolio_links"]["dashboard_portfolio"] = str(portfolio_links.get("dashboard_portfolio", "")).strip()
-            default_personal["portfolio_links"]["website"] = str(portfolio_links.get("website", "")).strip()
-        
-        return default_personal
-    
-    def _parse_career_profile(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse career profile with error handling"""
-        if not isinstance(data, dict):
-            return {"summary": ""}
-        
-        return {
-            "summary": str(data.get("summary", "")).strip()
-        }
-    
-    def _parse_technical_skills(self, data: List[Any]) -> List[str]:
-        """Parse technical skills array"""
-        if not isinstance(data, list):
-            return []
-        
-        skills = []
-        for skill in data:
-            if isinstance(skill, str) and skill.strip():
-                skills.append(skill.strip())
-        
-        return skills
-    
-    def _parse_education(self, data: List[Any]) -> List[Dict[str, Any]]:
-        """Parse education array with comprehensive error handling"""
-        if not isinstance(data, list):
-            return []
-        
-        education_list = []
-        for item in data:
-            if isinstance(item, dict):
-                education_entry = {
-                    "degree": str(item.get("degree", "")).strip(),
-                    "institution": str(item.get("institution", "")).strip(),
-                    "location": str(item.get("location", "")).strip(),
-                    "duration": str(item.get("duration", "")).strip(),
-                    "additional_info": str(item.get("additional_info", "")).strip(),
-                    "gpa": str(item.get("gpa", "")).strip(),
-                    "honors": str(item.get("honors", "")).strip(),
-                    "relevant_coursework": item.get("relevant_coursework", []) if isinstance(item.get("relevant_coursework"), list) else []
-                }
-                education_list.append(education_entry)
-        
-        return education_list
-    
-    def _parse_experience(self, data: List[Any]) -> List[Dict[str, Any]]:
-        """Parse experience array with comprehensive error handling"""
-        if not isinstance(data, list):
-            return []
-        
-        experience_list = []
-        for item in data:
-            if isinstance(item, dict):
-                experience_entry = {
-                    "position": str(item.get("position", "")).strip(),
-                    "company": str(item.get("company", "")).strip(),
-                    "location": str(item.get("location", "")).strip(),
-                    "duration": str(item.get("duration", "")).strip(),
-                    "employment_type": str(item.get("employment_type", "")).strip(),
-                    "achievements": [],
-                    "responsibilities": []
-                }
+            # Parse the JSON response
+            try:
+                parsed_data = json.loads(ai_response.content.strip())
                 
-                # Handle achievements
-                achievements = item.get("achievements", [])
-                if isinstance(achievements, list):
-                    experience_entry["achievements"] = [str(a).strip() for a in achievements if str(a).strip()]
+                # Validate and merge with default structure
+                structured_cv = self._merge_with_default_structure(parsed_data)
+                structured_cv["metadata"]["ai_model_used"] = ai_service.current_model
                 
-                # Handle responsibilities (alternative to achievements)
-                responsibilities = item.get("responsibilities", [])
-                if isinstance(responsibilities, list):
-                    experience_entry["responsibilities"] = [str(r).strip() for r in responsibilities if str(r).strip()]
+                logger.info(f"Successfully parsed CV using {ai_service.current_model}")
+                return structured_cv
                 
-                experience_list.append(experience_entry)
-        
-        return experience_list
-    
-    def _parse_projects(self, data: List[Any]) -> List[Dict[str, Any]]:
-        """Parse projects array with comprehensive error handling"""
-        if not isinstance(data, list):
-            return []
-        
-        projects_list = []
-        for item in data:
-            if isinstance(item, dict):
-                project_entry = {
-                    "name": str(item.get("name", "")).strip(),
-                    "duration": str(item.get("duration", "")).strip(),
-                    "company": str(item.get("company", "")).strip(),
-                    "description": str(item.get("description", "")).strip(),
-                    "bullet_points": [],
-                    "technologies": [],
-                    "achievements": [],
-                    "url": str(item.get("url", "")).strip()
-                }
-                
-                # Handle bullet_points
-                bullet_points = item.get("bullet_points", [])
-                if isinstance(bullet_points, list):
-                    project_entry["bullet_points"] = [str(b).strip() for b in bullet_points if str(b).strip()]
-                
-                # Handle technologies
-                technologies = item.get("technologies", [])
-                if isinstance(technologies, list):
-                    project_entry["technologies"] = [str(t).strip() for t in technologies if str(t).strip()]
-                
-                # Handle achievements
-                achievements = item.get("achievements", [])
-                if isinstance(achievements, list):
-                    project_entry["achievements"] = [str(a).strip() for a in achievements if str(a).strip()]
-                
-                projects_list.append(project_entry)
-        
-        return projects_list
-    
-    def _parse_certifications(self, data: List[Any]) -> List[Dict[str, Any]]:
-        """Parse certifications array with comprehensive error handling"""
-        if not isinstance(data, list):
-            return []
-        
-        certifications_list = []
-        for item in data:
-            if isinstance(item, dict):
-                cert_entry = {
-                    "name": str(item.get("name", "")).strip(),
-                    "issuing_organization": str(item.get("issuing_organization", "")).strip(),
-                    "date_obtained": str(item.get("date_obtained", "")).strip(),
-                    "expiry_date": str(item.get("expiry_date", "")).strip(),
-                    "status": str(item.get("status", "")).strip(),
-                    "description": str(item.get("description", "")).strip(),
-                    "credential_id": str(item.get("credential_id", "")).strip(),
-                    "url": str(item.get("url", "")).strip()
-                }
-                certifications_list.append(cert_entry)
-        
-        return certifications_list
-    
-    def _parse_languages(self, data: List[Any]) -> List[Dict[str, Any]]:
-        """Parse languages array with error handling"""
-        if not isinstance(data, list):
-            return []
-        
-        languages_list = []
-        for item in data:
-            if isinstance(item, dict):
-                language_entry = {
-                    "language": str(item.get("language", "")).strip(),
-                    "proficiency": str(item.get("proficiency", "")).strip(),
-                    "certification": str(item.get("certification", "")).strip()
-                }
-                languages_list.append(language_entry)
-        
-        return languages_list
-    
-    def _parse_simple_array(self, data: List[Any]) -> List[str]:
-        """Parse simple string arrays with error handling"""
-        if not isinstance(data, list):
-            return []
-        
-        result = []
-        for item in data:
-            if isinstance(item, str) and item.strip():
-                result.append(item.strip())
-        
-        return result
-    
-    def _parse_unknown_sections(self, original_data: Dict[str, Any], parsed_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Identify and store unknown sections"""
-        known_sections = {
-            "personal_information", "career_profile", "technical_skills", "education", 
-            "experience", "projects", "certifications", "soft_skills", "domain_expertise", 
-            "languages", "awards", "publications", "volunteer_work", "professional_memberships", 
-            "saved_at", "metadata"  # Include metadata as a known section
-        }
-        
-        unknown_sections = {}
-        for key, value in original_data.items():
-            if key not in known_sections:
-                unknown_sections[key] = value
-                logger.info(f"Found unknown section: {key}")
-        
-        return unknown_sections
-
-    def _parse_raw_text(self, text: str) -> Dict[str, Any]:
-        """Parse raw text CV format with enhanced extraction"""
-        result = self._get_empty_structure()
-        
-        try:
-            # Extract personal information
-            result["personal_information"] = self._extract_personal_info_from_text(text)
-            
-            # Extract sections based on headers
-            sections = self._extract_sections_from_text(text)
-            
-            # Map sections to structured format
-            if "CAREER PROFILE" in sections:
-                result["career_profile"]["summary"] = sections["CAREER PROFILE"].strip()
-            
-            if "KEY SKILLS" in sections:
-                result["technical_skills"] = self._extract_skills_from_text(sections["KEY SKILLS"])
-            elif "TECHNICAL SKILLS" in sections:
-                result["technical_skills"] = self._text_to_skills_array(sections["TECHNICAL SKILLS"])
-            
-            if "EDUCATION" in sections:
-                result["education"] = self._text_to_education_array(sections["EDUCATION"])
-            
-            if "PROFESSIONAL EXPERIENCE" in sections:
-                result["experience"] = self._text_to_experience_array(sections["PROFESSIONAL EXPERIENCE"])
-            elif "EXPERIENCE" in sections:
-                result["experience"] = self._text_to_experience_array(sections["EXPERIENCE"])
-            
-            if "UNIVERSITY PROJECT" in sections:
-                # Enhanced project parsing with education context
-                result["projects"] = self._text_to_projects_array_with_context(
-                    sections["UNIVERSITY PROJECT"], 
-                    result["education"]
-                )
-            elif "PROJECTS" in sections:
-                result["projects"] = self._text_to_projects_array_with_context(
-                    sections["PROJECTS"], 
-                    result["education"]
-                )
-            
-            if "CERTIFICATIONS" in sections:
-                result["certifications"] = self._text_to_certifications_array(sections["CERTIFICATIONS"])
-            
-            # Store unknown sections
-            known_headers = {
-                "CAREER PROFILE", "KEY SKILLS", "TECHNICAL SKILLS", "EDUCATION", 
-                "PROFESSIONAL EXPERIENCE", "EXPERIENCE", "UNIVERSITY PROJECT", 
-                "PROJECTS", "CERTIFICATIONS"
-            }
-            for header, content in sections.items():
-                if header not in known_headers:
-                    result["unknown_sections"][header] = content
-            
-            result["saved_at"] = datetime.now().isoformat()
-            
-            logger.info("Successfully parsed raw text CV with enhanced extraction")
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error parsing raw text: {e}")
-            return self._get_empty_structure()
-
-    def _extract_personal_info_from_text(self, text: str) -> Dict[str, Any]:
-        """Extract personal information from raw text with enhanced parsing"""
-        import re
-        
-        lines = text.split('\n')
-        personal_info = self.default_structure["personal_information"].copy()
-        
-        # Extract name from first line
-        if lines:
-            personal_info["name"] = lines[0].strip()
-        
-        # Look for contact information in the first few lines
-        contact_text = '\n'.join(lines[:5])
-        
-        # Extract phone number
-        phone_pattern = r'(\d{4}\s\d{3}\s\d{3})'
-        phone_match = re.search(phone_pattern, contact_text)
-        if phone_match:
-            personal_info["phone"] = phone_match.group(1)
-        
-        # Extract email
-        email_pattern = r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})'
-        email_match = re.search(email_pattern, contact_text)
-        if email_match:
-            personal_info["email"] = email_match.group(1)
-        
-        # Extract location from the entire text (look for Australian locations)
-        full_text = text.lower()
-        if 'sydney' in full_text and 'australia' in full_text:
-            personal_info["location"] = "Sydney, Australia"
-        elif 'melbourne' in full_text and 'australia' in full_text:
-            personal_info["location"] = "Melbourne, Australia"
-        elif 'brisbane' in full_text and 'australia' in full_text:
-            personal_info["location"] = "Brisbane, Australia"
-        elif 'perth' in full_text and 'australia' in full_text:
-            personal_info["location"] = "Perth, Australia"
-        elif 'australia' in full_text:
-            # More specific location extraction
-            location_patterns = [
-                r'([A-Za-z\s]+,\s*(?:NSW|VIC|QLD|WA|SA|TAS|NT|ACT),?\s*\d{4})',
-                r'([A-Za-z\s]+,\s*(?:New South Wales|Victoria|Queensland|Western Australia|South Australia|Tasmania|Northern Territory|Australian Capital Territory))',
-                r'(Sydney|Melbourne|Brisbane|Perth|Adelaide|Darwin|Hobart|Canberra),\s*Australia'
-            ]
-            
-            for pattern in location_patterns:
-                match = re.search(pattern, text, re.IGNORECASE)
-                if match:
-                    personal_info["location"] = match.group(1).strip()
-                    break
-            
-            # Fallback to just Australia if specific location not found
-            if not personal_info["location"]:
-                personal_info["location"] = "Australia"
-        
-        # Extract portfolio links
-        if 'GitHub' in contact_text:
-            personal_info["portfolio_links"]["github"] = "GitHub Profile Available"
-        if 'Medium' in contact_text or 'Blog' in contact_text:
-            personal_info["portfolio_links"]["blogs"] = "Medium Blog Available"
-        if 'Dashboard Portfolio' in contact_text:
-            personal_info["portfolio_links"]["dashboard_portfolio"] = "Dashboard Portfolio Available"
-        
-        # Extract LinkedIn
-        if 'LinkedIn' in contact_text:
-            personal_info["linkedin"] = "LinkedIn Profile Available"
-        
-        return personal_info
-
-    def _extract_sections_from_text(self, text: str) -> Dict[str, str]:
-        """Extract sections from raw text based on headers"""
-        sections = {}
-        lines = text.split('\n')
-        current_section = None
-        current_content = []
-        
-        # Define section headers to look for
-        section_headers = {
-            'CAREER PROFILE', 'KEY SKILLS', 'TECHNICAL SKILLS', 'EDUCATION', 
-            'PROFESSIONAL EXPERIENCE', 'EXPERIENCE', 'UNIVERSITY PROJECT', 
-            'PROJECTS', 'CERTIFICATIONS'
-        }
-        
-        for line in lines:
-            line_stripped = line.strip()
-            line_upper = line_stripped.upper()
-            
-            # Check if this line is a section header
-            if line_upper in section_headers:
-                # Save previous section if exists
-                if current_section and current_content:
-                    sections[current_section] = '\n'.join(current_content).strip()
-                
-                current_section = line_upper
-                current_content = []
-            elif current_section and line_stripped:  # Only add non-empty lines
-                current_content.append(line_stripped)
-        
-        # Don't forget the last section
-        if current_section and current_content:
-            sections[current_section] = '\n'.join(current_content).strip()
-        
-        return sections
-
-    def _extract_skills_from_text(self, text: str) -> List[str]:
-        """Extract technical skills from KEY SKILLS section"""
-        skills = []
-        lines = text.split('\n')
-        
-        for line in lines:
-            line = line.strip()
-            if line and ':' in line:
-                # Handle "Category: Description" format
-                skill_desc = line.split(':', 1)[1].strip()
-                if skill_desc:
-                    skills.append(skill_desc)
-            elif line and len(line) > 10:  # Standalone skill descriptions
-                skills.append(line)
-        
-        return skills
-
-    def _text_to_education_array(self, text: str) -> List[Dict[str, Any]]:
-        """Convert education text to structured array with enhanced parsing"""
-        import re
-        
-        education_list = []
-        lines = text.split('\n')
-        
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            
-            # Look for degree lines (usually contain degree names)
-            if any(degree_word in line.upper() for degree_word in ['MASTER', 'BACHELOR', 'DIPLOMA', 'CERTIFICATE', 'PHD', 'DOCTORATE']):
-                education_entry = {
-                    "degree": "",
-                    "institution": "",
-                    "location": "",
-                    "duration": "",
-                    "additional_info": "",
-                    "gpa": "",
-                    "honors": "",
-                    "relevant_coursework": []
-                }
-                
-                # Extract degree and dates from the same line
-                date_pattern = r'(\w{3}\s\d{4}\s*[-–]\s*\w{3}\s\d{4}|\w{3}\s\d{4}\s*[-–]\s*\w{3}\s\d{4})'
-                date_match = re.search(date_pattern, line)
-                
-                if date_match:
-                    education_entry["duration"] = date_match.group(1)
-                    degree_part = line.replace(date_match.group(1), '').strip()
-                    education_entry["degree"] = degree_part
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse LLM response as JSON: {e}")
+                # Try to extract JSON from response if it's wrapped in markdown
+                json_match = self._extract_json_from_response(ai_response.content)
+                if json_match:
+                    parsed_data = json.loads(json_match)
+                    structured_cv = self._merge_with_default_structure(parsed_data)
+                    structured_cv["metadata"]["ai_model_used"] = ai_service.current_model
+                    return structured_cv
                 else:
-                    education_entry["degree"] = line
-                
-                # Look for institution in next line
-                if i + 1 < len(lines):
-                    next_line = lines[i + 1].strip()
-                    if next_line and not any(degree_word in next_line.upper() for degree_word in ['MASTER', 'BACHELOR', 'DIPLOMA']):
-                        # Extract GPA if present
-                        gpa_match = re.search(r'GPA\s*[-:]?\s*([\d.]+\s*/\s*[\d.]+|[\d.]+%)', next_line)
-                        if gpa_match:
-                            education_entry["gpa"] = gpa_match.group(1)
-                            institution_part = next_line.replace(gpa_match.group(0), '').strip().rstrip(',')
-                            education_entry["institution"] = institution_part
-                        else:
-                            education_entry["institution"] = next_line
-                        
-                        # Extract location from institution name
-                        education_entry["location"] = self._extract_location_from_text(education_entry["institution"])
-                        
-                        # Clean institution name by removing location
-                        if education_entry["location"]:
-                            clean_institution = education_entry["institution"]
-                            clean_institution = clean_institution.replace(f", {education_entry['location']}", "")
-                            clean_institution = clean_institution.replace(education_entry['location'], "")
-                            education_entry["institution"] = clean_institution.strip().rstrip(',').strip()
-                        
-                        i += 1
-                
-                education_list.append(education_entry)
+                    raise e
             
-            i += 1
-        
-        return education_list
+        except Exception as e:
+            logger.error(f"Error in LLM parsing: {e}")
+            raise e
 
-    def _extract_location_from_text(self, text: str) -> str:
-        """Extract location from a text string (for institutions and companies)"""
+    def _create_parsing_prompt(self, cv_text: str) -> str:
+        """Create a content-preserving prompt for CV parsing"""
+        return f"""
+PARSE THIS CV INTO STRUCTURED JSON - PRESERVE ORIGINAL CONTENT EXACTLY AS WRITTEN
+
+CV TEXT:
+{cv_text}
+
+INSTRUCTIONS FOR CONTENT PRESERVATION:
+- MAINTAIN original bullet points, descriptions, and formatting exactly as they appear
+- DO NOT break down or fragment content - keep complete sentences and descriptions intact
+- PRESERVE the original wording, structure, and flow of each section
+- If the CV has bullet points with detailed descriptions, maintain those complete descriptions
+- If skills are presented in paragraph form, preserve the paragraph structure
+- Keep all original context and details - do not summarize or simplify
+
+Return a JSON object with this structure, but PRESERVE the original content format:
+
+{{
+    "personal_information": {{
+        "name": "Exact name as written",
+        "phone": "Phone number as written",
+        "email": "Email as written", 
+        "location": "Extract location from contact line (city, state, postcode) - look for address information in header",
+        "linkedin": "LinkedIn text/URL as written",
+        "github": "GitHub text/URL as written",
+        "portfolio_links": {{
+            "blogs": "Blog text/URL as written",
+            "dashboard_portfolio": "Portfolio text/URL as written",
+            "website": "Website text/URL as written"
+        }},
+        "residency_status": "Status as mentioned",
+        "open_to": "Preferences as mentioned"
+    }},
+    "career_profile": {{
+        "summary": "Complete summary/objective text exactly as written"
+    }},
+    "skills": {{
+        "technical_skills": ["PRESERVE ORIGINAL FORMAT: If bullet points, keep complete bullet descriptions. If paragraph, keep as paragraph. If list, keep as individual items."],
+        "key_skills": ["Only if CV has separate 'Key Skills' section - preserve original format"],
+        "soft_skills": ["Only if CV has separate 'Soft Skills' section - preserve original format"],
+        "domain_expertise": ["Derived expertise areas based on CV content"]
+    }},
+    "education": [
+        {{
+            "degree": "Exact degree name as written",
+            "institution": "Exact institution name as written",
+            "year": "Exact date/year format as written",
+            "gpa": "GPA exactly as mentioned (including 'GPA' text if shown)",
+            "relevant_courses": ["Courses exactly as listed"],
+            "honors": "Honors exactly as written",
+            "location": "Extract city, country from institution line - look for location info near institution name"
+        }}
+    ],
+    "experience": [
+        {{
+            "title": "Exact job title as written",
+            "company": "Exact company name as written",
+            "duration": "Exact duration format as written",
+            "location": "Exact location as written",
+            "responsibilities": ["Each bullet point or responsibility EXACTLY as written - do not break down or modify"],
+            "achievements": ["ONLY if there is a separate 'Achievements' section or subsection in the CV - otherwise leave empty"],
+            "technologies": ["ONLY if there is a separate 'Technologies' section or subsection in the CV - otherwise leave empty"]
+        }}
+    ],
+    "projects": [
+        {{
+            "name": "Project name exactly as written",
+            "description": ["PRESERVE BULLET POINTS: If project has bullet points, keep each bullet point as a separate array item exactly as written. If single paragraph, use one array item."],
+            "technologies": ["Technologies as listed"],
+            "duration": "Duration as mentioned",
+            "role": "Role as mentioned",
+            "achievements": ["Achievements as written"],
+            "url": "URL if provided"
+        }}
+    ],
+    "certifications": ["Parse if section exists, preserve exact format"],
+    "languages": ["Parse if section exists, preserve exact format"],
+    "awards": ["Parse if section exists, preserve exact format"],
+    "publications": ["Parse if section exists, preserve exact format"],
+    "volunteer_work": ["Parse if section exists, preserve exact format"],
+    "professional_memberships": ["Parse if section exists, preserve exact format"]
+}}
+
+CRITICAL CONTENT PRESERVATION RULES:
+1. **EXACT WORDING**: Use the exact words, phrases, and descriptions from the original CV
+2. **COMPLETE CONTENT**: If a bullet point has a full sentence/description, keep it complete - don't fragment it
+3. **ORIGINAL STRUCTURE**: If skills are in bullet format, keep as bullets. If paragraph, keep as paragraph
+4. **NO SUMMARIZATION**: Never summarize, paraphrase, or simplify the original content
+5. **CONTEXT PRESERVATION**: Maintain all context, details, and qualifiers from the original
+6. **FORMATTING CUES**: Preserve formatting indicators (bullet symbols, numbering, etc.) in the text
+7. **EMPTY SECTIONS**: Only populate sections that exist in the CV - leave others empty
+8. **NO FALSE EXTRACTIONS**: Do NOT create 'achievements' or 'technologies' arrays unless they exist as separate sections in the original CV
+9. **SECTION IDENTIFICATION**: Only identify actual section headers (like 'EXPERIENCE', 'SKILLS') - not names, job titles, or degree names
+10. **LOCATION EXTRACTION**: Carefully extract location information from contact details and institution descriptions - look for city, state, country patterns
+11. **PROJECT FORMAT PRESERVATION**: For projects with bullet points, keep each bullet as a separate array item in 'description'. For paragraph projects, use single array item.
+
+Return ONLY the JSON object with preserved original content.
+"""
+
+    def _extract_json_from_response(self, response: str) -> Optional[str]:
+        """Extract JSON from response that might be wrapped in markdown"""
+        import re
+        # Try to find JSON wrapped in code blocks
+        json_match = re.search(r'```(?:json)?\s*(\{.*\})\s*```', response, re.DOTALL)
+        if json_match:
+            return json_match.group(1)
+        
+        # Try to find JSON object in the response
+        json_match = re.search(r'\{.*\}', response, re.DOTALL)
+        if json_match:
+            return json_match.group(0)
+        
+        return None
+    
+    def _extract_section_headers(self, cv_text: str) -> List[str]:
+        """Extract section headers from CV text to understand structure"""
         import re
         
-        if not text:
-            return ""
-        
-        # Australian location patterns - ordered by specificity (most specific first)
-        location_patterns = [
-            # Specific City, Country patterns (most specific first)
-            r'(Sydney, Australia)',
-            r'(Melbourne, Australia)', 
-            r'(Brisbane, Australia)',
-            r'(Perth, Australia)',
-            r'(Adelaide, Australia)',
-            r'(Darwin, Australia)',
-            r'(Hobart, Australia)',
-            r'(Canberra, Australia)',
-            r'(Victoria, Australia)',  # Must come before general VIC pattern
-            
-            # Full state names with Australia
-            r'((?:New South Wales|Victoria|Queensland|Western Australia|South Australia|Tasmania|Northern Territory|Australian Capital Territory), Australia)',
-            
-            # State abbreviations with Australia
-            r'((?:NSW|QLD|WA|SA|TAS|NT|ACT), Australia)',
-            
-            # International locations
-            r'(Kathmandu, Nepal)',
-            r'(Nepal)',
-            
-            # General patterns (least specific, last)
-            r'([A-Za-z\s]+, (?:New South Wales|Victoria|Queensland|Western Australia|South Australia|Tasmania|Northern Territory|Australian Capital Territory))',
-            r'([A-Za-z\s]+, (?:NSW|QLD|WA|SA|TAS|NT|ACT))'  # VIC removed to avoid conflict with Victoria, Australia
+        # Known CV section keywords (must contain these to be considered headers)
+        section_keywords = [
+            'EXPERIENCE', 'WORK', 'EMPLOYMENT', 'CAREER', 'PROFESSIONAL',
+            'EDUCATION', 'ACADEMIC', 'QUALIFICATION', 'DEGREE',
+            'SKILLS', 'TECHNICAL', 'COMPETENCIES', 'ABILITIES',
+            'PROFILE', 'SUMMARY', 'OBJECTIVE', 'ABOUT',
+            'PROJECTS', 'PORTFOLIO', 'ACHIEVEMENTS', 'ACCOMPLISHMENTS',
+            'CERTIFICATIONS', 'CERTIFICATES', 'TRAINING',
+            'LANGUAGES', 'PUBLICATIONS', 'RESEARCH',
+            'AWARDS', 'HONORS', 'VOLUNTEER', 'ACTIVITIES'
         ]
         
-        for pattern in location_patterns:
-            match = re.search(pattern, text, re.IGNORECASE)
-            if match:
-                return match.group(1).strip()
+        # Patterns for section headers (must be ALL CAPS or clearly formatted)
+        header_patterns = [
+            r'^([A-Z][A-Z\s&-]+)\s*$',  # ALL CAPS headers only
+            r'^\*\*([A-Za-z\s&]+)\*\*',  # Bold headers
+            r'^#+ ([A-Za-z\s&]+)',  # Markdown headers
+        ]
         
-        return ""
-
-    def _extract_bullet_points_from_text(self, text: str) -> List[str]:
-        """Extract bullet points from text, handling various bullet styles"""
-        import re
-        
-        bullet_points = []
-        lines = text.split('\n')
+        headers_found = []
+        lines = cv_text.split('\n')
         
         for line in lines:
             line = line.strip()
             if not line:
                 continue
                 
-            # Check for bullet point patterns
-            bullet_patterns = [
-                r'^[•\-*]\s+(.+)',  # • - * bullets
-                r'^\d+\.\s+(.+)',  # numbered lists
-                r'^[a-z]\)\s+(.+)', # lettered lists a) b) c)
-                r'^[A-Z]\)\s+(.+)', # lettered lists A) B) C)
-            ]
-            
-            is_bullet = False
-            for pattern in bullet_patterns:
+            for pattern in header_patterns:
                 match = re.match(pattern, line)
                 if match:
-                    bullet_points.append(match.group(1).strip())
-                    is_bullet = True
+                    header = match.group(1).strip()
+                    # Check if this looks like a section header
+                    if (len(header) > 3 and len(header) < 50 and 
+                        any(keyword in header.upper() for keyword in section_keywords)):
+                        headers_found.append(header)
                     break
-            
-            # If not a bullet but contains key action words, might be an implicit bullet
-            if not is_bullet and len(line) > 20:
-                action_words = [
-                    'implemented', 'developed', 'created', 'built', 'designed', 'analyzed', 'optimized', 
-                    'enhanced', 'reduced', 'improved', 'achieved', 'addressed', 'presented', 'demonstrated',
-                    'applied', 'contributed', 'utilized', 'established', 'managed', 'led', 'coordinated',
-                    'researched', 'investigated', 'evaluated', 'tested', 'deployed', 'maintained',
-                    'configured', 'integrated', 'collaborated', 'facilitated', 'streamlined'
-                ]
-                if any(word in line.lower() for word in action_words):
-                    bullet_points.append(line)
         
-        return bullet_points
+        return list(set(headers_found))  # Remove duplicates
 
-    def _text_to_experience_array(self, text: str) -> List[Dict[str, Any]]:
-        """Convert experience text to structured array with enhanced parsing"""
-        import re
+    def _merge_with_default_structure(self, parsed_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Merge parsed data with default structure to ensure completeness"""
+        structured_cv = self.default_structure.copy()
         
-        experience_list = []
-        lines = text.split('\n')
-        
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            
-            # Look for job titles (lines with dates at the end)
-            date_pattern = r'(\w{3}\s\d{4}\s*[-–]\s*\w{3}\s\d{4}|\w{3}\s\d{4}\s*[-–]\s*Present|\d{4}\s*[-–]\s*\d{4})'
-            date_match = re.search(date_pattern, line)
-            
-            if date_match or (line and not line.startswith('•') and len(line) > 10):
-                experience_entry = {
-                    "position": "",
-                    "company": "",
-                    "location": "",
-                    "duration": "",
-                    "employment_type": "",
-                    "achievements": [],
-                    "responsibilities": []
-                }
-                
-                if date_match:
-                    experience_entry["duration"] = date_match.group(1).strip()
-                    position_part = line.replace(date_match.group(0), '').strip()
-                    experience_entry["position"] = position_part
+        # Recursively merge the structures
+        def merge_dict(default: Dict, parsed: Dict) -> Dict:
+            result = default.copy()
+            for key, value in parsed.items():
+                if key in result:
+                    if isinstance(result[key], dict) and isinstance(value, dict):
+                        result[key] = merge_dict(result[key], value)
+                    else:
+                        result[key] = value
                 else:
-                    experience_entry["position"] = line
-                
-                # Look for company in next line
-                if i + 1 < len(lines):
-                    next_line = lines[i + 1].strip()
-                    if next_line and not next_line.startswith('•') and not re.search(date_pattern, next_line):
-                        experience_entry["company"] = next_line
-                        
-                        # Extract location from company name
-                        experience_entry["location"] = self._extract_location_from_text(experience_entry["company"])
-                        
-                        # Clean company name by removing location
-                        if experience_entry["location"]:
-                            clean_company = experience_entry["company"]
-                            clean_company = clean_company.replace(f", {experience_entry['location']}", "")
-                            clean_company = clean_company.replace(experience_entry['location'], "")
-                            experience_entry["company"] = clean_company.strip().rstrip(',').strip()
-                        
-                        i += 1
-                
-                # Collect achievements/responsibilities
-                i += 1
-                while i < len(lines):
-                    achievement_line = lines[i].strip()
-                    if achievement_line.startswith('•') or achievement_line.startswith('-'):
-                        achievement_text = achievement_line[1:].strip()
-                        if achievement_text:
-                            experience_entry["achievements"].append(achievement_text)
-                        i += 1
-                    elif achievement_line and not re.search(date_pattern, achievement_line):
-                        # Non-bullet point achievement
-                        experience_entry["achievements"].append(achievement_line)
-                        i += 1
-                    else:
-                        # End of this experience entry
-                        i -= 1
-                        break
-                
-                experience_list.append(experience_entry)
-            
-            i += 1
+                    # Store unknown sections
+                    if key not in ["saved_at", "metadata"]:
+                        if "unknown_sections" not in result:
+                            result["unknown_sections"] = {}
+                        result["unknown_sections"][key] = value
+            return result
         
-        return experience_list
+        return merge_dict(structured_cv, parsed_data)
 
-    def _text_to_projects_array_with_context(self, text: str, education: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Convert projects text to structured array with education context for university/duration info"""
-        import re
-        
-        projects_list = []
-        lines = [line.strip() for line in text.split('\n') if line.strip()]
-        
-        # Find the most recent degree (likely Master's for thesis work)
-        master_degree = None
-        bachelor_degree = None
-        
-        for edu in education:
-            degree_text = edu.get('degree', '').lower()
-            if 'master' in degree_text or 'masters' in degree_text:
-                master_degree = edu
-            elif 'bachelor' in degree_text:
-                bachelor_degree = edu
-        
-        # Use master's degree as default context, fallback to bachelor's
-        university_context = master_degree or bachelor_degree
-        
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            
-            # Look for project titles - either with colon or with grade info
-            is_project_title = (
-                (':' in line and ('Grade' in line or 'Thesis' in line)) or
-                (re.search(r'\(Grade.*?\)', line)) or
-                (re.search(r'\t.*?\d{4}', line))  # Tab followed by date
-            )
-            
-            if is_project_title:
-                project_entry = {
-                    "name": "",
-                    "duration": "",
-                    "company": "",
-                    "description": "",
-                    "bullet_points": [],
-                    "technologies": [],
-                    "achievements": [],
-                    "url": ""
-                }
-                
-                # Extract project name and metadata
-                if ':' in line:
-                    # Format: "Project Name: Description (Grade: X/Y)"
-                    name_part = line.split(':', 1)[0].strip()
-                    rest_part = line.split(':', 1)[1].strip()
-                    
-                    project_entry["name"] = name_part
-                    
-                    # For thesis projects, use university context
-                    if 'thesis' in name_part.lower() and university_context:
-                        project_entry["company"] = university_context.get('institution', '')
-                        project_entry["duration"] = university_context.get('duration', '')
-                    
-                    # Extract grade
-                    grade_match = re.search(r'\(Grade[:\s]*([^)]+)\)', rest_part)
-                    if grade_match:
-                        project_entry["achievements"].append(f"Grade: {grade_match.group(1)}")
-                        rest_part = re.sub(r'\(Grade[:\s]*[^)]+\)', '', rest_part).strip()
-                    
-                    # Any remaining part goes to description
-                    if rest_part:
-                        project_entry["description"] = rest_part
-                
-                else:
-                    # Format: "Project Name (Grade: X/Y) \tDate"
-                    # Extract date first
-                    date_match = re.search(r'\t.*?(\w{3}\s\d{4})', line)
-                    if date_match:
-                        project_entry["duration"] = date_match.group(1)
-                    
-                    # Extract grade
-                    grade_match = re.search(r'\(Grade.*?([\d/]+)\)', line)
-                    if grade_match:
-                        project_entry["achievements"].append(f"Grade: {grade_match.group(1)}")
-                    
-                    # Clean up name by removing grade and date parts
-                    name = line
-                    name = re.sub(r'\(Grade.*?\)', '', name)
-                    name = re.sub(r'\t.*', '', name)
-                    project_entry["name"] = name.strip()
-                    
-                    # For non-thesis projects with specific dates, try to match with education
-                    if project_entry["duration"] and university_context:
-                        # Check if project date falls within degree duration
-                        project_entry["company"] = university_context.get('institution', '')
-                
-                # Collect project details from following lines until next project or end
-                i += 1
-                description_parts = []
-                
-                while i < len(lines):
-                    next_line = lines[i]
-                    
-                    # Check if this is the start of another project
-                    is_next_project = (
-                        (':' in next_line and ('Grade' in next_line or 'Thesis' in next_line)) or
-                        (re.search(r'\(Grade.*?\)', next_line)) or
-                        (re.search(r'\t.*?\d{4}', next_line))
-                    )
-                    
-                    if is_next_project:
-                        break
-                    else:
-                        description_parts.append(next_line)
-                        i += 1
-                
-                # Process description parts to extract bullet points and description
-                if description_parts:
-                    combined_text = "\n".join(description_parts)
-                    
-                    # Extract bullet points using the helper method
-                    project_entry["bullet_points"] = self._extract_bullet_points_from_text(combined_text)
-                    
-                    # For description, combine non-bullet lines or use a summary
-                    non_bullet_lines = []
-                    for part in description_parts:
-                        line = part.strip()
-                        # Skip lines that are clearly bullet points
-                        if not (line.startswith('•') or line.startswith('-') or line.startswith('*') or 
-                                line.startswith('1.') or line.startswith('2.') or line.startswith('3.')):
-                            if len(line) > 0:
-                                non_bullet_lines.append(line)
-                    
-                    # Build description from non-bullet content
-                    if project_entry["description"]:
-                        if non_bullet_lines:
-                            project_entry["description"] += " " + " ".join(non_bullet_lines)
-                    else:
-                        if non_bullet_lines:
-                            project_entry["description"] = " ".join(non_bullet_lines)
-                        elif project_entry["bullet_points"]:
-                            # If no separate description but we have bullet points, use first bullet as description
-                            project_entry["description"] = project_entry["bullet_points"][0][:100] + "..."
-                        else:
-                            project_entry["description"] = " ".join(description_parts)
-                
-                # Extract technologies from description
-                tech_keywords = [
-                    'Python', 'SQL', 'Machine Learning', 'Deep Learning', 'YOLOv8', 'YOLO',
-                    'Logistic Regression', 'Random Forest', 'Pruning', 'TensorFlow', 
-                    'PyTorch', 'Visualization', 'Data Analysis', 'Neural Networks',
-                    'Computer Vision', 'Object Detection', 'Fine-tuning'
-                ]
-                
-                for tech in tech_keywords:
-                    if tech.lower() in project_entry["description"].lower():
-                        if tech not in project_entry["technologies"]:
-                            project_entry["technologies"].append(tech)
-                
-                projects_list.append(project_entry)
-                
-                # Don't increment i here as the while loop will handle it
-                continue
-            
-            i += 1
-        
-        return projects_list
+    def _generate_content_hash(self, content: str) -> str:
+        """Generate a hash for content verification"""
+        import hashlib
+        return hashlib.md5(content.encode()).hexdigest()[:16]
 
-    def _text_to_certifications_array(self, text: str) -> List[Dict[str, Any]]:
-        """Convert certifications text to structured array"""
-        certifications_list = []
-        lines = text.split('\n')
+    def _calculate_quality_score(self, cv_data: Dict[str, Any]) -> int:
+        """Calculate CV quality score based on completeness and content"""
+        score = 0
         
-        for line in lines:
-            line = line.strip()
-            if line and ',' in line:
-                # Format: "Certification Name, Issuing Organization"
-                parts = line.split(',', 1)
-                if len(parts) == 2:
-                    cert_entry = {
-                        "name": parts[0].strip(),
-                        "issuing_organization": parts[1].strip(),
-                        "date_obtained": "",
-                        "expiry_date": "",
-                        "status": "Active",
-                        "description": "",
-                        "credential_id": "",
-                        "url": ""
-                    }
-                    certifications_list.append(cert_entry)
-            elif line:
-                # Single line certification
-                cert_entry = {
-                    "name": line,
-                    "issuing_organization": "",
-                    "date_obtained": "",
-                    "expiry_date": "",
-                    "status": "Active",
-                    "description": "",
-                    "credential_id": "",
-                    "url": ""
-                }
-                certifications_list.append(cert_entry)
+        # Personal information (30 points)
+        personal = cv_data.get("personal_information", {})
+        if personal.get("name"): score += 10
+        if personal.get("email"): score += 8
+        if personal.get("phone"): score += 5
+        if personal.get("location"): score += 4
+        if personal.get("linkedin"): score += 3
         
-        return certifications_list
+        # Career profile (15 points)
+        if cv_data.get("career_profile", {}).get("summary"): score += 15
+        
+        # Skills (25 points)
+        skills = cv_data.get("skills", {})
+        tech_skills = len(skills.get("technical_skills", []))
+        if tech_skills > 0: score += 10
+        if tech_skills >= 5: score += 5
+        if tech_skills >= 10: score += 5
+        if len(skills.get("key_skills", [])) > 0: score += 5
+        
+        # Experience (20 points)
+        experience = cv_data.get("experience", [])
+        if len(experience) > 0: score += 10
+        if len(experience) >= 2: score += 5
+        if len(experience) >= 3: score += 5
+        
+        # Education (10 points)
+        if len(cv_data.get("education", [])) > 0: score += 10
+        
+        return min(score, 100)
+
+    def _calculate_completeness_score(self, cv_data: Dict[str, Any]) -> int:
+        """Calculate completeness score based on filled sections"""
+        total_sections = 11  # Main sections count
+        filled_sections = 0
+        
+        sections_to_check = [
+            "personal_information", "career_profile", "skills", "education", 
+            "experience", "projects", "certifications", "languages", 
+            "awards", "publications", "volunteer_work"
+        ]
+        
+        for section in sections_to_check:
+            section_data = cv_data.get(section, {})
+            if isinstance(section_data, dict):
+                if any(v for v in section_data.values() if v):
+                    filled_sections += 1
+            elif isinstance(section_data, list):
+                if section_data:
+                    filled_sections += 1
+        
+        return int((filled_sections / total_sections) * 100)
 
     def _get_empty_structure(self) -> Dict[str, Any]:
-        """Get empty CV structure with current timestamp"""
-        structure = self.default_structure.copy()
-        structure["saved_at"] = datetime.now().isoformat()
-        return structure
+        """Get empty structure for error cases"""
+        return self.default_structure.copy()
 
     def save_structured_cv(self, cv_data: Dict[str, Any], file_path: str) -> bool:
-        """Save structured CV to file"""
+        """Save structured CV to JSON file"""
         try:
-            cv_data["saved_at"] = datetime.now().isoformat()
+            # Ensure directory exists
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             
+            # Save to file
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(cv_data, f, indent=2, ensure_ascii=False)
             
@@ -988,59 +424,68 @@ class StructuredCVParser:
         except Exception as e:
             logger.error(f"Error saving structured CV: {e}")
             return False
-    
+
     def load_structured_cv(self, file_path: str) -> Optional[Dict[str, Any]]:
-        """Load structured CV from file"""
+        """Load structured CV from JSON file"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            if not os.path.exists(file_path):
+                logger.warning(f"CV file not found: {file_path}")
+                return None
             
-            return self.parse_cv_content(data)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                cv_data = json.load(f)
+            
+            logger.info(f"Successfully loaded structured CV from {file_path}")
+            return cv_data
             
         except Exception as e:
-            logger.error(f"Error loading structured CV from {file_path}: {e}")
+            logger.error(f"Error loading structured CV: {e}")
             return None
-    
+
     def validate_cv_structure(self, cv_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate CV structure and return validation report"""
+        """Validate CV structure and content"""
         report = {
             "valid": True,
             "errors": [],
             "warnings": [],
+            "missing_required": [],
             "sections_found": [],
-            "missing_required": []
+            "completeness_score": 0,
+            "quality_score": 0,
+            "content_integrity": "good"
         }
         
-        required_sections = ["personal_information", "career_profile", "technical_skills"]
-        
+        # Check required sections
+        required_sections = ["personal_information", "skills"]
         for section in required_sections:
             if section not in cv_data or not cv_data[section]:
                 report["missing_required"].append(section)
                 report["valid"] = False
         
+        # Check sections found
         for section in cv_data.keys():
-            if section != "saved_at":
-                report["sections_found"].append(section)
+            if section not in ["saved_at", "metadata", "unknown_sections"]:
+                if cv_data[section]:  # Only count non-empty sections
+                    report["sections_found"].append(section)
         
-        # Check for empty critical fields
-        if cv_data.get("personal_information", {}).get("name", "").strip() == "":
-            report["warnings"].append("Name field is empty")
+        # Calculate scores
+        report["quality_score"] = self._calculate_quality_score(cv_data)
+        report["completeness_score"] = self._calculate_completeness_score(cv_data)
         
-        if not cv_data.get("technical_skills", []):
-            report["warnings"].append("No technical skills found")
+        # Check parsing notes for warnings
+        parsing_notes = cv_data.get("metadata", {}).get("parsing_notes", [])
+        if parsing_notes:
+            report["warnings"].extend(parsing_notes)
+        
+        # Quality-based warnings
+        if report["quality_score"] < 50:
+            report["warnings"].append("CV quality score is below 50")
+        
+        if report["completeness_score"] < 40:
+            report["warnings"].append("CV completeness score is below 40")
         
         return report
 
-    # Additional helper methods for backward compatibility...
-    def _text_to_skills_array(self, text: str) -> List[str]:
-        """Convert skills text to array"""
-        skills = []
-        for line in text.split('\n'):
-            line = line.strip()
-            if line and line.startswith('•'):
-                skills.append(line[1:].strip())
-        return skills
-
 
 # Global instance
-structured_cv_parser = StructuredCVParser()
+enhanced_cv_parser = LLMStructuredCVParser()

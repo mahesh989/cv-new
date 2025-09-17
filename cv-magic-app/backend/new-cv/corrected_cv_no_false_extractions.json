@@ -1,0 +1,110 @@
+{
+  "personal_information": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "location": "Hurstville, NSW, 2220",
+    "linkedin": "LinkedIn",
+    "github": "GitHub",
+    "portfolio_links": {
+      "blogs": "Blogs on Medium",
+      "dashboard_portfolio": "Dashboard  Portfolio",
+      "website": ""
+    },
+    "residency_status": "",
+    "open_to": ""
+  },
+  "career_profile": {
+    "summary": "I hold a PhD in Physics and completed a Master's in Data Science, bringing over three years of experience in Python coding, AI, and machine learning. My expertise encompasses modeling and training AI models, writing efficient Python scripts, designing and deploying robust data pipelines, conducting innovative research, and creating advanced visualizations that convert complex data into actionable insights. I am also proficient in SQL, Tableau, and Power BI, building comprehensive dashboards that support data-driven decision-making."
+  },
+  "skills": {
+    "technical_skills": [
+      "• Specialized in Python programming, including data analysis, automation, and machine learning using libraries such as Pandas, NumPy, and scikit-learn.",
+      "• Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.",
+      "• Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib.",
+      "• Experienced with GitHub for version control, Docker for containerization, and Snowflake for cloud data warehousing.",
+      "• Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting."
+    ],
+    "key_skills": [],
+    "soft_skills": [],
+    "domain_expertise": []
+  },
+  "education": [
+    {
+      "degree": "Master of Data Science",
+      "institution": "Charles Darwin University, Sydney, Australia",
+      "year": "Mar 2023 - Nov 2024",
+      "gpa": "GPA",
+      "relevant_courses": [],
+      "honors": "",
+      "location": ""
+    },
+    {
+      "degree": "PhD in Physics",
+      "institution": "CY Cergy Paris University, Cergy, France",
+      "year": "Oct 2018 - Sep 2022",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": "",
+      "location": ""
+    },
+    {
+      "degree": "Master of Theoretical Physics",
+      "institution": "CY Cergy Paris University, Cergy, France",
+      "year": "Sep 2016 - Jun 2018",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": "",
+      "location": ""
+    }
+  ],
+  "experience": [
+    {
+      "title": "Data Analyst",
+      "company": "The Bitrates, Sydney, New South Wales, Australia",
+      "duration": "Jul 2024 – Present",
+      "location": "Sydney, New South Wales, Australia",
+      "responsibilities": [
+        "• Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%.",
+        "• Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions.",
+        "• Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity.",
+        "• Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively.",
+        "• Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights."
+      ],
+      "achievements": [],
+      "technologies": []
+    }
+  ],
+  "projects": [],
+  "certifications": [],
+  "languages": [],
+  "awards": [],
+  "publications": [],
+  "volunteer_work": [],
+  "professional_memberships": [],
+  "unknown_sections": {},
+  "original_sections": {
+    "raw_cv_text": "\nMaheshwor Tiwari  \n0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220  \nBlogs on Medium  | GitHub  | Dashboard  Portfolio  \nCAREER PROFIL E \n \nI hold a PhD in Physics and completed a Master's in Data Science, bringing over three years of experience in Python \ncoding, AI, and machine learning. My expertise encompasses modeling and training AI models, writing efficient Python \nscripts, designing and deploying robust data pipelines, conducting innovative research, and creating advanced \nvisualiz ations that convert complex data into actionable insights. I am also proficient in SQL, Tableau, and Power BI, building \ncomprehensive dashboards that support data -driven decision -making.  \n \nTECHNICAL SKILLS  \n• Specialized in Python programming, including data analysis, automation, and machine learning using libraries such \nas Pandas, NumPy, and scikit -learn.  \n• Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.  \n• Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib.  \n• Experienced with GitHub for version control, Docker for containerization, and Snowflake for cloud data warehousing.  \n• Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data -driven solutions and reporting.  \n \nEDUCATION  \nMaster of Data Science  \nCharles Darwin University, Sydney, Australia GPA   Mar 2023 - Nov 2024  \nPhD in Physics  \nCY Cergy Paris University, Cergy, France  Oct 2018 - Sep 2022  \nMaster of Theoretical Physics  \nCY Cergy Paris University, Cergy, France    Sep 2016 - Jun 2018  \n \nEXPERIENCE   \nData Analyst         Jul 2024 – Present  \nThe Bitrates, Sydney, New South Wales, Australia  \n• Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline \nefficiency by 30%.  \n• Developed machine learning models in Python for predictive analytics, enabling data -driven business de...",
+    "section_headers_found": [
+      "EXPERIENCE",
+      "EDUCATION",
+      "TECHNICAL SKILLS",
+      "CAREER PROFIL E"
+    ],
+    "parsing_approach": "content_preserving"
+  },
+  "saved_at": "2025-09-17T10:47:01.879019",
+  "metadata": {
+    "parsing_version": "4.0_content_preserving",
+    "content_hash": "3a36ceb0dd5c7ca2",
+    "parsing_notes": [
+      "Content-preserving parser used - maintains original formatting"
+    ],
+    "quality_score": 80,
+    "completeness_score": 45,
+    "source_file": "",
+    "processed_at": "2025-09-17T10:47:01.879046",
+    "ai_model_used": "gpt-4o",
+    "content_preservation": "enabled"
+  }
+}

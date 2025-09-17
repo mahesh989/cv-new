@@ -14,7 +14,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, UploadFile
 from ..services.cv_processor import cv_processor
-from ..services.structured_cv_parser import structured_cv_parser
+from ..services.structured_cv_parser import LLMStructuredCVParser
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class EnhancedCVUploadService:
 
     def __init__(self):
         self.cv_processor = cv_processor
-        self.structured_parser = structured_cv_parser
+        self.structured_parser = LLMStructuredCVParser()
         self.original_cv_json_path = CV_ANALYSIS_DIR / "original_cv.json"
 
     async def upload_and_process_cv(
@@ -82,7 +82,7 @@ class EnhancedCVUploadService:
                 raise HTTPException(status_code=500, detail=f"Text extraction failed: {extraction_result['error']}")
             
             # Parse into structured format
-            structured_cv = self._parse_to_structured_format(
+            structured_cv = await self._parse_to_structured_format(
                 extraction_result["text"],
                 cv_file.filename,
                 title,
@@ -146,7 +146,7 @@ class EnhancedCVUploadService:
                 raise HTTPException(status_code=500, detail=f"Text extraction failed: {extraction_result['error']}")
             
             # Parse into structured format
-            structured_cv = self._parse_to_structured_format(extraction_result["text"], filename)
+            structured_cv = await self._parse_to_structured_format(extraction_result["text"], filename)
             
             # Validate structured CV
             validation_report = self.structured_parser.validate_cv_structure(structured_cv)
@@ -275,7 +275,7 @@ class EnhancedCVUploadService:
             logger.error(f"Error extracting text: {str(e)}")
             return {"success": False, "error": str(e)}
 
-    def _parse_to_structured_format(
+    async def _parse_to_structured_format(
         self, 
         text_content: str, 
         filename: str,
@@ -290,15 +290,15 @@ class EnhancedCVUploadService:
                 existing_data = json.loads(text_content)
                 if isinstance(existing_data, dict) and "personal_information" in existing_data:
                     # Already structured, just validate and clean
-                    structured_cv = self.structured_parser.parse_cv_content(existing_data)
+                    structured_cv = await self.structured_parser.parse_cv_content(existing_data)
                     logger.info("CV was already in structured format")
                 else:
                     # JSON but not our structure, parse as text
-                    structured_cv = self.structured_parser.parse_cv_content(text_content)
+                    structured_cv = await self.structured_parser.parse_cv_content(text_content)
                     logger.info("CV parsed from JSON content")
             except json.JSONDecodeError:
                 # Regular text content, parse it
-                structured_cv = self.structured_parser.parse_cv_content(text_content)
+                structured_cv = await self.structured_parser.parse_cv_content(text_content)
                 logger.info("CV parsed from raw text content")
             
             # Add metadata
@@ -355,7 +355,7 @@ class EnhancedCVUploadService:
             logger.error(f"Error saving structured CV: {str(e)}")
             return {"success": False, "error": str(e)}
 
-    def migrate_existing_cv(self, source_path: str, backup: bool = True) -> Dict[str, Any]:
+    async def migrate_existing_cv(self, source_path: str, backup: bool = True) -> Dict[str, Any]:
         """
         Migrate an existing CV from old format to structured format
         
@@ -385,10 +385,10 @@ class EnhancedCVUploadService:
             # Convert to structured format
             if isinstance(existing_data, dict) and "text" in existing_data:
                 # Old format with text field
-                structured_cv = self.structured_parser.parse_cv_content(existing_data["text"])
+                structured_cv = await self.structured_parser.parse_cv_content(existing_data["text"])
             else:
                 # Try to parse as-is
-                structured_cv = self.structured_parser.parse_cv_content(existing_data)
+                structured_cv = await self.structured_parser.parse_cv_content(existing_data)
             
             # Save in new format
             self.structured_parser.save_structured_cv(structured_cv, source_path)

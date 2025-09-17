@@ -1,0 +1,52 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-16T23:22:28.481137",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "analytical skills",
+    "problem-solving skills",
+    "project management",
+    "communication"
+  ],
+  "matched_preferred_keywords": [
+    "data-driven decision-making"
+  ],
+  "missed_required_keywords": [
+    "VBA",
+    "Excel",
+    "data warehouse",
+    "stakeholder management",
+    "customer service",
+    "data mining",
+    "direct marketing campaigns",
+    "campaign outcomes",
+    "data issues",
+    "de-duplication",
+    "clean data"
+  ],
+  "missed_preferred_keywords": [
+    "Tableau",
+    "segmentation strategies",
+    "business intelligence"
+  ],
+  "match_counts": {
+    "total_required_keywords": 14,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 6,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "SQL": "Found in professional experience section, utilized for data analysis",
+    "Power BI": "Mentioned multiple times in experience and skills",
+    "analytical skills": "Implied through data analysis and problem-solving descriptions",
+    "problem-solving skills": "Described as quantitative problem-solving in skills section",
+    "project management": "Explicitly stated in skills section",
+    "communication": "Implied through delivering reports to stakeholders",
+    "data-driven decision-making": "Found in context of creating dashboards"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "metadata": {}
+}

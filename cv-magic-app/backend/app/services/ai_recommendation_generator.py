@@ -15,6 +15,14 @@ from datetime import datetime
 from app.ai.ai_service import ai_service
 from app.ai.base_provider import AIResponse
 
+# Import CV tailoring service with conditional import to avoid circular dependencies
+try:
+    from app.tailored_cv.services.cv_tailoring_service import cv_tailoring_service
+    CV_TAILORING_AVAILABLE = True
+except ImportError:
+    CV_TAILORING_AVAILABLE = False
+    cv_tailoring_service = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,6 +78,17 @@ class AIRecommendationGenerator:
                 logger.info(f"📄 File: {output_file}")
                 logger.info(f"💰 Cost: ${ai_response.cost:.4f}")
                 logger.info(f"🔤 Tokens: {ai_response.tokens_used}")
+                
+                # Automatically trigger CV tailoring after successful AI recommendation generation
+                try:
+                    cv_success = await self._trigger_cv_tailoring(company)
+                    if cv_success:
+                        logger.info(f"🎯 [AI GENERATOR] CV tailoring completed automatically for {company}")
+                    else:
+                        logger.warning(f"⚠️ [AI GENERATOR] CV tailoring failed for {company}")
+                except Exception as cv_error:
+                    logger.error(f"❌ [AI GENERATOR] CV tailoring error for {company}: {cv_error}")
+                    # Don't fail the AI recommendation generation if CV tailoring fails
             
             return success
             
@@ -443,6 +462,63 @@ class AIRecommendationGenerator:
         except Exception as e:
             logger.error(f"Error in batch TXT to JSON conversion: {e}")
             return results
+    
+    async def _trigger_cv_tailoring(self, company: str) -> bool:
+        """
+        Automatically trigger CV tailoring after AI recommendations are generated
+        
+        Args:
+            company: Company name that just had AI recommendations generated
+            
+        Returns:
+            True if CV tailoring was successful, False otherwise
+        """
+        if not CV_TAILORING_AVAILABLE:
+            logger.warning(f"⚠️ [AI GENERATOR] CV tailoring service not available for {company}")
+            return False
+        
+        try:
+            logger.info(f"🚀 [AI GENERATOR] Starting automatic CV tailoring for {company}")
+            
+            # Load the original CV and the recommendation we just generated
+            original_cv, recommendation = cv_tailoring_service.load_real_cv_and_recommendation(company)
+            
+            # Import the required models here to avoid circular imports
+            from app.tailored_cv.models.cv_models import CVTailoringRequest
+            
+            # Create tailoring request
+            request = CVTailoringRequest(
+                original_cv=original_cv,
+                recommendations=recommendation,
+                custom_instructions="Auto-generated after AI recommendations",
+                company_folder=None  # We'll save manually
+            )
+            
+            # Process the CV tailoring
+            response = await cv_tailoring_service.tailor_cv(request)
+            
+            if response.success:
+                # Save tailored CV to cv-analysis folder
+                file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(response.tailored_cv)
+                logger.info(f"✅ [AI GENERATOR] Tailored CV saved automatically to {file_path}")
+                logger.info(f"📊 [AI GENERATOR] Estimated ATS score: {response.tailored_cv.estimated_ats_score}")
+                
+                # Also save to company-specific folder with timestamp
+                company_path = self.base_dir / company
+                company_file_path = cv_tailoring_service.save_tailored_cv(
+                    response.tailored_cv, 
+                    str(company_path)
+                )
+                logger.info(f"💾 [AI GENERATOR] Also saved to company folder: {company_file_path}")
+                
+                return True
+            else:
+                logger.error(f"❌ [AI GENERATOR] CV tailoring failed for {company}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ [AI GENERATOR] Error during automatic CV tailoring for {company}: {e}")
+            return False
 
 
 # Global instance

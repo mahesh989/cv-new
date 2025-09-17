@@ -422,7 +422,17 @@ class RecommendationParser:
     def _convert_structured_to_model_format(structured_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert structured CV data to the format expected by CV models
+        Uses comprehensive parser to handle all sections properly
         """
+        # Import the structured parser
+        from app.services.structured_cv_parser import structured_cv_parser
+        
+        # If the data looks like raw text, parse it first
+        if 'text' in structured_data and isinstance(structured_data.get('text'), str):
+            # This is raw text format, parse it
+            parsed_cv = structured_cv_parser.parse_cv_content(structured_data['text'])
+            structured_data = parsed_cv
+        
         personal_info = structured_data.get('personal_information', {})
         
         # Convert contact information
@@ -449,29 +459,91 @@ class RecommendationParser:
             # Convert achievements to bullets format
             bullets = exp.get('achievements', []) + exp.get('responsibilities', [])
             
+            # Parse dates more carefully
+            duration = exp.get('duration', '')
+            if ' – ' in duration:
+                parts = duration.split(' – ')
+                start_date = parts[0].strip()
+                end_date = parts[1].strip() if len(parts) > 1 else 'Present'
+            elif ' - ' in duration:
+                parts = duration.split(' - ')
+                start_date = parts[0].strip()
+                end_date = parts[1].strip() if len(parts) > 1 else 'Present'
+            else:
+                start_date = duration
+                end_date = 'Present'
+            
             experience.append({
                 'company': exp.get('company', ''),
                 'title': exp.get('position', ''),
                 'location': exp.get('location', ''),
-                'start_date': exp.get('duration', '').split(' – ')[0] if ' – ' in exp.get('duration', '') else exp.get('duration', ''),
-                'end_date': exp.get('duration', '').split(' – ')[1] if ' – ' in exp.get('duration', '') else 'Present',
+                'start_date': start_date,
+                'end_date': end_date,
                 'bullets': bullets
             })
         
-        # Convert skills
+        # Convert skills - handle both list and grouped format
         skills = []
         technical_skills = structured_data.get('technical_skills', [])
         if technical_skills:
-            # Group technical skills into categories
+            # Clean and process skills
+            cleaned_skills = []
+            for skill in technical_skills:
+                if isinstance(skill, str):
+                    # Remove common prefixes and clean up
+                    cleaned = skill.replace('Advanced ', '').replace('Strong experience in ', '')
+                    cleaned = cleaned.replace('Proficient in ', '').replace('Experience with ', '')
+                    # Take the main skill (before 'for' or 'and')
+                    if ' for ' in cleaned:
+                        cleaned = cleaned.split(' for ')[0]
+                    cleaned_skills.append(cleaned.strip())
+            
+            if cleaned_skills:
+                skills.append({
+                    'category': 'Technical Skills',
+                    'skills': cleaned_skills
+                })
+        
+        # Add soft skills if available
+        soft_skills = structured_data.get('soft_skills', [])
+        if soft_skills:
             skills.append({
-                'category': 'Technical Skills',
-                'skills': [skill.replace('Advanced ', '').replace('Strong experience in ', '').replace('Proficient in ', '').split(' for ')[0].split(' and ')[0] for skill in technical_skills[:5]]
+                'category': 'Soft Skills',
+                'skills': soft_skills
             })
         
-        return {
+        # Add domain expertise if available
+        domain_expertise = structured_data.get('domain_expertise', [])
+        if domain_expertise:
+            skills.append({
+                'category': 'Domain Expertise',
+                'skills': domain_expertise
+            })
+        
+        # Calculate years of experience
+        total_years = len(experience) * 2 if experience else 0  # Rough estimate
+        if structured_data.get('total_years_experience'):
+            total_years = structured_data['total_years_experience']
+        
+        # Build the complete model format
+        result = {
             'contact': contact,
             'education': education,
             'experience': experience,
             'skills': skills,
-            'total_years_experience': len(experience)
+            'total_years_experience': total_years
         }
+        
+        # Add projects if available
+        if structured_data.get('projects'):
+            result['projects'] = structured_data['projects']
+        
+        # Add languages if available
+        if structured_data.get('languages'):
+            result['languages'] = structured_data['languages']
+        
+        # Add certifications if available
+        if structured_data.get('certifications'):
+            result['certifications'] = structured_data['certifications']
+        
+        return result
