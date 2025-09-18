@@ -101,56 +101,43 @@ class AIRecommendationGenerator:
         company_dir = self.base_dir / company
         return company_dir / f"{company}_ai_recommendation.json"
     
+    def _get_input_recommendation_file_path(self, company: str) -> Path:
+        """Get the input recommendation file path for a company"""
+        company_dir = self.base_dir / company
+        return company_dir / f"{company}_input_recommendation.json"
+    
     def _load_ai_prompt(self, company: str) -> Optional[str]:
         """
-        Load the AI prompt for a company
+        Generate AI prompt using the centralized template with company analysis data
         
         Args:
             company: Company name
             
         Returns:
-            Prompt content or None if not found
+            Generated prompt content or None if data not found
         """
         try:
-            # Prefer company-specific prompt under cv-analysis/{company}
-            company_dir = self.base_dir / company
-            prompt_file = company_dir / f"{company}_prompt_recommendation.py"
-
-            # Fallback to legacy global prompt directory if company-specific not found
-            if not prompt_file.exists():
-                legacy_prompt_file = self.prompt_dir / f"{company}_prompt_recommendation.py"
-                if legacy_prompt_file.exists():
-                    prompt_file = legacy_prompt_file
-                else:
-                    logger.error(f"Prompt file not found in either location. Tried: {prompt_file} and {legacy_prompt_file}")
-                    return None
-            
-            # Import the prompt module dynamically
-            import sys
-            import importlib.util
-            
-            # Add the prompt file's parent directory to Python path
-            prompt_parent = str(prompt_file.parent)
-            if prompt_parent not in sys.path:
-                sys.path.append(prompt_parent)
-            
-            # Load the module
-            module_name = f"{company}_prompt_recommendation"
-            spec = importlib.util.spec_from_file_location(module_name, prompt_file)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            
-            # Get the prompt content
-            if hasattr(module, 'get_prompt'):
-                prompt_content = module.get_prompt()
-                logger.info(f"📋 [AI GENERATOR] Loaded AI prompt for {company} from {prompt_file} ({len(prompt_content)} characters)")
-                return prompt_content
-            else:
-                logger.error(f"Prompt module for {company} at {prompt_file} does not have get_prompt() function")
+            # Load the input recommendation data for the company
+            input_file = self._get_input_recommendation_file_path(company)
+            if not input_file.exists():
+                logger.error(f"Input recommendation file not found: {input_file}")
                 return None
+            
+            # Load analysis data
+            with open(input_file, 'r', encoding='utf-8') as f:
+                analysis_data = json.load(f)
+            
+            # Import the centralized prompt template
+            from prompt.ai_recommendation_prompt_template import generate_ai_recommendation_prompt
+            
+            # Generate the prompt using the template
+            prompt_content = generate_ai_recommendation_prompt(company, analysis_data)
+            
+            logger.info(f"📋 [AI GENERATOR] Generated AI prompt for {company} using centralized template ({len(prompt_content)} characters)")
+            return prompt_content
                 
         except Exception as e:
-            logger.error(f"Error loading AI prompt for {company}: {e}")
+            logger.error(f"Error generating AI prompt for {company}: {e}")
             return None
     
     async def _execute_ai_prompt(self, prompt_content: str) -> Optional[AIResponse]:

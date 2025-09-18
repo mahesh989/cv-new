@@ -617,56 +617,45 @@ async def get_tailored_cv_content(
     try:
         logger.info(f"📄 Tailored CV content request for {company_name} from user {current_user.id}")
         
-        # Path to cv-analysis/cvs/tailored folder
-        cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-        tailored_folder = cv_analysis_path / "cvs" / "tailored"
+        # Use dynamic CV selector to get the latest CV
+        from app.services.dynamic_cv_selector import dynamic_cv_selector
         
-        if not tailored_folder.exists():
+        # Get the latest CV files (could be from original or tailored folder)
+        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+        
+        if not latest_cv_paths['txt_path']:
             raise HTTPException(
                 status_code=404,
-                detail=f"Tailored CVs folder not found: {tailored_folder}"
+                detail="No CV text file found in cvs folders"
             )
         
-        # Find the most recent tailored CV text file matching company pattern
-        tailored_txt_files = list(tailored_folder.glob(f"{company_name}_tailored_cv_*.txt"))
-        if not tailored_txt_files:
-            # Fallback to any tailored CV files if company-specific pattern not found
-            tailored_txt_files = list(tailored_folder.glob("*tailored_cv_*.txt"))
-            if not tailored_txt_files:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"No tailored CV text file found for company: {company_name}"
-                )
+        latest_txt_file = Path(latest_cv_paths['txt_path'])
         
-        # Sort by timestamp in filename first, then by modified time as fallback
-        def get_timestamp(filepath):
-            try:
-                # Extract timestamp from filename pattern company_tailored_cv_YYYYMMDD_HHMMSS.txt
-                filename = filepath.name
-                timestamp_part = filename.split('_tailored_cv_')[1].replace('.txt', '')
-                # Convert to datetime for proper comparison
-                from datetime import datetime
-                return datetime.strptime(timestamp_part, '%Y%m%d_%H%M%S')
-            except:
-                # Fallback to file modification time if filename parsing fails
-                return filepath.stat().st_mtime
+        # Check if it exists
+        if not latest_txt_file.exists():
+            raise HTTPException(
+                status_code=404,
+                detail=f"CV text file not found: {latest_txt_file}"
+            )
         
-        latest_txt_file = max(tailored_txt_files, key=get_timestamp)
+        # File is already the latest from dynamic selector
         
         # Read the text content
         with open(latest_txt_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        logger.info(f"✅ Served tailored CV content: {latest_txt_file.name} ({len(content)} characters)")
+        logger.info(f"✅ Served CV content: {latest_txt_file.name} from {latest_cv_paths['txt_source']} folder ({len(content)} characters)")
         
         return JSONResponse(content={
             "success": True,
             "content": content,
             "filename": latest_txt_file.name,
             "company": company_name,
+            "source_folder": latest_cv_paths['txt_source'],
             "metadata": {
                 "file_size": len(content),
-                "last_modified": latest_txt_file.stat().st_mtime
+                "last_modified": latest_txt_file.stat().st_mtime,
+                "dynamic_selection": True
             }
         })
         

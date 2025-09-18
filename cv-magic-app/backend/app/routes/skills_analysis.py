@@ -940,16 +940,16 @@ async def generate_ai_recommendation(company: str, force_regenerate: bool = Fals
         
         logger.info(f"🤖 [API] Generating AI recommendation for: {company}")
         
-        # Check if prompt file exists
-        prompt_file = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/prompt/{company}_prompt_recommendation.py")
-        if not prompt_file.exists():
+        # Check if input recommendation file exists (no longer need company-specific prompt files)
+        input_file = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_input_recommendation.json")
+        if not input_file.exists():
             return JSONResponse(
                 status_code=404,
                 content={
-                    "error": "Prompt file not found for this company",
+                    "error": "Input recommendation data not found for this company",
                     "company": company,
-                    "prompt_file": str(prompt_file),
-                    "suggestion": "Create recommendation and prompt files first"
+                    "input_file": str(input_file),
+                    "suggestion": "Run skills analysis pipeline first to generate input recommendation data"
                 }
             )
         
