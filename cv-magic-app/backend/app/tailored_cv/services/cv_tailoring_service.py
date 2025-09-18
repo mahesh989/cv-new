@@ -1258,6 +1258,39 @@ FIX: Output ONLY valid JSON!
         except Exception as e:
             logger.error(f"❌ Failed to list available companies: {e}")
             return []
+    
+    def _extract_skills_from_experience(self, experience_entries: List) -> List[str]:
+        """
+        Extract skills mentioned in experience bullets
+        
+        Args:
+            experience_entries: List of ExperienceEntry objects
+            
+        Returns:
+            List of extracted skills
+        """
+        extracted_skills = []
+        
+        # Common technical skills to look for
+        skill_keywords = [
+            'Python', 'SQL', 'Tableau', 'Power BI', 'Excel', 'Docker', 'Git', 'GitHub',
+            'PostgreSQL', 'MySQL', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn',
+            'Machine Learning', 'Data Analysis', 'Analytics', 'Visualization',
+            'Dashboard', 'Reporting', 'Automation', 'ETL', 'Data Pipeline',
+            'Statistics', 'Modeling', 'Forecasting', 'Segmentation'
+        ]
+        
+        for entry in experience_entries:
+            # Use object attribute instead of .get() since these are Pydantic objects
+            bullets = entry.bullets if hasattr(entry, 'bullets') else []
+            for bullet in bullets:
+                if isinstance(bullet, str):
+                    bullet_lower = bullet.lower()
+                    for skill in skill_keywords:
+                        if skill.lower() in bullet_lower and skill not in extracted_skills:
+                            extracted_skills.append(skill)
+        
+        return extracted_skills
 
 
 # Create service instance

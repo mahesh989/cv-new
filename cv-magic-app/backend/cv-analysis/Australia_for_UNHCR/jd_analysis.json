@@ -4,9 +4,9 @@
     "technical": [
       "SQL",
       "Power BI",
-      "Excel",
+      "Tableau",
       "VBA",
-      "Tableau"
+      "Excel"
     ],
     "soft_skills": [
       "project management",
@@ -24,24 +24,21 @@
   },
   "preferred_skills": {
     "technical": [],
-    "soft_skills": [
-      "analytical thinking",
-      "problem-solving"
-    ],
+    "soft_skills": [],
     "domain_knowledge": [
       "data issues",
       "de-duplication",
-      "campaign optimisation",
-      "governing regulations"
+      "data governance",
+      "best practice guidelines"
     ],
     "experience": []
   },
   "required_keywords": [
     "SQL",
     "Power BI",
-    "Excel",
-    "VBA",
     "Tableau",
+    "VBA",
+    "Excel",
     "project management",
     "stakeholder management",
     "communication",
@@ -52,14 +49,12 @@
     "data models"
   ],
   "preferred_keywords": [
-    "analytical thinking",
-    "problem-solving",
     "data issues",
     "de-duplication",
-    "campaign optimisation",
-    "governing regulations"
+    "data governance",
+    "best practice guidelines"
   ],
-  "analysis_timestamp": "2025-09-18T09:51:58.478689",
+  "analysis_timestamp": "2025-09-18T11:00:46.436770",
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",

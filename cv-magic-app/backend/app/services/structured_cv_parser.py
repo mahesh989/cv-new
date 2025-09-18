@@ -212,7 +212,7 @@ Return a JSON object with this structure, but PRESERVE the original content form
             "year": "Exact date/year format as written",
             "gpa": "GPA exactly as mentioned (including 'GPA' text if shown)",
             "relevant_courses": ["Courses exactly as listed"],
-            "honors": "Honors exactly as written",
+            "honors": ["List of honors/achievements as individual items, or empty list if none"],
             "location": "Extract city, country from institution line - look for location info near institution name"
         }}
     ],
