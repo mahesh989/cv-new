@@ -127,11 +127,22 @@ class AIRecommendationGenerator:
             with open(input_file, 'r', encoding='utf-8') as f:
                 analysis_data = json.load(f)
             
-            # Import the centralized prompt template
-            from prompt.ai_recommendation_prompt_template import generate_ai_recommendation_prompt
+            # Import the centralized prompt template using absolute path
+            import sys
+            import importlib.util
+            
+            template_path = self.prompt_dir / "ai_recommendation_prompt_template.py"
+            if not template_path.exists():
+                logger.error(f"AI recommendation template not found: {template_path}")
+                return None
+            
+            # Load the template module
+            spec = importlib.util.spec_from_file_location("ai_recommendation_prompt_template", template_path)
+            template_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(template_module)
             
             # Generate the prompt using the template
-            prompt_content = generate_ai_recommendation_prompt(company, analysis_data)
+            prompt_content = template_module.generate_ai_recommendation_prompt(company, analysis_data)
             
             logger.info(f"📋 [AI GENERATOR] Generated AI prompt for {company} using centralized template ({len(prompt_content)} characters)")
             return prompt_content
