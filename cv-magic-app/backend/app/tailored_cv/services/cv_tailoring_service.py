@@ -1113,9 +1113,11 @@ FIX: Output ONLY valid JSON!
             company_path = Path(company_folder)
             company_path.mkdir(parents=True, exist_ok=True)
             
+            # Extract company name from path
+            company_name = company_path.name
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            json_filename = f"tailored_cv_{timestamp}.json"
-            txt_filename = f"tailored_cv_{timestamp}.txt"
+            json_filename = f"{company_name}_tailored_cv_{timestamp}.json"
+            txt_filename = f"{company_name}_tailored_cv_{timestamp}.txt"
             
             json_file_path = company_path / json_filename
             txt_file_path = company_path / txt_filename
@@ -1291,28 +1293,43 @@ FIX: Output ONLY valid JSON!
             logger.error(f"❌ Failed to load recommendation file: {e}")
             raise
     
-    def save_tailored_cv_to_analysis_folder(self, tailored_cv: TailoredCV) -> str:
+    def save_tailored_cv_to_analysis_folder(self, tailored_cv: TailoredCV, company: str) -> str:
         """
-        Save tailored CV to the cv-analysis folder as tailored_cv.json
+        Save tailored CV to the company-specific folder in cv-analysis with proper naming
         
         Args:
             tailored_cv: The tailored CV to save
+            company: Company name for folder and file naming
             
         Returns:
-            File path where CV was saved
+            File path where CV was saved (JSON file)
         """
         try:
             # Path to cv-analysis folder
             cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            cv_analysis_path.mkdir(parents=True, exist_ok=True)
+            company_folder = cv_analysis_path / company
+            company_folder.mkdir(parents=True, exist_ok=True)
             
-            file_path = cv_analysis_path / "tailored_cv.json"
+            # Use company-specific naming pattern
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            json_filename = f"{company}_tailored_cv_{timestamp}.json"
+            txt_filename = f"{company}_tailored_cv_{timestamp}.txt"
             
-            with open(file_path, 'w', encoding='utf-8') as f:
+            json_file_path = company_folder / json_filename
+            txt_file_path = company_folder / txt_filename
+            
+            # Save JSON file
+            with open(json_file_path, 'w', encoding='utf-8') as f:
                 json.dump(tailored_cv.model_dump(), f, indent=2, default=str)
             
-            logger.info(f"✅ Saved tailored CV to {file_path}")
-            return str(file_path)
+            # Convert to text and save TXT file
+            text_content = self._convert_tailored_cv_to_text(tailored_cv)
+            with open(txt_file_path, 'w', encoding='utf-8') as f:
+                f.write(text_content)
+            
+            logger.info(f"✅ Saved tailored CV to {json_file_path}")
+            logger.info(f"✅ Saved tailored CV text to {txt_file_path}")
+            return str(json_file_path)
             
         except Exception as e:
             logger.error(f"❌ Failed to save tailored CV to analysis folder: {e}")

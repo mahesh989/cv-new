@@ -210,7 +210,7 @@ async def tailor_cv_with_real_data(
             
             # Save tailored CV to cv-analysis folder - no fallback, fail if saving fails
             if response.success:
-                file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(response.tailored_cv)
+                file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(response.tailored_cv, company)
                 response.processing_summary["saved_to"] = file_path
                 logger.info(f"✅ Tailored CV saved to {file_path}")
             
@@ -627,15 +627,31 @@ async def get_tailored_cv_content(
                 detail=f"Company folder not found: {company_name}"
             )
         
-        # Find the most recent tailored CV text file
-        tailored_txt_files = list(company_folder.glob("tailored_cv_*.txt"))
+        # Find the most recent tailored CV text file matching company pattern
+        tailored_txt_files = list(company_folder.glob(f"{company_name}_tailored_cv_*.txt"))
         if not tailored_txt_files:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No tailored CV text file found for company: {company_name}"
-            )
+            # Fallback to any tailored CV files if company-specific pattern not found
+            tailored_txt_files = list(company_folder.glob("*tailored_cv_*.txt"))
+            if not tailored_txt_files:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No tailored CV text file found for company: {company_name}"
+                )
         
-        latest_txt_file = max(tailored_txt_files, key=lambda p: p.stat().st_mtime)
+        # Sort by timestamp in filename first, then by modified time as fallback
+        def get_timestamp(filepath):
+            try:
+                # Extract timestamp from filename pattern company_tailored_cv_YYYYMMDD_HHMMSS.txt
+                filename = filepath.name
+                timestamp_part = filename.split('_tailored_cv_')[1].replace('.txt', '')
+                # Convert to datetime for proper comparison
+                from datetime import datetime
+                return datetime.strptime(timestamp_part, '%Y%m%d_%H%M%S')
+            except:
+                # Fallback to file modification time if filename parsing fails
+                return filepath.stat().st_mtime
+        
+        latest_txt_file = max(tailored_txt_files, key=get_timestamp)
         
         # Read the text content
         with open(latest_txt_file, 'r', encoding='utf-8') as f:

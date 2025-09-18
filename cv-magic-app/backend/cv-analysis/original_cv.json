@@ -119,18 +119,18 @@
   "unknown_sections": {},
   "original_sections": {
     "section_headers_found": [
-      "EDUCATION",
-      "CAREER PROFILE",
-      "PROFESSIONAL EXPERIENCE",
       "CERTIFICATIONS",
-      "KEY SKILLS"
+      "CAREER PROFILE",
+      "KEY SKILLS",
+      "PROFESSIONAL EXPERIENCE",
+      "EDUCATION"
     ],
     "parsing_approach": "content_preserving"
   },
-  "saved_at": "2025-09-18T13:59:47.637959",
+  "saved_at": "2025-09-18T15:12:14.853196",
   "metadata": {
     "source_filename": "M_tiwari_CV_Capgemini.docx",
-    "processed_at": "2025-09-18T13:59:47.648488",
+    "processed_at": "2025-09-18T15:12:14.853502",
     "processing_version": "2.0",
     "content_type": "structured_cv"
   }

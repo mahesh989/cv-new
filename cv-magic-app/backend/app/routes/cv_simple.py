@@ -324,15 +324,31 @@ async def read_tailored_cv(company_name: str):
                 detail=f"Company folder not found: {company_name}"
             )
         
-        # Find the most recent tailored CV text file
-        tailored_txt_files = list(company_folder.glob("tailored_cv_*.txt"))
+        # Find the most recent tailored CV text file matching company pattern
+        tailored_txt_files = list(company_folder.glob(f"{company_name}_tailored_cv_*.txt"))
         if not tailored_txt_files:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No tailored CV text file found for company: {company_name}"
-            )
+            # Fallback to any tailored CV files if company-specific pattern not found
+            tailored_txt_files = list(company_folder.glob("*tailored_cv_*.txt"))
+            if not tailored_txt_files:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No tailored CV text file found for company: {company_name}"
+                )
         
-        latest_txt_file = max(tailored_txt_files, key=lambda p: p.stat().st_mtime)
+        # Sort by timestamp in filename first, then by modified time as fallback
+        def get_timestamp(filepath):
+            try:
+                # Extract timestamp from filename pattern company_tailored_cv_YYYYMMDD_HHMMSS.txt
+                filename = filepath.name
+                timestamp_part = filename.split('_tailored_cv_')[1].replace('.txt', '')
+                # Convert to datetime for proper comparison
+                from datetime import datetime
+                return datetime.strptime(timestamp_part, '%Y%m%d_%H%M%S')
+            except:
+                # Fallback to file modification time if filename parsing fails
+                return filepath.stat().st_mtime
+        
+        latest_txt_file = max(tailored_txt_files, key=get_timestamp)
         
         # Read the text content
         with open(latest_txt_file, 'r', encoding='utf-8') as f:
@@ -361,6 +377,89 @@ async def read_tailored_cv(company_name: str):
         )
 
 
+@router.get("/latest-tailored-cv")
+async def get_latest_tailored_cv():
+    """
+    Get the most recent tailored CV across all companies
+    
+    This endpoint finds the latest tailored CV file across all company folders
+    and returns its content for frontend preview.
+    """
+    try:
+        logger.info("📄 Fetching latest tailored CV across all companies")
+        
+        # Path to cv-analysis folder
+        cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        
+        if not cv_analysis_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="CV analysis folder not found"
+            )
+        
+        # Find all tailored CV text files across all company folders
+        all_tailored_files = []
+        for company_dir in cv_analysis_path.iterdir():
+            if company_dir.is_dir() and company_dir.name != "__pycache__":
+                # Look for company-specific naming pattern first
+                company_files = list(company_dir.glob(f"{company_dir.name}_tailored_cv_*.txt"))
+                if not company_files:
+                    # Fallback to any tailored CV files
+                    company_files = list(company_dir.glob("*tailored_cv_*.txt"))
+                
+                all_tailored_files.extend(company_files)
+        
+        if not all_tailored_files:
+            raise HTTPException(
+                status_code=404,
+                detail="No tailored CV files found in any company folder"
+            )
+        
+        # Sort by timestamp in filename first, then by modified time as fallback
+        def get_timestamp(filepath):
+            try:
+                # Extract timestamp from filename pattern company_tailored_cv_YYYYMMDD_HHMMSS.txt
+                filename = filepath.name
+                timestamp_part = filename.split('_tailored_cv_')[1].replace('.txt', '')
+                # Convert to datetime for proper comparison
+                from datetime import datetime
+                return datetime.strptime(timestamp_part, '%Y%m%d_%H%M%S')
+            except:
+                # Fallback to file modification time if filename parsing fails
+                return filepath.stat().st_mtime
+        
+        latest_txt_file = max(all_tailored_files, key=get_timestamp)
+        
+        # Extract company name from file path
+        company_name = latest_txt_file.parent.name
+        
+        # Read the text content
+        with open(latest_txt_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        logger.info(f"✅ Served latest tailored CV: {latest_txt_file.name} from {company_name} ({len(content)} characters)")
+        
+        return JSONResponse(content={
+            "success": True,
+            "content": content,
+            "filename": latest_txt_file.name,
+            "company": company_name,
+            "metadata": {
+                "file_size": len(content),
+                "last_modified": latest_txt_file.stat().st_mtime,
+                "file_path": str(latest_txt_file)
+            }
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to get latest tailored CV: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get latest tailored CV: {str(e)}"
+        )
+
 @router.get("/available-companies")
 async def get_available_companies():
     """
@@ -378,12 +477,17 @@ async def get_available_companies():
         if cv_analysis_path.exists():
             for company_dir in cv_analysis_path.iterdir():
                 if company_dir.is_dir() and company_dir.name != "__pycache__":
-                    # Check if it has tailored CV files
-                    tailored_files = list(company_dir.glob("tailored_cv_*.txt"))
+                    # Check if it has tailored CV files with company-specific naming
+                    company_name = company_dir.name
+                    tailored_files = list(company_dir.glob(f"{company_name}_tailored_cv_*.txt"))
+                    if not tailored_files:
+                        # Fallback to any tailored CV files
+                        tailored_files = list(company_dir.glob("*tailored_cv_*.txt"))
+                    
                     if tailored_files:
                         companies.append({
-                            "company": company_dir.name,
-                            "display_name": company_dir.name.replace('_', ' '),
+                            "company": company_name,
+                            "display_name": company_name.replace('_', ' '),
                             "has_tailored_cv": True,
                             "last_updated": max(tailored_files, key=lambda p: p.stat().st_mtime).stat().st_mtime
                         })

@@ -1,47 +1,41 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-18T14:01:05.535378",
+  "cv_analysis_timestamp": "2025-09-18T14:47:01.256546",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
     "Excel",
     "communication"
   ],
-  "matched_preferred_keywords": [
-    "data extraction",
-    "analytical thinking"
-  ],
+  "matched_preferred_keywords": [],
   "missed_required_keywords": [
-    "VBA",
     "Tableau",
+    "VBA",
     "project management",
     "stakeholder management",
     "customer service",
     "data mining",
-    "data models",
     "data warehouse",
-    "marketing campaigns"
+    "marketing campaigns",
+    "data models"
   ],
   "missed_preferred_keywords": [
-    "data querying",
-    "problem-solving",
-    "data de-duplication",
+    "data issues",
+    "de-duplication",
     "data governance",
     "best practice guidelines"
   ],
   "match_counts": {
     "total_required_keywords": 10,
-    "total_preferred_keywords": 5,
+    "total_preferred_keywords": 4,
     "matched_required_count": 4,
-    "matched_preferred_count": 2
+    "matched_preferred_count": 0
   },
   "matching_notes": {
-    "SQL": "Found in career profile and skills section",
-    "Power BI": "Mentioned in skills and professional experience",
-    "Excel": "Found in skills and used in project work",
-    "communication": "Explicitly stated as interpersonal skills",
-    "data extraction": "Inferred from the ability to analyze datasets",
-    "analytical thinking": "Demonstrated through data analysis tasks"
+    "SQL": "Found in key skills and certifications",
+    "Power BI": "Mentioned in key skills and professional experience",
+    "Excel": "Found in key skills and professional experience",
+    "communication": "Described as excellent interpersonal and communication skills"
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",

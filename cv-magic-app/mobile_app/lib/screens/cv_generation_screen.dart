@@ -22,8 +22,6 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         children: [
           _buildHeaderCard(),
           const SizedBox(height: 20),
-          _buildCompanySelectionCard(),
-          const SizedBox(height: 20),
           _buildCVGenerationCard(),
         ],
       ),
@@ -80,54 +78,6 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
   String? tailoredCVContent;
   bool _isLoadingCV = false;
-  String? selectedCompany;
-
-  // Available companies (dynamic list)
-  List<Map<String, dynamic>> availableCompanies = [];
-  bool _isLoadingCompanies = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadAvailableCompanies();
-  }
-
-  Future<void> _loadAvailableCompanies() async {
-    setState(() {
-      _isLoadingCompanies = true;
-    });
-
-    try {
-      final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cv/available-companies'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> companiesList = data['companies'] ?? [];
-
-        setState(() {
-          availableCompanies = companiesList
-              .map((company) => company as Map<String, dynamic>)
-              .toList();
-
-          // Auto-select first company if none selected
-          if (availableCompanies.isNotEmpty && selectedCompany == null) {
-            selectedCompany = availableCompanies.first['company'];
-            _loadTailoredCV(); // Load CV for the first company
-          }
-        });
-      } else {
-        debugPrint('Failed to load companies: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Error loading companies: $e');
-    } finally {
-      setState(() {
-        _isLoadingCompanies = false;
-      });
-    }
-  }
 
   Future<void> _loadTailoredCV() async {
     setState(() {
@@ -137,10 +87,9 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     });
 
     try {
-      // Try to load the company-specific tailored CV
+      // Load the latest tailored CV across all companies
       final response = await http.get(
-        Uri.parse(
-            'http://localhost:8000/api/cv/read-tailored-cv/$selectedCompany'),
+        Uri.parse('http://localhost:8000/api/cv/latest-tailored-cv'),
       );
 
       if (response.statusCode == 200) {
@@ -259,9 +208,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
   Widget _buildCVPreview() {
     if (_isLoadingCV) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (tailoredCVContent == null) {
@@ -319,91 +266,6 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     );
   }
 
-  Widget _buildCompanySelectionCard() {
-    return AppTheme.createCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Select Company',
-            style: AppTheme.headingMedium.copyWith(
-              color: AppTheme.primaryTeal,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (_isLoadingCompanies)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else if (availableCompanies.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.orange[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange[200]!),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber,
-                    color: Colors.orange[600],
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'No companies with tailored CVs found. Please run the analysis pipeline first.',
-                      style: AppTheme.bodySmall.copyWith(
-                        color: Colors.orange[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else
-            DropdownButtonFormField<String>(
-              value: selectedCompany,
-              decoration: InputDecoration(
-                labelText: 'Choose Company',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              items: availableCompanies
-                  .map((company) => DropdownMenuItem<String>(
-                        value: company['company'] as String,
-                        child: Text(
-                          company['display_name'] ?? company['company'],
-                          style: AppTheme.bodyMedium,
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedCompany = value;
-                  tailoredCVContent = null; // Clear previous content
-                });
-                if (value != null) {
-                  _loadTailoredCV(); // Load CV for selected company
-                }
-              },
-            ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCVGenerationCard() {
     return AppTheme.createCard(
       child: Column(
@@ -418,10 +280,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Generate an optimized CV using our AI-powered framework with sample data.',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.neutralGray600,
-            ),
+            'Generate an optimized CV using our AI-powered framework. The system will automatically find and display the latest tailored CV from your analysis pipeline.',
+            style: AppTheme.bodyMedium.copyWith(color: AppTheme.neutralGray600),
           ),
           const SizedBox(height: 20),
 
@@ -438,15 +298,11 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  color: AppTheme.primaryTeal,
-                  size: 20,
-                ),
+                Icon(Icons.info_outline, color: AppTheme.primaryTeal, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'This demo uses sample CV and Google recommendation data to showcase the CV tailoring system.',
+                    'The system automatically finds the most recent tailored CV from your analysis pipeline and displays it in the preview.',
                     style: AppTheme.bodySmall.copyWith(
                       color: AppTheme.primaryTeal,
                       fontWeight: FontWeight.w500,
@@ -459,67 +315,96 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
           const SizedBox(height: 20),
 
-          // Generate Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: (_isGenerating || selectedCompany == null)
-                  ? null
-                  : () async {
-                      await _loadTailoredCV();
-                    },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                backgroundColor: AppTheme.primaryTeal,
-                disabledBackgroundColor: AppTheme.neutralGray300,
-              ),
-              child: _isGenerating
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Generating CV...',
-                          style: AppTheme.bodyMedium.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          selectedCompany == null
-                              ? 'Select Company First'
-                              : 'Generate Tailored CV',
-                          style: AppTheme.bodyMedium.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+          // Generate Button and Close Button Row
+          Row(
+            children: [
+              // Generate Button
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _isGenerating
+                      ? null
+                      : () async {
+                          await _loadTailoredCV();
+                        },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-            ),
+                    backgroundColor: AppTheme.primaryTeal,
+                    disabledBackgroundColor: AppTheme.neutralGray300,
+                  ),
+                  child: _isGenerating
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Generating CV...',
+                              style: AppTheme.bodyMedium.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Generate Tailored CV',
+                              style: AppTheme.bodyMedium.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+
+              // Close Button
+              if (tailoredCVContent != null) ...[
+                const SizedBox(width: 12),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.red[100],
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.red[300]!, width: 1),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        tailoredCVContent = null;
+                        _isLoadingCV = false;
+                        _isGenerating = false;
+                      });
+                    },
+                    icon: Icon(Icons.close, color: Colors.red[600], size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 20),
           if (tailoredCVContent != null) _buildCVPreview(),
