@@ -410,12 +410,19 @@ class EnhancedATSOrchestrator:
         try:
             logger.info(f"[Enhanced ATS] Starting analysis for company: {company_name}")
             
-            # Define paths
+            # Define paths with dynamic CV selection
+            from app.services.dynamic_cv_selector import dynamic_cv_selector
+            
             base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
             company_dir = base_dir / company_name
             analysis_file = company_dir / f"{company_name}_skills_analysis.json"
-            cv_file = base_dir / "cvs" / "original" / "original_cv.txt"  # CV file is in the cvs/original directory
+            
+            # Use dynamic CV selection for the latest CV file
+            latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+            cv_file = Path(latest_cv_paths['txt_path']) if latest_cv_paths['txt_path'] else None
             jd_file = company_dir / "jd_original.json"
+            
+            logger.info(f"📄 [Enhanced ATS] Using dynamic CV from {latest_cv_paths['txt_source']} folder: {cv_file}")
             
             # Check if required files exist
             if not analysis_file.exists():

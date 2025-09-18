@@ -44,14 +44,25 @@ class ComponentAssembler:
         self.ats_calculator = ATSScoreCalculator()
 
     def _read_cv_text(self) -> str:
-        """Read CV text from the standard location."""
-        cv_txt = self.base_dir / "cvs" / "original" / "original_cv.txt"
+        """Read CV text from the latest available CV file."""
+        from app.services.dynamic_cv_selector import dynamic_cv_selector
+        
+        # Get the latest CV file dynamically
+        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+        
+        if not latest_cv_paths['txt_path']:
+            raise FileNotFoundError("No CV text file found in cvs folders")
+        
+        cv_txt = Path(latest_cv_paths['txt_path'])
         if not cv_txt.exists():
             raise FileNotFoundError(f"CV text not found: {cv_txt}")
+            
         with open(cv_txt, "r", encoding="utf-8") as f:
             text = f.read().strip()
         if not text:
             raise ValueError("CV text is empty")
+            
+        logger.info(f"📄 [COMPONENT_ASSEMBLER] Using CV from {latest_cv_paths['txt_source']} folder: {cv_txt}")
         return text
 
     def _read_jd_text(self, company: str) -> str:

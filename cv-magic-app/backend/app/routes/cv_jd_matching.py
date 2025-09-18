@@ -163,9 +163,13 @@ async def get_cv_jd_matching_status(
         base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
         company_dir = Path(base_path) / company_name
         
-        # Check CV file
-        cv_file_path = Path(base_path) / "cvs" / "original" / "original_cv.txt"
-        cv_file_exists = cv_file_path.exists()
+        # Check CV file using dynamic selection
+        from app.services.dynamic_cv_selector import dynamic_cv_selector
+        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+        cv_file_path = Path(latest_cv_paths['txt_path']) if latest_cv_paths['txt_path'] else None
+        cv_file_exists = cv_file_path and cv_file_path.exists()
+        
+        logger.info(f"📄 [CV_JD_MATCHING] Using dynamic CV from {latest_cv_paths['txt_source']} folder")
         
         # Check JD analysis file
         jd_analysis_file = company_dir / "jd_analysis.json"

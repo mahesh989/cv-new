@@ -159,19 +159,24 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             logger.error(f"[PIPELINE] CV-JD matching traceback: {traceback.format_exc()}")
             # Continue with component analysis even if matching fails
 
-        # Step 3: Component Analysis (includes ATS calculation)
+        # Step 3: Component Analysis (includes ATS calculation) - Using Dynamic CV Selection
         try:
             logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
             from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+            from app.services.dynamic_cv_selector import dynamic_cv_selector
+            
+            # Use dynamic CV selection to get the latest CV files
+            latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+            logger.info(f"📄 [PIPELINE] Dynamic CV selection - JSON: {latest_cv_paths['json_source']}, TXT: {latest_cv_paths['txt_source']}")
             
             # Check if we have the minimum required files
             base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            cv_file = base_dir / "cvs" / "original" / "original_cv.json"
+            cv_file = Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None
             jd_file = base_dir / cname / "jd_original.json"
             skills_file = base_dir / cname / f"{cname}_skills_analysis.json"
             
             # We can run component analysis if we have CV, JD, and skills analysis
-            if cv_file.exists() and jd_file.exists() and skills_file.exists():
+            if cv_file and cv_file.exists() and jd_file.exists() and skills_file.exists():
                 logger.info(f"📄 [PIPELINE] Required files found, proceeding with component analysis")
                 component_result = await modular_ats_orchestrator.run_component_analysis(cname)
                 logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
@@ -380,10 +385,16 @@ async def preliminary_analysis(
                 except Exception as e:
                     logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD file: {e}")
 
-                # Ensure original_cv.json exists for the matcher (but don't overwrite if it already exists with structured data)
+                # Ensure CV file exists for the matcher - use dynamic CV selection
                 try:
                     import json
-                    cv_file = base_dir / "cvs" / "original" / "original_cv.json"
+                    from app.services.dynamic_cv_selector import dynamic_cv_selector
+                    
+                    # Get the latest CV file dynamically
+                    latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+                    cv_file = Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None
+                    
+                    logger.info(f"📄 [PIPELINE] Using dynamic CV: {cv_file} from {latest_cv_paths['json_source']} folder")
                     
                     # Check if file exists and has structured data
                     should_save = True
@@ -527,11 +538,16 @@ async def trigger_component_analysis(company: str):
         logger.info(f"🔧 [MANUAL] Triggering component analysis for company: {company}")
         
         from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+        from app.services.dynamic_cv_selector import dynamic_cv_selector
+        
+        # Use dynamic CV selection for the latest CV file
+        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+        logger.info(f"🔧 [MANUAL] Using dynamic CV: {latest_cv_paths['json_source']} folder")
         
         # Check if required files exist
         base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         required_files = {
-            "cv_file": base_dir / "cvs" / "original" / "original_cv.json",
+            "cv_file": Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None,
             "jd_file": base_dir / company / "jd_original.json", 
             "match_file": base_dir / company / "cv_jd_match_results.json"
         }

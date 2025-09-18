@@ -288,9 +288,12 @@ class CVJDMatcher:
             Exception: If matching fails
         """
         try:
-            # Read CV content
+            # Read CV content using dynamic CV selection
             if not cv_file_path:
-                cv_file_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt"
+                from app.services.dynamic_cv_selector import dynamic_cv_selector
+                latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+                cv_file_path = latest_cv_paths['txt_path']
+                logger.info(f"📄 [CV_JD_MATCHER] Using dynamic CV from {latest_cv_paths['txt_source']} folder")
             
             cv_content = self._read_cv_file(cv_file_path)
             logger.info(f"📄 Read CV content from: {cv_file_path}")
