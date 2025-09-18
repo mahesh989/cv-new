@@ -1,12 +1,10 @@
 {
   "company_name": "Nine_Entertainment",
-  "cv_analysis_timestamp": "2025-09-18T12:20:19.886384",
+  "cv_analysis_timestamp": "2025-09-18T12:47:50.935080",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
-    "communication",
-    "data engineering",
-    "data warehousing"
+    "communication"
   ],
   "matched_preferred_keywords": [
     "Tableau",
@@ -14,6 +12,10 @@
   ],
   "missed_required_keywords": [
     "data modelling",
+    "data warehousing",
+    "dimensional modelling",
+    "detail-oriented",
+    "data engineering",
     "business intelligence"
   ],
   "missed_preferred_keywords": [
@@ -21,17 +23,16 @@
     "RAG"
   ],
   "match_counts": {
-    "total_required_keywords": 7,
-    "total_preferred_keywords": 4,
-    "matched_required_count": 5,
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 3,
     "matched_preferred_count": 2
   },
   "matching_notes": {
-    "SQL": "Proficient in SQL for querying and managing databases",
+    "SQL": "Proficient in SQL for querying, modeling, and managing complex relational databases",
     "Power BI": "Used Power BI to present research findings",
-    "communication": "Demonstrated communication skills in presenting research",
-    "Tableau": "Built dashboards using Tableau for decision-making",
-    "Snowflake": "Mentioned as a tool for cloud data warehousing"
+    "Tableau": "Skilled in creating interactive dashboards using Tableau",
+    "communication": "Demonstrated communication skills in presenting research findings"
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",

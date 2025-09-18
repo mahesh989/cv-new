@@ -1,62 +1,63 @@
 {
-  "generated": "2025-09-18T12:19:42.670",
+  "generated": "2025-09-18T12:47:04.972",
   "cv_filename": "maheshwor_tiwari.pdf",
   "jd_url": "preliminary_analysis",
-  "user_id": "ebacf662-5343-45a1-ad98-e47b5623a83b",
+  "user_id": "1deab35f-b62c-48c0-861f-96bc12d8c3c3",
   "company": "Nine_Entertainment",
   "model_used": "gpt-4o-mini",
   "cv_skills": {
     "technical_skills": [
       "Python",
-      "AI",
-      "Machine Learning",
-      "Data Pipelines",
-      "SQL",
-      "Tableau",
-      "Power BI",
       "Pandas",
       "NumPy",
       "scikit-learn",
+      "SQL",
+      "PostgreSQL",
+      "MySQL",
+      "Tableau",
+      "Power BI",
       "Matplotlib",
-      "GitHub",
       "Docker",
       "Snowflake",
+      "GitHub",
       "Visual Studio Code",
       "Google Analytics",
       "Excel",
       "Seaborn",
       "Data Cleaning",
       "Data Preprocessing",
+      "Machine Learning",
+      "Data Analysis",
+      "Data Visualization",
       "Predictive Analytics",
       "Automation",
-      "Data Visualization",
-      "Data Extraction",
-      "Data Analysis",
-      "Reporting",
-      "Metrics Tracking",
-      "Data Integrity",
-      "Computational Modeling",
-      "Workflow Development"
+      "Reporting"
     ],
     "soft_skills": [
       "Communication",
       "Teamwork",
-      "Mentoring",
       "Collaboration",
+      "Mentoring",
+      "Engagement",
       "Problem-solving",
       "Adaptability",
-      "Detail-oriented",
-      "Results-driven"
+      "Analytical Thinking",
+      "Detail-oriented"
     ],
     "domain_keywords": [
       "Data Science",
       "Physics",
-      "Research",
+      "AI",
+      "Machine Learning",
+      "Data Pipelines",
       "Customer Behavior",
+      "Predictive Analytics",
+      "Research",
+      "Data-Driven Decision-Making",
       "Operational Efficiency",
-      "Strategic Decision-making"
+      "Strategic Decision-Making"
     ],
-    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Python - \"over three years of experience in Python coding\"\n- AI - \"experience in AI\"\n- Machine Learning - \"experience in machine learning\"\n- Data Pipelines - \"designing and deploying robust data pipelines\"\n- SQL - \"proficient in SQL\"\n- Tableau - \"creating interactive dashboards and visualizations using Tableau\"\n- Power BI - \"Tableau, Power BI\"\n- Pandas - \"using libraries such as Pandas\"\n- NumPy - \"using libraries such as Pandas, NumPy\"\n- scikit-learn - \"and scikit-learn\"\n- Matplotlib - \"using Tableau, Power BI, and Matplotlib\"\n- GitHub - \"experienced with GitHub for version control\"\n- Docker - \"Docker for containerization\"\n- Snowflake - \"Snowflake for cloud data warehousing\"\n- Visual Studio Code - \"leveraging tools like Visual Studio Code\"\n- Google Analytics - \"Google Analytics for advanced analysis\"\n- Excel - \"Excel for data-driven solutions and reporting\"\n- Seaborn - \"using Python libraries like Matplotlib and Seaborn\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning - \"Designed and implemented Python scripts for data cleaning\"\n- Data Preprocessing - \"data cleaning, preprocessing, and analysis\"\n- Predictive Analytics - \"Developed machine learning models in Python for predictive analytics\"\n- Automation - \"Leveraged AI techniques to automate repetitive tasks\"\n- Data Visualization - \"Built dynamic dashboards and visualizations\"\n- Data Extraction - \"Automated data extraction and structuring\"\n- Data Analysis - \"Analyzed customer support data with Python\"\n- Reporting - \"Designed Python scripts to create dynamic reports and dashboards\"\n- Metrics Tracking - \"Built Python scripts to track key metrics\"\n- Data Integrity - \"ensuring 99% data accuracy and improving data integrity\"\n- Computational Modeling - \"Utilized advanced Python programming for computational modeling\"\n- Workflow Development - \"Developed Python-based workflows to manage and analyze large datasets\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"demonstrating technical expertise and communication skills\"\n- Teamwork - \"promoting teamwork\"\n- Mentoring - \"Mentored students on projects\"\n- Collaboration - \"collaborated with faculty\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Problem-solving - \"solving complex research problems\"\n- Adaptability - \"meeting strict deadlines for strategic decision-making\"\n- Detail-oriented - \"improving data accuracy and reliability\"\n- Results-driven - \"improving productivity\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"completed a Master's in Data Science\"\n- Physics - \"PhD in Physics\"\n- Research - \"conducting innovative research\"\n- Customer Behavior - \"enhancing customer behavior insights\"\n- Operational Efficiency - \"enhance operational efficiency\"\n- Strategic Decision-making - \"meeting strict deadlines for strategic decision-making\"\n\n**STRONGLY IMPLIED:**\n- Data-Driven Decision-Making - \"support data-driven decision-making\"\n- Population Datasets - \"structuring of population datasets\"\n- Customer Support - \"customer support data\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Teamwork\", \"Mentoring\", \"Collaboration\", \"Problem-solving\", \"Adaptability\", \"Detail-oriented\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Python\", \"AI\", \"Machine Learning\", \"Data Pipelines\", \"SQL\", \"Tableau\", \"Power BI\", \"Pandas\", \"NumPy\", \"scikit-learn\", \"Matplotlib\", \"GitHub\", \"Docker\", \"Snowflake\", \"Visual Studio Code\", \"Google Analytics\", \"Excel\", \"Seaborn\", \"Data Cleaning\", \"Data Preprocessing\", \"Predictive Analytics\", \"Automation\", \"Data Visualization\", \"Data Extraction\", \"Data Analysis\", \"Reporting\", \"Metrics Tracking\", \"Data Integrity\", \"Computational Modeling\", \"Workflow Development\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Physics\", \"Research\", \"Customer Behavior\", \"Operational Efficiency\", \"Strategic Decision-making\"]\n```"
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Python - \"Specialized in Python programming\"\n- Pandas - \"using libraries such as Pandas\"\n- NumPy - \"using libraries such as Pandas, NumPy\"\n- scikit-learn - \"and scikit-learn\"\n- SQL - \"Proficient in SQL\"\n- PostgreSQL - \"complex relational databases like PostgreSQL\"\n- MySQL - \"PostgreSQL and MySQL\"\n- Tableau - \"creating interactive dashboards and visualizations using Tableau\"\n- Power BI - \"Tableau, Power BI\"\n- Matplotlib - \"Power BI, and Matplotlib\"\n- Docker - \"experienced with Docker for containerization\"\n- Snowflake - \"Snowflake for cloud data warehousing\"\n- GitHub - \"Experienced with GitHub for version control\"\n- Visual Studio Code - \"leveraging tools like Visual Studio Code\"\n- Google Analytics - \"Integrated Google Analytics data with Python\"\n- Excel - \"leveraging tools like Excel for data-driven solutions\"\n- Seaborn - \"using Python libraries like Matplotlib and Seaborn\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning - \"Designed and implemented Python scripts for data cleaning\"\n- Data Preprocessing - \"Python for data preprocessing and analysis\"\n- Machine Learning - \"Developed machine learning models in Python\"\n- Data Analysis - \"Analyzed customer support data with Python\"\n- Data Visualization - \"Built dynamic dashboards and visualizations\"\n- Predictive Analytics - \"machine learning models in Python for predictive analytics\"\n- Automation - \"Leveraged AI techniques to automate repetitive tasks\"\n- Reporting - \"Designed Python scripts to create dynamic reports and dashboards\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"demonstrating technical expertise and communication skills\"\n- Teamwork - \"promoting teamwork\"\n- Collaboration - \"collaborated with faculty\"\n- Mentoring - \"mentored students on projects\"\n- Engagement - \"fostered student engagement\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Problem-solving - \"solving complex research problems\"\n- Adaptability - \"improving data accuracy and team collaboration\"\n- Analytical Thinking - \"analyze large datasets\"\n- Detail-oriented - \"ensuring 99% data accuracy\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"completed a Master's in Data Science\"\n- Physics - \"I hold a PhD in Physics\"\n- AI - \"experience in AI\"\n- Machine Learning - \"experience in machine learning\"\n- Data Pipelines - \"designing and deploying robust data pipelines\"\n- Customer Behavior - \"enhancing customer behavior insights\"\n- Predictive Analytics - \"enabling data-driven business decisions\"\n- Research - \"conducting innovative research\"\n\n**STRONGLY IMPLIED:**\n- Data-Driven Decision-Making - \"support data-driven decision-making\"\n- Operational Efficiency - \"enhance operational efficiency\"\n- Strategic Decision-Making - \"meeting strict deadlines for strategic decision-making\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Teamwork\", \"Collaboration\", \"Mentoring\", \"Engagement\", \"Problem-solving\", \"Adaptability\", \"Analytical Thinking\", \"Detail-oriented\"]\nTECHNICAL_SKILLS = [\"Python\", \"Pandas\", \"NumPy\", \"scikit-learn\", \"SQL\", \"PostgreSQL\", \"MySQL\", \"Tableau\", \"Power BI\", \"Matplotlib\", \"Docker\", \"Snowflake\", \"GitHub\", \"Visual Studio Code\", \"Google Analytics\", \"Excel\", \"Seaborn\", \"Data Cleaning\", \"Data Preprocessing\", \"Machine Learning\", \"Data Analysis\", \"Data Visualization\", \"Predictive Analytics\", \"Automation\", \"Reporting\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Physics\", \"AI\", \"Machine Learning\", \"Data Pipelines\", \"Customer Behavior\", \"Predictive Analytics\", \"Research\", \"Data-Driven Decision-Making\", \"Operational Efficiency\", \"Strategic Decision-Making\"]\n```"
   },
   "jd_skills": {
     "technical_skills": [
@@ -68,20 +69,19 @@
       "Dimensional Modelling",
       "ETL",
       "Data Quality",
+      "Data Aggregation",
       "Reporting",
-      "Data Integrity",
       "Data Visualization",
-      "Tableau",
-      "Snowflake",
-      "Version Control",
-      "Data Loading",
-      "Data Transformation",
-      "Role-Based Access Controls",
-      "Security Measures",
-      "Data Pipelines",
       "Self-Service Reporting",
+      "Data Integrity",
       "Performance Optimization",
-      "Data Aggregation"
+      "Version Control",
+      "Documentation",
+      "Role-Based Access Control",
+      "Snowflake",
+      "Tableau",
+      "Vector Databases",
+      "RAG"
     ],
     "soft_skills": [
       "Communication",
@@ -93,28 +93,321 @@
       "Problem-Solving"
     ],
     "domain_keywords": [
-      "Business Intelligence",
       "Automotive",
-      "Insights Delivery",
-      "Data Governance",
-      "Reporting Standards"
+      "Media",
+      "Insights",
+      "Business Decision-Making",
+      "Data Operations",
+      "Reporting Assets"
     ],
-    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Engineering - \"5+ years of experience in data engineering\"\n- Data Modelling - \"focus on data modelling, aggregation, and business intelligence\"\n- SQL - \"Write advanced SQL queries\"\n- Power BI - \"Build and maintain Power BI dashboards\"\n- Data Warehousing - \"understanding of data warehousing principles\"\n- Dimensional Modelling - \"dimensional modelling\"\n- ETL - \"collaborate with ETL Engineers\"\n- Data Quality - \"protect data quality\"\n- Reporting - \"support teams with data, reporting and insights\"\n- Data Integrity - \"ensuring data integrity and governance standards\"\n- Data Visualization - \"translate complex datasets into compelling visual stories\"\n- Tableau - \"building and maintaining reports and dashboards with Tableau\"\n- Snowflake - \"performance optimization in a modern environment such as Snowflake\"\n- Version Control - \"best practices for BI development including version control\"\n- Data Loading - \"Experience with data loading\"\n- Data Transformation - \"data loading, transformation\"\n- Role-Based Access Controls - \"Implement role-based access controls\"\n- Security Measures - \"security measures to safeguard sensitive data\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Pipelines - \"ensure reliable pipelines feed into BI reporting layers\"\n- Self-Service Reporting - \"develop and manage self-service reporting capabilities\"\n- Performance Optimization - \"performance optimisation\"\n- Data Aggregation - \"focus on data modelling, aggregation\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills to translate business needs\"\n- Detail-Oriented - \"a proactive, detail-oriented mindset\"\n- Proactive - \"a proactive, detail-oriented mindset\"\n- Results-Driven - \"empowering business users while ensuring data integrity\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Collaboration - \"work collaboratively with Technology squads\"\n- Analytical Thinking - \"translate complex datasets into compelling visual stories\"\n- Problem-Solving - \"understand requirements and translate them into BI solutions\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Business Intelligence - \"focus on data modelling, aggregation, and business intelligence\"\n- Automotive - \"Drive is Nine’s brand appealing to the automotive enthusiast\"\n- Insights Delivery - \"recommend new techniques or tools to improve insights delivery\"\n\n**STRONGLY IMPLIED:**\n- Data Governance - \"ensuring data integrity and governance standards\"\n- Reporting Standards - \"high standards of data quality, accuracy, and consistency across reporting assets\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Detail-Oriented\", \"Proactive\", \"Results-Driven\", \"Collaboration\", \"Analytical Thinking\", \"Problem-Solving\"]\nTECHNICAL_SKILLS = [\"Data Engineering\", \"Data Modelling\", \"SQL\", \"Power BI\", \"Data Warehousing\", \"Dimensional Modelling\", \"ETL\", \"Data Quality\", \"Reporting\", \"Data Integrity\", \"Data Visualization\", \"Tableau\", \"Snowflake\", \"Version Control\", \"Data Loading\", \"Data Transformation\", \"Role-Based Access Controls\", \"Security Measures\", \"Data Pipelines\", \"Self-Service Reporting\", \"Performance Optimization\", \"Data Aggregation\"]\nDOMAIN_KEYWORDS = [\"Business Intelligence\", \"Automotive\", \"Insights Delivery\", \"Data Governance\", \"Reporting Standards\"]\n```"
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Engineering - \"5+ years of experience in data engineering\"\n- Data Modelling - \"focus on data modelling, aggregation, and business intelligence\"\n- SQL - \"Write advanced SQL queries\"\n- Power BI - \"Build and maintain Power BI dashboards\"\n- Data Warehousing - \"understanding of data warehousing principles\"\n- Dimensional Modelling - \"dimensional modelling\"\n- ETL - \"collaborate with ETL Engineers\"\n- Data Quality - \"protect data quality\"\n- Data Aggregation - \"focus on data modelling, aggregation\"\n- Reporting - \"support reporting and analytics needs\"\n- Data Visualization - \"translate complex datasets into compelling visual stories\"\n- Self-Service Reporting - \"develop and manage self-service reporting capabilities\"\n- Data Integrity - \"ensuring data integrity and governance standards\"\n- Performance Optimization - \"optimise datasets for reporting and visualisation performance\"\n- Version Control - \"best practices for BI development including version control\"\n- Documentation - \"best practices for BI development including documentation\"\n- Role-Based Access Control - \"Implement role-based access controls\"\n- Snowflake - \"performance optimization in a modern environment such as Snowflake\"\n- Tableau - \"building and maintaining reports and dashboards with Tableau\"\n- Vector Databases - \"next-generation architectures such as Vector Databases\"\n- RAG - \"next-generation architectures such as RAG\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Pipelines - \"ensure reliable pipelines feed into BI reporting layers\"\n- Business Intelligence - \"focus on business intelligence\"\n- Data Governance - \"ensuring data integrity and governance standards\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills to translate business needs\"\n- Detail-Oriented - \"A proactive, detail-oriented mindset\"\n- Proactive - \"A proactive, detail-oriented mindset\"\n- Results-Driven - \"focus on data accuracy and integrity\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Collaboration - \"work collaboratively with Technology squads\"\n- Analytical Thinking - \"translate complex datasets into compelling visual stories\"\n- Problem-Solving - \"understand requirements and translate them into BI solutions\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Automotive - \"Drive is Nine’s brand appealing to the automotive enthusiast\"\n- Media - \"Australia's largest media organisation\"\n- Insights - \"support teams with data, reporting and insights\"\n- Business Decision-Making - \"deliver clear, actionable insights for business decision-making\"\n\n**STRONGLY IMPLIED:**\n- Data Operations - \"sits at the heart of our data operations\"\n- Reporting Assets - \"high standards of data quality, accuracy, and consistency across reporting assets\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Detail-Oriented\", \"Proactive\", \"Results-Driven\", \"Collaboration\", \"Analytical Thinking\", \"Problem-Solving\"]\nTECHNICAL_SKILLS = [\"Data Engineering\", \"Data Modelling\", \"SQL\", \"Power BI\", \"Data Warehousing\", \"Dimensional Modelling\", \"ETL\", \"Data Quality\", \"Data Aggregation\", \"Reporting\", \"Data Visualization\", \"Self-Service Reporting\", \"Data Integrity\", \"Performance Optimization\", \"Version Control\", \"Documentation\", \"Role-Based Access Control\", \"Snowflake\", \"Tableau\", \"Vector Databases\", \"RAG\"]\nDOMAIN_KEYWORDS = [\"Automotive\", \"Media\", \"Insights\", \"Business Decision-Making\", \"Data Operations\", \"Reporting Assets\"]\n```"
   },
-  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Python - \"over three years of experience in Python coding\"\n- AI - \"experience in AI\"\n- Machine Learning - \"experience in machine learning\"\n- Data Pipelines - \"designing and deploying robust data pipelines\"\n- SQL - \"proficient in SQL\"\n- Tableau - \"creating interactive dashboards and visualizations using Tableau\"\n- Power BI - \"Tableau, Power BI\"\n- Pandas - \"using libraries such as Pandas\"\n- NumPy - \"using libraries such as Pandas, NumPy\"\n- scikit-learn - \"and scikit-learn\"\n- Matplotlib - \"using Tableau, Power BI, and Matplotlib\"\n- GitHub - \"experienced with GitHub for version control\"\n- Docker - \"Docker for containerization\"\n- Snowflake - \"Snowflake for cloud data warehousing\"\n- Visual Studio Code - \"leveraging tools like Visual Studio Code\"\n- Google Analytics - \"Google Analytics for advanced analysis\"\n- Excel - \"Excel for data-driven solutions and reporting\"\n- Seaborn - \"using Python libraries like Matplotlib and Seaborn\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning - \"Designed and implemented Python scripts for data cleaning\"\n- Data Preprocessing - \"data cleaning, preprocessing, and analysis\"\n- Predictive Analytics - \"Developed machine learning models in Python for predictive analytics\"\n- Automation - \"Leveraged AI techniques to automate repetitive tasks\"\n- Data Visualization - \"Built dynamic dashboards and visualizations\"\n- Data Extraction - \"Automated data extraction and structuring\"\n- Data Analysis - \"Analyzed customer support data with Python\"\n- Reporting - \"Designed Python scripts to create dynamic reports and dashboards\"\n- Metrics Tracking - \"Built Python scripts to track key metrics\"\n- Data Integrity - \"ensuring 99% data accuracy and improving data integrity\"\n- Computational Modeling - \"Utilized advanced Python programming for computational modeling\"\n- Workflow Development - \"Developed Python-based workflows to manage and analyze large datasets\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"demonstrating technical expertise and communication skills\"\n- Teamwork - \"promoting teamwork\"\n- Mentoring - \"Mentored students on projects\"\n- Collaboration - \"collaborated with faculty\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Problem-solving - \"solving complex research problems\"\n- Adaptability - \"meeting strict deadlines for strategic decision-making\"\n- Detail-oriented - \"improving data accuracy and reliability\"\n- Results-driven - \"improving productivity\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"completed a Master's in Data Science\"\n- Physics - \"PhD in Physics\"\n- Research - \"conducting innovative research\"\n- Customer Behavior - \"enhancing customer behavior insights\"\n- Operational Efficiency - \"enhance operational efficiency\"\n- Strategic Decision-making - \"meeting strict deadlines for strategic decision-making\"\n\n**STRONGLY IMPLIED:**\n- Data-Driven Decision-Making - \"support data-driven decision-making\"\n- Population Datasets - \"structuring of population datasets\"\n- Customer Support - \"customer support data\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Teamwork\", \"Mentoring\", \"Collaboration\", \"Problem-solving\", \"Adaptability\", \"Detail-oriented\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Python\", \"AI\", \"Machine Learning\", \"Data Pipelines\", \"SQL\", \"Tableau\", \"Power BI\", \"Pandas\", \"NumPy\", \"scikit-learn\", \"Matplotlib\", \"GitHub\", \"Docker\", \"Snowflake\", \"Visual Studio Code\", \"Google Analytics\", \"Excel\", \"Seaborn\", \"Data Cleaning\", \"Data Preprocessing\", \"Predictive Analytics\", \"Automation\", \"Data Visualization\", \"Data Extraction\", \"Data Analysis\", \"Reporting\", \"Metrics Tracking\", \"Data Integrity\", \"Computational Modeling\", \"Workflow Development\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Physics\", \"Research\", \"Customer Behavior\", \"Operational Efficiency\", \"Strategic Decision-making\"]\n```",
-  "jd_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Engineering - \"5+ years of experience in data engineering\"\n- Data Modelling - \"focus on data modelling, aggregation, and business intelligence\"\n- SQL - \"Write advanced SQL queries\"\n- Power BI - \"Build and maintain Power BI dashboards\"\n- Data Warehousing - \"understanding of data warehousing principles\"\n- Dimensional Modelling - \"dimensional modelling\"\n- ETL - \"collaborate with ETL Engineers\"\n- Data Quality - \"protect data quality\"\n- Reporting - \"support teams with data, reporting and insights\"\n- Data Integrity - \"ensuring data integrity and governance standards\"\n- Data Visualization - \"translate complex datasets into compelling visual stories\"\n- Tableau - \"building and maintaining reports and dashboards with Tableau\"\n- Snowflake - \"performance optimization in a modern environment such as Snowflake\"\n- Version Control - \"best practices for BI development including version control\"\n- Data Loading - \"Experience with data loading\"\n- Data Transformation - \"data loading, transformation\"\n- Role-Based Access Controls - \"Implement role-based access controls\"\n- Security Measures - \"security measures to safeguard sensitive data\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Pipelines - \"ensure reliable pipelines feed into BI reporting layers\"\n- Self-Service Reporting - \"develop and manage self-service reporting capabilities\"\n- Performance Optimization - \"performance optimisation\"\n- Data Aggregation - \"focus on data modelling, aggregation\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills to translate business needs\"\n- Detail-Oriented - \"a proactive, detail-oriented mindset\"\n- Proactive - \"a proactive, detail-oriented mindset\"\n- Results-Driven - \"empowering business users while ensuring data integrity\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Collaboration - \"work collaboratively with Technology squads\"\n- Analytical Thinking - \"translate complex datasets into compelling visual stories\"\n- Problem-Solving - \"understand requirements and translate them into BI solutions\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Business Intelligence - \"focus on data modelling, aggregation, and business intelligence\"\n- Automotive - \"Drive is Nine’s brand appealing to the automotive enthusiast\"\n- Insights Delivery - \"recommend new techniques or tools to improve insights delivery\"\n\n**STRONGLY IMPLIED:**\n- Data Governance - \"ensuring data integrity and governance standards\"\n- Reporting Standards - \"high standards of data quality, accuracy, and consistency across reporting assets\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Detail-Oriented\", \"Proactive\", \"Results-Driven\", \"Collaboration\", \"Analytical Thinking\", \"Problem-Solving\"]\nTECHNICAL_SKILLS = [\"Data Engineering\", \"Data Modelling\", \"SQL\", \"Power BI\", \"Data Warehousing\", \"Dimensional Modelling\", \"ETL\", \"Data Quality\", \"Reporting\", \"Data Integrity\", \"Data Visualization\", \"Tableau\", \"Snowflake\", \"Version Control\", \"Data Loading\", \"Data Transformation\", \"Role-Based Access Controls\", \"Security Measures\", \"Data Pipelines\", \"Self-Service Reporting\", \"Performance Optimization\", \"Data Aggregation\"]\nDOMAIN_KEYWORDS = [\"Business Intelligence\", \"Automotive\", \"Insights Delivery\", \"Data Governance\", \"Reporting Standards\"]\n```",
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Python - \"Specialized in Python programming\"\n- Pandas - \"using libraries such as Pandas\"\n- NumPy - \"using libraries such as Pandas, NumPy\"\n- scikit-learn - \"and scikit-learn\"\n- SQL - \"Proficient in SQL\"\n- PostgreSQL - \"complex relational databases like PostgreSQL\"\n- MySQL - \"PostgreSQL and MySQL\"\n- Tableau - \"creating interactive dashboards and visualizations using Tableau\"\n- Power BI - \"Tableau, Power BI\"\n- Matplotlib - \"Power BI, and Matplotlib\"\n- Docker - \"experienced with Docker for containerization\"\n- Snowflake - \"Snowflake for cloud data warehousing\"\n- GitHub - \"Experienced with GitHub for version control\"\n- Visual Studio Code - \"leveraging tools like Visual Studio Code\"\n- Google Analytics - \"Integrated Google Analytics data with Python\"\n- Excel - \"leveraging tools like Excel for data-driven solutions\"\n- Seaborn - \"using Python libraries like Matplotlib and Seaborn\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning - \"Designed and implemented Python scripts for data cleaning\"\n- Data Preprocessing - \"Python for data preprocessing and analysis\"\n- Machine Learning - \"Developed machine learning models in Python\"\n- Data Analysis - \"Analyzed customer support data with Python\"\n- Data Visualization - \"Built dynamic dashboards and visualizations\"\n- Predictive Analytics - \"machine learning models in Python for predictive analytics\"\n- Automation - \"Leveraged AI techniques to automate repetitive tasks\"\n- Reporting - \"Designed Python scripts to create dynamic reports and dashboards\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"demonstrating technical expertise and communication skills\"\n- Teamwork - \"promoting teamwork\"\n- Collaboration - \"collaborated with faculty\"\n- Mentoring - \"mentored students on projects\"\n- Engagement - \"fostered student engagement\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Problem-solving - \"solving complex research problems\"\n- Adaptability - \"improving data accuracy and team collaboration\"\n- Analytical Thinking - \"analyze large datasets\"\n- Detail-oriented - \"ensuring 99% data accuracy\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"completed a Master's in Data Science\"\n- Physics - \"I hold a PhD in Physics\"\n- AI - \"experience in AI\"\n- Machine Learning - \"experience in machine learning\"\n- Data Pipelines - \"designing and deploying robust data pipelines\"\n- Customer Behavior - \"enhancing customer behavior insights\"\n- Predictive Analytics - \"enabling data-driven business decisions\"\n- Research - \"conducting innovative research\"\n\n**STRONGLY IMPLIED:**\n- Data-Driven Decision-Making - \"support data-driven decision-making\"\n- Operational Efficiency - \"enhance operational efficiency\"\n- Strategic Decision-Making - \"meeting strict deadlines for strategic decision-making\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Teamwork\", \"Collaboration\", \"Mentoring\", \"Engagement\", \"Problem-solving\", \"Adaptability\", \"Analytical Thinking\", \"Detail-oriented\"]\nTECHNICAL_SKILLS = [\"Python\", \"Pandas\", \"NumPy\", \"scikit-learn\", \"SQL\", \"PostgreSQL\", \"MySQL\", \"Tableau\", \"Power BI\", \"Matplotlib\", \"Docker\", \"Snowflake\", \"GitHub\", \"Visual Studio Code\", \"Google Analytics\", \"Excel\", \"Seaborn\", \"Data Cleaning\", \"Data Preprocessing\", \"Machine Learning\", \"Data Analysis\", \"Data Visualization\", \"Predictive Analytics\", \"Automation\", \"Reporting\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Physics\", \"AI\", \"Machine Learning\", \"Data Pipelines\", \"Customer Behavior\", \"Predictive Analytics\", \"Research\", \"Data-Driven Decision-Making\", \"Operational Efficiency\", \"Strategic Decision-Making\"]\n```",
+  "jd_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Engineering - \"5+ years of experience in data engineering\"\n- Data Modelling - \"focus on data modelling, aggregation, and business intelligence\"\n- SQL - \"Write advanced SQL queries\"\n- Power BI - \"Build and maintain Power BI dashboards\"\n- Data Warehousing - \"understanding of data warehousing principles\"\n- Dimensional Modelling - \"dimensional modelling\"\n- ETL - \"collaborate with ETL Engineers\"\n- Data Quality - \"protect data quality\"\n- Data Aggregation - \"focus on data modelling, aggregation\"\n- Reporting - \"support reporting and analytics needs\"\n- Data Visualization - \"translate complex datasets into compelling visual stories\"\n- Self-Service Reporting - \"develop and manage self-service reporting capabilities\"\n- Data Integrity - \"ensuring data integrity and governance standards\"\n- Performance Optimization - \"optimise datasets for reporting and visualisation performance\"\n- Version Control - \"best practices for BI development including version control\"\n- Documentation - \"best practices for BI development including documentation\"\n- Role-Based Access Control - \"Implement role-based access controls\"\n- Snowflake - \"performance optimization in a modern environment such as Snowflake\"\n- Tableau - \"building and maintaining reports and dashboards with Tableau\"\n- Vector Databases - \"next-generation architectures such as Vector Databases\"\n- RAG - \"next-generation architectures such as RAG\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Pipelines - \"ensure reliable pipelines feed into BI reporting layers\"\n- Business Intelligence - \"focus on business intelligence\"\n- Data Governance - \"ensuring data integrity and governance standards\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills to translate business needs\"\n- Detail-Oriented - \"A proactive, detail-oriented mindset\"\n- Proactive - \"A proactive, detail-oriented mindset\"\n- Results-Driven - \"focus on data accuracy and integrity\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Collaboration - \"work collaboratively with Technology squads\"\n- Analytical Thinking - \"translate complex datasets into compelling visual stories\"\n- Problem-Solving - \"understand requirements and translate them into BI solutions\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Automotive - \"Drive is Nine’s brand appealing to the automotive enthusiast\"\n- Media - \"Australia's largest media organisation\"\n- Insights - \"support teams with data, reporting and insights\"\n- Business Decision-Making - \"deliver clear, actionable insights for business decision-making\"\n\n**STRONGLY IMPLIED:**\n- Data Operations - \"sits at the heart of our data operations\"\n- Reporting Assets - \"high standards of data quality, accuracy, and consistency across reporting assets\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Detail-Oriented\", \"Proactive\", \"Results-Driven\", \"Collaboration\", \"Analytical Thinking\", \"Problem-Solving\"]\nTECHNICAL_SKILLS = [\"Data Engineering\", \"Data Modelling\", \"SQL\", \"Power BI\", \"Data Warehousing\", \"Dimensional Modelling\", \"ETL\", \"Data Quality\", \"Data Aggregation\", \"Reporting\", \"Data Visualization\", \"Self-Service Reporting\", \"Data Integrity\", \"Performance Optimization\", \"Version Control\", \"Documentation\", \"Role-Based Access Control\", \"Snowflake\", \"Tableau\", \"Vector Databases\", \"RAG\"]\nDOMAIN_KEYWORDS = [\"Automotive\", \"Media\", \"Insights\", \"Business Decision-Making\", \"Data Operations\", \"Reporting Assets\"]\n```",
   "analyze_match_entries": [
     {
-      "timestamp": "2025-09-18T12:19:52.905",
+      "timestamp": "2025-09-18T12:47:21.342",
       "model_used": "gpt-4o-mini",
-      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n---\n\n**MARKET REALITY CHECK:**\n\n- **What they actually need:** The core must-haves for this role include strong SQL skills, experience in building and maintaining Power BI dashboards, and a solid understanding of data modeling and data warehousing principles. While the JD lists 5+ years of experience, hiring managers may be flexible on this, especially if the candidate demonstrates strong technical skills and a proactive mindset.\n  \n- **Flexibility indicators:** The job description suggests a collaborative environment and mentions a commitment to diversity and inclusion, which often indicates a willingness to consider candidates who may not meet every single requirement. The emphasis on \"nice-to-haves\" also suggests that they may be open to candidates with strong foundational skills who can learn quickly.\n\n- **Hard blockers identified:** The primary hard blocker is the requirement for 5+ years of experience in data engineering, which Maheshwor does not meet. However, his strong technical skills and relevant experience in data analysis and machine learning could mitigate this to some extent.\n\n- **Hiring urgency signals:** The job description does not explicitly indicate urgency, but the detailed nature of the role and the need for collaboration with various teams suggest that they may be looking to fill this position relatively quickly.\n\n---\n\n**INTELLIGENT OBSERVATIONS:**\n\n- **Hidden strengths:** Maheshwor's PhD in Physics and Master's in Data Science provide a strong analytical foundation. His experience with Python for data analysis, machine learning, and dashboard creation aligns well with the core responsibilities of the role. His ability to communicate complex data insights through visualizations is also a valuable asset.\n\n- **Smart connections:** His experience with SQL, Tableau, and Power BI is directly relevant to the role. The combination of his academic background and practical experience in data analysis positions him well for the analytical demands of the BI Engineer/Data Analyst role.\n\n- **Growth potential:** Maheshwor's trajectory shows a clear path of continuous learning and skill development, particularly in data science and analysis. His recent roles indicate a strong ability to adapt and apply his skills in practical settings, which is a positive indicator for growth potential.\n\n- **Positioning opportunities:** Emphasizing his hands-on experience with Python and SQL, along with his ability to create actionable insights through dashboards, will be crucial. Highlighting his academic achievements and research experience can also showcase his analytical skills and problem-solving capabilities.\n\n---\n\n**REALISTIC ODDS:** 60% chance of getting an interview if the CV is tailored well to emphasize relevant skills and experiences.\n\n---\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n\n1. **Priority 1:** Highlight specific projects where Maheshwor built or maintained dashboards using Power BI and SQL, emphasizing the impact of these projects on business decision-making.\n  \n2. **Priority 2:** Emphasize his experience in data modeling and any relevant coursework or projects from his Master's in Data Science that demonstrate his understanding of data warehousing principles.\n\n3. **Priority 3:** Address the experience gap by framing his three years of experience as robust enough to handle the responsibilities of the role, focusing on his adaptability and quick learning ability.\n\n---\n\n**HONEST BOTTOM LINE:** Maheshwor has a strong technical foundation and relevant experience that could make him a competitive candidate for this role, despite not meeting the exact years of experience requirement. With strategic tailoring of his CV to emphasize his relevant skills and experiences, he stands a good chance of being considered for the position. It’s worth the effort to pursue this opportunity, especially given the potential for flexibility in hiring."
+      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** The core must-haves include strong SQL skills, experience with data modeling, and the ability to design and build dashboards in Power BI. While the JD lists 5+ years of experience, many companies are willing to consider candidates with less experience if they demonstrate strong technical skills and adaptability.\n- **Flexibility indicators:** The job description indicates that they are looking for a hands-on role and mentions collaboration with various teams. This suggests they may value practical skills and team fit over strict adherence to years of experience. The mention of \"nice-to-haves\" also indicates some flexibility.\n- **Hard blockers identified:** The requirement for 5+ years of experience in data engineering could be a hard blocker, but Maheshwor has relevant experience that may compensate for this. The lack of direct experience in data warehousing principles and dimensional modeling could also be a concern.\n- **Hiring urgency signals:** The urgency is not explicitly stated, but the detailed description and the emphasis on collaboration suggest they may be looking to fill this role soon.\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** Maheshwor has a strong foundation in Python and data analysis, which is crucial for the role. His experience in building dashboards and visualizations using Python and tools like Tableau aligns well with the job requirements.\n- **Smart connections:** His experience in automating data processes and improving efficiency shows a proactive approach that is valuable for the role. His academic background in data science and physics also suggests strong analytical skills.\n- **Growth potential:** Maheshwor's educational background and recent work experience indicate a solid trajectory toward data analytics and engineering. His ability to learn and adapt is evident from his transition from research to practical applications in data analysis.\n- **Positioning opportunities:** Highlighting his experience with Python for data manipulation and his dashboard creation skills will be crucial. Emphasizing his ability to work collaboratively and his proactive approach to problem-solving will also strengthen his application.\n\n**REALISTIC ODDS:** 60-70% chance of getting an interview if the CV is tailored well to emphasize relevant skills and experiences.\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Emphasize SQL proficiency and any relevant experience with data modeling, even if it’s from academic projects or previous roles.\n2. **Priority 2:** Highlight experience with Power BI and any relevant dashboarding work, as this is a key requirement for the role.\n3. **Priority 3:** Address the lack of direct data engineering experience by showcasing transferable skills and a strong willingness to learn and adapt.\n\n**HONEST BOTTOM LINE:** Maheshwor has a solid foundation for this role, and while he may not meet the experience requirement, his skills and adaptability make him a strong candidate. Tailoring his CV to highlight relevant experiences and skills will significantly improve his chances of securing an interview. It’s worth the effort to pursue this opportunity, especially given the potential for flexibility in the hiring process."
     }
   ],
   "preextracted_comparison_entries": [
     {
-      "timestamp": "2025-09-18T12:20:12.969",
+      "timestamp": "2025-09-18T12:47:41.726",
       "model_used": "gpt-4o-mini",
-      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 34\nMatched: 24\nMissing: 10\nMatch Rate: 71%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            30         22         16          5           76\nSoft Skills                   8          7          5          3           62\nDomain Keywords              6          5          3          2           60\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (16 items):\n    1. JD Required: 'Data Aggregation'\n       → Found in CV: 'Data Analysis'\n       💡 synonym match\n    2. JD Required: 'Data Engineering'\n       → Found in CV: 'Data Science'\n       💡 domain context - related fields\n    3. JD Required: 'Data Integrity'\n       → Found in CV: 'Data Integrity'\n       💡 exact match\n    4. JD Required: 'Data Pipelines'\n       → Found in CV: 'Data Pipelines'\n       💡 exact match\n    5. JD Required: 'Data Quality'\n       → Found in CV: 'Data Integrity'\n       💡 hierarchical - data quality relates to data integrity\n    6. JD Required: 'Data Transformation'\n       → Found in CV: 'Data Cleaning'\n       💡 partial match - both involve preparing data\n    7. JD Required: 'Data Warehousing'\n       → Found in CV: 'Data Science'\n       💡 domain context - related fields\n    8. JD Required: 'Etl'\n       → Found in CV: 'Data Pipelines'\n       💡 hierarchical - ETL is part of data pipelines\n    9. JD Required: 'Performance Optimization'\n       → Found in CV: 'Automation'\n       💡 partial match - both involve improving processes\n    10. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 exact match\n    11. JD Required: 'Reporting'\n       → Found in CV: 'Reporting'\n       💡 exact match\n    12. JD Required: 'Self-Service Reporting'\n       → Found in CV: 'Data Visualization'\n       💡 domain context - both involve reporting and visualization\n    13. JD Required: 'Snowflake'\n       → Found in CV: 'Snowflake'\n       💡 exact match\n    14. JD Required: 'SQL'\n       → Found in CV: 'Sql'\n       💡 exact match\n    15. JD Required: 'Tableau'\n       → Found in CV: 'Tableau'\n       💡 exact match\n    16. JD Required: 'Version Control'\n       → Found in CV: 'GitHub'\n       💡 synonym match - GitHub is a version control system\n  ❌ MISSING FROM CV (5 items):\n    1. JD Requires: 'Data Loading'\n       💡 no direct equivalent found in CV\n    2. JD Requires: 'Data Modelling'\n       💡 no direct equivalent found in CV\n    3. JD Requires: 'Dimensional Modelling'\n       💡 no direct equivalent found in CV\n    4. JD Requires: 'Role-Based Access Controls'\n       💡 no direct equivalent found in CV\n    5. JD Requires: 'Security Measures'\n       💡 no direct equivalent found in CV\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (5 items):\n    1. JD Required: 'Collaboration'\n       → Found in CV: 'Collaboration'\n       💡 exact match\n    2. JD Required: 'Communication'\n       → Found in CV: 'Communication'\n       💡 exact match\n    3. JD Required: 'Detail-Oriented'\n       → Found in CV: 'Detail-Oriented'\n       💡 exact match\n    4. JD Required: 'Problem-Solving'\n       → Found in CV: 'Problem-Solving'\n       💡 exact match\n    5. JD Required: 'Results-Driven'\n       → Found in CV: 'Results-Driven'\n       💡 exact match\n  ❌ MISSING FROM CV (3 items):\n    1. JD Requires: 'Analytical Thinking'\n       💡 no direct equivalent found in CV\n    2. JD Requires: 'Proactive'\n       💡 no direct equivalent found in CV\n    3. JD Requires: 'Teamwork'\n       💡 no direct equivalent found in CV\n\n🔹 DOMAIN KEYWORDS\n  ✅ MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Data Governance'\n       → Found in CV: 'Data Integrity'\n       💡 domain context - data governance relates to data integrity\n    2. JD Required: 'Insights Delivery'\n       → Found in CV: 'Data Visualization'\n       💡 domain context - insights delivery involves visualization\n    3. JD Required: 'Reporting Standards'\n       → Found in CV: 'Reporting'\n       💡 domain context - both involve reporting\n  ❌ MISSING FROM CV (2 items):\n    1. JD Requires: 'Automotive'\n       💡 no direct equivalent found in CV\n    2. JD Requires: 'Business Intelligence'\n       💡 no direct equivalent found in CV\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Python, AI, Machine Learning, Data Pipelines, SQL, Tableau, Power BI, Pandas, NumPy, scikit-learn...\n- Soft: Communication, Teamwork, Mentoring, Collaboration, Problem-solving, Adaptability, Detail-oriented, Results-driven\n- Domain: Data Science, Physics, Research, Customer Behavior, Operational Efficiency, Strategic Decision-making\n\nJD\n- Technical: Data Engineering, Data Modelling, SQL, Power BI, Data Warehousing, Dimensional Modelling, ETL, Data Quality, Reporting, Data Integrity...\n- Soft: Communication, Detail-Oriented, Proactive, Results-Driven, Collaboration, Analytical Thinking, Problem-Solving\n- Domain: Business Intelligence, Automotive, Insights Delivery, Data Governance, Reporting Standards\n"
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 34\nMatched: 12\nMissing: 22\nMatch Rate: 35%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            25         21          7         14           33\nSoft Skills                   9          7          5          2           71\nDomain Keywords             11          6          0          6            0\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (7 items):\n    1. JD Required: 'Data Aggregation'\n       → Found in CV: 'Data Analysis'\n       💡 synonym match - both involve collecting and summarizing data\n    2. JD Required: 'Data Visualization'\n       → Found in CV: 'Data Visualization'\n       💡 exact match - identical skills\n    3. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 exact match - identical skills\n    4. JD Required: 'Reporting'\n       → Found in CV: 'Reporting'\n       💡 exact match - identical skills\n    5. JD Required: 'Snowflake'\n       → Found in CV: 'Snowflake'\n       💡 exact match - identical skills\n    6. JD Required: 'SQL'\n       → Found in CV: 'Sql'\n       💡 exact match - identical skills\n    7. JD Required: 'Tableau'\n       → Found in CV: 'Tableau'\n       💡 exact match - identical skills\n  ❌ MISSING FROM CV (14 items):\n    1. JD Requires: 'Data Engineering'\n       💡 no direct equivalent found in CV\n    2. JD Requires: 'Data Integrity'\n       💡 no direct equivalent found in CV\n    3. JD Requires: 'Data Modelling'\n       💡 no direct equivalent found in CV\n    4. JD Requires: 'Data Quality'\n       💡 no direct equivalent found in CV\n    5. JD Requires: 'Data Warehousing'\n       💡 no direct equivalent found in CV\n    6. JD Requires: 'Dimensional Modelling'\n       💡 no direct equivalent found in CV\n    7. JD Requires: 'Documentation'\n       💡 no direct equivalent found in CV\n    8. JD Requires: 'Etl'\n       💡 no direct equivalent found in CV\n    9. JD Requires: 'Performance Optimization'\n       💡 no direct equivalent found in CV\n    10. JD Requires: 'Rag'\n       💡 no direct equivalent found in CV\n    11. JD Requires: 'Role-Based Access Control'\n       💡 no direct equivalent found in CV\n    12. JD Requires: 'Self-Service Reporting'\n       💡 no direct equivalent found in CV\n    13. JD Requires: 'Vector Databases'\n       💡 no direct equivalent found in CV\n    14. JD Requires: 'Version Control'\n       💡 no direct equivalent found in CV\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (5 items):\n    1. JD Required: 'Analytical Thinking'\n       → Found in CV: 'Analytical Thinking'\n       💡 exact match - identical skills\n    2. JD Required: 'Collaboration'\n       → Found in CV: 'Collaboration'\n       💡 exact match - identical skills\n    3. JD Required: 'Communication'\n       → Found in CV: 'Communication'\n       💡 exact match - identical skills\n    4. JD Required: 'Detail-Oriented'\n       → Found in CV: 'Detail-Oriented'\n       💡 exact match - identical skills\n    5. JD Required: 'Problem-Solving'\n       → Found in CV: 'Problem-Solving'\n       💡 exact match - identical skills\n  ❌ MISSING FROM CV (2 items):\n    1. JD Requires: 'Proactive'\n       💡 no direct equivalent found in CV\n    2. JD Requires: 'Results-Driven'\n       💡 no direct equivalent found in CV\n\n🔹 DOMAIN KEYWORDS\n  ❌ MISSING FROM CV (6 items):\n    1. JD Requires: 'Automotive'\n       💡 no direct equivalent found in CV\n    2. JD Requires: 'Business Decision-Making'\n       💡 no direct equivalent found in CV\n    3. JD Requires: 'Data Operations'\n       💡 no direct equivalent found in CV\n    4. JD Requires: 'Insights'\n       💡 no direct equivalent found in CV\n    5. JD Requires: 'Media'\n       💡 no direct equivalent found in CV\n    6. JD Requires: 'Reporting Assets'\n       💡 no direct equivalent found in CV\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Python, Pandas, NumPy, scikit-learn, SQL, PostgreSQL, MySQL, Tableau, Power BI, Matplotlib...\n- Soft: Communication, Teamwork, Collaboration, Mentoring, Engagement, Problem-solving, Adaptability, Analytical Thinking, Detail-oriented\n- Domain: Data Science, Physics, AI, Machine Learning, Data Pipelines, Customer Behavior, Predictive Analytics, Research, Data-Driven Decision-Making, Operational Efficiency...\n\nJD\n- Technical: Data Engineering, Data Modelling, SQL, Power BI, Data Warehousing, Dimensional Modelling, ETL, Data Quality, Data Aggregation, Reporting...\n- Soft: Communication, Detail-Oriented, Proactive, Results-Driven, Collaboration, Analytical Thinking, Problem-Solving\n- Domain: Automotive, Media, Insights, Business Decision-Making, Data Operations, Reporting Assets\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-09-18T12:48:26.261",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "SQL",
+              "cv_evidence": "Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.",
+              "jd_application": "Write advanced SQL queries and optimise datasets for reporting and visualisation performance.",
+              "relevance_score": 90,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Complex relational databases",
+                "Data modeling",
+                "Practical application in multiple roles"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Power BI",
+              "cv_evidence": "Skilled in creating interactive dashboards and visualizations using Power BI.",
+              "jd_application": "Build and maintain Power BI dashboards and reports to deliver clear, actionable insights.",
+              "relevance_score": 85,
+              "skill_level": "Intermediate",
+              "depth_indicators": [
+                "Dashboard creation",
+                "Visualization techniques",
+                "Experience in data storytelling"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Communication",
+              "cv_evidence": "Presented research findings at international conferences, demonstrating technical expertise and communication skills.",
+              "jd_application": "Excellent communication skills to translate business needs into technical data solutions.",
+              "relevance_score": 88,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Public speaking",
+                "Mentoring",
+                "Collaborative projects"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Tableau",
+              "cv_evidence": "Experienced in building dashboards using Tableau.",
+              "jd_application": "Translate complex datasets into compelling visual stories.",
+              "relevance_score": 80,
+              "skill_level": "Intermediate",
+              "depth_indicators": [
+                "Dashboard creation",
+                "Data visualization",
+                "Experience in analytics"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Snowflake",
+              "cv_evidence": "Familiarity with Snowflake for cloud data warehousing.",
+              "jd_application": "Collaborate with data engineers and technology squads to ensure reliable pipelines.",
+              "relevance_score": 75,
+              "skill_level": "Intermediate",
+              "depth_indicators": [
+                "Cloud data warehousing",
+                "Basic understanding of ETL processes"
+              ],
+              "synergy_bonus": 5
+            }
+          ],
+          "overall_skills_score": 87,
+          "strength_areas": [
+            "Data Analysis",
+            "Programming"
+          ],
+          "improvement_areas": [
+            "Database Administration",
+            "Cloud Platforms"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": 4,
+            "cv_role_level": "Mid-Senior",
+            "cv_progression": [
+              "Data Analyst",
+              "Software Engineer and Analyst",
+              "Research Assistant",
+              "Lecturer"
+            ],
+            "jd_required_years": "5+ years",
+            "jd_role_level": "Senior",
+            "alignment_score": 75,
+            "experience_gaps": [
+              "Lacks 1+ years of experience compared to JD requirements",
+              "No direct experience in data engineering or BI-specific roles"
+            ],
+            "experience_strengths": [
+              "Strong technical skills in Python and SQL",
+              "Experience in data visualization and dashboard creation",
+              "Research and analytical skills"
+            ],
+            "quantified_achievements": [
+              "Improved data pipeline efficiency by 30%",
+              "Enhanced customer behavior insights through advanced analysis"
+            ]
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Science and Analytics",
+            "cv_domain_expertise": [
+              "Data Analysis",
+              "Business Intelligence",
+              "Data Visualization"
+            ],
+            "jd_target_industry": "Automotive Media and Business Intelligence",
+            "jd_domain_requirements": [
+              "Data Modeling",
+              "Reporting",
+              "Data Quality Assurance"
+            ],
+            "industry_alignment_score": 70,
+            "domain_overlap_percentage": 65,
+            "data_familiarity_score": 75,
+            "stakeholder_fit_score": 60,
+            "business_cycle_alignment": 50,
+            "transferable_strengths": [
+              "Python Programming",
+              "SQL Proficiency",
+              "Dashboard Creation with Power BI"
+            ],
+            "industry_gaps": [
+              "Automotive Industry Experience",
+              "Specific Business Intelligence Practices",
+              "Understanding of Media Analytics"
+            ],
+            "adaptation_timeline": "3-6 months"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_experience_years": 6,
+            "cv_responsibility_scope": "Senior Individual Contributor",
+            "cv_leadership_indicators": 7,
+            "cv_decision_authority": "Project Level",
+            "cv_stakeholder_level": "Department",
+            "jd_required_seniority": "Senior",
+            "jd_leadership_requirements": "Team Leadership Expected",
+            "jd_decision_authority_needed": "Program Level",
+            "jd_stakeholder_level": "Executive",
+            "seniority_score": 75,
+            "experience_match_percentage": 85,
+            "responsibility_fit_percentage": 70,
+            "leadership_readiness_score": 65,
+            "growth_trajectory_score": 80,
+            "seniority_strengths": [
+              "Strong Technical Leadership",
+              "Cross-functional Collaboration"
+            ],
+            "seniority_gaps": [
+              "Direct Report Management",
+              "Executive Stakeholder Management"
+            ],
+            "readiness_assessment": "Stretch Role with Development Support"
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Advanced",
+            "cv_primary_domain": "Machine Learning & Data Science",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "ML Algorithms",
+              "Data Visualization"
+            ],
+            "cv_problem_complexity": 8,
+            "cv_innovation_indicators": [
+              "Published Research",
+              "Framework Development"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "Tableau",
+              "Excel"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 90,
+            "core_skills_match_percentage": 85,
+            "technical_stack_fit_percentage": 80,
+            "complexity_readiness_score": 95,
+            "learning_agility_score": 85,
+            "technical_strengths": [
+              "Advanced Analytics",
+              "ML Implementation",
+              "Data Architecture"
+            ],
+            "technical_gaps": [
+              "Tableau Proficiency",
+              "Business Domain Context"
+            ],
+            "overqualification_risk": "Moderate"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 10,
+            "total_preferred_keywords": 3,
+            "matched_required_count": 3,
+            "matched_preferred_count": 2,
+            "missing_required": 7,
+            "missing_preferred": 1
+          },
+          "bonus_breakdown": {
+            "required_bonus": 1.5,
+            "required_penalty": -4.0,
+            "preferred_bonus": 0.4,
+            "preferred_penalty": -0.15,
+            "total_bonus": -2.25
+          },
+          "coverage_metrics": {
+            "required_coverage": 30.0,
+            "preferred_coverage": 66.67
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 87.0,
+        "experience_alignment": 75.0,
+        "industry_fit": 70.0,
+        "domain_overlap_percentage": 65.0,
+        "data_familiarity_score": 75.0,
+        "stakeholder_fit_score": 60.0,
+        "business_cycle_alignment": 50.0,
+        "role_seniority": 75.0,
+        "experience_match_percentage": 85.0,
+        "responsibility_fit_percentage": 70.0,
+        "leadership_readiness_score": 65.0,
+        "growth_trajectory_score": 80.0,
+        "technical_depth": 90.0,
+        "core_skills_match_percentage": 85.0,
+        "technical_stack_fit_percentage": 80.0,
+        "complexity_readiness_score": 95.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": -2.25,
+        "total_bonus": -2.25,
+        "required_bonus": 1.5,
+        "required_penalty": -4.0,
+        "preferred_bonus": 0.4,
+        "preferred_penalty": -0.15,
+        "required_coverage": 30.0,
+        "preferred_coverage": 66.67
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-09-18T12:48:26.275",
+      "final_ats_score": 61.4875,
+      "category_status": "⚠️ Moderate fit",
+      "recommendation": "Consider if other factors are strong",
+      "breakdown": {
+        "category1": {
+          "score": 17.25,
+          "technical_skills_match_rate": 33.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 71.0,
+          "missing_counts": {
+            "technical": 14,
+            "domain": 6,
+            "soft": 2
+          }
+        },
+        "category2": {
+          "score": 46.4875,
+          "core_competency_avg": 82.5,
+          "experience_seniority_avg": 74.0,
+          "potential_ability_avg": 80.0,
+          "company_fit_avg": 61.25
+        },
+        "ats1_score": 63.7375,
+        "bonus_points": -2.25
+      }
     }
   ]
 }

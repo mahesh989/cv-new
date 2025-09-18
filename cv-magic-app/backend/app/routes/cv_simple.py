@@ -361,6 +361,49 @@ async def read_tailored_cv(company_name: str):
         )
 
 
+@router.get("/available-companies")
+async def get_available_companies():
+    """
+    Get list of available companies with tailored CVs
+    
+    Returns companies that have tailored CV files available for preview.
+    """
+    try:
+        logger.info("📋 Fetching available companies")
+        
+        # Path to cv-analysis folder
+        cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        companies = []
+        
+        if cv_analysis_path.exists():
+            for company_dir in cv_analysis_path.iterdir():
+                if company_dir.is_dir() and company_dir.name != "__pycache__":
+                    # Check if it has tailored CV files
+                    tailored_files = list(company_dir.glob("tailored_cv_*.txt"))
+                    if tailored_files:
+                        companies.append({
+                            "company": company_dir.name,
+                            "display_name": company_dir.name.replace('_', ' '),
+                            "has_tailored_cv": True,
+                            "last_updated": max(tailored_files, key=lambda p: p.stat().st_mtime).stat().st_mtime
+                        })
+        
+        logger.info(f"✅ Found {len(companies)} companies with tailored CVs")
+        
+        return JSONResponse(content={
+            "success": True,
+            "companies": companies,
+            "total_count": len(companies)
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to get available companies: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve companies: {str(e)}"
+        )
+
+
 @router.delete("/{filename}")
 async def delete_cv(filename: str):
     """Delete a CV file"""

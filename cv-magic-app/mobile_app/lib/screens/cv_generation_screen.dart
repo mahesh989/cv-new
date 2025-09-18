@@ -22,6 +22,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         children: [
           _buildHeaderCard(),
           const SizedBox(height: 20),
+          _buildCompanySelectionCard(),
+          const SizedBox(height: 20),
           _buildCVGenerationCard(),
         ],
       ),
@@ -78,7 +80,54 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
   String? tailoredCVContent;
   bool _isLoadingCV = false;
-  String? selectedCompany = 'Australia_for_UNHCR'; // TODO: Make this dynamic
+  String? selectedCompany;
+
+  // Available companies (dynamic list)
+  List<Map<String, dynamic>> availableCompanies = [];
+  bool _isLoadingCompanies = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvailableCompanies();
+  }
+
+  Future<void> _loadAvailableCompanies() async {
+    setState(() {
+      _isLoadingCompanies = true;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:8000/api/cv/available-companies'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> companiesList = data['companies'] ?? [];
+
+        setState(() {
+          availableCompanies = companiesList
+              .map((company) => company as Map<String, dynamic>)
+              .toList();
+
+          // Auto-select first company if none selected
+          if (availableCompanies.isNotEmpty && selectedCompany == null) {
+            selectedCompany = availableCompanies.first['company'];
+            _loadTailoredCV(); // Load CV for the first company
+          }
+        });
+      } else {
+        debugPrint('Failed to load companies: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error loading companies: $e');
+    } finally {
+      setState(() {
+        _isLoadingCompanies = false;
+      });
+    }
+  }
 
   Future<void> _loadTailoredCV() async {
     setState(() {
@@ -270,6 +319,91 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     );
   }
 
+  Widget _buildCompanySelectionCard() {
+    return AppTheme.createCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select Company',
+            style: AppTheme.headingMedium.copyWith(
+              color: AppTheme.primaryTeal,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (_isLoadingCompanies)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (availableCompanies.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber,
+                    color: Colors.orange[600],
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'No companies with tailored CVs found. Please run the analysis pipeline first.',
+                      style: AppTheme.bodySmall.copyWith(
+                        color: Colors.orange[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            DropdownButtonFormField<String>(
+              value: selectedCompany,
+              decoration: InputDecoration(
+                labelText: 'Choose Company',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              items: availableCompanies
+                  .map((company) => DropdownMenuItem<String>(
+                        value: company['company'] as String,
+                        child: Text(
+                          company['display_name'] ?? company['company'],
+                          style: AppTheme.bodyMedium,
+                        ),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedCompany = value;
+                  tailoredCVContent = null; // Clear previous content
+                });
+                if (value != null) {
+                  _loadTailoredCV(); // Load CV for selected company
+                }
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCVGenerationCard() {
     return AppTheme.createCard(
       child: Column(
@@ -329,7 +463,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isGenerating
+              onPressed: (_isGenerating || selectedCompany == null)
                   ? null
                   : () async {
                       await _loadTailoredCV();
@@ -375,7 +509,9 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Generate Tailored CV',
+                          selectedCompany == null
+                              ? 'Select Company First'
+                              : 'Generate Tailored CV',
                           style: AppTheme.bodyMedium.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,

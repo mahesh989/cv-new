@@ -1,0 +1,99 @@
+{
+  "generated": "2025-09-18T14:00:17.334",
+  "cv_filename": "M_tiwari_CV_Capgemini.docx",
+  "jd_url": "preliminary_analysis",
+  "user_id": "0833147f-41c8-47da-bb86-d9f2409a7f90",
+  "company": "Australia_for_UNHCR",
+  "model_used": "gpt-4o-mini",
+  "cv_skills": {
+    "technical_skills": [
+      "SQL",
+      "Tableau",
+      "Python",
+      "Power BI",
+      "Excel",
+      "Data Analysis",
+      "Statistical Analysis",
+      "Logistic Regression",
+      "Random Forests",
+      "Deep Learning",
+      "Data Visualization",
+      "Ad-hoc Analysis",
+      "Data Discrepancies",
+      "Undersampling Techniques",
+      "Data-driven Visualisations"
+    ],
+    "soft_skills": [
+      "Communication",
+      "Time Management",
+      "Analytical Thinking",
+      "Problem-solving",
+      "Detail-oriented"
+    ],
+    "domain_keywords": [
+      "Data Science",
+      "Analytics",
+      "Customer Insights",
+      "Industrial Inspection",
+      "Real-Time Object Detection",
+      "Machine Learning",
+      "Data-driven Projects"
+    ],
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- SQL - \"specializing in SQL\"\n- Tableau - \"specializing in Tableau\"\n- Python - \"specializing in Python\"\n- Power BI - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n- Excel - \"Proficient in Python and Excel for data analysis and automation\"\n- Data Analysis - \"Ability to uncover insights through analysis of large and diverse datasets\"\n- Statistical Analysis - \"Identified patterns and insights of user data through statistical analysis\"\n- Logistic Regression - \"Implemented logistic regression\"\n- Random Forests - \"Implemented random forests\"\n- Deep Learning - \"Implemented deep learning models\"\n- Data Visualization - \"creating interactive dashboards using Power BI and Excel\"\n- Ad-hoc Analysis - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Data Discrepancies - \"identifying and addressing data discrepancies\"\n- Undersampling Techniques - \"Addressed imbalanced datasets using undersampling techniques\"\n- Data-driven Visualisations - \"Presented findings through clear, data-driven visualisations\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Integrity - \"ensuring 99% accuracy and integrity\"\n- Dashboard Creation - \"Developed Power BI dashboards\"\n- Reporting - \"reducing reporting time by 30%\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent interpersonal and communication skills to work effectively with stakeholders\"\n- Time Management - \"Strong ability to manage and prioritise multiple tasks in dynamic environments\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Analytical Thinking - \"Adept at transforming complex datasets into actionable insights\"\n- Problem-solving - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Detail-oriented - \"ensuring 99% accuracy and integrity\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Dynamic Data Science Professional\"\n- Analytics - \"hands-on experience in analytics\"\n- Customer Insights - \"identify top 20 queries, enhancing response strategies\"\n- Industrial Inspection - \"Contributed to industrial inspection innovations\"\n- Real-Time Object Detection - \"improving real-time object detection models\"\n\n**STRONGLY IMPLIED:**\n- Machine Learning - \"MACHINE LEARNING AND ARTIFICIAL INTELLIGENCE\"\n- Data-driven Projects - \"contributing impactful solutions to data-driven projects\"\n\n**CRITICAL OUTPUT REQUIREMENT:**\n```python\nSOFT_SKILLS = [\"Communication\", \"Time Management\", \"Analytical Thinking\", \"Problem-solving\", \"Detail-oriented\"]\nTECHNICAL_SKILLS = [\"SQL\", \"Tableau\", \"Python\", \"Power BI\", \"Excel\", \"Data Analysis\", \"Statistical Analysis\", \"Logistic Regression\", \"Random Forests\", \"Deep Learning\", \"Data Visualization\", \"Ad-hoc Analysis\", \"Data Discrepancies\", \"Undersampling Techniques\", \"Data-driven Visualisations\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Analytics\", \"Customer Insights\", \"Industrial Inspection\", \"Real-Time Object Detection\", \"Machine Learning\", \"Data-driven Projects\"]\n```"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Data Mining",
+      "Data Analysis",
+      "Data Reporting",
+      "Power BI",
+      "SQL",
+      "Excel",
+      "VBA",
+      "Business Intelligence",
+      "Tableau",
+      "Data Warehouse",
+      "Data Modelling",
+      "Querying",
+      "Data Extraction"
+    ],
+    "soft_skills": [
+      "Collaborative",
+      "Inclusive",
+      "Motivated",
+      "Organised",
+      "Detail-oriented",
+      "Analytical",
+      "Problem-solving",
+      "Communication",
+      "Customer service",
+      "Stakeholder management",
+      "Project management",
+      "Results-driven",
+      "Adaptability"
+    ],
+    "domain_keywords": [
+      "International Aid",
+      "Fundraising",
+      "Not For Profit",
+      "Marketing Campaigns",
+      "Donor-Centricity",
+      "Segmentation Strategies",
+      "Evidence-Based Decision Making",
+      "Humanitarian Emergencies",
+      "Clean Data",
+      "Communication Regulations"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n- Collaborative\n- Inclusive\n- Motivated\n- Organised\n- Detail-oriented\n- Analytical\n- Problem-solving\n- Communication\n- Customer service\n- Stakeholder management\n- Project management\n- Results-driven\n- Adaptability\n\n## TECHNICAL SKILLS:\n- Data Mining\n- Data Analysis\n- Data Reporting\n- Power BI\n- SQL\n- Excel\n- VBA\n- Business Intelligence\n- Tableau\n- Data Warehouse\n- Data Modelling\n- Querying\n- Data Extraction\n\n## DOMAIN KEYWORDS:\n- International Aid\n- Fundraising\n- Not For Profit\n- Marketing Campaigns\n- Donor-Centricity\n- Segmentation Strategies\n- Evidence-Based Decision Making\n- Humanitarian Emergencies\n- Clean Data\n- Communication Regulations\n\n```python\nSOFT_SKILLS = [\"Collaborative\", \"Inclusive\", \"Motivated\", \"Organised\", \"Detail-oriented\", \"Analytical\", \"Problem-solving\", \"Communication\", \"Customer service\", \"Stakeholder management\", \"Project management\", \"Results-driven\", \"Adaptability\"]\nTECHNICAL_SKILLS = [\"Data Mining\", \"Data Analysis\", \"Data Reporting\", \"Power BI\", \"SQL\", \"Excel\", \"VBA\", \"Business Intelligence\", \"Tableau\", \"Data Warehouse\", \"Data Modelling\", \"Querying\", \"Data Extraction\"]\nDOMAIN_KEYWORDS = [\"International Aid\", \"Fundraising\", \"Not For Profit\", \"Marketing Campaigns\", \"Donor-Centricity\", \"Segmentation Strategies\", \"Evidence-Based Decision Making\", \"Humanitarian Emergencies\", \"Clean Data\", \"Communication Regulations\"]\n```"
+  },
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- SQL - \"specializing in SQL\"\n- Tableau - \"specializing in Tableau\"\n- Python - \"specializing in Python\"\n- Power BI - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n- Excel - \"Proficient in Python and Excel for data analysis and automation\"\n- Data Analysis - \"Ability to uncover insights through analysis of large and diverse datasets\"\n- Statistical Analysis - \"Identified patterns and insights of user data through statistical analysis\"\n- Logistic Regression - \"Implemented logistic regression\"\n- Random Forests - \"Implemented random forests\"\n- Deep Learning - \"Implemented deep learning models\"\n- Data Visualization - \"creating interactive dashboards using Power BI and Excel\"\n- Ad-hoc Analysis - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Data Discrepancies - \"identifying and addressing data discrepancies\"\n- Undersampling Techniques - \"Addressed imbalanced datasets using undersampling techniques\"\n- Data-driven Visualisations - \"Presented findings through clear, data-driven visualisations\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Integrity - \"ensuring 99% accuracy and integrity\"\n- Dashboard Creation - \"Developed Power BI dashboards\"\n- Reporting - \"reducing reporting time by 30%\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent interpersonal and communication skills to work effectively with stakeholders\"\n- Time Management - \"Strong ability to manage and prioritise multiple tasks in dynamic environments\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Analytical Thinking - \"Adept at transforming complex datasets into actionable insights\"\n- Problem-solving - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Detail-oriented - \"ensuring 99% accuracy and integrity\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Dynamic Data Science Professional\"\n- Analytics - \"hands-on experience in analytics\"\n- Customer Insights - \"identify top 20 queries, enhancing response strategies\"\n- Industrial Inspection - \"Contributed to industrial inspection innovations\"\n- Real-Time Object Detection - \"improving real-time object detection models\"\n\n**STRONGLY IMPLIED:**\n- Machine Learning - \"MACHINE LEARNING AND ARTIFICIAL INTELLIGENCE\"\n- Data-driven Projects - \"contributing impactful solutions to data-driven projects\"\n\n**CRITICAL OUTPUT REQUIREMENT:**\n```python\nSOFT_SKILLS = [\"Communication\", \"Time Management\", \"Analytical Thinking\", \"Problem-solving\", \"Detail-oriented\"]\nTECHNICAL_SKILLS = [\"SQL\", \"Tableau\", \"Python\", \"Power BI\", \"Excel\", \"Data Analysis\", \"Statistical Analysis\", \"Logistic Regression\", \"Random Forests\", \"Deep Learning\", \"Data Visualization\", \"Ad-hoc Analysis\", \"Data Discrepancies\", \"Undersampling Techniques\", \"Data-driven Visualisations\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Analytics\", \"Customer Insights\", \"Industrial Inspection\", \"Real-Time Object Detection\", \"Machine Learning\", \"Data-driven Projects\"]\n```",
+  "jd_comprehensive_analysis": "## SOFT SKILLS:\n- Collaborative\n- Inclusive\n- Motivated\n- Organised\n- Detail-oriented\n- Analytical\n- Problem-solving\n- Communication\n- Customer service\n- Stakeholder management\n- Project management\n- Results-driven\n- Adaptability\n\n## TECHNICAL SKILLS:\n- Data Mining\n- Data Analysis\n- Data Reporting\n- Power BI\n- SQL\n- Excel\n- VBA\n- Business Intelligence\n- Tableau\n- Data Warehouse\n- Data Modelling\n- Querying\n- Data Extraction\n\n## DOMAIN KEYWORDS:\n- International Aid\n- Fundraising\n- Not For Profit\n- Marketing Campaigns\n- Donor-Centricity\n- Segmentation Strategies\n- Evidence-Based Decision Making\n- Humanitarian Emergencies\n- Clean Data\n- Communication Regulations\n\n```python\nSOFT_SKILLS = [\"Collaborative\", \"Inclusive\", \"Motivated\", \"Organised\", \"Detail-oriented\", \"Analytical\", \"Problem-solving\", \"Communication\", \"Customer service\", \"Stakeholder management\", \"Project management\", \"Results-driven\", \"Adaptability\"]\nTECHNICAL_SKILLS = [\"Data Mining\", \"Data Analysis\", \"Data Reporting\", \"Power BI\", \"SQL\", \"Excel\", \"VBA\", \"Business Intelligence\", \"Tableau\", \"Data Warehouse\", \"Data Modelling\", \"Querying\", \"Data Extraction\"]\nDOMAIN_KEYWORDS = [\"International Aid\", \"Fundraising\", \"Not For Profit\", \"Marketing Campaigns\", \"Donor-Centricity\", \"Segmentation Strategies\", \"Evidence-Based Decision Making\", \"Humanitarian Emergencies\", \"Clean Data\", \"Communication Regulations\"]\n```",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-09-18T14:00:33.618",
+      "model_used": "gpt-4o-mini",
+      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n---\n\n**MARKET REALITY CHECK:**\n\n- **What they actually need:** The job description emphasizes strong SQL skills, experience with Power BI, and the ability to work with stakeholders. The core must-haves are SQL proficiency, experience with BI tools, and the ability to manage data for marketing campaigns. While they list various requirements, they are likely to prioritize candidates who can demonstrate strong analytical skills and the ability to work collaboratively in a mission-driven environment.\n\n- **Flexibility indicators:** The organization is a non-profit focused on humanitarian efforts, which often leads to a more flexible hiring approach. The emphasis on collaboration and values-driven work suggests that they may prioritize cultural fit and adaptability over strict adherence to all technical requirements. The job posting is relatively recent, but the non-profit sector often has a degree of urgency in hiring, which can lead to flexibility.\n\n- **Hard blockers identified:** The requirement for experience in building models in spreadsheets and familiarity with VBA in Excel could be a hard blocker if the candidate lacks this experience. However, Maheshwor's strong SQL and Power BI skills may offset this if he can demonstrate adaptability.\n\n- **Hiring urgency signals:** The role is a full-time contract position, which indicates a need for immediate support. The urgency may lead to a willingness to consider candidates who are close to meeting the requirements but may not fulfill every single one.\n\n---\n\n**INTELLIGENT OBSERVATIONS:**\n\n- **Hidden strengths:** Maheshwor has strong SQL skills and experience with Power BI, both of which are critical for the role. His experience in data analysis and creating dashboards aligns well with the job's requirements. His recent academic background in data science also indicates a strong theoretical foundation in analytics.\n\n- **Smart connections:** His experience in analyzing large datasets and developing dashboards can be positioned as directly relevant to the role's focus on data mining and reporting. His strong communication skills will be beneficial for stakeholder management, which is emphasized in the job description.\n\n- **Growth potential:** Maheshwor's ongoing education in data science and his involvement in relevant projects indicate a commitment to continuous learning and adaptability. His thesis work on optimization shows he can tackle complex problems, which is a valuable asset.\n\n- **Positioning opportunities:** Highlighting his analytical projects, especially those that involve stakeholder engagement and data-driven decision-making, will strengthen his application. He should also emphasize any experience he has with data cleaning and preparation, which is crucial for the role.\n\n---\n\n**REALISTIC ODDS:** 60% chance of getting an interview if CV tailored well.\n\n---\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n\n1. **Priority 1:** Emphasize experience with Power BI and any relevant projects that demonstrate his ability to create impactful dashboards and reports, particularly those that influenced decision-making.\n\n2. **Priority 2:** Address the potential gap in Excel/VBA experience by highlighting any relevant coursework or projects that involved advanced Excel functions or automation, even if not explicitly VBA.\n\n3. **Priority 3:** Showcase his strong communication skills and ability to work collaboratively with stakeholders, as this is a key aspect of the role and may help mitigate any technical gaps.\n\n---\n\n**HONEST BOTTOM LINE:** Given Maheshwor's relevant skills and the potential for flexibility in the hiring process, it is worth the effort to tailor his CV and apply. The combination of his analytical skills, ongoing education, and strong communication abilities positions him as a strong candidate for this role, despite some gaps."
+    }
+  ],
+  "preextracted_comparison_entries": []
+}
