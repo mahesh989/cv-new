@@ -63,8 +63,10 @@ async def save_cv_for_analysis(filename: str):
         analysis_dir = "cv-analysis"
         os.makedirs(analysis_dir, exist_ok=True)
         
-        # Save as original_cv.txt (for backward compatibility)
-        txt_filepath = os.path.join(analysis_dir, "original_cv.txt")
+        # Save as original_cv.txt in the new cvs/original folder
+        original_folder = os.path.join(analysis_dir, "cvs", "original")
+        os.makedirs(original_folder, exist_ok=True)
+        txt_filepath = os.path.join(original_folder, "original_cv.txt")
         
         with open(txt_filepath, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
@@ -79,7 +81,7 @@ async def save_cv_for_analysis(filename: str):
         
         # Start structured processing in background (non-blocking)
         structured_success = True
-        structured_path = "cv-analysis/original_cv.json (processing in background)"
+        structured_path = "cv-analysis/cvs/original/original_cv.json (processing in background)"
         
         # Trigger background structured processing without blocking response
         import asyncio

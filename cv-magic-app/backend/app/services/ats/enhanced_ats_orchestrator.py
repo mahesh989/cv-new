@@ -414,7 +414,7 @@ class EnhancedATSOrchestrator:
             base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
             company_dir = base_dir / company_name
             analysis_file = company_dir / f"{company_name}_skills_analysis.json"
-            cv_file = base_dir / "original_cv.txt"  # CV file is in the main directory
+            cv_file = base_dir / "cvs" / "original" / "original_cv.txt"  # CV file is in the cvs/original directory
             jd_file = company_dir / "jd_original.json"
             
             # Check if required files exist

@@ -1305,18 +1305,18 @@ FIX: Output ONLY valid JSON!
             File path where CV was saved (JSON file)
         """
         try:
-            # Path to cv-analysis folder
+            # Path to cv-analysis/cvs/tailored folder
             cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            company_folder = cv_analysis_path / company
-            company_folder.mkdir(parents=True, exist_ok=True)
+            tailored_folder = cv_analysis_path / "cvs" / "tailored"
+            tailored_folder.mkdir(parents=True, exist_ok=True)
             
             # Use company-specific naming pattern
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             json_filename = f"{company}_tailored_cv_{timestamp}.json"
             txt_filename = f"{company}_tailored_cv_{timestamp}.txt"
             
-            json_file_path = company_folder / json_filename
-            txt_file_path = company_folder / txt_filename
+            json_file_path = tailored_folder / json_filename
+            txt_file_path = tailored_folder / txt_filename
             
             # Save JSON file
             with open(json_file_path, 'w', encoding='utf-8') as f:
@@ -1348,7 +1348,7 @@ FIX: Output ONLY valid JSON!
         try:
             # Paths to the real files
             cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            original_cv_path = cv_analysis_path / "original_cv.json"
+            original_cv_path = cv_analysis_path / "cvs" / "original" / "original_cv.json"
             company_folder = cv_analysis_path / company
             
             logger.info(f"Loading real data for {company}")

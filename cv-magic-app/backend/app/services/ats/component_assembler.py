@@ -45,7 +45,7 @@ class ComponentAssembler:
 
     def _read_cv_text(self) -> str:
         """Read CV text from the standard location."""
-        cv_txt = self.base_dir / "original_cv.txt"
+        cv_txt = self.base_dir / "cvs" / "original" / "original_cv.txt"
         if not cv_txt.exists():
             raise FileNotFoundError(f"CV text not found: {cv_txt}")
         with open(cv_txt, "r", encoding="utf-8") as f:

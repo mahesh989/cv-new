@@ -166,7 +166,7 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             
             # Check if we have the minimum required files
             base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            cv_file = base_dir / "original_cv.json"
+            cv_file = base_dir / "cvs" / "original" / "original_cv.json"
             jd_file = base_dir / cname / "jd_original.json"
             skills_file = base_dir / cname / f"{cname}_skills_analysis.json"
             
@@ -383,7 +383,7 @@ async def preliminary_analysis(
                 # Ensure original_cv.json exists for the matcher (but don't overwrite if it already exists with structured data)
                 try:
                     import json
-                    cv_file = base_dir / "original_cv.json"
+                    cv_file = base_dir / "cvs" / "original" / "original_cv.json"
                     
                     # Check if file exists and has structured data
                     should_save = True
@@ -531,7 +531,7 @@ async def trigger_component_analysis(company: str):
         # Check if required files exist
         base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         required_files = {
-            "cv_file": base_dir / "original_cv.json",
+            "cv_file": base_dir / "cvs" / "original" / "original_cv.json",
             "jd_file": base_dir / company / "jd_original.json", 
             "match_file": base_dir / company / "cv_jd_match_results.json"
         }

@@ -164,7 +164,7 @@ async def get_cv_jd_matching_status(
         company_dir = Path(base_path) / company_name
         
         # Check CV file
-        cv_file_path = Path(base_path) / "original_cv.txt"
+        cv_file_path = Path(base_path) / "cvs" / "original" / "original_cv.txt"
         cv_file_exists = cv_file_path.exists()
         
         # Check JD analysis file

@@ -617,21 +617,21 @@ async def get_tailored_cv_content(
     try:
         logger.info(f"📄 Tailored CV content request for {company_name} from user {current_user.id}")
         
-        # Path to cv-analysis folder
+        # Path to cv-analysis/cvs/tailored folder
         cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-        company_folder = cv_analysis_path / company_name
+        tailored_folder = cv_analysis_path / "cvs" / "tailored"
         
-        if not company_folder.exists():
+        if not tailored_folder.exists():
             raise HTTPException(
                 status_code=404,
-                detail=f"Company folder not found: {company_name}"
+                detail=f"Tailored CVs folder not found: {tailored_folder}"
             )
         
         # Find the most recent tailored CV text file matching company pattern
-        tailored_txt_files = list(company_folder.glob(f"{company_name}_tailored_cv_*.txt"))
+        tailored_txt_files = list(tailored_folder.glob(f"{company_name}_tailored_cv_*.txt"))
         if not tailored_txt_files:
             # Fallback to any tailored CV files if company-specific pattern not found
-            tailored_txt_files = list(company_folder.glob("*tailored_cv_*.txt"))
+            tailored_txt_files = list(tailored_folder.glob("*tailored_cv_*.txt"))
             if not tailored_txt_files:
                 raise HTTPException(
                     status_code=404,

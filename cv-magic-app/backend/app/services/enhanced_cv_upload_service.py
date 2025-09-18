@@ -35,7 +35,7 @@ class EnhancedCVUploadService:
     def __init__(self):
         self.cv_processor = cv_processor
         self.structured_parser = LLMStructuredCVParser()
-        self.original_cv_json_path = CV_ANALYSIS_DIR / "original_cv.json"
+        self.original_cv_json_path = CV_ANALYSIS_DIR / "cvs" / "original" / "original_cv.json"
 
     async def upload_and_process_cv(
         self, 
