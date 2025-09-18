@@ -380,13 +380,30 @@ async def preliminary_analysis(
                 except Exception as e:
                     logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD file: {e}")
 
-                # Ensure original_cv.json exists for the matcher
+                # Ensure original_cv.json exists for the matcher (but don't overwrite if it already exists with structured data)
                 try:
                     import json
                     cv_file = base_dir / "original_cv.json"
-                    with open(cv_file, 'w', encoding='utf-8') as f:
-                        json.dump({"text": cv_content or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
-                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) CV JSON saved to: {cv_file}")
+                    
+                    # Check if file exists and has structured data
+                    should_save = True
+                    if cv_file.exists():
+                        try:
+                            with open(cv_file, 'r', encoding='utf-8') as f:
+                                existing_data = json.load(f)
+                            # If file has structured CV data (not just text), don't overwrite it
+                            if isinstance(existing_data, dict) and any(key in existing_data for key in ['personal_information', 'career_profile', 'skills', 'education', 'experience']):
+                                logger.info(f"💾 [PIPELINE] (preliminary-analysis) Structured CV already exists, preserving it: {cv_file}")
+                                should_save = False
+                        except:
+                            # If we can't read the file, we'll save the simple version
+                            pass
+                    
+                    if should_save:
+                        with open(cv_file, 'w', encoding='utf-8') as f:
+                            json.dump({"text": cv_content or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                        logger.info(f"💾 [PIPELINE] (preliminary-analysis) CV JSON saved to: {cv_file}")
+                        
                 except Exception as e:
                     logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save CV file: {e}")
 

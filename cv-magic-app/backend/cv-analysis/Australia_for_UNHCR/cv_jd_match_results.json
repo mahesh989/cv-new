@@ -1,17 +1,17 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-18T09:16:47.663459",
+  "cv_analysis_timestamp": "2025-09-18T09:52:04.316631",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
-    "Tableau",
     "Excel",
+    "Tableau",
     "project management",
     "communication"
   ],
   "matched_preferred_keywords": [
-    "data extraction",
-    "business intelligence tools"
+    "analytical thinking",
+    "problem-solving"
   ],
   "missed_required_keywords": [
     "VBA",
@@ -23,28 +23,27 @@
     "data models"
   ],
   "missed_preferred_keywords": [
-    "analytical thinking",
-    "problem-solving",
     "data issues",
     "de-duplication",
-    "campaign outcomes"
+    "campaign optimisation",
+    "governing regulations"
   ],
   "match_counts": {
     "total_required_keywords": 10,
-    "total_preferred_keywords": 5,
+    "total_preferred_keywords": 4,
     "matched_required_count": 6,
     "matched_preferred_count": 2
   },
   "matching_notes": {
-    "SQL": "Proficient in SQL for querying and managing databases",
+    "SQL": "Proficient in SQL for querying, modeling, and managing complex relational databases",
     "Power BI": "Used Power BI to present research findings",
-    "Tableau": "Produced Tableau dashboards for decision-making",
-    "Excel": "Adept at leveraging Excel for data-driven solutions",
-    "data extraction": "Automated data extraction using Python",
-    "business intelligence tools": "Skilled in using Tableau and Power BI as BI tools"
+    "Excel": "Adept at leveraging Excel for data-driven solutions and reporting",
+    "Tableau": "Produced Tableau dashboards that improved decision-making",
+    "project management": "Implied through experience in managing data projects and deadlines",
+    "communication": "Demonstrated through presenting research findings and mentoring students"
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
-  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.txt",
   "metadata": {}
 }

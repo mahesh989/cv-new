@@ -290,7 +290,7 @@ class CVJDMatcher:
         try:
             # Read CV content
             if not cv_file_path:
-                cv_file_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.json"
+                cv_file_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/original_cv.txt"
             
             cv_content = self._read_cv_file(cv_file_path)
             logger.info(f"📄 Read CV content from: {cv_file_path}")

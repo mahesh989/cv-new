@@ -74,11 +74,28 @@ class SkillExtractionResultSaver:
             company_folder = self.base_dir / company_slug
             company_folder.mkdir(parents=True, exist_ok=True)
             
-            # Save original CV JSON in root cv-analysis directory if it doesn't exist
+            # Save original CV JSON in root cv-analysis directory if it doesn't exist or doesn't have structured data
             if cv_data and cv_data.get('text'):
                 import json
                 cv_file_path = self.base_dir / "original_cv.json"
-                if not cv_file_path.exists():  # Only save if not already exists
+                should_save = True
+                
+                if cv_file_path.exists():
+                    try:
+                        with open(cv_file_path, 'r', encoding='utf-8') as f:
+                            existing_data = json.load(f)
+                        # If file has structured CV data (not just text), don't overwrite it
+                        if isinstance(existing_data, dict) and any(key in existing_data for key in ['personal_information', 'career_profile', 'skills', 'education', 'experience']):
+                            logger.info(f"💾 Structured CV already exists, preserving it: {cv_file_path}")
+                            should_save = False
+                        else:
+                            logger.info(f"💾 Simple CV exists, will replace with text version: {cv_file_path}")
+                    except:
+                        # If we can't read the file, we'll save the simple version
+                        logger.info(f"💾 Could not read existing CV file, will replace: {cv_file_path}")
+                        pass
+                
+                if should_save:
                     cv_json = {
                         "filename": cv_filename,
                         "user_id": user_id,
@@ -90,7 +107,7 @@ class SkillExtractionResultSaver:
                         json.dump(cv_json, f, ensure_ascii=False, indent=2)
                     logger.info(f"💾 CV JSON saved to: {cv_file_path}")
                 else:
-                    logger.info(f"💾 CV JSON already exists, skipping save: {cv_file_path}")
+                    logger.info(f"💾 Structured CV preserved, skipping save: {cv_file_path}")
             
             # Skip JD content saving during skills analysis - it's already saved separately
             

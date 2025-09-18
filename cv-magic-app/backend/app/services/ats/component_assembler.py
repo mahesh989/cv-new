@@ -45,12 +45,11 @@ class ComponentAssembler:
 
     def _read_cv_text(self) -> str:
         """Read CV text from the standard location."""
-        cv_json = self.base_dir / "original_cv.json"
-        if not cv_json.exists():
-            raise FileNotFoundError(f"CV text not found: {cv_json}")
-        with open(cv_json, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        text = (data.get("text") or "").strip()
+        cv_txt = self.base_dir / "original_cv.txt"
+        if not cv_txt.exists():
+            raise FileNotFoundError(f"CV text not found: {cv_txt}")
+        with open(cv_txt, "r", encoding="utf-8") as f:
+            text = f.read().strip()
         if not text:
             raise ValueError("CV text is empty")
         return text
