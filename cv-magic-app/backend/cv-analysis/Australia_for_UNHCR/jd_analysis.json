@@ -23,13 +23,18 @@
     "experience": []
   },
   "preferred_skills": {
-    "technical": [],
-    "soft_skills": [],
+    "technical": [
+      "data extraction",
+      "data manipulation"
+    ],
+    "soft_skills": [
+      "analytical thinking",
+      "problem-solving"
+    ],
     "domain_knowledge": [
-      "data issues",
-      "de-duplication",
-      "data governance",
-      "best practice guidelines"
+      "data de-duplication",
+      "campaign optimization",
+      "governing regulations"
     ],
     "experience": []
   },
@@ -49,12 +54,15 @@
     "data models"
   ],
   "preferred_keywords": [
-    "data issues",
-    "de-duplication",
-    "data governance",
-    "best practice guidelines"
+    "data extraction",
+    "data manipulation",
+    "analytical thinking",
+    "problem-solving",
+    "data de-duplication",
+    "campaign optimization",
+    "governing regulations"
   ],
-  "analysis_timestamp": "2025-09-18T11:00:46.436770",
+  "analysis_timestamp": "2025-09-18T11:20:55.632541",
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",

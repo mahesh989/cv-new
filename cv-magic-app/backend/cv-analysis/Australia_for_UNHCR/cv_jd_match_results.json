@@ -1,19 +1,20 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-18T11:00:50.843242",
+  "cv_analysis_timestamp": "2025-09-18T11:21:01.920114",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
     "Tableau",
     "Excel",
-    "project management",
     "communication"
   ],
   "matched_preferred_keywords": [
-    "data issues"
+    "data extraction",
+    "analytical thinking"
   ],
   "missed_required_keywords": [
     "VBA",
+    "project management",
     "stakeholder management",
     "customer service",
     "data warehouse",
@@ -22,23 +23,25 @@
     "data models"
   ],
   "missed_preferred_keywords": [
-    "de-duplication",
-    "data governance",
-    "best practice guidelines"
+    "data manipulation",
+    "problem-solving",
+    "data de-duplication",
+    "campaign optimization",
+    "governing regulations"
   ],
   "match_counts": {
     "total_required_keywords": 10,
-    "total_preferred_keywords": 3,
-    "matched_required_count": 6,
-    "matched_preferred_count": 1
+    "total_preferred_keywords": 6,
+    "matched_required_count": 5,
+    "matched_preferred_count": 2
   },
   "matching_notes": {
     "SQL": "Proficient in SQL for querying and managing databases",
     "Power BI": "Used Power BI to present research findings",
-    "Tableau": "Produced Tableau dashboards for decision-making",
+    "Tableau": "Created dashboards using Tableau for data visualization",
     "Excel": "Adept at using Excel for data-driven solutions",
-    "communication": "Demonstrated communication skills in presenting research findings",
-    "data issues": "Mentioned in the context of improving data accuracy"
+    "data extraction": "Automated data extraction and structuring of datasets",
+    "analytical thinking": "Utilized analytical skills in data analysis and problem-solving"
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",

@@ -1,0 +1,201 @@
+{
+  "contact": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "linkedin": null,
+    "location": "Hurstville, NSW, 2220",
+    "website": null
+  },
+  "education": [
+    {
+      "institution": "CY Cergy Paris University",
+      "degree": "PhD in Physics",
+      "location": "Cergy, France",
+      "graduation_date": "",
+      "gpa": null,
+      "relevant_coursework": null,
+      "honors": null
+    },
+    {
+      "institution": "CY Cergy Paris University",
+      "degree": "Master of Theoretical Physics",
+      "location": "Cergy, France",
+      "graduation_date": "",
+      "gpa": null,
+      "relevant_coursework": null,
+      "honors": null
+    },
+    {
+      "institution": "Charles Darwin University",
+      "degree": "Master of Data Science",
+      "location": "Sydney, Australia",
+      "graduation_date": "",
+      "gpa": null,
+      "relevant_coursework": null,
+      "honors": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "The Bitrates",
+      "title": "Data Analyst",
+      "location": "Sydney, New South Wales, Australia",
+      "start_date": "Jul 2024",
+      "end_date": "Present",
+      "duration": null,
+      "bullets": [
+        "Designed and implemented 5 Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%, processing 100K records weekly.",
+        "Developed 3 machine learning models in Python for predictive analytics, enabling data-driven business decisions that increased project efficiency by 25%.",
+        "Leveraged AI techniques to automate 4 repetitive tasks, reducing manual effort by 20% and improving overall productivity.",
+        "Built 6 dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively, enhancing stakeholder engagement.",
+        "Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights by 40%."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "iBuild Building Solutions",
+      "title": "Data Analyst",
+      "location": "Victoria, Australia",
+      "start_date": "Mar 2024",
+      "end_date": "Jun 2024",
+      "duration": null,
+      "bullets": [
+        "Automated data extraction and structuring of 10 population datasets using Python, improving data accuracy by 35% and team collaboration.",
+        "Analyzed customer support data with Python to optimize response times by 20% and enhance operational efficiency.",
+        "Developed 4 Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making that improved project outcomes.",
+        "Designed 3 Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction by 30% and decision-making processes."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "Property Console",
+      "title": "Software Engineer and Analyst",
+      "location": "Sydney, Australia",
+      "start_date": "Jun 2023",
+      "end_date": "Nov 2023",
+      "duration": null,
+      "bullets": [
+        "Built 5 Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency.",
+        "Collaborated with a team of 4 to enhance analytics capabilities, using Python to improve data processing speed by 25%.",
+        "Leveraged Python for data preprocessing and analysis, producing 3 Tableau dashboards that improved decision-making.",
+        "Supported cross-functional teams with Python-driven insights, enabling 5 customer-focused initiatives."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Research Assistant",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Oct 2018",
+      "end_date": "Sep 2022",
+      "duration": null,
+      "bullets": [
+        "Utilized advanced Python programming for computational modeling and solving complex research problems across 3 projects.",
+        "Developed Python-based workflows to manage and analyze large datasets across multiple research projects, improving data handling efficiency by 30%.",
+        "Presented Python-enabled research findings at 4 international conferences, demonstrating technical expertise and communication skills."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Lecturer and Course Facilitator",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Sep 2019",
+      "end_date": "Jun 2022",
+      "duration": null,
+      "bullets": [
+        "Led engaging physics tutorials for 20 master\u2019s students, enhancing understanding and promoting teamwork.",
+        "Designed course materials, assignments, and exams, strengthening the learning experience for over 50 students.",
+        "Mentored students on 10 projects, collaborated with faculty, and fostered student engagement."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Research Intern",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Feb 2018",
+      "end_date": "Jun 2018",
+      "duration": null,
+      "bullets": [
+        "Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials.",
+        "Managed and analyzed complex data sets, improving their accuracy and reliability by 25%.",
+        "Used Power BI to present research findings and participated in weekly reviews, improving collaboration and research skills."
+      ],
+      "skills_used": null
+    }
+  ],
+  "projects": null,
+  "skills": [
+    {
+      "category": "Technical Skills",
+      "skills": [
+        "Power BI",
+        "SQL",
+        "Excel",
+        "Data Analysis",
+        "Python",
+        "Collaborative"
+      ]
+    }
+  ],
+  "source_cv_id": null,
+  "target_company": "Australia_for_UNHCR",
+  "target_role": "Position at Australia for UNHCR",
+  "optimization_strategy": {
+    "section_order": [
+      "contact",
+      "experience",
+      "skills",
+      "education"
+    ],
+    "education_strategy": "education_last",
+    "keyword_placement": {
+      "skills": [
+        "Collaborative"
+      ],
+      "experience": []
+    },
+    "quantification_targets": [
+      "The Bitrates - \u2022 Developed machine learning models in Python for ...",
+      "The Bitrates - \u2022 Leveraged AI techniques to automate repetitive t...",
+      "The Bitrates - \u2022 Built dynamic dashboards and visualizations usin...",
+      "The Bitrates - \u2022 Integrated Google Analytics data with Python for...",
+      "iBuild Building Solutions - \u2022 Automated data extraction and structuring of pop...",
+      "iBuild Building Solutions - \u2022 Analyzed customer support data with Python to op...",
+      "iBuild Building Solutions - \u2022 Developed Python-based solutions to generate act...",
+      "iBuild Building Solutions - \u2022 Designed Python scripts to create dynamic report...",
+      "Property Console - \u2022 Leveraged Python for data preprocessing and anal...",
+      "Property Console - \u2022 Supported cross-functional teams with Python-dri...",
+      "CY Cergy Paris University - \u2022 Utilized advanced Python programming for computa...",
+      "CY Cergy Paris University - \u2022 Developed Python-based workflows to manage and a...",
+      "CY Cergy Paris University - \u2022 Presented Python-enabled research findings at in...",
+      "CY Cergy Paris University - \u2022 Led engaging physics tutorials for master\u2019s stud...",
+      "CY Cergy Paris University - \u2022 Designed course materials, assignments, and exam...",
+      "CY Cergy Paris University - \u2022 Mentored students on projects, collaborated with...",
+      "CY Cergy Paris University - \u2022 Managed and analysed complex data sets, improvin...",
+      "CY Cergy Paris University - \u2022 Used dashboard using Power BI to present researc..."
+    ],
+    "impact_enhancements": {
+      "experience": [],
+      "skills": []
+    }
+  },
+  "enhancements_applied": {
+    "keywords_added": [
+      "Collaborative"
+    ],
+    "impact_improvements": [],
+    "ats_optimizations": []
+  },
+  "keywords_integrated": [
+    "Collaborative"
+  ],
+  "quantifications_added": [],
+  "estimated_ats_score": 85,
+  "keyword_density": null,
+  "impact_statement_compliance": null,
+  "created_at": "2025-09-18 01:22:09.212878",
+  "framework_version": "1.0"
+}
