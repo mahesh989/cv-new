@@ -303,6 +303,64 @@ async def get_cv_preview(filename: str, max_length: int = 500):
         raise HTTPException(status_code=500, detail=f"Error generating CV preview: {str(e)}")
 
 
+@router.get("/read-tailored-cv/{company_name}")
+async def read_tailored_cv(company_name: str):
+    """
+    Read tailored CV content for frontend preview
+    
+    This endpoint serves the most recent tailored CV text content for a company,
+    compatible with the frontend CV preview functionality.
+    """
+    try:
+        logger.info(f"📄 Tailored CV content request for {company_name}")
+        
+        # Path to cv-analysis folder
+        cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        company_folder = cv_analysis_path / company_name
+        
+        if not company_folder.exists():
+            raise HTTPException(
+                status_code=404,
+                detail=f"Company folder not found: {company_name}"
+            )
+        
+        # Find the most recent tailored CV text file
+        tailored_txt_files = list(company_folder.glob("tailored_cv_*.txt"))
+        if not tailored_txt_files:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No tailored CV text file found for company: {company_name}"
+            )
+        
+        latest_txt_file = max(tailored_txt_files, key=lambda p: p.stat().st_mtime)
+        
+        # Read the text content
+        with open(latest_txt_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        logger.info(f"✅ Served tailored CV content: {latest_txt_file.name} ({len(content)} characters)")
+        
+        return JSONResponse(content={
+            "success": True,
+            "content": content,
+            "filename": latest_txt_file.name,
+            "company": company_name,
+            "metadata": {
+                "file_size": len(content),
+                "last_modified": latest_txt_file.stat().st_mtime
+            }
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to get tailored CV content: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get tailored CV content: {str(e)}"
+        )
+
+
 @router.delete("/{filename}")
 async def delete_cv(filename: str):
     """Delete a CV file"""

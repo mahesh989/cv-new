@@ -90,7 +90,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     try {
       // Try to load the company-specific tailored CV
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cv/read-tailored-cv/$selectedCompany'),
+        Uri.parse(
+            'http://localhost:8000/api/cv/read-tailored-cv/$selectedCompany'),
       );
 
       if (response.statusCode == 200) {
@@ -100,7 +101,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         });
       } else {
         setState(() {
-          tailoredCVContent = 'Failed to load tailored CV. Status: ${response.statusCode}';
+          tailoredCVContent =
+              'Failed to load tailored CV. Status: ${response.statusCode}';
         });
       }
     } catch (e) {
@@ -113,6 +115,97 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         _isGenerating = false;
       });
     }
+  }
+
+  String _formatTailoredCVContent(String content) {
+    final lines = content.split('\n');
+    final formattedLines = <String>[];
+
+    for (final line in lines) {
+      if (line.trim().isEmpty) {
+        formattedLines.add('');
+        continue;
+      }
+
+      // Skip metadata header section - filter out any metadata lines
+      if (line.contains('TAILORED CV TEXT') ||
+          line.contains('Target Company:') ||
+          line.contains('Generated:') ||
+          line.contains('ATS Score:') ||
+          line.contains('Framework Version:') ||
+          line.contains('CV GENERATION METADATA') ||
+          line.startsWith('===') ||
+          line.startsWith('=')) {
+        continue;
+      }
+
+      // Format section headers (all caps words)
+      if (line == line.toUpperCase() &&
+          line.length > 3 &&
+          !line.contains('•')) {
+        formattedLines.add('');
+        formattedLines.add('┌─ ' + line + ' ─' + '─' * (70 - line.length));
+        formattedLines.add('');
+        continue;
+      }
+
+      // Format bullet points
+      if (line.startsWith('•')) {
+        formattedLines.add('  ' + line);
+        continue;
+      }
+
+      // Format job titles (lines ending with date ranges)
+      if (line.contains(' – ') ||
+          line.contains(' - ') ||
+          (line.contains('Present') ||
+              line.contains('2024') ||
+              line.contains('2023') ||
+              line.contains('2022') ||
+              line.contains('2021') ||
+              line.contains('2020'))) {
+        formattedLines.add('');
+        formattedLines.add('📅 ' + line);
+        formattedLines.add('');
+        continue;
+      }
+
+      // Format company names (lines that might be company names)
+      if (line.contains(',') &&
+          (line.contains('Australia') ||
+              line.contains('France') ||
+              line.contains('Sydney') ||
+              line.contains('Victoria') ||
+              line.contains('Cergy'))) {
+        formattedLines.add('🏢 ' + line);
+        formattedLines.add('');
+        continue;
+      }
+
+      // Format education entries
+      if (line.contains('University') ||
+          line.contains('Master') ||
+          line.contains('PhD')) {
+        formattedLines.add('');
+        formattedLines.add('🎓 ' + line);
+        continue;
+      }
+
+      // Format contact information
+      if (line.contains('@') ||
+          line.contains('|') ||
+          line.contains('LinkedIn') ||
+          line.contains('GitHub') ||
+          line.contains('Portfolio')) {
+        formattedLines.add('📧 ' + line);
+        continue;
+      }
+
+      // Regular content
+      formattedLines.add(line);
+    }
+
+    return formattedLines.join('\n');
   }
 
   Widget _buildCVPreview() {
@@ -139,26 +232,35 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.description, color: AppTheme.primaryTeal),
+              const Icon(Icons.preview, color: Colors.blue),
               const SizedBox(width: 8),
               Text(
                 'Tailored CV Preview',
-                style: AppTheme.headingSmall.copyWith(
-                  color: AppTheme.primaryTeal,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Container(
-            constraints: const BoxConstraints(maxHeight: 400),
+            width: double.infinity,
+            height: 300,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[900], // Black background like original CV
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[700]!),
+            ),
             child: SingleChildScrollView(
-              child: Text(
-                tailoredCVContent!,
-                style: const TextStyle(
-                  fontFamily: 'Courier',
-                  fontSize: 14,
+              child: SelectableText(
+                _formatTailoredCVContent(tailoredCVContent!),
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.6,
+                  fontFamily: 'monospace', // Monospace font like original CV
+                  color: Colors.grey[100], // Light text like original CV
                 ),
               ),
             ),

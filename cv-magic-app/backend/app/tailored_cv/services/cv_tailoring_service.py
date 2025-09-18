@@ -1100,31 +1100,164 @@ FIX: Output ONLY valid JSON!
     
     def save_tailored_cv(self, tailored_cv: TailoredCV, company_folder: str) -> str:
         """
-        Save tailored CV to company-specific folder
+        Save tailored CV to company-specific folder (both JSON and TXT formats)
         
         Args:
             tailored_cv: The tailored CV to save
             company_folder: Company folder path
             
         Returns:
-            File path where CV was saved
+            File path where CV was saved (JSON file)
         """
         try:
             company_path = Path(company_folder)
             company_path.mkdir(parents=True, exist_ok=True)
             
-            filename = f"tailored_cv_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            file_path = company_path / filename
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            json_filename = f"tailored_cv_{timestamp}.json"
+            txt_filename = f"tailored_cv_{timestamp}.txt"
             
-            with open(file_path, 'w', encoding='utf-8') as f:
+            json_file_path = company_path / json_filename
+            txt_file_path = company_path / txt_filename
+            
+            # Save JSON file
+            with open(json_file_path, 'w', encoding='utf-8') as f:
                 json.dump(tailored_cv.model_dump(), f, indent=2, default=str)
             
-            logger.info(f"✅ Saved tailored CV to {file_path}")
-            return str(file_path)
+            # Convert to text and save TXT file
+            text_content = self._convert_tailored_cv_to_text(tailored_cv)
+            with open(txt_file_path, 'w', encoding='utf-8') as f:
+                f.write(text_content)
+            
+            logger.info(f"✅ Saved tailored CV to {json_file_path}")
+            logger.info(f"✅ Saved tailored CV text to {txt_file_path}")
+            return str(json_file_path)
             
         except Exception as e:
             logger.error(f"❌ Failed to save tailored CV: {e}")
             raise
+    
+    def _convert_tailored_cv_to_text(self, tailored_cv: TailoredCV) -> str:
+        """
+        Convert tailored CV JSON to readable text format matching original CV format
+        
+        Args:
+            tailored_cv: The tailored CV object
+            
+        Returns:
+            Formatted text content matching original CV format
+        """
+        try:
+            lines = []
+            
+            # No header - start directly with contact information like original CV
+            
+            # Contact Information - Single line format like original
+            if tailored_cv.contact:
+                contact_parts = []
+                if tailored_cv.contact.name:
+                    contact_parts.append(tailored_cv.contact.name)
+                if tailored_cv.contact.phone:
+                    contact_parts.append(tailored_cv.contact.phone)
+                if tailored_cv.contact.email:
+                    contact_parts.append(tailored_cv.contact.email)
+                if tailored_cv.contact.linkedin:
+                    contact_parts.append("LinkedIn")
+                if tailored_cv.contact.location:
+                    contact_parts.append(tailored_cv.contact.location)
+                
+                lines.append("  | ".join(contact_parts))
+                lines.append("")
+            
+            # Professional Summary (if available in the model)
+            # Note: This field might not exist in the current TailoredCV model
+            # if hasattr(tailored_cv, 'professional_summary') and tailored_cv.professional_summary:
+            #     lines.append("PROFESSIONAL SUMMARY")
+            #     lines.append("-" * 20)
+            #     lines.append(tailored_cv.professional_summary)
+            #     lines.append("")
+            
+            # Skills - Format like original CV
+            if tailored_cv.skills:
+                lines.append("TECHNICAL SKILLS")
+                lines.append("• " + ", ".join([skill for skill_category in tailored_cv.skills for skill in skill_category.skills]))
+                lines.append("")
+            
+            # Experience - Format like original CV
+            if tailored_cv.experience:
+                lines.append("EXPERIENCE")
+                for exp in tailored_cv.experience:
+                    # Format: Title + Duration on same line
+                    duration_str = f"{exp.start_date} – {exp.end_date}" if exp.start_date and exp.end_date else ""
+                    lines.append(f"{exp.title}         {duration_str}")
+                    
+                    # Company and location on next line
+                    if exp.company and exp.location:
+                        lines.append(f"{exp.company}, {exp.location}")
+                    elif exp.company:
+                        lines.append(exp.company)
+                    
+                    lines.append("")
+                    
+                    # Bullets
+                    if exp.bullets:
+                        for bullet in exp.bullets:
+                            lines.append(f"• {bullet}")
+                        lines.append("")
+            
+            # Education - Format like original CV with all data
+            if tailored_cv.education:
+                lines.append("EDUCATION")
+                for edu in tailored_cv.education:
+                    # Format: Degree on first line
+                    lines.append(edu.degree)
+                    
+                    # Institution, location, GPA, and date on second line
+                    edu_parts = []
+                    if edu.institution:
+                        edu_parts.append(edu.institution)
+                    if edu.location:
+                        edu_parts.append(edu.location)
+                    if edu.gpa:
+                        edu_parts.append(f"GPA {edu.gpa}")
+                    if edu.graduation_date:
+                        edu_parts.append(edu.graduation_date)
+                    
+                    if edu_parts:
+                        lines.append(", ".join(edu_parts))
+                    
+                    # Relevant coursework if available
+                    if edu.relevant_coursework:
+                        lines.append(f"Relevant Coursework: {', '.join(edu.relevant_coursework)}")
+                    
+                    # Honors if available
+                    if edu.honors:
+                        lines.append(f"Honors: {', '.join(edu.honors)}")
+                    
+                    lines.append("")
+            
+            # Projects - Format like original CV
+            if tailored_cv.projects:
+                lines.append("PROJECTS")
+                for project in tailored_cv.projects:
+                    lines.append(f"{project.name}")
+                    if project.context:
+                        lines.append(f"{project.context}")
+                    if project.technologies:
+                        lines.append(f"Technologies: {', '.join(project.technologies)}")
+                    if project.bullets:
+                        for bullet in project.bullets:
+                            lines.append(f"• {bullet}")
+                    lines.append("")
+            
+            # Note: Certifications and Languages are not part of the current TailoredCV model
+            # If needed, they can be added to the model and uncommented here
+            
+            return "\n".join(lines)
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to convert tailored CV to text: {e}")
+            return f"Error converting CV to text: {str(e)}"
     
     def load_recommendation_file(self, company_folder: str) -> RecommendationAnalysis:
         """
