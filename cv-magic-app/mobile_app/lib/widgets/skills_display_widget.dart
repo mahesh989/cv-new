@@ -30,7 +30,7 @@ class SkillsDisplayWidget extends StatelessWidget {
         if (controller.hasError) {
           return _buildErrorState();
         } else if (!controller.hasResults && !controller.isLoading) {
-          return _buildEmptyState();
+          return const SizedBox.shrink(); // Remove placeholder - show nothing
         } else {
           return _buildResultsContent();
         }
@@ -76,44 +76,6 @@ class SkillsDisplayWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.analytics_outlined,
-            color: Colors.grey.shade600,
-            size: 48,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No Analysis Results',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Start analysis to see CV and JD skills comparison',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildResultsContent() {
     // Debug logging
     debugPrint('🔍 [SKILLS_DISPLAY] _buildResultsContent called');
@@ -129,39 +91,9 @@ class SkillsDisplayWidget extends StatelessWidget {
       debugPrint('   JD total skills: ${controller.jdTotalSkills}');
     }
 
-    // Show loading only if we have no results at all yet
+    // Show nothing when loading with no results - remove loading placeholder
     if (controller.isLoading && controller.result == null) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.shade200),
-        ),
-        child: Column(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              'Starting analysis...',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.blue.shade700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Results will appear progressively as each step completes',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.blue.shade600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return Container(
@@ -458,17 +390,22 @@ class SkillsDisplayWidget extends StatelessWidget {
           ],
 
           // AI Recommendations - Show with progressive loading
-          if (controller.showAIRecommendationLoading || controller.showAIRecommendationResults) ...[
+          if (controller.showAIRecommendationLoading ||
+              controller.showAIRecommendationResults) ...[
             Builder(
               builder: (context) {
                 debugPrint(
                     '🔍 [SKILLS_DISPLAY] Rendering AI Recommendations section (progressive)');
-                debugPrint('   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
-                debugPrint('   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
-                debugPrint('   hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
+                debugPrint(
+                    '   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
+                debugPrint(
+                    '   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
+                debugPrint(
+                    '   hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
 
                 // Show loading state if AI recommendations should show but results aren't available yet
-                if (controller.showAIRecommendationLoading && !controller.showAIRecommendationResults) {
+                if (controller.showAIRecommendationLoading &&
+                    !controller.showAIRecommendationResults) {
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     child: Container(
@@ -506,7 +443,8 @@ class SkillsDisplayWidget extends StatelessWidget {
                 }
 
                 // Show actual AI recommendations when available
-                if (controller.showAIRecommendationResults && controller.result?.aiRecommendation != null) {
+                if (controller.showAIRecommendationResults &&
+                    controller.result?.aiRecommendation != null) {
                   return AIRecommendationsWidget(
                     aiRecommendation: controller.result!.aiRecommendation,
                     isLoading: false,

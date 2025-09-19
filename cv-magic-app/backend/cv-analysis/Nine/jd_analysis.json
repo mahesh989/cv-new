@@ -1,0 +1,84 @@
+{
+  "experience_years": null,
+  "required_skills": {
+    "technical": [
+      "TypeScript",
+      "ReactJS",
+      "Node.js",
+      "HTML5",
+      "SASS",
+      "REST",
+      "GraphQL"
+    ],
+    "soft_skills": [
+      "teamwork",
+      "communication"
+    ],
+    "domain_knowledge": [
+      "web development",
+      "software development lifecycle",
+      "Agile"
+    ],
+    "experience": []
+  },
+  "preferred_skills": {
+    "technical": [
+      "NextJS",
+      "Angular",
+      "Vue",
+      "Svelte",
+      "jest",
+      "vite",
+      "Cypress",
+      "Playwright",
+      "Golang",
+      "PHP",
+      "Python",
+      "Ruby",
+      "WordPress"
+    ],
+    "soft_skills": [
+      "willingness to learn"
+    ],
+    "domain_knowledge": [
+      "DevOps"
+    ],
+    "experience": []
+  },
+  "required_keywords": [
+    "TypeScript",
+    "ReactJS",
+    "Node.js",
+    "HTML5",
+    "SASS",
+    "REST",
+    "GraphQL",
+    "teamwork",
+    "communication",
+    "web development",
+    "software development lifecycle",
+    "Agile"
+  ],
+  "preferred_keywords": [
+    "NextJS",
+    "Angular",
+    "Vue",
+    "Svelte",
+    "jest",
+    "vite",
+    "Cypress",
+    "Playwright",
+    "Golang",
+    "PHP",
+    "Python",
+    "Ruby",
+    "WordPress",
+    "willingness to learn",
+    "DevOps"
+  ],
+  "analysis_timestamp": "2025-09-19T22:57:39.364613",
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "company_name": "Nine",
+  "metadata": {}
+}

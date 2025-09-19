@@ -1,0 +1,281 @@
+{
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Python\n- Ai\n- Machine Learning\n- Data Pipelines\n- Sql\n- Tableau\n- Power Bi\n- Pandas\n- Numpy\n- Scikit-Learn\n- Matplotlib\n- Github\n- Docker\n- Snowflake\n- Visual Studio Code\n- Google Analytics\n- Excel\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning\n- Data Preprocessing\n- Data Analysis\n- Predictive Analytics\n- Automation\n- Data Visualization\n- Reporting\n- Computational Modeling\n- Workflow Management\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication\n- Teamwork\n- Collaboration\n- Problem-Solving\n- Adaptability\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Problem-solving\n- Adaptability\n- Time Management\n- Detail-oriented\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science\n- Physics\n- Research\n- Customer Behavior\n- Operational Efficiency\n- Strategic Decision-Making\n\n**STRONGLY IMPLIED:**\n- Predictive Analytics\n- Operational Efficiency\n- Strategic Decision-making\n\n```python\nSOFT_SKILLS = ['Communication', 'Teamwork', 'Collaboration', 'Problem-solving', 'Adaptability', 'Mentoring']\nTECHNICAL_SKILLS = ['Python', 'AI', 'Machine Learning', 'Data Pipelines', 'SQL', 'Tableau', 'Power BI', 'Pandas', 'NumPy', 'scikit-learn', 'Matplotlib', 'GitHub', 'Docker', 'Snowflake', 'Visual Studio Code', 'Google Analytics', 'Excel', 'Seaborn', 'Data Cleaning', 'Data Preprocessing', 'Predictive Analytics', 'Data Analysis', 'Reporting', 'Data Accuracy', 'Data Integrity', 'Computational Modeling', 'Workflow Management']\nDOMAIN_KEYWORDS = ['Data Science', 'Physics', 'Research', 'Customer Behavior', 'Operational Efficiency', 'Strategic Decision-making']\n```",
+  "jd_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Typescript\n- Reactjs\n- Node.Js\n- Html5\n- Sass\n- Javascript\n- Nextjs\n- Angular\n- Vue\n- Svelte\n- Devops\n- Rest\n- Graphql\n- Jest\n- Vite\n- Cypress\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Analytical Models\n- Bulk Communications\n- Evidence-Based Decision Making\n- Clean Data\n- De-duplication\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Collaboration\n- Adaptability\n- Problem-Solving\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Teamwork\n- Adaptability\n- Results-Driven\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Web Development\n- Agile\n- Software Development Lifecycle\n\n**STRONGLY IMPLIED:**\n- Campaign Outcomes\n- Business Intelligence\n\n```python\nSOFT_SKILLS = ['Collaboration', 'Adaptability', 'Problem-solving']\nTECHNICAL_SKILLS = ['TypeScript', 'ReactJS', 'Node.js', 'HTML5', 'SASS', 'JavaScript', 'NextJS', 'Angular', 'Vue', 'Svelte', 'DevOps', 'REST', 'GraphQL', 'Jest', 'Vite', 'Cypress', 'Playwright', 'Golang', 'PHP', 'Python', 'Ruby', 'WordPress']\nDOMAIN_KEYWORDS = ['Web Development', 'Agile', 'Software Development Lifecycle']\n```",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-09-19T22:57:14.056",
+      "model_used": "gpt-4o-mini",
+      "content": "**DECISION:** \ud83d\udfe1 STRATEGIC PURSUE\n\n---\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** The core requirements for this role focus on web development skills, particularly in ReactJS and TypeScript, along with a solid understanding of the software development lifecycle. While the job description lists several technologies, the essential skills are likely to be ReactJS and Node.js, which are crucial for building web applications.\n  \n- **Flexibility indicators:** The presence of \"nice to have\" skills suggests that the hiring manager may be open to candidates who can demonstrate strong foundational skills and a willingness to learn. The emphasis on cross-skilling and training indicates a culture that values growth and adaptability.\n\n- **Hard blockers identified:** The primary hard blocker is the lack of direct experience with ReactJS and TypeScript, which are explicitly mentioned as key technologies. However, Maheshwor has Python experience and some exposure to web technologies, which could mitigate this gap if positioned correctly.\n\n- **Hiring urgency signals:** The job description does not explicitly indicate urgency, but the need for a Software Engineer in a competitive field like media suggests a reasonable level of urgency, especially if they are looking to enhance their digital products.\n\n---\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** Maheshwor's strong background in Python and machine learning can be framed as a significant asset, particularly in data-driven decision-making and automation, which are increasingly valuable in software engineering roles. His experience in building dashboards and visualizations can also be highlighted as relevant to creating user interfaces.\n\n- **Smart connections:** His experience with SQL and data pipelines can be positioned as complementary to backend development, especially if he emphasizes any relevant experience with REST APIs or data integration. His academic background in physics showcases strong analytical and problem-solving skills, which are crucial in software engineering.\n\n- **Growth potential:** Maheshwor's continuous learning trajectory, as evidenced by his recent Master's in Data Science and relevant work experience, indicates a strong potential for growth. His adaptability in transitioning from academia to industry roles can be a compelling narrative.\n\n- **Positioning opportunities:** Emphasizing his Python programming and any relevant projects involving web technologies will be crucial. If he can demonstrate any self-directed learning in ReactJS or TypeScript, that would significantly strengthen his application.\n\n---\n\n**REALISTIC ODDS:** 60% chance of getting an interview if CV tailored well.\n\n---\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight any relevant projects or coursework involving web development, particularly with JavaScript frameworks. If Maheshwor has done any self-study or projects in ReactJS or TypeScript, these should be front and center.\n  \n2. **Priority 2:** Emphasize his strong analytical skills and experience in building data-driven applications, which can translate well into web development and enhance the user experience.\n\n3. **Priority 3:** Address the gap in direct experience with ReactJS and TypeScript by framing his Python experience as a strong foundation for learning new programming languages and frameworks quickly.\n\n---\n\n**HONEST BOTTOM LINE:** Maheshwor has a solid foundation in programming and data analysis, which can be leveraged to transition into a software engineering role. While he lacks direct experience with the core technologies listed in the job description, his adaptability and strong analytical skills present a compelling case for consideration. Tailoring his CV to emphasize relevant experiences and a willingness to learn will be essential for maximizing his chances of securing an interview. Pursuing this opportunity is worthwhile, especially if he can demonstrate his eagerness to bridge the technology gap."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-09-19T22:57:35.611",
+      "model_used": "gpt-4o-mini",
+      "content": "\ud83c\udfaf OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 28\nMatched: 4\nMissing: 24\nMatch Rate: 14%\n\n\ud83d\udcca SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            27         22          1         21            5\nSoft Skills                   6          3          3          0           100\nDomain Keywords              6          3          0          3            0\n\n\ud83e\udde0 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n\ud83d\udd39 TECHNICAL SKILLS\n  \u2705 MATCHED JD REQUIREMENTS (1 items):\n    1. JD Required: 'Python'\n       \u2192 Found in CV: 'Python'\n       \ud83d\udca1 exact match\n  \u274c MISSING FROM CV (21 items):\n    1. JD Requires: 'Angular'\n       \ud83d\udca1 no equivalent found in CV\n    2. JD Requires: 'Cypress'\n       \ud83d\udca1 no equivalent found in CV\n    3. JD Requires: 'Devops'\n       \ud83d\udca1 no equivalent found in CV\n    4. JD Requires: 'Golang'\n       \ud83d\udca1 no equivalent found in CV\n    5. JD Requires: 'Graphql'\n       \ud83d\udca1 no equivalent found in CV\n    6. JD Requires: 'Html5'\n       \ud83d\udca1 no equivalent found in CV\n    7. JD Requires: 'Javascript'\n       \ud83d\udca1 no equivalent found in CV\n    8. JD Requires: 'Jest'\n       \ud83d\udca1 no equivalent found in CV\n    9. JD Requires: 'Nextjs'\n       \ud83d\udca1 no equivalent found in CV\n    10. JD Requires: 'Node.js'\n       \ud83d\udca1 no equivalent found in CV\n    11. JD Requires: 'Php'\n       \ud83d\udca1 no equivalent found in CV\n    12. JD Requires: 'Playwright'\n       \ud83d\udca1 no equivalent found in CV\n    13. JD Requires: 'Reactjs'\n       \ud83d\udca1 no equivalent found in CV\n    14. JD Requires: 'Rest'\n       \ud83d\udca1 no equivalent found in CV\n    15. JD Requires: 'Ruby'\n       \ud83d\udca1 no equivalent found in CV\n    16. JD Requires: 'Sass'\n       \ud83d\udca1 no equivalent found in CV\n    17. JD Requires: 'Svelte'\n       \ud83d\udca1 no equivalent found in CV\n    18. JD Requires: 'Typescript'\n       \ud83d\udca1 no equivalent found in CV\n    19. JD Requires: 'Vite'\n       \ud83d\udca1 no equivalent found in CV\n    20. JD Requires: 'Vue'\n       \ud83d\udca1 no equivalent found in CV\n    21. JD Requires: 'Wordpress'\n       \ud83d\udca1 no equivalent found in CV\n\n\ud83d\udd39 SOFT SKILLS\n  \u2705 MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Adaptability'\n       \u2192 Found in CV: 'Adaptability'\n       \ud83d\udca1 exact match\n    2. JD Required: 'Collaboration'\n       \u2192 Found in CV: 'Collaboration'\n       \ud83d\udca1 exact match\n    3. JD Required: 'Problem-Solving'\n       \u2192 Found in CV: 'Problem-Solving'\n       \ud83d\udca1 exact match\n\n\ud83d\udd39 DOMAIN KEYWORDS\n  \u274c MISSING FROM CV (3 items):\n    1. JD Requires: 'Agile'\n       \ud83d\udca1 no equivalent found in CV\n    2. JD Requires: 'Software Development Lifecycle'\n       \ud83d\udca1 no equivalent found in CV\n    3. JD Requires: 'Web Development'\n       \ud83d\udca1 no equivalent found in CV\n\n\ud83d\udcda INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Python, AI, Machine Learning, Data Pipelines, SQL, Tableau, Power BI, Pandas, NumPy, scikit-learn...\n- Soft: Communication, Teamwork, Collaboration, Problem-solving, Adaptability, Mentoring\n- Domain: Data Science, Physics, Research, Customer Behavior, Operational Efficiency, Strategic Decision-making\n\nJD\n- Technical: TypeScript, ReactJS, Node.js, HTML5, SASS, JavaScript, NextJS, Angular, Vue, Svelte...\n- Soft: Collaboration, Adaptability, Problem-solving\n- Domain: Web Development, Agile, Software Development Lifecycle\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-09-19T22:58:10.331",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "Python",
+              "cv_evidence": "3+ years, pandas, scikit-learn, multiple projects",
+              "jd_application": "Data analysis and automation tasks",
+              "relevance_score": 95,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Multiple libraries",
+                "Project leadership",
+                "3+ years"
+              ],
+              "synergy_bonus": 10
+            },
+            {
+              "skill": "Teamwork",
+              "cv_evidence": "Collaborated with development teams and mentored students",
+              "jd_application": "Working in small, autonomous Agile squads",
+              "relevance_score": 85,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Cross-functional collaboration",
+                "Mentorship experience"
+              ],
+              "synergy_bonus": 5
+            },
+            {
+              "skill": "Communication",
+              "cv_evidence": "Presented research findings and led tutorials",
+              "jd_application": "Ensuring consistency of practices and processes",
+              "relevance_score": 80,
+              "skill_level": "Advanced",
+              "depth_indicators": [
+                "Public speaking",
+                "Teaching experience"
+              ],
+              "synergy_bonus": 5
+            }
+          ],
+          "overall_skills_score": 87,
+          "strength_areas": [
+            "Data Analysis",
+            "Programming"
+          ],
+          "improvement_areas": [
+            "Web Development Frameworks",
+            "DevOps Practices"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": 4,
+            "cv_role_level": "Mid-Senior",
+            "cv_progression": [
+              "Data Analyst",
+              "Software Engineer and Analyst",
+              "Research Assistant"
+            ],
+            "jd_required_years": "3-5 years",
+            "jd_role_level": "Senior",
+            "alignment_score": 75,
+            "experience_gaps": [
+              "Lack of direct experience with ReactJS, TypeScript, and Node.js"
+            ],
+            "experience_strengths": [
+              "Strong Python programming skills",
+              "Experience in data analysis and machine learning",
+              "Experience in building dashboards and visualizations"
+            ],
+            "quantified_achievements": [
+              "Improved data pipeline efficiency by 30%",
+              "Enhanced customer behavior insights through advanced analysis"
+            ]
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Science and Analytics",
+            "cv_domain_expertise": [
+              "Data Analysis",
+              "Machine Learning",
+              "Data Visualization"
+            ],
+            "jd_target_industry": "Media and Publishing Technology",
+            "jd_domain_requirements": [
+              "Web Development",
+              "Software Design",
+              "API Integration"
+            ],
+            "industry_alignment_score": 55,
+            "domain_overlap_percentage": 40,
+            "data_familiarity_score": 70,
+            "stakeholder_fit_score": 50,
+            "business_cycle_alignment": 40,
+            "transferable_strengths": [
+              "Python Programming",
+              "Data Pipeline Development",
+              "Analytical Skills"
+            ],
+            "industry_gaps": [
+              "Web Development Experience",
+              "Knowledge of Frontend Frameworks (React, TypeScript)",
+              "Experience in Agile Development"
+            ],
+            "adaptation_timeline": "6-12 months"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_experience_years": 6,
+            "cv_responsibility_scope": "Senior Individual Contributor",
+            "cv_leadership_indicators": 7,
+            "cv_decision_authority": "Project Level",
+            "cv_stakeholder_level": "Department",
+            "jd_required_seniority": "Senior",
+            "jd_leadership_requirements": "Team Leadership Expected",
+            "jd_decision_authority_needed": "Program Level",
+            "jd_stakeholder_level": "Executive",
+            "seniority_score": 75,
+            "experience_match_percentage": 85,
+            "responsibility_fit_percentage": 70,
+            "leadership_readiness_score": 65,
+            "growth_trajectory_score": 80,
+            "seniority_strengths": [
+              "Strong Technical Leadership",
+              "Cross-functional Collaboration"
+            ],
+            "seniority_gaps": [
+              "Direct Report Management",
+              "Executive Stakeholder Management"
+            ],
+            "readiness_assessment": "Stretch Role with Development Support"
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Advanced",
+            "cv_primary_domain": "Machine Learning & Data Science",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "ML Algorithms",
+              "Data Visualization"
+            ],
+            "cv_problem_complexity": 8,
+            "cv_innovation_indicators": [
+              "Published Research",
+              "Framework Development"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "Tableau",
+              "Excel"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 90,
+            "core_skills_match_percentage": 85,
+            "technical_stack_fit_percentage": 80,
+            "complexity_readiness_score": 95,
+            "learning_agility_score": 85,
+            "technical_strengths": [
+              "Advanced Analytics",
+              "ML Implementation",
+              "Data Architecture"
+            ],
+            "technical_gaps": [
+              "Tableau Proficiency",
+              "Business Domain Context"
+            ],
+            "overqualification_risk": "Moderate"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 10,
+            "total_preferred_keywords": 14,
+            "matched_required_count": 2,
+            "matched_preferred_count": 0,
+            "missing_required": 8,
+            "missing_preferred": 14
+          },
+          "bonus_breakdown": {
+            "required_bonus": 1.0,
+            "required_penalty": -4.0,
+            "preferred_bonus": 0.0,
+            "preferred_penalty": -2.1,
+            "total_bonus": -5.1
+          },
+          "coverage_metrics": {
+            "required_coverage": 20.0,
+            "preferred_coverage": 0.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 87.0,
+        "experience_alignment": 75.0,
+        "industry_fit": 55.0,
+        "domain_overlap_percentage": 40.0,
+        "data_familiarity_score": 70.0,
+        "stakeholder_fit_score": 50.0,
+        "business_cycle_alignment": 40.0,
+        "role_seniority": 75.0,
+        "experience_match_percentage": 85.0,
+        "responsibility_fit_percentage": 70.0,
+        "leadership_readiness_score": 65.0,
+        "growth_trajectory_score": 80.0,
+        "technical_depth": 90.0,
+        "core_skills_match_percentage": 85.0,
+        "technical_stack_fit_percentage": 80.0,
+        "complexity_readiness_score": 95.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": -5.1,
+        "total_bonus": -5.1,
+        "required_bonus": 1.0,
+        "required_penalty": -4.0,
+        "preferred_bonus": 0.0,
+        "preferred_penalty": -2.1,
+        "required_coverage": 20.0,
+        "preferred_coverage": 0.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-09-19T22:58:10.338",
+      "final_ats_score": 56.324999999999996,
+      "category_status": "\u274c Poor fit",
+      "recommendation": "Generally rejected",
+      "breakdown": {
+        "category1": {
+          "score": 16.0,
+          "technical_skills_match_rate": 5.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 100.0,
+          "missing_counts": {
+            "technical": 21,
+            "domain": 3,
+            "soft": 0
+          }
+        },
+        "category2": {
+          "score": 45.425,
+          "core_competency_avg": 81.25,
+          "experience_seniority_avg": 74.0,
+          "potential_ability_avg": 80.0,
+          "company_fit_avg": 46.25
+        },
+        "ats1_score": 61.425,
+        "bonus_points": -5.1
+      }
+    }
+  ]
+}

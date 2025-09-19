@@ -1,0 +1,52 @@
+{
+  "company_name": "Nine",
+  "cv_analysis_timestamp": "2025-09-19T22:57:44.728373",
+  "matched_required_keywords": [
+    "teamwork",
+    "communication"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "TypeScript",
+    "ReactJS",
+    "Node.js",
+    "HTML5",
+    "SASS",
+    "REST",
+    "GraphQL",
+    "web development",
+    "software development lifecycle",
+    "Agile"
+  ],
+  "missed_preferred_keywords": [
+    "NextJS",
+    "Angular",
+    "Vue",
+    "Svelte",
+    "jest",
+    "vite",
+    "Cypress",
+    "Playwright",
+    "Golang",
+    "PHP",
+    "Python",
+    "Ruby",
+    "WordPress",
+    "willingness to learn",
+    "DevOps"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 14,
+    "matched_required_count": 2,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "teamwork": "Mentioned in the context of mentoring and collaboration with students",
+    "communication": "Demonstrated through presentation of research findings and teaching"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}

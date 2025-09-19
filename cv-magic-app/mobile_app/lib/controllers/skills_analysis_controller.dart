@@ -396,7 +396,8 @@ class SkillsAnalysisController extends ChangeNotifier {
         if (completeResults['ai_recommendation'] != null) {
           aiRecommendation = AIRecommendationResult.fromJson(
               completeResults['ai_recommendation']);
-          print('🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars');
+          print(
+              '🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars');
         }
 
         // Store the complete results for progressive reveal

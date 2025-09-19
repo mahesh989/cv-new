@@ -1,0 +1,61 @@
+Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+
+TECHNICAL SKILLS
+• Data Analysis, Python, Power BI, SQL, Excel, Data Science, Web Development, Agile
+
+EXPERIENCE
+Data Analyst         Jul 2024 – Present
+The Bitrates, Sydney, New South Wales, Australia
+
+• Designed and implemented 5 Python scripts for data cleaning and preprocessing, improving data pipeline efficiency by 30%, processing 100K records weekly.
+• Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions that increased revenue by 15%.
+• Leveraged AI techniques to automate repetitive tasks, reducing manual effort by 40% and improving productivity across the team.
+• Built 8 dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively, enhancing stakeholder engagement.
+• Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights and supporting strategic decision-making.
+
+Data Analyst         Mar 2024 – Jun 2024
+iBuild Building Solutions, Victoria, Australia
+
+• Automated data extraction and structuring of population datasets using Python, improving data accuracy by 25% and enhancing team collaboration.
+• Analyzed customer support data with Python to optimize response times, reducing average response time by 20% and enhancing operational efficiency.
+• Developed Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making that improved project outcomes by 30%.
+• Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction scores by 15%.
+
+Software Engineer and Analyst         Jun 2023 – Nov 2023
+Property Console, Sydney, Australia
+
+• Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency across projects.
+• Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%, facilitating quicker decision-making.
+• Leveraged Python for data preprocessing and analysis, producing 10 Tableau dashboards that improved decision-making processes for stakeholders.
+• Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives that increased engagement by 20%.
+
+Research Assistant         Oct 2018 – Sep 2022
+CY Cergy Paris University, Cergy-Pontoise, France
+
+• Utilized advanced Python programming for computational modeling and solving complex research problems, contributing to 3 major publications.
+• Developed Python-based workflows to manage and analyze large datasets across multiple research projects, improving data processing efficiency by 30%.
+• Presented Python-enabled research findings at 5 international conferences, demonstrating technical expertise and effective communication skills.
+
+Lecturer and Course Facilitator         Sep 2019 – Jun 2022
+CY Cergy Paris University, Cergy-Pontoise, France
+
+• Led engaging physics tutorials for master’s students, enhancing understanding and promoting teamwork among 30 students.
+• Designed course materials, assignments, and exams, strengthening the learning experience and improving student performance by 20%.
+• Mentored students on projects, collaborated with faculty, and fostered student engagement, resulting in a 15% increase in course satisfaction ratings.
+
+Research Intern         Feb 2018 – Jun 2018
+CY Cergy Paris University, Cergy-Pontoise, France
+
+• Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials, contributing to a project that improved accuracy by 30%.
+• Managed and analyzed complex data sets, improving their accuracy and reliability for ongoing research projects.
+• Used Power BI to present research findings, enhancing collaboration and research skills through weekly reviews with the team.
+
+EDUCATION
+Master of Data Science
+Charles Darwin University, Sydney, Australia
+
+PhD in Physics
+CY Cergy Paris University, Cergy, France
+
+Master of Theoretical Physics
+CY Cergy Paris University, Cergy, France
