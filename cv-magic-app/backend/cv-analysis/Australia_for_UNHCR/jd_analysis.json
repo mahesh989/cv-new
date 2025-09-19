@@ -4,9 +4,9 @@
     "technical": [
       "SQL",
       "Power BI",
-      "Excel",
+      "Tableau",
       "VBA",
-      "Tableau"
+      "Excel"
     ],
     "soft_skills": [
       "project management",
@@ -15,56 +15,54 @@
       "customer service"
     ],
     "domain_knowledge": [
-      "data warehouse",
       "data mining",
+      "data warehouse",
       "direct marketing campaigns",
-      "campaign optimization"
+      "data models"
     ],
     "experience": []
   },
   "preferred_skills": {
     "technical": [
-      "data models",
-      "business intelligence tools"
+      "data extraction",
+      "data querying"
     ],
     "soft_skills": [
       "analytical thinking",
       "problem-solving"
     ],
     "domain_knowledge": [
-      "data issues",
-      "de-duplication",
-      "governing regulations",
-      "best practice guidelines"
+      "data de-duplication",
+      "campaign optimization",
+      "governing regulations"
     ],
     "experience": []
   },
   "required_keywords": [
     "SQL",
     "Power BI",
-    "Excel",
-    "VBA",
     "Tableau",
+    "VBA",
+    "Excel",
     "project management",
     "stakeholder management",
     "communication",
     "customer service",
-    "data warehouse",
     "data mining",
+    "data warehouse",
     "direct marketing campaigns",
-    "campaign optimization"
+    "data models"
   ],
   "preferred_keywords": [
-    "data models",
-    "business intelligence tools",
+    "data extraction",
+    "data querying",
     "analytical thinking",
     "problem-solving",
-    "data issues",
-    "de-duplication",
-    "governing regulations",
-    "best practice guidelines"
+    "data de-duplication",
+    "campaign optimization",
+    "governing regulations"
   ],
-  "analysis_timestamp": "2025-09-18T23:22:02.896532",
+  "analysis_timestamp": "2025-09-19T11:25:08.066435",
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",

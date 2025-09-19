@@ -179,16 +179,16 @@ class SkillsAnalysisController extends ChangeNotifier {
             '🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis');
       }
 
-      // Perform fresh analysis
-      print('=== CONTROLLER CALLING SERVICE ===');
-      debugPrint('[SKILLS_ANALYSIS] Starting fresh analysis...');
+      // Perform basic skills extraction first (fast response)
+      print('=== CONTROLLER CALLING SERVICE (BASIC) ===');
+      debugPrint('[SKILLS_ANALYSIS] Starting basic skills extraction...');
       debugPrint('   CV: $cvFilename');
       debugPrint('   JD text length: ${jdText.length} chars');
 
       // Show starting notification
-      _showNotification('🚀 Starting skills analysis...');
+      _showNotification('🚀 Starting skills extraction...');
 
-      final result = await SkillsAnalysisService.performPreliminaryAnalysis(
+      final result = await SkillsAnalysisService.performBasicSkillsExtraction(
         cvFilename: cvFilename,
         jdText: jdText,
       );
@@ -276,8 +276,11 @@ class SkillsAnalysisController extends ChangeNotifier {
     _showPreextractedComparison = false;
     _showATSLoading = false;
     _showATSResults = false;
+    _showAIRecommendationLoading = false;
+    _showAIRecommendationResults = false;
 
-    // Step 1: Show skills immediately (side-by-side display)
+    // Step 1: Show initial skills immediately (side-by-side display)
+    // Include analyze match and preextracted comparison if already available from backend
     _result = SkillsAnalysisResult(
       cvSkills: _fullResult!.cvSkills,
       jdSkills: _fullResult!.jdSkills,
@@ -287,10 +290,10 @@ class SkillsAnalysisController extends ChangeNotifier {
       extractedKeywords: _fullResult!.extractedKeywords,
       executionDuration: _fullResult!.executionDuration,
       isSuccess: true,
-      // Don't show these yet
-      analyzeMatch: null,
-      preextractedRawOutput: null,
-      preextractedCompanyName: null,
+      // Include results that are already available from backend
+      analyzeMatch: _fullResult!.analyzeMatch,
+      preextractedRawOutput: _fullResult!.preextractedRawOutput,
+      preextractedCompanyName: _fullResult!.preextractedCompanyName,
     );
 
     _setState(SkillsAnalysisState.completed);
@@ -298,61 +301,8 @@ class SkillsAnalysisController extends ChangeNotifier {
       '✅ Skills extracted! Found ${_fullResult!.cvSkills.totalSkillsCount} CV skills and ${_fullResult!.jdSkills.totalSkillsCount} JD skills.',
     );
 
-    // Step 2: Show analyze match loading immediately, then results after 10 seconds
-    if (_fullResult?.analyzeMatch != null) {
-      // Immediately show loading state and notification
-      _showAnalyzeMatch = true;
-      notifyListeners();
-      _showNotification('📎 Starting recruiter assessment analysis...');
-
-      Timer(Duration(seconds: 10), () {
-        // Show analyze match results
-        _result = _result!.copyWith(
-          analyzeMatch: _fullResult!.analyzeMatch,
-        );
-        notifyListeners();
-        _showNotification('🎯 Recruiter assessment completed!');
-
-        // Step 3: Immediately show preextracted comparison loading
-        if (_fullResult?.preextractedRawOutput != null) {
-          _showPreextractedComparison = true;
-          notifyListeners();
-          _showNotification('📈 Starting skills comparison analysis...');
-
-          Timer(Duration(seconds: 10), () {
-            // Show preextracted comparison results
-            _result = _result!.copyWith(
-              preextractedRawOutput: _fullResult!.preextractedRawOutput,
-              preextractedCompanyName: _fullResult!.preextractedCompanyName,
-            );
-            notifyListeners();
-            _showNotification('📊 Skills comparison analysis completed!');
-
-            // Step 4: Start polling for component analysis and ATS results
-            _startPollingForCompleteResults();
-          });
-        }
-      });
-    } else {
-      // No analyze match, go directly to preextracted comparison
-      if (_fullResult?.preextractedRawOutput != null) {
-        _showPreextractedComparison = true;
-        notifyListeners();
-        _showNotification('📈 Starting skills comparison analysis...');
-
-        Timer(Duration(seconds: 10), () {
-          _result = _result!.copyWith(
-            preextractedRawOutput: _fullResult!.preextractedRawOutput,
-            preextractedCompanyName: _fullResult!.preextractedCompanyName,
-          );
-          notifyListeners();
-          _showNotification('📊 Skills comparison analysis completed!');
-
-          // Step 4: Start polling for component analysis and ATS results
-          _startPollingForCompleteResults();
-        });
-      }
-    }
+    // Start polling immediately for additional pipeline results (analyze match, skills comparison, ATS, AI recommendations)
+    _startPollingForCompleteResults();
   }
 
   /// Start polling for component analysis and ATS calculation results
@@ -364,115 +314,94 @@ class SkillsAnalysisController extends ChangeNotifier {
       return;
     }
 
-    print('🔄 [POLLING] Starting polling for complete results...');
-    _showNotification(
-        '🔧 Running advanced analysis (component analysis & ATS calculation)...');
+    print('🔄 [POLLING] Starting polling for progressive results...');
 
     try {
-      final completeResults =
+      // Poll for results
+      final results =
           await SkillsAnalysisService.waitForCompleteResults(company);
+      if (results == null) {
+        print('⚠️ [POLLING] No results available yet');
+        return;
+      }
 
-      if (completeResults != null) {
-        print('✅ [POLLING] Complete results obtained!');
-
-        // Parse component analysis
-        ComponentAnalysisResult? componentAnalysis;
-        if (completeResults['component_analysis'] != null) {
-          componentAnalysis = ComponentAnalysisResult.fromJson(
-              completeResults['component_analysis']);
-          print(
-              '📊 [POLLING] Component analysis parsed: ${componentAnalysis.extractedScores.length} scores');
-        }
-
-        // Parse ATS result
-        ATSResult? atsResult;
-        if (completeResults['ats_score'] != null) {
-          atsResult = ATSResult.fromJson(completeResults['ats_score']);
-          print('🎯 [POLLING] ATS result parsed: ${atsResult.finalATSScore}');
-        }
-
-        // Parse AI recommendation
-        AIRecommendationResult? aiRecommendation;
-        if (completeResults['ai_recommendation'] != null) {
-          aiRecommendation = AIRecommendationResult.fromJson(
-              completeResults['ai_recommendation']);
-          print('🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars');
-        }
-
-        // Store the complete results for progressive reveal
-        _fullResult = _fullResult!.copyWith(
-          componentAnalysis: componentAnalysis,
-          atsResult: atsResult,
-          aiRecommendation: aiRecommendation,
-        );
-
-        // Update result with component analysis first (component analysis can show immediately)
+      // Handle analyze match results if available
+      if (results['analyze_match'] != null && !_showAnalyzeMatch) {
+        _showAnalyzeMatch = true;
         _result = _result!.copyWith(
-          componentAnalysis: componentAnalysis,
+          analyzeMatch: AnalyzeMatchResult.fromJson(results['analyze_match']),
         );
         notifyListeners();
+        _showNotification('🎯 Recruiter assessment completed!');
+      }
 
-        // Step 5: Show ATS loading immediately, then results after 10 seconds
-        if (atsResult != null) {
-          // Immediately show ATS loading state and notification
-          _showATSLoading = true;
-          notifyListeners();
-          _showNotification('⚡ Generating enhanced ATS analysis...');
+      // Handle preextracted comparison if available
+      if (results['preextracted_comparison'] != null &&
+          !_showPreextractedComparison) {
+        _showPreextractedComparison = true;
+        _result = _result!.copyWith(
+          preextractedRawOutput: results['preextracted_comparison']
+              ['raw_content'],
+          preextractedCompanyName: results['preextracted_comparison']
+              ['company_name'],
+        );
+        notifyListeners();
+        _showNotification('📊 Skills comparison analysis completed!');
+      }
 
-          Timer(Duration(seconds: 10), () {
-            // Show ATS results after 10-second delay
-            _showATSResults = true;
-            _result = _result!.copyWith(
-              atsResult: _fullResult!.atsResult,
-            );
-            notifyListeners();
+      // Handle component analysis if available
+      if (results['component_analysis'] != null) {
+        ComponentAnalysisResult componentAnalysis =
+            ComponentAnalysisResult.fromJson(results['component_analysis']);
+        _result = _result!.copyWith(componentAnalysis: componentAnalysis);
+        notifyListeners();
+      }
 
-            // Use the stored ATS result from _fullResult for notification
-            final finalAtsResult = _fullResult!.atsResult;
-            if (finalAtsResult != null) {
-              _showNotification(
-                  '🎯 ATS Score: ${finalAtsResult.finalATSScore.toStringAsFixed(1)}/100 (${finalAtsResult.categoryStatus})');
-            } else {
-              _showNotification('✅ ATS Analysis completed!');
-            }
-
-            // Step 6: Show AI Recommendation loading immediately after ATS results
-            if (_fullResult!.aiRecommendation != null) {
-              _showAIRecommendationLoading = true;
-              notifyListeners();
-              _showNotification('🤖 Generating AI recommendations...');
-
-              Timer(Duration(seconds: 10), () {
-                // Show AI recommendations after another 10-second delay
-                _showAIRecommendationResults = true;
-                _result = _result!.copyWith(
-                  aiRecommendation: _fullResult!.aiRecommendation,
-                );
-                notifyListeners();
-                _showNotification('✅ AI recommendations completed!');
-
-                _finishAnalysis();
-              });
-            } else {
-              _finishAnalysis();
-            }
-          });
-        } else {
-          _showNotification('✅ Advanced analysis completed!');
-          _finishAnalysis();
-        }
-      } else {
-        print('⚠️ [POLLING] Polling timed out, analysis incomplete');
+      // Handle ATS results if available
+      if (results['ats_score'] != null && !_showATSResults) {
+        _showATSResults = true;
+        ATSResult atsResult = ATSResult.fromJson(results['ats_score']);
+        _result = _result!.copyWith(atsResult: atsResult);
+        notifyListeners();
         _showNotification(
-            '⚠️ Advanced analysis timed out - basic analysis complete');
+            '🎯 ATS Score: ${atsResult.finalATSScore.toStringAsFixed(1)}/100 (${atsResult.categoryStatus})');
+      }
+
+      // Handle AI recommendation if available
+      if (results['ai_recommendation'] != null &&
+          !_showAIRecommendationResults) {
+        _showAIRecommendationResults = true;
+        AIRecommendationResult aiRecommendation =
+            AIRecommendationResult.fromJson(results['ai_recommendation']);
+        _result = _result!.copyWith(aiRecommendation: aiRecommendation);
+        notifyListeners();
+        _showNotification('✅ AI recommendations completed!');
+      }
+
+      // Continue polling if any component is missing
+      if (!_hasAllComponents()) {
+        print(
+            '🔄 [POLLING] Some components still missing, continuing to poll...');
+        Timer(Duration(seconds: 2), () {
+          _startPollingForCompleteResults();
+        });
+      } else {
+        print('✅ [POLLING] All components received');
         _finishAnalysis();
       }
     } catch (e) {
       print('❌ [POLLING] Error during polling: $e');
-      _showNotification(
-          '⚠️ Advanced analysis failed - basic analysis complete');
+      _showNotification('⚠️ Some analysis components could not be loaded');
       _finishAnalysis();
     }
+  }
+
+  bool _hasAllComponents() {
+    return _result?.analyzeMatch != null &&
+        _result?.preextractedRawOutput != null &&
+        _result?.componentAnalysis != null &&
+        _result?.atsResult != null &&
+        _result?.aiRecommendation != null;
   }
 
   /// Finish the analysis process

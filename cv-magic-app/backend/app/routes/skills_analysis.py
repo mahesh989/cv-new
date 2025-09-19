@@ -279,6 +279,171 @@ async def analyze_skills(request: Request):
         )
 
 
+@router.post("/basic-skills-extraction")
+async def basic_skills_extraction(
+    request: Request,
+    current_model: str = Depends(get_current_model)
+):
+    """Basic skills extraction from CV and JD (CV skills + JD skills only)"""
+    try:
+        # Verify authentication
+        auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authentication required"}
+            )
+        
+        token = auth_header.replace("Bearer ", "")
+        token_data = verify_token(token)
+        if not token_data:
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Invalid token"}
+            )
+        
+        data = await request.json()
+        
+        # Extract parameters
+        cv_filename = data.get("cv_filename")
+        jd_text = data.get("jd_text")
+        config_name = data.get("config_name")  # Optional custom config
+        user_id = getattr(token_data, 'user_id', 1)
+        
+        # Validate required parameters
+        if not cv_filename:
+            return JSONResponse(
+                status_code=400, 
+                content={"error": "cv_filename is required"}
+            )
+        
+        if not jd_text:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "jd_text is required"}
+            )
+        
+        logger.info(f"🎯 Basic skills extraction request: CV={cv_filename}, JD_length={len(jd_text)}, CONFIG={config_name}")
+        
+        # Get CV content dynamically (no fallback)
+        cv_content_result = cv_content_service.get_cv_content(cv_filename, user_id, use_fallback=False)
+        if not cv_content_result["success"]:
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": cv_content_result.get('error', 'CV content not found'),
+                    "suggestions": cv_content_result.get('suggestions', []),
+                    "filename": cv_filename
+                }
+            )
+        
+        cv_content = cv_content_result["content"]
+        logger.info(f"Using CV content from {cv_content_result['source']} for {cv_filename} (length: {len(cv_content)})")
+        
+        # Perform basic skills analysis (CV + JD skills only)
+        result = await perform_basic_skills_extraction(
+            cv_content=cv_content,
+            jd_text=jd_text,
+            cv_filename=cv_filename,
+            current_model=current_model,
+            config_name=config_name,
+            user_id=user_id
+        )
+        
+        # Save basic results for downstream pipelines
+        try:
+            # Derive company from the actual saved path when available
+            saved_path = result.get("saved_file_path")
+            company_name = None
+            if saved_path:
+                try:
+                    company_name = Path(saved_path).parent.name
+                except Exception:
+                    company_name = None
+
+            # Fallback to detector if we couldn't extract from saved path
+            if not company_name:
+                company_name = _detect_most_recent_company()
+                logger.info(f"🏢 [PIPELINE] (basic-skills-extraction) fallback detected company: {company_name}")
+
+            # If we have a company, ensure required files exist for the pipeline
+            if company_name:
+                base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+                company_dir = base_dir / company_name
+                try:
+                    company_dir.mkdir(parents=True, exist_ok=True)
+                except Exception:
+                    # best-effort; continue
+                    pass
+
+                # Save JD content to jd_original.json for JD analyzer
+                try:
+                    import json
+                    jd_file = company_dir / "jd_original.json"
+                    with open(jd_file, 'w', encoding='utf-8') as f:
+                        json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                    logger.info(f"💾 [PIPELINE] (basic-skills-extraction) JD JSON saved to: {jd_file}")
+                except Exception as e:
+                    logger.warning(f"⚠️ [PIPELINE] (basic-skills-extraction) failed to save JD file: {e}")
+
+                # Ensure CV file exists for the matcher - use dynamic CV selection
+                try:
+                    import json
+                    from app.services.dynamic_cv_selector import dynamic_cv_selector
+                    
+                    # Get the latest CV file dynamically
+                    latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+                    cv_file = Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None
+                    
+                    logger.info(f"📄 [PIPELINE] Using dynamic CV: {cv_file} from {latest_cv_paths['json_source']} folder")
+                    
+                    # Check if file exists and has structured data
+                    should_save = True
+                    if cv_file.exists():
+                        try:
+                            with open(cv_file, 'r', encoding='utf-8') as f:
+                                existing_data = json.load(f)
+                            # If file has structured CV data (not just text), don't overwrite it
+                            if isinstance(existing_data, dict) and any(key in existing_data for key in ['personal_information', 'career_profile', 'skills', 'education', 'experience']):
+                                logger.info(f"💾 [PIPELINE] (basic-skills-extraction) Structured CV already exists, preserving it: {cv_file}")
+                                should_save = False
+                        except:
+                            # If we can't read the file, we'll save the simple version
+                            pass
+                    
+                    if should_save:
+                        with open(cv_file, 'w', encoding='utf-8') as f:
+                            json.dump({"text": cv_content or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                        logger.info(f"💾 [PIPELINE] (basic-skills-extraction) CV JSON saved to: {cv_file}")
+                        
+                except Exception as e:
+                    logger.warning(f"⚠️ [PIPELINE] (basic-skills-extraction) failed to save CV file: {e}")
+
+            logger.info(f"🚀 [PIPELINE] (basic-skills-extraction) scheduling for company: {company_name}")
+            _schedule_post_skill_pipeline(company_name)
+        except Exception as e:
+            logger.warning(f"⚠️ [PIPELINE] (basic-skills-extraction) failed to schedule: {e}")
+        
+        return JSONResponse(content=result)
+        
+    except Exception as e:
+        import traceback
+        error_msg = str(e) if str(e) else "Unknown error occurred"
+        error_type = type(e).__name__
+        traceback_info = traceback.format_exc()
+        
+        logger.error(f"❌ Basic skills extraction error ({error_type}): {error_msg}")
+        logger.error(f"Traceback: {traceback_info}")
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Basic skills extraction failed ({error_type}): {error_msg}",
+                "type": error_type
+            }
+        )
+
+
 @router.post("/preliminary-analysis")
 async def preliminary_analysis(
     request: Request,
@@ -1313,6 +1478,203 @@ async def create_analysis_config(request: Request):
             status_code=500,
             content={"error": f"Failed to create configuration: {str(e)}"}
         )
+
+
+async def perform_basic_skills_extraction(
+    cv_content: str, 
+    jd_text: str, 
+    cv_filename: str, 
+    current_model: str,
+    config_name: Optional[str] = None,
+    user_id: int = 1
+) -> dict:
+    """Perform basic skills extraction (CV + JD skills only) - fast response for immediate display"""
+    try:
+        # Get configuration
+        config = skills_analysis_config_service.get_config(config_name)
+        ai_params = skills_analysis_config_service.get_ai_parameters(config_name)
+        logging_params = skills_analysis_config_service.get_logging_parameters(config_name)
+        
+        if logging_params["enable_detailed_logging"]:
+            logger.info(f"🔍 [BASIC_SKILLS] Starting basic skills extraction for {cv_filename}")
+            logger.info(f"🔍 [BASIC_SKILLS] CV content length: {len(cv_content)} chars")
+            logger.info(f"🔍 [BASIC_SKILLS] JD content length: {len(jd_text)} chars")
+            logger.info(f"🔍 [BASIC_SKILLS] Using config: {config_name or 'default'}")
+        
+        # Get AI service instance
+        from app.ai.ai_service import ai_service
+        
+        # Extract CV skills using enhanced structured prompt
+        if logging_params["enable_detailed_logging"]:
+            logger.info("🔍 [BASIC_SKILLS] Extracting CV skills...")
+        
+        cv_structured_prompt = get_skill_prompt('combined_structured', text=cv_content, document_type="CV")
+        
+        # Use configuration parameters
+        cv_structured_response = await ai_service.generate_response(
+            prompt=cv_structured_prompt,
+            temperature=ai_params["temperature"],
+            max_tokens=ai_params["max_tokens"]
+        )
+        cv_raw_response = cv_structured_response.content
+        
+        # Parse the structured response
+        cv_parser = SkillExtractionParser()
+        cv_parsed = cv_parser.parse_response(cv_raw_response, "CV")
+        cv_technical_skills = cv_parsed.get('technical_skills', [])
+        cv_soft_skills = cv_parsed.get('soft_skills', [])
+        cv_domain_keywords = cv_parsed.get('domain_keywords', [])
+        
+        # Extract JD skills using enhanced structured prompt
+        if logging_params["enable_detailed_logging"]:
+            logger.info("🔍 [BASIC_SKILLS] Extracting JD skills...")
+        
+        jd_structured_prompt = get_skill_prompt('combined_structured', text=jd_text, document_type="Job Description")
+        
+        # Use configuration parameters
+        jd_structured_response = await ai_service.generate_response(
+            prompt=jd_structured_prompt,
+            temperature=ai_params["temperature"],
+            max_tokens=ai_params["max_tokens"]
+        )
+        jd_raw_response = jd_structured_response.content
+        
+        # Parse the structured response
+        jd_parser = SkillExtractionParser()
+        jd_parsed = jd_parser.parse_response(jd_raw_response, "JD")
+        jd_technical_skills = jd_parsed.get('technical_skills', [])
+        jd_soft_skills = jd_parsed.get('soft_skills', [])
+        jd_domain_keywords = jd_parsed.get('domain_keywords', [])
+        
+        # Generate comprehensive analysis
+        if logging_params["enable_detailed_logging"]:
+            logger.info("🔍 [BASIC_SKILLS] Using structured analysis as comprehensive analysis...")
+        
+        # Use the detailed structured responses as the comprehensive analysis
+        cv_analysis = cv_raw_response
+        jd_analysis = jd_raw_response
+        
+        # Debug logging
+        if logging_params["enable_detailed_logging"]:
+            logger.info(f"✅ [BASIC_SKILLS] CV Technical Skills ({len(cv_technical_skills)}): {cv_technical_skills}")
+            logger.info(f"✅ [BASIC_SKILLS] CV Soft Skills ({len(cv_soft_skills)}): {cv_soft_skills}")
+            logger.info(f"✅ [BASIC_SKILLS] CV Domain Keywords ({len(cv_domain_keywords)}): {cv_domain_keywords}")
+            logger.info(f"✅ [BASIC_SKILLS] JD Technical Skills ({len(jd_technical_skills)}): {jd_technical_skills}")
+            logger.info(f"✅ [BASIC_SKILLS] JD Soft Skills ({len(jd_soft_skills)}): {jd_soft_skills}")
+            logger.info(f"✅ [BASIC_SKILLS] JD Domain Keywords ({len(jd_domain_keywords)}): {jd_domain_keywords}")
+        
+        result = {
+            "cv_skills": {
+                "technical_skills": cv_technical_skills,
+                "soft_skills": cv_soft_skills,
+                "domain_keywords": cv_domain_keywords
+            },
+            "jd_skills": {
+                "technical_skills": jd_technical_skills,
+                "soft_skills": jd_soft_skills,
+                "domain_keywords": jd_domain_keywords
+            },
+            "cv_comprehensive_analysis": cv_analysis,
+            "jd_comprehensive_analysis": jd_analysis,
+            "expandable_analysis": {
+                "cv_analysis": {
+                    "title": "CV Analysis",
+                    "content": cv_analysis,
+                    "skills_summary": {
+                        "technical": f"{len(cv_technical_skills)} technical skills",
+                        "soft": f"{len(cv_soft_skills)} soft skills", 
+                        "domain": f"{len(cv_domain_keywords)} domain keywords"
+                    }
+                },
+                "jd_analysis": {
+                    "title": "Job Description Analysis", 
+                    "content": jd_analysis,
+                    "skills_summary": {
+                        "technical": f"{len(jd_technical_skills)} technical skills",
+                        "soft": f"{len(jd_soft_skills)} soft skills",
+                        "domain": f"{len(jd_domain_keywords)} domain keywords"
+                    }
+                }
+            },
+            "extracted_keywords": list(set(cv_technical_skills + jd_technical_skills + cv_soft_skills + jd_soft_skills + cv_domain_keywords + jd_domain_keywords)),
+            "analysis_timestamp": datetime.now().isoformat(),
+            "config_used": config_name or "default"
+        }
+        
+        if logging_params["enable_detailed_logging"]:
+            logger.info(f"✅ [BASIC_SKILLS] Basic skills extraction completed successfully")
+        
+        # Save results to file if enabled
+        file_params = skills_analysis_config_service.get_file_parameters(config_name)
+        if file_params["save_analysis_results"]:
+            try:
+                result_saver = SkillExtractionResultSaver()
+                
+                # Get the most recent company folder (created during JD analysis)
+                company_name = None
+                if file_params["auto_detect_company"]:
+                    try:
+                        from pathlib import Path
+                        cv_analysis_dir = Path("cv-analysis")
+                        if cv_analysis_dir.exists():
+                            # Find the most recently created company folder (excluding Unknown_Company)
+                            company_folders = []
+                            for company_folder in cv_analysis_dir.iterdir():
+                                if (company_folder.is_dir() and 
+                                    company_folder.name != "Unknown_Company" and
+                                    company_folder.name != "cvs"):
+                                    company_folders.append(company_folder)
+                            
+                            if company_folders:
+                                # Sort by modification time, get the most recent
+                                company_folders.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+                                company_name = company_folders[0].name
+                                if logging_params["enable_detailed_logging"]:
+                                    logger.info(f"🏢 [BASIC_SKILLS] Auto-detected company: {company_name}")
+                    except Exception as e:
+                        if logging_params["enable_detailed_logging"]:
+                            logger.warning(f"⚠️ [BASIC_SKILLS] Failed to auto-detect company: {e}")
+                
+                # Prepare skills data for saving
+                cv_skills_data = {
+                    "technical_skills": cv_technical_skills,
+                    "soft_skills": cv_soft_skills,
+                    "domain_keywords": cv_domain_keywords
+                }
+                jd_skills_data = {
+                    "technical_skills": jd_technical_skills,
+                    "soft_skills": jd_soft_skills,
+                    "domain_keywords": jd_domain_keywords
+                }
+                
+                # Save to file with company name
+                saved_file_path = result_saver.save_analysis_results(
+                    cv_skills=cv_skills_data,
+                    jd_skills=jd_skills_data,
+                    jd_url="basic_skills_extraction",
+                    cv_filename=cv_filename,
+                    user_id=user_id,
+                    cv_comprehensive_analysis=cv_analysis,
+                    jd_comprehensive_analysis=jd_analysis,
+                    cv_data={"text": cv_content, "filename": cv_filename},
+                    jd_data=None,
+                    company_name=company_name
+                )
+                
+                if logging_params["enable_detailed_logging"]:
+                    logger.info(f"📁 [BASIC_SKILLS] Results saved to: {saved_file_path}")
+                result["saved_file_path"] = saved_file_path
+                
+            except Exception as e:
+                if logging_params["enable_detailed_logging"]:
+                    logger.warning(f"⚠️ [BASIC_SKILLS] Failed to save results to file: {str(e)}")
+                result["saved_file_path"] = None
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ [BASIC_SKILLS] Error in basic skills extraction: {str(e)}")
+        raise e
 
 
 async def perform_preliminary_skills_analysis(

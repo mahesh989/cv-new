@@ -1,47 +1,47 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-18T23:22:10.119220",
+  "cv_analysis_timestamp": "2025-09-19T11:25:14.418719",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
+    "Tableau",
     "Excel",
+    "project management",
     "communication"
   ],
   "matched_preferred_keywords": [
+    "data extraction",
     "analytical thinking"
   ],
   "missed_required_keywords": [
     "VBA",
-    "Tableau",
-    "project management",
     "stakeholder management",
     "customer service",
-    "data warehouse",
     "data mining",
+    "data warehouse",
     "direct marketing campaigns",
-    "campaign optimization"
+    "data models"
   ],
   "missed_preferred_keywords": [
-    "data models",
-    "business intelligence tools",
+    "data querying",
     "problem-solving",
-    "data issues",
-    "de-duplication",
-    "governing regulations",
-    "best practice guidelines"
+    "data de-duplication",
+    "campaign optimization",
+    "governing regulations"
   ],
   "match_counts": {
     "total_required_keywords": 10,
-    "total_preferred_keywords": 7,
-    "matched_required_count": 4,
-    "matched_preferred_count": 1
+    "total_preferred_keywords": 5,
+    "matched_required_count": 6,
+    "matched_preferred_count": 2
   },
   "matching_notes": {
-    "SQL": "Found in skills and certifications sections",
-    "Power BI": "Mentioned in skills and professional experience",
-    "Excel": "Found in skills and professional experience",
-    "communication": "Explicitly mentioned in skills section",
-    "analytical thinking": "Inferred from experience in data analysis and insights"
+    "SQL": "Proficient in SQL for querying and managing databases",
+    "Power BI": "Used Power BI to present research findings",
+    "Tableau": "Produced Tableau dashboards for decision-making",
+    "Excel": "Leveraged Excel for data-driven solutions",
+    "data extraction": "Automated data extraction and structuring of datasets",
+    "analytical thinking": "Demonstrated through data analysis and problem-solving in projects"
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",

@@ -36,6 +36,10 @@ class EnhancedCVUploadService:
         self.cv_processor = cv_processor
         self.structured_parser = LLMStructuredCVParser()
         self.original_cv_json_path = CV_ANALYSIS_DIR / "cvs" / "original" / "original_cv.json"
+        
+        # Ensure cvs folder structure exists
+        (CV_ANALYSIS_DIR / "cvs" / "original").mkdir(parents=True, exist_ok=True)
+        (CV_ANALYSIS_DIR / "cvs" / "tailored").mkdir(parents=True, exist_ok=True)
 
     async def upload_and_process_cv(
         self, 

@@ -77,6 +77,10 @@ class SkillExtractionResultSaver:
             # Save original CV JSON in root cv-analysis directory if it doesn't exist or doesn't have structured data
             if cv_data and cv_data.get('text'):
                 import json
+                # Ensure cvs folder structure exists
+                (self.base_dir / "cvs" / "original").mkdir(parents=True, exist_ok=True)
+                (self.base_dir / "cvs" / "tailored").mkdir(parents=True, exist_ok=True)
+                
                 cv_file_path = self.base_dir / "cvs" / "original" / "original_cv.json"
                 should_save = True
                 

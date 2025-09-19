@@ -3,6 +3,126 @@ import 'api_service.dart';
 
 /// Service for handling skills analysis (preliminary analysis) operations
 class SkillsAnalysisService {
+  /// Perform basic skills extraction (CV + JD skills only) - fast response
+  static Future<SkillsAnalysisResult> performBasicSkillsExtraction({
+    required String cvFilename,
+    required String jdText,
+  }) async {
+    print('=== FRONTEND SERVICE CALLED (BASIC) ===');
+    print('CV: $cvFilename');
+    print('JD length: ${jdText.length}');
+    try {
+      print('🚀 [SERVICE_DEBUG] Starting performBasicSkillsExtraction');
+      print('   CV: $cvFilename');
+      print('   JD text length: ${jdText.length}');
+
+      final stopwatch = Stopwatch()..start();
+
+      final result = await APIService.makeAuthenticatedCall(
+        endpoint: '/basic-skills-extraction',
+        method: 'POST',
+        body: {
+          'cv_filename': cvFilename,
+          'jd_text': jdText,
+        },
+      );
+
+      print('📡 [SERVICE_DEBUG] Received response from API');
+      print('📡 [SERVICE_DEBUG] Raw result type: ${result.runtimeType}');
+      print('📡 [SERVICE_DEBUG] Raw result: $result');
+      print('   Response keys: ${result.keys.toList()}');
+      print(
+          '   cv_comprehensive_analysis present: ${result.containsKey("cv_comprehensive_analysis")}');
+      print(
+          '   jd_comprehensive_analysis present: ${result.containsKey("jd_comprehensive_analysis")}');
+      print(
+          '🔍 [ANALYZE_MATCH_SERVICE] analyze_match present: ${result.containsKey("analyze_match")}');
+      if (result.containsKey('analyze_match')) {
+        final analyzeMatch = result['analyze_match'] as Map<String, dynamic>?;
+        print('🔍 [ANALYZE_MATCH_SERVICE] analyze_match data: $analyzeMatch');
+        if (analyzeMatch != null) {
+          print(
+              '🔍 [ANALYZE_MATCH_SERVICE] raw_analysis length: ${(analyzeMatch['raw_analysis'] as String?)?.length ?? 0}');
+          print(
+              '🔍 [ANALYZE_MATCH_SERVICE] company_name: ${analyzeMatch['company_name']}');
+          print(
+              '🔍 [ANALYZE_MATCH_SERVICE] has error: ${analyzeMatch.containsKey('error')}');
+        }
+      }
+      if (result.containsKey('cv_comprehensive_analysis')) {
+        final cvAnalysis = result['cv_comprehensive_analysis'] as String?;
+        print(
+            '   cv_comprehensive_analysis length: ${cvAnalysis?.length ?? 0}');
+      }
+      if (result.containsKey('jd_comprehensive_analysis')) {
+        final jdAnalysis = result['jd_comprehensive_analysis'] as String?;
+        print(
+            '   jd_comprehensive_analysis length: ${jdAnalysis?.length ?? 0}');
+      }
+
+      stopwatch.stop();
+
+      print('📊 [SERVICE_DEBUG] About to parse SkillsAnalysisResult from JSON');
+      final analysisResult = SkillsAnalysisResult.fromJson(result);
+      print('📊 [SERVICE_DEBUG] Successfully parsed SkillsAnalysisResult');
+      print(
+          '   CV comprehensive analysis length: ${analysisResult.cvComprehensiveAnalysis?.length ?? 0}');
+      print(
+          '   JD comprehensive analysis length: ${analysisResult.jdComprehensiveAnalysis?.length ?? 0}');
+      print(
+          '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch in parsed result: ${analysisResult.analyzeMatch != null}');
+      if (analysisResult.analyzeMatch != null) {
+        print(
+            '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch raw analysis length: ${analysisResult.analyzeMatch!.rawAnalysis.length}');
+        print(
+            '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch company name: ${analysisResult.analyzeMatch!.companyName}');
+      }
+
+      // Return with execution duration
+      final finalResult = SkillsAnalysisResult(
+        cvSkills: analysisResult.cvSkills,
+        jdSkills: analysisResult.jdSkills,
+        cvComprehensiveAnalysis: analysisResult.cvComprehensiveAnalysis,
+        jdComprehensiveAnalysis: analysisResult.jdComprehensiveAnalysis,
+        expandableAnalysis: analysisResult.expandableAnalysis,
+        extractedKeywords: analysisResult.extractedKeywords,
+        analyzeMatch: analysisResult.analyzeMatch,
+        executionDuration: stopwatch.elapsed,
+        isSuccess: true,
+        // carry pre-extracted comparison fields through to the UI
+        preextractedRawOutput: analysisResult.preextractedRawOutput,
+        preextractedCompanyName: analysisResult.preextractedCompanyName,
+      );
+
+      print(
+          '🔍 [SERVICE_DEBUG] Final result analyzeMatch: ${finalResult.analyzeMatch != null}');
+      if (finalResult.analyzeMatch != null) {
+        print(
+            '🔍 [SERVICE_DEBUG] Final result analyzeMatch raw analysis length: ${finalResult.analyzeMatch!.rawAnalysis.length}');
+      }
+
+      return finalResult;
+    } catch (e, stackTrace) {
+      print('❌ [SERVICE_ERROR] Exception in performBasicSkillsExtraction: $e');
+      print('❌ [SERVICE_ERROR] Stack trace: $stackTrace');
+
+      // Enhanced error handling for CV not found
+      if (e.toString().contains('404') || e.toString().contains('not found')) {
+        return SkillsAnalysisResult.error(
+            'CV file not found. Please upload a CV file first.');
+      } else if (e.toString().contains('401')) {
+        return SkillsAnalysisResult.error(
+            'Authentication required. Please log in again.');
+      } else if (e.toString().contains('500')) {
+        return SkillsAnalysisResult.error(
+            'Server error. Please try again later.');
+      } else {
+        return SkillsAnalysisResult.error(
+            'Failed to perform skills analysis: $e');
+      }
+    }
+  }
+
   /// Perform preliminary analysis to extract skills from CV and JD
   static Future<SkillsAnalysisResult> performPreliminaryAnalysis({
     required String cvFilename,
@@ -203,7 +323,7 @@ class SkillsAnalysisService {
   static Future<Map<String, dynamic>?> getCompleteAnalysisResults(
       String company) async {
     try {
-      print('📊 [POLLING] Checking for complete results for company: $company');
+      print('📊 [POLLING] Checking for results for company: $company');
 
       final result = await APIService.makeAuthenticatedCall(
         endpoint: '/analysis-results/$company',
@@ -212,23 +332,25 @@ class SkillsAnalysisService {
 
       if (result['success'] == true && result['data'] != null) {
         final data = result['data'] as Map<String, dynamic>;
+        // Log available components
+        print('📊 [POLLING] Available components:');
+        print('  • Skills Analysis: ${data.containsKey("skills_analysis")}');
         print(
-            '📊 [POLLING] Component analysis present: ${data.containsKey("component_analysis")}');
+            '  • Preextracted Comparison: ${data.containsKey("preextracted_comparison")}');
         print(
-            '📊 [POLLING] ATS score present: ${data.containsKey("ats_score")}');
+            '  • Component Analysis: ${data.containsKey("component_analysis")}');
+        print('  • ATS Score: ${data.containsKey("ats_score")}');
         print(
-            '📊 [POLLING] AI recommendation present: ${data.containsKey("ai_recommendation")}');
+            '  • AI Recommendation: ${data.containsKey("ai_recommendation")}');
 
-        if (data.containsKey('component_analysis') &&
-            data.containsKey('ats_score')) {
-          print('✅ [POLLING] Complete results found!');
+        // Return any available data immediately
+        if (data.isNotEmpty) {
+          print('✅ [POLLING] Returning available components');
           return data;
-        } else {
-          print('⏳ [POLLING] Still waiting for complete results...');
-          return null;
         }
       }
 
+      print('⏳ [POLLING] No results available yet');
       return null;
     } catch (e) {
       print('❌ [POLLING] Error getting complete results: $e');
