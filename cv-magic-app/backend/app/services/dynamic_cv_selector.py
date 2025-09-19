@@ -27,6 +27,10 @@ class DynamicCVSelector:
         self.cvs_path = self.base_path / "cvs"
         self.original_path = self.cvs_path / "original"
         self.tailored_path = self.cvs_path / "tailored"
+        
+        # Ensure cvs folder structure exists
+        self.original_path.mkdir(parents=True, exist_ok=True)
+        self.tailored_path.mkdir(parents=True, exist_ok=True)
     
     def get_latest_cv_files(self) -> Dict[str, Optional[Path]]:
         """
