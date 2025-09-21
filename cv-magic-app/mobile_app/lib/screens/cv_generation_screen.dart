@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 import '../core/theme/app_theme.dart';
 
 class CVGenerationScreen extends StatefulWidget {
@@ -12,6 +13,9 @@ class CVGenerationScreen extends StatefulWidget {
 
 class _CVGenerationScreenState extends State<CVGenerationScreen> {
   bool _isGenerating = false;
+  bool _isEditMode = false;
+  String? _currentCompany;
+  final TextEditingController _editController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +100,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         final data = json.decode(response.body);
         setState(() {
           tailoredCVContent = data['content'] ?? 'No content available';
+          _currentCompany = data['company'] ?? 'Unknown';
         });
       } else {
         setState(() {
@@ -250,17 +255,23 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
               border: Border.all(color: Colors.grey[700]!),
             ),
             child: SingleChildScrollView(
-              child: SelectableText(
-                _formatTailoredCVContent(tailoredCVContent!),
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.6,
-                  fontFamily: 'monospace', // Monospace font like original CV
-                  color: Colors.grey[100], // Light text like original CV
-                ),
-              ),
+              child: _isEditMode
+                  ? _buildEditableContent()
+                  : SelectableText(
+                      _formatTailoredCVContent(tailoredCVContent!),
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.6,
+                        fontFamily:
+                            'monospace', // Monospace font like original CV
+                        color: Colors.grey[100], // Light text like original CV
+                      ),
+                    ),
             ),
           ),
+          const SizedBox(height: 16),
+          // Action buttons
+          _buildActionButtons(),
         ],
       ),
     );
@@ -411,5 +422,259 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        // Edit Button
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _toggleEditMode,
+            icon: Icon(_isEditMode ? Icons.save : Icons.edit),
+            label: Text(_isEditMode ? 'Save' : 'Edit'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _isEditMode ? Colors.green : Colors.blue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+
+        // Additional Prompt Button
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _showAdditionalPromptDialog,
+            icon: const Icon(Icons.add_comment),
+            label: const Text('Additional Prompt'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+
+        // Run ATS Again Button
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _runATSAgain,
+            icon: const Icon(Icons.analytics),
+            label: const Text('Run ATS Again'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.purple,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEditableContent() {
+    if (_editController.text.isEmpty && tailoredCVContent != null) {
+      _editController.text = tailoredCVContent!;
+    }
+
+    return TextField(
+      controller: _editController,
+      maxLines: null,
+      style: TextStyle(
+        fontSize: 13,
+        height: 1.6,
+        fontFamily: 'monospace',
+        color: Colors.grey[100],
+      ),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        hintText: 'Edit your CV content here...',
+        hintStyle: TextStyle(color: Colors.grey),
+      ),
+      onChanged: _onContentChanged,
+    );
+  }
+
+  void _toggleEditMode() {
+    setState(() {
+      if (_isEditMode) {
+        // Save mode - update the content and save to backend
+        tailoredCVContent = _editController.text;
+        _saveEditedContent();
+      } else {
+        // Edit mode - populate the text field
+        _editController.text = tailoredCVContent ?? '';
+      }
+      _isEditMode = !_isEditMode;
+    });
+  }
+
+  void _onContentChanged(String value) {
+    // Real-time auto-save every 2 seconds after user stops typing
+    if (_isEditMode) {
+      tailoredCVContent = value;
+      _debounceAutoSave();
+    }
+  }
+
+  Timer? _autoSaveTimer;
+  void _debounceAutoSave() {
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer(const Duration(seconds: 2), () {
+      _saveEditedContent();
+    });
+  }
+
+  Future<void> _saveEditedContent() async {
+    if (_currentCompany == null || tailoredCVContent == null) return;
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:8000/api/tailored-cv/save-edited'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'company': _currentCompany,
+          'content': tailoredCVContent,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ CV saved successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error saving edited content: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error saving CV: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showAdditionalPromptDialog() {
+    final TextEditingController promptController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Additional Prompt'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Enter additional instructions for CV improvement:',
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: promptController,
+                  maxLines: 5,
+                  decoration: const InputDecoration(
+                    hintText:
+                        'E.g., "Add more technical skills", "Emphasize leadership experience", etc.',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _saveAdditionalPrompt(promptController.text);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _saveAdditionalPrompt(String promptText) async {
+    if (promptText.trim().isEmpty || _currentCompany == null) return;
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'http://localhost:8000/api/tailored-cv/save-additional-prompt'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'company': _currentCompany,
+          'prompt': promptText.trim(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Additional prompt saved successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error saving additional prompt: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error saving prompt: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _runATSAgain() {
+    // Navigate back to CV Magic tab and show notification
+    if (mounted) {
+      // Show notification
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              '🔄 Please click the "Analyze Skills" button. ATS test will run soon for the tailored CV.'),
+          backgroundColor: Colors.blue,
+          duration: Duration(seconds: 4),
+        ),
+      );
+
+      // Navigate to CV Magic tab (assuming it's the first tab in a TabBar)
+      // You might need to adjust this based on your navigation structure
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+  }
+
+  @override
+  void dispose() {
+    _editController.dispose();
+    _autoSaveTimer?.cancel();
+    super.dispose();
   }
 }

@@ -40,6 +40,7 @@ class SkillsDisplayWidget extends StatelessWidget {
 
   Widget _buildErrorState() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.red.shade50,
@@ -47,6 +48,8 @@ class SkillsDisplayWidget extends StatelessWidget {
         border: Border.all(color: Colors.red.shade200),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
             Icons.error_outline,
@@ -61,6 +64,7 @@ class SkillsDisplayWidget extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: Colors.red.shade700,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(

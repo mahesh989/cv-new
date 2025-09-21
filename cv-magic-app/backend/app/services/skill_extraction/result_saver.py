@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 from app.core.model_dependency import get_request_model
+from app.utils.timestamp_utils import TimestampUtils
 
 logger = logging.getLogger(__name__)
 
@@ -111,9 +112,10 @@ class SkillExtractionResultSaver:
             
             # Skip JD content saving during skills analysis - it's already saved separately
             
-            # Generate skill analysis JSON filename with company slug
+            # Generate skill analysis JSON filename with company slug and timestamp
             import json
-            filename = f"{company_slug}_skills_analysis.json"
+            timestamp = TimestampUtils.get_timestamp()
+            filename = f"{company_slug}_skills_analysis_{timestamp}.json"
             file_path = company_folder / filename
             
             # Clean cv_skills and jd_skills by removing raw_response
@@ -559,8 +561,8 @@ class SkillExtractionResultSaver:
                 # List files for specific company
                 company_folder = self.base_dir / self._clean_company_name(company_name)
                 if company_folder.exists():
-                    # Look for JSON skills analysis files
-                    files = list(company_folder.glob("*skills_analysis.json"))
+                    # Look for timestamped JSON skills analysis files
+                    files = TimestampUtils.find_all_timestamped_files(company_folder, f"{company_name}_skills_analysis", "json")
                     result["companies"].append({
                         "name": company_name,
                         "folder": str(company_folder),
@@ -573,8 +575,8 @@ class SkillExtractionResultSaver:
                 if self.base_dir.exists():
                     for company_folder in self.base_dir.iterdir():
                         if company_folder.is_dir():
-                            # Look for JSON skills analysis files
-                            files = list(company_folder.glob("*skills_analysis.json"))
+                            # Look for timestamped JSON skills analysis files
+                            files = TimestampUtils.find_all_timestamped_files(company_folder, f"{company_folder.name}_skills_analysis", "json")
                             result["companies"].append({
                                 "name": company_folder.name,
                                 "folder": str(company_folder),
@@ -615,10 +617,15 @@ class SkillExtractionResultSaver:
             # Create company folder path
             company_folder = self.base_dir / company_slug
             
-            # Use the same JSON filename as used in save_analysis_results
+            # Find the latest timestamped skills analysis file
             import json
-            filename = f"{company_slug}_skills_analysis.json"
-            file_path = company_folder / filename
+            file_path = TimestampUtils.find_latest_timestamped_file(company_folder, f"{company_slug}_skills_analysis", "json")
+            
+            # If no timestamped file exists, create a new one
+            if not file_path:
+                timestamp = TimestampUtils.get_timestamp()
+                filename = f"{company_slug}_skills_analysis_{timestamp}.json"
+                file_path = company_folder / filename
             
             # Ensure directory exists
             company_folder.mkdir(parents=True, exist_ok=True)
@@ -698,8 +705,15 @@ class SkillExtractionResultSaver:
                         break
             company_folder = self.base_dir / company_slug
             import json
-            filename = f"{company_slug}_skills_analysis.json"
-            file_path = company_folder / filename
+            
+            # Find the latest timestamped skills analysis file
+            file_path = TimestampUtils.find_latest_timestamped_file(company_folder, f"{company_slug}_skills_analysis", "json")
+            
+            # If no timestamped file exists, create a new one
+            if not file_path:
+                timestamp = TimestampUtils.get_timestamp()
+                filename = f"{company_slug}_skills_analysis_{timestamp}.json"
+                file_path = company_folder / filename
             company_folder.mkdir(parents=True, exist_ok=True)
 
             from datetime import datetime

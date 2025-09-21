@@ -55,7 +55,16 @@ class AIServiceManager:
     def get_current_provider(self) -> Optional[BaseAIProvider]:
         """Get the current active provider"""
         current_provider_name = self.config.get_current_provider()
-        return self._providers.get(current_provider_name)
+        provider = self._providers.get(current_provider_name)
+        
+        # Debug logging to help diagnose issues
+        if not provider:
+            logger.error(f"❌ [AI_SERVICE] No provider found for '{current_provider_name}'")
+            logger.error(f"❌ [AI_SERVICE] Available providers: {list(self._providers.keys())}")
+            logger.error(f"❌ [AI_SERVICE] Current provider name: {current_provider_name}")
+            logger.error(f"❌ [AI_SERVICE] Provider status: {self.get_provider_status()}")
+        
+        return provider
     
     def get_provider(self, provider_name: str) -> Optional[BaseAIProvider]:
         """Get a specific provider by name"""
@@ -218,11 +227,14 @@ class AIServiceManager:
         if provider_name:
             provider = self.get_provider(provider_name)
             if not provider:
-                raise Exception(f"Provider {provider_name} not available")
+                available_providers = self.get_available_providers()
+                raise Exception(f"Provider '{provider_name}' not available. Available providers: {available_providers}")
         else:
             provider = self.get_current_provider()
             if not provider:
-                raise Exception("No available AI provider")
+                available_providers = self.get_available_providers()
+                current_provider_name = self.config.get_current_provider()
+                raise Exception(f"No available AI provider. Current provider: '{current_provider_name}', Available providers: {available_providers}")
         
         # Log the actual model being used
         logger.info(f"Generating response with provider: {provider.provider_name}, model: {provider.model_name}")

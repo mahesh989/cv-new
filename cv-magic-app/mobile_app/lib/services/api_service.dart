@@ -69,6 +69,19 @@ class APIService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     } else {
+      // Try to parse error response for better error handling
+      try {
+        final errorData = jsonDecode(response.body);
+        if (errorData is Map<String, dynamic> &&
+            errorData.containsKey('error')) {
+          // Use the clean error message directly
+          throw Exception(errorData['error']);
+        }
+      } catch (e) {
+        // If we can't parse the error, fall back to original behavior
+        rethrow; // Re-throw our custom error
+      }
+
       throw Exception(
           'API call failed: ${response.statusCode} - ${response.body}');
     }

@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import datetime
 from app.ai.ai_service import ai_service
 from app.ai.base_provider import AIResponse
+from app.utils.timestamp_utils import TimestampUtils
 from .cv_jd_matching_prompt import get_cv_jd_matching_prompts
 
 logger = logging.getLogger(__name__)
@@ -139,13 +140,21 @@ class CVJDMatcher:
         if not base_path:
             base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
         
-        analysis_file = Path(base_path) / company_name / "jd_analysis.json"
+        company_dir = Path(base_path) / company_name
+        analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
+        
+        # Fallback to non-timestamped file if no timestamped file exists
+        if not analysis_file:
+            analysis_file = company_dir / "jd_analysis.json"
+        
         if not analysis_file.exists():
             raise FileNotFoundError(f"JD analysis file not found: {analysis_file}")
         
         try:
             with open(analysis_file, 'r', encoding='utf-8') as file:
-                return json.load(file)
+                data = json.load(file)
+            logger.info(f"📂 Loaded JD analysis from: {analysis_file}")
+            return data
         except Exception as e:
             logger.error(f"Error reading JD analysis file {analysis_file}: {e}")
             raise IOError(f"Failed to read JD analysis file: {e}")
@@ -382,8 +391,9 @@ class CVJDMatcher:
         company_dir = Path(base_path) / company_name
         company_dir.mkdir(parents=True, exist_ok=True)
         
-        # Save result
-        result_file = company_dir / "cv_jd_match_results.json"
+        # Save result with timestamp
+        timestamp = TimestampUtils.get_timestamp()
+        result_file = company_dir / f"cv_jd_match_results_{timestamp}.json"
         
         try:
             with open(result_file, 'w', encoding='utf-8') as file:
@@ -410,9 +420,10 @@ class CVJDMatcher:
         if not base_path:
             base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
         
-        result_file = Path(base_path) / company_name / "cv_jd_match_results.json"
+        company_dir = Path(base_path) / company_name
+        result_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
         
-        if not result_file.exists():
+        if not result_file or not result_file.exists():
             return None
         
         try:

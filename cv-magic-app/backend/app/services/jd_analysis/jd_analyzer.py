@@ -14,6 +14,7 @@ from pathlib import Path
 
 from app.ai.ai_service import ai_service
 from app.ai.base_provider import AIResponse
+from app.utils.timestamp_utils import TimestampUtils
 from .jd_analysis_prompt import get_jd_analysis_prompts
 
 logger = logging.getLogger(__name__)
@@ -362,8 +363,9 @@ class JDAnalyzer:
             company_dir = self.base_analysis_path / company_name
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save analysis result
-            analysis_file = company_dir / "jd_analysis.json"
+            # Save analysis result with timestamp
+            timestamp = TimestampUtils.get_timestamp()
+            analysis_file = company_dir / f"jd_analysis_{timestamp}.json"
             
             with open(analysis_file, 'w', encoding='utf-8') as f:
                 json.dump(result.to_dict(), f, indent=2, ensure_ascii=False)
@@ -386,14 +388,16 @@ class JDAnalyzer:
             JDAnalysisResult if found, None otherwise
         """
         try:
-            analysis_file = self.base_analysis_path / company_name / "jd_analysis.json"
+            company_dir = self.base_analysis_path / company_name
+            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
             
-            if not analysis_file.exists():
+            if not analysis_file or not analysis_file.exists():
                 return None
             
             with open(analysis_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
+            logger.info(f"📂 Loaded existing JD analysis from: {analysis_file}")
             return JDAnalysisResult(data)
             
         except Exception as e:
@@ -484,7 +488,12 @@ class JDAnalyzer:
         if not base_path:
             base_path = str(self.base_analysis_path)
         
-        jd_file_path = Path(base_path) / company_name / "jd_original.json"
+        company_dir = Path(base_path) / company_name
+        jd_file_path = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+        
+        # Fallback to non-timestamped file if no timestamped file exists
+        if not jd_file_path:
+            jd_file_path = company_dir / "jd_original.json"
         
         return await self.analyze_jd_file(jd_file_path, temperature)
     

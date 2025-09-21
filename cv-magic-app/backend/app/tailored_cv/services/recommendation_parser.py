@@ -553,11 +553,31 @@ class RecommendationParser:
             'name': personal_info.get('name', ''),
             'email': personal_info.get('email', ''),
             'phone': personal_info.get('phone', ''),
-            'location': personal_info.get('location', '')
+            'location': personal_info.get('location', ''),
+            'linkedin': personal_info.get('linkedin', ''),
+            'website': personal_info.get('github', '')  # Map GitHub to website field
         }
+        
+        # Handle portfolio_links if available
+        portfolio_links = personal_info.get('portfolio_links', {})
+        if portfolio_links:
+            # If we have a website in portfolio, use that instead of GitHub
+            if portfolio_links.get('website'):
+                contact['website'] = portfolio_links['website']
+            # If LinkedIn is empty but we have other portfolio links, add them as comma-separated
+            if not contact['linkedin'] and (portfolio_links.get('blogs') or portfolio_links.get('dashboard_portfolio')):
+                links = []
+                if portfolio_links.get('blogs'):
+                    links.append(portfolio_links['blogs'])
+                if portfolio_links.get('dashboard_portfolio'):
+                    links.append(portfolio_links['dashboard_portfolio'])
+                contact['linkedin'] = ', '.join(links)
+        
         logger.info(f"  - Source fields: {list(personal_info.keys())}")
         logger.info(f"  - Mapped fields: {list(contact.keys())}")
         logger.info(f"  - Contact completeness: {sum(1 for v in contact.values() if v) / len(contact) * 100:.1f}%")
+        logger.info(f"  - LinkedIn: {contact['linkedin']}")
+        logger.info(f"  - Website: {contact['website']}")
         
         # Convert experience entries
         logger.info("💼 Converting experience entries")
@@ -693,11 +713,35 @@ class RecommendationParser:
         else:
             logger.info("✨ Validation passed - All required sections present")
         
+        # Convert education entries with proper field mapping
+        logger.info("🎓 Converting education entries")
+        education = []
+        source_education = structured_data.get('education', [])
+        logger.info(f"  - Found {len(source_education)} education entries")
+        
+        for idx, edu in enumerate(source_education, 1):
+            logger.info(f"  - Processing education {idx}/{len(source_education)}")
+            education_entry = {
+                'institution': edu.get('institution', ''),
+                'degree': edu.get('degree', ''),
+                'location': edu.get('location', ''),
+                'graduation_date': edu.get('year', ''),  # Map 'year' to 'graduation_date'
+                'gpa': edu.get('gpa', ''),
+                'relevant_coursework': edu.get('relevant_courses'),
+                'honors': edu.get('honors')
+            }
+            logger.info(f"    • Institution: {education_entry['institution']}")
+            logger.info(f"    • Degree: {education_entry['degree']}")
+            logger.info(f"    • Graduation date: {education_entry['graduation_date']}")
+            education.append(education_entry)
+        
+        logger.info(f"Converted {len(education)} education entries")
+        
         converted_data = {
             'contact': contact,
             'experience': experience,
             'skills': skills,
-            'education': structured_data.get('education', [])
+            'education': education
         }
         
         logger.info("📤 Returning converted CV data:")

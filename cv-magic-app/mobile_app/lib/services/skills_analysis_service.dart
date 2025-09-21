@@ -106,7 +106,7 @@ class SkillsAnalysisService {
       print('❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: $e');
       print('❌ [SERVICE_ERROR] Stack trace: $stackTrace');
 
-      // Enhanced error handling for CV not found
+      // Enhanced error handling for different error types
       if (e.toString().contains('404') || e.toString().contains('not found')) {
         return SkillsAnalysisResult.error(
             'CV file not found. Please upload a CV file first.');
@@ -116,7 +116,21 @@ class SkillsAnalysisService {
       } else if (e.toString().contains('500')) {
         return SkillsAnalysisResult.error(
             'Server error. Please try again later.');
+      } else if (e.toString().contains('analyze the job description first')) {
+        return SkillsAnalysisResult.error(
+            'Please analyze the job description first before running skills analysis.');
       } else {
+        // Try to extract just the error message from API responses
+        String errorMsg = e.toString();
+        if (errorMsg.contains('{"error":"') && errorMsg.contains('"}')) {
+          // Extract clean error message from JSON response
+          final start = errorMsg.indexOf('{"error":"') + 10;
+          final end = errorMsg.indexOf('"}', start);
+          if (end > start) {
+            errorMsg = errorMsg.substring(start, end);
+            return SkillsAnalysisResult.error(errorMsg);
+          }
+        }
         return SkillsAnalysisResult.error(
             'Failed to perform skills analysis: $e');
       }

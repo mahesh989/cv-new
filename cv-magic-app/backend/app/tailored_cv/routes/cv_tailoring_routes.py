@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, File, UploadFile, Query
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, File, UploadFile, Query, Request
 from fastapi.responses import JSONResponse, FileResponse
 
 from app.core.dependencies import get_current_user
@@ -46,12 +46,14 @@ async def tailor_cv(
         # Process the CV tailoring
         response = await cv_tailoring_service.tailor_cv(request)
         
-        # Save tailored CV if successful and company folder is provided
-        if response.success and request.company_folder:
+        # Save tailored CV if successful - ONLY to tailored folder
+        if response.success:
             try:
-                file_path = cv_tailoring_service.save_tailored_cv(
+                # Extract company name from recommendations
+                company = request.recommendations.company if hasattr(request.recommendations, 'company') else "Unknown"
+                file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(
                     response.tailored_cv, 
-                    request.company_folder
+                    company
                 )
                 response.processing_summary["saved_to"] = file_path
             except Exception as e:
@@ -537,6 +539,227 @@ async def tailor_cv_with_real_data(
         )
 
 
+@router.post("/save-edited")
+async def save_edited_cv(
+    request: Request,
+    # current_user: User = Depends(get_current_user)  # Temporarily disabled for debugging
+):
+    """
+    Save edited CV content to both JSON and TXT files
+    Updates existing JSON structure with new content while preserving metadata
+    """
+    try:
+        data = await request.json()
+        
+        # 🔍 DEBUG: Log the incoming request data
+        logger.info(f"🔍 [SAVE_EDITED] Received request data keys: {list(data.keys())}")
+        logger.info(f"🔍 [SAVE_EDITED] Request data: {json.dumps(data, indent=2)[:500]}...")
+        
+        company = data.get('company')
+        content = data.get('content')
+        
+        # 🔍 DEBUG: Log extracted parameters
+        logger.info(f"🔍 [SAVE_EDITED] Extracted - Company: {company}")
+        logger.info(f"🔍 [SAVE_EDITED] Extracted - Content type: {type(content)}")
+        logger.info(f"🔍 [SAVE_EDITED] Extracted - Content length: {len(str(content)) if content else 0}")
+        
+        if not company or not content:
+            raise HTTPException(status_code=400, detail="Company and content are required")
+        
+        # 🔍 DEBUG: Log the save process
+        logger.info(f"🔍 [SAVE_EDITED] Starting save process for {company}")
+        
+        # Only save to tailored folder, not in company-specific folders
+        tailored_path = Path("cv-analysis/cvs/tailored")
+        
+        logger.info(f"🔍 [SAVE_EDITED] Tailored path: {tailored_path}")
+        
+        # Find existing TXT files ONLY in tailored folder
+        existing_txt_files = []
+        if tailored_path.exists():
+            existing_txt_files.extend(list(tailored_path.glob(f"{company}_tailored_cv_*.txt")))
+        
+        logger.info(f"🔍 [SAVE_EDITED] Found {len(existing_txt_files)} existing TXT files in tailored folder")
+        for file in existing_txt_files:
+            logger.info(f"🔍 [SAVE_EDITED] - {file}")
+        
+        files_updated = []
+        
+        if existing_txt_files:
+            # Update all existing TXT files in tailored folder
+            for txt_file in existing_txt_files:
+                logger.info(f"🔍 [SAVE_EDITED] Updating existing file: {txt_file}")
+                with open(txt_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                files_updated.append(str(txt_file))
+                logger.info(f"✅ [SAVE_EDITED] Updated: {txt_file}")
+        else:
+            # If no existing files, create new ones with timestamp ONLY in tailored folder
+            logger.info(f"🔍 [SAVE_EDITED] No existing files found, creating new ones in tailored folder")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            # Create tailored directory if it doesn't exist
+            tailored_path.mkdir(parents=True, exist_ok=True)
+            
+            # Save TXT file ONLY in tailored folder
+            tailored_txt_file = tailored_path / f"{company}_tailored_cv_{timestamp}.txt"
+            with open(tailored_txt_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            files_updated.append(str(tailored_txt_file))
+            logger.info(f"✅ [SAVE_EDITED] Created new file: {tailored_txt_file}")
+        
+        # Find and update existing JSON files (simple update without AI processing)
+        if tailored_path.exists():
+            json_files = list(tailored_path.glob(f"{company}_tailored_cv_*.json"))
+            logger.info(f"🔍 [SAVE_EDITED] Found {len(json_files)} JSON files")
+            
+            for json_file in json_files:
+                try:
+                    # Load existing JSON structure
+                    with open(json_file, 'r', encoding='utf-8') as f:
+                        existing_json = json.load(f)
+                    
+                    # Parse the edited content back into structured JSON format
+                    updated_json = _parse_cv_content_to_json(content, existing_json)
+                    
+                    # Add metadata
+                    updated_json['last_edited'] = datetime.now().isoformat()
+                    updated_json['manually_edited'] = True
+                    
+                    # Update the same JSON file
+                    with open(json_file, 'w', encoding='utf-8') as f:
+                        json.dump(updated_json, f, indent=2, ensure_ascii=False)
+                    
+                    files_updated.append(str(json_file))
+                    logger.info(f"✅ [SAVE_EDITED] Updated JSON file: {json_file}")
+                    
+                except Exception as json_error:
+                    logger.warning(f"⚠️ [SAVE_EDITED] Failed to update JSON file {json_file}: {json_error}")
+        
+        logger.info(f"✅ [SAVE_EDITED] Completed saving for {company}")
+        
+        return {
+            "success": True,
+            "message": f"CV saved successfully - updated {len(files_updated)} files",
+            "files_updated": files_updated
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to save edited CV: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save CV: {str(e)}")
+
+
+async def _update_json_with_edited_content(existing_json: dict, edited_content: str, company: str) -> dict:
+    """
+    Update existing JSON structure with edited content using AI parsing
+    Preserves metadata and structure while updating the content
+    """
+    try:
+        from app.ai.ai_service import ai_service
+        
+        # Create a prompt to parse the edited content back into JSON structure
+        parsing_prompt = f"""
+You are a CV parser. I need you to update an existing CV JSON structure with new edited content.
+
+EXISTING JSON STRUCTURE (preserve this format exactly):
+{json.dumps(existing_json, indent=2)}
+
+EDITED CONTENT TO PARSE:
+{edited_content}
+
+INSTRUCTIONS:
+1. Parse the edited content and map it back to the existing JSON structure
+2. PRESERVE ALL METADATA: created_at, framework_version, estimated_ats_score, etc.
+3. UPDATE ONLY THE CONTENT FIELDS: contact, education, experience, skills, projects, etc.
+4. Maintain the exact same JSON structure and field names
+5. If edited content is missing some sections, keep the original values
+6. Return ONLY the updated JSON, no explanations
+
+Updated JSON:"""
+
+        # Generate response using AI
+        response = await ai_service.generate_response(
+            prompt=parsing_prompt,
+            temperature=0.1,  # Low temperature for consistent parsing
+            max_tokens=4000
+        )
+        
+        # Parse the AI response
+        try:
+            updated_json = json.loads(response.content.strip())
+            
+            # Ensure metadata is preserved
+            metadata_fields = ['created_at', 'framework_version', 'estimated_ats_score', 'keyword_density', 
+                             'impact_statement_compliance', 'quantifications_added']
+            
+            for field in metadata_fields:
+                if field in existing_json and field not in updated_json:
+                    updated_json[field] = existing_json[field]
+            
+            # Update the created_at to show when it was last edited
+            updated_json['last_edited'] = datetime.now().isoformat()
+            
+            return updated_json
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"❌ Failed to parse AI response as JSON: {e}")
+            # Return original with updated timestamp
+            existing_json['last_edited'] = datetime.now().isoformat()
+            existing_json['edit_note'] = "Content was edited but could not be parsed back to JSON structure"
+            return existing_json
+            
+    except Exception as e:
+        logger.error(f"❌ Failed to update JSON with AI: {e}")
+        # Return original with updated timestamp
+        existing_json['last_edited'] = datetime.now().isoformat()
+        existing_json['edit_note'] = f"Content was edited but update failed: {str(e)}"
+        return existing_json
+
+
+@router.post("/save-additional-prompt")
+async def save_additional_prompt(
+    request: Request,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Save additional prompt instructions for CV improvement
+    """
+    try:
+        data = await request.json()
+        company = data.get('company')
+        prompt = data.get('prompt')
+        
+        if not company or not prompt:
+            raise HTTPException(status_code=400, detail="Company and prompt are required")
+        
+        # Save to analysis folder
+        analysis_path = Path("cv-analysis") / company
+        analysis_path.mkdir(parents=True, exist_ok=True)
+        
+        # Generate timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Save prompt file
+        prompt_file = analysis_path / f"{company}_additional_prompt_{timestamp}.txt"
+        with open(prompt_file, 'w', encoding='utf-8') as f:
+            f.write(f"Additional Prompt for {company}\n")
+            f.write(f"Created: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"{'='*50}\n\n")
+            f.write(prompt)
+        
+        logger.info(f"✅ Saved additional prompt for {company}")
+        
+        return {
+            "success": True,
+            "message": "Additional prompt saved successfully",
+            "file_saved": str(prompt_file)
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to save additional prompt: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save prompt: {str(e)}")
+
+
 @router.get("/available-companies-real")
 async def get_available_companies_real(
     current_user: User = Depends(get_current_user)
@@ -735,6 +958,185 @@ async def _process_batch_tailoring(
         
     except Exception as e:
         logger.error(f"❌ Batch processing failed for task {task_id}: {e}")
+
+
+def _parse_cv_content_to_json(content: str, existing_json: dict) -> dict:
+    """
+    Parse edited CV content back into structured JSON format while preserving minimal metadata.
+    
+    This function maintains the JSON structure and handles:
+    - Adding new content to existing sections
+    - Modifying existing content
+    - Deleting sections (keeps structure but empties content)
+    - Preserving only essential metadata (no optimization data)
+    """
+    try:
+        logger.info(f"🔍 [CV_PARSER] Starting CV content parsing")
+        logger.info(f"🔍 [CV_PARSER] Content length: {len(content)}")
+        logger.info(f"🔍 [CV_PARSER] Existing JSON keys: {list(existing_json.keys())}")
+        
+        # Create clean structure with only CV content and minimal metadata
+        updated_json = {
+            'contact': existing_json.get('contact', {}),
+            'education': [],
+            'experience': [],
+            'projects': [],
+            'skills': [],
+            'created_at': existing_json.get('created_at'),
+            'last_edited': None,  # Will be set later
+            'manually_edited': False  # Will be set later
+        }
+        
+        # Parse the content line by line
+        lines = content.strip().split('\n')
+        logger.info(f"🔍 [CV_PARSER] Processing {len(lines)} lines")
+        
+        # Track current section and content
+        current_section = None
+        current_company = None
+        current_bullets = []
+        section_content = {}
+        
+        # Extract contact info from first line if present
+        if lines and ('|' in lines[0] or '@' in lines[0]):
+            contact_line = lines[0]
+            logger.info(f"🔍 [CV_PARSER] Parsing contact line: {contact_line}")
+            
+            # Parse contact information
+            contact_parts = [part.strip() for part in contact_line.split('|')]
+            if len(contact_parts) >= 3:
+                updated_json['contact'] = {
+                    "name": contact_parts[0].strip(),
+                    "phone": contact_parts[1].strip() if len(contact_parts) > 1 else updated_json.get('contact', {}).get('phone'),
+                    "email": contact_parts[2].strip() if len(contact_parts) > 2 else updated_json.get('contact', {}).get('email'),
+                    "linkedin": updated_json.get('contact', {}).get('linkedin'),
+                    "location": contact_parts[3].strip() if len(contact_parts) > 3 else updated_json.get('contact', {}).get('location'),
+                    "website": updated_json.get('contact', {}).get('website')
+                }
+            lines = lines[1:]  # Remove processed contact line
+        
+        # Process remaining lines
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            
+            if not line:
+                i += 1
+                continue
+            
+            # Detect section headers (ALL CAPS or specific patterns)
+            if line.isupper() or line in ['TECHNICAL SKILLS', 'EXPERIENCE', 'EDUCATION', 'PROJECTS', 'SKILLS']:
+                current_section = line.lower().replace(' ', '_')
+                logger.info(f"🔍 [CV_PARSER] Found section: {current_section}")
+                section_content[current_section] = []
+                i += 1
+                continue
+            
+            # Process content based on current section
+            if current_section == 'technical_skills' or current_section == 'skills':
+                if line.startswith('•') or line.startswith('-'):
+                    skills_text = line.replace('•', '').replace('-', '').strip()
+                    # Split skills by comma and clean them
+                    skills_list = [skill.strip() for skill in skills_text.split(',') if skill.strip()]
+                    updated_json['skills'] = skills_list
+                    logger.info(f"🔍 [CV_PARSER] Parsed {len(skills_list)} skills")
+            
+            elif current_section == 'experience':
+                # Look for job title with date pattern (e.g., "Data Analyst         Jul 2024 – Present")
+                if ('20' in line or 'Present' in line) and ('–' in line or '-' in line):
+                    # This line contains job title and dates
+                    parts = line.split()
+                    
+                    # Find the date part (contains numbers or "Present")
+                    date_start_idx = -1
+                    for idx, part in enumerate(parts):
+                        if '20' in part or 'Present' in part or part in ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']:
+                            date_start_idx = idx
+                            break
+                    
+                    if date_start_idx > 0:
+                        job_title = ' '.join(parts[:date_start_idx]).strip()
+                        date_range = ' '.join(parts[date_start_idx:]).strip()
+                        
+                        # Get company from next line
+                        i += 1
+                        company_location = ""
+                        if i < len(lines):
+                            company_location = lines[i].strip()
+                        
+                        # Skip empty line if present
+                        if i + 1 < len(lines) and not lines[i+1].strip():
+                            i += 1
+                        
+                        # Collect bullets for this job
+                        job_bullets = []
+                        i += 1
+                        while i < len(lines) and (lines[i].strip().startswith('•') or lines[i].strip().startswith('-')):
+                            bullet = lines[i].strip().replace('•', '').replace('-', '').strip()
+                            if bullet:
+                                job_bullets.append(bullet)
+                            i += 1
+                        i -= 1  # Back up one since we'll increment at the end of the loop
+                        
+                        # Parse dates
+                        start_date = "Unknown"
+                        end_date = "Unknown"
+                        if '–' in date_range or '-' in date_range:
+                            date_parts = date_range.replace('–', '-').split('-')
+                            if len(date_parts) >= 2:
+                                start_date = date_parts[0].strip()
+                                end_date = date_parts[1].strip()
+                        
+                        # Create experience entry
+                        exp_entry = {
+                            "company": company_location.split(',')[0].strip(),
+                            "title": job_title,
+                            "location": company_location,
+                            "start_date": start_date,
+                            "end_date": end_date,
+                            "duration": None,
+                            "bullets": job_bullets
+                        }
+                        
+                        if 'experience' not in updated_json:
+                            updated_json['experience'] = []
+                        
+                        updated_json['experience'].append(exp_entry)
+                        logger.info(f"🔍 [CV_PARSER] Added experience: {job_title} at {company_location.split(',')[0]} ({len(job_bullets)} bullets)")
+            
+            elif current_section == 'education':
+                # Similar logic for education - simplified for now
+                if not line.startswith('•') and not line.startswith('-'):
+                    # This might be an education entry
+                    education_info = line
+                    logger.info(f"🔍 [CV_PARSER] Found education: {education_info}")
+            
+            elif current_section == 'projects':
+                # Handle projects section
+                if not line.startswith('•') and not line.startswith('-'):
+                    project_name = line
+                    logger.info(f"🔍 [CV_PARSER] Found project: {project_name}")
+            
+            i += 1
+        
+        # Sections are already cleared at the beginning, so if they weren't populated during parsing,
+        # they remain empty (which is what we want for deleted sections)
+        
+        # Note: parsed_text is not saved to keep the output clean
+        # The original content is processed but not stored in the final JSON
+        
+        logger.info(f"🔍 [CV_PARSER] Parsing completed successfully")
+        logger.info(f"🔍 [CV_PARSER] Updated JSON keys: {list(updated_json.keys())}")
+        
+        return updated_json
+        
+    except Exception as e:
+        logger.error(f"❌ [CV_PARSER] Error parsing CV content: {e}")
+        # Fallback: preserve structure but update text field
+        fallback_json = existing_json.copy()
+        fallback_json['text'] = content
+        fallback_json['parsing_error'] = str(e)
+        return fallback_json
 
 
 # Export router

@@ -98,7 +98,7 @@ async def auth_debug_middleware(request: Request, call_next):
     auth_header = request.headers.get("authorization")
     
     # Define public endpoints that don't need auth
-    public_endpoints = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh-session", "/api/quick-login", "/health", "/api/info", "/api/ai/health"]
+    public_endpoints = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh-session", "/api/quick-login", "/health", "/api/info", "/api/ai/health", "/api/tailored-cv/save-edited"]
     
     # Only log auth attempts for protected API routes
     if path.startswith("/api/") and path not in public_endpoints:

@@ -10,6 +10,7 @@ import json
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from datetime import datetime
+from app.utils.timestamp_utils import TimestampUtils
 
 logger = logging.getLogger(__name__)
 
@@ -258,9 +259,10 @@ class ATSRecommendationService:
                 logger.error(f"Could not extract ATS data for {company}")
                 return False
             
-            # Construct the output file path
+            # Construct the output file path with timestamp
             company_dir = self.base_dir / company
-            recommendation_file = company_dir / f"{company}_input_recommendation.json"
+            timestamp = TimestampUtils.get_timestamp()
+            recommendation_file = company_dir / f"{company}_input_recommendation_{timestamp}.json"
             
             # Ensure the company directory exists
             company_dir.mkdir(parents=True, exist_ok=True)
@@ -349,15 +351,19 @@ class ATSRecommendationService:
     
     def get_recommendation_file_path(self, company: str) -> Path:
         """
-        Get the path for a company's recommendation file
+        Get the path for a company's latest recommendation file
         
         Args:
             company: Company name
             
         Returns:
-            Path object for the recommendation file
+            Path object for the latest recommendation file
         """
         company_dir = self.base_dir / company
+        latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
+        if latest_file:
+            return latest_file
+        # Return expected path for new file (without timestamp)
         return company_dir / f"{company}_input_recommendation.json"
     
     def check_if_recommendation_exists(self, company: str) -> bool:
@@ -370,8 +376,9 @@ class ATSRecommendationService:
         Returns:
             True if file exists, False otherwise
         """
-        recommendation_file = self.get_recommendation_file_path(company)
-        return recommendation_file.exists()
+        company_dir = self.base_dir / company
+        latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
+        return latest_file is not None and latest_file.exists()
     
     def _create_ai_recommendation_prompt(self, recommendation_data: Dict[str, Any]) -> str:
         """Create a dynamic prompt module for AI recommendation generation

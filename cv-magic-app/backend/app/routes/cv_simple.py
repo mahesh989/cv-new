@@ -4,10 +4,12 @@ Simplified CV processing routes with improved structure
 import logging
 import os
 import shutil
+import json
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Request
 from fastapi.responses import JSONResponse
 
 from ..services.cv_processor import cv_processor
@@ -619,3 +621,168 @@ async def get_upload_stats():
     except Exception as e:
         logger.error(f"Error getting upload stats: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting upload stats: {str(e)}")
+
+
+@router.put("/tailored-cv/save")
+async def save_tailored_cv(request: Request):
+    """Save edited tailored CV content back to the file"""
+    try:
+        data = await request.json()
+        
+        # 🔍 DEBUG: Log the incoming request data
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Received request data keys: {list(data.keys())}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Request data: {json.dumps(data, indent=2)[:500]}...")
+        
+        # Extract parameters
+        company_name = data.get("company_name")
+        cv_content = data.get("cv_content")  # This should be the edited CV content
+        filename = data.get("filename")  # Optional: specific filename to update
+        
+        # 🔍 DEBUG: Log extracted parameters
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - Company: {company_name}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - Filename: {filename}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - CV Content type: {type(cv_content)}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - CV Content length: {len(str(cv_content)) if cv_content else 0}")
+        
+        # Validate required parameters
+        if not company_name:
+            logger.error("❌ [TAILORED_CV_SAVE] Missing company_name")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "company_name is required"}
+            )
+        
+        if not cv_content:
+            logger.error("❌ [TAILORED_CV_SAVE] Missing cv_content")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "cv_content is required"}
+            )
+        
+        # Determine the file to save to
+        cv_analysis_path = Path("cv-analysis")
+        company_path = cv_analysis_path / company_name
+        
+        # 🔍 DEBUG: Log path information
+        logger.info(f"🔍 [TAILORED_CV_SAVE] CV Analysis path: {cv_analysis_path.absolute()}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Company path: {company_path.absolute()}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Company path exists: {company_path.exists()}")
+        
+        if not company_path.exists():
+            logger.error(f"❌ [TAILORED_CV_SAVE] Company directory not found: {company_path}")
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"Company directory not found: {company_name}"}
+            )
+        
+        # Find the tailored CV file to update
+        if filename:
+            # Use specific filename if provided
+            target_file = company_path / filename
+            logger.info(f"🔍 [TAILORED_CV_SAVE] Using specified filename: {target_file}")
+            if not target_file.exists():
+                logger.error(f"❌ [TAILORED_CV_SAVE] Specified file not found: {target_file}")
+                return JSONResponse(
+                    status_code=404,
+                    content={"error": f"File not found: {filename}"}
+                )
+        else:
+            # Find the latest tailored CV file
+            tailored_files = list(company_path.glob("*tailored_cv*.json"))
+            logger.info(f"🔍 [TAILORED_CV_SAVE] Found {len(tailored_files)} tailored CV files")
+            for file in tailored_files:
+                logger.info(f"🔍 [TAILORED_CV_SAVE] - {file.name}")
+            
+            if not tailored_files:
+                logger.error(f"❌ [TAILORED_CV_SAVE] No tailored CV files found for {company_name}")
+                return JSONResponse(
+                    status_code=404,
+                    content={"error": f"No tailored CV files found for {company_name}"}
+                )
+            target_file = max(tailored_files, key=lambda p: p.stat().st_mtime)
+            logger.info(f"🔍 [TAILORED_CV_SAVE] Selected latest file: {target_file.name}")
+        
+        # Load existing file to preserve metadata
+        try:
+            logger.info(f"🔍 [TAILORED_CV_SAVE] Loading existing file: {target_file}")
+            with open(target_file, 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+            logger.info(f"🔍 [TAILORED_CV_SAVE] Existing data keys: {list(existing_data.keys()) if isinstance(existing_data, dict) else 'Not a dict'}")
+            logger.info(f"🔍 [TAILORED_CV_SAVE] Existing data type: {type(existing_data)}")
+        except Exception as e:
+            logger.warning(f"⚠️ [TAILORED_CV_SAVE] Could not load existing file {target_file}: {e}")
+            existing_data = {}
+        
+        # 🔍 DEBUG: Log the merge process
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Merging data - CV content type: {type(cv_content)}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Merging data - Existing data type: {type(existing_data)}")
+        
+        # Update the CV content while preserving metadata
+        if isinstance(existing_data, dict):
+            # If it's structured data, update the content field
+            if isinstance(cv_content, dict):
+                # If cv_content is structured, merge it
+                logger.info("🔍 [TAILORED_CV_SAVE] Merging structured CV content with existing data")
+                existing_data.update(cv_content)
+            else:
+                # If cv_content is text, update the text field
+                logger.info("🔍 [TAILORED_CV_SAVE] Updating text field with CV content")
+                existing_data["text"] = cv_content
+            existing_data["updated_at"] = datetime.now().isoformat()
+            existing_data["manually_edited"] = True
+            updated_data = existing_data
+        else:
+            # If existing data is not structured, create new structure
+            logger.info("🔍 [TAILORED_CV_SAVE] Creating new structured data")
+            updated_data = {
+                "content": cv_content,
+                "updated_at": datetime.now().isoformat(),
+                "manually_edited": True,
+                "original_data": existing_data
+            }
+        
+        # 🔍 DEBUG: Log before saving
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Final data keys: {list(updated_data.keys()) if isinstance(updated_data, dict) else 'Not a dict'}")
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Saving to file: {target_file}")
+        
+        # Save the updated content
+        with open(target_file, 'w', encoding='utf-8') as f:
+            json.dump(updated_data, f, ensure_ascii=False, indent=2)
+        
+        logger.info(f"✅ [TAILORED_CV_SAVE] Successfully saved to: {target_file}")
+        
+        # Also save to the cvs/tailored directory if it exists
+        tailored_cvs_path = cv_analysis_path / "cvs" / "tailored"
+        if tailored_cvs_path.exists():
+            tailored_file = tailored_cvs_path / target_file.name
+            logger.info(f"🔍 [TAILORED_CV_SAVE] Also saving to: {tailored_file}")
+            with open(tailored_file, 'w', encoding='utf-8') as f:
+                json.dump(updated_data, f, ensure_ascii=False, indent=2)
+            logger.info(f"✅ [TAILORED_CV_SAVE] Also saved to: {tailored_file}")
+        else:
+            logger.info(f"🔍 [TAILORED_CV_SAVE] cvs/tailored directory does not exist: {tailored_cvs_path}")
+        
+        logger.info(f"🎉 [TAILORED_CV_SAVE] Tailored CV saved successfully: {target_file}")
+        
+        response_data = {
+            "success": True,
+            "message": "Tailored CV saved successfully",
+            "company": company_name,
+            "filename": target_file.name,
+            "file_path": str(target_file),
+            "updated_at": updated_data.get("updated_at")
+        }
+        
+        logger.info(f"🔍 [TAILORED_CV_SAVE] Returning response: {response_data}")
+        
+        return JSONResponse(content=response_data)
+        
+    except Exception as e:
+        logger.error(f"❌ [TAILORED_CV_SAVE] Error saving tailored CV: {str(e)}")
+        logger.error(f"❌ [TAILORED_CV_SAVE] Exception type: {type(e)}")
+        import traceback
+        logger.error(f"❌ [TAILORED_CV_SAVE] Traceback: {traceback.format_exc()}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to save tailored CV: {str(e)}"}
+        )

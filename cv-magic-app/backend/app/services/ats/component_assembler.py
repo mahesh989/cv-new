@@ -10,6 +10,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional
+from app.utils.timestamp_utils import TimestampUtils
 
 from app.services.ats.components import (
     SkillsAnalyzer,
@@ -67,7 +68,13 @@ class ComponentAssembler:
 
     def _read_jd_text(self, company: str) -> str:
         """Read JD text for a specific company."""
-        jd_json = self.base_dir / company / "jd_original.json"
+        company_dir = self.base_dir / company
+        jd_json = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+        
+        # Fallback to non-timestamped file if no timestamped file exists
+        if not jd_json:
+            jd_json = company_dir / "jd_original.json"
+        
         if not jd_json.exists():
             raise FileNotFoundError(f"JD text not found: {jd_json}")
         with open(jd_json, "r", encoding="utf-8") as f:
@@ -79,7 +86,13 @@ class ComponentAssembler:
 
     def _read_matched_skills(self, company: str) -> str:
         """Read matched skills for a specific company."""
-        match_file = self.base_dir / company / "cv_jd_match_results.json"
+        company_dir = self.base_dir / company
+        match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
+        
+        # Fallback to non-timestamped file if no timestamped file exists
+        if not match_file:
+            match_file = company_dir / "cv_jd_match_results.json"
+        
         if not match_file.exists():
             logger.warning("[ASSEMBLER] Match results not found: %s", match_file)
             return "[]"

@@ -29,6 +29,154 @@ import re
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Skills Analysis"])
 
+# Helper functions for file validation
+async def _extract_company_name_from_jd(jd_text: str) -> str:
+    """Extract company name from job description text using AI with fallback to existing folders"""
+    try:
+        from app.services.job_extractor import extract_job_metadata
+        metadata = await extract_job_metadata(jd_text)
+        
+        if metadata and "company" in metadata and metadata["company"]:
+            ai_company_name = metadata["company"].strip()
+            
+            # Clean and limit the AI-extracted name
+            ai_company_name = re.sub(r'[^\w\s-]', '', ai_company_name)
+            ai_company_name = re.sub(r'\s+', '_', ai_company_name)
+            
+            # Limit length to prevent overly long names
+            if len(ai_company_name) > 50:
+                ai_company_name = ai_company_name[:50]
+            
+            # Check if this matches any existing company folder
+            existing_company = _find_matching_company_folder(ai_company_name)
+            if existing_company:
+                logger.info(f"🎯 Found matching company folder: {existing_company}")
+                return existing_company
+            
+            return ai_company_name
+        
+        # Fallback: try simple regex patterns for common company names
+        patterns = [
+            r'Australia\s+for\s+UNHCR',  # Specific pattern for Australia for UNHCR
+            r'([A-Z][a-zA-Z\s&.-]+?)\s+logo',
+            r'About\s+([A-Z][a-zA-Z\s&.-]{3,20}?)\s+is',
+            r'([A-Z][a-zA-Z\s&.-]{3,20}?)\s+is\s+(?:Australia\'s|the)',
+            r'Working\s+at\s+([A-Z][a-zA-Z\s&.-]{3,20}?),',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, jd_text, re.IGNORECASE)
+            if match:
+                company_name = match.group(1).strip() if len(match.groups()) > 0 else match.group(0).strip()
+                # Clean company name for file naming
+                company_name = re.sub(r'[^\w\s-]', '', company_name)
+                company_name = re.sub(r'\s+', '_', company_name)
+                
+                # Check if this matches any existing company folder
+                existing_company = _find_matching_company_folder(company_name)
+                if existing_company:
+                    logger.info(f"🎯 Found matching company folder: {existing_company}")
+                    return existing_company
+                
+                return company_name
+        
+        # Final fallback: check if any existing company folders match parts of the JD text
+        existing_company = _find_company_in_existing_folders(jd_text)
+        if existing_company:
+            logger.info(f"🎯 Found company in existing folders: {existing_company}")
+            return existing_company
+                
+        return "Unknown_Company"
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to extract company name: {e}")
+        return "Unknown_Company"
+
+def _find_matching_company_folder(extracted_name: str) -> Optional[str]:
+    """Find matching company folder for extracted name"""
+    try:
+        cv_analysis_path = Path("cv-analysis")
+        if not cv_analysis_path.exists():
+            return None
+        
+        extracted_lower = extracted_name.lower()
+        
+        for folder in cv_analysis_path.iterdir():
+            if folder.is_dir() and folder.name != "cvs":
+                folder_lower = folder.name.lower()
+                
+                # Exact match
+                if folder_lower == extracted_lower:
+                    return folder.name
+                
+                # Partial match (extracted name contains folder name or vice versa)
+                if extracted_lower in folder_lower or folder_lower in extracted_lower:
+                    return folder.name
+        
+        return None
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Error finding matching company folder: {e}")
+        return None
+
+def _find_company_in_existing_folders(jd_text: str) -> Optional[str]:
+    """Find company name by checking if existing folder names appear in JD text"""
+    try:
+        cv_analysis_path = Path("cv-analysis")
+        if not cv_analysis_path.exists():
+            return None
+        
+        jd_lower = jd_text.lower()
+        
+        for folder in cv_analysis_path.iterdir():
+            if folder.is_dir() and folder.name != "cvs":
+                # Convert folder name back to readable format for searching
+                folder_readable = folder.name.replace('_', ' ').lower()
+                
+                # Check if the readable folder name appears in the JD text
+                if folder_readable in jd_lower:
+                    return folder.name
+                
+                # Also check individual words
+                folder_words = folder_readable.split()
+                if len(folder_words) >= 2:
+                    # Check if at least 2 words from folder name appear in JD
+                    matches = sum(1 for word in folder_words if word in jd_lower and len(word) > 3)
+                    if matches >= 2:
+                        return folder.name
+        
+        return None
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Error finding company in existing folders: {e}")
+        return None
+
+def _validate_required_analysis_files(company_name: str) -> Optional[str]:
+    """Validate that required analysis files exist for the company"""
+    try:
+        base_path = Path("cv-analysis") / company_name
+        
+        # Required files
+        jd_original_file = base_path / "jd_original.json"
+        job_info_file = base_path / f"job_info_{company_name}.json"
+        
+        missing_files = []
+        
+        if not jd_original_file.exists():
+            missing_files.append(f"jd_original.json")
+            
+        if not job_info_file.exists():
+            missing_files.append(f"job_info_{company_name}.json")
+        
+        if missing_files:
+            return f"Please analyze the job description first before running skills analysis."
+            
+        return None
+        
+    except Exception as e:
+        logger.error(f"❌ Error validating required files: {e}")
+        return f"Error validating required files: {str(e)}"
+
 
 def _extract_match_rates_from_content(content: str) -> dict:
     """Extract match rates from preextracted comparison content"""
@@ -324,6 +472,19 @@ async def preliminary_analysis(
             )
         
         logger.info(f"🎯 Preliminary analysis request: CV={cv_filename}, JD_length={len(jd_text)}, CONFIG={config_name}")
+        
+        # Extract company name from JD text to validate required files
+        company_name = await _extract_company_name_from_jd(jd_text)
+        logger.info(f"🏢 Extracted company name: {company_name}")
+        
+        # Validate required files exist before proceeding
+        file_validation_error = _validate_required_analysis_files(company_name)
+        if file_validation_error:
+            logger.warning(f"❌ Required files validation failed: {file_validation_error}")
+            return JSONResponse(
+                status_code=400,
+                content={"error": file_validation_error}
+            )
         
         # Get CV content dynamically (no fallback)
         cv_content_result = cv_content_service.get_cv_content(cv_filename, user_id, use_fallback=False)

@@ -120,7 +120,7 @@ class OptimizationStrategy(BaseModel):
 
 
 class TailoredCV(BaseModel):
-    """Tailored CV data structure"""
+    """Tailored CV data structure - FULL VERSION with all metadata"""
     # Core CV Structure
     contact: ContactInfo
     education: List[Education]
@@ -147,6 +147,21 @@ class TailoredCV(BaseModel):
     # Metadata
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
     framework_version: str = Field(default="1.0", description="Framework version used")
+
+
+class CleanTailoredCV(BaseModel):
+    """Clean tailored CV data structure - ONLY CV content, no metadata"""
+    # Core CV Structure Only
+    contact: ContactInfo
+    education: List[Education]
+    experience: List[ExperienceEntry]
+    projects: Optional[List[Project]] = Field(None, description="Projects section")
+    skills: List[SkillCategory] = Field(..., description="Skills")
+    
+    # Minimal metadata for tracking
+    created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
+    last_edited: Optional[datetime] = Field(None, description="Last edit timestamp")
+    manually_edited: Optional[bool] = Field(False, description="Whether manually edited")
     
 
 class CVTailoringRequest(BaseModel):

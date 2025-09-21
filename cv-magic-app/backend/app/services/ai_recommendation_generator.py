@@ -14,6 +14,7 @@ from datetime import datetime
 
 from app.ai.ai_service import ai_service
 from app.ai.base_provider import AIResponse
+from app.utils.timestamp_utils import TimestampUtils
 
 # Import CV tailoring service with conditional import to avoid circular dependencies
 try:
@@ -97,8 +98,12 @@ class AIRecommendationGenerator:
             return False
     
     def _get_output_file_path(self, company: str) -> Path:
-        """Get the output file path for AI recommendation"""
+        """Get the latest output file path for AI recommendation"""
         company_dir = self.base_dir / company
+        latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
+        if latest_file:
+            return latest_file
+        # Return expected path for new file (without timestamp - will be added during save)
         return company_dir / f"{company}_ai_recommendation.json"
     
     def _get_input_recommendation_file_path(self, company: str) -> Path:
@@ -222,8 +227,9 @@ class AIRecommendationGenerator:
             company_dir = self.base_dir / company
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save to JSON file
-            output_file = company_dir / f"{company}_ai_recommendation.json"
+            # Save to JSON file with timestamp
+            timestamp = TimestampUtils.get_timestamp()
+            output_file = company_dir / f"{company}_ai_recommendation_{timestamp}.json"
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(recommendation_data, f, indent=2, ensure_ascii=False)
             
@@ -242,7 +248,9 @@ class AIRecommendationGenerator:
     
     def check_ai_recommendation_exists(self, company: str) -> bool:
         """Check if AI recommendation file exists"""
-        return self._get_output_file_path(company).exists()
+        company_dir = self.base_dir / company
+        latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
+        return latest_file is not None and latest_file.exists()
     
     def list_companies_with_ai_recommendations(self) -> List[str]:
         """
@@ -259,8 +267,9 @@ class AIRecommendationGenerator:
             
             for company_dir in self.base_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    ai_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
-                    if ai_file.exists():
+                    # Check for timestamped AI recommendation files
+                    latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_ai_recommendation", "json")
+                    if latest_file and latest_file.exists():
                         companies.append(company_dir.name)
             
             logger.info(f"Found {len(companies)} companies with AI recommendations")
@@ -505,18 +514,10 @@ class AIRecommendationGenerator:
             response = await cv_tailoring_service.tailor_cv(request)
             
             if response.success:
-                # Save tailored CV to cv-analysis folder with company parameter
+                # Save tailored CV ONLY to cv-analysis/cvs/tailored folder
                 file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(response.tailored_cv, company)
                 logger.info(f"✅ [AI GENERATOR] Tailored CV saved automatically to {file_path}")
                 logger.info(f"📊 [AI GENERATOR] Estimated ATS score: {response.tailored_cv.estimated_ats_score}")
-                
-                # Also save to company-specific folder with timestamp
-                company_path = self.base_dir / company
-                company_file_path = cv_tailoring_service.save_tailored_cv(
-                    response.tailored_cv, 
-                    str(company_path)
-                )
-                logger.info(f"💾 [AI GENERATOR] Also saved to company folder: {company_file_path}")
                 
                 return True
             else:

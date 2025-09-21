@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
 from app.ai.ai_service import ai_service
+from app.utils.timestamp_utils import TimestampUtils
 from app.tailored_cv.models.cv_models import (
     OriginalCV, RecommendationAnalysis, TailoredCV, 
     CVTailoringRequest, CVTailoringResponse,
@@ -374,8 +375,8 @@ class CVTailoringService:
 ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
 
 1. CONTACT INFORMATION RULES:
-   - COPY ALL contact fields EXACTLY from the original CV's personal_information or contact section
-   - NEVER leave any contact field empty or null
+   - COPY ALL contact fields EXACTLY from the original CV's contact section
+   - NEVER leave any contact field empty or null - use empty string if no value exists
    - If a field exists in the original CV, you MUST include it with its exact value
    - Format for contact section:
      "contact": {
@@ -383,8 +384,8 @@ ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
        "phone": "EXACT phone from CV (no whitespace-only values)",
        "email": "EXACT email from CV",
        "location": "EXACT location from CV",
-       "linkedin": "EXACT LinkedIn from CV or empty string",
-       "website": "EXACT website from CV or empty string"
+       "linkedin": "EXACT LinkedIn from CV or empty string if null",
+       "website": "EXACT website from CV or empty string if null"
      }
 
 2. EVERY BULLET MUST HAVE NUMBERS:
@@ -442,7 +443,10 @@ The exact JSON structure must be:
       "institution": "EXACT institution from provided CV",
       "degree": "EXACT degree from provided CV",
       "location": "EXACT location from provided CV",
-      "graduation_date": "EXACT date from provided CV"
+      "graduation_date": "EXACT graduation_date from provided CV (preserve all date information)",
+      "gpa": "EXACT gpa from provided CV or empty string",
+      "relevant_coursework": "EXACT relevant_coursework from provided CV or null",
+      "honors": "EXACT honors from provided CV or null"
     }
   ],
   "experience": [
@@ -688,6 +692,23 @@ Please provide the optimized CV in the requested JSON format."""
         )
         
         return tailored_cv
+    
+    def _create_clean_tailored_cv(self, full_tailored_cv: TailoredCV) -> 'CleanTailoredCV':
+        """
+        Convert a full TailoredCV with all metadata to a clean version with only CV content
+        """
+        from app.tailored_cv.models.cv_models import CleanTailoredCV
+        
+        clean_cv = CleanTailoredCV(
+            contact=full_tailored_cv.contact,
+            education=full_tailored_cv.education,
+            experience=full_tailored_cv.experience,
+            projects=full_tailored_cv.projects,
+            skills=full_tailored_cv.skills,
+            created_at=full_tailored_cv.created_at
+        )
+        
+        return clean_cv
     
     def _extract_and_parse_json(self, content: str) -> Dict[str, Any]:
         """Extract and parse JSON from AI response with multiple strategies"""
@@ -1310,17 +1331,20 @@ FIX: Output ONLY valid JSON!
             tailored_folder = cv_analysis_path / "cvs" / "tailored"
             tailored_folder.mkdir(parents=True, exist_ok=True)
             
-            # Use company-specific naming pattern
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            # Use company-specific naming pattern with consistent timestamp format
+            timestamp = TimestampUtils.get_timestamp()
             json_filename = f"{company}_tailored_cv_{timestamp}.json"
             txt_filename = f"{company}_tailored_cv_{timestamp}.txt"
             
             json_file_path = tailored_folder / json_filename
             txt_file_path = tailored_folder / txt_filename
             
-            # Save JSON file
+            # Create clean version without metadata
+            clean_cv = self._create_clean_tailored_cv(tailored_cv)
+            
+            # Save clean JSON file (without metadata)
             with open(json_file_path, 'w', encoding='utf-8') as f:
-                json.dump(tailored_cv.model_dump(), f, indent=2, default=str)
+                json.dump(clean_cv.model_dump(), f, indent=2, default=str)
             
             # Convert to text and save TXT file
             text_content = self._convert_tailored_cv_to_text(tailored_cv)

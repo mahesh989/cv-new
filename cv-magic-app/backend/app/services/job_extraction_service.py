@@ -6,6 +6,7 @@ import logging
 from datetime import datetime
 from typing import Dict, Any, Optional
 from pathlib import Path
+from app.utils.timestamp_utils import TimestampUtils
 
 logger = logging.getLogger(__name__)
 
@@ -566,8 +567,9 @@ TEXT TO ANALYZE:
             company_dir = self.cv_analysis_dir / company_slug
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save job_info JSON file
-            job_info_file = company_dir / f"job_info_{company_slug}.json"
+            # Save job_info JSON file with timestamp
+            timestamp = TimestampUtils.get_timestamp()
+            job_info_file = company_dir / f"job_info_{company_slug}_{timestamp}.json"
             job_info_data = job_info.copy()
             job_info_data["extracted_at"] = datetime.now().isoformat()
             if job_url:
@@ -576,8 +578,8 @@ TEXT TO ANALYZE:
             with open(job_info_file, 'w', encoding='utf-8') as f:
                 json.dump(job_info_data, f, indent=2, ensure_ascii=False)
             
-            # Save original job description as JSON file
-            jd_original_file = company_dir / "jd_original.json"
+            # Save original job description as JSON file with timestamp
+            jd_original_file = company_dir / f"jd_original_{timestamp}.json"
             with open(jd_original_file, 'w', encoding='utf-8') as f:
                 json.dump({
                     "company": job_info['company_name'],
