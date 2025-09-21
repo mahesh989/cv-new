@@ -60,7 +60,12 @@ class ModularATSOrchestrator:
         Returns:
             Dict containing analysis summary
         """
-        file_path = self.base_dir / company / f"{company}_skills_analysis.json"
+        # Use timestamped analysis file with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        company_dir = self.base_dir / company
+        file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+        if not file_path:
+            file_path = company_dir / f"{company}_skills_analysis.json"
         
         if not file_path.exists():
             return {"error": "No analysis found", "company": company}

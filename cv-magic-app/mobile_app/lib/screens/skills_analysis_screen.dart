@@ -108,6 +108,17 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
 
               // Analysis Button
               _buildAnalysisButton(),
+              const SizedBox(height: 16),
+
+              // Run ATS Test Again Button (appears after first analysis)
+              Consumer<SkillsAnalysisController>(
+                builder: (context, controller, child) {
+                  if (controller.hasResults && _canPerformRerunAnalysis()) {
+                    return _buildRerunAnalysisButton();
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               const SizedBox(height: 24),
 
               // Skills Display Results
@@ -244,6 +255,99 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     return canAnalyze;
   }
 
+  bool _canPerformRerunAnalysis() {
+    // For rerun analysis, we need JD URL and company name
+    final hasJdUrl = _jdUrlController.text.trim().isNotEmpty;
+    final hasCompany = _extractCompanyFromJD() != null;
+    return hasJdUrl && hasCompany;
+  }
+
+  String? _extractCompanyFromJD() {
+    // Simple company extraction from JD text
+    final jdText = _jdController.text.trim();
+    if (jdText.isEmpty) return null;
+
+    // Look for common company indicators
+    final lines = jdText.split('\n');
+    for (final line in lines) {
+      final lowerLine = line.toLowerCase();
+      if (lowerLine.contains('company:') ||
+          lowerLine.contains('organization:') ||
+          lowerLine.contains('employer:')) {
+        return line.split(':').last.trim();
+      }
+    }
+
+    // Fallback: use first line if it looks like a company name
+    if (lines.isNotEmpty && lines.first.length < 50) {
+      return lines.first.trim();
+    }
+
+    return null;
+  }
+
+  Widget _buildRerunAnalysisButton() {
+    return Card(
+      color: Colors.orange.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.refresh,
+                  color: Colors.orange.shade600,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Run ATS Test Again',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Use the latest tailored CV for improved analysis results',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.orange.shade600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _canPerformRerunAnalysis() && !_controller.isLoading
+                    ? _performRerunAnalysis
+                    : null,
+                icon: const Icon(Icons.psychology, size: 18),
+                label: const Text(
+                  'Run ATS Test Again',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _performAnalysis() async {
     if (!_canPerformAnalysis()) {
       String message = 'Cannot perform analysis:\n';
@@ -271,6 +375,38 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
       // No need to show duplicate notifications here
     } catch (e) {
       _showSnackBar('Error performing analysis: $e', isError: true);
+    }
+  }
+
+  Future<void> _performRerunAnalysis() async {
+    if (!_canPerformRerunAnalysis()) {
+      String message = 'Cannot perform rerun analysis:\n';
+      if (_jdUrlController.text.trim().isEmpty) {
+        message += '• Please enter a job description URL\n';
+      }
+      if (_extractCompanyFromJD() == null) {
+        message += '• Could not extract company name from job description\n';
+      }
+
+      _showSnackBar(message.trim(), isError: true);
+      return;
+    }
+
+    try {
+      final company = _extractCompanyFromJD()!;
+
+      // Perform context-aware rerun analysis
+      await _controller.performContextAwareAnalysis(
+        jdUrl: _jdUrlController.text.trim(),
+        company: company,
+        isRerun: true, // This is the key parameter for rerun
+        includeTailoring: true,
+      );
+
+      _showSnackBar(
+          'Rerun analysis completed! Using latest tailored CV for improved results.');
+    } catch (e) {
+      _showSnackBar('Error performing rerun analysis: $e', isError: true);
     }
   }
 

@@ -34,7 +34,12 @@ class ATSRecommendationService:
         try:
             # Construct file paths
             company_dir = self.base_dir / company
-            analysis_file = company_dir / f"{company}_skills_analysis.json"
+            
+            # Use timestamped analysis file with fallback
+            from app.utils.timestamp_utils import TimestampUtils
+            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+            if not analysis_file:
+                analysis_file = company_dir / f"{company}_skills_analysis.json"
             
             # Check if analysis file exists
             if not analysis_file.exists():
@@ -439,7 +444,13 @@ Format your response as structured recommendations with clear sections and bulle
         """
         try:
             recommendation_file = self.get_recommendation_file_path(company)
-            analysis_file = self.base_dir / company / f"{company}_skills_analysis.json"
+            
+            # Use timestamped analysis file with fallback
+            from app.utils.timestamp_utils import TimestampUtils
+            company_dir = self.base_dir / company
+            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+            if not analysis_file:
+                analysis_file = company_dir / f"{company}_skills_analysis.json"
             
             # Check if we need to update
             if not force_update and recommendation_file.exists():
@@ -470,7 +481,11 @@ Format your response as structured recommendations with clear sections and bulle
             
             for company_dir in self.base_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    analysis_file = company_dir / f"{company_dir.name}_skills_analysis.json"
+                    # Use timestamped analysis file with fallback
+                    from app.utils.timestamp_utils import TimestampUtils
+                    analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_skills_analysis", "json")
+                    if not analysis_file:
+                        analysis_file = company_dir / f"{company_dir.name}_skills_analysis.json"
                     
                     if analysis_file.exists():
                         try:

@@ -21,6 +21,9 @@ from app.services.skill_extraction.result_saver import SkillExtractionResultSave
 from app.ai.ai_service import ai_service
 from app.services.jd_analysis import analyze_and_save_company_jd
 from app.services.cv_jd_matching import match_and_save_cv_jd
+from app.services.context_aware_analysis_pipeline import context_aware_pipeline
+from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
+from app.services.jd_cache_manager import jd_cache_manager
 from pathlib import Path
 import asyncio
 import json
@@ -154,11 +157,18 @@ def _find_company_in_existing_folders(jd_text: str) -> Optional[str]:
 def _validate_required_analysis_files(company_name: str) -> Optional[str]:
     """Validate that required analysis files exist for the company"""
     try:
+        from app.utils.timestamp_utils import TimestampUtils
+        
         base_path = Path("cv-analysis") / company_name
         
-        # Required files
-        jd_original_file = base_path / "jd_original.json"
-        job_info_file = base_path / f"job_info_{company_name}.json"
+        # Check for timestamped files first, then fallback to non-timestamped
+        jd_original_file = TimestampUtils.find_latest_timestamped_file(base_path, "jd_original", "json")
+        if not jd_original_file:
+            jd_original_file = base_path / "jd_original.json"
+        
+        job_info_file = TimestampUtils.find_latest_timestamped_file(base_path, f"job_info_{company_name}", "json")
+        if not job_info_file:
+            job_info_file = base_path / f"job_info_{company_name}.json"
         
         missing_files = []
         
@@ -256,7 +266,11 @@ def _detect_most_recent_company() -> Optional[str]:
         candidates = []
         for d in base_path.iterdir():
             if d.is_dir() and d.name != "Unknown_Company":
-                if list(d.glob("job_info_*.json")) or (d / "jd_original.json").exists():
+                # Check for timestamped files first, then fallback to non-timestamped
+                from app.utils.timestamp_utils import TimestampUtils
+                has_job_info = TimestampUtils.find_latest_timestamped_file(d, "job_info", "json") or list(d.glob("job_info_*.json"))
+                has_jd_original = TimestampUtils.find_latest_timestamped_file(d, "jd_original", "json") or (d / "jd_original.json").exists()
+                if has_job_info or has_jd_original:
                     candidates.append(d)
 
         if not candidates:
@@ -320,8 +334,17 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             # Check if we have the minimum required files
             base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
             cv_file = Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None
-            jd_file = base_dir / cname / "jd_original.json"
-            skills_file = base_dir / cname / f"{cname}_skills_analysis.json"
+            
+            # Use timestamped files with fallback
+            from app.utils.timestamp_utils import TimestampUtils
+            company_dir = base_dir / cname
+            jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+            if not jd_file:
+                jd_file = company_dir / "jd_original.json"
+            
+            skills_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{cname}_skills_analysis", "json")
+            if not skills_file:
+                skills_file = company_dir / f"{cname}_skills_analysis.json"
             
             # We can run component analysis if we have CV, JD, and skills analysis
             if cv_file and cv_file.exists() and jd_file.exists() and skills_file.exists():
@@ -424,6 +447,125 @@ async def analyze_skills(request: Request):
         return JSONResponse(
             status_code=500,
             content={"error": f"Skill extraction failed: {str(e)}"}
+        )
+
+
+@router.post("/context-aware-analysis")
+async def context_aware_analysis(
+    request: Request,
+    current_model: str = Depends(get_current_model)
+):
+    """Context-aware analysis that intelligently selects CV and caches JD data"""
+    try:
+        # Verify authentication
+        auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authentication required"}
+            )
+        
+        token = auth_header.replace("Bearer ", "")
+        token_data = verify_token(token)
+        if not token_data:
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Invalid token"}
+            )
+        
+        data = await request.json()
+        
+        # Extract parameters
+        jd_url = data.get("jd_url")
+        company = data.get("company")
+        is_rerun = data.get("is_rerun", False)  # New parameter for context awareness
+        include_tailoring = data.get("include_tailoring", True)
+        user_id = getattr(token_data, 'user_id', 1)
+        
+        # Validate required parameters
+        if not jd_url:
+            return JSONResponse(
+                status_code=400, 
+                content={"error": "jd_url is required"}
+            )
+        
+        if not company:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "company is required"}
+            )
+        
+        logger.info(f"🎯 Context-aware analysis request: Company={company}, JD={jd_url}, Rerun={is_rerun}")
+        
+        # Get CV selection context for user feedback
+        cv_context = enhanced_dynamic_cv_selector.get_cv_for_analysis(company, is_rerun)
+        logger.info(f"📄 Using {cv_context.cv_type} CV v{cv_context.version} (Source: {cv_context.source})")
+        
+        # Get JD cache status for user feedback
+        jd_cached = jd_cache_manager.should_reuse_jd_analysis(jd_url, company)
+        cache_stats = jd_cache_manager.get_cache_stats(company)
+        logger.info(f"🗄️ JD Cache status: {'Reusing cached data' if jd_cached else 'Fresh analysis'}")
+        
+        # Run the context-aware analysis pipeline
+        results = await context_aware_pipeline.run_full_analysis(
+            jd_url=jd_url,
+            company=company,
+            is_rerun=is_rerun,
+            user_id=user_id,
+            include_tailoring=include_tailoring
+        )
+        
+        if results.success:
+            logger.info(f"✅ Context-aware analysis completed in {results.processing_time:.2f}s")
+            
+            # Prepare response with rich context information
+            response_data = {
+                "success": True,
+                "analysis_context": {
+                    "company": company,
+                    "jd_url": jd_url,
+                    "is_rerun": is_rerun,
+                    "cv_selection": cv_context.to_dict(),
+                    "jd_cache_status": {
+                        "cached": jd_cached,
+                        "cache_stats": cache_stats
+                    },
+                    "processing_time": results.processing_time,
+                    "steps_completed": results.steps_completed,
+                    "steps_skipped": results.steps_skipped
+                },
+                "results": results.to_dict()['results'],
+                "warnings": results.warnings
+            }
+            
+            return JSONResponse(content=response_data)
+        else:
+            logger.error(f"❌ Context-aware analysis failed: {results.errors}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "errors": results.errors,
+                    "warnings": results.warnings,
+                    "analysis_context": results.context.to_dict() if results.context else None
+                }
+            )
+        
+    except Exception as e:
+        import traceback
+        error_msg = str(e) if str(e) else "Unknown error occurred"
+        error_type = type(e).__name__
+        traceback_info = traceback.format_exc()
+        
+        logger.error(f"❌ Context-aware analysis error ({error_type}): {error_msg}")
+        logger.error(f"Traceback: {traceback_info}")
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Context-aware analysis failed ({error_type}): {error_msg}",
+                "type": error_type
+            }
         )
 
 
@@ -539,7 +681,9 @@ async def preliminary_analysis(
                 # Save JD content to jd_original.json for JD analyzer
                 try:
                     import json
-                    jd_file = company_dir / "jd_original.json"
+                    from app.utils.timestamp_utils import TimestampUtils
+                    timestamp = TimestampUtils.get_timestamp()
+                    jd_file = company_dir / f"jd_original_{timestamp}.json"
                     with open(jd_file, 'w', encoding='utf-8') as f:
                         json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
                     logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
@@ -636,6 +780,40 @@ async def get_cached_preliminary_analysis(request: Request):
         )
 
 
+@router.get("/cv-context/{company}")
+async def get_cv_context(company: str, is_rerun: bool = False):
+    """Get CV selection context for UI feedback"""
+    try:
+        # Get CV selection context
+        cv_context = enhanced_dynamic_cv_selector.get_cv_for_analysis(company, is_rerun)
+        
+        # Get available CV versions
+        available_versions = enhanced_dynamic_cv_selector.list_available_cv_versions(company)
+        
+        # Get JD cache status
+        cache_stats = jd_cache_manager.get_cache_stats(company)
+        
+        return JSONResponse(content={
+            "success": True,
+            "company": company,
+            "cv_context": cv_context.to_dict(),
+            "available_cv_versions": available_versions,
+            "jd_cache_status": cache_stats,
+            "recommendation": {
+                "suggested_cv": cv_context.cv_type,
+                "reason": cv_context.source,
+                "version": cv_context.version
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ CV context error: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to get CV context: {str(e)}"}
+        )
+
+
 @router.get("/preliminary-analysis/status")
 async def get_preliminary_analysis_status(request: Request):
     """Get preliminary analysis status"""
@@ -707,9 +885,17 @@ async def trigger_component_analysis(company: str):
         
         # Check if required files exist
         base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        
+        # Use timestamped files with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        company_dir = base_dir / company
+        jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+        if not jd_file:
+            jd_file = company_dir / "jd_original.json"
+        
         required_files = {
             "cv_file": Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None,
-            "jd_file": base_dir / company / "jd_original.json", 
+            "jd_file": jd_file, 
             "match_file": base_dir / company / "cv_jd_match_results.json"
         }
         
@@ -1304,7 +1490,11 @@ async def list_companies_with_results():
         companies = []
         for company_dir in base_dir.iterdir():
             if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                analysis_file = company_dir / f"{company_dir.name}_skills_analysis.json"
+                # Use timestamped analysis file with fallback
+                from app.utils.timestamp_utils import TimestampUtils
+                analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_skills_analysis", "json")
+                if not analysis_file:
+                    analysis_file = company_dir / f"{company_dir.name}_skills_analysis.json"
                 if analysis_file.exists():
                     # Get basic info about the analysis
                     try:
@@ -1357,9 +1547,15 @@ async def get_analysis_results(company: str):
     try:
         logger.info(f"📊 [API] Fetching analysis results for company: {company}")
         
-        # Build file path
+        # Build file path using timestamped files
         base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-        analysis_file = base_dir / company / f"{company}_skills_analysis.json"
+        company_dir = base_dir / company
+        
+        # Use timestamped analysis file with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+        if not analysis_file:
+            analysis_file = company_dir / f"{company}_skills_analysis.json"
         
         if not analysis_file.exists():
             return JSONResponse(
@@ -1414,7 +1610,13 @@ async def get_analysis_results(company: str):
             result["ats_score"] = latest
         
         # Get AI recommendation content if available
-        ai_recommendation_file = base_dir / company / f"{company}_ai_recommendation.json"
+        # Use timestamped AI recommendation file with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        company_dir = base_dir / company
+        ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
+        if not ai_recommendation_file:
+            ai_recommendation_file = company_dir / f"{company}_ai_recommendation.json"
+        
         if ai_recommendation_file.exists():
             try:
                 with open(ai_recommendation_file, 'r', encoding='utf-8') as f:

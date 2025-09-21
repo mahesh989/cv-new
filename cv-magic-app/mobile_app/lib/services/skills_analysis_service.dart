@@ -3,7 +3,98 @@ import 'api_service.dart';
 
 /// Service for handling skills analysis (preliminary analysis) operations
 class SkillsAnalysisService {
-  /// Perform preliminary analysis to extract skills from CV and JD
+  /// Perform context-aware analysis with intelligent CV selection and JD caching
+  static Future<SkillsAnalysisResult> performContextAwareAnalysis({
+    required String jdUrl,
+    required String company,
+    required bool isRerun,
+    bool includeTailoring = true,
+  }) async {
+    print('=== CONTEXT-AWARE ANALYSIS SERVICE CALLED ===');
+    print('JD URL: $jdUrl');
+    print('Company: $company');
+    print('Is Rerun: $isRerun');
+    print('Include Tailoring: $includeTailoring');
+
+    try {
+      print('🚀 [CONTEXT_AWARE_SERVICE] Starting context-aware analysis');
+
+      final stopwatch = Stopwatch()..start();
+
+      final result = await APIService.makeAuthenticatedCall(
+        endpoint: '/context-aware-analysis',
+        method: 'POST',
+        body: {
+          'jd_url': jdUrl,
+          'company': company,
+          'is_rerun': isRerun,
+          'include_tailoring': includeTailoring,
+        },
+      );
+
+      print('📡 [CONTEXT_AWARE_SERVICE] Received response from API');
+      print(
+          '📡 [CONTEXT_AWARE_SERVICE] Raw result type: ${result.runtimeType}');
+      print(
+          '📡 [CONTEXT_AWARE_SERVICE] Raw result keys: ${result.keys.toList()}');
+
+      stopwatch.stop();
+
+      // Convert context-aware result to SkillsAnalysisResult format
+      final analysisResult = _convertContextAwareResult(result);
+      print(
+          '📊 [CONTEXT_AWARE_SERVICE] Successfully converted to SkillsAnalysisResult');
+
+      // Return with execution duration
+      final finalResult = SkillsAnalysisResult(
+        cvSkills: analysisResult.cvSkills,
+        jdSkills: analysisResult.jdSkills,
+        cvComprehensiveAnalysis: analysisResult.cvComprehensiveAnalysis,
+        jdComprehensiveAnalysis: analysisResult.jdComprehensiveAnalysis,
+        expandableAnalysis: analysisResult.expandableAnalysis,
+        extractedKeywords: analysisResult.extractedKeywords,
+        analyzeMatch: analysisResult.analyzeMatch,
+        executionDuration: stopwatch.elapsed,
+        isSuccess: true,
+        preextractedRawOutput: analysisResult.preextractedRawOutput,
+        preextractedCompanyName: analysisResult.preextractedCompanyName,
+      );
+
+      return finalResult;
+    } catch (e, stackTrace) {
+      print(
+          '❌ [CONTEXT_AWARE_SERVICE] Exception in performContextAwareAnalysis: $e');
+      print('❌ [CONTEXT_AWARE_SERVICE] Stack trace: $stackTrace');
+
+      // Enhanced error handling for different error types
+      if (e.toString().contains('404') || e.toString().contains('not found')) {
+        return SkillsAnalysisResult.error(
+            'Analysis resources not found. Please check your inputs.');
+      } else if (e.toString().contains('401')) {
+        return SkillsAnalysisResult.error(
+            'Authentication required. Please log in again.');
+      } else if (e.toString().contains('500')) {
+        return SkillsAnalysisResult.error(
+            'Server error. Please try again later.');
+      } else {
+        // Try to extract just the error message from API responses
+        String errorMsg = e.toString();
+        if (errorMsg.contains('{"error":"') && errorMsg.contains('"}')) {
+          // Extract clean error message from JSON response
+          final start = errorMsg.indexOf('{"error":"') + 10;
+          final end = errorMsg.indexOf('"}', start);
+          if (end > start) {
+            errorMsg = errorMsg.substring(start, end);
+            return SkillsAnalysisResult.error(errorMsg);
+          }
+        }
+        return SkillsAnalysisResult.error(
+            'Failed to perform context-aware analysis: $e');
+      }
+    }
+  }
+
+  /// Perform preliminary analysis to extract skills from CV and JD (legacy method)
   static Future<SkillsAnalysisResult> performPreliminaryAnalysis({
     required String cvFilename,
     required String jdText,
@@ -174,6 +265,69 @@ class SkillsAnalysisService {
       // If cache retrieval fails, just return null to proceed with fresh analysis
       return null;
     }
+  }
+
+  /// Convert context-aware analysis result to SkillsAnalysisResult format
+  static SkillsAnalysisResult _convertContextAwareResult(
+      Map<String, dynamic> result) {
+    final results = result['results'] as Map<String, dynamic>? ?? {};
+    final analysisContext =
+        result['analysis_context'] as Map<String, dynamic>? ?? {};
+
+    // Extract CV skills
+    final cvSkillsData = results['cv_skills'] as Map<String, dynamic>? ?? {};
+    final cvSkills = SkillsData(
+      technicalSkills:
+          List<String>.from(cvSkillsData['technical_skills'] ?? []),
+      softSkills: List<String>.from(cvSkillsData['soft_skills'] ?? []),
+      domainKeywords: List<String>.from(cvSkillsData['domain_keywords'] ?? []),
+    );
+
+    // Extract JD skills
+    final jdSkillsData = results['jd_skills'] as Map<String, dynamic>? ?? {};
+    final jdSkills = SkillsData(
+      technicalSkills:
+          List<String>.from(jdSkillsData['technical_skills'] ?? []),
+      softSkills: List<String>.from(jdSkillsData['soft_skills'] ?? []),
+      domainKeywords: List<String>.from(jdSkillsData['domain_keywords'] ?? []),
+    );
+
+    // Extract comprehensive analysis
+    final cvComprehensiveAnalysis =
+        cvSkillsData['comprehensive_analysis'] as String?;
+    final jdComprehensiveAnalysis =
+        jdSkillsData['comprehensive_analysis'] as String?;
+
+    // Extract analyze match if available
+    final cvJdMatching =
+        results['cv_jd_matching'] as Map<String, dynamic>? ?? {};
+    AnalyzeMatchResult? analyzeMatch;
+    if (cvJdMatching.isNotEmpty) {
+      analyzeMatch = AnalyzeMatchResult(
+        rawAnalysis: cvJdMatching['raw_analysis'] ?? '',
+        companyName: analysisContext['company'] ?? '',
+        filePath: cvJdMatching['file_path'],
+        error: cvJdMatching['has_error'] == true ? 'Analysis error' : null,
+      );
+    }
+
+    // Extract keywords
+    final extractedKeywords =
+        List<String>.from(cvSkillsData['extracted_keywords'] ?? []);
+
+    return SkillsAnalysisResult(
+      cvSkills: cvSkills,
+      jdSkills: jdSkills,
+      cvComprehensiveAnalysis: cvComprehensiveAnalysis,
+      jdComprehensiveAnalysis: jdComprehensiveAnalysis,
+      expandableAnalysis: null, // Not available in context-aware result
+      extractedKeywords: extractedKeywords,
+      analyzeMatch: analyzeMatch,
+      executionDuration: Duration.zero, // Will be set by caller
+      isSuccess: result['success'] ?? false,
+      preextractedRawOutput: null, // Not available in context-aware result
+      preextractedCompanyName: analysisContext['company'],
+    );
   }
 
   /// Generate a simple hash for JD text for caching purposes

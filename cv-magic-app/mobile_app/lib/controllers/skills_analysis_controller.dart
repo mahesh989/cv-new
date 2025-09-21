@@ -224,6 +224,60 @@ class SkillsAnalysisController extends ChangeNotifier {
     }
   }
 
+  /// Perform context-aware analysis with intelligent CV selection
+  Future<void> performContextAwareAnalysis({
+    required String jdUrl,
+    required String company,
+    required bool isRerun,
+    bool includeTailoring = true,
+  }) async {
+    // Validate inputs
+    if (jdUrl.trim().isEmpty) {
+      _setError('Please provide a job description URL');
+      _showNotification('Please provide a job description URL', isError: true);
+      return;
+    }
+
+    if (company.trim().isEmpty) {
+      _setError('Please provide a company name');
+      _showNotification('Please provide a company name', isError: true);
+      return;
+    }
+
+    _setState(SkillsAnalysisState.loading);
+    _currentJdText = jdUrl; // Store for compatibility
+    _currentCvFilename = company; // Store for compatibility
+
+    try {
+      print('🚀 [SKILLS_ANALYSIS_CONTROLLER] Starting context-aware analysis');
+      print('   JD URL: $jdUrl');
+      print('   Company: $company');
+      print('   Is Rerun: $isRerun');
+
+      _result = await SkillsAnalysisService.performContextAwareAnalysis(
+        jdUrl: jdUrl,
+        company: company,
+        isRerun: isRerun,
+        includeTailoring: includeTailoring,
+      );
+
+      if (_result!.isSuccess) {
+        _setState(SkillsAnalysisState.completed);
+        _showNotification('Context-aware analysis completed successfully!');
+        _startProgressiveDisplay();
+      } else {
+        _setError(_result!.errorMessage ?? 'Context-aware analysis failed');
+        _showNotification(
+            _result!.errorMessage ?? 'Context-aware analysis failed',
+            isError: true);
+      }
+    } catch (e) {
+      _setError('Context-aware analysis failed: $e');
+      _showNotification('Context-aware analysis failed: $e', isError: true);
+      debugPrint('❌ [SKILLS_ANALYSIS_CONTROLLER] Error: $e');
+    }
+  }
+
   /// Clear all results and reset to idle state
   void clearResults() {
     _progressiveTimer?.cancel();
@@ -407,6 +461,23 @@ class SkillsAnalysisController extends ChangeNotifier {
           aiRecommendation: aiRecommendation,
         );
 
+        // Check if AI recommendation is now available and trigger display
+        if (aiRecommendation != null && !_showAIRecommendationResults) {
+          _showAIRecommendationLoading = true;
+          notifyListeners();
+          _showNotification('🤖 Generating AI recommendations...');
+
+          Timer(Duration(seconds: 10), () {
+            // Show AI recommendations after 10-second delay
+            _showAIRecommendationResults = true;
+            _result = _result!.copyWith(
+              aiRecommendation: aiRecommendation,
+            );
+            notifyListeners();
+            _showNotification('🎯 AI recommendations ready!');
+          });
+        }
+
         // Update result with component analysis first (component analysis can show immediately)
         _result = _result!.copyWith(
           componentAnalysis: componentAnalysis,
@@ -437,26 +508,9 @@ class SkillsAnalysisController extends ChangeNotifier {
               _showNotification('✅ ATS Analysis completed!');
             }
 
-            // Step 6: Show AI Recommendation loading immediately after ATS results
-            if (_fullResult!.aiRecommendation != null) {
-              _showAIRecommendationLoading = true;
-              notifyListeners();
-              _showNotification('🤖 Generating AI recommendations...');
-
-              Timer(Duration(seconds: 10), () {
-                // Show AI recommendations after another 10-second delay
-                _showAIRecommendationResults = true;
-                _result = _result!.copyWith(
-                  aiRecommendation: _fullResult!.aiRecommendation,
-                );
-                notifyListeners();
-                _showNotification('✅ AI recommendations completed!');
-
-                _finishAnalysis();
-              });
-            } else {
-              _finishAnalysis();
-            }
+            // Step 6: AI recommendations are now handled in the polling process
+            // when they become available, so we can finish analysis here
+            _finishAnalysis();
           });
         } else {
           _showNotification('✅ Advanced analysis completed!');

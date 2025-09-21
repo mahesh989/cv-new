@@ -44,15 +44,18 @@ class ComponentAssembler:
         self.requirements_extractor = RequirementsExtractor()
         self.ats_calculator = ATSScoreCalculator()
 
-    def _read_cv_text(self) -> str:
-        """Read CV text from the latest available CV file."""
-        from app.services.dynamic_cv_selector import dynamic_cv_selector
+    def _read_cv_text(self, company_name: str = "Unknown") -> str:
+        """Read CV text from the latest available CV file with context awareness."""
+        from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
         
-        # Get the latest CV file dynamically
-        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+        # Get the latest CV file dynamically with context awareness
+        # For component assembler, assume fresh analysis unless specified otherwise
+        latest_cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
+            company=company_name, is_rerun=False
+        )
         
         if not latest_cv_paths['txt_path']:
-            raise FileNotFoundError("No CV text file found in cvs folders")
+            raise FileNotFoundError(f"No CV text file found for company: {company_name}")
         
         cv_txt = Path(latest_cv_paths['txt_path'])
         if not cv_txt.exists():
@@ -348,7 +351,12 @@ class ComponentAssembler:
 
     def _save_results(self, company: str, component_results: Dict[str, Any], scores: Dict[str, float]) -> None:
         """Save assembled results to the company's skills analysis file."""
-        file_path = self.base_dir / company / f"{company}_skills_analysis.json"
+        # Use timestamped analysis file with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        company_dir = self.base_dir / company
+        file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+        if not file_path:
+            file_path = company_dir / f"{company}_skills_analysis.json"
         
         # Create the assembled entry
         assembled_entry = {
@@ -385,7 +393,12 @@ class ComponentAssembler:
         """Run ATS score calculation and save results."""
         try:
             # Read preextracted comparison data
-            file_path = self.base_dir / company / f"{company}_skills_analysis.json"
+            # Use timestamped analysis file with fallback
+            from app.utils.timestamp_utils import TimestampUtils
+            company_dir = self.base_dir / company
+            file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+            if not file_path:
+                file_path = company_dir / f"{company}_skills_analysis.json"
             if not file_path.exists():
                 logger.warning("[ASSEMBLER] Skills analysis file not found for ATS calculation")
                 return {"error": "Skills analysis file not found"}
@@ -484,7 +497,7 @@ class ComponentAssembler:
         
         try:
             # Read input data
-            cv_text = self._read_cv_text()
+            cv_text = self._read_cv_text(company)
             jd_text = self._read_jd_text(company)
             matched_skills = self._read_matched_skills(company)
             

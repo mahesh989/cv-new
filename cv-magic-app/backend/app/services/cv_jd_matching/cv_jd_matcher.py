@@ -297,12 +297,17 @@ class CVJDMatcher:
             Exception: If matching fails
         """
         try:
-            # Read CV content using dynamic CV selection
+            # Read CV content using enhanced dynamic CV selection with context awareness
             if not cv_file_path:
-                from app.services.dynamic_cv_selector import dynamic_cv_selector
-                latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+                from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
+                # Extract company name for context-aware selection
+                company_name = company_name if 'company_name' in locals() else "Unknown"
+                # For now, assume fresh analysis (could be enhanced with rerun detection)
+                latest_cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
+                    company=company_name, is_rerun=False
+                )
                 cv_file_path = latest_cv_paths['txt_path']
-                logger.info(f"📄 [CV_JD_MATCHER] Using dynamic CV from {latest_cv_paths['txt_source']} folder")
+                logger.info(f"📄 [CV_JD_MATCHER] Using enhanced dynamic CV from {latest_cv_paths['txt_source']} folder for {company_name}")
             
             cv_content = self._read_cv_file(cv_file_path)
             logger.info(f"📄 Read CV content from: {cv_file_path}")

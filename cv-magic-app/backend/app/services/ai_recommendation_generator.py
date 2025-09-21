@@ -109,7 +109,14 @@ class AIRecommendationGenerator:
     def _get_input_recommendation_file_path(self, company: str) -> Path:
         """Get the input recommendation file path for a company"""
         company_dir = self.base_dir / company
-        return company_dir / f"{company}_input_recommendation.json"
+        
+        # Use timestamped file with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        input_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
+        if not input_file:
+            input_file = company_dir / f"{company}_input_recommendation.json"
+        
+        return input_file
     
     def _load_ai_prompt(self, company: str) -> Optional[str]:
         """
@@ -397,8 +404,16 @@ class AIRecommendationGenerator:
         """
         try:
             company_dir = self.base_dir / company
-            txt_file = company_dir / f"{company}_ai_recommendation.txt"
-            json_file = company_dir / f"{company}_ai_recommendation.json"
+            
+            # Use timestamped files with fallback
+            from app.utils.timestamp_utils import TimestampUtils
+            txt_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "txt")
+            if not txt_file:
+                txt_file = company_dir / f"{company}_ai_recommendation.txt"
+            
+            json_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
+            if not json_file:
+                json_file = company_dir / f"{company}_ai_recommendation.json"
             
             if not txt_file.exists():
                 logger.error(f"TXT file not found: {txt_file}")
@@ -454,8 +469,15 @@ class AIRecommendationGenerator:
             
             for company_dir in self.base_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    txt_file = company_dir / f"{company_dir.name}_ai_recommendation.txt"
-                    json_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
+                    # Use timestamped files with fallback
+                    from app.utils.timestamp_utils import TimestampUtils
+                    txt_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_ai_recommendation", "txt")
+                    if not txt_file:
+                        txt_file = company_dir / f"{company_dir.name}_ai_recommendation.txt"
+                    
+                    json_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_ai_recommendation", "json")
+                    if not json_file:
+                        json_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
                     
                     # Only convert if TXT exists and JSON doesn't exist (or is older)
                     if txt_file.exists():

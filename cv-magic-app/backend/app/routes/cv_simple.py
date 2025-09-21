@@ -446,10 +446,17 @@ async def get_latest_tailored_cv():
                 detail="CV analysis folder not found"
             )
         
-        # Find all tailored CV text files across all company folders
+        # Find all tailored CV text files in the centralized tailored folder
+        tailored_folder = cv_analysis_path / "cvs" / "tailored"
         all_tailored_files = []
+        
+        if tailored_folder.exists():
+            # Look for all tailored CV text files in the centralized folder
+            all_tailored_files = list(tailored_folder.glob("*_tailored_cv_*.txt"))
+        
+        # Fallback: also check company folders for any remaining files
         for company_dir in cv_analysis_path.iterdir():
-            if company_dir.is_dir() and company_dir.name != "__pycache__":
+            if company_dir.is_dir() and company_dir.name != "__pycache__" and company_dir.name != "cvs":
                 # Look for company-specific naming pattern first
                 company_files = list(company_dir.glob(f"{company_dir.name}_tailored_cv_*.txt"))
                 if not company_files:
@@ -461,7 +468,7 @@ async def get_latest_tailored_cv():
         if not all_tailored_files:
             raise HTTPException(
                 status_code=404,
-                detail="No tailored CV files found in any company folder"
+                detail="No tailored CV files found in tailored folder or company folders"
             )
         
         # Sort by timestamp in filename first, then by modified time as fallback
@@ -479,8 +486,9 @@ async def get_latest_tailored_cv():
         
         latest_txt_file = max(all_tailored_files, key=get_timestamp)
         
-        # Extract company name from file path
-        company_name = latest_txt_file.parent.name
+        # Extract company name from filename (e.g., "Australia_for_UNHCR_tailored_cv_20250921_150701.txt")
+        filename = latest_txt_file.name
+        company_name = filename.split('_tailored_cv_')[0] if '_tailored_cv_' in filename else "Unknown"
         
         # Read the text content
         with open(latest_txt_file, 'r', encoding='utf-8') as f:

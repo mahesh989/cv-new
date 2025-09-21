@@ -410,17 +410,29 @@ class EnhancedATSOrchestrator:
         try:
             logger.info(f"[Enhanced ATS] Starting analysis for company: {company_name}")
             
-            # Define paths with dynamic CV selection
-            from app.services.dynamic_cv_selector import dynamic_cv_selector
+            # Define paths with enhanced dynamic CV selection
+            from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
             
             base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
             company_dir = base_dir / company_name
-            analysis_file = company_dir / f"{company_name}_skills_analysis.json"
             
-            # Use dynamic CV selection for the latest CV file
-            latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+            # Use timestamped analysis file with fallback
+            from app.utils.timestamp_utils import TimestampUtils
+            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_skills_analysis", "json")
+            if not analysis_file:
+                analysis_file = company_dir / f"{company_name}_skills_analysis.json"
+            
+            # Use enhanced dynamic CV selection with context awareness
+            latest_cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
+                company=company_name, is_rerun=False
+            )
             cv_file = Path(latest_cv_paths['txt_path']) if latest_cv_paths['txt_path'] else None
-            jd_file = company_dir / "jd_original.json"
+            
+            # Use timestamped JD file with fallback
+            from app.utils.timestamp_utils import TimestampUtils
+            jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+            if not jd_file:
+                jd_file = company_dir / "jd_original.json"
             
             logger.info(f"📄 [Enhanced ATS] Using dynamic CV from {latest_cv_paths['txt_source']} folder: {cv_file}")
             
