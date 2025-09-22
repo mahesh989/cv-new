@@ -154,15 +154,15 @@
     "section_headers_found": [
       "EXPERIENCE",
       "EDUCATION",
-      "CAREER PROFIL E",
-      "TECHNICAL SKILLS"
+      "TECHNICAL SKILLS",
+      "CAREER PROFIL E"
     ],
     "parsing_approach": "content_preserving"
   },
-  "saved_at": "2025-09-22T12:06:31.178553",
+  "saved_at": "2025-09-22T12:20:27.805443",
   "metadata": {
     "source_filename": "maheshwor_tiwari.pdf",
-    "processed_at": "2025-09-22T12:06:31.178897",
+    "processed_at": "2025-09-22T12:20:27.820627",
     "processing_version": "2.0",
     "content_type": "structured_cv"
   }
