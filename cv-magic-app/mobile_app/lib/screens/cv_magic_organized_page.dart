@@ -9,6 +9,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:async';
 import '../modules/cv/cv_upload_module.dart';
 import '../modules/cv/cv_selection_module.dart';
 import '../modules/cv/cv_preview_module.dart';
@@ -47,6 +48,9 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   // Skills analysis controller
   late final SkillsAnalysisController _skillsController;
 
+  // Timer for checking clear flag
+  Timer? _clearCheckTimer;
+
   @override
   void initState() {
     super.initState();
@@ -57,9 +61,14 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
     // Check if we need to clear results (called from Run ATS Again)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.shouldClearResults?.call() == true) {
-        clearAnalysisResults();
-        widget.onResultsCleared?.call();
+      _checkAndClearResults();
+    });
+
+    // Start a timer to periodically check for clear flag
+    _clearCheckTimer =
+        Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        _checkAndClearResults();
       }
     });
 
@@ -78,7 +87,35 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check for clear results flag every time the widget becomes active
+    _checkAndClearResults();
+  }
+
+  /// Check if we need to clear results and do so if needed
+  void _checkAndClearResults() {
+    debugPrint('🧹 [CV_MAGIC] _checkAndClearResults called');
+    final shouldClear = widget.shouldClearResults?.call();
+    debugPrint('🧹 [CV_MAGIC] shouldClearResults returned: $shouldClear');
+
+    if (shouldClear == true) {
+      debugPrint('🧹 [CV_MAGIC] Clearing results due to Run ATS Again');
+      debugPrint('🧹 [CV_MAGIC] About to call clearAnalysisResults()');
+      clearAnalysisResults();
+      debugPrint(
+          '🧹 [CV_MAGIC] clearAnalysisResults() completed, calling onResultsCleared');
+      widget.onResultsCleared?.call();
+      debugPrint('🧹 [CV_MAGIC] onResultsCleared callback completed');
+    } else {
+      debugPrint(
+          '🧹 [CV_MAGIC] shouldClearResults returned false, no clearing needed');
+    }
+  }
+
+  @override
   void dispose() {
+    _clearCheckTimer?.cancel();
     _skillsController.dispose();
     jdController.dispose();
     jdUrlController.dispose();
@@ -91,6 +128,10 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
+
+    // Check for clear results flag every time the widget builds
+    _checkAndClearResults();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('CV Magic - Organized'),
@@ -512,12 +553,23 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
   /// Clear all analysis results and reset the controller
   void clearAnalysisResults() {
-    debugPrint('🧹 Clearing analysis results in CV Magic tab');
+    debugPrint('🧹 [CV_MAGIC] Clearing analysis results in CV Magic tab');
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller has results before clear: ${_skillsController.hasResults}');
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller state before clear: ${_skillsController.state}');
+
     _skillsController.clearResults();
+
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller has results after clear: ${_skillsController.hasResults}');
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller state after clear: ${_skillsController.state}');
 
     // Clear any other state if needed
     setState(() {
       // Reset any local state variables if needed
+      debugPrint('🧹 [CV_MAGIC] setState called to refresh UI');
     });
   }
 }

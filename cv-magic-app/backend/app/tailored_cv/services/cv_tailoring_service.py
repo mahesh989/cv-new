@@ -78,6 +78,12 @@ class CVTailoringService:
                 optimization_strategy,
                 request.custom_instructions
             )
+
+            # Post-fix skills taxonomy if the model misclassified
+            try:
+                tailored_cv = self._normalize_skills_taxonomy(tailored_cv)
+            except Exception as e:
+                logger.warning(f"⚠️ [TAILORING] Failed to normalize skills taxonomy: {e}")
             
             # Step 4: Post-process and validate results
             processing_summary = self._generate_processing_summary(
@@ -365,6 +371,83 @@ class CVTailoringService:
             strategy
         )
         return tailored_cv
+
+    def _normalize_skills_taxonomy(self, cv: TailoredCV) -> TailoredCV:
+        """Ensure Technical Skills only contain tools/tech and move domain terms to Domain Expertise."""
+        if not cv.skills:
+            return cv
+
+        # Define heuristics
+        technical_whitelist = set([
+            'python','sql','excel','power bi','tableau','vba','pandas','numpy','matplotlib','seaborn',
+            'aws','gcp','azure','snowflake','bigquery','redshift','docker','git','github','jenkins','airflow',
+            'spark','hadoop','databricks','kafka','postgresql','mysql','mongodb','firebase','flask','django',
+            'fastapi','rest','graphql','power query','power pivot','lookerstudio','superset'
+        ])
+        domain_keywords = set([
+            'international aid','fundraising','not for profit','nfp','humanitarian','community engagement',
+            'social impact','donor-centricity','donor centricity','non-profit','nonprofit'
+        ])
+
+        from app.tailored_cv.models.cv_models import SkillCategory
+
+        technical_skills = []
+        domain_expertise = []
+        soft_skills = []
+        others = []
+
+        def classify(skill: str) -> str:
+            s = skill.strip()
+            sl = s.lower()
+            if any(k in sl for k in domain_keywords):
+                return 'domain'
+            if sl in technical_whitelist or any(k in sl for k in technical_whitelist):
+                return 'technical'
+            # simple soft indicators
+            if any(k in sl for k in ['communication','leadership','stakeholder','collaboration','teamwork','problem','analytical']):
+                return 'soft'
+            return 'other'
+
+        # Flatten existing skills
+        for cat in cv.skills:
+            for s in cat.skills:
+                kind = classify(s)
+                if kind == 'technical':
+                    technical_skills.append(s)
+                elif kind == 'domain':
+                    domain_expertise.append(s)
+                elif kind == 'soft':
+                    soft_skills.append(s)
+                else:
+                    others.append(s)
+
+        # De-dup and keep concise
+        def uniq(xs):
+            seen = set()
+            out = []
+            for x in xs:
+                xl = x.lower()
+                if xl not in seen:
+                    seen.add(xl)
+                    out.append(x)
+            return out
+
+        technical_skills = uniq(technical_skills)
+        domain_expertise = uniq(domain_expertise)
+        soft_skills = uniq(soft_skills)
+
+        new_skills = []
+        if technical_skills:
+            new_skills.append(SkillCategory(category='Technical Skills', skills=technical_skills))
+        if domain_expertise:
+            new_skills.append(SkillCategory(category='Domain Expertise', skills=domain_expertise))
+        if soft_skills:
+            new_skills.append(SkillCategory(category='Soft Skills', skills=soft_skills))
+        if others:
+            new_skills.append(SkillCategory(category='Other Skills', skills=uniq(others)))
+
+        cv.skills = new_skills
+        return cv
     
     def _build_system_prompt(self) -> str:
         """Build the system prompt with framework content"""

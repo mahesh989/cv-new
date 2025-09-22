@@ -679,7 +679,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     // Use the callback to navigate to CV Magic tab
     if (widget.onNavigateToCVMagic != null) {
       widget.onNavigateToCVMagic!();
-      debugPrint('✅ Navigated to CV Magic tab and cleared results');
+      debugPrint(
+          '✅ Navigated to CV Magic tab - clearing should happen in CV Magic tab');
     } else {
       debugPrint('❌ No navigation callback provided');
     }

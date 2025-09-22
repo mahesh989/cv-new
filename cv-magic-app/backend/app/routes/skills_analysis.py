@@ -14,6 +14,7 @@ from app.core.auth import verify_token
 from app.core.model_dependency import get_current_model
 from app.services.skill_extraction import skill_extraction_service
 from app.services.cv_content_service import cv_content_service
+from app.services.dynamic_cv_selector import dynamic_cv_selector
 from app.services.skills_analysis_config import skills_analysis_config_service
 from app.services.skill_extraction.prompt_templates import get_prompt as get_skill_prompt
 from app.services.skill_extraction.response_parser import SkillExtractionParser
@@ -628,20 +629,44 @@ async def preliminary_analysis(
                 content={"error": file_validation_error}
             )
         
-        # Get CV content dynamically (no fallback)
-        cv_content_result = cv_content_service.get_cv_content(cv_filename, user_id, use_fallback=False)
-        if not cv_content_result["success"]:
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error": cv_content_result.get('error', 'CV content not found'),
-                    "suggestions": cv_content_result.get('suggestions', []),
-                    "filename": cv_filename
-                }
+        # NEW: Always use the latest CV from cvs/original or cvs/tailored, irrespective of filename
+        latest_cv = dynamic_cv_selector.get_cv_content_for_analysis()
+        cv_selection_info = None
+        if latest_cv.get("success"):
+            cv_content = latest_cv.get("text_content")
+            if not cv_content and isinstance(latest_cv.get("json_content"), dict):
+                cv_content = latest_cv["json_content"].get("text", "")
+            if not cv_content:
+                logger.error("❌ [PRELIM_ANALYSIS] Latest CV content was empty")
+                return JSONResponse(status_code=404, content={"error": "Latest CV content is empty"})
+
+            logger.info(
+                "📄 [PRELIM_ANALYSIS] Using dynamically selected latest CV | TXT: %s | JSON: %s",
+                latest_cv["metadata"].get("txt_path"),
+                latest_cv["metadata"].get("json_path"),
             )
-        
-        cv_content = cv_content_result["content"]
-        logger.info(f"Using CV content from {cv_content_result['source']} for {cv_filename} (length: {len(cv_content)})")
+            # Prepare selection info for frontend notification
+            cv_selection_info = {
+                "txt_path": latest_cv["metadata"].get("txt_path"),
+                "json_path": latest_cv["metadata"].get("json_path"),
+                "txt_source": latest_cv["metadata"].get("txt_source"),
+                "json_source": latest_cv["metadata"].get("json_source"),
+            }
+        else:
+            # Fallback to legacy file/database lookup using provided filename (should rarely be used)
+            logger.warning("⚠️ [PRELIM_ANALYSIS] Dynamic CV selection failed, falling back to cv_filename lookup: %s", cv_filename)
+            cv_content_result = cv_content_service.get_cv_content(cv_filename, user_id, use_fallback=False)
+            if not cv_content_result["success"]:
+                return JSONResponse(
+                    status_code=404,
+                    content={
+                        "error": cv_content_result.get('error', 'CV content not found'),
+                        "suggestions": cv_content_result.get('suggestions', []),
+                        "filename": cv_filename
+                    }
+                )
+            cv_content = cv_content_result["content"]
+            logger.info(f"Using CV content from {cv_content_result['source']} for {cv_filename} (length: {len(cv_content)})")
         
         # Perform skills analysis with configuration
         result = await perform_preliminary_skills_analysis(
@@ -652,6 +677,14 @@ async def preliminary_analysis(
             config_name=config_name,
             user_id=user_id
         )
+        # Attach CV selection info for frontend display (under expandable_analysis)
+        try:
+            if cv_selection_info:
+                expandable = result.get("expandable_analysis") or {}
+                expandable["cv_selection"] = cv_selection_info
+                result["expandable_analysis"] = expandable
+        except Exception:
+            pass
         # Persist inputs for downstream pipeline and trigger JD analysis + CV–JD matching
         try:
             # Derive company from the actual saved path when available
@@ -693,10 +726,11 @@ async def preliminary_analysis(
                 # Ensure CV file exists for the matcher - use dynamic CV selection
                 try:
                     import json
-                    from app.services.dynamic_cv_selector import dynamic_cv_selector
+                    # Avoid shadowing the module-level import used earlier
+                    from app.services.dynamic_cv_selector import dynamic_cv_selector as _dynamic_cv_selector
                     
                     # Get the latest CV file dynamically
-                    latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+                    latest_cv_paths = _dynamic_cv_selector.get_latest_cv_paths_for_services()
                     cv_file = Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None
                     
                     logger.info(f"📄 [PIPELINE] Using dynamic CV: {cv_file} from {latest_cv_paths['json_source']} folder")

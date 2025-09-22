@@ -280,6 +280,10 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   /// Clear all results and reset to idle state
   void clearResults() {
+    debugPrint('🧹 [CONTROLLER] clearResults() called');
+    debugPrint('🧹 [CONTROLLER] Current state before clear: $_state');
+    debugPrint('🧹 [CONTROLLER] Has results before clear: $hasResults');
+
     _progressiveTimer?.cancel();
     _progressiveTimer = null;
     _fullResult = null;
@@ -293,6 +297,10 @@ class SkillsAnalysisController extends ChangeNotifier {
     _executionDuration = Duration.zero;
     _clearError();
     _setState(SkillsAnalysisState.idle);
+
+    debugPrint('🧹 [CONTROLLER] State after clear: $_state');
+    debugPrint('🧹 [CONTROLLER] Has results after clear: $hasResults');
+    debugPrint('🧹 [CONTROLLER] clearResults() completed');
   }
 
   /// Check if we can perform analysis with current inputs
@@ -307,8 +315,13 @@ class SkillsAnalysisController extends ChangeNotifier {
   // Private methods
   void _setState(SkillsAnalysisState newState) {
     if (_state != newState) {
+      debugPrint('🧹 [CONTROLLER] _setState: $_state -> $newState');
       _state = newState;
+      debugPrint('🧹 [CONTROLLER] Calling notifyListeners()');
       notifyListeners();
+      debugPrint('🧹 [CONTROLLER] notifyListeners() completed');
+    } else {
+      debugPrint('🧹 [CONTROLLER] _setState: No state change needed ($_state)');
     }
   }
 

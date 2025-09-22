@@ -52,7 +52,7 @@ OPTIMIZATION STRATEGY:
         if custom_instructions:
             prompt += f"\nCUSTOM INSTRUCTIONS:\n{custom_instructions}\n"
 
-        # Add structured output format
+        # Add structured output format and strict skills taxonomy
         prompt += """
 RULES:
 1. Keep original CV structure and section order
@@ -64,11 +64,22 @@ RULES:
 7. Use action verbs
 8. Maintain professional formatting
 
+STRICT SKILLS TAXONOMY (VERY IMPORTANT):
+- Technical Skills: ONLY tools/technologies/platforms/languages/frameworks (e.g., Python, SQL, Excel, Power BI, VBA, Tableau, Snowflake, AWS). Do NOT include domain concepts.
+- Domain Expertise (or Sector Skills): Industry/domain concepts and practices (e.g., International Aid and Development, Fundraising, Not for Profit (NFP), Humanitarian Emergencies, Community Engagement, Social Impact, Donor-Centricity).
+- Soft Skills: Communication, leadership, stakeholder management, collaboration, problem solving, etc.
+
+ENFORCEMENT:
+- If a skill is a domain concept, place it under "Domain Expertise", not under "Technical Skills".
+- If there are no true technical tools relevant to the role, leave non-relevant ones out; do NOT fill "Technical Skills" with domain terms.
+- Prefer technical tools explicitly present in the JD/company requirements or the original CV; avoid hallucinations.
+- Keep skills concise; comma-separated, no duplicates.
+
 OUTPUT FORMAT:
 Return ONLY a complete CV in the exact same format as input, with tailored content for:
 - Summary/Objective
 - Experience bullets
-- Skills section
+- Skills section with three clear sub-sections: Technical Skills, Domain Expertise (or Sector Skills), Soft Skills
 - Project descriptions
 - Education details (if relevant)
 """

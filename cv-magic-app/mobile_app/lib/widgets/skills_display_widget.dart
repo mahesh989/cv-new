@@ -26,12 +26,22 @@ class SkillsDisplayWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
+        debugPrint('🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered');
+        debugPrint('   controller.hasError: ${controller.hasError}');
+        debugPrint('   controller.hasResults: ${controller.hasResults}');
+        debugPrint('   controller.isLoading: ${controller.isLoading}');
+        debugPrint('   controller.state: ${controller.state}');
+
         // Main content based on state
         if (controller.hasError) {
+          debugPrint('🔍 [SKILLS_DISPLAY] Building error state');
           return _buildErrorState();
         } else if (!controller.hasResults && !controller.isLoading) {
+          debugPrint(
+              '🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)');
           return const SizedBox.shrink(); // Remove placeholder - show nothing
         } else {
+          debugPrint('🔍 [SKILLS_DISPLAY] Building results content');
           return _buildResultsContent();
         }
       },
