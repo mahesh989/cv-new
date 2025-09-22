@@ -5,7 +5,12 @@ import 'dart:async';
 import '../core/theme/app_theme.dart';
 
 class CVGenerationScreen extends StatefulWidget {
-  const CVGenerationScreen({super.key});
+  final VoidCallback? onNavigateToCVMagic;
+
+  const CVGenerationScreen({
+    super.key,
+    this.onNavigateToCVMagic,
+  });
 
   @override
   State<CVGenerationScreen> createState() => _CVGenerationScreenState();
@@ -653,21 +658,30 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
   }
 
   void _runATSAgain() {
-    // Navigate back to CV Magic tab and show notification
+    // Navigate back to CV Magic tab and clear results
     if (mounted) {
       // Show notification
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-              '🔄 Please click the "Analyze Skills" button. ATS test will run soon for the tailored CV.'),
+              '🔄 Navigating to CV Magic tab. Previous results cleared for fresh analysis with tailored CV.'),
           backgroundColor: Colors.blue,
           duration: Duration(seconds: 4),
         ),
       );
 
-      // Navigate to CV Magic tab (assuming it's the first tab in a TabBar)
-      // You might need to adjust this based on your navigation structure
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      // Navigate to CV Magic tab (index 1) and clear results
+      _navigateToCVMagicTab();
+    }
+  }
+
+  void _navigateToCVMagicTab() {
+    // Use the callback to navigate to CV Magic tab
+    if (widget.onNavigateToCVMagic != null) {
+      widget.onNavigateToCVMagic!();
+      debugPrint('✅ Navigated to CV Magic tab and cleared results');
+    } else {
+      debugPrint('❌ No navigation callback provided');
     }
   }
 

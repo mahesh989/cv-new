@@ -1,11 +1,11 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-21T14:51:56.266149",
+  "cv_analysis_timestamp": "2025-09-22T12:08:10.508254",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
-    "Excel",
     "Tableau",
+    "Excel",
     "project management",
     "communication"
   ],
@@ -17,32 +17,32 @@
     "VBA",
     "stakeholder management",
     "customer service",
-    "data warehouse",
     "data mining",
+    "data warehouse",
     "direct marketing campaigns",
     "data models"
   ],
   "missed_preferred_keywords": [
     "data querying",
+    "report authoring",
     "problem-solving",
+    "campaign optimisation",
     "data de-duplication",
     "data governance regulations"
   ],
   "match_counts": {
     "total_required_keywords": 10,
-    "total_preferred_keywords": 4,
+    "total_preferred_keywords": 6,
     "matched_required_count": 6,
     "matched_preferred_count": 2
   },
   "matching_notes": {
     "SQL": "Proficient in SQL for querying and managing databases",
     "Power BI": "Used Power BI to present research findings",
-    "Excel": "Adept at leveraging Excel for data-driven solutions",
-    "Tableau": "Skilled in creating visualizations using Tableau",
-    "project management": "Experience in managing projects through data-driven decision-making",
-    "communication": "Demonstrated communication skills through presentations at conferences",
+    "Tableau": "Built Tableau dashboards for data visualization",
+    "Excel": "Adept at using Excel for data-driven solutions",
     "data extraction": "Automated data extraction using Python",
-    "analytical thinking": "Involved in analyzing customer support data"
+    "analytical thinking": "Developed Python-based solutions for actionable insights"
   },
   "ai_model_used": "openai/gpt-4o-mini",
   "processing_status": "completed",

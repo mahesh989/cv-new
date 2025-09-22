@@ -893,10 +893,15 @@ async def trigger_component_analysis(company: str):
         if not jd_file:
             jd_file = company_dir / "jd_original.json"
         
+        # Use timestamped match file with fallback
+        match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
+        if not match_file:
+            match_file = company_dir / "cv_jd_match_results.json"
+        
         required_files = {
             "cv_file": Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None,
             "jd_file": jd_file, 
-            "match_file": base_dir / company / "cv_jd_match_results.json"
+            "match_file": match_file
         }
         
         missing_files = {k: str(v) for k, v in required_files.items() if not v.exists()}

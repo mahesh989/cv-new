@@ -19,17 +19,22 @@ import '../widgets/skills_display_widget.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
-  
+  final bool Function()? shouldClearResults;
+  final VoidCallback? onResultsCleared;
+
   const CVMagicOrganizedPage({
     super.key,
     this.onNavigateToCVGeneration,
+    this.shouldClearResults,
+    this.onResultsCleared,
   });
 
   @override
   State<CVMagicOrganizedPage> createState() => _CVMagicOrganizedPageState();
 }
 
-class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with AutomaticKeepAliveClientMixin {
+class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
+    with AutomaticKeepAliveClientMixin {
   // State variables
   String? selectedCVFilename;
   bool isLoading = false;
@@ -50,11 +55,19 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
 
+    // Check if we need to clear results (called from Run ATS Again)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.shouldClearResults?.call() == true) {
+        clearAnalysisResults();
+        widget.onResultsCleared?.call();
+      }
+    });
+
     // Add listener to jdController to debug changes and trigger rebuilds
     jdController.addListener(() {
       print(
           '🔍 [DEBUG] CV Magic: jdController changed - length: ${jdController.text.length}');
-      
+
       // Force a rebuild of the widget to update button state
       if (mounted) {
         setState(() {
@@ -109,6 +122,10 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
             ),
             const SizedBox(height: 16),
 
+            // CV Context Display (shows which CV is being used for analysis)
+            if (selectedCVFilename != null) _buildCVContextCard(),
+            if (selectedCVFilename != null) const SizedBox(height: 16),
+
             // Job Description Input
             JobInput(
               jdController: jdController,
@@ -155,7 +172,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
                     SizedBox(
                       width: double.infinity,
                       child: AnimatedBuilder(
-                        animation: Listenable.merge([_skillsController, jdController]),
+                        animation:
+                            Listenable.merge([_skillsController, jdController]),
                         builder: (context, _) {
                           final canAnalyze = selectedCVFilename != null &&
                               jdController.text.trim().isNotEmpty;
@@ -163,14 +181,22 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
 
                           // Comprehensive debug logging
                           print('=== BUTTON STATE CHECK ===');
-                          print('🔍 [DEBUG] Button state - canAnalyze: $canAnalyze, isAnalyzing: $isAnalyzing');
-                          print('🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
-                          print('🔍 [DEBUG] selectedCVFilename != null: ${selectedCVFilename != null}');
-                          print('🔍 [DEBUG] jdController.text.length: ${jdController.text.length}');
-                          print('🔍 [DEBUG] jdController.text.trim().length: ${jdController.text.trim().length}');
-                          print('🔍 [DEBUG] jdController.text.trim().isEmpty: ${jdController.text.trim().isEmpty}');
-                          print('🔍 [DEBUG] jdController.text.trim().isNotEmpty: ${jdController.text.trim().isNotEmpty}');
-                          print('🔍 [DEBUG] _skillsController.isLoading: ${_skillsController.isLoading}');
+                          print(
+                              '🔍 [DEBUG] Button state - canAnalyze: $canAnalyze, isAnalyzing: $isAnalyzing');
+                          print(
+                              '🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
+                          print(
+                              '🔍 [DEBUG] selectedCVFilename != null: ${selectedCVFilename != null}');
+                          print(
+                              '🔍 [DEBUG] jdController.text.length: ${jdController.text.length}');
+                          print(
+                              '🔍 [DEBUG] jdController.text.trim().length: ${jdController.text.trim().length}');
+                          print(
+                              '🔍 [DEBUG] jdController.text.trim().isEmpty: ${jdController.text.trim().isEmpty}');
+                          print(
+                              '🔍 [DEBUG] jdController.text.trim().isNotEmpty: ${jdController.text.trim().isNotEmpty}');
+                          print(
+                              '🔍 [DEBUG] _skillsController.isLoading: ${_skillsController.isLoading}');
                           print('=== END BUTTON CHECK ===');
 
                           return ElevatedButton.icon(
@@ -248,7 +274,9 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
             SkillsDisplayWidget(
               controller: _skillsController,
               cvFilename: selectedCVFilename,
-              jobDescription: jdController.text.trim().isNotEmpty ? jdController.text.trim() : null,
+              jobDescription: jdController.text.trim().isNotEmpty
+                  ? jdController.text.trim()
+                  : null,
               onNavigateToCVGeneration: _navigateToCVGeneration,
             ),
             // JD Analysis UI section removed for backend-only focus
@@ -363,7 +391,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
 
   void _navigateToCVGeneration() {
     debugPrint('🚀 CV Magic: Navigate to CV Generation tab requested');
-    
+
     if (widget.onNavigateToCVGeneration != null) {
       // Use the callback to navigate to CV Generation tab
       widget.onNavigateToCVGeneration!();
@@ -381,5 +409,115 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage> with Automa
     setState(() {});
   }
 
+  Widget _buildCVContextCard() {
+    return Card(
+      color: Colors.blue.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.description,
+                  color: Colors.blue.shade600,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'CV Selected for Analysis',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue.shade700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // CV Filename
+            _buildContextItem(
+              'CV File',
+              selectedCVFilename ?? 'Unknown',
+              Colors.blue,
+            ),
+
+            // Analysis Status
+            _buildContextItem(
+              'Analysis Status',
+              _skillsController.isLoading
+                  ? 'Analyzing...'
+                  : _skillsController.hasResults
+                      ? 'Analysis Complete'
+                      : _skillsController.hasError
+                          ? 'Analysis Failed'
+                          : 'Ready to Analyze',
+              _skillsController.isLoading
+                  ? Colors.orange
+                  : _skillsController.hasResults
+                      ? Colors.green
+                      : _skillsController.hasError
+                          ? Colors.red
+                          : Colors.grey,
+            ),
+
+            // Execution Duration (if available)
+            if (_skillsController.executionDuration.inSeconds > 0)
+              _buildContextItem(
+                'Analysis Time',
+                '${_skillsController.executionDuration.inSeconds}s',
+                Colors.grey,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContextItem(String label, String value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Company selector removed (backend-only focus)
+
+  /// Clear all analysis results and reset the controller
+  void clearAnalysisResults() {
+    debugPrint('🧹 Clearing analysis results in CV Magic tab');
+    _skillsController.clearResults();
+
+    // Clear any other state if needed
+    setState(() {
+      // Reset any local state variables if needed
+    });
+  }
 }

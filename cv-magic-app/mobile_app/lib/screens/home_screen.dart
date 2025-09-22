@@ -23,10 +23,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<Offset> _slideAnimation;
 
   String _userName = 'User';
+  bool _shouldClearCVMagicResults = false;
 
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   late final CVMagicOrganizedPage _cvMagicPage;
-  final CVGenerationScreen _cvGenerationScreen = const CVGenerationScreen();
+  late final CVGenerationScreen _cvGenerationScreen;
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
@@ -58,6 +59,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Initialize CV Magic page with navigation callback
     _cvMagicPage = CVMagicOrganizedPage(
       onNavigateToCVGeneration: _navigateToCVGenerationTab,
+      shouldClearResults: () => _shouldClearCVMagicResults,
+      onResultsCleared: () => _shouldClearCVMagicResults = false,
+    );
+
+    // Initialize CV Generation screen with navigation callback
+    _cvGenerationScreen = CVGenerationScreen(
+      onNavigateToCVMagic: _navigateToCVMagicTab,
     );
 
     _animationController = AnimationController(
@@ -153,6 +161,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _onTabTapped(2); // Switch to CV Generation tab (index 2)
   }
 
+  void _navigateToCVMagicTab() {
+    debugPrint(
+        '🔄 HomeScreen: Navigating to CV Magic tab (index 1) and clearing results');
+    _shouldClearCVMagicResults = true; // Set flag to clear results
+    _onTabTapped(1); // Switch to CV Magic tab (index 1)
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,27 +212,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return IndexedStack(
       index: _currentIndex,
       children: [
-        _welcomeHomePage,        // Index 0: Home
-        _cvMagicPage,           // Index 1: CV Magic
-        _cvGenerationScreen,    // Index 2: CV Generation
+        _welcomeHomePage, // Index 0: Home
+        _cvMagicPage, // Index 1: CV Magic
+        _cvGenerationScreen, // Index 2: CV Generation
       ],
     );
-  }
-
-  // Keep the old method for reference/fallback if needed
-  Widget _buildTabContent() {
-    switch (_currentIndex) {
-      case 0:
-        return _welcomeHomePage;
-      case 1:
-        return _cvMagicPage;
-      case 2:
-        return _cvGenerationScreen;
-      default:
-        return const Center(
-          child: Text('Tab content coming soon!'),
-        );
-    }
   }
 
   Widget _buildAppBar() {

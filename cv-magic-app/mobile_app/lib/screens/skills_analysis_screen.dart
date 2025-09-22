@@ -119,6 +119,17 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
                   return const SizedBox.shrink();
                 },
               ),
+              const SizedBox(height: 16),
+
+              // CV Context Display (shows which CV is being used)
+              Consumer<SkillsAnalysisController>(
+                builder: (context, controller, child) {
+                  if (controller.currentCvFilename != null) {
+                    return _buildCVContextCard(controller);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               const SizedBox(height: 24),
 
               // Skills Display Results
@@ -408,6 +419,105 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     } catch (e) {
       _showSnackBar('Error performing rerun analysis: $e', isError: true);
     }
+  }
+
+  Widget _buildCVContextCard(SkillsAnalysisController controller) {
+    return Card(
+      color: Colors.blue.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.description,
+                  color: Colors.blue.shade600,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'CV Being Used for Analysis',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue.shade700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // CV Filename
+            _buildContextItem(
+              'CV File',
+              controller.currentCvFilename ?? 'Unknown',
+              Colors.blue,
+            ),
+
+            // Analysis Status
+            _buildContextItem(
+              'Analysis Status',
+              controller.isLoading
+                  ? 'Analyzing...'
+                  : controller.hasResults
+                      ? 'Analysis Complete'
+                      : controller.hasError
+                          ? 'Analysis Failed'
+                          : 'Ready to Analyze',
+              controller.isLoading
+                  ? Colors.orange
+                  : controller.hasResults
+                      ? Colors.green
+                      : controller.hasError
+                          ? Colors.red
+                          : Colors.grey,
+            ),
+
+            // Execution Duration (if available)
+            if (controller.executionDuration.inSeconds > 0)
+              _buildContextItem(
+                'Analysis Time',
+                '${controller.executionDuration.inSeconds}s',
+                Colors.grey,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContextItem(String label, String value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSnackBar(String message, {bool isError = false}) {

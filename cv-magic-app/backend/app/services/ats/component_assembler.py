@@ -115,7 +115,12 @@ class ComponentAssembler:
 
     def _calculate_requirement_bonus(self, company: str) -> Dict[str, Any]:
         """Calculate requirement bonus from CV-JD match results."""
-        match_file = self.base_dir / company / "cv_jd_match_results.json"
+        # Use timestamped file with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        company_dir = self.base_dir / company
+        match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
+        if not match_file:
+            match_file = company_dir / "cv_jd_match_results.json"
         
         try:
             if not match_file.exists():

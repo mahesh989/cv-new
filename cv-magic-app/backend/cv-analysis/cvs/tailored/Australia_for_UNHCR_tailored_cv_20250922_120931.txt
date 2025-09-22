@@ -1,0 +1,61 @@
+Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+
+TECHNICAL SKILLS
+• SQL, Python, Data Analysis, Excel, Power BI, VBA, Data Warehouse, Data Modelling
+
+EXPERIENCE
+Data Analyst         Jul 2024 – Present
+The Bitrates, Sydney, New South Wales, Australia
+
+• Designed and implemented 5 Python scripts for data cleaning and preprocessing, improving data pipeline efficiency by 30%, processing 100K records weekly.
+• Developed 3 machine learning models in Python for predictive analytics, enabling data-driven business decisions that increased operational efficiency by 20%.
+• Leveraged AI techniques to automate repetitive tasks, reducing manual effort by 25% and improving productivity across the analytics team.
+• Built 4 dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively, enhancing stakeholder engagement.
+• Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights and supporting fundraising strategies.
+
+Data Analyst         Mar 2024 – Jun 2024
+iBuild Building Solutions, Victoria, Australia
+
+• Automated data extraction and structuring of population datasets using Python, improving data accuracy by 40% and enhancing team collaboration.
+• Analyzed customer support data with Python to optimize response times, enhancing operational efficiency by 30% and improving customer satisfaction.
+• Developed 4 Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making that supported fundraising efforts.
+• Designed Python scripts to create 3 dynamic reports and dashboards, significantly improving decision-making processes and community engagement.
+
+Software Engineer and Analyst         Jun 2023 – Nov 2023
+Property Console, Sydney, Australia
+
+• Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency for non-profit initiatives.
+• Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%, supporting evidence-based approaches.
+• Leveraged Python for data preprocessing and analysis, producing 5 Tableau dashboards that improved decision-making and stakeholder engagement.
+• Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives that aligned with social impact goals.
+
+Research Assistant         Oct 2018 – Sep 2022
+CY Cergy Paris University, Cergy-Pontoise, France
+
+• Utilized advanced Python programming for computational modeling and solving complex research problems, contributing to international aid projects.
+• Developed Python-based workflows to manage and analyze large datasets across multiple research projects, improving accuracy and reliability by 30%.
+• Presented Python-enabled research findings at 3 international conferences, demonstrating technical expertise and communication skills in community engagement.
+
+Lecturer and Course Facilitator         Sep 2019 – Jun 2022
+CY Cergy Paris University, Cergy-Pontoise, France
+
+• Led engaging physics tutorials for 20 master’s students, enhancing understanding and promoting teamwork in a collaborative learning environment.
+• Designed course materials, assignments, and exams, strengthening the learning experience and fostering student engagement.
+• Mentored students on projects, collaborated with faculty, and facilitated community service initiatives, aligning with social impact values.
+
+Research Intern         Feb 2018 – Jun 2018
+CY Cergy Paris University, Cergy-Pontoise, France
+
+• Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials, contributing to international aid research.
+• Managed and analyzed complex data sets, improving their accuracy and reliability by 25%, supporting evidence-based approaches.
+• Used Power BI to present research findings and participated in weekly reviews, improving collaboration and research skills in community engagement.
+
+EDUCATION
+Master of Data Science
+Charles Darwin University, Sydney, Australia, Mar 2023 - Nov 2024
+
+PhD in Physics
+CY Cergy Paris University, Cergy, France, Oct 2018 - Sep 2022
+
+Master of Theoretical Physics
+CY Cergy Paris University, Cergy, France, Sep 2016 - Jun 2018
