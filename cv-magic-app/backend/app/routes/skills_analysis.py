@@ -1679,11 +1679,31 @@ async def get_analysis_results(company: str):
             data = json.load(f)
         
         # Extract latest entries from each analysis type
+        def _sorted(lst: list[str]) -> list[str]:
+            try:
+                return sorted(lst, key=lambda s: s.lower())
+            except Exception:
+                return sorted(lst)
+
+        # Sort skills if present (covers existing stored files)
+        cv_skills_raw = data.get("cv_skills", {})
+        jd_skills_raw = data.get("jd_skills", {})
+        cv_skills_sorted = {
+            "technical_skills": _sorted(cv_skills_raw.get("technical_skills", [])),
+            "soft_skills": _sorted(cv_skills_raw.get("soft_skills", [])),
+            "domain_keywords": _sorted(cv_skills_raw.get("domain_keywords", [])),
+        }
+        jd_skills_sorted = {
+            "technical_skills": _sorted(jd_skills_raw.get("technical_skills", [])),
+            "soft_skills": _sorted(jd_skills_raw.get("soft_skills", [])),
+            "domain_keywords": _sorted(jd_skills_raw.get("domain_keywords", [])),
+        }
+
         result = {
             "company": company,
             "skills_analysis": {
-                "cv_skills": data.get("cv_skills", {}),
-                "jd_skills": data.get("jd_skills", {})
+                "cv_skills": cv_skills_sorted,
+                "jd_skills": jd_skills_sorted
             },
             "preextracted_comparison": None,
             "component_analysis": None,
@@ -1884,6 +1904,20 @@ async def perform_preliminary_skills_analysis(
             logger.info(f"✅ [SKILLS_ANALYSIS] JD Soft Skills ({len(jd_soft_skills)}): {jd_soft_skills}")
             logger.info(f"✅ [SKILLS_ANALYSIS] JD Domain Keywords ({len(jd_domain_keywords)}): {jd_domain_keywords}")
         
+        # Sort skills alphabetically (case-insensitive) for consistent frontend display
+        def _sorted(lst: list[str]) -> list[str]:
+            try:
+                return sorted(lst, key=lambda s: s.lower())
+            except Exception:
+                return sorted(lst)
+
+        cv_technical_skills = _sorted(cv_technical_skills)
+        cv_soft_skills = _sorted(cv_soft_skills)
+        cv_domain_keywords = _sorted(cv_domain_keywords)
+        jd_technical_skills = _sorted(jd_technical_skills)
+        jd_soft_skills = _sorted(jd_soft_skills)
+        jd_domain_keywords = _sorted(jd_domain_keywords)
+
         result = {
             "cv_skills": {
                 "technical_skills": cv_technical_skills,
