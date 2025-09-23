@@ -384,6 +384,40 @@ class RecommendationParser:
                 logger.info(f"  - Projects: {len(data.get('projects', []))}")
                 
                 return RecommendationParser._convert_structured_to_model_format(data)
+            # Detect already-tailored structured CV format (contact/education/experience/projects/skills)
+            elif all(key in data for key in ['contact', 'experience', 'skills']):
+                logger.info("✅ Detected tailored structured CV format (contact/experience/skills)")
+                # Normalize minimal fields to ensure compatibility with OriginalCV model
+                try:
+                    normalized: Dict[str, Any] = {
+                        'contact': {
+                            'name': (data.get('contact') or {}).get('name', '') or '',
+                            'email': (data.get('contact') or {}).get('email', '') or '',
+                            'phone': (data.get('contact') or {}).get('phone', '') or '',
+                            'location': (data.get('contact') or {}).get('location', '') or '',
+                            'linkedin': (data.get('contact') or {}).get('linkedin', '') or '',
+                            'website': (data.get('contact') or {}).get('website', '') or ''
+                        },
+                        'education': data.get('education') or [],
+                        'experience': data.get('experience') or [],
+                        'skills': data.get('skills') or [],
+                    }
+                    # Optionally pass through projects if present
+                    if 'projects' in data and isinstance(data.get('projects'), list):
+                        normalized['projects'] = data.get('projects')
+
+                    # Basic validation
+                    if not isinstance(normalized['experience'], list):
+                        raise ValueError('Expected list for experience in tailored CV')
+                    if not isinstance(normalized['skills'], list):
+                        raise ValueError('Expected list for skills in tailored CV')
+
+                    logger.info("✅ Successfully normalized tailored structured CV")
+                    return normalized
+                except Exception as ne:
+                    logger.error(f"❌ Failed to normalize tailored structured CV: {ne}")
+                    raise
+
             elif 'text' in data:
                 # Raw text format - parse it
                 logger.info("📝 Detected raw text format")
