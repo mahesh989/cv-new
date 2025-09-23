@@ -1,0 +1,45 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-23T14:16:09.267410",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "VBA",
+    "data warehouse"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "Tableau",
+    "project management",
+    "stakeholder management",
+    "communication",
+    "customer service",
+    "data mining",
+    "marketing campaigns",
+    "data models"
+  ],
+  "missed_preferred_keywords": [
+    "data issues",
+    "de-duplication",
+    "data governance",
+    "best practice guidelines"
+  ],
+  "match_counts": {
+    "total_required_keywords": 12,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 5,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "SQL": "Found in technical skills section",
+    "Power BI": "Found in technical skills section",
+    "Excel": "Found in technical skills section",
+    "VBA": "Found in technical skills section",
+    "data warehouse": "Found in technical skills section"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20250923_134241.txt",
+  "metadata": {}
+}

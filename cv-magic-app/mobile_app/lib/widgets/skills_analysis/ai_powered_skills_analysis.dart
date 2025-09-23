@@ -102,7 +102,7 @@ class AIPoweredSkillsAnalysis extends StatelessWidget {
                       padding: const EdgeInsets.all(8), child: Text(r.name)),
                   Padding(
                       padding: const EdgeInsets.all(8),
-                      child: Text(r.cvTotal == 0 ? '-' : r.cvTotal.toString())),
+                      child: Text(r.cvTotal.toString())),
                   Padding(
                       padding: const EdgeInsets.all(8),
                       child: Text(r.jdTotal.toString())),

@@ -371,61 +371,74 @@ Domain ({jd_domain_count} items): {jd_deduplicated.get('domain_keywords', [])}
 - Provide brief, clear reasoning
 - IMPORTANT: Each skill is counted only once (no duplicates across categories)
 
+**CRITICAL CATEGORIZATION RULES:**
+- ✅ MATCHED section: ONLY list JD requirements that have a corresponding skill in the CV
+- ❌ MISSING section: ONLY list JD requirements that have NO corresponding skill in the CV
+- NEVER list the same JD requirement in both sections
+- If a JD requirement has a match in CV → goes in MATCHED section
+- If a JD requirement has no match in CV → goes in MISSING section
+
 **OUTPUT FORMAT (TEXT ONLY):**
 🎯 OVERALL SUMMARY
 ----------------------------------------
 Total Requirements: {jd_tech_count + jd_soft_count + jd_domain_count}
-Matched: [Y - must be ≤ {cv_tech_count + cv_soft_count + cv_domain_count}]
-Missing: [Z]
-Match Rate: [P%]
+Matched: [Calculate total matches across all categories]
+Missing: [Calculate total missing across all categories]
+Match Rate: [Calculate percentage: (Matched / Total Requirements) * 100]
 
 📊 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
-Technical Skills            {cv_tech_count:2d}         {jd_tech_count:2d}         [MT]         [MS]            [RP]
-Soft Skills                  {cv_soft_count:2d}         {jd_soft_count:2d}         [MT]         [MS]            [RP]
-Domain Keywords             {cv_domain_count:2d}         {jd_domain_count:2d}         [MT]         [MS]            [RP]
+Technical Skills            {cv_tech_count:2d}         {jd_tech_count:2d}         [Calculate matches]         [Calculate missing]            [Calculate percentage]
+Soft Skills                  {cv_soft_count:2d}         {jd_soft_count:2d}         [Calculate matches]         [Calculate missing]            [Calculate percentage]
+Domain Keywords             {cv_domain_count:2d}         {jd_domain_count:2d}         [Calculate matches]         [Calculate missing]            [Calculate percentage]
 
 🧠 DETAILED AI ANALYSIS
 --------------------------------------------------------------------------------
 
 🔹 TECHNICAL SKILLS
   ✅ MATCHED JD REQUIREMENTS (K items):
+    [ONLY list JD requirements that have a corresponding skill in the CV]
     1. JD Required: '...'
        → Found in CV: '...'
        💡 brief reasoning
   ❌ MISSING FROM CV (M items):
+    [ONLY list JD requirements that have NO corresponding skill in the CV]
     1. JD Requires: '...'
        💡 brief reason why not found
 
 🔹 SOFT SKILLS
   ✅ MATCHED JD REQUIREMENTS (K items):
+    [ONLY list JD requirements that have a corresponding skill in the CV]
     1. JD Required: '...'
        → Found in CV: '...'
        💡 brief reasoning
   ❌ MISSING FROM CV (M items):
+    [ONLY list JD requirements that have NO corresponding skill in the CV]
     1. JD Requires: '...'
        💡 brief reason why not found
 
 🔹 DOMAIN KEYWORDS
   ✅ MATCHED JD REQUIREMENTS (K items):
+    [ONLY list JD requirements that have a corresponding skill in the CV]
     1. JD Required: '...'
        → Found in CV: '...'
        💡 brief reasoning
   ❌ MISSING FROM CV (M items):
+    [ONLY list JD requirements that have NO corresponding skill in the CV]
     1. JD Requires: '...'
        💡 brief reason why not found
 
 📚 INPUT SUMMARY (normalized, truncated if long)
 CV
-- Technical: [comma-separated]
-- Soft: [comma-separated]
-- Domain: [comma-separated]
+- Technical: [List CV technical skills]
+- Soft: [List CV soft skills]
+- Domain: [List CV domain keywords]
 
 JD
-- Technical: [comma-separated]
-- Soft: [comma-separated]
-- Domain: [comma-separated]
+- Technical: [List JD technical skills]
+- Soft: [List JD soft skills]
+- Domain: [List JD domain keywords]
 
 Return only this formatted analysis.
 """
@@ -864,8 +877,8 @@ def _format_json_to_text(json_result: Dict[str, Any], cv_skills: Dict[str, list]
             total_matched += len(json_result[category].get('matched', []))
             total_missing += len(json_result[category].get('missing', []))
     
-    # Ensure we're using a safe division to avoid divide-by-zero errors
-    match_rate = round((total_matched / max(total_matched + total_missing, 1)) * 100)
+    # Calculate match rate as matched / total_requirements
+    match_rate = round((total_matched / max(jd_total, 1)) * 100)
     
     # Build formatted output using RAW counts to match initial extraction
     output = f"""🎯 OVERALL SUMMARY
