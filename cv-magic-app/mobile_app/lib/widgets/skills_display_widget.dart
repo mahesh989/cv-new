@@ -598,6 +598,10 @@ class SkillsDisplayWidget extends StatelessWidget {
     List<String> skills,
     Color backgroundColor,
   ) {
+    // Create a sorted copy for display to avoid mutating source lists
+    final List<String> sortedSkills = List<String>.from(skills)
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -617,7 +621,7 @@ class SkillsDisplayWidget extends StatelessWidget {
           child: Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: skills
+            children: sortedSkills
                 .map(
                   (skill) => Chip(
                     label: Text(
