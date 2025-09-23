@@ -25,7 +25,7 @@ from app.ai.ai_service import ai_service
 from app.services.jd_analysis import analyze_and_save_company_jd
 from app.services.cv_jd_matching import match_and_save_cv_jd
 from app.services.context_aware_analysis_pipeline import context_aware_pipeline
-from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
+from app.unified_latest_file_selector import unified_selector
 from app.services.jd_cache_manager import jd_cache_manager
 from pathlib import Path
 import asyncio
@@ -35,6 +35,11 @@ from app.utils.timestamp_utils import TimestampUtils
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Skills Analysis"])
+
+
+class CVSkillsEmptyError(Exception):
+    """Raised when CV skills extraction results in zero skills across all categories."""
+    pass
 
 # Helper functions for file validation
 async def _extract_company_name_from_jd(jd_text: str) -> str:
@@ -363,38 +368,34 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             logger.error(f"[PIPELINE] CV-JD matching traceback: {traceback.format_exc()}")
             # Continue with component analysis even if matching fails
 
-        # Step 3: Component Analysis (includes ATS calculation) - Using Dynamic CV Selection
+        # Step 3: Component Analysis (includes ATS calculation) - Tailored-only via unified selector
         try:
             logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
             from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
-            from app.services.dynamic_cv_selector import dynamic_cv_selector
+            from app.unified_latest_file_selector import unified_selector
             
-            # Use dynamic CV selection to get the latest CV files, but prefer tailored if present
-            latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+            # Get latest CV context across tailored+original, log paths, then read content
             try:
-                base_dir_local = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-                tailored_dir = base_dir_local / "cvs" / "tailored"
-                if tailored_dir.exists():
-                    json_candidates = list(tailored_dir.glob("*.json"))
-                    if json_candidates:
-                        preferred_json = max(json_candidates, key=lambda p: p.stat().st_mtime)
-                        latest_cv_paths['json_path'] = str(preferred_json)
-                        latest_cv_paths['json_source'] = 'tailored'
-                    txt_candidates = list(tailored_dir.glob("*.txt"))
-                    if txt_candidates:
-                        preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
-                        latest_cv_paths['txt_path'] = str(preferred_txt)
-                        latest_cv_paths['txt_source'] = 'tailored'
-                        logger.info("📄 [PIPELINE] Tailored preference applied for component analysis")
-            except Exception as _pref_err:
-                logger.warning(f"⚠️ [PIPELINE] Tailored preference override failed: {_pref_err}")
-            logger.info(f"📄 [PIPELINE] Dynamic CV selection - JSON: {latest_cv_paths['json_source']}, TXT: {latest_cv_paths['txt_source']}")
+                cv_ctx_debug = unified_selector.get_latest_cv_across_all(cname)
+                logger.info(
+                    "📄 [PIPELINE] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
+                    cv_ctx_debug.file_type,
+                    cv_ctx_debug.timestamp,
+                    cv_ctx_debug.json_path,
+                    cv_ctx_debug.txt_path,
+                )
+                cv_text_for_analysis = unified_selector.get_cv_content_across_all(cname)
+                try:
+                    _preview = (cv_text_for_analysis or "")[:400].replace('\n', ' ')
+                    logger.info("🧪 [PIPELINE] CV content length=%d, preview='%s'", len(cv_text_for_analysis or ""), _preview)
+                except Exception:
+                    pass
+            except Exception as sel_err:
+                logger.error(f"❌ [PIPELINE] CV selection failed for component analysis: {sel_err}")
+                raise
             
-            # Check if we have the minimum required files
+            # Check if we have the minimum required files (JD + skills analysis must exist)
             base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            cv_file = Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None
-            
-            # Use timestamped files with fallback
             from app.utils.timestamp_utils import TimestampUtils
             company_dir = base_dir / cname
             jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
@@ -405,26 +406,9 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             if not skills_file:
                 skills_file = company_dir / f"{cname}_skills_analysis.json"
             
-            # We can run component analysis if we have CV, JD, and skills analysis
-            if cv_file and cv_file.exists() and jd_file.exists() and skills_file.exists():
+            # We can run component analysis if we have CV text, JD, and skills analysis
+            if cv_text_for_analysis and jd_file.exists() and skills_file.exists():
                 logger.info(f"📄 [PIPELINE] Required files found, proceeding with component analysis")
-                # Read CV text now and pass it through to ensure assembler doesn't re-select
-                try:
-                    with open(cv_file, 'r', encoding='utf-8') as f:
-                        cv_json = json.load(f)
-                    cv_text_for_analysis = (cv_json.get('text') or '').strip()
-                except Exception:
-                    # If JSON missing text, try TXT path
-                    cv_text_for_analysis = ''
-                    try:
-                        txt_path = latest_cv_paths.get('txt_path')
-                        if txt_path:
-                            p = Path(txt_path)
-                            if p.exists():
-                                cv_text_for_analysis = p.read_text(encoding='utf-8').strip()
-                    except Exception:
-                        pass
-
                 component_result = await modular_ats_orchestrator.run_component_analysis(cname, cv_text=cv_text_for_analysis or None)
                 logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
                 pipeline_results["component_analysis"] = True
@@ -444,7 +428,7 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
                     logger.info(f"🎯 [PIPELINE] ATS Score calculated: {final_score}")
             else:
                 missing = []
-                if not cv_file.exists(): missing.append("CV")
+                if not cv_text_for_analysis: missing.append("CV")
                 if not jd_file.exists(): missing.append("JD")
                 if not skills_file.exists(): missing.append("Skills")
                 logger.warning(f"⚠️ [PIPELINE] Missing files for component analysis: {missing}")
@@ -500,12 +484,23 @@ async def analyze_skills(request: Request):
         logger.info(f"🎯 Skill extraction request: CV={cv_filename}, JD_URL={jd_url}, USER={user_id}, CONFIG={config_name}")
         
         # Perform skill analysis using the service (no fallback)
-        result = await skill_extraction_service.analyze_skills(
-            cv_filename=cv_filename,
-            jd_url=jd_url,
-            user_id=user_id,
-            force_refresh=force_refresh
-        )
+        try:
+            result = await skill_extraction_service.analyze_skills(
+                cv_filename=cv_filename,
+                jd_url=jd_url,
+                user_id=user_id,
+                force_refresh=force_refresh
+            )
+        except CVSkillsEmptyError as e:
+            logger.error(f"❌ CV skills empty: {str(e)}")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": "No CV skills could be extracted. Please review the CV content and try again.",
+                    "error_type": "cv_skills_empty"
+                }
+            )
 
         # Fire-and-forget: run JD analysis and CV–JD matching pipeline in background
         company_name = _detect_most_recent_company()
@@ -716,44 +711,25 @@ async def preliminary_analysis(
                 content={"error": file_validation_error}
             )
         
-        # NEW: Always use the latest CV from cvs/original or cvs/tailored, irrespective of filename
-        latest_cv = dynamic_cv_selector.get_cv_content_for_analysis()
-        cv_selection_info = None
-        if latest_cv.get("success"):
-            cv_content = latest_cv.get("text_content")
-            if not cv_content and isinstance(latest_cv.get("json_content"), dict):
-                cv_content = latest_cv["json_content"].get("text", "")
-            if not cv_content:
-                logger.error("❌ [PRELIM_ANALYSIS] Latest CV content was empty")
-                return JSONResponse(status_code=404, content={"error": "Latest CV content is empty"})
-
+        # NEW: Always use unified latest-across-all CV (tailored or original by newest timestamp)
+        from app.unified_latest_file_selector import unified_selector
+        try:
+            cv_ctx = unified_selector.get_latest_cv_across_all(company_name)
             logger.info(
-                "📄 [PRELIM_ANALYSIS] Using dynamically selected latest CV | TXT: %s | JSON: %s",
-                latest_cv["metadata"].get("txt_path"),
-                latest_cv["metadata"].get("json_path"),
+                "📄 [PRELIM_ANALYSIS] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
+                cv_ctx.file_type, cv_ctx.timestamp, cv_ctx.json_path, cv_ctx.txt_path
             )
-            # Prepare selection info for frontend notification
+            cv_content = unified_selector.get_cv_content_across_all(company_name)
+            preview = (cv_content or "")[:400].replace('\n', ' ')
+            logger.info("🧪 [PRELIM_ANALYSIS] CV content length=%d, preview='%s'", len(cv_content or ""), preview)
             cv_selection_info = {
-                "txt_path": latest_cv["metadata"].get("txt_path"),
-                "json_path": latest_cv["metadata"].get("json_path"),
-                "txt_source": latest_cv["metadata"].get("txt_source"),
-                "json_source": latest_cv["metadata"].get("json_source"),
+                "txt_path": str(cv_ctx.txt_path) if cv_ctx.txt_path else None,
+                "json_path": str(cv_ctx.json_path) if cv_ctx.json_path else None,
+                "txt_source": cv_ctx.file_type,
+                "json_source": cv_ctx.file_type,
             }
-        else:
-            # Fallback to legacy file/database lookup using provided filename (should rarely be used)
-            logger.warning("⚠️ [PRELIM_ANALYSIS] Dynamic CV selection failed, falling back to cv_filename lookup: %s", cv_filename)
-            cv_content_result = cv_content_service.get_cv_content(cv_filename, user_id, use_fallback=False)
-            if not cv_content_result["success"]:
-                return JSONResponse(
-                    status_code=404,
-                    content={
-                        "error": cv_content_result.get('error', 'CV content not found'),
-                        "suggestions": cv_content_result.get('suggestions', []),
-                        "filename": cv_filename
-                    }
-                )
-            cv_content = cv_content_result["content"]
-            logger.info(f"Using CV content from {cv_content_result['source']} for {cv_filename} (length: {len(cv_content)})")
+        except Exception as e:
+            return JSONResponse(status_code=404, content={"error": f"Failed to load latest CV: {str(e)}"})
         
         # Perform skills analysis with configuration
         result = await perform_preliminary_skills_analysis(
@@ -1865,6 +1841,10 @@ async def perform_preliminary_skills_analysis(
         cv_technical_skills = cv_parsed.get('technical_skills', [])
         cv_soft_skills = cv_parsed.get('soft_skills', [])
         cv_domain_keywords = cv_parsed.get('domain_keywords', [])
+
+        # Enforce stop: if no CV skills extracted, abort early for frontend handling
+        if not cv_technical_skills and not cv_soft_skills and not cv_domain_keywords:
+            raise CVSkillsEmptyError("CV skills extraction returned zero items across all categories")
         
         # Extract JD skills using enhanced structured prompt
         if logging_params["enable_detailed_logging"]:

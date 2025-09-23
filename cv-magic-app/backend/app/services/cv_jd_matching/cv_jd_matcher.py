@@ -307,62 +307,32 @@ class CVJDMatcher:
             Exception: If matching fails
         """
         try:
-            # Read CV content using enhanced dynamic CV selection with context awareness
+            # Read CV content using unified latest file selector
             if not cv_file_path:
-                logger.info(f"🔍 [CV_JD_MATCHER] No explicit CV path provided, using dynamic selection for {company_name}")
+                logger.info(f"🔍 [CV_JD_MATCHER] No explicit CV path provided, using unified selector for {company_name}")
                 
-                # Try to read original CV first as fallback
-                try:
-                    original_cv_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt")
-                    if original_cv_path.exists():
-                        with open(original_cv_path, 'r', encoding='utf-8') as f:
-                            original_content = f.read().strip()
-                            if len(original_content) >= 100:
-                                logger.info(f"✅ [CV_JD_MATCHER] Using original CV as fallback: {original_cv_path}")
-                                cv_file_path = str(original_cv_path)
-                                return self._read_cv_file(cv_file_path)
-                except Exception as e:
-                    logger.warning(f"⚠️ [CV_JD_MATCHER] Failed to read original CV: {e}")
+                from app.unified_latest_file_selector import unified_selector
+                cv_context = unified_selector.get_latest_cv_for_company(company_name)
                 
-                from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
-                # Extract company name for context-aware selection
-                company_name = company_name if 'company_name' in locals() else "Unknown"
+                if not cv_context.exists:
+                    raise FileNotFoundError(f"No CV found for company: {company_name}")
                 
-                # First try to get company-specific tailored CV
-                try:
-                    # Explicit company-specific selection
-                    latest_cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
-                        company=company_name, is_rerun=True  # Prefer tailored CVs
-                    )
-                    cv_file_path = latest_cv_paths['txt_path']
-                    
-                    if cv_file_path:
-                        logger.info(f"✅ [CV_JD_MATCHER] Found CV via enhanced selection: {cv_file_path}")
-                        logger.info(f"   Source: {latest_cv_paths['txt_source']}")
-                        logger.info(f"   Company: {company_name}")
-                    else:
-                        logger.warning(f"⚠️ [CV_JD_MATCHER] No CV found via enhanced selection for {company_name}")
-                        
-                except Exception as e:
-                    logger.error(f"❌ [CV_JD_MATCHER] Error in enhanced CV selection: {e}")
-                    cv_file_path = None
-                
-                # Fallback to basic dynamic selection if needed
-                if not cv_file_path:
-                    logger.info("🔄 [CV_JD_MATCHER] Falling back to basic dynamic selection...")
-                    from app.services.dynamic_cv_selector import dynamic_cv_selector
-                    basic_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
-                    cv_file_path = basic_paths.get('txt_path')
-                    
-                    if cv_file_path:
-                        logger.info(f"✅ [CV_JD_MATCHER] Found CV via basic selection: {cv_file_path}")
-                        logger.info(f"   Source: {basic_paths.get('txt_source')}")
-                    else:
-                        logger.error("❌ [CV_JD_MATCHER] No CV found via any selection method")
+                # Use TXT file if available, otherwise JSON
+                cv_file_path = str(cv_context.txt_path) if cv_context.txt_path else str(cv_context.json_path)
+                logger.info(
+                    f"✅ [CV_JD_MATCHER] Selected CV → type={cv_context.file_type}, ts={cv_context.timestamp}, path={cv_file_path}"
+                )
+            else:
+                logger.info(f"📄 [CV_JD_MATCHER] Using provided CV path: {cv_file_path}")
             
             cv_content = self._read_cv_file(cv_file_path)
-            logger.info(f"📄 Read CV content from: {cv_file_path}")
-            logger.info(f"🧪 CV content length: {len(cv_content)} chars")
+            try:
+                preview = (cv_content or "")[:400].replace('\n', ' ')
+                logger.info(f"📄 [CV_JD_MATCHER] Read CV from: {cv_file_path}")
+                logger.info(f"🧪 [CV_JD_MATCHER] CV content length={len(cv_content or '')}, preview='{preview}'")
+            except Exception:
+                logger.info(f"📄 [CV_JD_MATCHER] Read CV from: {cv_file_path}")
+                logger.info(f"🧪 [CV_JD_MATCHER] CV content length={len(cv_content or '')}")
             
             # Get JD analysis data
             if not jd_analysis_data:

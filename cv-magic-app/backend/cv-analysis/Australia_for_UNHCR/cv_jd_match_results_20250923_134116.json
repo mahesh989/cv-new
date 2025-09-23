@@ -1,0 +1,51 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-23T13:41:16.993940",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Tableau",
+    "Excel",
+    "communication"
+  ],
+  "matched_preferred_keywords": [
+    "data extraction",
+    "teamwork"
+  ],
+  "missed_required_keywords": [
+    "VBA",
+    "project management",
+    "stakeholder management",
+    "customer service",
+    "data warehouse",
+    "data mining",
+    "marketing campaigns",
+    "analytical models"
+  ],
+  "missed_preferred_keywords": [
+    "report authoring",
+    "data modeling",
+    "problem-solving",
+    "data issues",
+    "de-duplication",
+    "communication regulations"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 6,
+    "matched_required_count": 5,
+    "matched_preferred_count": 2
+  },
+  "matching_notes": {
+    "SQL": "Proficiently mentioned for querying and managing databases",
+    "Power BI": "Used to present research findings",
+    "Tableau": "Built dashboards for data visualization",
+    "Excel": "Utilized for data-driven solutions and reporting",
+    "data extraction": "Automated extraction of datasets using Python",
+    "teamwork": "Mentored students and collaborated with faculty"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}

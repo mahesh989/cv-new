@@ -152,15 +152,16 @@ class ContextAwareAnalysisPipeline:
             context = await self._initialize_context(jd_url, company, is_rerun, user_id)
             results.context = context
             
-            # Step 2: CV Selection
-            cv_context = enhanced_dynamic_cv_selector.get_cv_for_analysis(company, is_rerun)
+            # Step 2: CV Selection using unified selector
+            from app.unified_latest_file_selector import unified_selector
+            cv_context = unified_selector.get_latest_cv_for_company(company)
             context.cv_context = cv_context
             
             if not cv_context.exists:
-                results.errors.append(f"No CV found: {cv_context.source}")
+                results.errors.append(f"No CV found for company: {company}")
                 return results
             
-            logger.info(f"📄 [CONTEXT_AWARE_PIPELINE] Using {cv_context.cv_type} CV v{cv_context.version}")
+            logger.info(f"📄 [CONTEXT_AWARE_PIPELINE] Using {cv_context.file_type} CV - {cv_context.json_path}")
             
             # Step 3: JD Analysis (with caching)
             jd_data = await self._handle_jd_analysis(context, results)

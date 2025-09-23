@@ -45,27 +45,24 @@ class ComponentAssembler:
         self.ats_calculator = ATSScoreCalculator()
 
     def _read_cv_text(self, company_name: str = "Unknown") -> str:
-        """Read CV text from the latest available CV file using dynamic CV selector."""
-        from app.services.dynamic_cv_selector import dynamic_cv_selector
+        """Read CV text from the latest available CV (tailored or original)."""
+        from app.unified_latest_file_selector import unified_selector
         
-        logger.info("🔍 [COMPONENT_ASSEMBLER] Starting dynamic CV selection")
-        cv_content = dynamic_cv_selector.get_cv_content_for_analysis()
+        logger.info("🔍 [COMPONENT_ASSEMBLER] Selecting latest CV across tailored+original")
+        cv_content = unified_selector.get_cv_content_across_all(company_name)
         
-        if not cv_content['success']:
+        if not cv_content:
             logger.error("❌ [COMPONENT_ASSEMBLER] Failed to get CV content")
             raise FileNotFoundError(f"Could not load CV content for company: {company_name}")
             
-        if not cv_content['text_content']:
+        if not cv_content.strip():
             logger.error("❌ [COMPONENT_ASSEMBLER] No text content available in CV")
             raise ValueError("CV text content is empty")
         
-        source = cv_content['metadata']['txt_source']
-        path = cv_content['metadata']['txt_path']
+        logger.info(f"📄 [COMPONENT_ASSEMBLER] Selected CV content")
+        logger.info(f"📊 [COMPONENT_ASSEMBLER] Content length: {len(cv_content)} chars")
         
-        logger.info(f"📄 [COMPONENT_ASSEMBLER] Selected CV - Source: {source}, Path: {path}")
-        logger.info(f"📊 [COMPONENT_ASSEMBLER] Content length: {len(cv_content['text_content'])} chars")
-        
-        return cv_content['text_content']
+        return cv_content
 
     def _read_jd_text(self, company: str) -> str:
         """Read JD text for a specific company."""
@@ -509,11 +506,13 @@ class ComponentAssembler:
         logger.info("===== [ASSEMBLER] Starting component assembly for: %s =====", company)
         
         try:
-            # Read input data
+            # Read input data (auto-select latest across tailored+original when not provided)
             if cv_text is None:
                 cv_text = self._read_cv_text(company)
             else:
-                logger.info("📄 [ASSEMBLER] Using CV text provided by caller (dynamic selector upstream)")
+                logger.info("📄 [ASSEMBLER] Using CV text provided by caller")
+                if not isinstance(cv_text, str) or not cv_text.strip():
+                    raise ValueError("Provided CV text is empty")
             jd_text = self._read_jd_text(company)
             matched_skills = self._read_matched_skills(company)
             
