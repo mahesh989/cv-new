@@ -112,8 +112,12 @@ def validate_analysis_result(result: dict, analysis_type: str) -> bool:
     # Check score ranges
     score_field = f"{analysis_type}_score" if analysis_type != "experience" else "alignment_score"
     if score_field in result:
-        score = result[score_field]
-        if not (0 <= score <= 100):
+        score_value = result[score_field]
+        try:
+            numeric_score = float(score_value)
+        except (TypeError, ValueError):
+            return False
+        if not (0.0 <= numeric_score <= 100.0):
             return False
     
     return True
