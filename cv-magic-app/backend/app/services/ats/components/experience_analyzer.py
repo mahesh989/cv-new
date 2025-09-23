@@ -11,6 +11,7 @@ from typing import Dict, Any
 
 from app.ai.ai_service import ai_service
 from prompt.ats_experience_prompt import EXPERIENCE_ALIGNMENT_PROMPT
+from .standardized_config import STANDARD_AI_PARAMS, validate_analysis_result
 
 logger = logging.getLogger(__name__)
 
@@ -100,8 +101,9 @@ class ExperienceAnalyzer:
         try:
             response = await ai_service.generate_response(
                 prompt=prompt, 
-                temperature=0.1, 
-                max_tokens=1200
+                temperature=STANDARD_AI_PARAMS["temperature"], 
+                max_tokens=STANDARD_AI_PARAMS["max_tokens"],
+                system_prompt=STANDARD_AI_PARAMS["system_prompt"]
             )
             
             result = self._parse_response(response.content.strip())
@@ -117,6 +119,10 @@ class ExperienceAnalyzer:
             score = float(exp_analysis["alignment_score"])
             if not 0 <= score <= 100:
                 raise ValueError(f"Experience score {score} out of range [0, 100]")
+            
+            # Validate analysis result for consistency
+            if not validate_analysis_result(exp_analysis, "experience"):
+                logger.warning("[EXPERIENCE] Analysis result failed validation, but continuing...")
             
             logger.info("[EXPERIENCE] Analysis completed. Score: %.1f", score)
             return result

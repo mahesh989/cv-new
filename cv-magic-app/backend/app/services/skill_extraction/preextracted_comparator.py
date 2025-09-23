@@ -364,10 +364,19 @@ Domain ({jd_domain_count} items): {jd_deduplicated.get('domain_keywords', [])}
 
 **MATCHING RULES:**
 - Compare only the provided lists (no external knowledge)
-- Use semantic matching: "Python programming" → "Python" = ✅ match
+- Use STRICT semantic matching: "Python programming" → "Python" = ✅ match
 - "Leadership" → "Team leadership" = ✅ match  
 - "Data analysis" → "Analytical skills" = ✅ match
-- Only mark as missing if no semantic equivalent exists
+- **CRITICAL**: Only match skills that are DIRECTLY relevant to the job requirements
+- **CRITICAL**: Domain keywords must be relevant to the job domain (e.g., humanitarian work, not academic subjects)
+- **CRITICAL**: Technical skills must be directly applicable to the job role
+- **AVOID**: Overly broad matches like "Data Mining" → "Data Analysis" (these are different skills)
+- **AVOID**: Matching academic subjects (Physics, Theoretical Physics) to non-academic jobs
+- **EXAMPLE**: For UNHCR job, "Physics" and "Theoretical Physics" are NOT relevant domain keywords
+- **EXAMPLE**: "Data Mining" and "Data Analysis" are different technical skills - don't match them
+- **EXAMPLE**: "Business Intelligence Tools" → "Power BI" is acceptable (Power BI is a BI tool)
+- **EXAMPLE**: "Data Science" → "Data Science" is acceptable (exact match)
+- Only mark as missing if no DIRECT semantic equivalent exists
 - Provide brief, clear reasoning
 - IMPORTANT: Each skill is counted only once (no duplicates across categories)
 
@@ -398,14 +407,14 @@ Domain Keywords             {cv_domain_count:2d}         {jd_domain_count:2d}   
 
 🔹 TECHNICAL SKILLS
   ✅ MATCHED JD REQUIREMENTS (K items):
-    [ONLY list JD requirements that have a corresponding skill in the CV]
+    [ONLY list JD requirements that have a DIRECT corresponding skill in the CV]
     1. JD Required: '...'
        → Found in CV: '...'
-       💡 brief reasoning
+       💡 brief reasoning: [Be specific - why is this a DIRECT match?]
   ❌ MISSING FROM CV (M items):
-    [ONLY list JD requirements that have NO corresponding skill in the CV]
+    [ONLY list JD requirements that have NO DIRECT corresponding skill in the CV]
     1. JD Requires: '...'
-       💡 brief reason why not found
+       💡 brief reason why not found: [Be specific - why no DIRECT match exists]
 
 🔹 SOFT SKILLS
   ✅ MATCHED JD REQUIREMENTS (K items):
@@ -420,14 +429,14 @@ Domain Keywords             {cv_domain_count:2d}         {jd_domain_count:2d}   
 
 🔹 DOMAIN KEYWORDS
   ✅ MATCHED JD REQUIREMENTS (K items):
-    [ONLY list JD requirements that have a corresponding skill in the CV]
+    [ONLY list JD requirements that have a DIRECT corresponding skill in the CV]
     1. JD Required: '...'
        → Found in CV: '...'
-       💡 brief reasoning
+       💡 brief reasoning: [Be specific - why is this a DIRECT match?]
   ❌ MISSING FROM CV (M items):
-    [ONLY list JD requirements that have NO corresponding skill in the CV]
+    [ONLY list JD requirements that have NO DIRECT corresponding skill in the CV]
     1. JD Requires: '...'
-       💡 brief reason why not found
+       💡 brief reason why not found: [Be specific - why no DIRECT match exists]
 
 📚 INPUT SUMMARY (normalized, truncated if long)
 CV

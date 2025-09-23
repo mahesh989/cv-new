@@ -19,6 +19,7 @@ from app.services.ats.components import (
     SeniorityAnalyzer,
     TechnicalAnalyzer
 )
+from app.services.ats.components.consistency_validator import ConsistencyValidator
 from app.services.ats.components.batched_analyzer import BatchedAnalyzer
 from app.services.ats.requirement_bonus_calculator import RequirementBonusCalculator
 from app.services.jd_analysis.jd_analyzer import RequirementsExtractor
@@ -43,6 +44,7 @@ class ComponentAssembler:
         self.bonus_calculator = RequirementBonusCalculator()
         self.requirements_extractor = RequirementsExtractor()
         self.ats_calculator = ATSScoreCalculator()
+        self.consistency_validator = ConsistencyValidator()
 
     def _read_cv_text(self, company_name: str = "Unknown") -> str:
         """Read CV text from the latest available CV (tailored or original)."""
@@ -522,6 +524,16 @@ class ComponentAssembler:
             # Extract scores
             scores = self._extract_scores(component_results)
             
+            # Validate consistency across analyzers
+            logger.info("[ASSEMBLER] Validating cross-analyzer consistency...")
+            consistency_results = self.consistency_validator.validate_cross_analyzer_consistency(component_results)
+            
+            if not consistency_results["is_consistent"]:
+                logger.warning("[ASSEMBLER] Inconsistencies detected in analysis results")
+                logger.warning(f"[ASSEMBLER] Confidence score: {consistency_results['confidence_score']}%")
+                for recommendation in consistency_results["recommendations"]:
+                    logger.warning(f"[ASSEMBLER] Recommendation: {recommendation}")
+            
             # Save results
             self._save_results(company, component_results, scores)
             
@@ -536,6 +548,7 @@ class ComponentAssembler:
                 "component_results": component_results,
                 "extracted_scores": scores,
                 "ats_results": ats_result,
+                "consistency_validation": consistency_results,
                 "status": "success"
             }
             

@@ -11,6 +11,7 @@ import re
 from typing import Dict, Any, Optional
 
 from app.ai.ai_service import ai_service
+from .standardized_config import STANDARD_AI_PARAMS
 
 logger = logging.getLogger(__name__)
 
@@ -146,9 +147,9 @@ Guidelines:
             
             response = await ai_service.generate_response(
                 prompt=prompt,
-                system_prompt="You are an expert ATS analyst. Provide detailed, actionable analysis in the requested JSON format.",
-                temperature=0.3,
-                max_tokens=3000
+                system_prompt=STANDARD_AI_PARAMS["system_prompt"],
+                temperature=STANDARD_AI_PARAMS["temperature"],
+                max_tokens=STANDARD_AI_PARAMS["max_tokens"]
             )
             
             result = self._parse_llm_response(response.content)
@@ -176,9 +177,9 @@ Guidelines:
             
             response = await ai_service.generate_response(
                 prompt=prompt,
-                system_prompt="You are an expert ATS analyst. Provide detailed, actionable analysis in the requested JSON format.",
-                temperature=0.3,
-                max_tokens=3000
+                system_prompt=STANDARD_AI_PARAMS["system_prompt"],
+                temperature=STANDARD_AI_PARAMS["temperature"],
+                max_tokens=STANDARD_AI_PARAMS["max_tokens"]
             )
             
             result = self._parse_llm_response(response.content)

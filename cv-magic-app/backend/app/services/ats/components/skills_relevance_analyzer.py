@@ -11,6 +11,7 @@ from typing import Dict, Any, Optional
 
 from app.ai.ai_service import ai_service
 from prompt.ats_skills_relevance_prompt import SKILLS_RELEVANCE_PROMPT
+from .standardized_config import STANDARD_AI_PARAMS, validate_analysis_result
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +103,9 @@ class SkillsAnalyzer:
         try:
             response = await ai_service.generate_response(
                 prompt=prompt, 
-                temperature=0.1, 
-                max_tokens=1200
+                temperature=STANDARD_AI_PARAMS["temperature"], 
+                max_tokens=STANDARD_AI_PARAMS["max_tokens"],
+                system_prompt=STANDARD_AI_PARAMS["system_prompt"]
             )
             
             result = self._parse_response(response.content.strip())
