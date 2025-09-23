@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, Optional, List, Any
 from datetime import datetime
 from app.utils.timestamp_utils import TimestampUtils
+from app.exceptions import TailoredCVNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -82,13 +83,19 @@ class EnhancedDynamicCVSelector:
                     logger.info(f"✅ [ENHANCED_CV_SELECTOR] Using tailored CV v{tailored_context.version} for rerun")
                     return tailored_context
                 else:
-                    logger.info(f"⚠️ [ENHANCED_CV_SELECTOR] No tailored CV found for {company}, falling back to original")
+                    # Raise explicit error for rerun when tailored CV is missing
+                    logger.error(f"❌ [ENHANCED_CV_SELECTOR] No tailored CV found for {company} during rerun")
+                    raise TailoredCVNotFoundError(company)
             
-            # Default: Use original CV for fresh analysis or fallback
+            # Default: Use original CV for fresh analysis
             original_context = self._get_original_cv_context(company, is_rerun)
-            logger.info(f"✅ [ENHANCED_CV_SELECTOR] Using original CV for {'rerun fallback' if is_rerun else 'fresh analysis'}")
+            logger.info(f"✅ [ENHANCED_CV_SELECTOR] Using original CV for fresh analysis")
             return original_context
             
+        except TailoredCVNotFoundError as e:
+            # Re-raise to be handled by API layer for explicit popup behavior
+            logger.error(f"❌ [ENHANCED_CV_SELECTOR] {str(e)}")
+            raise
         except Exception as e:
             logger.error(f"❌ [ENHANCED_CV_SELECTOR] Error selecting CV: {e}")
             # Return fallback context
@@ -106,12 +113,22 @@ class EnhancedDynamicCVSelector:
                 })
             
             # Find all tailored CV files for this company
+            logger.info(f"🔍 [ENHANCED_CV_SELECTOR] Searching for {company} tailored CVs in: {self.tailored_path}")
+            
             json_files = TimestampUtils.find_all_timestamped_files(
                 self.tailored_path, f"{company}_tailored_cv", "json"
             )
             txt_files = TimestampUtils.find_all_timestamped_files(
                 self.tailored_path, f"{company}_tailored_cv", "txt"
             )
+            
+            logger.info(f"📄 [ENHANCED_CV_SELECTOR] Found {len(json_files)} JSON and {len(txt_files)} TXT tailored CVs for {company}")
+            
+            # Debug: Print all found files
+            for f in json_files:
+                logger.info(f"   JSON: {f.name} (modified: {datetime.fromtimestamp(f.stat().st_mtime)})")
+            for f in txt_files:
+                logger.info(f"   TXT: {f.name} (modified: {datetime.fromtimestamp(f.stat().st_mtime)})")
             
             if not json_files:
                 return CVSelectionContext({
@@ -226,10 +243,18 @@ class EnhancedDynamicCVSelector:
             
             # Load text content
             if cv_context.txt_path and cv_context.txt_path.exists():
+                logger.info(f"🔍 [ENHANCED_CV_SELECTOR] Attempting to load TXT CV: {cv_context.txt_path}")
                 try:
                     with open(cv_context.txt_path, 'r', encoding='utf-8') as f:
-                        result['text_content'] = f.read().strip()
-                    logger.info(f"✅ [ENHANCED_CV_SELECTOR] Loaded text content from {cv_context.txt_path}")
+                        content = f.read().strip()
+                    
+                    # Validate content length
+                    if len(content) < 100:  # Basic validation - CV should have meaningful content
+                        logger.warning(f"⚠️ [ENHANCED_CV_SELECTOR] CV file {cv_context.txt_path} has insufficient content (length: {len(content)})")
+                        result['text_content'] = None
+                    else:
+                        result['text_content'] = content
+                        logger.info(f"✅ [ENHANCED_CV_SELECTOR] Loaded valid text content from {cv_context.txt_path} (length: {len(content)})")
                 except Exception as e:
                     logger.error(f"❌ [ENHANCED_CV_SELECTOR] Failed to load text content: {e}")
             
@@ -251,6 +276,10 @@ class EnhancedDynamicCVSelector:
             
             return result
             
+        except TailoredCVNotFoundError as e:
+            logger.error(f"❌ [ENHANCED_CV_SELECTOR] {str(e)}")
+            # Propagate for API layer to present explicit error to frontend
+            raise
         except Exception as e:
             logger.error(f"❌ [ENHANCED_CV_SELECTOR] Error getting CV content for analysis: {e}")
             return {

@@ -118,6 +118,16 @@ class CVJDMatcher:
                     content = file.read().strip()
             if not content:
                 raise ValueError(f"CV file is empty: {path}")
+            # Add basic content validation - at least some text beyond basic contact info
+            content_lines = [line.strip() for line in content.split('\n') if line.strip() and not line.startswith('=')]
+            
+            # Remove common header lines that don't contain matchable content
+            content_lines = [line for line in content_lines 
+                           if not any(header in line.lower() for header in 
+                                    ['original cv text', 'cv file:', 'extracted:', 'length:', 'character'])]
+                           
+            if len(content_lines) <= 2:  # Assuming first line might be contact info
+                raise ValueError(f"CV file contains insufficient content for matching: {path}")
             return content
         except Exception as e:
             logger.error(f"Error reading CV file {path}: {e}")
@@ -299,30 +309,87 @@ class CVJDMatcher:
         try:
             # Read CV content using enhanced dynamic CV selection with context awareness
             if not cv_file_path:
+                logger.info(f"🔍 [CV_JD_MATCHER] No explicit CV path provided, using dynamic selection for {company_name}")
+                
+                # Try to read original CV first as fallback
+                try:
+                    original_cv_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt")
+                    if original_cv_path.exists():
+                        with open(original_cv_path, 'r', encoding='utf-8') as f:
+                            original_content = f.read().strip()
+                            if len(original_content) >= 100:
+                                logger.info(f"✅ [CV_JD_MATCHER] Using original CV as fallback: {original_cv_path}")
+                                cv_file_path = str(original_cv_path)
+                                return self._read_cv_file(cv_file_path)
+                except Exception as e:
+                    logger.warning(f"⚠️ [CV_JD_MATCHER] Failed to read original CV: {e}")
+                
                 from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
                 # Extract company name for context-aware selection
                 company_name = company_name if 'company_name' in locals() else "Unknown"
-                # For now, assume fresh analysis (could be enhanced with rerun detection)
-                latest_cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
-                    company=company_name, is_rerun=False
-                )
-                cv_file_path = latest_cv_paths['txt_path']
-                logger.info(f"📄 [CV_JD_MATCHER] Using enhanced dynamic CV from {latest_cv_paths['txt_source']} folder for {company_name}")
+                
+                # First try to get company-specific tailored CV
+                try:
+                    # Explicit company-specific selection
+                    latest_cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
+                        company=company_name, is_rerun=True  # Prefer tailored CVs
+                    )
+                    cv_file_path = latest_cv_paths['txt_path']
+                    
+                    if cv_file_path:
+                        logger.info(f"✅ [CV_JD_MATCHER] Found CV via enhanced selection: {cv_file_path}")
+                        logger.info(f"   Source: {latest_cv_paths['txt_source']}")
+                        logger.info(f"   Company: {company_name}")
+                    else:
+                        logger.warning(f"⚠️ [CV_JD_MATCHER] No CV found via enhanced selection for {company_name}")
+                        
+                except Exception as e:
+                    logger.error(f"❌ [CV_JD_MATCHER] Error in enhanced CV selection: {e}")
+                    cv_file_path = None
+                
+                # Fallback to basic dynamic selection if needed
+                if not cv_file_path:
+                    logger.info("🔄 [CV_JD_MATCHER] Falling back to basic dynamic selection...")
+                    from app.services.dynamic_cv_selector import dynamic_cv_selector
+                    basic_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+                    cv_file_path = basic_paths.get('txt_path')
+                    
+                    if cv_file_path:
+                        logger.info(f"✅ [CV_JD_MATCHER] Found CV via basic selection: {cv_file_path}")
+                        logger.info(f"   Source: {basic_paths.get('txt_source')}")
+                    else:
+                        logger.error("❌ [CV_JD_MATCHER] No CV found via any selection method")
             
             cv_content = self._read_cv_file(cv_file_path)
             logger.info(f"📄 Read CV content from: {cv_file_path}")
+            logger.info(f"🧪 CV content length: {len(cv_content)} chars")
             
             # Get JD analysis data
             if not jd_analysis_data:
                 jd_analysis_data = self._read_jd_analysis(company_name)
                 logger.info(f"📊 Loaded JD analysis for: {company_name}")
             
-            # Extract keywords from JD analysis
+            # Extract keywords from JD analysis with fallback to skills-based extraction
             required_keywords = jd_analysis_data.get('required_keywords', [])
             preferred_keywords = jd_analysis_data.get('preferred_keywords', [])
             
+            # If no direct keywords found, try to extract from skills
+            if not required_keywords and 'required_skills' in jd_analysis_data:
+                skills = jd_analysis_data['required_skills']
+                for category in ['technical', 'soft_skills', 'domain_knowledge']:
+                    required_keywords.extend(skills.get(category, []))
+            
+            if not preferred_keywords and 'preferred_skills' in jd_analysis_data:
+                skills = jd_analysis_data['preferred_skills']
+                for category in ['technical', 'soft_skills', 'domain_knowledge']:
+                    preferred_keywords.extend(skills.get(category, []))
+            
             if not required_keywords and not preferred_keywords:
                 raise ValueError("No keywords found in JD analysis data")
+            
+            # Remove duplicates while preserving order
+            required_keywords = list(dict.fromkeys(required_keywords))
+            preferred_keywords = list(dict.fromkeys(preferred_keywords))
             
             logger.info(f"🔍 Found {len(required_keywords)} required and {len(preferred_keywords)} preferred keywords")
             
@@ -458,7 +525,8 @@ async def match_and_save_cv_jd(
     company_name: str,
     cv_file_path: Optional[str] = None,
     force_refresh: bool = False,
-    temperature: float = 0.3
+    temperature: float = 0.3,
+    jd_analysis_data: Optional[Dict[str, Any]] = None
 ) -> CVJDMatchResult:
     """Convenience function to match CV against JD and save results"""
     matcher = CVJDMatcher()
@@ -470,11 +538,18 @@ async def match_and_save_cv_jd(
             logger.info(f"📦 Using cached CV-JD match results for {company_name}")
             return existing_result
     
-    # Perform matching
-    result = await matcher.match_cv_against_jd(company_name, cv_file_path, None, temperature)
-    
-    # Save results
-    matcher._save_match_result(result, company_name)
+            # Perform matching
+    try:
+        result = await matcher.match_cv_against_jd(company_name, cv_file_path, jd_analysis_data, temperature)
+        
+        # Save results
+        matcher._save_match_result(result, company_name)
+    except ValueError as ve:
+        if "insufficient content" in str(ve):
+            logger.error(f"❌ CV file for {company_name} does not contain enough content for matching. Please ensure the CV includes relevant experience and skills.")
+        elif "No keywords found" in str(ve):
+            logger.error(f"❌ No keywords found in JD analysis for {company_name}. Please ensure the job description has been properly analyzed.")
+        raise
     
     return result
 

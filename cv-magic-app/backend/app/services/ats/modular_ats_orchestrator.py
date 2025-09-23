@@ -21,7 +21,7 @@ class ModularATSOrchestrator:
         self.base_dir: Path = base_dir or Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
         self.assembler = ComponentAssembler(base_dir)
 
-    async def run_component_analysis(self, company: str) -> Dict[str, Any]:
+    async def run_component_analysis(self, company: str, cv_text: Optional[str] = None) -> Dict[str, Any]:
         """
         Run complete modular component analysis for a company.
         
@@ -41,7 +41,7 @@ class ModularATSOrchestrator:
         
         try:
             # Use the assembler to run all components and assemble results
-            result = await self.assembler.assemble_analysis(company)
+            result = await self.assembler.assemble_analysis(company, cv_text=cv_text)
             
             logger.info("===== [MODULAR ATS] Component analysis completed for: %s =====", company)
             return result

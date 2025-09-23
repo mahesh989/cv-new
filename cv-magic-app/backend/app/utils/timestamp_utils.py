@@ -110,7 +110,8 @@ class TimestampUtils:
             return None
         
         # Pattern to match: base_name_YYYYMMDD_HHMMSS.extension
-        pattern = f"{base_name}_\\d{{8}}_\\d{{6}}\\.{extension}"
+        pattern = f".*{base_name}.*_\d{{8}}_\d{{6}}\.{extension}"
+        logger.debug(f"🔍 [TIMESTAMP_UTILS] Using pattern: {pattern}")
         
         matching_files = []
         for file_path in directory.glob(f"{base_name}_*.{extension}"):

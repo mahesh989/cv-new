@@ -1,3 +1,4 @@
+import '../exceptions/cv_exceptions.dart';
 import '../models/skills_analysis_model.dart';
 import 'api_service.dart';
 
@@ -37,6 +38,11 @@ class ContextAwareAnalysisService {
           '📡 [CONTEXT_AWARE_SERVICE] Raw result type: ${result.runtimeType}');
       print(
           '📡 [CONTEXT_AWARE_SERVICE] Raw result keys: ${result.keys.toList()}');
+
+      // Check for tailored CV not found error
+      if (result['error_type'] == 'tailored_cv_not_found') {
+        throw TailoredCVNotFoundException(result['error'] as String);
+      }
 
       stopwatch.stop();
 

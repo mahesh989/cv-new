@@ -1,0 +1,72 @@
+{
+  "experience_years": 2,
+  "required_skills": {
+    "technical": [
+      "SQL",
+      "Power BI",
+      "Excel",
+      "VBA",
+      "Tableau"
+    ],
+    "soft_skills": [
+      "project management",
+      "stakeholder management",
+      "communication",
+      "customer service"
+    ],
+    "domain_knowledge": [
+      "data warehouse",
+      "data mining",
+      "direct marketing campaigns",
+      "data models"
+    ],
+    "experience": []
+  },
+  "preferred_skills": {
+    "technical": [
+      "data extraction",
+      "data querying",
+      "analytical models"
+    ],
+    "soft_skills": [
+      "problem-solving",
+      "teamwork"
+    ],
+    "domain_knowledge": [
+      "data governance",
+      "data de-duplication",
+      "campaign optimization"
+    ],
+    "experience": []
+  },
+  "required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "VBA",
+    "Tableau",
+    "project management",
+    "stakeholder management",
+    "communication",
+    "customer service",
+    "data warehouse",
+    "data mining",
+    "direct marketing campaigns",
+    "data models"
+  ],
+  "preferred_keywords": [
+    "data extraction",
+    "data querying",
+    "analytical models",
+    "problem-solving",
+    "teamwork",
+    "data governance",
+    "data de-duplication",
+    "campaign optimization"
+  ],
+  "analysis_timestamp": "2025-09-23T09:41:38.884647",
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "company_name": "Australia_for_UNHCR",
+  "metadata": {}
+}

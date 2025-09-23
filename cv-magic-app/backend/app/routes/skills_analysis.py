@@ -5,9 +5,11 @@ Extracted from main.py to provide better organization and maintainability
 """
 import logging
 from datetime import datetime
+from fastapi.responses import JSONResponse
 from typing import Optional, List
 
 from fastapi import APIRouter, Request, Depends, HTTPException
+from app.exceptions import TailoredCVNotFoundError
 from fastapi.responses import JSONResponse
 
 from app.core.auth import verify_token
@@ -29,6 +31,7 @@ from pathlib import Path
 import asyncio
 import json
 import re
+from app.utils.timestamp_utils import TimestampUtils
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Skills Analysis"])
@@ -299,11 +302,16 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             "component_analysis": False
         }
         
-        # Step 1: JD Analysis
+        # Step 1: JD Analysis (force refresh to guarantee availability)
         try:
-            logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname}")
-            await analyze_and_save_company_jd(cname, force_refresh=False)
-            logger.info(f"✅ [PIPELINE] JD analysis saved for {cname}")
+            company_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / cname
+            logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
+            from app.services.jd_analysis.jd_analyzer import JDAnalyzer
+            _analyzer = JDAnalyzer()
+            jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True)
+            jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
+            saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
+            logger.info(f"✅ [PIPELINE] JD analysis saved for {cname} at: {saved_path}")
             pipeline_results["jd_analysis"] = True
         except Exception as e:
             logger.error(f"❌ [PIPELINE] JD analysis failed for {cname}: {e}")
@@ -312,7 +320,40 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
         # Step 2: CV-JD Matching
         try:
             logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
-            await match_and_save_cv_jd(cname, cv_file_path=None, force_refresh=False)
+            # Prefer tailored CV if available; else fall back to dynamic latest
+            try:
+                base_dir_local = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+                tailored_dir = base_dir_local / "cvs" / "tailored"
+                preferred_txt = None
+                if tailored_dir.exists():
+                    txt_candidates = list(tailored_dir.glob("*.txt"))
+                    if txt_candidates:
+                        preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
+                cv_txt_path_for_match = str(preferred_txt) if preferred_txt else None
+                if not cv_txt_path_for_match:
+                    from app.services.dynamic_cv_selector import dynamic_cv_selector as _dyn
+                    latest_cv_paths_for_match = _dyn.get_latest_cv_paths_for_services()
+                    cv_txt_path_for_match = latest_cv_paths_for_match.get('txt_path')
+                if cv_txt_path_for_match:
+                    logger.info(f"📄 [PIPELINE] CV–JD matching will use CV TXT: {cv_txt_path_for_match}")
+            except Exception as _sel_err:
+                logger.warning(f"⚠️ [PIPELINE] Could not preselect CV TXT for matching: {_sel_err}")
+                cv_txt_path_for_match = None
+
+            # Pass JD analysis data directly when available
+            jd_data_for_match = None
+            try:
+                jd_data_for_match = jd_result if 'jd_result' in locals() else None
+            except Exception:
+                jd_data_for_match = None
+
+            # Force refresh so requirement bonus uses the newest match_counts
+            await match_and_save_cv_jd(
+                cname,
+                cv_file_path=cv_txt_path_for_match,
+                force_refresh=True,
+                jd_analysis_data=jd_data_for_match
+            )
             logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
             pipeline_results["cv_jd_matching"] = True
         except Exception as e:
@@ -328,8 +369,25 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
             from app.services.dynamic_cv_selector import dynamic_cv_selector
             
-            # Use dynamic CV selection to get the latest CV files
+            # Use dynamic CV selection to get the latest CV files, but prefer tailored if present
             latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+            try:
+                base_dir_local = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+                tailored_dir = base_dir_local / "cvs" / "tailored"
+                if tailored_dir.exists():
+                    json_candidates = list(tailored_dir.glob("*.json"))
+                    if json_candidates:
+                        preferred_json = max(json_candidates, key=lambda p: p.stat().st_mtime)
+                        latest_cv_paths['json_path'] = str(preferred_json)
+                        latest_cv_paths['json_source'] = 'tailored'
+                    txt_candidates = list(tailored_dir.glob("*.txt"))
+                    if txt_candidates:
+                        preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
+                        latest_cv_paths['txt_path'] = str(preferred_txt)
+                        latest_cv_paths['txt_source'] = 'tailored'
+                        logger.info("📄 [PIPELINE] Tailored preference applied for component analysis")
+            except Exception as _pref_err:
+                logger.warning(f"⚠️ [PIPELINE] Tailored preference override failed: {_pref_err}")
             logger.info(f"📄 [PIPELINE] Dynamic CV selection - JSON: {latest_cv_paths['json_source']}, TXT: {latest_cv_paths['txt_source']}")
             
             # Check if we have the minimum required files
@@ -350,7 +408,24 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             # We can run component analysis if we have CV, JD, and skills analysis
             if cv_file and cv_file.exists() and jd_file.exists() and skills_file.exists():
                 logger.info(f"📄 [PIPELINE] Required files found, proceeding with component analysis")
-                component_result = await modular_ats_orchestrator.run_component_analysis(cname)
+                # Read CV text now and pass it through to ensure assembler doesn't re-select
+                try:
+                    with open(cv_file, 'r', encoding='utf-8') as f:
+                        cv_json = json.load(f)
+                    cv_text_for_analysis = (cv_json.get('text') or '').strip()
+                except Exception:
+                    # If JSON missing text, try TXT path
+                    cv_text_for_analysis = ''
+                    try:
+                        txt_path = latest_cv_paths.get('txt_path')
+                        if txt_path:
+                            p = Path(txt_path)
+                            if p.exists():
+                                cv_text_for_analysis = p.read_text(encoding='utf-8').strip()
+                    except Exception:
+                        pass
+
+                component_result = await modular_ats_orchestrator.run_component_analysis(cname, cv_text=cv_text_for_analysis or None)
                 logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
                 pipeline_results["component_analysis"] = True
                 
@@ -508,13 +583,25 @@ async def context_aware_analysis(
         logger.info(f"🗄️ JD Cache status: {'Reusing cached data' if jd_cached else 'Fresh analysis'}")
         
         # Run the context-aware analysis pipeline
-        results = await context_aware_pipeline.run_full_analysis(
-            jd_url=jd_url,
-            company=company,
-            is_rerun=is_rerun,
-            user_id=user_id,
-            include_tailoring=include_tailoring
-        )
+        try:
+            results = await context_aware_pipeline.run_full_analysis(
+                jd_url=jd_url,
+                company=company,
+                is_rerun=is_rerun,
+                user_id=user_id,
+                include_tailoring=include_tailoring
+            )
+        except TailoredCVNotFoundError as e:
+            # Return a specific error response for missing tailored CV
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": str(e),
+                    "error_type": "tailored_cv_not_found",
+                    "company": company
+                }
+            )
         
         if results.success:
             logger.info(f"✅ Context-aware analysis completed in {results.processing_time:.2f}s")
@@ -711,17 +798,26 @@ async def preliminary_analysis(
                     # best-effort; continue
                     pass
 
-                # Save JD content to jd_original.json for JD analyzer
+                # Save JD content to jd_original.json for JD analyzer only if it doesn't already exist
                 try:
                     import json
                     from app.utils.timestamp_utils import TimestampUtils
-                    timestamp = TimestampUtils.get_timestamp()
-                    jd_file = company_dir / f"jd_original_{timestamp}.json"
-                    with open(jd_file, 'w', encoding='utf-8') as f:
-                        json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
-                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
+                    
+                    # Check if JD file already exists
+                    existing_jd = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+                    
+                    if not existing_jd:
+                        # Only save if no JD file exists
+                        timestamp = TimestampUtils.get_timestamp()
+                        jd_file = company_dir / f"jd_original_{timestamp}.json"
+                        with open(jd_file, 'w', encoding='utf-8') as f:
+                            json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                        logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
+                    else:
+                        logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
+                        
                 except Exception as e:
-                    logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD file: {e}")
+                    logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to check/save JD file: {e}")
 
                 # Ensure CV file exists for the matcher - use dynamic CV selection
                 try:

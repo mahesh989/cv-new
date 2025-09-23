@@ -24,6 +24,7 @@ from app.routes.jd_analysis import router as jd_analysis_router
 from app.routes.cv_jd_matching import cv_jd_matching_router
 from app.routes.ai_recommendations import router as ai_recommendations_router
 from app.tailored_cv.routes.cv_tailoring_routes import router as cv_tailoring_router
+from app.routes.enhanced_skills_analysis import router as enhanced_skills_router  # New enhanced skills routes
 
 # Import dependencies
 from app.core.model_dependency import get_current_model
@@ -136,6 +137,7 @@ app.include_router(cv_structured_router)  # New structured CV routes
 app.include_router(job_router)  # Job description routes
 app.include_router(job_analysis_router)  # Job analysis routes
 app.include_router(skills_analysis_router)  # Skills analysis routes
+app.include_router(enhanced_skills_router)  # Enhanced skills analysis routes
 app.include_router(jd_analysis_router)  # Job description analysis routes
 app.include_router(cv_jd_matching_router)  # CV-JD matching routes
 app.include_router(ai_recommendations_router, prefix="/api")  # AI recommendations routes

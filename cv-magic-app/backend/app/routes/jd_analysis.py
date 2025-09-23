@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from app.core.auth import verify_token
 from app.services.jd_analysis import JDAnalyzer, JDAnalysisResult, analyze_and_save_company_jd, load_jd_analysis
+from app.utils.timestamp_utils import TimestampUtils
 from app.ai.ai_service import ai_service
 
 logger = logging.getLogger(__name__)
@@ -75,6 +76,46 @@ async def analyze_jd_endpoint(
         
         logger.info(f"🎯 JD Analysis request: Company={company_name}, ForceRefresh={force_refresh}")
         
+        # Short-circuit: if jd_original and an existing jd_analysis are present, reuse without re-analysis
+        if not force_refresh:
+            base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+            company_dir = base_dir / company_name
+            try:
+                jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
+                jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json") or (company_dir / "jd_analysis.json" if (company_dir / "jd_analysis.json").exists() else None)
+                if jd_original and jd_analysis and jd_analysis.exists():
+                    result = load_jd_analysis(company_name)
+                    if result:
+                        response_data = {
+                            "company_name": company_name,
+                            "required_keywords": result.required_keywords,
+                            "preferred_keywords": result.preferred_keywords,
+                            "all_keywords": result.all_keywords,
+                            "experience_years": result.experience_years,
+                            "required_skills": result.required_skills,
+                            "preferred_skills": result.preferred_skills,
+                            "analysis_timestamp": result.analysis_timestamp,
+                            "ai_model_used": result.ai_model_used,
+                            "processing_status": result.processing_status,
+                            "from_cache": True,
+                            "skill_summary": result.get_skill_summary()
+                        }
+                        metadata = {
+                            "analysis_duration": "N/A",
+                            "ai_service_status": ai_service.get_current_status(),
+                            "saved_path": None,
+                            "reused": True
+                        }
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": f"Reused existing JD analysis for {company_name}",
+                            "data": response_data,
+                            "metadata": metadata
+                        })
+            except Exception:
+                # If any error during guard, continue to normal flow
+                pass
+
         # Perform analysis
         result = await analyze_and_save_company_jd(
             company_name=company_name,

@@ -45,29 +45,27 @@ class ComponentAssembler:
         self.ats_calculator = ATSScoreCalculator()
 
     def _read_cv_text(self, company_name: str = "Unknown") -> str:
-        """Read CV text from the latest available CV file with context awareness."""
-        from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
+        """Read CV text from the latest available CV file using dynamic CV selector."""
+        from app.services.dynamic_cv_selector import dynamic_cv_selector
         
-        # Get the latest CV file dynamically with context awareness
-        # For component assembler, assume fresh analysis unless specified otherwise
-        latest_cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
-            company=company_name, is_rerun=False
-        )
+        logger.info("🔍 [COMPONENT_ASSEMBLER] Starting dynamic CV selection")
+        cv_content = dynamic_cv_selector.get_cv_content_for_analysis()
         
-        if not latest_cv_paths['txt_path']:
-            raise FileNotFoundError(f"No CV text file found for company: {company_name}")
-        
-        cv_txt = Path(latest_cv_paths['txt_path'])
-        if not cv_txt.exists():
-            raise FileNotFoundError(f"CV text not found: {cv_txt}")
+        if not cv_content['success']:
+            logger.error("❌ [COMPONENT_ASSEMBLER] Failed to get CV content")
+            raise FileNotFoundError(f"Could not load CV content for company: {company_name}")
             
-        with open(cv_txt, "r", encoding="utf-8") as f:
-            text = f.read().strip()
-        if not text:
-            raise ValueError("CV text is empty")
-            
-        logger.info(f"📄 [COMPONENT_ASSEMBLER] Using CV from {latest_cv_paths['txt_source']} folder: {cv_txt}")
-        return text
+        if not cv_content['text_content']:
+            logger.error("❌ [COMPONENT_ASSEMBLER] No text content available in CV")
+            raise ValueError("CV text content is empty")
+        
+        source = cv_content['metadata']['txt_source']
+        path = cv_content['metadata']['txt_path']
+        
+        logger.info(f"📄 [COMPONENT_ASSEMBLER] Selected CV - Source: {source}, Path: {path}")
+        logger.info(f"📊 [COMPONENT_ASSEMBLER] Content length: {len(cv_content['text_content'])} chars")
+        
+        return cv_content['text_content']
 
     def _read_jd_text(self, company: str) -> str:
         """Read JD text for a specific company."""
@@ -115,15 +113,24 @@ class ComponentAssembler:
 
     def _calculate_requirement_bonus(self, company: str) -> Dict[str, Any]:
         """Calculate requirement bonus from CV-JD match results."""
-        # Use timestamped file with fallback
+        # Use timestamped file with robust fallback to newest by mtime
         from app.utils.timestamp_utils import TimestampUtils
         company_dir = self.base_dir / company
         match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
-        if not match_file:
-            match_file = company_dir / "cv_jd_match_results.json"
+        try:
+            # Scan all possible files and choose newest by modification time
+            candidates = list(company_dir.glob("cv_jd_match_results*.json"))
+            if candidates:
+                newest = max(candidates, key=lambda p: p.stat().st_mtime)
+                if not match_file or newest.stat().st_mtime > match_file.stat().st_mtime:
+                    match_file = newest
+        except Exception:
+            # Fallback to non-timestamped file if no timestamped file exists
+            if not match_file:
+                match_file = company_dir / "cv_jd_match_results.json"
         
         try:
-            if not match_file.exists():
+            if not match_file or not match_file.exists():
                 logger.warning("[ASSEMBLER] Match results not found for bonus calculation: %s", match_file)
                 return {
                     "match_counts": {
@@ -147,6 +154,7 @@ class ComponentAssembler:
                     },
                 }
             
+            logger.info("[ASSEMBLER] Requirement bonus using match file: %s", match_file)
             with open(match_file, "r", encoding="utf-8") as f:
                 match_data = json.load(f)
             
@@ -488,7 +496,7 @@ class ComponentAssembler:
             logger.error("[ASSEMBLER] ATS calculation failed: %s", e)
             return {"error": str(e)}
 
-    async def assemble_analysis(self, company: str) -> Dict[str, Any]:
+    async def assemble_analysis(self, company: str, cv_text: Optional[str] = None) -> Dict[str, Any]:
         """
         Assemble complete ATS component analysis for a company.
         
@@ -502,7 +510,10 @@ class ComponentAssembler:
         
         try:
             # Read input data
-            cv_text = self._read_cv_text(company)
+            if cv_text is None:
+                cv_text = self._read_cv_text(company)
+            else:
+                logger.info("📄 [ASSEMBLER] Using CV text provided by caller (dynamic selector upstream)")
             jd_text = self._read_jd_text(company)
             matched_skills = self._read_matched_skills(company)
             

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../exceptions/cv_exceptions.dart';
 import '../models/skills_analysis_model.dart';
 import '../services/context_aware_analysis_service.dart';
 
@@ -195,18 +196,21 @@ class ContextAwareAnalysisController extends ChangeNotifier {
         // Start progressive display
         _startProgressiveDisplay();
       } else {
-        _setError(_result!.errors.isNotEmpty
+        String errorMessage = _result!.errors.isNotEmpty
             ? _result!.errors.first
-            : 'Analysis failed');
-        _showNotification(
-            _result!.errors.isNotEmpty
-                ? _result!.errors.first
-                : 'Analysis failed',
-            isError: true);
+            : 'Analysis failed';
+        _setError(errorMessage);
+        _showNotification(errorMessage, isError: true);
       }
     } catch (e) {
-      _setError('Context-aware analysis failed: $e');
-      _showNotification('Context-aware analysis failed: $e', isError: true);
+      if (e is TailoredCVNotFoundException) {
+        String errorMessage = 'No tailored CV is available. Please create a tailored CV first.';
+        _setError(errorMessage);
+        _showNotification(errorMessage, isError: true);
+      } else {
+        _setError('Context-aware analysis failed: $e');
+        _showNotification('Context-aware analysis failed: $e', isError: true);
+      }
       debugPrint('❌ [CONTEXT_AWARE_CONTROLLER] Error: $e');
     }
   }

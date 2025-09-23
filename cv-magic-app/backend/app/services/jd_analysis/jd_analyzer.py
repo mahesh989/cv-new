@@ -521,6 +521,19 @@ class JDAnalyzer:
                 if cached_result:
                     logger.info(f"📂 Using cached analysis for {company_name}")
                     return cached_result
+                # If a JD original already exists in the company folder and an analysis file also exists,
+                # avoid re-running analysis again. This is a defensive guard against duplicate runs.
+                company_dir = self.base_analysis_path / company_name
+                try:
+                    jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
+                    jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json") or (company_dir / "jd_analysis.json" if (company_dir / "jd_analysis.json").exists() else None)
+                    if jd_original and jd_analysis and jd_analysis.exists():
+                        logger.info(f"♻️ JD original and analysis already present for {company_name}; skipping re-analysis")
+                        with open(jd_analysis, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        return JDAnalysisResult(data)
+                except Exception as guard_err:
+                    logger.debug(f"Guard check for existing JD files failed (continuing with analysis): {guard_err}")
             
             # Perform fresh analysis
             logger.info(f"🔄 Analyzing JD for {company_name} (force_refresh={force_refresh})")
