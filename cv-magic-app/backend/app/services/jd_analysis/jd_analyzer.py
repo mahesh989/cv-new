@@ -11,6 +11,7 @@ import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
+import hashlib
 
 from app.ai.ai_service import ai_service
 from app.ai.base_provider import AIResponse
@@ -274,6 +275,10 @@ class JDAnalyzer:
         except Exception as e:
             logger.error(f"Error reading JD file {path}: {e}")
             raise IOError(f"Failed to read job description file: {e}")
+
+    def _compute_jd_hash(self, text: str) -> str:
+        """Compute a stable hash for JD text to de-duplicate analyses."""
+        return hashlib.sha256(text.encode('utf-8')).hexdigest()
     
     def _parse_ai_response(self, response: AIResponse) -> JDAnalysisResult:
         """
@@ -465,6 +470,12 @@ class JDAnalyzer:
             logger.info(f"📄 Analyzing JD file: {file_path}")
             
             result = await self.analyze_jd_text(jd_text, temperature)
+            # Attach JD hash to metadata for de-duplication
+            try:
+                result.metadata = result.metadata or {}
+                result.metadata['jd_hash'] = self._compute_jd_hash(jd_text)
+            except Exception:
+                pass
             
             return result
             
@@ -525,8 +536,21 @@ class JDAnalyzer:
             if not force_refresh:
                 cached_result = self._load_analysis_result(company_name)
                 if cached_result:
-                    logger.info(f"📂 Using cached analysis for {company_name}")
-                    return cached_result
+                    # If we can compute the current JD hash, only reuse cache if hashes match
+                    try:
+                        company_dir = self.base_analysis_path / company_name
+                        jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json")
+                        current_text = self._read_jd_file(jd_file) if jd_file and jd_file.exists() else None
+                        current_hash = self._compute_jd_hash(current_text) if current_text else None
+                        cached_hash = (cached_result.metadata or {}).get('jd_hash') if hasattr(cached_result, 'metadata') else None
+                        if current_hash and cached_hash and current_hash == cached_hash:
+                            logger.info(f"📂 Using cached analysis for {company_name} (JD hash matched)")
+                            return cached_result
+                        else:
+                            logger.info(f"🔁 Cached JD analysis exists but hash changed or missing; re-analyzing")
+                    except Exception:
+                        # If any issue computing hash, fall back to previous guard below
+                        pass
                 # If a JD original already exists in the company folder and an analysis file also exists,
                 # avoid re-running analysis again. This is a defensive guard against duplicate runs.
                 company_dir = self.base_analysis_path / company_name
@@ -534,10 +558,17 @@ class JDAnalyzer:
                     jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
                     jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json") or (company_dir / "jd_analysis.json" if (company_dir / "jd_analysis.json").exists() else None)
                     if jd_original and jd_analysis and jd_analysis.exists():
-                        logger.info(f"♻️ JD original and analysis already present for {company_name}; skipping re-analysis")
-                        with open(jd_analysis, 'r', encoding='utf-8') as f:
-                            data = json.load(f)
-                        return JDAnalysisResult(data)
+                        # If hash matches, reuse; else proceed to fresh analysis
+                        try:
+                            current_text = self._read_jd_file(jd_original)
+                            current_hash = self._compute_jd_hash(current_text)
+                            with open(jd_analysis, 'r', encoding='utf-8') as f:
+                                data = json.load(f)
+                            if isinstance(data, dict) and data.get('metadata', {}).get('jd_hash') == current_hash:
+                                logger.info(f"♻️ JD original and matching analysis already present for {company_name}; skipping re-analysis")
+                                return JDAnalysisResult(data)
+                        except Exception:
+                            logger.debug("Hash comparison failed; continuing with fresh analysis")
                 except Exception as guard_err:
                     logger.debug(f"Guard check for existing JD files failed (continuing with analysis): {guard_err}")
             

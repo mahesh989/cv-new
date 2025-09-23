@@ -37,12 +37,15 @@ async def get_latest_ai_recommendations():
                 content={"error": "No AI recommendations directory found"}
             )
         
-        # Find all AI recommendation files
+        # Find all latest timestamped AI recommendation files per company
         recommendation_files = []
+        from app.utils.timestamp_utils import TimestampUtils
         for company_dir in ai_recommendations_dir.iterdir():
             if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                ai_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
-                if ai_file.exists():
+                ai_file = TimestampUtils.find_latest_timestamped_file(
+                    company_dir, f"{company_dir.name}_ai_recommendation", "json"
+                )
+                if ai_file and ai_file.exists():
                     recommendation_files.append(ai_file)
         
         if not recommendation_files:
@@ -88,7 +91,14 @@ async def get_company_ai_recommendations(company: str):
         JSON response with recommendation content
     """
     try:
-        ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_ai_recommendation.json")
+        from app.utils.timestamp_utils import TimestampUtils
+        ai_file_path = TimestampUtils.find_latest_timestamped_file(
+            Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}"),
+            f"{company}_ai_recommendation",
+            "json",
+        )
+        if not ai_file_path:
+            ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_ai_recommendation.json")
         
         if not ai_file_path.exists():
             return JSONResponse(
@@ -139,8 +149,9 @@ async def list_available_ai_recommendations():
         
         for company_dir in ai_recommendations_dir.iterdir():
             if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                ai_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
-                if ai_file.exists():
+                from app.utils.timestamp_utils import TimestampUtils
+                ai_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_ai_recommendation", "json")
+                if ai_file and ai_file.exists():
                     try:
                         # Get file stats
                         stat_info = ai_file.stat()
