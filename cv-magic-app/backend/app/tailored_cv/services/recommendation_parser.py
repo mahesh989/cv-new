@@ -340,8 +340,30 @@ class RecommendationParser:
         """
         try:
             logger.info(f"📂 Loading CV from: {cv_path}")
+            path_obj = Path(cv_path)
+            # If it's a .txt file, parse as raw text directly
+            if path_obj.suffix.lower() == '.txt':
+                logger.info("📝 Detected .txt CV file → parsing as raw text")
+                cv_text = path_obj.read_text(encoding='utf-8', errors='ignore')
+                if not cv_text.strip():
+                    raise ValueError("Original CV text file is empty")
+                structured_cv = RecommendationParser._parse_cv_text(cv_text)
+                logger.info("✅ Successfully parsed raw text CV from .txt")
+                return structured_cv
+
+            # Otherwise treat as JSON; on parse failure, fall back to text field if present
             with open(cv_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+                file_content = f.read()
+            if not file_content.strip():
+                raise ValueError("Original CV JSON file is empty")
+            try:
+                data = json.loads(file_content)
+            except json.JSONDecodeError as je:
+                logger.error(f"❌ JSON parsing failed for {cv_path}: {je}. Attempting to parse as raw text JSON wrapper if 'text' key present")
+                # As a last resort, treat the entire content as text
+                structured_cv = RecommendationParser._parse_cv_text(file_content)
+                logger.info("✅ Fallback: Parsed CV by treating file content as raw text")
+                return structured_cv
             
             # Log the detected format and structure
             logger.info(f"📋 CV format check:")
@@ -367,6 +389,8 @@ class RecommendationParser:
                 logger.info("📝 Detected raw text format")
                 cv_text = data.get('text', '')
                 logger.info(f"  - Text length: {len(cv_text)} characters")
+                if not cv_text.strip():
+                    raise ValueError("Original CV JSON 'text' field is empty")
                 structured_cv = RecommendationParser._parse_cv_text(cv_text)
                 logger.info("✅ Successfully parsed raw text CV")
                 return structured_cv

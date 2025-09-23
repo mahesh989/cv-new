@@ -1473,7 +1473,8 @@ FIX: Output ONLY valid JSON!
                 cv_ctx = unified_selector.get_latest_cv_across_all(company)
                 if not cv_ctx.exists:
                     raise FileNotFoundError("No CV file found via unified selector")
-                selected_cv_path = str(cv_ctx.txt_path or cv_ctx.json_path)
+                # Prefer JSON when available; fall back to TXT
+                selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
                 logger.info(
                     f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
                 )
