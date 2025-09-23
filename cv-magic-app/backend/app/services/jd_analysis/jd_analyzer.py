@@ -363,13 +363,19 @@ class JDAnalyzer:
             company_dir = self.base_analysis_path / company_name
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save analysis result with timestamp
+            # Reuse existing analysis file if present to avoid duplicates for same JD URL/text
+            existing = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
+            if existing and existing.exists():
+                logger.info(f"♻️ JD analysis already exists, reusing: {existing}")
+                return str(existing)
+
+            # Otherwise save analysis result with timestamp
             timestamp = TimestampUtils.get_timestamp()
             analysis_file = company_dir / f"jd_analysis_{timestamp}.json"
-            
+
             with open(analysis_file, 'w', encoding='utf-8') as f:
                 json.dump(result.to_dict(), f, indent=2, ensure_ascii=False)
-            
+
             logger.info(f"💾 Analysis result saved to: {analysis_file}")
             return str(analysis_file)
             

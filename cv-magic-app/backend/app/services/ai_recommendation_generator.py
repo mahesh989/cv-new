@@ -48,11 +48,38 @@ class AIRecommendationGenerator:
         try:
             logger.info(f"🤖 [AI GENERATOR] Starting AI recommendation generation for: {company}")
             
-            # Check if output file already exists
+            # Check recency between latest input recommendation and latest AI recommendation
             output_file = self._get_output_file_path(company)
-            if output_file.exists() and not force_regenerate:
-                logger.info(f"AI recommendation file already exists for {company}, skipping")
-                return True
+            if not force_regenerate:
+                try:
+                    company_dir = self.base_dir / company
+                    # Find latest input recommendation (timestamped preferred)
+                    latest_input = TimestampUtils.find_latest_timestamped_file(
+                        company_dir, f"{company}_input_recommendation", "json"
+                    ) or (company_dir / f"{company}_input_recommendation.json")
+
+                    # Find latest AI recommendation (timestamped preferred)
+                    latest_ai = TimestampUtils.find_latest_timestamped_file(
+                        company_dir, f"{company}_ai_recommendation", "json"
+                    ) or (company_dir / f"{company}_ai_recommendation.json")
+
+                    latest_input_mtime = latest_input.stat().st_mtime if latest_input and latest_input.exists() else 0
+                    latest_ai_mtime = latest_ai.stat().st_mtime if latest_ai and latest_ai.exists() else 0
+
+                    # If an AI file exists and is newer or equal to input, we can skip;
+                    # otherwise we must regenerate to reflect the latest input recommendations.
+                    if latest_ai.exists() and latest_ai_mtime >= latest_input_mtime:
+                        logger.info(
+                            f"🟢 [AI GENERATOR] Latest AI recommendation ({latest_ai.name}) is up-to-date vs input ({latest_input.name if latest_input else 'N/A'}); skipping regeneration"
+                        )
+                        return True
+                    else:
+                        logger.info(
+                            f"🟡 [AI GENERATOR] Input recommendation is newer (ai_mtime={latest_ai_mtime}, input_mtime={latest_input_mtime}); regenerating AI recommendation"
+                        )
+                except Exception as time_err:
+                    # If any error during timestamp checks, fall back to default existence check
+                    logger.warning(f"⚠️ [AI GENERATOR] Timestamp check failed, proceeding with generation: {time_err}")
             
             # Load the AI prompt
             prompt_content = self._load_ai_prompt(company)

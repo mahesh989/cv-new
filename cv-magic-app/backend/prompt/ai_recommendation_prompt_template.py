@@ -105,6 +105,11 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
   - Validation (how to defend if asked)
   - Risk (likelihood of challenge)
 
+### Section Completeness Guidance
+- If the provided CV lacks certain sections (e.g., Projects, Certifications), DO NOT recommend creating entirely new sections.
+- Instead, provide concise recommendations on how to strengthen the CV within the existing sections only.
+- If a section is missing but relevant, suggest content ideas as guidance, clearly labeled as suggestions, not mandatory additions.
+
 ### Validation Requirements
 For each recommendation provide:
 - **Basis:** Existing CV evidence supporting the claim
@@ -195,6 +200,11 @@ Technical depth score: {extracted_scores.get('technical_depth', 0)}/100
 ## ⚠️ Strategic Warnings
 - **Don't Oversell:** Skills not to claim + risks
 - **Don't Undersell:** Strengths/advantages to highlight
+
+## 📌 Section Completeness Notes
+- Identify any missing sections in the current CV structure (purely observational).
+- Provide targeted suggestions on how the candidate could improve those areas in the future.
+- Do NOT instruct to add new sections in the immediate tailoring; recommendations should respect the current CV structure.
 
 ---
 

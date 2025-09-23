@@ -507,11 +507,18 @@ ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
    - Start with { and end with }
    - Use proper JSON structure
 
+5. SECTION PRESERVATION RULES:
+   - DO NOT create new top-level sections that do not exist in the provided CV
+   - Only tailor and enhance the sections that are present in the provided CV
+   - If a section is missing in the provided CV (e.g., Projects), DO NOT add it
+   - Keep the same set of sections as the input; optimize content only
+
 VERIFY BEFORE RESPONDING:
 ✓ Count bullets - do they ALL have numbers?
 ✓ Search for keywords - are they ALL present?
 ✓ Check names/dates - are they EXACTLY preserved?
 ✓ Valid JSON - proper format with no extra text?
+✓ Sections preserved - no new sections introduced beyond the original
 
 The exact JSON structure must be:
 {
@@ -1376,17 +1383,17 @@ FIX: Output ONLY valid JSON!
             RecommendationAnalysis object
         """
         try:
-            # Look for AI recommendation files
-            recommendation_files = list(Path(company_folder).glob("*_ai_recommendation.json"))
-            if not recommendation_files:
-                # Fallback to any recommendation file
-                recommendation_files = list(Path(company_folder).glob("*recommendation*.json"))
-            
-            if not recommendation_files:
-                raise FileNotFoundError(f"No recommendation file found in {company_folder}")
-            
-            # Use the most recent recommendation file
-            latest_file = max(recommendation_files, key=lambda p: p.stat().st_mtime)
+            # Strict selection: require a timestamped AI recommendation file for the company
+            company_dir = Path(company_folder)
+            from app.utils.timestamp_utils import TimestampUtils
+            latest_file = TimestampUtils.find_latest_timestamped_file(
+                company_dir, f"{company_dir.name}_ai_recommendation", "json"
+            )
+            if not latest_file:
+                # No fallbacks: fail fast to surface the issue
+                raise FileNotFoundError(
+                    f"No timestamped AI recommendation found for {company_dir.name} in {company_folder}"
+                )
             
             # Parse the recommendation file using our parser
             parsed_data = RecommendationParser.parse_recommendation_file(str(latest_file))
@@ -1453,27 +1460,43 @@ FIX: Output ONLY valid JSON!
             Tuple of (OriginalCV, RecommendationAnalysis)
         """
         try:
-            # Paths to the real files
+            # Paths
             cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            original_cv_path = cv_analysis_path / "cvs" / "original" / "original_cv.json"
             company_folder = cv_analysis_path / company
-            
+
             logger.info(f"Loading real data for {company}")
-            logger.info(f"CV path: {original_cv_path}")
             logger.info(f"Company folder: {company_folder}")
-            
-            # Load original CV
-            if not original_cv_path.exists():
-                raise FileNotFoundError(f"Original CV not found at {original_cv_path}")
-            
+
+            # Use unified latest file selector to choose the latest CV across tailored+original
+            try:
+                from app.unified_latest_file_selector import unified_selector
+                cv_ctx = unified_selector.get_latest_cv_across_all(company)
+                if not cv_ctx.exists:
+                    raise FileNotFoundError("No CV file found via unified selector")
+                selected_cv_path = str(cv_ctx.txt_path or cv_ctx.json_path)
+                logger.info(
+                    f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
+                )
+            except Exception as sel_err:
+                # Fallback to original JSON path if selector fails
+                logger.warning(f"⚠️ [TAILORING] Unified selector failed: {sel_err}. Falling back to original CV path")
+                selected_cv_path = str(cv_analysis_path / "cvs" / "original" / "original_cv.json")
+
             # Debug logging for CV loading
-            logger.info(f"🔍 [DEBUG] Loading original CV from {original_cv_path}")
-            with open(original_cv_path, 'r') as f:
-                raw_cv_data = json.load(f)
-            logger.info(f"- Raw CV data keys: {list(raw_cv_data.keys())}")
-            logger.info(f"- Format type: {'text only' if 'text' in raw_cv_data else 'structured'}")
-            
-            cv_data = RecommendationParser.load_original_cv(str(original_cv_path))
+            try:
+                logger.info(f"🔍 [DEBUG] Loading CV from {selected_cv_path}")
+                # Try to peek if it's json
+                try:
+                    with open(selected_cv_path, 'r', encoding='utf-8') as f:
+                        peek = f.read(200)
+                    logger.info(f"- First 200 chars: {peek.replace(chr(10),' ')[:200]}")
+                except Exception:
+                    pass
+            except Exception:
+                pass
+
+            # Parse CV (RecommendationParser handles json/txt)
+            cv_data = RecommendationParser.load_original_cv(selected_cv_path)
             logger.info(f"- Parsed CV data keys: {list(cv_data.keys() if isinstance(cv_data, dict) else [])}")
             
             original_cv = OriginalCV(**cv_data)

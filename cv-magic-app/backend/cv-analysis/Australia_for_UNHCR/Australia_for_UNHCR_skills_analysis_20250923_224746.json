@@ -1,0 +1,97 @@
+{
+  "generated": "2025-09-23T22:47:46.318",
+  "cv_filename": "M_tiwari_CV_Capgemini.docx",
+  "jd_url": "preliminary_analysis",
+  "user_id": "e041b6e2-494c-4d5c-854a-da4d52f07423",
+  "company": "Australia_for_UNHCR",
+  "model_used": "gpt-4o-mini",
+  "cv_skills": {
+    "technical_skills": [
+      "SQL",
+      "Tableau",
+      "Python",
+      "Power BI",
+      "Excel",
+      "Data Analysis",
+      "Data Visualization",
+      "Statistical Analysis",
+      "Logistic Regression",
+      "Random Forests",
+      "Deep Learning",
+      "Undersampling Techniques",
+      "Data Discrepancies",
+      "Interactive Dashboards",
+      "Model Optimization",
+      "Pruning Techniques",
+      "Fine-tuning Strategies",
+      "Data-driven Visualisations"
+    ],
+    "soft_skills": [
+      "Communication",
+      "Time Management",
+      "Analytical Thinking",
+      "Problem-solving",
+      "Detail-oriented",
+      "Results-driven"
+    ],
+    "domain_keywords": [
+      "Data Science",
+      "Analytics",
+      "Customer Insights",
+      "Industrial Inspection",
+      "Real-Time Object Detection",
+      "Heart Attack Risk Prediction",
+      "Data-driven Projects"
+    ],
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- SQL - \"specializing in SQL\"\n- Tableau - \"specializing in Tableau\"\n- Python - \"specializing in Python\"\n- Power BI - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n- Excel - \"Proficient in Python and Excel for data analysis and automation\"\n- Data Analysis - \"Ability to uncover insights through analysis of large and diverse datasets\"\n- Data Visualization - \"Developed Power BI dashboards to analyse customer text data\"\n- Statistical Analysis - \"Identified patterns and insights of user data through statistical analysis\"\n- Logistic Regression - \"Implemented logistic regression\"\n- Random Forests - \"Implemented random forests\"\n- Deep Learning - \"Implemented deep learning models\"\n- Undersampling Techniques - \"Addressed imbalanced datasets using undersampling techniques\"\n- Data Discrepancies - \"identifying and addressing data discrepancies\"\n- Interactive Dashboards - \"Created interactive dashboards using Power BI and Excel\"\n- Model Optimization - \"Optimisation of Yolov8n Model for Real-Time Corrosion Detection\"\n- Pruning Techniques - \"improved inference time by 39.34% with pruning techniques\"\n- Fine-tuning Strategies - \"Demonstrated fine-tuning strategies\"\n- Data-driven Visualisations - \"Presented findings through clear, data-driven visualisations\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent interpersonal and communication skills to work effectively with stakeholders\"\n- Time Management - \"Strong ability to manage and prioritise multiple tasks in dynamic environments\"\n- Analytical Thinking - \"Adept at transforming complex datasets into actionable insights\"\n- Problem-solving - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Detail-oriented - \"ensuring 99% accuracy and integrity\"\n- Results-driven - \"contributing impactful solutions to data-driven projects\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Dynamic Data Science Professional\"\n- Analytics - \"hands-on experience in analytics\"\n- Customer Insights - \"identify top 20 queries, enhancing response strategies\"\n- Industrial Inspection - \"Contributed to industrial inspection innovations\"\n- Real-Time Object Detection - \"improving real-time object detection models\"\n- Heart Attack Risk Prediction - \"Heart Attack Risk Prediction\"\n- Data-driven Projects - \"contributing impactful solutions to data-driven projects\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Time Management\", \"Analytical Thinking\", \"Problem-solving\", \"Detail-oriented\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"SQL\", \"Tableau\", \"Python\", \"Power BI\", \"Excel\", \"Data Analysis\", \"Data Visualization\", \"Statistical Analysis\", \"Logistic Regression\", \"Random Forests\", \"Deep Learning\", \"Undersampling Techniques\", \"Data Discrepancies\", \"Interactive Dashboards\", \"Model Optimization\", \"Pruning Techniques\", \"Fine-tuning Strategies\", \"Data-driven Visualisations\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Analytics\", \"Customer Insights\", \"Industrial Inspection\", \"Real-Time Object Detection\", \"Heart Attack Risk Prediction\", \"Data-driven Projects\"]\n```"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Data Mining",
+      "Data Analysis",
+      "Reporting",
+      "Power BI",
+      "SQL",
+      "Excel",
+      "Tableau",
+      "Data Warehouse",
+      "Project Management",
+      "Data Extraction",
+      "Data Segmentation",
+      "Communication",
+      "Customer Service",
+      "Analytical Models",
+      "Bulk Communications",
+      "Stakeholder Management",
+      "Querying",
+      "Clean Data"
+    ],
+    "soft_skills": [
+      "Collaborative",
+      "Organised",
+      "Detail-oriented",
+      "Problem-solving",
+      "Communication",
+      "Self-motivated",
+      "Adaptability",
+      "Results-driven"
+    ],
+    "domain_keywords": [
+      "International Aid and Development",
+      "Fundraising",
+      "Not For Profit (NFP)",
+      "Marketing Campaigns",
+      "Donor-centricity",
+      "Humanitarian Emergencies",
+      "Refugees",
+      "Data-driven Decision Making",
+      "Multi-channel Communication",
+      "Evidence-based Decision Making"
+    ],
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Mining - \"providing segmented data selections, data mining, analysis\"\n- Data Analysis - \"providing data to support data-driven business decision-making\"\n- Reporting - \"developing and maintaining reports\"\n- Power BI - \"BI report authoring in Power BI or a similar reporting suite\"\n- SQL - \"development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment\"\n- Excel - \"building models in spreadsheets, and comfortable writing formulas and VBA in Excel\"\n- Tableau - \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- Data Warehouse - \"administer and develop A4U’s data warehouse (DWH)\"\n- Project Management - \"strong project management framework\"\n- Data Extraction - \"extracting data for marketing campaigns\"\n- Data Segmentation - \"advise on segmentation strategies\"\n- Communication - \"updating records with contact history\"\n- Customer Service - \"Excellent communication and customer service skills\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Analytical Models - \"building analytical models\"\n- Bulk Communications - \"manipulating data in preparation for bulk communications\"\n- Stakeholder Management - \"working with Fundraising stakeholders\"\n- Querying - \"Hands on experience in querying and extracting data\"\n- Clean Data - \"importance of maintaining clean data\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Collaborative - \"Our people are collaborative and inclusive team players\"\n- Organised - \"highly motivated, organised and detail-oriented\"\n- Detail-oriented - \"detail-oriented Data Analyst\"\n- Problem-solving - \"strong analytical and problem-solving skills\"\n- Communication - \"Excellent communication and customer service skills\"\n- Self-motivated - \"work autonomously to meet deadlines\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Adaptability - \"committed to finding new ways to increase support for refugees\"\n- Results-driven - \"driving evidence-based decision making throughout the organisation\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- International Aid and Development - \"International Aid and Development\"\n- Fundraising - \"Fundraising\"\n- Not For Profit (NFP) - \"Not For Profit (NFP)\"\n- Marketing Campaigns - \"data for marketing campaigns\"\n- Donor-centricity - \"donor-centricity approach\"\n- Humanitarian Emergencies - \"life-saving aid during humanitarian emergencies\"\n- Refugees - \"empowers refugees to find safety and protection\"\n\n**STRONGLY IMPLIED:**\n- Data-driven Decision Making - \"support data-driven business decision-making\"\n- Multi-channel Communication - \"considering a multi-channel communication\"\n- Evidence-based Decision Making - \"driving evidence-based decision making\"\n\n```python\nSOFT_SKILLS = [\"Collaborative\", \"Organised\", \"Detail-oriented\", \"Problem-solving\", \"Communication\", \"Self-motivated\", \"Adaptability\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Data Mining\", \"Data Analysis\", \"Reporting\", \"Power BI\", \"SQL\", \"Excel\", \"Tableau\", \"Data Warehouse\", \"Project Management\", \"Data Extraction\", \"Data Segmentation\", \"Communication\", \"Customer Service\", \"Analytical Models\", \"Bulk Communications\", \"Stakeholder Management\", \"Querying\", \"Clean Data\"]\nDOMAIN_KEYWORDS = [\"International Aid and Development\", \"Fundraising\", \"Not For Profit (NFP)\", \"Marketing Campaigns\", \"Donor-centricity\", \"Humanitarian Emergencies\", \"Refugees\", \"Data-driven Decision Making\", \"Multi-channel Communication\", \"Evidence-based Decision Making\"]\n```"
+  },
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- SQL - \"specializing in SQL\"\n- Tableau - \"specializing in Tableau\"\n- Python - \"specializing in Python\"\n- Power BI - \"Strong experience in Power BI for dashboard creation and data visualisation\"\n- Excel - \"Proficient in Python and Excel for data analysis and automation\"\n- Data Analysis - \"Ability to uncover insights through analysis of large and diverse datasets\"\n- Data Visualization - \"Developed Power BI dashboards to analyse customer text data\"\n- Statistical Analysis - \"Identified patterns and insights of user data through statistical analysis\"\n- Logistic Regression - \"Implemented logistic regression\"\n- Random Forests - \"Implemented random forests\"\n- Deep Learning - \"Implemented deep learning models\"\n- Undersampling Techniques - \"Addressed imbalanced datasets using undersampling techniques\"\n- Data Discrepancies - \"identifying and addressing data discrepancies\"\n- Interactive Dashboards - \"Created interactive dashboards using Power BI and Excel\"\n- Model Optimization - \"Optimisation of Yolov8n Model for Real-Time Corrosion Detection\"\n- Pruning Techniques - \"improved inference time by 39.34% with pruning techniques\"\n- Fine-tuning Strategies - \"Demonstrated fine-tuning strategies\"\n- Data-driven Visualisations - \"Presented findings through clear, data-driven visualisations\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent interpersonal and communication skills to work effectively with stakeholders\"\n- Time Management - \"Strong ability to manage and prioritise multiple tasks in dynamic environments\"\n- Analytical Thinking - \"Adept at transforming complex datasets into actionable insights\"\n- Problem-solving - \"Conducted ad-hoc analyses to uncover actionable insights\"\n- Detail-oriented - \"ensuring 99% accuracy and integrity\"\n- Results-driven - \"contributing impactful solutions to data-driven projects\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Dynamic Data Science Professional\"\n- Analytics - \"hands-on experience in analytics\"\n- Customer Insights - \"identify top 20 queries, enhancing response strategies\"\n- Industrial Inspection - \"Contributed to industrial inspection innovations\"\n- Real-Time Object Detection - \"improving real-time object detection models\"\n- Heart Attack Risk Prediction - \"Heart Attack Risk Prediction\"\n- Data-driven Projects - \"contributing impactful solutions to data-driven projects\"\n\n```python\nSOFT_SKILLS = [\"Communication\", \"Time Management\", \"Analytical Thinking\", \"Problem-solving\", \"Detail-oriented\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"SQL\", \"Tableau\", \"Python\", \"Power BI\", \"Excel\", \"Data Analysis\", \"Data Visualization\", \"Statistical Analysis\", \"Logistic Regression\", \"Random Forests\", \"Deep Learning\", \"Undersampling Techniques\", \"Data Discrepancies\", \"Interactive Dashboards\", \"Model Optimization\", \"Pruning Techniques\", \"Fine-tuning Strategies\", \"Data-driven Visualisations\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Analytics\", \"Customer Insights\", \"Industrial Inspection\", \"Real-Time Object Detection\", \"Heart Attack Risk Prediction\", \"Data-driven Projects\"]\n```",
+  "jd_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Mining - \"providing segmented data selections, data mining, analysis\"\n- Data Analysis - \"providing data to support data-driven business decision-making\"\n- Reporting - \"developing and maintaining reports\"\n- Power BI - \"BI report authoring in Power BI or a similar reporting suite\"\n- SQL - \"development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment\"\n- Excel - \"building models in spreadsheets, and comfortable writing formulas and VBA in Excel\"\n- Tableau - \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- Data Warehouse - \"administer and develop A4U’s data warehouse (DWH)\"\n- Project Management - \"strong project management framework\"\n- Data Extraction - \"extracting data for marketing campaigns\"\n- Data Segmentation - \"advise on segmentation strategies\"\n- Communication - \"updating records with contact history\"\n- Customer Service - \"Excellent communication and customer service skills\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Analytical Models - \"building analytical models\"\n- Bulk Communications - \"manipulating data in preparation for bulk communications\"\n- Stakeholder Management - \"working with Fundraising stakeholders\"\n- Querying - \"Hands on experience in querying and extracting data\"\n- Clean Data - \"importance of maintaining clean data\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Collaborative - \"Our people are collaborative and inclusive team players\"\n- Organised - \"highly motivated, organised and detail-oriented\"\n- Detail-oriented - \"detail-oriented Data Analyst\"\n- Problem-solving - \"strong analytical and problem-solving skills\"\n- Communication - \"Excellent communication and customer service skills\"\n- Self-motivated - \"work autonomously to meet deadlines\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Adaptability - \"committed to finding new ways to increase support for refugees\"\n- Results-driven - \"driving evidence-based decision making throughout the organisation\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- International Aid and Development - \"International Aid and Development\"\n- Fundraising - \"Fundraising\"\n- Not For Profit (NFP) - \"Not For Profit (NFP)\"\n- Marketing Campaigns - \"data for marketing campaigns\"\n- Donor-centricity - \"donor-centricity approach\"\n- Humanitarian Emergencies - \"life-saving aid during humanitarian emergencies\"\n- Refugees - \"empowers refugees to find safety and protection\"\n\n**STRONGLY IMPLIED:**\n- Data-driven Decision Making - \"support data-driven business decision-making\"\n- Multi-channel Communication - \"considering a multi-channel communication\"\n- Evidence-based Decision Making - \"driving evidence-based decision making\"\n\n```python\nSOFT_SKILLS = [\"Collaborative\", \"Organised\", \"Detail-oriented\", \"Problem-solving\", \"Communication\", \"Self-motivated\", \"Adaptability\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Data Mining\", \"Data Analysis\", \"Reporting\", \"Power BI\", \"SQL\", \"Excel\", \"Tableau\", \"Data Warehouse\", \"Project Management\", \"Data Extraction\", \"Data Segmentation\", \"Communication\", \"Customer Service\", \"Analytical Models\", \"Bulk Communications\", \"Stakeholder Management\", \"Querying\", \"Clean Data\"]\nDOMAIN_KEYWORDS = [\"International Aid and Development\", \"Fundraising\", \"Not For Profit (NFP)\", \"Marketing Campaigns\", \"Donor-centricity\", \"Humanitarian Emergencies\", \"Refugees\", \"Data-driven Decision Making\", \"Multi-channel Communication\", \"Evidence-based Decision Making\"]\n```",
+  "analyze_match_entries": [],
+  "preextracted_comparison_entries": []
+}
