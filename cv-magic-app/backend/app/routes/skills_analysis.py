@@ -774,24 +774,56 @@ async def preliminary_analysis(
                     # best-effort; continue
                     pass
 
-                # Save JD content to jd_original.json for JD analyzer only if it doesn't already exist
-                try:
-                    import json
-                    from app.utils.timestamp_utils import TimestampUtils
+            # Save JD content and job info to files
+            try:
+                import json
+                from datetime import datetime
+                from app.utils.timestamp_utils import TimestampUtils
+                from app.services.job_extractor import extract_job_metadata
+                
+                # Check if JD file already exists
+                existing_jd = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+                
+                if not existing_jd:
+                    # Only save if no JD file exists
+                    timestamp = TimestampUtils.get_timestamp()
+                    jd_file = company_dir / f"jd_original_{timestamp}.json"
+                    # Save JD file
+                    with open(jd_file, 'w', encoding='utf-8') as f:
+                        json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                    logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
                     
-                    # Check if JD file already exists
-                    existing_jd = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
-                    
-                    if not existing_jd:
-                        # Only save if no JD file exists
-                        timestamp = TimestampUtils.get_timestamp()
-                        jd_file = company_dir / f"jd_original_{timestamp}.json"
-                        with open(jd_file, 'w', encoding='utf-8') as f:
-                            json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
-                        logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
-                    else:
-                        logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
+                    # Extract and save job metadata
+                    job_metadata = await extract_job_metadata(jd_text)
+                    if job_metadata:
+                        job_info_file = company_dir / "job_info.json"
+                        with open(job_info_file, 'w', encoding='utf-8') as f:
+                            json.dump(job_metadata, f, indent=2, ensure_ascii=False)
+                        logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
                         
+                        # Save to shared jobs file
+                        saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+                        saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
+                        
+                        if saved_jobs_file.exists():
+                            with open(saved_jobs_file, 'r', encoding='utf-8') as f:
+                                saved_jobs_data = json.load(f)
+                        else:
+                            saved_jobs_data = {"jobs": [], "last_updated": datetime.now().isoformat(), "total_jobs": 0}
+                        
+                        if not any(job.get("job_url") == job_metadata.get("job_url") for job in saved_jobs_data["jobs"]):
+                            saved_jobs_data["jobs"].append(job_metadata)
+                            saved_jobs_data["last_updated"] = datetime.now().isoformat()
+                            saved_jobs_data["total_jobs"] = len(saved_jobs_data["jobs"])
+                            
+                            with open(saved_jobs_file, 'w', encoding='utf-8') as f:
+                                json.dump(saved_jobs_data, f, indent=2, ensure_ascii=False)
+                            logger.info(f"✅ [JOBS] Added job to shared jobs file: {job_metadata.get('job_title')} at {job_metadata.get('company_name')}")
+                else:
+                    logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
+                
+            except Exception as e:
+                logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD and job info: {e}")
                 except Exception as e:
                     logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to check/save JD file: {e}")
 
@@ -1055,9 +1087,48 @@ async def trigger_complete_pipeline(company: str):
             "steps": []
         }
         
-        # Step 1: JD Analysis
+# Step 1: JD Analysis
         try:
             logger.info(f"🔧 [MANUAL] Step 1: JD Analysis for {company}")
+            # Save job info to shared jobs file
+            from pathlib import Path
+            import json
+            from datetime import datetime
+
+            saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+            saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Create initial jobs file if it doesn't exist
+            if not saved_jobs_file.exists():
+                initial_data = {
+                    "jobs": [],
+                    "last_updated": datetime.utcnow().isoformat(),
+                    "total_jobs": 0
+                }
+                with open(saved_jobs_file, 'w', encoding='utf-8') as f:
+                    json.dump(initial_data, f, indent=2, ensure_ascii=False)
+
+            # Read current jobs
+            with open(saved_jobs_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            # Get job info from original JD file
+            job_info_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / company / "job_info.json"
+            if job_info_file.exists():
+                with open(job_info_file, 'r', encoding='utf-8') as f:
+                    job_info = json.load(f)
+                    
+                    # Add job to jobs list if not already present
+                    if not any(job.get("job_url") == job_info.get("job_url") for job in data["jobs"]):
+                        data["jobs"].append(job_info)
+                        data["last_updated"] = datetime.utcnow().isoformat()
+                        data["total_jobs"] = len(data["jobs"])
+                        
+                        # Save updated jobs data
+                        with open(saved_jobs_file, 'w', encoding='utf-8') as f:
+                            json.dump(data, f, indent=2, ensure_ascii=False)
+                        logger.info(f"✅ [JOBS] Added job to shared jobs file: {job_info.get('job_title')} at {job_info.get('company_name')}")
+
             await analyze_and_save_company_jd(company, force_refresh=True)
             results["steps"].append({"step": "jd_analysis", "status": "success"})
         except Exception as e:
