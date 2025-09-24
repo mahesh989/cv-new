@@ -1653,10 +1653,10 @@ async def list_companies_with_results():
 
 
 @router.get("/analysis-results/{company}")
-async def get_analysis_results(company: str):
+async def get_analysis_results(company: str, force_refresh: bool = False):
     """Get complete analysis results for a company (skills, components, ATS) for frontend display"""
     try:
-        logger.info(f"📊 [API] Fetching analysis results for company: {company}")
+        logger.info(f"📊 [API] Fetching analysis results for company: {company} (force_refresh: {force_refresh})")
         
         # Build file path using timestamped files
         base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
@@ -1741,26 +1741,43 @@ async def get_analysis_results(company: str):
             result["ats_score"] = latest
         
         # Get AI recommendation content if available
-        # Use timestamped AI recommendation file with fallback
+        # Use consistent file selection logic with proper timestamp handling
         from app.utils.timestamp_utils import TimestampUtils
         company_dir = base_dir / company
-        ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
-        if not ai_recommendation_file:
-            ai_recommendation_file = company_dir / f"{company}_ai_recommendation.json"
         
-        if ai_recommendation_file.exists():
+        # Find all AI recommendation files and get the latest by modification time
+        ai_recommendation_files = []
+        
+        # Check for timestamped files first
+        timestamped_files = TimestampUtils.find_all_timestamped_files(company_dir, f"{company}_ai_recommendation", "json")
+        ai_recommendation_files.extend(timestamped_files)
+        
+        # Check for non-timestamped files
+        fallback_file = company_dir / f"{company}_ai_recommendation.json"
+        if fallback_file.exists():
+            ai_recommendation_files.append(fallback_file)
+        
+        # Sort by modification time (most recent first)
+        ai_recommendation_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        
+        if ai_recommendation_files:
+            ai_recommendation_file = ai_recommendation_files[0]
             try:
                 with open(ai_recommendation_file, 'r', encoding='utf-8') as f:
                     ai_data = json.load(f)
                 result["ai_recommendation"] = {
                     "content": ai_data.get("recommendation_content"),
                     "generated_at": ai_data.get("generated_at"),
-                    "model_info": ai_data.get("ai_model_info", {})
+                    "model_info": ai_data.get("ai_model_info", {}),
+                    "file_path": str(ai_recommendation_file),
+                    "last_modified": ai_recommendation_file.stat().st_mtime
                 }
+                logger.info(f"✅ [ANALYSIS_RESULTS] Loaded AI recommendation from {ai_recommendation_file.name}")
             except Exception as e:
                 logger.warning(f"Failed to load AI recommendation for {company}: {e}")
                 result["ai_recommendation"] = None
         else:
+            logger.warning(f"No AI recommendation files found for {company}")
             result["ai_recommendation"] = None
         
         return JSONResponse(content={

@@ -369,12 +369,15 @@ class SkillsAnalysisService {
 
   /// Poll for complete analysis results (component analysis + ATS)
   static Future<Map<String, dynamic>?> getCompleteAnalysisResults(
-      String company) async {
+      String company,
+      {bool forceRefresh = false}) async {
     try {
-      print('📊 [POLLING] Checking for complete results for company: $company');
+      print(
+          '📊 [POLLING] Checking for complete results for company: $company (forceRefresh: $forceRefresh)');
 
       final result = await APIService.makeAuthenticatedCall(
-        endpoint: '/analysis-results/$company',
+        endpoint:
+            '/analysis-results/$company${forceRefresh ? '?force_refresh=true' : ''}',
         method: 'GET',
       );
 
@@ -406,19 +409,21 @@ class SkillsAnalysisService {
 
   /// Wait for complete analysis results with polling
   static Future<Map<String, dynamic>?> waitForCompleteResults(String company,
-      {int maxWaitTimeSeconds = 30}) async {
-    print('🔄 [POLLING] Starting polling for complete results...');
+      {int maxWaitTimeSeconds = 60}) async {
+    print(
+        '🔄 [POLLING] Starting polling for complete results... (timeout: ${maxWaitTimeSeconds}s)');
 
-    const pollInterval = Duration(seconds: 2);
-    final maxAttempts = maxWaitTimeSeconds ~/ 2;
+    const pollInterval = Duration(seconds: 3);
+    final maxAttempts = maxWaitTimeSeconds ~/ 3;
 
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       print('🔄 [POLLING] Attempt $attempt/$maxAttempts');
 
-      final completeResults = await getCompleteAnalysisResults(company);
+      final completeResults =
+          await getCompleteAnalysisResults(company, forceRefresh: attempt == 1);
       if (completeResults != null) {
         print(
-            '✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
+            '✅ [POLLING] Complete results obtained after ${attempt * 3} seconds');
         return completeResults;
       }
 

@@ -435,6 +435,12 @@ class SkillsAnalysisController extends ChangeNotifier {
     _showNotification(
         '🔧 Running advanced analysis (component analysis & ATS calculation)...');
 
+    // Reset progressive display states for rerun scenarios
+    _showAIRecommendationLoading = false;
+    _showAIRecommendationResults = false;
+    _showATSLoading = false;
+    _showATSResults = false;
+
     try {
       final completeResults =
           await SkillsAnalysisService.waitForCompleteResults(company);
@@ -461,10 +467,17 @@ class SkillsAnalysisController extends ChangeNotifier {
         // Parse AI recommendation
         AIRecommendationResult? aiRecommendation;
         if (completeResults['ai_recommendation'] != null) {
-          aiRecommendation = AIRecommendationResult.fromJson(
-              completeResults['ai_recommendation']);
-          print(
-              '🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars');
+          try {
+            aiRecommendation = AIRecommendationResult.fromJson(
+                completeResults['ai_recommendation']);
+            print(
+                '🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars');
+          } catch (e) {
+            print('❌ [POLLING] Failed to parse AI recommendation: $e');
+            aiRecommendation = null;
+          }
+        } else {
+          print('⚠️ [POLLING] No AI recommendation data in complete results');
         }
 
         // Store the complete results for progressive reveal
