@@ -1,0 +1,45 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-24T11:45:23.156576",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Tableau",
+    "Excel",
+    "communication"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "VBA",
+    "project management",
+    "stakeholder management",
+    "customer service",
+    "data mining",
+    "data warehouse",
+    "direct marketing campaigns",
+    "donor-centricity"
+  ],
+  "missed_preferred_keywords": [
+    "data issues",
+    "data de-duplication",
+    "governing regulations",
+    "best practice guidelines"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 5,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "SQL": "Proficient in SQL for querying and managing databases",
+    "Power BI": "Used Power BI to present research findings",
+    "Tableau": "Produced Tableau dashboards for improved decision-making",
+    "Excel": "Adept at using Excel for data-driven solutions",
+    "communication": "Demonstrated communication skills through presentations at conferences"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}

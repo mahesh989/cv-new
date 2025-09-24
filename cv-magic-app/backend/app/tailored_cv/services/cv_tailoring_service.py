@@ -72,30 +72,34 @@ class CVTailoringService:
             )
             
             # Step 3: Generate tailored CV using AI
-            tailored_cv_data = await self._generate_tailored_cv(
+            tailored_cv = await self._generate_tailored_cv(
                 request.original_cv,
                 request.recommendations, 
                 optimization_strategy,
                 request.custom_instructions
             )
 
-            # Step 4: Create clean tailored CV in original format
-            clean_tailored_cv = self._create_clean_tailored_cv(tailored_cv_data)
+            # Post-fix skills taxonomy if the model misclassified
+            try:
+                tailored_cv = self._normalize_skills_taxonomy(tailored_cv)
+            except Exception as e:
+                logger.warning(f"⚠️ [TAILORING] Failed to normalize skills taxonomy: {e}")
             
-            # Step 5: Generate processing summary
-            processing_summary = self._generate_processing_summary_dict(
+            # Step 4: Post-process and validate results
+            processing_summary = self._generate_processing_summary(
                 request.original_cv,
-                clean_tailored_cv,
+                tailored_cv,
                 request.recommendations
             )
             
-            # Step 6: Estimate ATS score improvement
-            estimated_score = await self._estimate_ats_score_dict(clean_tailored_cv, request.recommendations)
+            # Step 5: Estimate ATS score improvement
+            estimated_score = await self._estimate_ats_score(tailored_cv, request.recommendations)
+            tailored_cv.estimated_ats_score = estimated_score
             
             response = CVTailoringResponse(
-                tailored_cv=clean_tailored_cv,  # Now a dictionary in original format
+                tailored_cv=tailored_cv,
                 processing_summary=processing_summary,
-                recommendations_applied=self._extract_applied_recommendations_dict(clean_tailored_cv),
+                recommendations_applied=self._extract_applied_recommendations(tailored_cv),
                 success=True
             )
             
@@ -280,7 +284,7 @@ class CVTailoringService:
         recommendations: RecommendationAnalysis,
         strategy: OptimizationStrategy,
         custom_instructions: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> TailoredCV:
         """Generate tailored CV using AI service"""
         import uuid
         request_id = str(uuid.uuid4())[:8]
@@ -518,33 +522,21 @@ VERIFY BEFORE RESPONDING:
 
 The exact JSON structure must be:
 {
-  "personal_information": {
+  "contact": {
     "name": "EXACT name from provided CV",
-    "phone": "EXACT phone from provided CV",
     "email": "EXACT email from provided CV",
-    "location": "EXACT location from provided CV",
-    "linkedin": "EXACT LinkedIn text/URL from provided CV",
-    "github": "EXACT GitHub text/URL from provided CV",
-    "portfolio_links": {
-      "blogs": "EXACT blog text/URL from provided CV",
-      "dashboard_portfolio": "EXACT portfolio text/URL from provided CV",
-      "website": "EXACT website text/URL from provided CV"
-    },
-    "residency_status": "EXACT status from provided CV",
-    "open_to": "EXACT preferences from provided CV"
-  },
-  "career_profile": {
-    "summary": "enhanced summary with quantified impact based on original plus recommended additions"
+    "phone": "EXACT phone from provided CV",
+    "location": "EXACT location from provided CV"
   },
   "education": [
     {
-      "degree": "EXACT degree name from provided CV",
-      "institution": "EXACT institution name from provided CV",
-      "year": "EXACT date/year format from provided CV",
-      "gpa": "EXACT GPA from provided CV",
-      "relevant_courses": ["EXACT courses from provided CV"],
-      "honors": ["EXACT honors/achievements from provided CV"],
-      "location": "EXACT city, country from provided CV"
+      "institution": "EXACT institution from provided CV",
+      "degree": "EXACT degree from provided CV",
+      "location": "EXACT location from provided CV",
+      "graduation_date": "EXACT graduation_date from provided CV (preserve all date information)",
+      "gpa": "EXACT gpa from provided CV or empty string",
+      "relevant_coursework": "EXACT relevant_coursework from provided CV or null",
+      "honors": "EXACT honors from provided CV or null"
     }
   ],
   "experience": [
@@ -557,19 +549,18 @@ The exact JSON structure must be:
       "bullets": ["enhanced bullet with quantified impact based on original", ...]
     }
   ],
-  "skills": ["key skill 1", "key skill 2", "key skill 3", "key skill 4", ...],
-  "projects": [
+  "skills": [
+    {
+      "category": "enhanced category name",
+      "skills": ["skills from original CV plus recommended additions", ...]
+    }
+  ],
+  "projects": [  // OPTIONAL - include only if original CV has projects
     {
       "name": "EXACT project name from provided CV",
       "bullets": ["enhanced project bullet with quantified impact", ...]
     }
   ],
-  "certifications": ["EXACT certifications from provided CV if section exists"],
-  "languages": ["EXACT languages from provided CV if section exists"],
-  "awards": ["EXACT awards from provided CV if section exists"],
-  "publications": ["EXACT publications from provided CV if section exists"],
-  "volunteer_work": ["EXACT volunteer work from provided CV if section exists"],
-  "professional_memberships": ["EXACT memberships from provided CV if section exists"],
   "optimization_notes": {
     "keywords_added": ["keyword1", "keyword2"],
     "impact_improvements": ["improvement1", "improvement2"],
@@ -701,220 +692,113 @@ Please provide the optimized CV in the requested JSON format."""
         ai_generated_data: Dict[str, Any],
         recommendations: RecommendationAnalysis,
         strategy: OptimizationStrategy
-    ) -> Dict[str, Any]:
-        """
-        Construct tailored CV in original format structure
+    ) -> TailoredCV:
+        # Enhanced skills extraction from experience
+        extracted_skills = self._extract_skills_from_experience(original_cv.experience)
         
-        Args:
-            original_cv: Original CV data
-            ai_generated_data: AI-generated tailored content
-            recommendations: Job recommendations
-            strategy: Optimization strategy
+        # Skills categorization helper
+        def categorize_skill(skill: str) -> str:
+            technical_indicators = ['python', 'sql', 'tableau', 'bi', 'docker', 'git', 'analytics', 'data']
+            soft_indicators = ['communication', 'leadership', 'collaboration', 'teamwork', 'mentoring', 'presenting']
+            skill_lower = skill.lower()
             
-        Returns:
-            Tailored CV in original format structure
-        """
-        logger.info("🔄 [TAILORING] Constructing tailored CV in original format")
+            if any(ind in skill_lower for ind in technical_indicators):
+                return 'Technical Skills'
+            elif any(ind in skill_lower for ind in soft_indicators):
+                return 'Soft Skills'
+            return 'Domain Expertise'
         
-        # Start with original CV structure as base
-        tailored_cv = {
-            "personal_information": {
-                "name": original_cv.contact.name,
-                "phone": original_cv.contact.phone,
-                "email": original_cv.contact.email,
-                "location": original_cv.contact.location,
-                "linkedin": original_cv.contact.linkedin or "",
-                "github": "",
-                "portfolio_links": {
-                    "blogs": "",
-                    "dashboard_portfolio": "",
-                    "website": ""
-                },
-                "residency_status": "",
-                "open_to": ""
-            },
-            "career_profile": {
-                "summary": ""  # Will be populated if AI generates it
-            },
-            "skills": {
-                "technical_skills": [],
-                "key_skills": [],
-                "soft_skills": [],
-                "domain_expertise": []
-            },
-            "education": [],
-            "experience": [],
-            "projects": [],
-            "certifications": [],
-            "languages": [],
-            "awards": [],
-            "publications": [],
-            "volunteer_work": [],
-            "professional_memberships": [],
-            "unknown_sections": {},
-            "original_sections": {
-                "section_headers_found": [],
-                "parsing_approach": "tailored_cv"
-            },
-            "saved_at": datetime.now().isoformat(),
-            "metadata": {
-                "source_filename": f"tailored_cv_{recommendations.company}",
-                "processed_at": datetime.now().isoformat(),
-                "processing_version": "2.0",
-                "content_type": "tailored_cv"
-            }
-        }
+        # Group extracted skills by category
+        categorized_skills = {}
+        for skill in extracted_skills:
+            category = categorize_skill(skill)
+            if category not in categorized_skills:
+                categorized_skills[category] = set()
+            categorized_skills[category].add(skill)
         
-        # Update with AI-generated content if available
-        if "personal_information" in ai_generated_data:
-            tailored_cv["personal_information"].update(ai_generated_data["personal_information"])
+        """Construct TailoredCV object from AI-generated content"""
         
-        if "career_profile" in ai_generated_data:
-            tailored_cv["career_profile"] = ai_generated_data["career_profile"]
+        # Extract optimization notes and applied enhancements
+        optimization_notes = ai_generated_data.get("optimization_notes", {})
         
-        # Process skills - keep as simple array format with key skills from JD
-        if "skills" in ai_generated_data:
-            ai_skills = ai_generated_data["skills"]
-            if isinstance(ai_skills, list):
-                # Keep as simple array format - these are key skills from JD
-                tailored_cv["skills"] = ai_skills
-                logger.info(f"✅ [SKILLS] Preserved {len(ai_skills)} key skills from AI generation")
-            elif isinstance(ai_skills, dict):
-                # Convert nested format to simple array, focusing on key skills
-                all_skills = []
-                for category, skills_list in ai_skills.items():
-                    if skills_list:
-                        # Extract individual skills from formatted strings
-                        for skill in skills_list:
-                            # Remove bullet points and clean up
-                            clean_skill = skill.replace("•", "").strip()
-                            if clean_skill and clean_skill not in all_skills:
-                                all_skills.append(clean_skill)
-                tailored_cv["skills"] = all_skills
-                logger.info(f"✅ [SKILLS] Converted nested format to {len(all_skills)} key skills")
-        else:
-            # If no skills in AI data, extract from original CV
-            original_skills = []
-            if hasattr(original_cv, 'skills') and original_cv.skills:
-                for skill_category in original_cv.skills:
-                    if hasattr(skill_category, 'skills'):
-                        for skill in skill_category.skills:
-                            clean_skill = skill.replace("•", "").strip()
-                            if clean_skill and clean_skill not in original_skills:
-                                original_skills.append(clean_skill)
-            tailored_cv["skills"] = original_skills
-            logger.info(f"✅ [SKILLS] Extracted {len(original_skills)} skills from original CV")
+        # Convert AI-generated data to proper models
+        from app.tailored_cv.models.cv_models import (
+            ContactInfo, Education, ExperienceEntry, 
+            Project, SkillCategory
+        )
         
-        # Process education - maintain original structure
-        if "education" in ai_generated_data and ai_generated_data["education"]:
-            tailored_cv["education"] = ai_generated_data["education"]
-        else:
-            # Use original education if no AI-generated education
-            tailored_cv["education"] = [edu.model_dump() for edu in original_cv.education]
+        # Process contact info
+        contact_data = ai_generated_data.get("contact", {})
+        contact = ContactInfo(**contact_data) if contact_data else original_cv.contact
         
-        # Process experience - maintain original structure
-        if "experience" in ai_generated_data and ai_generated_data["experience"]:
-            tailored_cv["experience"] = ai_generated_data["experience"]
-        else:
-            # Use original experience if no AI-generated experience
-            tailored_cv["experience"] = [exp.model_dump() for exp in original_cv.experience]
+        # Process education entries
+        education_data = ai_generated_data.get("education", [])
+        education = []
+        for edu in education_data:
+            education.append(Education(**edu))
         
-        # Process projects - maintain original structure
+        # Process experience entries - MOST IMPORTANT
+        experience_data = ai_generated_data.get("experience", [])
+        experience = []
+        for exp in experience_data:
+            experience.append(ExperienceEntry(**exp))
+        
+        # Process projects if present
+        projects = None
         if "projects" in ai_generated_data and ai_generated_data["projects"]:
-            tailored_cv["projects"] = ai_generated_data["projects"]
-        else:
-            # Use original projects if no AI-generated projects
-            if original_cv.projects:
-                tailored_cv["projects"] = [proj.model_dump() for proj in original_cv.projects]
+            projects = []
+            for proj in ai_generated_data["projects"]:
+                projects.append(Project(**proj))
         
-        # Preserve other original sections
-        for key in ["certifications", "languages", "awards", "publications", "volunteer_work", "professional_memberships"]:
-            if hasattr(original_cv, key):
-                original_value = getattr(original_cv, key)
-                if original_value:
-                    tailored_cv[key] = [item.model_dump() for item in original_value] if isinstance(original_value, list) else original_value
+        # Process skills
+        skills_data = ai_generated_data.get("skills", [])
+        skills = []
+        for skill in skills_data:
+            skills.append(SkillCategory(**skill))
         
-        logger.info("✅ [TAILORING] Constructed tailored CV in original format")
+        # Create the tailored CV with AI-generated content
+        tailored_cv = TailoredCV(
+            contact=contact,
+            education=education if education else original_cv.education,
+            experience=experience if experience else original_cv.experience,
+            projects=projects if projects else original_cv.projects,
+            skills=skills if skills else original_cv.skills,
+            
+            # Metadata
+            source_cv_id=getattr(original_cv, 'id', None),
+            target_company=recommendations.company,
+            target_role=recommendations.job_title,
+            optimization_strategy=strategy,
+            
+            # Enhancement tracking
+            enhancements_applied=optimization_notes,
+            keywords_integrated=recommendations.critical_gaps + recommendations.keyword_integration,
+            quantifications_added=[],  # Will be populated based on changes
+            
+            # Quality metrics (to be calculated)
+            estimated_ats_score=None,
+            keyword_density=None,
+            impact_statement_compliance=None
+        )
+        
         return tailored_cv
     
-    def _create_clean_tailored_cv(self, tailored_cv_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_clean_tailored_cv(self, full_tailored_cv: TailoredCV) -> 'CleanTailoredCV':
         """
-        Clean tailored CV data and keep only specified sections
+        Convert a full TailoredCV with all metadata to a clean version with only CV content
+        """
+        from app.tailored_cv.models.cv_models import CleanTailoredCV
         
-        Args:
-            tailored_cv_data: Tailored CV data in original format
-            
-        Returns:
-            Clean tailored CV data with only required sections
-        """
-        try:
-            logger.info("✅ [CLEAN_CV] Creating clean tailored CV with specified sections only")
-            
-            # Start with empty structure
-            clean_cv = {}
-            
-            # Always include these required sections
-            required_sections = ["personal_information", "experience", "education"]
-            
-            for section in required_sections:
-                if section in tailored_cv_data and tailored_cv_data[section]:
-                    clean_cv[section] = tailored_cv_data[section]
-                else:
-                    # Provide empty structure for required sections
-                    if section == "personal_information":
-                        clean_cv[section] = {
-                            "name": "",
-                            "phone": "",
-                            "email": "",
-                            "location": "",
-                            "linkedin": "",
-                            "github": "",
-                            "portfolio_links": {"blogs": "", "dashboard_portfolio": "", "website": ""},
-                            "residency_status": "",
-                            "open_to": ""
-                        }
-                    elif section == "experience":
-                        clean_cv[section] = []
-                    elif section == "education":
-                        clean_cv[section] = []
-            
-            # Handle skills - preserve as simple array format
-            if "skills" in tailored_cv_data and tailored_cv_data["skills"]:
-                clean_cv["skills"] = tailored_cv_data["skills"]
-                logger.info(f"✅ [CLEAN_CV] Preserved skills section with {len(tailored_cv_data['skills'])} key skills")
-            
-            # Include projects only if available
-            if "projects" in tailored_cv_data and tailored_cv_data["projects"]:
-                clean_cv["projects"] = tailored_cv_data["projects"]
-            
-            # Add timestamp fields
-            clean_cv["saved_at"] = datetime.now().isoformat()
-            clean_cv["last_edited"] = datetime.now().isoformat()
-            clean_cv["manually_edited"] = False
-            
-            return clean_cv
-            
-        except Exception as e:
-            logger.error(f"❌ [CLEAN_CV] Failed to create clean tailored CV: {e}")
-            # Return minimal structure as fallback with only required sections
-            return {
-                "personal_information": {
-                    "name": "",
-                    "phone": "",
-                    "email": "",
-                    "location": "",
-                    "linkedin": "",
-                    "github": "",
-                    "portfolio_links": {"blogs": "", "dashboard_portfolio": "", "website": ""},
-                    "residency_status": "",
-                    "open_to": ""
-                },
-                "education": [],
-                "experience": [],
-                "saved_at": datetime.now().isoformat(),
-                "last_edited": datetime.now().isoformat(),
-                "manually_edited": False
-            }
+        clean_cv = CleanTailoredCV(
+            contact=full_tailored_cv.contact,
+            education=full_tailored_cv.education,
+            experience=full_tailored_cv.experience,
+            projects=full_tailored_cv.projects,
+            skills=full_tailored_cv.skills,
+            created_at=full_tailored_cv.created_at
+        )
+        
+        return clean_cv
     
     def _extract_and_parse_json(self, content: str) -> Dict[str, Any]:
         """Extract and parse JSON from AI response with multiple strategies"""
@@ -1520,12 +1404,12 @@ FIX: Output ONLY valid JSON!
             logger.error(f"❌ Failed to load recommendation file: {e}")
             raise
     
-    def save_tailored_cv_to_analysis_folder(self, tailored_cv_data: Dict[str, Any], company: str) -> str:
+    def save_tailored_cv_to_analysis_folder(self, tailored_cv: TailoredCV, company: str) -> str:
         """
         Save tailored CV to the company-specific folder in cv-analysis with proper naming
         
         Args:
-            tailored_cv_data: The tailored CV data in original format
+            tailored_cv: The tailored CV to save
             company: Company name for folder and file naming
             
         Returns:
@@ -1545,15 +1429,15 @@ FIX: Output ONLY valid JSON!
             json_file_path = tailored_folder / json_filename
             txt_file_path = tailored_folder / txt_filename
             
-            # Create clean version
-            clean_cv = self._create_clean_tailored_cv(tailored_cv_data)
+            # Create clean version without metadata
+            clean_cv = self._create_clean_tailored_cv(tailored_cv)
             
-            # Save clean JSON file
+            # Save clean JSON file (without metadata)
             with open(json_file_path, 'w', encoding='utf-8') as f:
-                json.dump(clean_cv, f, indent=2, default=str)
+                json.dump(clean_cv.model_dump(), f, indent=2, default=str)
             
             # Convert to text and save TXT file
-            text_content = self._convert_tailored_cv_dict_to_text(clean_cv)
+            text_content = self._convert_tailored_cv_to_text(tailored_cv)
             with open(txt_file_path, 'w', encoding='utf-8') as f:
                 f.write(text_content)
             
@@ -1615,40 +1499,6 @@ FIX: Output ONLY valid JSON!
             # Parse CV (RecommendationParser handles json/txt)
             cv_data = RecommendationParser.load_original_cv(selected_cv_path)
             logger.info(f"- Parsed CV data keys: {list(cv_data.keys() if isinstance(cv_data, dict) else [])}")
-            
-            # Check if this is a tailored CV with different structure
-            is_tailored_format = 'contact' in cv_data and 'skills' in cv_data and isinstance(cv_data['skills'], list) and isinstance(cv_data['skills'][0], str)
-            
-            if is_tailored_format:
-                logger.info("🔄 [TAILORING] Detected tailored CV format - converting to original CV structure")
-                
-                # Load the original CV to get the proper structure
-                original_cv_path = cv_analysis_path / "cvs" / "original" / "original_cv.json"
-                if original_cv_path.exists():
-                    with open(original_cv_path, 'r', encoding='utf-8') as f:
-                        original_structure = json.load(f)
-                    
-                    # Map tailored CV data to original structure
-                    cv_data = self._map_tailored_to_original_structure(cv_data, original_structure)
-                    logger.info("✅ [TAILORING] Mapped tailored CV to original structure")
-                else:
-                    logger.warning("⚠️ [TAILORING] Original CV not found, using tailored structure as-is")
-            else:
-                logger.info("✅ [TAILORING] Using original CV structure")
-            
-            # Transform skills data format if needed (for OriginalCV model)
-            if 'skills' in cv_data and isinstance(cv_data['skills'], list):
-                logger.info(f"🔍 [TAILORING] Found skills data: {cv_data['skills'][:5]}... (type: {type(cv_data['skills'][0]) if cv_data['skills'] else 'empty'})")
-                # Check if skills are simple strings (need transformation)
-                if cv_data['skills'] and isinstance(cv_data['skills'][0], str):
-                    logger.info("🔄 [TAILORING] Transforming skills from string array to SkillCategory format")
-                    # Transform from ["SQL", "Excel", ...] to [{"category": "Technical Skills", "skills": ["SQL", "Excel", ...]}]
-                    cv_data['skills'] = [{"category": "Technical Skills", "skills": cv_data['skills']}]
-                    logger.info(f"- Transformed skills: {cv_data['skills']}")
-                else:
-                    logger.info("✅ [TAILORING] Skills already in correct format")
-            else:
-                logger.warning("⚠️ [TAILORING] No skills data found in CV")
             
             original_cv = OriginalCV(**cv_data)
             logger.info(f"- Final CV object attributes: {dir(original_cv)}")
@@ -1722,320 +1572,6 @@ FIX: Output ONLY valid JSON!
                             extracted_skills.append(skill)
         
         return extracted_skills
-    
-    def _map_tailored_to_original_structure(self, tailored_data: Dict[str, Any], original_structure: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Map tailored CV data to original CV structure format
-        
-        Args:
-            tailored_data: Tailored CV data with contact/skills structure
-            original_structure: Original CV structure to maintain format
-            
-        Returns:
-            Mapped data in original structure format
-        """
-        try:
-            # Start with original structure as base
-            mapped_data = original_structure.copy()
-            
-            # Map contact information
-            if 'contact' in tailored_data and 'personal_information' in original_structure:
-                contact = tailored_data['contact']
-                mapped_data['personal_information'] = {
-                    'name': contact.get('name', ''),
-                    'phone': contact.get('phone', ''),
-                    'email': contact.get('email', ''),
-                    'location': contact.get('location', ''),
-                    'linkedin': contact.get('linkedin', ''),
-                    'github': contact.get('github', ''),
-                    'portfolio_links': original_structure['personal_information'].get('portfolio_links', {}),
-                    'residency_status': original_structure['personal_information'].get('residency_status', ''),
-                    'open_to': original_structure['personal_information'].get('open_to', '')
-                }
-            
-            # Map skills - convert from simple array to original structure
-            if 'skills' in tailored_data and isinstance(tailored_data['skills'], list):
-                # Convert simple skills array to original format
-                skills_list = tailored_data['skills']
-                mapped_data['skills'] = {
-                    'technical_skills': [f"• {skill}" for skill in skills_list],
-                    'key_skills': original_structure['skills'].get('key_skills', []),
-                    'soft_skills': original_structure['skills'].get('soft_skills', []),
-                    'domain_expertise': original_structure['skills'].get('domain_expertise', [])
-                }
-            
-            # Map experience - convert from tailored format to original format
-            if 'experience' in tailored_data and isinstance(tailored_data['experience'], list):
-                mapped_experience = []
-                for exp in tailored_data['experience']:
-                    mapped_exp = {
-                        'title': exp.get('title', ''),
-                        'company': exp.get('company', ''),
-                        'duration': f"{exp.get('start_date', '')} – {exp.get('end_date', '')}",
-                        'location': exp.get('location', ''),
-                        'responsibilities': exp.get('bullets', []),
-                        'achievements': [],
-                        'technologies': []
-                    }
-                    mapped_experience.append(mapped_exp)
-                mapped_data['experience'] = mapped_experience
-            
-            # Map education
-            if 'education' in tailored_data:
-                mapped_data['education'] = tailored_data['education']
-            
-            # Map projects
-            if 'projects' in tailored_data:
-                mapped_data['projects'] = tailored_data['projects']
-            
-            # Preserve other original fields
-            for key in ['career_profile', 'certifications', 'languages', 'awards', 'publications', 'volunteer_work', 'professional_memberships']:
-                if key in original_structure:
-                    mapped_data[key] = original_structure[key]
-            
-            logger.info("✅ [MAPPING] Successfully mapped tailored CV to original structure")
-            return mapped_data
-            
-        except Exception as e:
-            logger.error(f"❌ [MAPPING] Failed to map tailored CV structure: {e}")
-            # Return original structure as fallback
-            return original_structure
-    
-    def _map_tailored_cv_to_original_format(self, tailored_cv: TailoredCV, original_structure: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Map TailoredCV object to original CV structure format
-        
-        Args:
-            tailored_cv: TailoredCV object with optimized content
-            original_structure: Original CV structure to maintain format
-            
-        Returns:
-            Mapped data in original structure format
-        """
-        try:
-            # Start with original structure as base
-            mapped_data = original_structure.copy()
-            
-            # Map contact information from TailoredCV to personal_information
-            if hasattr(tailored_cv, 'contact') and 'personal_information' in original_structure:
-                contact = tailored_cv.contact
-                mapped_data['personal_information'] = {
-                    'name': contact.name,
-                    'phone': contact.phone,
-                    'email': contact.email,
-                    'location': contact.location,
-                    'linkedin': contact.linkedin or '',
-                    'github': original_structure['personal_information'].get('github', ''),
-                    'portfolio_links': original_structure['personal_information'].get('portfolio_links', {}),
-                    'residency_status': original_structure['personal_information'].get('residency_status', ''),
-                    'open_to': original_structure['personal_information'].get('open_to', '')
-                }
-            
-            # Map skills from TailoredCV to original structure
-            if hasattr(tailored_cv, 'skills') and tailored_cv.skills:
-                # Convert SkillCategory objects to original format
-                technical_skills = []
-                for skill_category in tailored_cv.skills:
-                    if hasattr(skill_category, 'skills'):
-                        for skill in skill_category.skills:
-                            technical_skills.append(f"• {skill}")
-                
-                mapped_data['skills'] = {
-                    'technical_skills': technical_skills,
-                    'key_skills': original_structure['skills'].get('key_skills', []),
-                    'soft_skills': original_structure['skills'].get('soft_skills', []),
-                    'domain_expertise': original_structure['skills'].get('domain_expertise', [])
-                }
-            
-            # Map experience from TailoredCV to original structure
-            if hasattr(tailored_cv, 'experience') and tailored_cv.experience:
-                mapped_experience = []
-                for exp in tailored_cv.experience:
-                    mapped_exp = {
-                        'title': exp.title,
-                        'company': exp.company,
-                        'duration': f"{exp.start_date} – {exp.end_date}" if exp.start_date and exp.end_date else exp.duration or '',
-                        'location': exp.location,
-                        'responsibilities': exp.bullets,
-                        'achievements': [],
-                        'technologies': []
-                    }
-                    mapped_experience.append(mapped_exp)
-                mapped_data['experience'] = mapped_experience
-            
-            # Map education
-            if hasattr(tailored_cv, 'education') and tailored_cv.education:
-                mapped_data['education'] = [edu.model_dump() for edu in tailored_cv.education]
-            
-            # Map projects
-            if hasattr(tailored_cv, 'projects') and tailored_cv.projects:
-                mapped_data['projects'] = [proj.model_dump() for proj in tailored_cv.projects]
-            
-            # Preserve other original fields
-            for key in ['career_profile', 'certifications', 'languages', 'awards', 'publications', 'volunteer_work', 'professional_memberships']:
-                if key in original_structure:
-                    mapped_data[key] = original_structure[key]
-            
-            # Add metadata
-            mapped_data['saved_at'] = datetime.now().isoformat()
-            mapped_data['metadata'] = {
-                'source_filename': f"tailored_cv_{tailored_cv.target_company}",
-                'processed_at': datetime.now().isoformat(),
-                'processing_version': '2.0',
-                'content_type': 'tailored_cv'
-            }
-            
-            logger.info("✅ [MAPPING] Successfully mapped TailoredCV to original structure")
-            return mapped_data
-            
-        except Exception as e:
-            logger.error(f"❌ [MAPPING] Failed to map TailoredCV to original structure: {e}")
-            # Return original structure as fallback
-            return original_structure
-    
-    def _generate_processing_summary_dict(
-        self, 
-        original_cv: OriginalCV, 
-        tailored_cv_data: Dict[str, Any], 
-        recommendations: RecommendationAnalysis
-    ) -> Dict[str, Any]:
-        """Generate processing summary for dictionary-based tailored CV"""
-        try:
-            # Count changes
-            original_exp_count = len(original_cv.experience)
-            tailored_exp_count = len(tailored_cv_data.get('experience', []))
-            
-            original_skills_count = sum(len(cat.skills) for cat in original_cv.skills)
-            tailored_skills_count = len(tailored_cv_data.get('skills', {}).get('technical_skills', []))
-            
-            return {
-                "optimization_applied": True,
-                "experience_entries_modified": abs(tailored_exp_count - original_exp_count),
-                "skills_enhanced": tailored_skills_count > original_skills_count,
-                "keywords_integrated": len(recommendations.critical_gaps),
-                "ats_improvements": recommendations.technical_enhancements,
-                "processing_time": "N/A",
-                "ai_model_used": "gpt-4o-mini"
-            }
-        except Exception as e:
-            logger.error(f"❌ [PROCESSING_SUMMARY] Failed to generate summary: {e}")
-            return {
-                "optimization_applied": True,
-                "experience_entries_modified": 0,
-                "skills_enhanced": False,
-                "keywords_integrated": 0,
-                "ats_improvements": [],
-                "processing_time": "N/A",
-                "ai_model_used": "gpt-4o-mini"
-            }
-    
-    async def _estimate_ats_score_dict(self, tailored_cv_data: Dict[str, Any], recommendations: RecommendationAnalysis) -> int:
-        """Estimate ATS score for dictionary-based tailored CV"""
-        try:
-            # Simple scoring based on keyword integration
-            base_score = 60
-            
-            # Add points for integrated keywords
-            keyword_bonus = min(len(recommendations.critical_gaps) * 5, 20)
-            
-            # Add points for technical enhancements
-            tech_bonus = min(len(recommendations.technical_enhancements) * 3, 15)
-            
-            # Add points for experience optimization
-            exp_bonus = 5 if len(tailored_cv_data.get('experience', [])) > 0 else 0
-            
-            estimated_score = base_score + keyword_bonus + tech_bonus + exp_bonus
-            return min(estimated_score, 95)  # Cap at 95
-            
-        except Exception as e:
-            logger.error(f"❌ [ATS_SCORE] Failed to estimate score: {e}")
-            return 70  # Default score
-    
-    def _extract_applied_recommendations_dict(self, tailored_cv_data: Dict[str, Any]) -> List[str]:
-        """Extract applied recommendations for dictionary-based tailored CV"""
-        try:
-            applied = []
-            
-            # Check for keyword integration
-            if tailored_cv_data.get('skills', {}).get('technical_skills'):
-                applied.append("Technical skills optimized")
-            
-            # Check for experience enhancement
-            if tailored_cv_data.get('experience'):
-                applied.append("Experience entries enhanced")
-            
-            # Check for career profile
-            if tailored_cv_data.get('career_profile', {}).get('summary'):
-                applied.append("Career profile optimized")
-            
-            return applied
-            
-        except Exception as e:
-            logger.error(f"❌ [RECOMMENDATIONS] Failed to extract applied recommendations: {e}")
-            return ["CV optimization applied"]
-    
-    def _convert_tailored_cv_dict_to_text(self, tailored_cv_data: Dict[str, Any]) -> str:
-        """Convert tailored CV dictionary to text format"""
-        try:
-            text_parts = []
-            
-            # Personal Information
-            if "personal_information" in tailored_cv_data:
-                pi = tailored_cv_data["personal_information"]
-                text_parts.append(f"Name: {pi.get('name', '')}")
-                text_parts.append(f"Email: {pi.get('email', '')}")
-                text_parts.append(f"Phone: {pi.get('phone', '')}")
-                text_parts.append(f"Location: {pi.get('location', '')}")
-                if pi.get('linkedin'):
-                    text_parts.append(f"LinkedIn: {pi['linkedin']}")
-                text_parts.append("")
-            
-            # Career Profile
-            if "career_profile" in tailored_cv_data and tailored_cv_data["career_profile"].get("summary"):
-                text_parts.append("CAREER PROFILE")
-                text_parts.append(tailored_cv_data["career_profile"]["summary"])
-                text_parts.append("")
-            
-            # Skills
-            if "skills" in tailored_cv_data:
-                skills = tailored_cv_data["skills"]
-                if skills.get("technical_skills"):
-                    text_parts.append("TECHNICAL SKILLS")
-                    for skill in skills["technical_skills"]:
-                        text_parts.append(skill)
-                    text_parts.append("")
-            
-            # Education
-            if "education" in tailored_cv_data and tailored_cv_data["education"]:
-                text_parts.append("EDUCATION")
-                for edu in tailored_cv_data["education"]:
-                    text_parts.append(f"{edu.get('degree', '')} - {edu.get('institution', '')}")
-                    if edu.get('year'):
-                        text_parts.append(f"Year: {edu['year']}")
-                    if edu.get('location'):
-                        text_parts.append(f"Location: {edu['location']}")
-                    text_parts.append("")
-            
-            # Experience
-            if "experience" in tailored_cv_data and tailored_cv_data["experience"]:
-                text_parts.append("EXPERIENCE")
-                for exp in tailored_cv_data["experience"]:
-                    text_parts.append(f"{exp.get('title', '')} at {exp.get('company', '')}")
-                    if exp.get('duration'):
-                        text_parts.append(f"Duration: {exp['duration']}")
-                    if exp.get('location'):
-                        text_parts.append(f"Location: {exp['location']}")
-                    if exp.get('responsibilities'):
-                        text_parts.append("Responsibilities:")
-                        for resp in exp['responsibilities']:
-                            text_parts.append(f"  {resp}")
-                    text_parts.append("")
-            
-            return "\n".join(text_parts)
-            
-        except Exception as e:
-            logger.error(f"❌ [TEXT_CONVERSION] Failed to convert tailored CV to text: {e}")
-            return "Tailored CV content"
 
 
 # Create service instance

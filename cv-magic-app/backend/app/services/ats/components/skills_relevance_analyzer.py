@@ -53,20 +53,30 @@ class SkillsAnalyzer:
 
     def _parse_response(self, raw_response: str) -> Dict[str, Any]:
         """Parse LLM response with multiple fallback strategies."""
+        logger.info("[SKILLS] Raw response length: %d", len(raw_response))
+        logger.info("[SKILLS] Raw response preview: %s", raw_response[:200])
+        
         cleaned = self._clean_llm_response(raw_response)
+        logger.info("[SKILLS] Cleaned response: %s", cleaned[:200])
         
         # Strategy 1: direct parse
         try:
-            return json.loads(cleaned)
-        except json.JSONDecodeError:
-            pass
+            result = json.loads(cleaned)
+            logger.info("[SKILLS] Direct parse successful")
+            return result
+        except json.JSONDecodeError as e:
+            logger.warning("[SKILLS] Direct parse failed: %s", str(e))
         
         # Strategy 2: extract first balanced object
         objs = self._extract_json_objects(raw_response)
-        for obj in objs:
+        logger.info("[SKILLS] Found %d JSON objects", len(objs))
+        for i, obj in enumerate(objs):
             try:
-                return json.loads(obj)
-            except json.JSONDecodeError:
+                result = json.loads(obj)
+                logger.info("[SKILLS] Object %d parse successful", i)
+                return result
+            except json.JSONDecodeError as e:
+                logger.warning("[SKILLS] Object %d parse failed: %s", i, str(e))
                 continue
         
         # Strategy 3: wrap key-value if missing outer braces
@@ -74,12 +84,56 @@ class SkillsAnalyzer:
         if m:
             candidate = '{' + m.group(1) + '}'
             try:
-                return json.loads(candidate)
-            except json.JSONDecodeError:
-                pass
+                result = json.loads(candidate)
+                logger.info("[SKILLS] Wrapped parse successful")
+                return result
+            except json.JSONDecodeError as e:
+                logger.warning("[SKILLS] Wrapped parse failed: %s", str(e))
         
-        logger.error("[SKILLS] Failed to parse LLM response. Raw: %s", raw_response[:400])
-        raise ValueError("Skills analysis response not valid JSON")
+        # Strategy 4: Try to extract JSON from markdown code blocks
+        json_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', raw_response)
+        if json_match:
+            try:
+                result = json.loads(json_match.group(1))
+                logger.info("[SKILLS] Markdown extraction successful")
+                return result
+            except json.JSONDecodeError as e:
+                logger.warning("[SKILLS] Markdown extraction failed: %s", str(e))
+        
+        # Strategy 5: Try to find any JSON-like structure
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        matches = re.findall(json_pattern, raw_response, re.DOTALL)
+        for i, match in enumerate(matches):
+            try:
+                result = json.loads(match)
+                logger.info("[SKILLS] Pattern match %d successful", i)
+                return result
+            except json.JSONDecodeError:
+                continue
+        
+        # Strategy 6: Provide fallback response if all parsing fails
+        logger.warning("[SKILLS] All parsing strategies failed, providing fallback response")
+        logger.error("[SKILLS] Raw response: %s", raw_response[:800])
+        
+        # Create a fallback response with reasonable defaults
+        fallback_response = {
+            "skills_analysis": [],
+            "overall_skills_score": 50.0,  # Neutral score
+            "corporate_skills_strength": "Unable to analyze due to response format",
+            "academic_skills_discount": "Analysis failed",
+            "business_readiness_score": 50.0,
+            "skill_development_timeline": "Unknown",
+            "strength_areas": ["Analysis failed"],
+            "critical_gaps": ["Unable to determine"],
+            "training_investment_needed": ["Analysis failed"],
+            "immediate_value_skills": ["Unable to determine"],
+            "risky_transition_skills": ["Unable to determine"],
+            "parsing_error": True,
+            "raw_response_preview": raw_response[:200]
+        }
+        
+        logger.warning("[SKILLS] Using fallback response due to parsing failure")
+        return fallback_response
 
     async def analyze(self, cv_text: str, jd_text: str, matched_skills: str) -> Dict[str, Any]:
         """
@@ -123,4 +177,21 @@ class SkillsAnalyzer:
             
         except Exception as e:
             logger.error("[SKILLS] Analysis failed: %s", str(e))
-            raise ValueError(f"Skills analysis failed: {str(e)}")
+            # Provide a fallback response instead of raising an error
+            fallback_response = {
+                "skills_analysis": [],
+                "overall_skills_score": 50.0,
+                "corporate_skills_strength": "Analysis failed due to error",
+                "academic_skills_discount": "Analysis failed",
+                "business_readiness_score": 50.0,
+                "skill_development_timeline": "Unknown",
+                "strength_areas": ["Analysis failed"],
+                "critical_gaps": ["Unable to determine"],
+                "training_investment_needed": ["Analysis failed"],
+                "immediate_value_skills": ["Unable to determine"],
+                "risky_transition_skills": ["Unable to determine"],
+                "analysis_error": True,
+                "error_message": str(e)
+            }
+            logger.warning("[SKILLS] Returning fallback response due to analysis error")
+            return fallback_response
