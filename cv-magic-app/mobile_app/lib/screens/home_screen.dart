@@ -71,17 +71,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Initialize CV Magic page with navigation callback
     _cvMagicPage = CVMagicOrganizedPage(
       onNavigateToCVGeneration: _navigateToCVGenerationTab,
-      shouldClearResults: () {
-        debugPrint(
-            '🔄 HomeScreen: shouldClearResults called, returning: $_shouldClearCVMagicResults');
-        return _shouldClearCVMagicResults;
-      },
-      onResultsCleared: () {
-        debugPrint(
-            '🔄 HomeScreen: onResultsCleared called, resetting flag to false');
-        _shouldClearCVMagicResults = false;
-      },
-      clearVersion: _cvMagicClearVersion,
+      shouldClearResults: () => _shouldClearCVMagicResults,
+      onResultsCleared: () => _shouldClearCVMagicResults = false,
     );
 
     // Initialize CV Generation screen with navigation callback
@@ -196,15 +187,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _navigateToCVMagicTab() {
-    debugPrint(
-        '🔄 HomeScreen: Navigating to CV Magic tab (index 1) and clearing results');
-    debugPrint('🔄 HomeScreen: Setting _shouldClearCVMagicResults = true');
-    _shouldClearCVMagicResults = true; // Set flag to clear results
-    debugPrint('🔄 HomeScreen: Flag set, now switching to tab index 1');
-    _onTabTapped(1); // Switch to CV Magic tab (index 1)
+    debugPrint('🔄 HomeScreen: Navigating to CV Magic tab (index 1) and clearing results');
     setState(() {
-      // bump version to notify CVMagicOrganizedPage
-      _cvMagicClearVersion++;
+      _shouldClearCVMagicResults = true; // Set flag to clear results
+    });
+    debugPrint('🔄 HomeScreen: Flag set, now switching to tab index 1');
+    
+    // Use Timer.run to ensure flag is set before switching tabs
+    Timer.run(() {
+      _onTabTapped(1); // Switch to CV Magic tab (index 1)
     });
   }
 

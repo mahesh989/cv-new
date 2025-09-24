@@ -1,0 +1,418 @@
+{
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Extraction\n- Data Modelling\n- Data Warehouse\n- Data-Driven Decision-Making\n- Excel\n- Power Bi\n- Python\n- Querying\n- Sql\n- Vba\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning\n- Data Preprocessing\n- Data Analysis\n- Predictive Analytics\n- Automation\n- Data Visualization\n- Reporting\n- Computational Modeling\n- Workflow Management\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Adaptability\n- Collaboration\n- Problem-Solving\n- Results-Driven\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Problem-solving\n- Adaptability\n- Time Management\n- Detail-oriented\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science\n- Theoretical Physics\n\n**STRONGLY IMPLIED:**\n- Predictive Analytics\n- Operational Efficiency\n- Strategic Decision-making\n\n```python\nSOFT_SKILLS = ['Adaptability', 'Collaboration', 'Problem-Solving', 'Results-Driven']\nTECHNICAL_SKILLS = ['Data Extraction', 'Data Modelling', 'Data Warehouse', 'Data-Driven Decision-Making', 'Excel', 'Power BI', 'Python', 'Querying', 'SQL', 'VBA']\nDOMAIN_KEYWORDS = ['Data Science', 'Theoretical Physics']\n```",
+  "jd_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Data Analysis\n- Data Extraction\n- Data Mining\n- Data Warehouse\n- Excel\n- Power Bi\n- Project Management\n- Querying\n- Reporting\n- Segmentation\n- Sql\n- Tableau\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Analytical Models\n- Bulk Communications\n- Evidence-Based Decision Making\n- Clean Data\n- De-duplication\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Collaborative\n- Communication\n- Detail-Oriented\n- Organised\n- Problem-Solving\n- Results-Driven\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Teamwork\n- Adaptability\n- Results-Driven\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Issues\n- Donor-Centricity\n- Fundraising\n- Humanitarian Emergencies\n- International Aid And Development\n- Marketing Campaigns\n- Not For Profit (Nfp)\n\n**STRONGLY IMPLIED:**\n- Campaign Outcomes\n- Business Intelligence\n\n```python\nSOFT_SKILLS = ['Collaborative', 'Communication', 'Detail-oriented', 'Organised', 'Problem-solving', 'Results-driven', 'Self-motivated', 'Stakeholder Management']\nTECHNICAL_SKILLS = ['Data Analysis', 'Data Extraction', 'Data Mining', 'Data Warehouse', 'Excel', 'Power BI', 'Project Management', 'Querying', 'Reporting', 'Segmentation', 'SQL', 'Tableau']\nDOMAIN_KEYWORDS = ['Data Issues', 'Donor-centricity', 'Fundraising', 'Humanitarian Emergencies', 'International Aid and Development', 'Marketing Campaigns', 'Not For Profit (NFP)']\n```",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-09-24T20:58:21.712",
+      "model_used": "gpt-4o-mini",
+      "content": "**DECISION:** \ud83d\udfe1 STRATEGIC PURSUE\n\n---\n\n**MARKET REALITY CHECK:**\n\n- **What they actually need:** The job description emphasizes experience with data analysis, SQL, and business intelligence tools like Power BI. The core must-haves are strong SQL skills, experience in data extraction and manipulation, and familiarity with BI tools. The rest of the requirements may be more flexible, particularly the specifics of project management and stakeholder experience.\n  \n- **Flexibility indicators:** The organization is a non-profit focused on humanitarian efforts, which often leads to a more flexible hiring approach. The job posting is relatively new, but the urgency in the language suggests they may be eager to fill the role, indicating potential flexibility on some requirements.\n\n- **Hard blockers identified:** The main hard blockers could be the required SQL experience and familiarity with data warehouse environments. If Maheshwor lacks significant experience in these areas, it could be a deal-breaker.\n\n- **Hiring urgency signals:** The language used in the job description suggests an urgent need for a data analyst, which typically means they might be more willing to consider candidates who show potential but may not meet every single requirement.\n\n---\n\n**INTELLIGENT OBSERVATIONS:**\n\n- **Hidden strengths:** Maheshwor has a strong technical skill set, including Power BI, SQL, and Python, which are directly relevant to the role. His problem-solving and data modeling skills are also valuable assets that align with the job's requirements.\n\n- **Smart connections:** His background in theoretical physics and data science suggests strong analytical skills and the ability to learn complex concepts quickly. This could translate well into the analytical modeling and data mining aspects of the job.\n\n- **Growth potential:** The ongoing Master of Data Science indicates a commitment to learning and developing relevant skills. If he can demonstrate how his academic background and projects relate to the job, it could mitigate some concerns about experience.\n\n- **Positioning opportunities:** Maheshwor should emphasize any relevant projects or coursework that involved SQL, data extraction, or BI tools, as well as any practical experience he may have had with data analysis in a professional or academic setting.\n\n---\n\n**REALISTIC ODDS:** 60% chance of getting an interview if the CV is tailored well to highlight relevant skills and experiences.\n\n---\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n\n1. **Priority 1:** Highlight any specific projects or experiences related to SQL and data warehousing, even if they were part of academic work or internships. This will address the hard blocker of SQL experience.\n\n2. **Priority 2:** Emphasize experience with Power BI and any relevant data visualization projects. If he has created reports or dashboards, detailing these will strengthen his application.\n\n3. **Priority 3:** Address the project management and stakeholder management skills by demonstrating any relevant experiences, such as group projects, collaborative work, or leadership roles in academic settings.\n\n---\n\n**HONEST BOTTOM LINE:** Maheshwor has a solid foundation that aligns well with the job requirements, but he needs to strategically position his skills and experiences to address potential gaps, particularly in SQL and data warehousing. Tailoring his CV to emphasize relevant experiences and demonstrating a strong willingness to learn will make him a competitive candidate for this role. It\u2019s worth the effort to pursue this opportunity."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-09-24T20:58:40.041",
+      "model_used": "gpt-4o-mini",
+      "content": "\ud83c\udfaf OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 27\nMatched: 14\nMissing: 16\nMatch Rate: 52%\n\n\ud83d\udcca SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            10         12         10          3           77\nSoft Skills                   4          8          3          6           33\nDomain Keywords              2          7          1          7           12\n\n\ud83e\udde0 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n\ud83d\udd39 TECHNICAL SKILLS\n  \u2705 MATCHED JD REQUIREMENTS (10 items):\n    1. JD Required: 'Data Analysis'\n       \u2192 Found in CV: 'Data Modelling'\n       \ud83d\udca1 synonym match - both involve analyzing data structures\n    2. JD Required: 'Data Extraction'\n       \u2192 Found in CV: 'Data Extraction'\n       \ud83d\udca1 exact match\n    3. JD Required: 'Data Mining'\n       \u2192 Found in CV: 'Python'\n       \ud83d\udca1 hierarchical match - Python demonstrates data mining capabilities\n    4. JD Required: 'Data Warehouse'\n       \u2192 Found in CV: 'Data Warehouse'\n       \ud83d\udca1 exact match\n    5. JD Required: 'Excel'\n       \u2192 Found in CV: 'Excel'\n       \ud83d\udca1 exact match\n    6. JD Required: 'Power BI'\n       \u2192 Found in CV: 'Power BI'\n       \ud83d\udca1 exact match\n    7. JD Required: 'Querying'\n       \u2192 Found in CV: 'Querying'\n       \ud83d\udca1 exact match\n    8. JD Required: 'Reporting'\n       \u2192 Found in CV: 'Power BI'\n       \ud83d\udca1 domain context - Power BI is used for reporting\n    9. JD Required: 'SQL'\n       \u2192 Found in CV: 'Sql'\n       \ud83d\udca1 exact match\n    10. JD Required: 'Tableau'\n       \u2192 Found in CV: 'Power BI'\n       \ud83d\udca1 domain context - both are data visualization tools\n  \u274c MISSING FROM CV (3 items):\n    1. JD Requires: 'Data Mining'\n       \ud83d\udca1 no direct CV equivalent found\n    2. JD Requires: 'Project Management'\n       \ud83d\udca1 no direct CV equivalent found\n    3. JD Requires: 'Segmentation'\n       \ud83d\udca1 no direct CV equivalent found\n\n\ud83d\udd39 SOFT SKILLS\n  \u2705 MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Collaboration'\n       \u2192 Found in CV: 'Collaboration'\n       \ud83d\udca1 exact match\n    2. JD Required: 'Problem-Solving'\n       \u2192 Found in CV: 'Problem-Solving'\n       \ud83d\udca1 exact match\n    3. JD Required: 'Results-Driven'\n       \u2192 Found in CV: 'Results-Driven'\n       \ud83d\udca1 exact match\n  \u274c MISSING FROM CV (6 items):\n    1. JD Requires: 'Collaborative'\n       \ud83d\udca1 no direct CV equivalent found\n    2. JD Requires: 'Communication'\n       \ud83d\udca1 no direct CV equivalent found\n    3. JD Requires: 'Detail-Oriented'\n       \ud83d\udca1 no direct CV equivalent found\n    4. JD Requires: 'Organised'\n       \ud83d\udca1 no direct CV equivalent found\n    5. JD Requires: 'Self-Motivated'\n       \ud83d\udca1 no direct CV equivalent found\n    6. JD Requires: 'Stakeholder Management'\n       \ud83d\udca1 no direct CV equivalent found\n\n\ud83d\udd39 DOMAIN KEYWORDS\n  \u2705 MATCHED JD REQUIREMENTS (1 items):\n    1. JD Required: 'Data Science'\n       \u2192 Found in CV: 'Data Science'\n       \ud83d\udca1 exact match\n  \u274c MISSING FROM CV (7 items):\n    1. JD Requires: 'Data Issues'\n       \ud83d\udca1 no direct CV equivalent found\n    2. JD Requires: 'Donor-Centricity'\n       \ud83d\udca1 no direct CV equivalent found\n    3. JD Requires: 'Fundraising'\n       \ud83d\udca1 no direct CV equivalent found\n    4. JD Requires: 'Humanitarian Emergencies'\n       \ud83d\udca1 no direct CV equivalent found\n    5. JD Requires: 'International Aid And Development'\n       \ud83d\udca1 no direct CV equivalent found\n    6. JD Requires: 'Marketing Campaigns'\n       \ud83d\udca1 no direct CV equivalent found\n    7. JD Requires: 'Not For Profit (Nfp)'\n       \ud83d\udca1 no direct CV equivalent found\n\n\ud83d\udcda INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Data Extraction, Data Modelling, Data Warehouse, Data-Driven Decision-Making, Excel, Power BI, Python, Querying, SQL, VBA\n- Soft: Adaptability, Collaboration, Problem-Solving, Results-Driven\n- Domain: Data Science, Theoretical Physics\n\nJD\n- Technical: Data Analysis, Data Extraction, Data Mining, Data Warehouse, Excel, Power BI, Project Management, Querying, Reporting, Segmentation...\n- Soft: Collaborative, Communication, Detail-oriented, Organised, Problem-solving, Results-driven, Self-motivated, Stakeholder Management\n- Domain: Data Issues, Donor-centricity, Fundraising, Humanitarian Emergencies, International Aid and Development, Marketing Campaigns, Not For Profit (NFP)\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-09-24T20:59:44.260",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "SQL",
+              "cv_evidence": "Leveraged SQL for querying databases in various roles.",
+              "jd_application": "Use SQL for database querying.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": 1,
+              "academic_experience_years": 0,
+              "business_impact_evidence": "Improved data accuracy and efficiency in data processing.",
+              "relevance_score": 80,
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "N/A",
+              "depth_indicators": [
+                "Used in data extraction and structuring",
+                "Supported business intelligence efforts"
+              ],
+              "business_application_bonus": 10,
+              "academic_penalty": 0,
+              "synergy_score": 15,
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Power BI",
+              "cv_evidence": "Used Power BI to present research findings and create dashboards.",
+              "jd_application": "Present analysis results through dashboards using Power BI.",
+              "context_type": "MIXED",
+              "corporate_experience_years": 0.5,
+              "academic_experience_years": 1,
+              "business_impact_evidence": "Enhanced collaboration and communication of insights.",
+              "relevance_score": 65,
+              "skill_level_corporate": "Beginner",
+              "skill_level_academic": "Intermediate",
+              "depth_indicators": [
+                "Created dashboards for research",
+                "Participated in weekly reviews"
+              ],
+              "business_application_bonus": 5,
+              "academic_penalty": 10,
+              "synergy_score": 10,
+              "transferability_risk": "MEDIUM"
+            },
+            {
+              "skill": "Excel",
+              "cv_evidence": "Utilized Excel for data analysis and reporting.",
+              "jd_application": "Utilise advanced Excel for data analysis.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": 1,
+              "academic_experience_years": 0,
+              "business_impact_evidence": "Improved decision-making processes for stakeholders.",
+              "relevance_score": 75,
+              "skill_level_corporate": "Advanced",
+              "skill_level_academic": "N/A",
+              "depth_indicators": [
+                "Created dynamic reports",
+                "Enhanced data analysis capabilities"
+              ],
+              "business_application_bonus": 10,
+              "academic_penalty": 0,
+              "synergy_score": 15,
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Data Analysis",
+              "cv_evidence": "Analyzed large datasets to identify trends and actionable insights.",
+              "jd_application": "Analyse large data sets to identify trends and patterns.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": 1,
+              "academic_experience_years": 2,
+              "business_impact_evidence": "Increased revenue by 15% through data-driven decisions.",
+              "relevance_score": 85,
+              "skill_level_corporate": "Advanced",
+              "skill_level_academic": "Intermediate",
+              "depth_indicators": [
+                "Developed machine learning models",
+                "Optimized response times"
+              ],
+              "business_application_bonus": 20,
+              "academic_penalty": 5,
+              "synergy_score": 20,
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Stakeholder Management",
+              "cv_evidence": "Enhanced stakeholder engagement through effective communication of insights.",
+              "jd_application": "Communicate complex data in an easy-to-understand way for non-technical stakeholders.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": 1,
+              "academic_experience_years": 2,
+              "business_impact_evidence": "Improved decision-making processes for stakeholders.",
+              "relevance_score": 70,
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "Advanced",
+              "depth_indicators": [
+                "Collaborated with cross-functional teams",
+                "Presented findings at conferences"
+              ],
+              "business_application_bonus": 10,
+              "academic_penalty": 5,
+              "synergy_score": 15,
+              "transferability_risk": "MEDIUM"
+            },
+            {
+              "skill": "Data Governance",
+              "cv_evidence": "Implemented data governance practices in data analysis roles.",
+              "jd_application": "Ensure data is compliant with privacy laws and corporate data governance standards.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": 1,
+              "academic_experience_years": 1,
+              "business_impact_evidence": "Improved data reliability and compliance.",
+              "relevance_score": 75,
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "Intermediate",
+              "depth_indicators": [
+                "Managed data quality",
+                "Supported data governance initiatives"
+              ],
+              "business_application_bonus": 10,
+              "academic_penalty": 0,
+              "synergy_score": 10,
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Python",
+              "cv_evidence": "Developed Python scripts for data cleaning, analysis, and visualization.",
+              "jd_application": "Utilise Python for data analysis and reporting.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": 1,
+              "academic_experience_years": 4,
+              "business_impact_evidence": "Improved data pipeline efficiency by 30%.",
+              "relevance_score": 90,
+              "skill_level_corporate": "Advanced",
+              "skill_level_academic": "Expert",
+              "depth_indicators": [
+                "Built machine learning models",
+                "Automated repetitive tasks"
+              ],
+              "business_application_bonus": 20,
+              "academic_penalty": 0,
+              "synergy_score": 20,
+              "transferability_risk": "LOW"
+            }
+          ],
+          "overall_skills_score": 78,
+          "corporate_skills_strength": "Strong skills in data analysis, SQL, and Python with measurable business impact.",
+          "academic_skills_discount": "Moderate discount due to academic experience in some skills.",
+          "business_readiness_score": 85,
+          "skill_development_timeline": "6-12 months to reach full corporate proficiency in weaker areas.",
+          "strength_areas": [
+            "Data Analysis",
+            "Python",
+            "SQL"
+          ],
+          "critical_gaps": [
+            "Advanced Excel",
+            "Power BI"
+          ],
+          "training_investment_needed": [
+            "Power BI",
+            "Advanced Excel"
+          ],
+          "immediate_value_skills": [
+            "SQL",
+            "Data Analysis",
+            "Python"
+          ],
+          "risky_transition_skills": [
+            "Power BI"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "2.5",
+            "cv_corporate_years": "1.5",
+            "cv_academic_years": "4.5",
+            "cv_role_level": "Junior to Mid-level Data Analyst",
+            "cv_progression": [
+              "Data Analyst at The Bitrates (0.5 years)",
+              "Data Analyst at iBuild Building Solutions (0.25 years)",
+              "Software Engineer and Analyst at Property Console (0.5 years)",
+              "Research Assistant at CY Cergy Paris University (4 years)",
+              "Lecturer and Course Facilitator at CY Cergy Paris University (3 years)",
+              "Research Intern at CY Cergy Paris University (0.5 years)"
+            ],
+            "jd_required_years": "1-2",
+            "jd_role_level": "Mid-level Data Analyst",
+            "alignment_score": 75,
+            "experience_gaps": [
+              "Limited direct corporate experience in a full-time data analyst role",
+              "No experience with Fieldglass and SAP Ariba"
+            ],
+            "experience_strengths": [
+              "Strong technical skills in Python, SQL, and data visualization tools",
+              "Demonstrated ability to improve data processes and stakeholder engagement"
+            ],
+            "quantified_achievements": [
+              "Increased revenue by 15% ($150K annually) through predictive analytics",
+              "Improved data pipeline efficiency by 30%",
+              "Enhanced customer satisfaction by 10% through data analysis"
+            ],
+            "overqualification_risk": "MEDIUM"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Analysis",
+            "cv_secondary_industries": [
+              "Research",
+              "Education"
+            ],
+            "cv_academic_background": "Data Science, Physics",
+            "cv_corporate_exposure": "Less than 1 year",
+            "jd_target_industry": "Human Resource Services",
+            "jd_industry_specificity": "Moderately specific, requires data analysis skills applicable to HR",
+            "direct_industry_match": "NO",
+            "industry_alignment_score": 40,
+            "corporate_background_bonus": 0,
+            "industry_penalty_factors": [
+              "No direct HR industry experience",
+              "Limited corporate experience"
+            ],
+            "transferable_skills_score": 70,
+            "cultural_adaptation_difficulty": "DIFFICULT",
+            "regulatory_knowledge_gap": "Moderate, lacks HR compliance knowledge",
+            "client_stakeholder_fit": "Moderate, some experience in stakeholder engagement but not in HR context",
+            "business_cycle_understanding": "Limited understanding of HR-specific business cycles",
+            "success_probability": "LOW",
+            "adaptation_timeline": "12+ months",
+            "investment_level_required": "HIGH",
+            "industry_strengths": [
+              "Strong technical skills in data analysis and visualization",
+              "Experience with Python and data manipulation",
+              "Ability to communicate insights effectively"
+            ],
+            "critical_industry_gaps": [
+              "Understanding of HR data governance",
+              "Experience with HR-specific tools like SAP Ariba and Fieldglass",
+              "Knowledge of HR compliance and regulations"
+            ],
+            "hiring_risk_assessment": "HIGH RISK"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "1.5 years",
+            "cv_academic_years": "4 years",
+            "cv_total_weighted_years": "1.8 years (1.5 * 0.8 + 4 * 0.2)",
+            "cv_responsibility_scope": "Limited to data analysis and reporting without direct management or P&L responsibility.",
+            "cv_leadership_indicators": "4",
+            "cv_decision_authority": "Limited; primarily focused on data analysis and reporting without strategic decision-making authority.",
+            "cv_stakeholder_level": "Moderate; experience in collaborating with stakeholders but not in a leadership capacity.",
+            "cv_management_experience": "None; roles have not included team or budget management.",
+            "jd_required_seniority": "1-2 years of experience in a data analysis role.",
+            "jd_leadership_requirements": "Strong stakeholder management skills.",
+            "jd_decision_authority_needed": "Ability to provide data-driven recommendations to improve business operations.",
+            "jd_stakeholder_level": "Collaborative work with other departments and business leaders.",
+            "seniority_score": "65",
+            "corporate_seniority_match": "60",
+            "leadership_readiness_score": "40",
+            "decision_authority_match": "50",
+            "stakeholder_management_fit": "70",
+            "overqualification_risk": "MEDIUM",
+            "seniority_strengths": [
+              "Proficient in data analysis and visualization tools.",
+              "Experience in automating processes and improving data quality."
+            ],
+            "seniority_gaps": [
+              "Lack of direct management experience.",
+              "No P&L or budget management responsibilities.",
+              "Limited experience in strategic decision-making."
+            ],
+            "leadership_transition_risk": "MEDIUM; transitioning from academic to corporate leadership may require additional experience.",
+            "readiness_assessment": "Moderately ready for the role but needs to develop management and strategic decision-making skills."
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Advanced",
+            "cv_primary_domain": "Machine Learning & Data Science",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "ML Algorithms",
+              "Data Visualization"
+            ],
+            "cv_problem_complexity": 8,
+            "cv_innovation_indicators": [
+              "Published Research",
+              "Framework Development"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "Tableau",
+              "Excel"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 90,
+            "core_skills_match_percentage": 85,
+            "technical_stack_fit_percentage": 80,
+            "complexity_readiness_score": 95,
+            "learning_agility_score": 85,
+            "technical_strengths": [
+              "Advanced Analytics",
+              "ML Implementation",
+              "Data Architecture"
+            ],
+            "technical_gaps": [
+              "Tableau Proficiency",
+              "Business Domain Context"
+            ],
+            "overqualification_risk": "Moderate"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 10,
+            "total_preferred_keywords": 3,
+            "matched_required_count": 8,
+            "matched_preferred_count": 2,
+            "missing_required": 2,
+            "missing_preferred": 1
+          },
+          "bonus_breakdown": {
+            "required_bonus": 3.0,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.4,
+            "preferred_penalty": -0.15,
+            "total_bonus": 1.75
+          },
+          "coverage_metrics": {
+            "required_coverage": 80.0,
+            "preferred_coverage": 66.67
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 78.0,
+        "experience_alignment": 75.0,
+        "industry_fit": 40.0,
+        "domain_overlap_percentage": 0.0,
+        "data_familiarity_score": 0.0,
+        "stakeholder_fit_score": 0.0,
+        "business_cycle_alignment": 0.0,
+        "role_seniority": 65.0,
+        "leadership_readiness_score": 40.0,
+        "technical_depth": 90.0,
+        "core_skills_match_percentage": 85.0,
+        "technical_stack_fit_percentage": 80.0,
+        "complexity_readiness_score": 95.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": 1.75,
+        "total_bonus": 1.75,
+        "required_bonus": 3.0,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.4,
+        "preferred_penalty": -0.15,
+        "required_coverage": 80.0,
+        "preferred_coverage": 66.67
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-09-24T20:59:44.286",
+      "final_ats_score": 52.33749999999999,
+      "category_status": "\u274c Poor fit",
+      "recommendation": "Generally rejected",
+      "breakdown": {
+        "category1": {
+          "score": 20.95,
+          "technical_skills_match_rate": 77.0,
+          "domain_keywords_match_rate": 12.0,
+          "soft_skills_match_rate": 33.0,
+          "missing_counts": {
+            "technical": 3,
+            "domain": 7,
+            "soft": 6
+          }
+        },
+        "category2": {
+          "score": 29.637499999999996,
+          "core_competency_avg": 63.75,
+          "experience_seniority_avg": 36.0,
+          "potential_ability_avg": 60.0,
+          "company_fit_avg": 10.0
+        },
+        "ats1_score": 50.58749999999999,
+        "bonus_points": 1.75
+      }
+    }
+  ]
+}

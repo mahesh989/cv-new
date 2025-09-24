@@ -1,0 +1,52 @@
+{
+  "company_name": "Chandler_Macleod",
+  "cv_analysis_timestamp": "2025-09-24T20:48:27.354107",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "communication",
+    "problem solving",
+    "data analysis",
+    "data governance"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau",
+    "SAP Ariba"
+  ],
+  "missed_required_keywords": [
+    "data structures",
+    "data warehousing"
+  ],
+  "missed_preferred_keywords": [
+    "Power Query",
+    "stakeholder management",
+    "Fieldglass"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 7,
+    "matched_preferred_count": 2
+  },
+  "matching_notes": {
+    "SQL": "Mentioned in technical skills section",
+    "Power BI": "Found in technical skills and experience sections",
+    "Excel": "Found in technical skills section",
+    "communication": "Demonstrated through stakeholder engagement in experience",
+    "problem solving": "Inferred from roles involving data analysis and decision-making",
+    "data analysis": "Explicitly mentioned in technical skills and experience",
+    "data governance": "Found in multiple experience descriptions",
+    "Tableau": "Used in experience for dashboard creation",
+    "SAP Ariba": "Found in technical skills section",
+    "data structures": "Not explicitly mentioned in CV",
+    "data warehousing": "Not explicitly mentioned in CV",
+    "Power Query": "Not mentioned in CV",
+    "stakeholder management": "Mentioned in technical skills but not elaborated in experience",
+    "Fieldglass": "Found in technical skills section but not elaborated in experience"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/tailored/Chandler_Macleod_tailored_cv_20250924_201733.txt",
+  "metadata": {}
+}

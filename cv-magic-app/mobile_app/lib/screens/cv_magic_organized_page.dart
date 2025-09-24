@@ -22,14 +22,12 @@ class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
   final bool Function()? shouldClearResults;
   final VoidCallback? onResultsCleared;
-  final int clearVersion;
 
   const CVMagicOrganizedPage({
     super.key,
     this.onNavigateToCVGeneration,
     this.shouldClearResults,
     this.onResultsCleared,
-    this.clearVersion = 0,
   });
 
   @override
@@ -61,9 +59,13 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
 
-    // Check if we need to clear results (called from Run ATS Again) - only once on init
+    // Check for results clearing one time after init
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAndClearResults();
+      _clearCheckTimer = Timer(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _checkAndClearResults();
+        }
+      });
     });
 
     // Add listener to jdController to debug changes and trigger rebuilds
@@ -83,14 +85,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // No-op: avoid continuous checks here to prevent log spam
-  }
-
-  @override
-  void didUpdateWidget(covariant CVMagicOrganizedPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Trigger a one-time check when HomeScreen bumps the version
-    if (oldWidget.clearVersion != widget.clearVersion) {
+    // Only check for clearing if we have results to clear
+    if (_skillsController.hasResults) {
       _checkAndClearResults();
     }
   }

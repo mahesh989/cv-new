@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import '../core/theme/app_theme.dart';
+import '../services/skills_analysis_handler.dart';
 
 class CVGenerationScreen extends StatefulWidget {
   final VoidCallback? onNavigateToCVMagic;
@@ -657,7 +658,21 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     }
   }
 
-  void _runATSAgain() {
+  void _runATSAgain() async {
+    debugPrint('🗑 [CV_GENERATION] Run ATS Again clicked - clearing results');
+
+    try {
+      // Clear all results first
+      await SkillsAnalysisHandler.clearResults();
+      debugPrint('✅ [CV_GENERATION] Results cleared successfully');
+
+      // Navigate to CV Magic tab
+      _navigateToCVMagicTab();
+    } catch (e) {
+      debugPrint('⚠️ [CV_GENERATION] Error clearing results: $e');
+      // Still try to navigate even if clearing fails
+      _navigateToCVMagicTab();
+    }
     // Navigate back to CV Magic tab and clear results
     if (mounted) {
       // Show notification
@@ -676,6 +691,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
   }
 
   void _navigateToCVMagicTab() {
+    debugPrint('🔀 [CV_GENERATION] Navigating to CV Magic tab');
     // Use the callback to navigate to CV Magic tab
     if (widget.onNavigateToCVMagic != null) {
       widget.onNavigateToCVMagic!();

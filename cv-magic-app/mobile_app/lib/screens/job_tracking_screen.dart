@@ -9,7 +9,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../services/saved_jobs_service.dart';
-import '../widgets/job_tracking/saved_jobs_table_updated.dart';
+import '../widgets/job_tracking/saved_jobs_table_final.dart';
 import '../core/theme/app_theme.dart';
 
 class JobTrackingScreen extends StatefulWidget {

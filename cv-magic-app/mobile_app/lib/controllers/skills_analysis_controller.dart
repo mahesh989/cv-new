@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/skills_analysis_model.dart';
 import '../services/skills_analysis_service.dart';
+import '../services/skills_analysis_handler.dart';
+import '../services/job_parser.dart';
+import '../services/jobs_state_manager.dart';
 
 /// States for skills analysis
 enum SkillsAnalysisState {
@@ -198,6 +201,12 @@ class SkillsAnalysisController extends ChangeNotifier {
 
       if (result.isSuccess) {
         debugPrint('✅ [SKILLS_ANALYSIS] Analysis completed successfully');
+
+        // Save job details if analysis was successful
+        await SkillsAnalysisHandler.handleAnalysisResult(
+          jdText: jdText,
+          result: result,
+        );
         debugPrint('   CV Skills: ${result.cvSkills.totalSkillsCount}');
         debugPrint('   JD Skills: ${result.jdSkills.totalSkillsCount}');
         debugPrint('   Duration: ${result.executionDuration.inSeconds}s');
@@ -250,6 +259,26 @@ class SkillsAnalysisController extends ChangeNotifier {
 
     try {
       print('🚀 [SKILLS_ANALYSIS_CONTROLLER] Starting context-aware analysis');
+
+      // First, parse the job description and save job details
+      try {
+        final jobDetails = JobParser.parseJobDetails(jdUrl);
+        if (jobDetails['company_name'] != null && 
+            jobDetails['job_title'] != null && 
+            jobDetails['location'] != null) {
+          await JobsStateManager.saveNewJob(
+            companyName: jobDetails['company_name']!,
+            jobTitle: jobDetails['job_title']!,
+            jobUrl: jobDetails['job_url'] ?? '',
+            location: jobDetails['location']!,
+            phoneNumber: jobDetails['phone_number'],
+            email: jobDetails['email'],
+          );
+        }
+      } catch (e) {
+        debugPrint('⚠️ [SKILLS_CONTROLLER] Error saving job details: $e');
+        // Continue with analysis even if saving fails
+      }
       print('   JD URL: $jdUrl');
       print('   Company: $company');
       print('   Is Rerun: $isRerun');
@@ -264,6 +293,13 @@ class SkillsAnalysisController extends ChangeNotifier {
       if (_result!.isSuccess) {
         _setState(SkillsAnalysisState.completed);
         _showNotification('Context-aware analysis completed successfully!');
+
+        // Save job details if analysis was successful
+        await SkillsAnalysisHandler.handleAnalysisResult(
+          jdText: jdUrl,
+          result: _result!,
+        );
+
         _startProgressiveDisplay();
       } else {
         _setError(_result!.errorMessage ?? 'Context-aware analysis failed');
@@ -279,7 +315,9 @@ class SkillsAnalysisController extends ChangeNotifier {
   }
 
   /// Clear all results and reset to idle state
-  void clearResults() {
+  void clearResults() async {
+    await SkillsAnalysisHandler.clearResults();
+    _triggerClearResults();
     debugPrint('🧹 [CONTROLLER] clearResults() called');
     debugPrint('🧹 [CONTROLLER] Current state before clear: $_state');
     debugPrint('🧹 [CONTROLLER] Has results before clear: $hasResults');
@@ -544,7 +582,34 @@ class SkillsAnalysisController extends ChangeNotifier {
   }
 
   /// Finish the analysis process
+  Future<void> _saveJobFromAnalysis(String jdText) async {
+    try {
+      final jobDetails = JobParser.parseJobDetails(jdText);
+      if (jobDetails['company_name'] != null && 
+          jobDetails['job_title'] != null && 
+          jobDetails['location'] != null) {
+        await JobsStateManager.saveNewJob(
+          companyName: jobDetails['company_name']!,
+          jobTitle: jobDetails['job_title']!,
+          jobUrl: jobDetails['job_url'] ?? '',
+          location: jobDetails['location']!,
+          phoneNumber: jobDetails['phone_number'],
+          email: jobDetails['email'],
+        );
+      }
+    } catch (e) {
+      debugPrint('⚠️ [SKILLS_CONTROLLER] Error saving job details: $e');
+      // Continue with analysis even if saving fails
+    }
+  }
+
   void _finishAnalysis() {
+    _executionDuration = _fullResult?.executionDuration ?? Duration.zero;
+    notifyListeners();
+    debugPrint('🏁 [CONTROLLER] Analysis fully completed');
+  }
+
+  void _triggerClearResults() {
     _executionDuration = _fullResult?.executionDuration ?? Duration.zero;
     notifyListeners();
     print('🏁 [CONTROLLER] Analysis fully completed');
