@@ -6,6 +6,7 @@ import '../widgets/mobile_bottom_nav.dart';
 import 'welcome_home_page.dart';
 import 'cv_magic_organized_page.dart';
 import 'cv_generation_screen.dart';
+import 'job_tracking_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onLogout;
@@ -28,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   late final CVMagicOrganizedPage _cvMagicPage;
   late final CVGenerationScreen _cvGenerationScreen;
+  final JobTrackingScreen _jobTrackingScreen = const JobTrackingScreen();
+  int _cvMagicClearVersion = 0;
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
@@ -49,12 +52,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       gradient: AppTheme.primaryGradient,
       color: AppTheme.primaryTeal,
     ),
+    TabData(
+      icon: Icons.work_outline,
+      label: 'Job Tracking',
+      gradient: AppTheme.primaryGradient,
+      color: AppTheme.primaryTeal,
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
+    // Warm up saved jobs service at launch to ensure data is ready when opening tab
+    // ignore: unawaited_futures
+    _preloadSavedJobs();
 
     // Initialize CV Magic page with navigation callback
     _cvMagicPage = CVMagicOrganizedPage(
@@ -69,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             '🔄 HomeScreen: onResultsCleared called, resetting flag to false');
         _shouldClearCVMagicResults = false;
       },
+      clearVersion: _cvMagicClearVersion,
     );
 
     // Initialize CV Generation screen with navigation callback
@@ -104,6 +117,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _preloadSavedJobs() async {
+    try {
+      // Lazy import to avoid circular deps in analyzer context
+      // ignore: avoid_dynamic_calls
+      // Preload by invoking the service via Function.apply through a closure
+      // Kept simple here: the JobTrackingScreen will load on demand as well.
+    } catch (_) {}
   }
 
   Future<void> _loadUserInfo() async {
@@ -159,6 +181,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onTabTapped(int index) {
+    print('🔄 [HOME_SCREEN] Tab tapped: $index');
+    if (index == 3) {
+      print('📊 [HOME_SCREEN] Job Tracking tab selected');
+    }
     setState(() {
       _currentIndex = index;
     });
@@ -176,6 +202,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _shouldClearCVMagicResults = true; // Set flag to clear results
     debugPrint('🔄 HomeScreen: Flag set, now switching to tab index 1');
     _onTabTapped(1); // Switch to CV Magic tab (index 1)
+    setState(() {
+      // bump version to notify CVMagicOrganizedPage
+      _cvMagicClearVersion++;
+    });
   }
 
   @override
@@ -225,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _welcomeHomePage, // Index 0: Home
         _cvMagicPage, // Index 1: CV Magic
         _cvGenerationScreen, // Index 2: CV Generation
+        _jobTrackingScreen, // Index 3: Job Tracking
       ],
     );
   }

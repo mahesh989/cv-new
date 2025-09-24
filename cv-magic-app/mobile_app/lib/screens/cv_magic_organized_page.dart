@@ -22,12 +22,14 @@ class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
   final bool Function()? shouldClearResults;
   final VoidCallback? onResultsCleared;
+  final int clearVersion;
 
   const CVMagicOrganizedPage({
     super.key,
     this.onNavigateToCVGeneration,
     this.shouldClearResults,
     this.onResultsCleared,
+    this.clearVersion = 0,
   });
 
   @override
@@ -59,17 +61,9 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
 
-    // Check if we need to clear results (called from Run ATS Again)
+    // Check if we need to clear results (called from Run ATS Again) - only once on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndClearResults();
-    });
-
-    // Start a timer to periodically check for clear flag
-    _clearCheckTimer =
-        Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (mounted) {
-        _checkAndClearResults();
-      }
     });
 
     // Add listener to jdController to debug changes and trigger rebuilds
@@ -89,8 +83,16 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Check for clear results flag every time the widget becomes active
-    _checkAndClearResults();
+    // No-op: avoid continuous checks here to prevent log spam
+  }
+
+  @override
+  void didUpdateWidget(covariant CVMagicOrganizedPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Trigger a one-time check when HomeScreen bumps the version
+    if (oldWidget.clearVersion != widget.clearVersion) {
+      _checkAndClearResults();
+    }
   }
 
   /// Check if we need to clear results and do so if needed
@@ -113,6 +115,13 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     }
   }
 
+  /// Public method to trigger clear check when needed (called from parent)
+  void triggerClearCheck() {
+    if (mounted) {
+      _checkAndClearResults();
+    }
+  }
+
   @override
   void dispose() {
     _clearCheckTimer?.cancel();
@@ -129,8 +138,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
 
-    // Check for clear results flag every time the widget builds
-    _checkAndClearResults();
+    // Remove the continuous check from build method to prevent infinite loops
 
     return Scaffold(
       appBar: AppBar(

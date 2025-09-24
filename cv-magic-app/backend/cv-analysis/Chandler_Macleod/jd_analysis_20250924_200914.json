@@ -1,0 +1,58 @@
+{
+  "experience_years": 1,
+  "required_skills": {
+    "technical": [
+      "SQL",
+      "Power BI",
+      "Excel",
+      "Power Query"
+    ],
+    "soft_skills": [
+      "communication",
+      "problem solving",
+      "stakeholder management"
+    ],
+    "domain_knowledge": [
+      "data analysis",
+      "data governance",
+      "data structures",
+      "data warehousing"
+    ],
+    "experience": []
+  },
+  "preferred_skills": {
+    "technical": [
+      "Tableau",
+      "Fieldglass",
+      "SAP Ariba"
+    ],
+    "soft_skills": [],
+    "domain_knowledge": [],
+    "experience": []
+  },
+  "required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "Power Query",
+    "communication",
+    "problem solving",
+    "stakeholder management",
+    "data analysis",
+    "data governance",
+    "data structures",
+    "data warehousing"
+  ],
+  "preferred_keywords": [
+    "Tableau",
+    "Fieldglass",
+    "SAP Ariba"
+  ],
+  "analysis_timestamp": "2025-09-24T20:09:14.980289",
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "company_name": "Chandler_Macleod",
+  "metadata": {
+    "jd_hash": "24057b9fd2eddb2f9310d5ee93c294ffa08d4a84b9268f2b9f6fc4cc11a374b0"
+  }
+}

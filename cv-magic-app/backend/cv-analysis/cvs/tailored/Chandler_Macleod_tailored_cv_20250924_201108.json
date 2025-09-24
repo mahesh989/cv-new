@@ -1,0 +1,158 @@
+{
+  "contact": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "linkedin": null,
+    "location": "Hurstville, NSW, 2220",
+    "website": null
+  },
+  "education": [
+    {
+      "institution": "Charles Darwin University",
+      "degree": "Master of Data Science",
+      "location": "Sydney, Australia",
+      "graduation_date": "Mar 2023 - Nov 2024",
+      "gpa": "GPA",
+      "relevant_coursework": null,
+      "honors": null
+    },
+    {
+      "institution": "CY Cergy Paris University",
+      "degree": "PhD in Physics",
+      "location": "Cergy, France",
+      "graduation_date": "Oct 2018 - Sep 2022",
+      "gpa": "",
+      "relevant_coursework": null,
+      "honors": null
+    },
+    {
+      "institution": "CY Cergy Paris University",
+      "degree": "Master of Theoretical Physics",
+      "location": "Cergy, France",
+      "graduation_date": "Sep 2016 - Jun 2018",
+      "gpa": "",
+      "relevant_coursework": null,
+      "honors": null
+    }
+  ],
+  "experience": [
+    {
+      "company": "The Bitrates",
+      "title": "Data Analyst",
+      "location": "Sydney, New South Wales, Australia",
+      "start_date": "Jul 2024",
+      "end_date": "Present",
+      "duration": null,
+      "bullets": [
+        "Designed and implemented 5 Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%, processing 50K records weekly.",
+        "Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions that increased revenue by 15%.",
+        "Leveraged AI techniques to automate repetitive tasks, reducing manual effort by 25% and improving productivity.",
+        "Built 10 dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively, enhancing stakeholder engagement.",
+        "Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights and supporting business intelligence initiatives."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "iBuild Building Solutions",
+      "title": "Data Analyst",
+      "location": "Victoria, Australia",
+      "start_date": "Mar 2024",
+      "end_date": "Jun 2024",
+      "duration": null,
+      "bullets": [
+        "Automated data extraction and structuring of population datasets using Python, improving data accuracy by 20% and enhancing team collaboration.",
+        "Analyzed customer support data with Python to optimize response times by 15% and enhance operational efficiency.",
+        "Developed Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making that improved customer satisfaction by 10%.",
+        "Designed Python scripts to create dynamic reports and dashboards, significantly improving decision-making processes for stakeholders."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "Property Console",
+      "title": "Software Engineer and Analyst",
+      "location": "Sydney, Australia",
+      "start_date": "Jun 2023",
+      "end_date": "Nov 2023",
+      "duration": null,
+      "bullets": [
+        "Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency.",
+        "Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%, supporting business intelligence efforts.",
+        "Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision-making by 30%.",
+        "Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives and fostering collaboration."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Research Assistant",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Oct 2018",
+      "end_date": "Sep 2022",
+      "duration": null,
+      "bullets": [
+        "Utilized advanced Python programming for computational modeling and solving complex research problems, enhancing analytical capabilities.",
+        "Developed Python-based workflows to manage and analyze large datasets across multiple research projects, improving data reliability by 15%.",
+        "Presented Python-enabled research findings at international conferences, demonstrating technical expertise and strong stakeholder communication skills."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Lecturer and Course Facilitator",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Sep 2019",
+      "end_date": "Jun 2022",
+      "duration": null,
+      "bullets": [
+        "Led engaging physics tutorials for master\u2019s students, enhancing understanding and promoting teamwork among 20+ students.",
+        "Designed course materials, assignments, and exams, strengthening the learning experience for over 100 students.",
+        "Mentored students on projects, collaborated with faculty, and fostered student engagement, contributing to a 20% increase in course satisfaction."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Research Intern",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Feb 2018",
+      "end_date": "Jun 2018",
+      "duration": null,
+      "bullets": [
+        "Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials, managing datasets of over 10K records.",
+        "Managed and analyzed complex data sets, improving their accuracy and reliability by 20%.",
+        "Used Power BI to present research findings and participated in weekly reviews, improving collaboration and research skills."
+      ],
+      "skills_used": null
+    }
+  ],
+  "projects": null,
+  "skills": [
+    {
+      "category": "Technical Skills",
+      "skills": [
+        "Power BI",
+        "Excel",
+        "SQL",
+        "Python"
+      ]
+    },
+    {
+      "category": "Soft Skills",
+      "skills": [
+        "Analytical",
+        "Stakeholder Management"
+      ]
+    },
+    {
+      "category": "Other Skills",
+      "skills": [
+        "Data Analysis",
+        "Business Intelligence"
+      ]
+    }
+  ],
+  "created_at": "2025-09-24 10:11:07.445348",
+  "last_edited": null,
+  "manually_edited": false
+}
