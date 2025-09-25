@@ -42,8 +42,23 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   }
 
   Future<void> _saveStatus(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('applied_$key', value);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final prefKey = 'applied_$key';
+      final success = await prefs.setBool(prefKey, value);
+
+      // Verify the save
+      final savedValue = prefs.getBool(prefKey);
+
+      if (success && savedValue == value) {
+        print('✅ [SAVED_JOBS_TABLE] Saved applied status: $prefKey = $value');
+      } else {
+        print(
+            '❌ [SAVED_JOBS_TABLE] Failed to save applied status: $prefKey, expected $value, got $savedValue');
+      }
+    } catch (e) {
+      print('❌ [SAVED_JOBS_TABLE] Error saving applied status: $e');
+    }
   }
 
   Future<void> _saveRemark(String key, String value) async {
@@ -52,7 +67,16 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   }
 
   String _getJobKey(Map<String, dynamic> job) {
-    return '${job['company_name']}_${job['job_url']}';
+    // Create a more robust key using multiple fields and normalize them
+    // This MUST match the key generation in JobTrackingScreen
+    final companyName =
+        (job['company_name'] ?? '').toString().trim().toLowerCase();
+    final jobUrl = (job['job_url'] ?? '').toString().trim();
+    final jobTitle = (job['job_title'] ?? '').toString().trim().toLowerCase();
+
+    // Use a combination of fields to create a unique, stable key
+    final key = '${companyName}_${jobTitle}_${jobUrl.hashCode}';
+    return key;
   }
 
   String _formatDate(String? dateString) {
@@ -269,10 +293,15 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
               child: Switch(
                 value: isApplied,
                 onChanged: (value) async {
+                  print(
+                      '🔄 [SAVED_JOBS_TABLE] Toggle clicked for ${job['company_name']}: $value');
+                  print('🔑 [SAVED_JOBS_TABLE] Generated key: $key');
                   setState(() => _appliedStatus[key] = value);
                   await _saveStatus(key, value);
                   // Notify parent about status change
                   widget.onAppliedStatusChanged?.call(job, value);
+                  print(
+                      '📞 [SAVED_JOBS_TABLE] Called parent callback for ${job['company_name']}: $value');
                 },
                 activeColor: Colors.green,
               ),

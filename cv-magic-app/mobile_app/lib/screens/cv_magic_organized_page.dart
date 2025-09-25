@@ -139,14 +139,25 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
         actions: [
-          // Clear All button - only show when there are results to clear
-          if (_skillsController.hasResults || _skillsController.hasError)
-            IconButton(
-              onPressed: () {
-                _showClearConfirmationDialog();
-              },
-              icon: const Icon(Icons.clear_all),
-              tooltip: 'Clear All Results',
+          // Clear All button - show when CV is selected or there are results
+          if (selectedCVFilename != null ||
+              _skillsController.hasResults ||
+              _skillsController.hasError)
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: IconButton(
+                onPressed: () {
+                  _showClearConfirmationDialog();
+                },
+                icon: const Icon(Icons.clear),
+                tooltip: 'Clear All Results',
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(8),
+                ),
+              ),
             ),
         ],
       ),

@@ -1,0 +1,373 @@
+{
+  "generated": "2025-09-25T11:31:16.485",
+  "cv_filename": "maheshwor_tiwari.pdf",
+  "jd_url": "preliminary_analysis",
+  "user_id": "bfa7b1d8-8e6e-4b74-98e8-464e1f2f2099",
+  "company": "Australia_for_UNHCR",
+  "model_used": "gpt-4o-mini",
+  "cv_skills": {
+    "technical_skills": [
+      "Automation",
+      "Data Analysis",
+      "Data Cleaning",
+      "Data Extraction",
+      "Data Modelling",
+      "Data Preprocessing",
+      "Data Visualization",
+      "Excel",
+      "Google Analytics",
+      "Machine Learning",
+      "Matplotlib",
+      "Power BI",
+      "Predictive Analytics",
+      "Python",
+      "Reporting",
+      "Seaborn",
+      "SQL",
+      "Stakeholder Management",
+      "Tableau",
+      "VBA"
+    ],
+    "soft_skills": [
+      "Adaptability",
+      "Analytical Thinking",
+      "Collaboration",
+      "Communication",
+      "Detail-oriented",
+      "Mentoring",
+      "Problem-solving",
+      "Teamwork"
+    ],
+    "domain_keywords": [
+      "Academic Publications",
+      "Customer Support",
+      "Data Science",
+      "Education",
+      "Fundraising",
+      "Humanitarian Aid",
+      "Research",
+      "Social Impact",
+      "Strategic Decision-making"
+    ],
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Power BI - \"Used Power BI to create dashboards presenting research findings\"\n- Python - \"Designed and implemented 5 Python scripts for data cleaning and preprocessing\"\n- SQL - \"SQL\"\n- Excel - \"Excel\"\n- VBA - \"VBA\"\n- Stakeholder Management - \"enhancing stakeholder engagement in fundraising initiatives\"\n- Data Modelling - \"Data Modelling\"\n- Data Analysis - \"Data Analysis\"\n- Data Extraction - \"Automated data extraction and structuring of population datasets using Python\"\n- Machine Learning - \"Developed machine learning models in Python for predictive analytics\"\n- Google Analytics - \"Integrated Google Analytics data with Python for advanced analysis\"\n- Matplotlib - \"Built dynamic dashboards and visualizations using Python libraries like Matplotlib\"\n- Seaborn - \"using Python libraries like Matplotlib and Seaborn\"\n- Tableau - \"producing Tableau dashboards that improved decision-making for direct marketing campaigns\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning - \"Designed and implemented 5 Python scripts for data cleaning and preprocessing\"\n- Data Preprocessing - \"Leveraged Python for data preprocessing and analysis\"\n- Automation - \"Leveraged AI techniques to automate repetitive tasks\"\n- Data Visualization - \"Built dynamic dashboards and visualizations\"\n- Predictive Analytics - \"Developed machine learning models in Python for predictive analytics\"\n- Reporting - \"Designed Python scripts to create dynamic reports and dashboards\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Teamwork - \"promoting teamwork, resulting in a 25% increase in student engagement\"\n- Collaboration - \"enhancing team collaboration\"\n- Communication - \"demonstrating technical expertise and effective stakeholder communication\"\n- Mentoring - \"Mentored students on projects\"\n- Problem-solving - \"solving complex research problems\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Adaptability - \"meeting strict deadlines for strategic decision-making\"\n- Analytical Thinking - \"analyzing customer support data with Python to optimize response times\"\n- Detail-oriented - \"ensuring 99% data accuracy and improving data integrity\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Master of Data Science\"\n- Research - \"Research Assistant\"\n- Education - \"Lecturer and Course Facilitator\"\n- Humanitarian Aid - \"enhancing stakeholder management for humanitarian aid projects\"\n- Social Impact - \"social impact data analysis\"\n- Customer Support - \"Analyzed customer support data\"\n\n**STRONGLY IMPLIED:**\n- Fundraising - \"enhancing stakeholder engagement in fundraising initiatives\"\n- Academic Publications - \"contributing to academic publications\"\n- Strategic Decision-making - \"meeting strict deadlines for strategic decision-making\"\n\n```python\nSOFT_SKILLS = [\"Teamwork\", \"Collaboration\", \"Communication\", \"Mentoring\", \"Problem-solving\", \"Adaptability\", \"Analytical Thinking\", \"Detail-oriented\"]\nTECHNICAL_SKILLS = [\"Power BI\", \"Python\", \"SQL\", \"Excel\", \"VBA\", \"Stakeholder Management\", \"Data Modelling\", \"Data Analysis\", \"Data Extraction\", \"Machine Learning\", \"Google Analytics\", \"Matplotlib\", \"Seaborn\", \"Tableau\", \"Data Cleaning\", \"Data Preprocessing\", \"Automation\", \"Data Visualization\", \"Predictive Analytics\", \"Reporting\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Research\", \"Education\", \"Humanitarian Aid\", \"Social Impact\", \"Customer Support\", \"Fundraising\", \"Academic Publications\", \"Strategic Decision-making\"]\n```"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Analytical Models",
+      "Business Intelligence (BI)",
+      "Data Analysis",
+      "Data Extraction",
+      "Data Mining",
+      "Data Reporting",
+      "Data Segmentation",
+      "Data Warehouse (DWH)",
+      "Excel",
+      "Power BI",
+      "SQL",
+      "Tableau",
+      "VBA"
+    ],
+    "soft_skills": [
+      "Adaptability",
+      "Analytical",
+      "Collaborative",
+      "Communication",
+      "Customer service",
+      "Detail-oriented",
+      "Inclusive",
+      "Motivated",
+      "Organised",
+      "Problem-solving",
+      "Project management",
+      "Results-driven",
+      "Stakeholder management"
+    ],
+    "domain_keywords": [
+      "Clean Data",
+      "Communication Regulations",
+      "Development",
+      "Donor-Centricity",
+      "Fundraising",
+      "Humanitarian Emergencies",
+      "International Aid",
+      "Marketing Campaigns",
+      "Not For Profit (NFP)",
+      "Refugee Support"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n- Collaborative\n- Inclusive\n- Motivated\n- Organised\n- Detail-oriented\n- Analytical\n- Problem-solving\n- Communication\n- Customer service\n- Stakeholder management\n- Project management\n- Results-driven\n- Adaptability\n\n## TECHNICAL SKILLS:\n- Data Mining\n- Data Analysis\n- Data Reporting\n- Power BI\n- SQL\n- Excel\n- VBA\n- Tableau\n- Data Warehouse (DWH)\n- Data Extraction\n- Data Segmentation\n- Analytical Models\n- Business Intelligence (BI)\n\n## DOMAIN KEYWORDS:\n- International Aid\n- Development\n- Fundraising\n- Not For Profit (NFP)\n- Marketing Campaigns\n- Donor-Centricity\n- Humanitarian Emergencies\n- Refugee Support\n- Clean Data\n- Communication Regulations\n\n```python\nSOFT_SKILLS = [\"Collaborative\", \"Inclusive\", \"Motivated\", \"Organised\", \"Detail-oriented\", \"Analytical\", \"Problem-solving\", \"Communication\", \"Customer service\", \"Stakeholder management\", \"Project management\", \"Results-driven\", \"Adaptability\"]\nTECHNICAL_SKILLS = [\"Data Mining\", \"Data Analysis\", \"Data Reporting\", \"Power BI\", \"SQL\", \"Excel\", \"VBA\", \"Tableau\", \"Data Warehouse (DWH)\", \"Data Extraction\", \"Data Segmentation\", \"Analytical Models\", \"Business Intelligence (BI)\"]  \nDOMAIN_KEYWORDS = [\"International Aid\", \"Development\", \"Fundraising\", \"Not For Profit (NFP)\", \"Marketing Campaigns\", \"Donor-Centricity\", \"Humanitarian Emergencies\", \"Refugee Support\", \"Clean Data\", \"Communication Regulations\"]\n```"
+  },
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Power BI - \"Used Power BI to create dashboards presenting research findings\"\n- Python - \"Designed and implemented 5 Python scripts for data cleaning and preprocessing\"\n- SQL - \"SQL\"\n- Excel - \"Excel\"\n- VBA - \"VBA\"\n- Stakeholder Management - \"enhancing stakeholder engagement in fundraising initiatives\"\n- Data Modelling - \"Data Modelling\"\n- Data Analysis - \"Data Analysis\"\n- Data Extraction - \"Automated data extraction and structuring of population datasets using Python\"\n- Machine Learning - \"Developed machine learning models in Python for predictive analytics\"\n- Google Analytics - \"Integrated Google Analytics data with Python for advanced analysis\"\n- Matplotlib - \"Built dynamic dashboards and visualizations using Python libraries like Matplotlib\"\n- Seaborn - \"using Python libraries like Matplotlib and Seaborn\"\n- Tableau - \"producing Tableau dashboards that improved decision-making for direct marketing campaigns\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Cleaning - \"Designed and implemented 5 Python scripts for data cleaning and preprocessing\"\n- Data Preprocessing - \"Leveraged Python for data preprocessing and analysis\"\n- Automation - \"Leveraged AI techniques to automate repetitive tasks\"\n- Data Visualization - \"Built dynamic dashboards and visualizations\"\n- Predictive Analytics - \"Developed machine learning models in Python for predictive analytics\"\n- Reporting - \"Designed Python scripts to create dynamic reports and dashboards\"\n\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n- Teamwork - \"promoting teamwork, resulting in a 25% increase in student engagement\"\n- Collaboration - \"enhancing team collaboration\"\n- Communication - \"demonstrating technical expertise and effective stakeholder communication\"\n- Mentoring - \"Mentored students on projects\"\n- Problem-solving - \"solving complex research problems\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Adaptability - \"meeting strict deadlines for strategic decision-making\"\n- Analytical Thinking - \"analyzing customer support data with Python to optimize response times\"\n- Detail-oriented - \"ensuring 99% data accuracy and improving data integrity\"\n\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n- Data Science - \"Master of Data Science\"\n- Research - \"Research Assistant\"\n- Education - \"Lecturer and Course Facilitator\"\n- Humanitarian Aid - \"enhancing stakeholder management for humanitarian aid projects\"\n- Social Impact - \"social impact data analysis\"\n- Customer Support - \"Analyzed customer support data\"\n\n**STRONGLY IMPLIED:**\n- Fundraising - \"enhancing stakeholder engagement in fundraising initiatives\"\n- Academic Publications - \"contributing to academic publications\"\n- Strategic Decision-making - \"meeting strict deadlines for strategic decision-making\"\n\n```python\nSOFT_SKILLS = [\"Teamwork\", \"Collaboration\", \"Communication\", \"Mentoring\", \"Problem-solving\", \"Adaptability\", \"Analytical Thinking\", \"Detail-oriented\"]\nTECHNICAL_SKILLS = [\"Power BI\", \"Python\", \"SQL\", \"Excel\", \"VBA\", \"Stakeholder Management\", \"Data Modelling\", \"Data Analysis\", \"Data Extraction\", \"Machine Learning\", \"Google Analytics\", \"Matplotlib\", \"Seaborn\", \"Tableau\", \"Data Cleaning\", \"Data Preprocessing\", \"Automation\", \"Data Visualization\", \"Predictive Analytics\", \"Reporting\"]\nDOMAIN_KEYWORDS = [\"Data Science\", \"Research\", \"Education\", \"Humanitarian Aid\", \"Social Impact\", \"Customer Support\", \"Fundraising\", \"Academic Publications\", \"Strategic Decision-making\"]\n```",
+  "jd_comprehensive_analysis": "## SOFT SKILLS:\n- Collaborative\n- Inclusive\n- Motivated\n- Organised\n- Detail-oriented\n- Analytical\n- Problem-solving\n- Communication\n- Customer service\n- Stakeholder management\n- Project management\n- Results-driven\n- Adaptability\n\n## TECHNICAL SKILLS:\n- Data Mining\n- Data Analysis\n- Data Reporting\n- Power BI\n- SQL\n- Excel\n- VBA\n- Tableau\n- Data Warehouse (DWH)\n- Data Extraction\n- Data Segmentation\n- Analytical Models\n- Business Intelligence (BI)\n\n## DOMAIN KEYWORDS:\n- International Aid\n- Development\n- Fundraising\n- Not For Profit (NFP)\n- Marketing Campaigns\n- Donor-Centricity\n- Humanitarian Emergencies\n- Refugee Support\n- Clean Data\n- Communication Regulations\n\n```python\nSOFT_SKILLS = [\"Collaborative\", \"Inclusive\", \"Motivated\", \"Organised\", \"Detail-oriented\", \"Analytical\", \"Problem-solving\", \"Communication\", \"Customer service\", \"Stakeholder management\", \"Project management\", \"Results-driven\", \"Adaptability\"]\nTECHNICAL_SKILLS = [\"Data Mining\", \"Data Analysis\", \"Data Reporting\", \"Power BI\", \"SQL\", \"Excel\", \"VBA\", \"Tableau\", \"Data Warehouse (DWH)\", \"Data Extraction\", \"Data Segmentation\", \"Analytical Models\", \"Business Intelligence (BI)\"]  \nDOMAIN_KEYWORDS = [\"International Aid\", \"Development\", \"Fundraising\", \"Not For Profit (NFP)\", \"Marketing Campaigns\", \"Donor-Centricity\", \"Humanitarian Emergencies\", \"Refugee Support\", \"Clean Data\", \"Communication Regulations\"]\n```",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-09-25T11:31:28.874",
+      "model_used": "gpt-4o-mini",
+      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** The core requirements for this role include strong SQL coding skills, experience with Power BI or similar BI tools, and the ability to manage data for marketing campaigns. While the JD lists several requirements, the essential skills revolve around data analysis, stakeholder management, and the ability to deliver actionable insights from data.\n- **Flexibility indicators:** The organization is a not-for-profit (NFP) and emphasizes a values-driven culture, which often translates to a more flexible approach to hiring. The presence of a hybrid work arrangement and the focus on collaboration suggest they might prioritize cultural fit and adaptability over strict adherence to all technical requirements.\n- **Hard blockers identified:** There are no explicit hard blockers in Maheshwor's CV. However, the JD mentions a strong SQL coding background and experience with data warehouse environments, which Maheshwor does not explicitly highlight.\n- **Hiring urgency signals:** The job was posted recently (March 2025), but the urgency is not explicitly stated. The NFP sector often has a consistent need for data analysis, but it’s unclear how quickly they need to fill this role.\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** Maheshwor has demonstrated significant experience in Python, data analysis, and stakeholder management, which are crucial for the role. His experience in developing machine learning models and automating tasks showcases his analytical capabilities and problem-solving skills.\n- **Smart connections:** His experience with data extraction and analysis aligns well with the job's requirements for data mining and segmentation strategies. His background in academia also suggests strong analytical thinking and presentation skills.\n- **Growth potential:** Maheshwor's trajectory from a Research Assistant to a Data Analyst indicates a solid growth path. His continued education in Data Science further supports his commitment to learning and adapting to new technologies.\n- **Positioning opportunities:** Emphasizing his experience with Python for data analysis and automation, along with any relevant projects that involved stakeholder engagement and reporting, will strengthen his application. Highlighting any experience with SQL or willingness to learn could also be beneficial.\n\n**REALISTIC ODDS:** 60% chance of getting an interview if the CV is tailored well to emphasize relevant skills and experiences.\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight any relevant experience with SQL, even if it's not explicitly mentioned in the CV. If Maheshwor has worked with SQL in any capacity, it should be emphasized.\n2. **Priority 2:** Focus on his experience with Power BI and any related tools. If he has created reports or dashboards, these should be detailed to align with the JD's requirements.\n3. **Priority 3:** Address the gap in direct marketing campaign experience by framing his data analysis work in a way that demonstrates understanding of campaign strategies and donor engagement.\n\n**HONEST BOTTOM LINE:** Maheshwor has a solid foundation for this role, and with some strategic tailoring of his CV to emphasize relevant skills and experiences, he stands a good chance of being considered for an interview. The flexibility of the NFP sector and the emphasis on cultural fit further support the decision to pursue this opportunity."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-09-25T11:31:47.439",
+      "model_used": "gpt-4o-mini",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 36\nMatched: 16\nMissing: 21\nMatch Rate: 44%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            20         13          7          6           54\nSoft Skills                   8         13          7          7           50\nDomain Keywords              9         10          2          8           20\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (7 items):\n    1. JD Required: 'Data Analysis'\n       → Found in CV: 'Data Analysis'\n       💡 exact match\n    2. JD Required: 'Data Extraction'\n       → Found in CV: 'Sql'\n       💡 hierarchical - SQL enables data extraction\n    3. JD Required: 'Excel'\n       → Found in CV: 'Excel'\n       💡 exact match\n    4. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 exact match\n    5. JD Required: 'Sql'\n       → Found in CV: 'Sql'\n       💡 exact match\n    6. JD Required: 'Tableau'\n       → Found in CV: 'Tableau'\n       💡 exact match\n    7. JD Required: 'Vba'\n       → Found in CV: 'Vba'\n       💡 exact match\n  ❌ MISSING FROM CV (6 items):\n    1. JD Requires: 'Analytical Models'\n       💡 no CV equivalent found\n    2. JD Requires: 'Business Intelligence (Bi)'\n       💡 no CV equivalent found\n    3. JD Requires: 'Data Mining'\n       💡 no CV equivalent found\n    4. JD Requires: 'Data Reporting'\n       💡 no CV equivalent found\n    5. JD Requires: 'Data Segmentation'\n       💡 no CV equivalent found\n    6. JD Requires: 'Data Warehouse (Dwh)'\n       💡 no CV equivalent found\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (7 items):\n    1. JD Required: 'Adaptability'\n       → Found in CV: 'Adaptability'\n       💡 exact match\n    2. JD Required: 'Collaboration'\n       → Found in CV: 'Collaboration'\n       💡 exact match\n    3. JD Required: 'Communication'\n       → Found in CV: 'Communication'\n       💡 exact match\n    4. JD Required: 'Detail-Oriented'\n       → Found in CV: 'Detail-Oriented'\n       💡 exact match\n    5. JD Required: 'Problem-Solving'\n       → Found in CV: 'Problem-Solving'\n       💡 exact match\n    6. JD Required: 'Stakeholder Management'\n       → Found in CV: 'Stakeholder Management'\n       💡 exact match\n    7. JD Required: 'Teamwork'\n       → Found in CV: 'Collaboration'\n       💡 synonym match\n  ❌ MISSING FROM CV (7 items):\n    1. JD Requires: 'Analytical'\n       💡 no CV equivalent found\n    2. JD Requires: 'Customer Service'\n       💡 no CV equivalent found\n    3. JD Requires: 'Inclusive'\n       💡 no CV equivalent found\n    4. JD Requires: 'Motivated'\n       💡 no CV equivalent found\n    5. JD Requires: 'Organised'\n       💡 no CV equivalent found\n    6. JD Requires: 'Project Management'\n       💡 no CV equivalent found\n    7. JD Requires: 'Results-Driven'\n       💡 no CV equivalent found\n\n🔹 DOMAIN KEYWORDS\n  ✅ MATCHED JD REQUIREMENTS (2 items):\n    1. JD Required: 'Fundraising'\n       → Found in CV: 'Fundraising'\n       💡 exact match\n    2. JD Required: 'Humanitarian Emergencies'\n       → Found in CV: 'Humanitarian Aid'\n       💡 domain context - related fields\n  ❌ MISSING FROM CV (8 items):\n    1. JD Requires: 'Clean Data'\n       💡 no CV equivalent found\n    2. JD Requires: 'Communication Regulations'\n       💡 no CV equivalent found\n    3. JD Requires: 'Development'\n       💡 no CV equivalent found\n    4. JD Requires: 'Donor-Centricity'\n       💡 no CV equivalent found\n    5. JD Requires: 'International Aid'\n       💡 no CV equivalent found\n    6. JD Requires: 'Marketing Campaigns'\n       💡 no CV equivalent found\n    7. JD Requires: 'Not For Profit (Nfp)'\n       💡 no CV equivalent found\n    8. JD Requires: 'Refugee Support'\n       💡 no CV equivalent found\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Automation, Data Analysis, Data Cleaning, Data Extraction, Data Modelling, Data Preprocessing, Data Visualization, Excel, Google Analytics, Machine Learning...\n- Soft: Adaptability, Analytical Thinking, Collaboration, Communication, Detail-oriented, Mentoring, Problem-solving, Teamwork\n- Domain: Academic Publications, Customer Support, Data Science, Education, Fundraising, Humanitarian Aid, Research, Social Impact, Strategic Decision-making\n\nJD\n- Technical: Analytical Models, Business Intelligence (BI), Data Analysis, Data Extraction, Data Mining, Data Reporting, Data Segmentation, Data Warehouse (DWH), Excel, Power BI...\n- Soft: Adaptability, Analytical, Collaborative, Communication, Customer service, Detail-oriented, Inclusive, Motivated, Organised, Problem-solving...\n- Domain: Clean Data, Communication Regulations, Development, Donor-Centricity, Fundraising, Humanitarian Emergencies, International Aid, Marketing Campaigns, Not For Profit (NFP), Refugee Support\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-09-25T11:32:52.004",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [],
+          "overall_skills_score": 50.0,
+          "corporate_skills_strength": "Analysis failed due to error",
+          "academic_skills_discount": "Analysis failed",
+          "business_readiness_score": 50.0,
+          "skill_development_timeline": "Unknown",
+          "strength_areas": [
+            "Analysis failed"
+          ],
+          "critical_gaps": [
+            "Unable to determine"
+          ],
+          "training_investment_needed": [
+            "Analysis failed"
+          ],
+          "immediate_value_skills": [
+            "Unable to determine"
+          ],
+          "risky_transition_skills": [
+            "Unable to determine"
+          ],
+          "analysis_error": true,
+          "error_message": "Missing overall_skills_score in response"
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "2.5",
+            "cv_corporate_years": "1.5",
+            "cv_academic_years": "3.0",
+            "cv_role_level": "Junior to Mid-level Data Analyst",
+            "cv_progression": [
+              "Data Analyst at The Bitrates",
+              "Data Analyst at iBuild Building Solutions",
+              "Software Engineer and Analyst at Property Console",
+              "Research Assistant at CY Cergy Paris University",
+              "Lecturer and Course Facilitator at CY Cergy Paris University",
+              "Research Intern at CY Cergy Paris University"
+            ],
+            "jd_required_years": "3+ years of relevant experience preferred",
+            "jd_role_level": "Mid-level Data Analyst",
+            "alignment_score": "60",
+            "experience_gaps": [
+              "Lack of extensive corporate experience in fundraising or direct marketing campaigns",
+              "Limited experience in a non-profit or humanitarian context"
+            ],
+            "experience_strengths": [
+              "Strong technical skills in Python, SQL, and Power BI",
+              "Demonstrated ability to improve data processes and analytics capabilities",
+              "Experience in stakeholder management and collaboration"
+            ],
+            "quantified_achievements": [
+              "Improved data pipeline efficiency by 30%",
+              "Increased revenue by 20% through predictive analytics",
+              "Reduced manual effort by 25% through automation"
+            ],
+            "overqualification_risk": "MEDIUM"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Analysis in Non-Profit and Academic Research",
+            "cv_secondary_industries": [
+              "Building Solutions",
+              "Software Engineering"
+            ],
+            "cv_academic_background": "PhD in Physics, Master of Data Science",
+            "cv_corporate_exposure": "Less than 1 year in corporate roles",
+            "jd_target_industry": "International Aid and Development (Non-Profit)",
+            "jd_industry_specificity": "High",
+            "direct_industry_match": "NO",
+            "industry_alignment_score": 35,
+            "corporate_background_bonus": 0,
+            "industry_penalty_factors": [
+              "No direct experience in International Aid and Development",
+              "Limited corporate experience",
+              "No client-facing experience"
+            ],
+            "transferable_skills_score": 60,
+            "cultural_adaptation_difficulty": "DIFFICULT",
+            "regulatory_knowledge_gap": "Moderate - lacks understanding of non-profit regulations and compliance",
+            "client_stakeholder_fit": "LOW - limited experience with fundraising stakeholders",
+            "business_cycle_understanding": "LOW - primarily academic and research-focused background",
+            "success_probability": "LOW",
+            "adaptation_timeline": "12+ months",
+            "investment_level_required": "VERY HIGH",
+            "industry_strengths": [
+              "Strong technical skills in data analysis and Python",
+              "Experience in data visualization and reporting",
+              "Ability to automate processes and improve efficiency"
+            ],
+            "critical_industry_gaps": [
+              "Understanding of fundraising strategies",
+              "Experience with donor management and segmentation",
+              "Knowledge of non-profit operational frameworks"
+            ],
+            "hiring_risk_assessment": "HIGH RISK"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "1.5 years",
+            "cv_academic_years": "4 years",
+            "cv_total_weighted_years": "1.8 years (1.5 * 0.8 + 4 * 0.2)",
+            "cv_responsibility_scope": "Limited corporate responsibility primarily as a Data Analyst with no direct management or P&L responsibility.",
+            "cv_leadership_indicators": "4",
+            "cv_decision_authority": "Low, primarily focused on data analysis and reporting without strategic decision-making authority.",
+            "cv_stakeholder_level": "Moderate, with experience in stakeholder engagement but limited to data-driven insights.",
+            "cv_management_experience": "No direct team or budget management experience in a corporate context.",
+            "jd_required_seniority": "Mid Level Data Analyst with strong analytical skills and stakeholder collaboration.",
+            "jd_leadership_requirements": "Collaborative team player with the ability to support business decision-making.",
+            "jd_decision_authority_needed": "Ability to influence data-driven decisions but not in a leadership capacity.",
+            "jd_stakeholder_level": "High, requiring interaction with business stakeholders and fundraising teams.",
+            "seniority_score": "55",
+            "corporate_seniority_match": "50",
+            "leadership_readiness_score": "40",
+            "decision_authority_match": "30",
+            "stakeholder_management_fit": "60",
+            "overqualification_risk": "MEDIUM, due to PhD and academic background without significant corporate management experience.",
+            "seniority_strengths": [
+              "Strong technical skills in data analysis and Python.",
+              "Experience in developing dashboards and reports.",
+              "Ability to automate processes and improve efficiency."
+            ],
+            "seniority_gaps": [
+              "Limited corporate experience (1.5 years) in a business context.",
+              "No management or leadership experience.",
+              "Lack of direct P&L or budget responsibility."
+            ],
+            "leadership_transition_risk": "MEDIUM, transitioning from academic to corporate roles may require adjustment to business leadership expectations.",
+            "readiness_assessment": "Candidate shows potential but requires further development in corporate leadership and decision-making roles."
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Advanced",
+            "cv_primary_domain": "Machine Learning & Data Science",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "ML Algorithms",
+              "Data Visualization"
+            ],
+            "cv_problem_complexity": 8,
+            "cv_innovation_indicators": [
+              "Published Research",
+              "Framework Development"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "Tableau",
+              "Excel"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 90,
+            "core_skills_match_percentage": 85,
+            "technical_stack_fit_percentage": 80,
+            "complexity_readiness_score": 95,
+            "learning_agility_score": 85,
+            "technical_strengths": [
+              "Advanced Analytics",
+              "ML Implementation",
+              "Data Architecture"
+            ],
+            "technical_gaps": [
+              "Tableau Proficiency",
+              "Business Domain Context"
+            ],
+            "overqualification_risk": "Moderate"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 10,
+            "total_preferred_keywords": 3,
+            "matched_required_count": 6,
+            "matched_preferred_count": 1,
+            "missing_required": 4,
+            "missing_preferred": 2
+          },
+          "bonus_breakdown": {
+            "required_bonus": 3.0,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.2,
+            "preferred_penalty": -0.3,
+            "total_bonus": 1.4
+          },
+          "coverage_metrics": {
+            "required_coverage": 60.0,
+            "preferred_coverage": 33.33
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 50.0,
+        "experience_alignment": 60.0,
+        "industry_fit": 35.0,
+        "domain_overlap_percentage": 0.0,
+        "data_familiarity_score": 0.0,
+        "stakeholder_fit_score": 0.0,
+        "business_cycle_alignment": 0.0,
+        "role_seniority": 55.0,
+        "leadership_readiness_score": 40.0,
+        "technical_depth": 90.0,
+        "core_skills_match_percentage": 85.0,
+        "technical_stack_fit_percentage": 80.0,
+        "complexity_readiness_score": 95.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": 1.4,
+        "total_bonus": 1.4,
+        "required_bonus": 3.0,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.2,
+        "preferred_penalty": -0.3,
+        "required_coverage": 60.0,
+        "preferred_coverage": 33.33
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-09-25T11:32:52.046",
+      "final_ats_score": 49.275,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally rejected",
+      "breakdown": {
+        "category1": {
+          "score": 19.3,
+          "technical_skills_match_rate": 54.0,
+          "domain_keywords_match_rate": 20.0,
+          "soft_skills_match_rate": 50.0,
+          "missing_counts": {
+            "technical": 6,
+            "domain": 8,
+            "soft": 7
+          }
+        },
+        "category2": {
+          "score": 28.575,
+          "core_competency_avg": 63.75,
+          "experience_seniority_avg": 31.0,
+          "potential_ability_avg": 60.0,
+          "company_fit_avg": 8.75
+        },
+        "ats1_score": 47.875,
+        "bonus_points": 1.4
+      }
+    }
+  ]
+}

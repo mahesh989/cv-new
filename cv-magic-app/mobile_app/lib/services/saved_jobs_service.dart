@@ -82,8 +82,8 @@ class SavedJobsService {
       }
     } catch (e) {
       debugPrint('❌ [SAVED_JOBS] API request failed: $e');
-      // Return empty list instead of throwing to prevent app crashes
-      return [];
+      // Re-throw the exception so the UI can handle it properly
+      rethrow;
     }
   }
 
