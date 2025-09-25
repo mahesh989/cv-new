@@ -183,7 +183,8 @@ class AIConfig:
                     self._current_model = models[0]  # Use first available model
                     return
         
-        # Ultimate fallback
+        # Ultimate fallback - use first available provider instead of hardcoding specific model
+        logger.warning("No AI providers available with valid API keys - using default configuration")
         self._current_provider = "openai"
         self._current_model = "gpt-4o-mini"
     

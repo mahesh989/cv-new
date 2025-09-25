@@ -148,7 +148,7 @@ class AIModelService extends ChangeNotifier {
       case 'claude-3.5-sonnet':
         return 'claude-3-5-sonnet-20241022';
       case 'claude-3-haiku':
-        return 'claude-3-haiku-20240307';
+        return 'claude-3-5-haiku-20241022';
       case 'deepseek-chat':
         return 'deepseek-chat';
       case 'deepseek-coder':

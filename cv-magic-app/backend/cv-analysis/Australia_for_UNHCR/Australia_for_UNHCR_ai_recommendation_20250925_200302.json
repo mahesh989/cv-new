@@ -1,0 +1,15 @@
+{
+  "company": "Australia_for_UNHCR",
+  "generated_at": "2025-09-25T20:03:02.277412",
+  "recommendation_content": "# 🎯 CV Tailoring Strategy Report for Australia_for_UNHCR\n\n## 🔍 Priority Gap Analysis\n**Immediate Action Required (Low Scores):**\n- Soft Skills Match: 0.0%\n- Domain Keywords Match: 0.0%\n- Experience/Seniority: 41.0%\n\n**Optimization Opportunities (Medium Scores):**\n- Core Competency: 63.75%\n- Company Fit: 12.5%\n\n## 🔑 Keyword Integration Strategy\n**Critical Missing Keywords (0.0% domain match):**\n- **Emphasize:** Data Analysis, Data Cleaning, Data Extraction\n- **Safe to Add:** Data Mining, Data Modeling, Data Segmentation\n- **Avoid:** Business Decision-Making, Direct Marketing\n- **Alternatives:** Predictive Analytics, Operational Efficiency\n\n**Technical Skills Enhancement (32.0% current match):**\n- **Emphasize:** Python, SQL, Power BI\n- **Safe to Add:** Business Intelligence, Database Management\n- **Avoid:** VBA, Excel\n- **Alternatives:** Business Intelligence, Spreadsheets\n\n**Soft Skills Optimization (0.0% current match):**\n- **Emphasize:** Problem-Solving, Collaboration, Communication\n- **Safe to Add:** Analytical Thinking, Creativity, Critical Thinking\n- **Avoid:** Innovation, Negotiation\n- **Alternatives:** Detail-oriented, Results-driven\n\n## 🎪 Experience Reframing Strategy\n**Industry Transition Focus (50.0/100 current fit):**\n- Showcase adaptability in transitioning to humanitarian aid sector\n- Highlight understanding of data governance and decision-making\n- Connect experience in data cleaning to clean data maintenance\n\n**Seniority Positioning (65.0/100 current match):**\n- Emphasize leadership in project management and analytical models\n- Highlight responsibility in data warehousing and data segmentation\n- Position growth trajectory towards business intelligence roles\n\n**Technical Depth Showcase (90.0/100 current score):**\n- Showcase proficiency in Python for computational modeling\n- Highlight experience with SQL for data extraction and querying\n- Emphasize data visualization skills using Tableau and Matplotlib\n\n## ⚠️ Strategic Warnings\n- **Don't Oversell:** Avoid claiming skills without clear evidence\n- **Don't Undersell:** Highlight strong problem-solving and data analysis abilities\n\n## 📌 Section Completeness Notes\n- Add a section on Projects to detail hands-on experience with data analysis projects\n- Consider including Certifications related to data science or business intelligence to strengthen technical credentials\n- Ensure Education section highlights relevance of Physics background to data analysis and AI\n\n---\n\n**Strategic Note:** Focus on strategic keyword integration, aligning technical skills with JD requirements, and showcasing experience for industry transition and seniority positioning. Prioritize authenticity and evidence-based claims to optimize for ATS and interview success.",
+  "ai_model_info": {
+    "provider": "openai",
+    "model": "gpt-3.5-turbo",
+    "cost": 0.004586000000000001,
+    "tokens_used": 3529
+  },
+  "metadata": {
+    "content_length": 2741,
+    "format_version": "1.0"
+  }
+}

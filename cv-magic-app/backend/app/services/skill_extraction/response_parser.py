@@ -38,10 +38,30 @@ class SkillExtractionParser:
         domain_keywords = []
         
         try:
-            # Primary parsing strategy: Look for Python list variable assignments
+            # Multiple parsing strategies for different AI models
+            # Strategy 1: Python list variable assignments (original format for GPT-4o Mini)
             soft_skills = SkillExtractionParser._extract_python_list(response_text, "SOFT_SKILLS", document_type)
             technical_skills = SkillExtractionParser._extract_python_list(response_text, "TECHNICAL_SKILLS", document_type)  
             domain_keywords = SkillExtractionParser._extract_python_list(response_text, "DOMAIN_KEYWORDS", document_type)
+            
+            # Strategy 2: If no Python lists found, try markdown format (GPT-3.5, Claude, DeepSeek)
+            if not soft_skills and not technical_skills and not domain_keywords:
+                logger.info(f"🔄 [{document_type.upper()}] Python format not found, trying markdown format...")
+                soft_skills = SkillExtractionParser._extract_markdown_list(response_text, "SOFT SKILLS", document_type)
+                technical_skills = SkillExtractionParser._extract_markdown_list(response_text, "TECHNICAL SKILLS", document_type)
+                domain_keywords = SkillExtractionParser._extract_markdown_list(response_text, "DOMAIN KEYWORDS", document_type)
+            
+            # Strategy 3: If still no results, try section headers format
+            if not soft_skills and not technical_skills and not domain_keywords:
+                logger.info(f"🔄 [{document_type.upper()}] Markdown format not found, trying section headers...")
+                soft_skills = SkillExtractionParser._extract_section_list(response_text, ["Soft Skills", "SOFT SKILLS"], document_type)
+                technical_skills = SkillExtractionParser._extract_section_list(response_text, ["Technical Skills", "TECHNICAL SKILLS"], document_type)
+                domain_keywords = SkillExtractionParser._extract_section_list(response_text, ["Domain Keywords", "DOMAIN KEYWORDS"], document_type)
+            
+            # Log which parsing strategy worked
+            if soft_skills or technical_skills or domain_keywords:
+                total_skills = len(soft_skills) + len(technical_skills) + len(domain_keywords)
+                logger.info(f"✅ [{document_type.upper()}] Successfully extracted {total_skills} total skills using multi-format parser")
             
             # Validate and clean extracted skills
             soft_skills = SkillExtractionParser._validate_and_clean_skills(soft_skills, "soft_skills", document_type)
@@ -111,6 +131,83 @@ class SkillExtractionParser:
                 
         except Exception as e:
             logger.error(f"❌ [{document_type.upper()}] Failed to extract {variable_name}: {e}")
+            return []
+    
+    @staticmethod
+    def _extract_markdown_list(text: str, section_name: str, document_type: str) -> List[str]:
+        """
+        Extract skills from markdown format like:
+        **SOFT SKILLS:**
+        - Communication
+        - Leadership
+        
+        Args:
+            text: Response text to search
+            section_name: Section name to look for (e.g., "SOFT SKILLS")
+            document_type: Type of document for logging
+            
+        Returns:
+            List of extracted skills
+        """
+        try:
+            # Look for markdown sections with bullet points
+            pattern = rf'\*\*{re.escape(section_name)}:\*\*\s*\n((?:- .+\n?)+)'
+            match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+            
+            if match:
+                skills_text = match.group(1)
+                # Extract individual skills from bullet points
+                skill_lines = re.findall(r'- (.+)', skills_text)
+                skills = [skill.strip() for skill in skill_lines if skill.strip()]
+                logger.debug(f"🔍 [{document_type.upper()}] Extracted {section_name} (markdown): {len(skills)} items")
+                return skills
+            else:
+                logger.debug(f"🔍 [{document_type.upper()}] No {section_name} markdown section found")
+                return []
+                
+        except Exception as e:
+            logger.error(f"❌ [{document_type.upper()}] Failed to extract {section_name} (markdown): {e}")
+            return []
+    
+    @staticmethod
+    def _extract_section_list(text: str, section_names: List[str], document_type: str) -> List[str]:
+        """
+        Extract skills from general section format with various headers
+        
+        Args:
+            text: Response text to search
+            section_names: List of possible section names to look for
+            document_type: Type of document for logging
+            
+        Returns:
+            List of extracted skills
+        """
+        try:
+            for section_name in section_names:
+                # Try multiple patterns for section headers
+                patterns = [
+                    rf'{re.escape(section_name)}:\s*\n((?:- .+\n?)+)',  # Header with bullets
+                    rf'{re.escape(section_name)}\s*\n((?:- .+\n?)+)',   # Header without colon
+                    rf'{re.escape(section_name)}:\s*\n((?:\* .+\n?)+)', # Header with asterisks
+                    rf'{re.escape(section_name)}\s*\n((?:\* .+\n?)+)',  # Header with asterisks, no colon
+                ]
+                
+                for pattern in patterns:
+                    match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+                    if match:
+                        skills_text = match.group(1)
+                        # Extract individual skills from bullet points (both - and *)
+                        skill_lines = re.findall(r'[*-] (.+)', skills_text)
+                        skills = [skill.strip() for skill in skill_lines if skill.strip()]
+                        if skills:
+                            logger.debug(f"🔍 [{document_type.upper()}] Extracted {section_name} (section): {len(skills)} items")
+                            return skills
+            
+            logger.debug(f"🔍 [{document_type.upper()}] No section format found for {section_names}")
+            return []
+                
+        except Exception as e:
+            logger.error(f"❌ [{document_type.upper()}] Failed to extract section {section_names}: {e}")
             return []
     
     @staticmethod

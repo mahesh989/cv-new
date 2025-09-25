@@ -115,87 +115,54 @@ TEXT TO ANALYZE:
             return self._get_default_job_info()
     
     async def _try_ai_extraction(self, job_description: str, auth_token: str) -> Dict[str, Any]:
-        """Attempt AI extraction with comprehensive error handling"""
+        """Attempt AI extraction using centralized AI service"""
         try:
             # Load prompt template
             prompt_template = self._load_prompt()
             # Use safe string replacement to avoid format issues with braces
             prompt = prompt_template.replace('{job_description}', job_description[:3000])
             
-            async with httpx.AsyncClient() as client:
-                headers = {
-                    "Authorization": f"Bearer {auth_token}",
-                    "Content-Type": "application/json"
-                }
-                
-                response = await client.post(
-                    "http://localhost:8000/api/ai/chat",
-                    headers=headers,
-                    json={
-                        "prompt": prompt,
-                        "system_prompt": "You are a precise job information extractor. CRITICAL: Return ONLY a valid JSON object that starts with { and ends with }. Do NOT wrap in code blocks. Do NOT add any text before or after the JSON. Use double quotes for all keys. If information is not available, use null. Your response must be parsable by json.loads() without modification.",
-                        "temperature": 0.1,
-                        "max_tokens": 1000
-                    },
-                    timeout=30.0
+            # Use centralized AI service instead of direct HTTP calls
+            from app.ai.ai_service import ai_service
+            
+            try:
+                ai_response = await ai_service.generate_response(
+                    prompt=prompt,
+                    system_prompt="You are a precise job information extractor. CRITICAL: Return ONLY a valid JSON object that starts with { and ends with }. Do NOT wrap in code blocks. Do NOT add any text before or after the JSON. Use double quotes for all keys. If information is not available, use null. Your response must be parsable by json.loads() without modification.",
+                    temperature=0.1,
+                    max_tokens=1000
                 )
                 
-                # Handle HTTP errors
-                if response.status_code == 403:
-                    return {"error": "Authentication failed - invalid or expired token"}
-                elif response.status_code == 400:
-                    return {"error": "Bad request - check AI model configuration"}
-                elif response.status_code != 200:
-                    return {"error": f"AI API returned status {response.status_code}"}
+                response_text = ai_response.content
                 
-                # Parse AI response
-                try:
-                    ai_response = response.json()
-                    response_text = ai_response.get("content", "")
-                    
-                    if not response_text.strip():
-                        return {"error": "AI returned empty response"}
-                    
-                    # Debug logging
-                    logger.debug("AI response length: %s", len(response_text))
-                    logger.debug("Response type: %s", type(response_text))
-                    logger.debug("Response preview: %s", str(response_text)[:200] + "...")
-                    print(f"🤖 AI raw response (first 100 chars): '{response_text[:100]}'")
-                    print(f"🤖 AI raw response (last 50 chars): '{response_text[-50:]}'")
-                    print(f"🤖 Response length: {len(response_text)} characters")
-                    print(f"🤖 Starts with: '{response_text[:10]}'")
-                    print(f"🤖 Ends with: '{response_text[-10:]}'")
-                    print(f"🤖 Full response: '{response_text}'")
-                    print(f"🤖 Response repr: {repr(response_text)}")
-                    
-                    # Parse and validate JSON
-                    try:
-                        job_info = self._parse_ai_response(response_text)
-                        if job_info and self._validate_ai_response(job_info):
-                            validated_info = self._validate_job_info(job_info)
-                            print(f"✅ Successfully extracted and validated job info: {validated_info.get('company_name', 'Unknown')}")
-                            return validated_info
-                        else:
-                            print(f"❌ AI response failed validation")
-                            return {"error": "AI response failed validation"}
-                    except Exception as parse_error:
-                        print(f"❌ JSON parsing error in _parse_ai_response: {str(parse_error)}")
-                        print(f"❌ Full error details: {repr(parse_error)}")
-                        print(f"❌ Response that caused error: '{response_text}'")
-                        print(f"❌ Response repr that caused error: {repr(response_text)}")
-                        print(f"❌ Response length: {len(response_text)}")
-                        return {"error": f"AI extraction failed: {str(parse_error)}"}
-                    
-                except json.JSONDecodeError as e:
-                    return {"error": f"Invalid JSON from AI API: {str(e)}"}
-                except Exception as e:
-                    return {"error": f"Failed to process AI response: {str(e)}"}
+                if not response_text.strip():
+                    return {"error": "AI returned empty response"}
                 
-        except httpx.TimeoutException:
-            return {"error": "AI API request timed out"}
-        except httpx.ConnectError:
-            return {"error": "Cannot connect to AI API - is the backend running?"}
+                # Debug logging
+                logger.debug("AI response length: %s", len(response_text))
+                logger.debug("Response type: %s", type(response_text))
+                logger.debug("Response preview: %s", str(response_text)[:200] + "...")
+                print(f"🤖 AI raw response (first 100 chars): '{response_text[:100]}'")
+                print(f"🤖 AI raw response (last 50 chars): '{response_text[-50:]}'")
+                print(f"🤖 Response length: {len(response_text)} characters")
+                print(f"🤖 Starts with: '{response_text[:10]}'")
+                
+                # Parse the AI response as JSON
+                job_info = self._parse_ai_response(response_text)
+                if job_info and self._validate_ai_response(job_info):
+                    validated_info = self._validate_job_info(job_info)
+                    print(f"✅ Successfully extracted and validated job info: {validated_info.get('company_name', 'Unknown')}")
+                    return validated_info
+                else:
+                    print(f"❌ AI response failed validation")
+                    return {"error": "AI response failed validation"}
+                
+            except Exception as ai_error:
+                logger.error(f"AI service error: {ai_error}")
+                return {"error": f"AI service failed: {str(ai_error)}"}
+                
         except Exception as e:
+            logger.error(f"AI extraction failed: {e}")
             return {"error": f"AI extraction failed: {str(e)}"}
     
     def _get_default_job_info(self) -> Dict[str, Any]:

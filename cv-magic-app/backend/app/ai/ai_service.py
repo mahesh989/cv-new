@@ -138,9 +138,16 @@ class AIServiceManager:
         """
         current_provider = self.get_current_provider()
         if not current_provider:
-            logger.warning("No current provider available - returning success for demo purposes")
-            # For demo purposes, return True even when no providers are available
-            return True
+            logger.error("❌ No current provider available for model switching")
+            # Don't silently succeed - this masks real problems
+            available_providers = self.get_available_providers()
+            if available_providers:
+                logger.info(f"🔄 Available providers: {available_providers}")
+                # Try to switch to the model in any available provider
+                for provider_name in available_providers:
+                    if self.switch_provider(provider_name, model_name):
+                        return True
+            return False
         
         # Resolve model name (handle display names)
         resolved_model_name = self._resolve_model_name(model_name, current_provider.provider_name)
@@ -228,13 +235,27 @@ class AIServiceManager:
             provider = self.get_provider(provider_name)
             if not provider:
                 available_providers = self.get_available_providers()
+                logger.error(f"❌ Provider '{provider_name}' not available. Available providers: {available_providers}")
                 raise Exception(f"Provider '{provider_name}' not available. Available providers: {available_providers}")
         else:
             provider = self.get_current_provider()
             if not provider:
                 available_providers = self.get_available_providers()
                 current_provider_name = self.config.get_current_provider()
-                raise Exception(f"No available AI provider. Current provider: '{current_provider_name}', Available providers: {available_providers}")
+                logger.error(f"❌ No available AI provider. Current: '{current_provider_name}', Available: {available_providers}")
+                
+                # Try to get first available provider as fallback
+                if available_providers:
+                    fallback_provider = available_providers[0]
+                    logger.warning(f"🔄 Using fallback provider: {fallback_provider}")
+                    provider = self.get_provider(fallback_provider)
+                    if provider:
+                        # Update current provider to the working one
+                        self.config.set_current_model(fallback_provider, provider.model_name)
+                    else:
+                        raise Exception(f"No available AI provider. Current: '{current_provider_name}', Available: {available_providers}")
+                else:
+                    raise Exception(f"No available AI provider. Current: '{current_provider_name}', Available: {available_providers}")
         
         # Log the actual model being used
         logger.info(f"Generating response with provider: {provider.provider_name}, model: {provider.model_name}")

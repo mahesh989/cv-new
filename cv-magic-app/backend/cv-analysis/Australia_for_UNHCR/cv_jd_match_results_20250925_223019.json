@@ -1,0 +1,49 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-25T22:30:19.621731",
+  "matched_required_keywords": [
+    "SQL",
+    "VBA",
+    "Power BI",
+    "communication",
+    "project management",
+    "data warehouse"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "SQL data warehouse environment",
+    "stakeholder management"
+  ],
+  "missed_preferred_keywords": [
+    "Tableau",
+    "customer service",
+    "marketing campaigns",
+    "communication purposes",
+    "governing regulations"
+  ],
+  "match_counts": {
+    "total_required_keywords": 8,
+    "total_preferred_keywords": 5,
+    "matched_required_count": 6,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "SQL": "Mentioned in technical skills section and experience",
+    "VBA": "Not explicitly mentioned in the CV",
+    "Power BI": "Listed in technical skills section and used for creating dashboards",
+    "communication": "Highlighted in career profile and experience sections",
+    "project management": "Highlighted in career profile and experience sections",
+    "data warehouse": "Listed in technical skills section",
+    "SQL data warehouse environment": "Not explicitly mentioned in the CV",
+    "stakeholder management": "Not explicitly mentioned in the CV",
+    "Tableau": "Not mentioned in the CV",
+    "customer service": "Not mentioned in the CV",
+    "marketing campaigns": "Not mentioned in the CV",
+    "communication purposes": "Not mentioned in the CV",
+    "governing regulations": "Not mentioned in the CV"
+  },
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}

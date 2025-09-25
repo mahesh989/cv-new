@@ -263,8 +263,8 @@ class SkillsAnalysisController extends ChangeNotifier {
       // First, parse the job description and save job details
       try {
         final jobDetails = JobParser.parseJobDetails(jdUrl);
-        if (jobDetails['company_name'] != null && 
-            jobDetails['job_title'] != null && 
+        if (jobDetails['company_name'] != null &&
+            jobDetails['job_title'] != null &&
             jobDetails['location'] != null) {
           await JobsStateManager.saveNewJob(
             companyName: jobDetails['company_name']!,
@@ -315,6 +315,7 @@ class SkillsAnalysisController extends ChangeNotifier {
   }
 
   /// Clear all results and reset to idle state
+  /// Note: This is called internally to clear analysis state, not UI inputs
   void clearResults() async {
     await SkillsAnalysisHandler.clearResults();
     _triggerClearResults();
@@ -330,6 +331,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     _showATSLoading = false;
     _showATSResults = false;
     _result = null;
+    // Keep _currentCvFilename and _currentJdText for re-runs - they're just internal tracking
+    // The UI controllers are managed separately in the CV Magic page
     _currentCvFilename = null;
     _currentJdText = null;
     _executionDuration = Duration.zero;
@@ -514,12 +517,14 @@ class SkillsAnalysisController extends ChangeNotifier {
 
         // Check if AI recommendation is now available and trigger display
         if (aiRecommendation != null && !_showAIRecommendationResults) {
+          // AI recommendations are already generated, show them immediately with brief loading
           _showAIRecommendationLoading = true;
           notifyListeners();
-          _showNotification('🤖 Generating AI recommendations...');
+          _showNotification('🤖 AI recommendations found!');
 
-          Timer(Duration(seconds: 10), () {
-            // Show AI recommendations after 10-second delay
+          Timer(Duration(seconds: 2), () {
+            // Reduced delay from 10 to 2 seconds
+            // Show AI recommendations after brief delay for UI smoothness
             _showAIRecommendationResults = true;
             _result = _result!.copyWith(
               aiRecommendation: aiRecommendation,
@@ -530,8 +535,11 @@ class SkillsAnalysisController extends ChangeNotifier {
         }
 
         // Update result with component analysis first (component analysis can show immediately)
+        // Also include AI recommendation if available (don't lose it in this update)
         _result = _result!.copyWith(
           componentAnalysis: componentAnalysis,
+          aiRecommendation:
+              aiRecommendation, // Keep AI recommendation in the result
         );
         notifyListeners();
 
@@ -547,6 +555,8 @@ class SkillsAnalysisController extends ChangeNotifier {
             _showATSResults = true;
             _result = _result!.copyWith(
               atsResult: _fullResult!.atsResult,
+              aiRecommendation:
+                  _fullResult!.aiRecommendation, // Keep AI recommendation
             );
             notifyListeners();
 
@@ -585,8 +595,8 @@ class SkillsAnalysisController extends ChangeNotifier {
   Future<void> _saveJobFromAnalysis(String jdText) async {
     try {
       final jobDetails = JobParser.parseJobDetails(jdText);
-      if (jobDetails['company_name'] != null && 
-          jobDetails['job_title'] != null && 
+      if (jobDetails['company_name'] != null &&
+          jobDetails['job_title'] != null &&
           jobDetails['location'] != null) {
         await JobsStateManager.saveNewJob(
           companyName: jobDetails['company_name']!,

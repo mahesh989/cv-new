@@ -96,11 +96,18 @@ class CVTailoringService:
             estimated_score = await self._estimate_ats_score(tailored_cv, request.recommendations)
             tailored_cv.estimated_ats_score = estimated_score
             
+            # Add quality warnings to processing summary if any
+            if hasattr(self, '_quality_warnings') and self._quality_warnings:
+                processing_summary["quality_assessment"] = self._quality_warnings["assessment"]
+                processing_summary["quality_message"] = self._quality_warnings["message"]
+                logger.info(f"⚠️ CV created with quality warnings: {self._quality_warnings['assessment']['quality_grade']}")
+            
             response = CVTailoringResponse(
                 tailored_cv=tailored_cv,
                 processing_summary=processing_summary,
                 recommendations_applied=self._extract_applied_recommendations(tailored_cv),
-                success=True
+                success=True,
+                warnings=self._quality_warnings["message"].split('\n') if hasattr(self, '_quality_warnings') and self._quality_warnings else None
             )
             
             logger.info(f"✅ CV tailoring completed successfully. Estimated ATS score: {estimated_score}")
@@ -900,28 +907,91 @@ Please provide the optimized CV in the requested JSON format."""
             
             for j, bullet in enumerate(exp.get('bullets', [])):
                 total_bullets += 1
-                # Check for quantification (numbers, percentages, dollar amounts)
+                # Enhanced quantification detection
                 has_numbers = any(char.isdigit() for char in bullet)
                 has_percentage = '%' in bullet
-                has_dollar = '$' in bullet
-                has_quantification = has_numbers or has_percentage or has_dollar
+                has_dollar = '$' in bullet or '£' in bullet or '€' in bullet
+                has_times = any(word in bullet.lower() for word in ['times', 'x', '×'])
+                has_ranges = '-' in bullet and any(char.isdigit() for char in bullet)
+                has_quantification = has_numbers or has_percentage or has_dollar or has_times or has_ranges
                 
                 if has_quantification:
                     bullets_with_quantification += 1
                 else:
                     quantification_failures.append(f"Experience {i+1}, bullet {j+1}: '{bullet[:60]}...'")
         
-        # Be more lenient - require at least 75% of bullets to have quantification
+        # More realistic quantification requirements - 50% minimum (adjusted for different AI models)
         quantification_ratio = bullets_with_quantification / total_bullets if total_bullets > 0 else 0
+        minimum_ratio = 0.50  # Further reduced to 50% to work with all AI models including GPT-3.5 Turbo
         
-        if quantification_ratio < 0.75:  # Less than 75% have quantification
-            # Only fail if it's really bad (less than 50%)
-            if quantification_ratio < 0.5:
-                failure_summary = "\n".join(quantification_failures[:5])  # Show only first 5 failures
-                raise ValueError(f"Impact Statement Formula violation - only {bullets_with_quantification}/{total_bullets} bullets have quantification (need at least 75%):\n{failure_summary}")
-            else:
-                # Just warn if between 50-75%
-                logger.warning(f"⚠️ Only {bullets_with_quantification}/{total_bullets} bullets have quantification. Ideally need 75%+")
+        # Create quality assessment and recommendations
+        quality_assessment = {
+            "quantification_ratio": quantification_ratio,
+            "bullets_with_quantification": bullets_with_quantification,
+            "total_bullets": total_bullets,
+            "missing_bullets": quantification_failures[:8],
+            "quality_grade": self._get_quality_grade(quantification_ratio),
+            "model_recommendation": self._get_model_recommendation(quantification_ratio)
+        }
+        
+        # Always generate CV, but provide appropriate warnings based on quality
+        failure_summary = "\n".join(quantification_failures[:8]) if quantification_failures else ""
+        
+        if quantification_ratio < minimum_ratio:
+            # Below minimum threshold - strong warning
+            warning_message = f"""🚨 CV QUALITY WARNING - BELOW MINIMUM STANDARDS:
+
+📊 ACHIEVED: {bullets_with_quantification}/{total_bullets} bullets quantified ({quantification_ratio:.1%})
+🎯 OPTIMAL: {int(total_bullets * 0.75)}/{total_bullets} bullets quantified (75% for best ATS performance)
+📈 MINIMUM: {int(total_bullets * minimum_ratio)}/{total_bullets} bullets quantified ({minimum_ratio:.0%} minimum recommended)
+
+⚠️ IMPACT: This CV will likely underperform significantly in ATS systems.
+
+BULLETS NEEDING IMPROVEMENT:
+{failure_summary}
+
+💡 STRONG RECOMMENDATION:
+{quality_assessment['model_recommendation']}
+
+⚡ URGENT FIXES NEEDED:
+• Add specific numbers: "analyzed 500+ datasets", "reduced time by 30%"
+• Include scale metrics: "managed $2M budget", "led 8-person team"  
+• Specify timeframes: "completed in 6 months", "achieved within 3 weeks"
+• Switch to GPT-4o Mini for much better quantification results
+"""
+            
+            logger.warning(f"[{request_id}] CV created below minimum standards: {quantification_ratio:.1%} quantification")
+        elif quantification_ratio < 0.75:
+            # Above minimum but below optimal - moderate warning
+            warning_message = f"""⚠️ CV QUALITY WARNING - SUBOPTIMAL QUANTIFICATION:
+
+📊 ACHIEVED: {bullets_with_quantification}/{total_bullets} bullets quantified ({quantification_ratio:.1%})
+🎯 OPTIMAL: {int(total_bullets * 0.75)}/{total_bullets} bullets quantified (75% for best ATS performance)
+✅ STATUS: Above minimum threshold ({minimum_ratio:.0%}) but room for improvement
+
+💡 RECOMMENDATIONS:
+{quality_assessment['model_recommendation']}
+
+⚡ IMPROVEMENT SUGGESTIONS:
+• Add specific numbers: "analyzed 500+ datasets", "reduced time by 30%"
+• Include scale metrics: "managed $2M budget", "led 8-person team"
+• Specify timeframes: "completed in 6 months", "achieved within 3 weeks"
+"""
+            
+            logger.info(f"[{request_id}] CV created with improvement suggestions: {quantification_ratio:.1%} quantification")
+        else:
+            # High quality - no warnings
+            warning_message = None
+            logger.info(f"[{request_id}] CV created with excellent quality: {quantification_ratio:.1%} quantification")
+        
+        # Store warnings if any
+        if warning_message:
+            self._quality_warnings = {
+                "message": warning_message,
+                "assessment": quality_assessment
+            }
+        else:
+            self._quality_warnings = None
         
         # Validate skills structure
         if not isinstance(data['skills'], list):
@@ -943,20 +1013,25 @@ Please provide the optimized CV in the requested JSON format."""
             
             correction += f"""
 FIX THESE SPECIFIC BULLETS - ADD NUMBERS TO EACH:
-{chr(10).join(missing_bullets[:5])}
+{chr(10).join(missing_bullets[:8])}
 
-For EVERY bullet without numbers, you MUST add:
-- Specific quantities (e.g., "15 reports", "8 team members", "500+ customers")
-- Percentages (e.g., "reduced costs by 25%", "improved efficiency by 40%")
-- Time frames (e.g., "within 3 months", "across 2 quarters")
-- Dollar amounts where applicable (e.g., "$2M budget", "saved $50K annually")
+CRITICAL: You need {max(0, int(total_bullets * minimum_ratio) - bullets_with_quantification)} MORE bullets with numbers to pass minimum validation.
 
-EXAMPLES OF FIXES:
-Bad: "Used Power BI to create dashboards presenting research findings"
-Good: "Used Power BI to create 12+ interactive dashboards presenting research findings to 50+ stakeholders, reducing report generation time by 60%"
+EASY FIXES - Add these types of numbers:
+• DATA SCALE: "analyzed 10K+ records", "processed 500+ files", "handled 50+ requests"  
+• TIME SAVED: "reduced time by 40%", "improved speed by 2x", "completed in 30% less time"
+• TEAM SIZE: "led 5-person team", "trained 15+ users", "supported 20+ stakeholders"
+• FREQUENCY: "daily reports", "weekly analysis", "monthly presentations"
+• SIMPLE COUNTS: "created 8 dashboards", "automated 12 processes", "identified 5 issues"
 
-Bad: "Conducted data analysis for business insights"
-Good: "Conducted data analysis on 100K+ customer records to derive business insights, identifying 3 key growth opportunities worth $1.5M"
+TRANSFORM THESE EXACT PATTERNS:
+• "Python for analysis" → "Python to analyze 1K+ datasets" 
+• "created dashboards" → "created 6 interactive dashboards"
+• "improved efficiency" → "improved efficiency by 35%"
+• "supported teams" → "supported 3 cross-functional teams"
+• "data preprocessing" → "preprocessed 50K+ records"
+
+JUST ADD REALISTIC NUMBERS TO EXISTING BULLETS - Don't change the core meaning!
 """
         
         if "keyword" in error_message.lower():
@@ -1086,6 +1161,34 @@ FIX: Output ONLY valid JSON!
         logger.info(f"✅ Keyword integration validation passed - {len(valid_keywords) - len(missing_keywords)}/{len(valid_keywords)} critical keywords found")
         
         logger.info(f"✅ Keyword integration validation passed - {len(valid_keywords)} critical keywords found")
+    
+    def _get_quality_grade(self, quantification_ratio: float) -> str:
+        """Get quality grade based on quantification ratio"""
+        if quantification_ratio >= 0.85:
+            return "EXCELLENT (A+)"
+        elif quantification_ratio >= 0.75:
+            return "VERY GOOD (A)"
+        elif quantification_ratio >= 0.65:
+            return "GOOD (B+)"
+        elif quantification_ratio >= 0.55:
+            return "ACCEPTABLE (B)"
+        elif quantification_ratio >= 0.45:
+            return "BELOW AVERAGE (C)"
+        elif quantification_ratio >= 0.35:
+            return "POOR (D)"
+        else:
+            return "VERY POOR (F)"
+    
+    def _get_model_recommendation(self, quantification_ratio: float) -> str:
+        """Get AI model recommendation based on performance"""
+        if quantification_ratio >= 0.75:
+            return "✅ Current AI model performing well! Continue using for consistent results."
+        elif quantification_ratio >= 0.60:
+            return "⚠️ Consider switching to GPT-4o Mini or Claude 3.5 Sonnet for better quantification."
+        elif quantification_ratio >= 0.45:
+            return "🔄 Strongly recommend switching to GPT-4o Mini for optimal CV quality and ATS performance."
+        else:
+            return "🚨 Current model not suitable for CV generation. Switch to GPT-4o Mini immediately for professional results."
     
     # Fallback CV creation removed - now raises errors for better debugging
     

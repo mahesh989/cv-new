@@ -409,7 +409,11 @@ class AnalysisResults {
           Map<String, dynamic>.from(json['ats_recommendations'] ?? {}),
       aiRecommendations:
           Map<String, dynamic>.from(json['ai_recommendations'] ?? {}),
-      tailoredCvPath: json['tailored_cv_path'],
+      tailoredCvPath: json['tailored_cv_path'] ??
+          (json['tailored_cv'] != null &&
+                  json['tailored_cv']['available'] == true
+              ? json['tailored_cv']['file_path']
+              : null),
     );
   }
 }

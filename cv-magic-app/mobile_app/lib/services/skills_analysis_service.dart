@@ -386,6 +386,8 @@ class SkillsAnalysisService {
             '📊 [POLLING] ATS score present: ${data.containsKey("ats_score")}');
         print(
             '📊 [POLLING] AI recommendation present: ${data.containsKey("ai_recommendation")}');
+        print(
+            '📊 [POLLING] Tailored CV present: ${data.containsKey("tailored_cv")}');
 
         if (data.containsKey('component_analysis') &&
             data.containsKey('ats_score')) {

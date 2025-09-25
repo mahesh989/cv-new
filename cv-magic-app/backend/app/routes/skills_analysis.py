@@ -1894,6 +1894,25 @@ async def get_analysis_results(company: str):
         else:
             result["ai_recommendation"] = None
         
+        # Get tailored CV information if available
+        tailored_cv_dir = base_dir / "cvs" / "tailored"
+        tailored_cv_file = TimestampUtils.find_latest_timestamped_file(tailored_cv_dir, f"{company}_tailored_cv", "json")
+        
+        if tailored_cv_file and tailored_cv_file.exists():
+            try:
+                result["tailored_cv"] = {
+                    "file_path": str(tailored_cv_file),
+                    "generated_at": tailored_cv_file.stat().st_mtime,
+                    "available": True
+                }
+                logger.info(f"✅ [API] Found tailored CV for {company}: {tailored_cv_file}")
+            except Exception as e:
+                logger.warning(f"Failed to load tailored CV info for {company}: {e}")
+                result["tailored_cv"] = None
+        else:
+            result["tailored_cv"] = None
+            logger.debug(f"No tailored CV found for {company}")
+        
         return JSONResponse(content={
             "success": True,
             "data": result

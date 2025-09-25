@@ -1,0 +1,15 @@
+{
+  "company": "Australia_for_UNHCR",
+  "generated_at": "2025-09-25T22:48:34.328482",
+  "recommendation_content": "# 🎯 CV Tailoring Strategy Report for Australia_for_UNHCR\n\n## 🔍 Priority Gap Analysis\n**Immediate Action Required (Low Scores):**\n- Soft Skills Match: 0.0%\n- Domain Keywords Match: 0.0%\n\n**Optimization Opportunities (Medium Scores):**\n- Technical Skills Match: 28%\n\n## 🔑 Keyword Integration Strategy\n**Critical Missing Keywords (0.0% domain match):**\n- **Emphasize:** Collaborative keywords like 'Collaboration,' 'Communication'\n- **Safe to Add:** 'Data Segmentation,' 'Data Warehousing'\n- **Avoid:** 'Direct Marketing,' 'Diversity and Inclusion'\n- **Alternatives:** Synonyms for 'Data Analysis,' 'Data Cleansing'\n\n**Technical Skills Enhancement (73.0% current match):**\n- **Emphasize:** 'Data Analysis,' 'Data Extraction,' 'Machine Learning'\n- **Safe to Add:** 'Data Modeling,' 'Data Segmentation'\n- **Avoid:** 'Power BI' without evidence\n- **Alternatives:** 'Data Mining,' 'Data Visualization'\n\n**Soft Skills Optimization (0.0% current match):**\n- **Emphasize:** 'Analytical Thinking,' 'Collaboration'\n- **Safe to Add:** 'Creativity,' 'Critical Thinking'\n- **Avoid:** 'Innovation,' 'Negotiation'\n- **Alternatives:** Demonstrate 'Problem-solving,' 'Teamwork'\n\n## 🎪 Experience Reframing Strategy\n**Industry Transition Focus (60.0/100 current fit):**\n- Showcase adaptability to diverse environments\n- Highlight problem-solving and analytical thinking in varied contexts\n- Integrate communication skills in cross-functional teams\n\n**Seniority Positioning (65.0/100 current match):**\n- Emphasize project management experience and decision-making autonomy\n- Showcase leadership in guiding data analysis initiatives\n- Highlight results-driven approach in achieving project goals\n\n**Technical Depth Showcase (90.0/100 current score):**\n- Demonstrate proficiency in Python, machine learning, and data visualization\n- Showcase expertise in data analysis and computational modeling\n- Highlight experience with large datasets and predictive analytics\n\n## ⚠️ Strategic Warnings\n- **Don't Oversell:** Avoid claiming skills without direct evidence\n- **Don't Undersell:** Highlight transferable skills and achievements effectively\n\n## 📌 Section Completeness Notes\n- Consider adding a section for 'Projects' to showcase hands-on experience\n- Highlight certifications related to data analysis and machine learning\n- Include a 'Professional Summary' to succinctly highlight key skills and achievements\n\n---\n\n**Strategic Note:** These recommendations aim to bridge the gap between your current profile and the desired job requirements. By strategically aligning your CV with the job description, you can enhance your ATS performance and increase your chances of securing an interview.",
+  "ai_model_info": {
+    "provider": "openai",
+    "model": "gpt-3.5-turbo",
+    "cost": 0.004654,
+    "tokens_used": 3581
+  },
+  "metadata": {
+    "content_length": 2665,
+    "format_version": "1.0"
+  }
+}
