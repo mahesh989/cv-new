@@ -8,6 +8,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/saved_jobs_service.dart';
 import '../widgets/job_tracking/saved_jobs_table_final.dart';
 import '../core/theme/app_theme.dart';
@@ -29,6 +30,7 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
   bool _showAppliedJobs = false; // Toggle for showing applied jobs only
   final Map<String, bool> _appliedStatus =
       {}; // Track applied status for each job
+  bool _hasCachedData = false; // Track if we have cached data to show
 
   /// Public method to trigger refresh from external sources
   void refreshJobs() {
@@ -41,6 +43,7 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
     super.initState();
     _verifyAssets();
     _loadJobs();
+    _loadAppliedStatus();
   }
 
   Future<void> _verifyAssets() async {
@@ -73,14 +76,56 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
       setState(() {
         _jobs = jobs;
         _isLoading = false;
+        _hasCachedData = jobs.isNotEmpty;
       });
+      // Load applied status after jobs are loaded
+      await _loadAppliedStatus();
     } catch (e, stackTrace) {
       debugPrint('❌ [JOB_TRACKING] Error loading jobs: $e');
       debugPrint('📋 [JOB_TRACKING] Stack trace: $stackTrace');
-      setState(() {
-        _error = 'Failed to load saved jobs: $e';
-        _isLoading = false;
-      });
+
+      // If we have cached data, show it instead of error
+      if (_hasCachedData && _jobs.isNotEmpty) {
+        debugPrint('📋 [JOB_TRACKING] Showing cached data due to API error');
+        setState(() {
+          _isLoading = false;
+          _error = null; // Don't show error if we have cached data
+        });
+      } else {
+        setState(() {
+          _error = 'Failed to load saved jobs: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadAppliedStatus() async {
+    try {
+      debugPrint(
+          '🔄 [JOB_TRACKING] Loading applied status from SharedPreferences...');
+      final prefs = await SharedPreferences.getInstance();
+
+      // Load applied status for each job
+      for (var job in _jobs) {
+        final key = _getJobKey(job);
+        final isApplied = prefs.getBool('applied_$key') ?? false;
+        _appliedStatus[key] = isApplied;
+        debugPrint(
+            '📋 [JOB_TRACKING] Job ${job['company_name']}: applied = $isApplied');
+      }
+
+      debugPrint(
+          '✅ [JOB_TRACKING] Loaded applied status for ${_appliedStatus.length} jobs');
+
+      // Trigger UI update if we're showing applied jobs
+      if (_showAppliedJobs) {
+        setState(() {
+          // This will trigger a rebuild to show updated applied jobs
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ [JOB_TRACKING] Error loading applied status: $e');
     }
   }
 
@@ -145,6 +190,37 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
                     color: AppTheme.neutralGray800,
                   ),
             ),
+            // Show indicator when using cached data
+            if (_hasCachedData && _jobs.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.cached,
+                      size: 12,
+                      color: Colors.orange.shade700,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Cached',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const Spacer(),
             IconButton(
               onPressed: _loadJobs,

@@ -7,7 +7,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 
@@ -56,9 +55,17 @@ class SavedJobsService {
 
       // Use localhost for development
       const baseUrl = 'http://localhost:8000';
+
+      // Add timeout to prevent hanging during analysis
       final response = await http.get(
         Uri.parse('$baseUrl/api/jobs/saved'),
         headers: {'Content-Type': 'application/json'},
+      ).timeout(
+        const Duration(seconds: 10), // 10 second timeout
+        onTimeout: () {
+          debugPrint('⏰ [SAVED_JOBS] API request timed out');
+          throw Exception('Request timeout - server may be busy');
+        },
       );
 
       debugPrint('📡 [SAVED_JOBS] API Response status: ${response.statusCode}');
@@ -78,31 +85,6 @@ class SavedJobsService {
       // Return empty list instead of throwing to prevent app crashes
       return [];
     }
-  }
-
-  static List<Map<String, dynamic>> _parseJobsJson(String contents) {
-    if (contents.trim().isEmpty) {
-      throw const FormatException('Saved jobs data is empty');
-    }
-
-    final data = json.decode(contents);
-
-    if (data is! Map<String, dynamic>) {
-      throw FormatException(
-          'Invalid JSON structure: expected Map, got ${data.runtimeType}');
-    }
-
-    if (!data.containsKey('jobs')) {
-      throw const FormatException('Missing "jobs" key in saved jobs data');
-    }
-
-    final jobs = data['jobs'];
-    if (jobs is! List) {
-      throw FormatException(
-          'Invalid "jobs" structure: expected List, got ${jobs.runtimeType}');
-    }
-
-    return jobs.cast<Map<String, dynamic>>();
   }
 
   /// Get saved jobs summary from API (for Flutter web)

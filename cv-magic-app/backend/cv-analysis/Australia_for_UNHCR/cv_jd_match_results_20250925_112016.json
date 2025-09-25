@@ -1,0 +1,50 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-09-25T11:20:16.368917",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "customer service"
+  ],
+  "matched_preferred_keywords": [
+    "data extraction"
+  ],
+  "missed_required_keywords": [
+    "Tableau",
+    "VBA",
+    "project management",
+    "stakeholder management",
+    "communication",
+    "data mining",
+    "data warehouse",
+    "direct marketing campaigns",
+    "data models",
+    "campaign outcomes"
+  ],
+  "missed_preferred_keywords": [
+    "data querying",
+    "analytical thinking",
+    "problem-solving",
+    "data de-duplication",
+    "data governance",
+    "communication regulations"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 6,
+    "matched_required_count": 4,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "SQL": "Found in technical skills section",
+    "Power BI": "Used to present research findings",
+    "Excel": "Found in technical skills section",
+    "customer service": "Mentioned in context of optimizing response times",
+    "data extraction": "Automated data extraction mentioned in experience"
+  },
+  "ai_model_used": "openai/gpt-4o-mini",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/tailored/Chandler_Macleod_tailored_cv_20250925_104502.txt",
+  "metadata": {}
+}
