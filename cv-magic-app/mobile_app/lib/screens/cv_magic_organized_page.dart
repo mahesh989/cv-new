@@ -60,7 +60,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     _skillsController.setNotificationCallback(_showSnackBar);
 
     // Start periodic timer to check if we need to clear results
-    _clearCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+    _clearCheckTimer =
+        Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (mounted) {
         _checkAndClearResults();
       }
@@ -137,6 +138,17 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
         title: const Text('CV Magic - Organized'),
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
+        actions: [
+          // Clear All button - only show when there are results to clear
+          if (_skillsController.hasResults || _skillsController.hasError)
+            IconButton(
+              onPressed: () {
+                _showClearConfirmationDialog();
+              },
+              icon: const Icon(Icons.clear_all),
+              tooltip: 'Clear All Results',
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -551,25 +563,75 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
   // Company selector removed (backend-only focus)
 
+  /// Show confirmation dialog before clearing all results
+  void _showClearConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Clear All Results'),
+          content: const Text(
+            'This will clear all analysis results but keep your selected CV and CV preview. Are you sure?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                clearAnalysisResults();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Clear All'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// Clear all analysis results and reset the controller
+  /// Preserves selected CV and CV preview as requested
   void clearAnalysisResults() {
     debugPrint('🧹 [CV_MAGIC] Clearing analysis results in CV Magic tab');
+    debugPrint('🧹 [CV_MAGIC] Preserving selected CV: $selectedCVFilename');
     debugPrint(
         '🧹 [CV_MAGIC] Controller has results before clear: ${_skillsController.hasResults}');
     debugPrint(
         '🧹 [CV_MAGIC] Controller state before clear: ${_skillsController.state}');
 
+    // Clear the skills analysis results
     _skillsController.clearResults();
+
+    // Clear job description inputs
+    jdController.clear();
+    jdUrlController.clear();
 
     debugPrint(
         '🧹 [CV_MAGIC] Controller has results after clear: ${_skillsController.hasResults}');
     debugPrint(
         '🧹 [CV_MAGIC] Controller state after clear: ${_skillsController.state}');
+    debugPrint('🧹 [CV_MAGIC] Selected CV preserved: $selectedCVFilename');
 
     // Clear any other state if needed
     setState(() {
       // Reset any local state variables if needed
       debugPrint('🧹 [CV_MAGIC] setState called to refresh UI');
     });
+
+    // Show confirmation message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+            '✅ All analysis results cleared. Selected CV and preview preserved.'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 }

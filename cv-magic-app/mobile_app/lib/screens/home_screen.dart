@@ -30,7 +30,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   late final CVMagicOrganizedPage _cvMagicPage;
   late final CVGenerationScreen _cvGenerationScreen;
-  final JobTrackingScreen _jobTrackingScreen = const JobTrackingScreen();
+  final GlobalKey<JobTrackingScreenState> _jobTrackingKey =
+      GlobalKey<JobTrackingScreenState>();
+  late final JobTrackingScreen _jobTrackingScreen;
   int _cvMagicClearVersion = 0;
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
@@ -79,6 +81,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Initialize CV Generation screen with navigation callback
     _cvGenerationScreen = CVGenerationScreen(
       onNavigateToCVMagic: _navigateToCVMagicTab,
+    );
+
+    // Initialize Job Tracking screen with key for external refresh control
+    _jobTrackingScreen = JobTrackingScreen(
+      key: _jobTrackingKey,
     );
 
     _animationController = AnimationController(
@@ -175,7 +182,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _onTabTapped(int index) {
     print('🔄 [HOME_SCREEN] Tab tapped: $index');
     if (index == 3) {
-      print('📊 [HOME_SCREEN] Job Tracking tab selected');
+      print('📊 [HOME_SCREEN] Job Tracking tab selected - triggering refresh');
+      // Trigger refresh of job tracking screen when tab is selected
+      _jobTrackingKey.currentState?.refreshJobs();
     }
     setState(() {
       _currentIndex = index;
@@ -188,7 +197,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _navigateToCVMagicTab() {
-    debugPrint('🔄 HomeScreen: Navigating to CV Magic tab (index 1) and clearing results');
+    debugPrint(
+        '🔄 HomeScreen: Navigating to CV Magic tab (index 1) and clearing results');
     _shouldClearCVMagicResults = true; // Set flag to clear results
     debugPrint('🔄 HomeScreen: Flag set, now switching to tab index 1');
     _onTabTapped(1); // Switch to CV Magic tab (index 1)

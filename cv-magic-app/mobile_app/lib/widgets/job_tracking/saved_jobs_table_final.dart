@@ -5,10 +5,14 @@ import '../../core/theme/app_theme.dart';
 
 class SavedJobsTable extends StatefulWidget {
   final List<Map<String, dynamic>> jobs;
+  final Function(Map<String, dynamic>, bool)? onAppliedStatusChanged;
+  final Function(Map<String, dynamic>, String)? onRemarksChanged;
 
   const SavedJobsTable({
     super.key,
     required this.jobs,
+    this.onAppliedStatusChanged,
+    this.onRemarksChanged,
   });
 
   @override
@@ -51,20 +55,31 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
     return '${job['company_name']}_${job['job_url']}';
   }
 
+  String _formatDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) {
+      return 'Unknown Date';
+    }
+
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return 'Invalid Date';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SizedBox(
-        width: 1200,  // Fixed minimum width
+        width: 1200, // Fixed minimum width
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTableHeader(),
             const SizedBox(height: 8),
-            widget.jobs.isEmpty 
-                ? _buildEmptyState() 
-                : _buildJobList(),
+            widget.jobs.isEmpty ? _buildEmptyState() : _buildJobList(),
           ],
         ),
       ),
@@ -107,6 +122,17 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
             flex: 3,
             child: Text(
               'Post',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.neutralGray700,
+                  ),
+            ),
+          ),
+          // Date column
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Date',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.neutralGray700,
@@ -164,7 +190,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
     final key = _getJobKey(job);
     final isHovered = _hoveredRows.contains(key);
     final isApplied = _appliedStatus[key] ?? false;
-    
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hoveredRows.add(key)),
       onExit: (_) => setState(() => _hoveredRows.remove(key)),
@@ -185,7 +211,9 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
             Expanded(
               flex: 3,
               child: GestureDetector(
-                onTap: job['job_url'] != null ? () => _launchUrl(job['job_url']) : null,
+                onTap: job['job_url'] != null
+                    ? () => _launchUrl(job['job_url'])
+                    : null,
                 child: Text(
                   job['company_name'] ?? 'Unknown Company',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -193,8 +221,9 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
                         color: job['job_url'] != null
                             ? (isHovered ? Colors.blue : AppTheme.primaryTeal)
                             : AppTheme.neutralGray700,
-                        decoration:
-                            job['job_url'] != null && isHovered ? TextDecoration.underline : null,
+                        decoration: job['job_url'] != null && isHovered
+                            ? TextDecoration.underline
+                            : null,
                       ),
                 ),
               ),
@@ -219,6 +248,16 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
                     ),
               ),
             ),
+            // Date (extracted_at)
+            Expanded(
+              flex: 2,
+              child: Text(
+                _formatDate(job['extracted_at']),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.neutralGray600,
+                    ),
+              ),
+            ),
             // Contact info (email/phone)
             Expanded(
               flex: 2,
@@ -232,6 +271,8 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
                 onChanged: (value) async {
                   setState(() => _appliedStatus[key] = value);
                   await _saveStatus(key, value);
+                  // Notify parent about status change
+                  widget.onAppliedStatusChanged?.call(job, value);
                 },
                 activeColor: Colors.green,
               ),
@@ -242,7 +283,8 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
               child: GestureDetector(
                 onTap: () => _showRemarksDialog(job),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                   decoration: BoxDecoration(
                     color: AppTheme.neutralGray50,
                     borderRadius: BorderRadius.circular(4),
@@ -257,14 +299,15 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
                           _remarks[key]?.isEmpty ?? true
                               ? 'Add note...'
                               : _remarks[key]!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: _remarks[key]?.isEmpty ?? true
-                                    ? AppTheme.neutralGray400
-                                    : AppTheme.neutralGray700,
-                                fontStyle: _remarks[key]?.isEmpty ?? true
-                                    ? FontStyle.italic
-                                    : FontStyle.normal,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: _remarks[key]?.isEmpty ?? true
+                                        ? AppTheme.neutralGray400
+                                        : AppTheme.neutralGray700,
+                                    fontStyle: _remarks[key]?.isEmpty ?? true
+                                        ? FontStyle.italic
+                                        : FontStyle.normal,
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -316,8 +359,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-        if (email != null && phone != null)
-          const SizedBox(height: 4),
+        if (email != null && phone != null) const SizedBox(height: 4),
         if (phone != null)
           InkWell(
             onTap: () => _launchUrl('tel:$phone'),
