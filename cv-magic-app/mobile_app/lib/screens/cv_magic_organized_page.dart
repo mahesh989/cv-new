@@ -59,13 +59,11 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
 
-    // Check for results clearing one time after init
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _clearCheckTimer = Timer(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          _checkAndClearResults();
-        }
-      });
+    // Start periodic timer to check if we need to clear results
+    _clearCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        _checkAndClearResults();
+      }
     });
 
     // Add listener to jdController to debug changes and trigger rebuilds
@@ -85,10 +83,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Only check for clearing if we have results to clear
-    if (_skillsController.hasResults) {
-      _checkAndClearResults();
-    }
+    // Check if results need to be cleared when dependencies change
+    _checkAndClearResults();
   }
 
   /// Check if we need to clear results and do so if needed

@@ -2,13 +2,33 @@
   "jobs": [
     {
       "company_name": "Australia for UNHCR",
-      "job_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst",
       "job_title": "Data Analyst",
       "location": "Sydney, Australia",
+      "experience_required": "Unknown",
+      "seniority_level": "Unknown",
+      "industry": "International Aid and Development",
       "phone_number": null,
-      "email": null
+      "email": null,
+      "website": null,
+      "work_type": "Hybrid",
+      "extracted_at": "2025-09-25T10:30:19.539696",
+      "job_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst"
+    },
+    {
+      "company_name": "Chandler Macleod",
+      "job_title": "Data Analyst",
+      "location": "Sydney, NSW",
+      "experience_required": "1-2 years",
+      "seniority_level": "entry-level",
+      "industry": "Information & Communication Technology",
+      "phone_number": null,
+      "email": null,
+      "website": null,
+      "work_type": "Hybrid",
+      "extracted_at": "2025-09-25T10:42:01.073853",
+      "job_url": "https://www.seek.com.au/job/87409441?utm_source=joraau&utm_campaign=joraau&utm_medium=organic&tracking=ILC-S%2AAU%2A-JOR-Referrer-4324"
     }
   ],
-  "last_updated": "2025-09-24T14:38:24.673550",
-  "total_jobs": 1
+  "last_updated": "2025-09-25T10:43:11.826904",
+  "total_jobs": 2
 }

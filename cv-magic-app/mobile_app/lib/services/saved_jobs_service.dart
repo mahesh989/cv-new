@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 class SavedJobsService {
   static String get _savedJobsPath {
@@ -43,49 +44,39 @@ class SavedJobsService {
     return defaultPath;
   }
 
-  /// Load saved jobs from the JSON file
+  /// Load saved jobs from the backend API
   static Future<List<Map<String, dynamic>>> loadSavedJobs() async {
-    // For Flutter web, we need to use HTTP requests instead of direct file access
-    if (kIsWeb) {
-      return await _loadSavedJobsFromAPI();
-    }
+    return await _loadSavedJobsFromAPI();
+  }
 
+  /// Load saved jobs from the backend API
+  static Future<List<Map<String, dynamic>>> _loadSavedJobsFromAPI() async {
     try {
-      final file = File(_savedJobsPath);
-      debugPrint('🔍 [SAVED_JOBS] Looking for file at: $_savedJobsPath');
-      
-      if (await file.exists()) {
-        try {
-          final contents = await file.readAsString();
-          debugPrint('✅ [SAVED_JOBS] Loaded from filesystem, length: ${contents.length}');
-          return _parseJobsJson(contents);
-        } catch (e) {
-          debugPrint('⚠️ [SAVED_JOBS] Failed to read from filesystem: $e');
-          // Continue to fallback
-        }
-      } else {
-        debugPrint('ℹ️ [SAVED_JOBS] File not found at $_savedJobsPath');
-      }
+      debugPrint('🌐 [SAVED_JOBS] Loading from API...');
 
-      // Fallback to bundled asset for mobile/simulator
-      debugPrint('📎 [SAVED_JOBS] Attempting to load from assets...');
-      try {
-        final assetContents = await rootBundle.loadString('assets/saved_jobs.json');
-        debugPrint('✅ [SAVED_JOBS] Loaded from assets, length: ${assetContents.length}');
-        return _parseJobsJson(assetContents);
-      } catch (e) {
-        debugPrint('❌ [SAVED_JOBS] Failed to load from assets: $e');
-        rethrow;
+      // Use localhost for development
+      const baseUrl = 'http://localhost:8000';
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/jobs/saved'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      debugPrint('📡 [SAVED_JOBS] API Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        debugPrint('✅ [SAVED_JOBS] Loaded ${data['total']} jobs from API');
+
+        // Return the jobs array
+        return List<Map<String, dynamic>>.from(data['jobs'] ?? []);
+      } else {
+        debugPrint('❌ [SAVED_JOBS] API error: ${response.statusCode}');
+        throw Exception('Failed to load saved jobs: ${response.statusCode}');
       }
-    } on FormatException catch (e) {
-      debugPrint('JSON format error: $e');
-      rethrow;
-    } on FlutterError catch (e) {
-      debugPrint('Asset load error: $e');
-      rethrow;
     } catch (e) {
-      debugPrint('Error loading saved jobs: $e');
-      throw Exception('Failed to load saved jobs: $e');
+      debugPrint('❌ [SAVED_JOBS] API request failed: $e');
+      // Return empty list instead of throwing to prevent app crashes
+      return [];
     }
   }
 
@@ -112,30 +103,6 @@ class SavedJobsService {
     }
 
     return jobs.cast<Map<String, dynamic>>();
-  }
-
-  /// Load saved jobs from API (for Flutter web)
-  static Future<List<Map<String, dynamic>>> _loadSavedJobsFromAPI() async {
-    try {
-      debugPrint('🌐 [SAVED_JOBS] Loading from API for web platform');
-
-      // For now, return sample data since we don't have a backend API endpoint
-      // In a real implementation, you would make an HTTP request to your backend
-      return [
-        {
-          'company_name': 'Australia for UNHCR',
-          'job_url':
-              'https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst',
-          'job_title': 'Data Analyst',
-          'location': 'Sydney, Australia',
-          'phone_number': null,
-          'email': null,
-        }
-      ];
-    } catch (e) {
-      debugPrint('Error loading saved jobs from API: $e');
-      throw Exception('Failed to load saved jobs from API: $e');
-    }
   }
 
   /// Get saved jobs summary from API (for Flutter web)

@@ -506,6 +506,51 @@ async def analyze_skills(request: Request):
         company_name = _detect_most_recent_company()
         _schedule_post_skill_pipeline(company_name)
         
+        # ALSO trigger job saving logic for the analyze endpoint
+        try:
+            import json
+            from datetime import datetime
+            if company_name:
+                company_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / company_name
+                
+                # Check for job_info files and add to saved_jobs.json (same logic as preliminary_analysis)
+                job_info_files = list(company_dir.glob("job_info_*.json"))
+                if not job_info_files:
+                    # Fallback to job_info.json (legacy format)
+                    legacy_job_info = company_dir / "job_info.json"
+                    if legacy_job_info.exists():
+                        job_info_files = [legacy_job_info]
+                
+                if job_info_files:
+                    # Use the most recent job_info file
+                    latest_job_info_file = max(job_info_files, key=lambda f: f.stat().st_mtime)
+                    
+                    with open(latest_job_info_file, 'r', encoding='utf-8') as f:
+                        job_metadata = json.load(f)
+                    
+                    # Save to shared jobs file
+                    saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+                    saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    if saved_jobs_file.exists():
+                        with open(saved_jobs_file, 'r', encoding='utf-8') as f:
+                            saved_jobs_data = json.load(f)
+                    else:
+                        saved_jobs_data = {"jobs": [], "last_updated": datetime.now().isoformat(), "total_jobs": 0}
+                    
+                    if not any(job.get("job_url") == job_metadata.get("job_url") for job in saved_jobs_data["jobs"]):
+                        saved_jobs_data["jobs"].append(job_metadata)
+                        saved_jobs_data["last_updated"] = datetime.now().isoformat()
+                        saved_jobs_data["total_jobs"] = len(saved_jobs_data["jobs"])
+                        
+                        with open(saved_jobs_file, 'w', encoding='utf-8') as f:
+                            json.dump(saved_jobs_data, f, indent=2, ensure_ascii=False)
+                        logger.info(f"✅ [JOBS] Added job to shared jobs file: {job_metadata.get('job_title')} at {job_metadata.get('company_name')}")
+                    else:
+                        logger.info(f"♻️ [JOBS] Job already exists in saved_jobs.json: {job_metadata.get('job_title')} at {job_metadata.get('company_name')}")
+        except Exception as e:
+            logger.warning(f"⚠️ [JOBS] Failed to save job info: {e}")
+        
         return JSONResponse(content={
             "success": True,
             "message": "Skill extraction completed successfully",
@@ -800,32 +845,47 @@ async def preliminary_analysis(
                         with open(job_info_file, 'w', encoding='utf-8') as f:
                             json.dump(job_metadata, f, indent=2, ensure_ascii=False)
                         logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
-                        
-                        # Save to shared jobs file
-                        saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
-                        saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
-                        
-                        if saved_jobs_file.exists():
-                            with open(saved_jobs_file, 'r', encoding='utf-8') as f:
-                                saved_jobs_data = json.load(f)
-                        else:
-                            saved_jobs_data = {"jobs": [], "last_updated": datetime.now().isoformat(), "total_jobs": 0}
-                        
-                        if not any(job.get("job_url") == job_metadata.get("job_url") for job in saved_jobs_data["jobs"]):
-                            saved_jobs_data["jobs"].append(job_metadata)
-                            saved_jobs_data["last_updated"] = datetime.now().isoformat()
-                            saved_jobs_data["total_jobs"] = len(saved_jobs_data["jobs"])
-                            
-                            with open(saved_jobs_file, 'w', encoding='utf-8') as f:
-                                json.dump(saved_jobs_data, f, indent=2, ensure_ascii=False)
-                            logger.info(f"✅ [JOBS] Added job to shared jobs file: {job_metadata.get('job_title')} at {job_metadata.get('company_name')}")
                 else:
                     logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
                 
+                # ALWAYS check for job_info files and add to saved_jobs.json (whether JD exists or not)
+                job_info_files = list(company_dir.glob("job_info_*.json"))
+                if not job_info_files:
+                    # Fallback to job_info.json (legacy format)
+                    legacy_job_info = company_dir / "job_info.json"
+                    if legacy_job_info.exists():
+                        job_info_files = [legacy_job_info]
+                
+                if job_info_files:
+                    # Use the most recent job_info file
+                    latest_job_info_file = max(job_info_files, key=lambda f: f.stat().st_mtime)
+                    
+                    with open(latest_job_info_file, 'r', encoding='utf-8') as f:
+                        job_metadata = json.load(f)
+                    
+                    # Save to shared jobs file
+                    saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+                    saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    if saved_jobs_file.exists():
+                        with open(saved_jobs_file, 'r', encoding='utf-8') as f:
+                            saved_jobs_data = json.load(f)
+                    else:
+                        saved_jobs_data = {"jobs": [], "last_updated": datetime.now().isoformat(), "total_jobs": 0}
+                    
+                    if not any(job.get("job_url") == job_metadata.get("job_url") for job in saved_jobs_data["jobs"]):
+                        saved_jobs_data["jobs"].append(job_metadata)
+                        saved_jobs_data["last_updated"] = datetime.now().isoformat()
+                        saved_jobs_data["total_jobs"] = len(saved_jobs_data["jobs"])
+                        
+                        with open(saved_jobs_file, 'w', encoding='utf-8') as f:
+                            json.dump(saved_jobs_data, f, indent=2, ensure_ascii=False)
+                        logger.info(f"✅ [JOBS] Added job to shared jobs file: {job_metadata.get('job_title')} at {job_metadata.get('company_name')}")
+                    else:
+                        logger.info(f"♻️ [JOBS] Job already exists in saved_jobs.json: {job_metadata.get('job_title')} at {job_metadata.get('company_name')}")
+                
             except Exception as e:
                 logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD and job info: {e}")
-                except Exception as e:
-                    logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to check/save JD file: {e}")
 
                 # Ensure CV file exists for the matcher - use dynamic CV selection
                 try:
