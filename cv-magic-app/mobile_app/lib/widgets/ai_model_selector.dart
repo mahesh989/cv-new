@@ -29,7 +29,7 @@ class _AIModelSelectorState extends State<AIModelSelector>
 
   final APIKeyService _apiKeyService = APIKeyService();
   Map<String, dynamic> _providerStatus = {};
-  bool _isLoadingStatus = false;
+  String _selectedProvider = 'select'; // Track selected provider
 
   @override
   void initState() {
@@ -60,24 +60,19 @@ class _AIModelSelectorState extends State<AIModelSelector>
   }
 
   Future<void> _loadProviderStatus() async {
-    setState(() {
-      _isLoadingStatus = true;
-    });
+    print('🔄 [STATUS] Loading provider status...');
 
     try {
       final status = await _apiKeyService.getProvidersStatus();
+      print('📊 [STATUS] Loaded provider status: $status');
       if (mounted) {
         setState(() {
           _providerStatus = status;
-          _isLoadingStatus = false;
         });
+        print('✅ [STATUS] Provider status updated in state');
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingStatus = false;
-        });
-      }
+      print('❌ [STATUS] Error loading provider status: $e');
     }
   }
 
@@ -108,20 +103,19 @@ class _AIModelSelectorState extends State<AIModelSelector>
 
   bool _hasValidAPIKey(String provider) {
     final status = _providerStatus[provider];
-    if (status == null) return false;
-    return status['api_key_configured'] == true &&
-        status['api_key_valid'] == true;
+    print('🔍 [API_KEY] Checking status for $provider: $status');
+    if (status == null) {
+      print('❌ [API_KEY] No status found for $provider');
+      return false;
+    }
+    final hasKey = status['api_key_configured'] == true;
+    final isValid = status['api_key_valid'] == true;
+    print('🔑 [API_KEY] $provider - hasKey: $hasKey, isValid: $isValid');
+    return hasKey && isValid;
   }
 
   Future<void> _changeModel(String modelId) async {
-    final provider = _getProviderFromModel(modelId);
-
-    // Check if API key is configured and valid
-    if (!_hasValidAPIKey(provider)) {
-      _showAPIKeyRequiredDialog(provider, modelId);
-      return;
-    }
-
+    // No API key validation needed here - handled at provider level
     final aiModelService = Provider.of<AIModelService>(context, listen: false);
     await aiModelService.changeModel(modelId);
 
@@ -141,30 +135,6 @@ class _AIModelSelectorState extends State<AIModelSelector>
         ),
       );
     }
-  }
-
-  void _showAPIKeyRequiredDialog(String provider, String modelId) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => APIKeyInputDialog(
-        provider: provider,
-        providerDisplayName: _getProviderDisplayName(provider),
-        onSuccess: () async {
-          await _loadProviderStatus();
-          // Try to change model again after API key is set
-          final aiModelService =
-              Provider.of<AIModelService>(context, listen: false);
-          await aiModelService.changeModel(modelId);
-          if (widget.onModelChanged != null) {
-            widget.onModelChanged!();
-          }
-        },
-        onCancel: () {
-          // Do nothing, user cancelled
-        },
-      ),
-    );
   }
 
   void _toggleExpanded() {
@@ -210,9 +180,9 @@ class _AIModelSelectorState extends State<AIModelSelector>
                             const SizedBox(height: 16),
                             _buildCurrentModelDisplay(currentModel),
                             const SizedBox(height: 16),
-                            _buildModelDropdown(allModels, currentModel.id),
+                            _buildProviderDropdown(),
                             const SizedBox(height: 16),
-                            _buildAPIKeyManagementSection(),
+                            _buildModelDropdown(allModels, currentModel.id),
                             const SizedBox(height: 16),
                             _buildRecommendedModels(
                                 recommendedModels, currentModel.id),
@@ -425,6 +395,128 @@ class _AIModelSelectorState extends State<AIModelSelector>
     );
   }
 
+  Widget _buildProviderDropdown() {
+    final providers = [
+      {
+        'id': 'select',
+        'name': 'Select AI Provider',
+        'icon': Icons.arrow_drop_down_rounded,
+        'color': AppTheme.neutralGray500
+      },
+      {
+        'id': 'openai',
+        'name': 'OpenAI',
+        'icon': Icons.auto_awesome_rounded,
+        'color': AppTheme.primaryCosmic
+      },
+      {
+        'id': 'anthropic',
+        'name': 'Anthropic (Claude)',
+        'icon': Icons.psychology_alt_rounded,
+        'color': AppTheme.primaryAurora
+      },
+      {
+        'id': 'deepseek',
+        'name': 'DeepSeek',
+        'icon': Icons.code_rounded,
+        'color': AppTheme.primaryEmerald
+      },
+    ];
+
+    return DropdownButtonFormField<String>(
+      value: _selectedProvider, // Use tracked provider
+      isExpanded: true,
+      menuMaxHeight: 200,
+      decoration: InputDecoration(
+        labelText: 'Select AI Provider',
+        prefixIcon: const Icon(Icons.cloud_rounded),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+      ),
+      items: providers.map((provider) {
+        final providerId = provider['id'] as String;
+
+        // Handle "Select AI Provider" option differently
+        if (providerId == 'select') {
+          return DropdownMenuItem<String>(
+            value: providerId,
+            child: Row(
+              children: [
+                Icon(
+                  provider['icon'] as IconData,
+                  color: provider['color'] as Color,
+                  size: 18,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    provider['name'] as String,
+                    style: AppTheme.bodySmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.neutralGray500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return DropdownMenuItem<String>(
+          value: providerId,
+          child: Row(
+            children: [
+              Icon(
+                provider['icon'] as IconData,
+                color: provider['color'] as Color,
+                size: 18,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  provider['name'] as String,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              TextButton(
+                onPressed: () => _showAPIKeyDialog(providerId),
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Configure',
+                  style: AppTheme.labelSmall.copyWith(
+                    color: AppTheme.primaryTeal,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: (String? newProvider) {
+        if (newProvider != null && newProvider != _selectedProvider) {
+          _changeProvider(newProvider);
+        }
+      },
+    );
+  }
+
   Widget _buildModelDropdown(List<AIModel> allModels, String currentModelId) {
     return DropdownButtonFormField<String>(
       value: currentModelId,
@@ -442,9 +534,6 @@ class _AIModelSelectorState extends State<AIModelSelector>
         ),
       ),
       items: allModels.map((model) {
-        final provider = _getProviderFromModel(model.id);
-        final hasValidAPIKey = _hasValidAPIKey(provider);
-
         return DropdownMenuItem<String>(
           value: model.id,
           child: Padding(
@@ -458,36 +547,15 @@ class _AIModelSelectorState extends State<AIModelSelector>
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          model.isRecommended ? '${model.name} ⭐' : model.name,
-                          style: AppTheme.bodySmall.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      if (!hasValidAPIKey)
-                        Tooltip(
-                          message: 'API key required',
-                          child: Icon(
-                            Icons.key_off_rounded,
-                            size: 12,
-                            color: Colors.orange,
-                          ),
-                        ),
-                    ],
+                  child: Text(
+                    model.isRecommended ? '${model.name} ⭐' : model.name,
+                    style: AppTheme.bodySmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
-                if (hasValidAPIKey)
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 16,
-                    color: Colors.green,
-                  ),
               ],
             ),
           ),
@@ -598,175 +666,40 @@ class _AIModelSelectorState extends State<AIModelSelector>
     );
   }
 
-  Widget _buildAPIKeyManagementSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.neutralGray50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.neutralGray200,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.key_rounded,
-                color: AppTheme.primaryTeal,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'API Key Management',
-                style: AppTheme.labelMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              if (_isLoadingStatus)
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _buildProviderStatusList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProviderStatusList() {
-    final providers = ['openai', 'anthropic', 'deepseek'];
-
-    return Column(
-      children: providers.map((provider) {
-        final status = _providerStatus[provider];
-        final hasKey = status?['api_key_configured'] == true;
-        final isValid = status?['api_key_valid'] == true;
-        final displayName = _getProviderDisplayName(provider);
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isValid
-                  ? Colors.green.withOpacity(0.3)
-                  : hasKey
-                      ? Colors.orange.withOpacity(0.3)
-                      : AppTheme.neutralGray200,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                _getProviderIcon(provider),
-                color: isValid
-                    ? Colors.green
-                    : hasKey
-                        ? Colors.orange
-                        : AppTheme.neutralGray400,
-                size: 18,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      style: AppTheme.bodySmall.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isValid
-                          ? 'API key configured and valid'
-                          : hasKey
-                              ? 'API key configured but invalid'
-                              : 'No API key configured',
-                      style: AppTheme.labelSmall.copyWith(
-                        color: isValid
-                            ? Colors.green
-                            : hasKey
-                                ? Colors.orange
-                                : AppTheme.neutralGray500,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isValid)
-                Icon(
-                  Icons.check_circle_rounded,
-                  color: Colors.green,
-                  size: 16,
-                )
-              else
-                TextButton(
-                  onPressed: () => _showAPIKeyDialog(provider),
-                  style: TextButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    hasKey ? 'Update' : 'Configure',
-                    style: AppTheme.labelSmall.copyWith(
-                      color: AppTheme.primaryTeal,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  IconData _getProviderIcon(String provider) {
-    switch (provider) {
-      case 'openai':
-        return Icons.auto_awesome_rounded;
-      case 'anthropic':
-        return Icons.psychology_alt_rounded;
-      case 'deepseek':
-        return Icons.code_rounded;
-      default:
-        return Icons.smart_toy_rounded;
-    }
-  }
-
   void _showAPIKeyDialog(String provider) {
+    print('🚀 [DIALOG] _showAPIKeyDialog called for provider: $provider');
+    print('🚀 [DIALOG] Context available: true');
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => APIKeyInputDialog(
-        provider: provider,
-        providerDisplayName: _getProviderDisplayName(provider),
-        onSuccess: () async {
-          await _loadProviderStatus();
-        },
-        onCancel: () {
-          // Do nothing, user cancelled
-        },
-      ),
+      builder: (context) {
+        print('🚀 [DIALOG] Builder called, creating APIKeyInputDialog');
+        return APIKeyInputDialog(
+          provider: provider,
+          providerDisplayName: _getProviderDisplayName(provider),
+          onSuccess: () async {
+            await _loadProviderStatus();
+            // Automatically switch to the provider and select first model after successful API key setup
+            final models = aiModelService.getAllModels();
+            final providerModels = models
+                .where((model) => _getProviderFromModel(model.id) == provider)
+                .toList();
+
+            if (providerModels.isNotEmpty) {
+              final firstModel = providerModels.first;
+              print('🎯 [DIALOG] Switching to first model: ${firstModel.id}');
+              await _changeModel(firstModel.id);
+              // Update the selected provider to show the configured provider
+              setState(() {
+                _selectedProvider = provider;
+              });
+            }
+          },
+          onCancel: () {
+            // Do nothing, user cancelled
+          },
+        );
+      },
     );
   }
 
@@ -815,5 +748,24 @@ class _AIModelSelectorState extends State<AIModelSelector>
         ],
       ),
     );
+  }
+
+  Future<void> _changeProvider(String provider) async {
+    print('🔄 [PROVIDER] Changing to provider: $provider');
+
+    // Update the selected provider state
+    setState(() {
+      _selectedProvider = provider;
+    });
+
+    // Handle "Select AI Provider" option
+    if (provider == 'select') {
+      print('🔍 [PROVIDER] Select option chosen, no action needed');
+      return;
+    }
+
+    // Always show API key dialog for any provider selection - same logic for all providers
+    print('🔑 [PROVIDER] Showing API key dialog for $provider');
+    _showAPIKeyDialog(provider);
   }
 }
