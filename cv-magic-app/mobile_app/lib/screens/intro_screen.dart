@@ -162,9 +162,41 @@ class _IntroScreenState extends State<IntroScreen>
           Builder(
             builder: (context) {
               print('🎯 Using YouTube Video ID: ${AppConfig.youtubeVideoId}');
-              return YouTubePlayerWidget(
-                videoId: AppConfig.youtubeVideoId,
-                aspectRatio: 16 / 9,
+              print(
+                  '🎯 Expected URL: https://www.youtube.com/embed/${AppConfig.youtubeVideoId}');
+              return Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Stack(
+                  children: [
+                    YouTubePlayerWidget(
+                      videoId: AppConfig.youtubeVideoId,
+                      aspectRatio: 16 / 9,
+                    ),
+                    // Debug overlay showing video info
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Video ID: ${AppConfig.youtubeVideoId}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),

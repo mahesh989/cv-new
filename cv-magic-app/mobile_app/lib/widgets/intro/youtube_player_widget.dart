@@ -102,9 +102,10 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
 
   String _getEmbedUrl() {
     // Convert YouTube URL to embed format
-    // From: https://www.youtube.com/shorts/qMl0h3Z3PD8
-    // To: https://www.youtube.com/embed/qMl0h3Z3PD8
-    final url = 'https://www.youtube.com/embed/${widget.videoId}?autoplay=0&loop=1&controls=1&modestbranding=1&rel=0&enablejsapi=1';
+    // From: https://www.youtube.com/watch?v=io-5b07geD4
+    // To: https://www.youtube.com/embed/io-5b07geD4
+    final url =
+        'https://www.youtube.com/embed/${widget.videoId}?autoplay=0&loop=1&controls=1&modestbranding=1&rel=0&enablejsapi=1';
     print('🎬 YouTube embed URL: $url'); // Debug log
     return url;
   }
