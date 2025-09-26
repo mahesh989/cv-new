@@ -5,9 +5,8 @@ class AppConfig {
   // API endpoints
   static const String apiBaseUrl = '$baseUrl/api';
 
-  // Video and media paths
-  static const String videoPath = '$baseUrl/video';
-  static const String introVideoPath = '$videoPath/info.mp4';
+  // Video and media paths (now using YouTube embed)
+  static const String youtubeVideoId = 'qMl0h3Z3PD8';
 
   // App constants
   static const String appName = 'CV Magic';

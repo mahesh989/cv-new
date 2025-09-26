@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String _userName = 'User';
   bool _shouldClearCVMagicResults = false;
 
-  final IntroScreen _introScreen = const IntroScreen();
+  late final IntroScreen _introScreen;
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   late final CVMagicOrganizedPage _cvMagicPage;
   late final CVGenerationScreen _cvGenerationScreen;
@@ -77,6 +77,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Warm up saved jobs service at launch to ensure data is ready when opening tab
     // ignore: unawaited_futures
     _preloadSavedJobs();
+
+    // Initialize intro screen with navigation callback
+    _introScreen = IntroScreen(
+      onNavigateToTab: _onTabTapped,
+    );
 
     // Initialize CV Magic page with navigation callback
     _cvMagicPage = CVMagicOrganizedPage(

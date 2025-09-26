@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../widgets/intro/video_player_widget.dart';
+import '../widgets/intro/youtube_player_widget.dart';
 import '../widgets/intro/step_guide_widget.dart';
 import '../core/config/app_config.dart';
 
 class IntroScreen extends StatefulWidget {
-  const IntroScreen({super.key});
+  final Function(int)? onNavigateToTab;
+
+  const IntroScreen({super.key, this.onNavigateToTab});
 
   @override
   State<IntroScreen> createState() => _IntroScreenState();
@@ -156,8 +158,15 @@ class _IntroScreenState extends State<IntroScreen>
             ),
           ),
           const SizedBox(height: 16),
-          VideoPlayerWidget(
-            videoPath: '${AppConfig.baseUrl}/video/info.mp4',
+          // Debug: Ensure we're using the correct video ID
+          Builder(
+            builder: (context) {
+              print('🎯 Using YouTube Video ID: ${AppConfig.youtubeVideoId}');
+              return YouTubePlayerWidget(
+                videoId: AppConfig.youtubeVideoId,
+                aspectRatio: 16 / 9,
+              );
+            },
           ),
         ],
       ),
@@ -250,7 +259,10 @@ class _IntroScreenState extends State<IntroScreen>
                 child: ElevatedButton.icon(
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    // Navigate to main app (will be handled by tab controller)
+                    // Navigate to Home tab (index 1)
+                    if (widget.onNavigateToTab != null) {
+                      widget.onNavigateToTab!(1);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
