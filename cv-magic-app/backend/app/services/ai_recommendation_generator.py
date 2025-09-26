@@ -201,8 +201,10 @@ class AIRecommendationGenerator:
             AIResponse object or None if failed
         """
         try:
-            # Use the centralized AI service to generate response
-            response = await ai_service.generate_response(
+            # Use the enhanced AI service with API key validation
+            from app.services.enhanced_ai_service import enhanced_ai_service
+            
+            response = await enhanced_ai_service.generate_response_with_validation(
                 prompt=prompt_content,
                 system_prompt="You are an expert CV strategist and career consultant. Provide detailed, actionable recommendations in the exact format requested.",
                 temperature=0.7,  # Balanced creativity and consistency

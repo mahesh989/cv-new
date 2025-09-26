@@ -9,9 +9,12 @@ This module handles all AI configuration including:
 """
 
 import os
+import logging
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -190,6 +193,16 @@ class AIConfig:
     
     def get_api_key(self, provider: str) -> Optional[str]:
         """Get API key for a specific provider"""
+        # First try dynamic API key manager
+        try:
+            from app.services.api_key_manager import api_key_manager
+            dynamic_key = api_key_manager.get_api_key(provider)
+            if dynamic_key:
+                return dynamic_key
+        except Exception as e:
+            logger.warning(f"Failed to get dynamic API key for {provider}: {e}")
+        
+        # Fallback to environment variables
         env_vars = {
             "openai": "OPENAI_API_KEY",
             "anthropic": ["ANTHROPIC_API_KEY", "CLAUDE_API_KEY"],  # Try both names

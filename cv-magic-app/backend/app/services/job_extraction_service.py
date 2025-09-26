@@ -122,11 +122,11 @@ TEXT TO ANALYZE:
             # Use safe string replacement to avoid format issues with braces
             prompt = prompt_template.replace('{job_description}', job_description[:3000])
             
-            # Use centralized AI service instead of direct HTTP calls
-            from app.ai.ai_service import ai_service
+            # Use enhanced AI service with API key validation
+            from app.services.enhanced_ai_service import enhanced_ai_service
             
             try:
-                ai_response = await ai_service.generate_response(
+                ai_response = await enhanced_ai_service.generate_response_with_validation(
                     prompt=prompt,
                     system_prompt="You are a precise job information extractor. CRITICAL: Return ONLY a valid JSON object that starts with { and ends with }. Do NOT wrap in code blocks. Do NOT add any text before or after the JSON. Use double quotes for all keys. If information is not available, use null. Your response must be parsable by json.loads() without modification.",
                     temperature=0.1,

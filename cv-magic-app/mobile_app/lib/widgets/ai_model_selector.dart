@@ -4,6 +4,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../core/theme/app_theme.dart';
 import '../models/ai_model.dart';
 import '../services/ai_model_service.dart';
+import '../services/api_key_service.dart';
+import 'api_key_input_dialog.dart';
 
 class AIModelSelector extends StatefulWidget {
   final VoidCallback? onModelChanged;
@@ -25,11 +27,15 @@ class _AIModelSelectorState extends State<AIModelSelector>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  final APIKeyService _apiKeyService = APIKeyService();
+  Map<String, dynamic> _providerStatus = {};
+  bool _isLoadingStatus = false;
+
   @override
   void initState() {
     super.initState();
     _isExpanded = widget.isExpanded;
-    
+
     _animationController = AnimationController(
       duration: AppTheme.normalAnimation,
       vsync: this,
@@ -44,6 +50,7 @@ class _AIModelSelectorState extends State<AIModelSelector>
     ));
 
     _animationController.forward();
+    _loadProviderStatus();
   }
 
   @override
@@ -52,7 +59,69 @@ class _AIModelSelectorState extends State<AIModelSelector>
     super.dispose();
   }
 
+  Future<void> _loadProviderStatus() async {
+    setState(() {
+      _isLoadingStatus = true;
+    });
+
+    try {
+      final status = await _apiKeyService.getProvidersStatus();
+      if (mounted) {
+        setState(() {
+          _providerStatus = status;
+          _isLoadingStatus = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingStatus = false;
+        });
+      }
+    }
+  }
+
+  String _getProviderFromModel(String modelId) {
+    // Map model IDs to providers
+    if (modelId.startsWith('gpt-') || modelId == 'gpt-5-nano') {
+      return 'openai';
+    } else if (modelId.startsWith('claude-')) {
+      return 'anthropic';
+    } else if (modelId.startsWith('deepseek-')) {
+      return 'deepseek';
+    }
+    return 'unknown';
+  }
+
+  String _getProviderDisplayName(String provider) {
+    switch (provider) {
+      case 'openai':
+        return 'OpenAI';
+      case 'anthropic':
+        return 'Anthropic (Claude)';
+      case 'deepseek':
+        return 'DeepSeek';
+      default:
+        return provider;
+    }
+  }
+
+  bool _hasValidAPIKey(String provider) {
+    final status = _providerStatus[provider];
+    if (status == null) return false;
+    return status['api_key_configured'] == true &&
+        status['api_key_valid'] == true;
+  }
+
   Future<void> _changeModel(String modelId) async {
+    final provider = _getProviderFromModel(modelId);
+
+    // Check if API key is configured and valid
+    if (!_hasValidAPIKey(provider)) {
+      _showAPIKeyRequiredDialog(provider, modelId);
+      return;
+    }
+
     final aiModelService = Provider.of<AIModelService>(context, listen: false);
     await aiModelService.changeModel(modelId);
 
@@ -72,6 +141,30 @@ class _AIModelSelectorState extends State<AIModelSelector>
         ),
       );
     }
+  }
+
+  void _showAPIKeyRequiredDialog(String provider, String modelId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => APIKeyInputDialog(
+        provider: provider,
+        providerDisplayName: _getProviderDisplayName(provider),
+        onSuccess: () async {
+          await _loadProviderStatus();
+          // Try to change model again after API key is set
+          final aiModelService =
+              Provider.of<AIModelService>(context, listen: false);
+          await aiModelService.changeModel(modelId);
+          if (widget.onModelChanged != null) {
+            widget.onModelChanged!();
+          }
+        },
+        onCancel: () {
+          // Do nothing, user cancelled
+        },
+      ),
+    );
   }
 
   void _toggleExpanded() {
@@ -119,7 +212,10 @@ class _AIModelSelectorState extends State<AIModelSelector>
                             const SizedBox(height: 16),
                             _buildModelDropdown(allModels, currentModel.id),
                             const SizedBox(height: 16),
-                            _buildRecommendedModels(recommendedModels, currentModel.id),
+                            _buildAPIKeyManagementSection(),
+                            const SizedBox(height: 16),
+                            _buildRecommendedModels(
+                                recommendedModels, currentModel.id),
                             const SizedBox(height: 16),
                             _buildModelInfo(),
                             const SizedBox(height: 16),
@@ -333,7 +429,7 @@ class _AIModelSelectorState extends State<AIModelSelector>
     return DropdownButtonFormField<String>(
       value: currentModelId,
       isExpanded: true,
-      menuMaxHeight: 200,
+      menuMaxHeight: 400,
       decoration: InputDecoration(
         labelText: 'Select AI Model',
         prefixIcon: const Icon(Icons.psychology_rounded),
@@ -342,33 +438,58 @@ class _AIModelSelectorState extends State<AIModelSelector>
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 12,
+          vertical: 8,
         ),
       ),
       items: allModels.map((model) {
+        final provider = _getProviderFromModel(model.id);
+        final hasValidAPIKey = _hasValidAPIKey(provider);
+
         return DropdownMenuItem<String>(
           value: model.id,
-          child: Row(
-            children: [
-              Icon(
-                model.icon,
-                color: model.color,
-                size: 18,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  model.isRecommended 
-                    ? '${model.name} ⭐'
-                    : model.name,
-                  style: AppTheme.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: Row(
+              children: [
+                Icon(
+                  model.icon,
+                  color: model.color,
+                  size: 18,
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          model.isRecommended ? '${model.name} ⭐' : model.name,
+                          style: AppTheme.bodySmall.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                      if (!hasValidAPIKey)
+                        Tooltip(
+                          message: 'API key required',
+                          child: Icon(
+                            Icons.key_off_rounded,
+                            size: 12,
+                            color: Colors.orange,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (hasValidAPIKey)
+                  Icon(
+                    Icons.check_circle_rounded,
+                    size: 16,
+                    color: Colors.green,
+                  ),
+              ],
+            ),
           ),
         );
       }).toList(),
@@ -423,16 +544,16 @@ class _AIModelSelectorState extends State<AIModelSelector>
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       gradient: isSelected
-                          ? LinearGradient(
-                              colors: [model.color, model.color.withOpacity(0.8)]
-                            )
+                          ? LinearGradient(colors: [
+                              model.color,
+                              model.color.withOpacity(0.8)
+                            ])
                           : null,
                       color: isSelected ? null : AppTheme.neutralGray50,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected
-                            ? model.color
-                            : AppTheme.neutralGray300,
+                        color:
+                            isSelected ? model.color : AppTheme.neutralGray300,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -474,6 +595,178 @@ class _AIModelSelectorState extends State<AIModelSelector>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildAPIKeyManagementSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.neutralGray50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.neutralGray200,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.key_rounded,
+                color: AppTheme.primaryTeal,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'API Key Management',
+                style: AppTheme.labelMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              if (_isLoadingStatus)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildProviderStatusList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProviderStatusList() {
+    final providers = ['openai', 'anthropic', 'deepseek'];
+
+    return Column(
+      children: providers.map((provider) {
+        final status = _providerStatus[provider];
+        final hasKey = status?['api_key_configured'] == true;
+        final isValid = status?['api_key_valid'] == true;
+        final displayName = _getProviderDisplayName(provider);
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isValid
+                  ? Colors.green.withOpacity(0.3)
+                  : hasKey
+                      ? Colors.orange.withOpacity(0.3)
+                      : AppTheme.neutralGray200,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                _getProviderIcon(provider),
+                color: isValid
+                    ? Colors.green
+                    : hasKey
+                        ? Colors.orange
+                        : AppTheme.neutralGray400,
+                size: 18,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: AppTheme.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isValid
+                          ? 'API key configured and valid'
+                          : hasKey
+                              ? 'API key configured but invalid'
+                              : 'No API key configured',
+                      style: AppTheme.labelSmall.copyWith(
+                        color: isValid
+                            ? Colors.green
+                            : hasKey
+                                ? Colors.orange
+                                : AppTheme.neutralGray500,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isValid)
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.green,
+                  size: 16,
+                )
+              else
+                TextButton(
+                  onPressed: () => _showAPIKeyDialog(provider),
+                  style: TextButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    hasKey ? 'Update' : 'Configure',
+                    style: AppTheme.labelSmall.copyWith(
+                      color: AppTheme.primaryTeal,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  IconData _getProviderIcon(String provider) {
+    switch (provider) {
+      case 'openai':
+        return Icons.auto_awesome_rounded;
+      case 'anthropic':
+        return Icons.psychology_alt_rounded;
+      case 'deepseek':
+        return Icons.code_rounded;
+      default:
+        return Icons.smart_toy_rounded;
+    }
+  }
+
+  void _showAPIKeyDialog(String provider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => APIKeyInputDialog(
+        provider: provider,
+        providerDisplayName: _getProviderDisplayName(provider),
+        onSuccess: () async {
+          await _loadProviderStatus();
+        },
+        onCancel: () {
+          // Do nothing, user cancelled
+        },
+      ),
     );
   }
 

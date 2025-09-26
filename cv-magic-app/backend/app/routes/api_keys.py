@@ -1,0 +1,276 @@
+"""
+API Key Management Routes
+
+This module provides REST API endpoints for managing API keys
+for all AI providers dynamically.
+"""
+
+from fastapi import APIRouter, HTTPException, Depends, status
+from pydantic import BaseModel, Field
+from typing import Dict, Any, Optional
+import logging
+
+from app.services.api_key_manager import api_key_manager
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/api-keys", tags=["API Keys"])
+
+
+class APIKeyRequest(BaseModel):
+    """Request model for setting API key"""
+    provider: str = Field(..., description="AI provider (openai, anthropic, deepseek)")
+    api_key: str = Field(..., description="API key for the provider")
+
+
+class APIKeyResponse(BaseModel):
+    """Response model for API key operations"""
+    success: bool
+    message: str
+    provider: Optional[str] = None
+    is_valid: Optional[bool] = None
+
+
+class ProviderStatusResponse(BaseModel):
+    """Response model for provider status"""
+    provider: str
+    has_api_key: bool
+    is_valid: bool
+    last_validated: Optional[str] = None
+    created_at: Optional[str] = None
+
+
+class AllProvidersStatusResponse(BaseModel):
+    """Response model for all providers status"""
+    providers: Dict[str, ProviderStatusResponse]
+    session_id: str
+
+
+@router.post("/set", response_model=APIKeyResponse)
+async def set_api_key(
+    request: APIKeyRequest,
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Set API key for a specific provider
+    
+    Args:
+        request: API key request data
+        current_user: Current authenticated user
+        
+    Returns:
+        APIKeyResponse: Result of the operation
+    """
+    try:
+        # Validate provider
+        valid_providers = ['openai', 'anthropic', 'deepseek']
+        if request.provider not in valid_providers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid provider. Must be one of: {', '.join(valid_providers)}"
+            )
+        
+        # Set the API key
+        success = api_key_manager.set_api_key(request.provider, request.api_key)
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to set API key for {request.provider}"
+            )
+        
+        # Validate the key
+        is_valid, validation_message = api_key_manager.validate_api_key(
+            request.provider, request.api_key
+        )
+        
+        return APIKeyResponse(
+            success=True,
+            message=f"API key set for {request.provider}. {validation_message}",
+            provider=request.provider,
+            is_valid=is_valid
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting API key for {request.provider}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
+@router.post("/validate/{provider}", response_model=APIKeyResponse)
+async def validate_api_key(
+    provider: str,
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Validate API key for a specific provider
+    
+    Args:
+        provider: AI provider name
+        current_user: Current authenticated user
+        
+    Returns:
+        APIKeyResponse: Validation result
+    """
+    try:
+        # Validate provider
+        valid_providers = ['openai', 'anthropic', 'deepseek']
+        if provider not in valid_providers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid provider. Must be one of: {', '.join(valid_providers)}"
+            )
+        
+        # Check if API key exists
+        if not api_key_manager.has_api_key(provider):
+            return APIKeyResponse(
+                success=False,
+                message=f"No API key found for {provider}",
+                provider=provider,
+                is_valid=False
+            )
+        
+        # Validate the key
+        is_valid, message = api_key_manager.validate_api_key(provider)
+        
+        return APIKeyResponse(
+            success=True,
+            message=message,
+            provider=provider,
+            is_valid=is_valid
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error validating API key for {provider}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
+@router.get("/status", response_model=AllProvidersStatusResponse)
+async def get_providers_status(
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Get status of all AI providers
+    
+    Args:
+        current_user: Current authenticated user
+        
+    Returns:
+        AllProvidersStatusResponse: Status of all providers
+    """
+    try:
+        status_data = api_key_manager.get_provider_status()
+        
+        providers = {}
+        for provider, data in status_data.items():
+            providers[provider] = ProviderStatusResponse(
+                provider=provider,
+                has_api_key=data['has_api_key'],
+                is_valid=data['is_valid'],
+                last_validated=data['last_validated'],
+                created_at=data['created_at']
+            )
+        
+        return AllProvidersStatusResponse(
+            providers=providers,
+            session_id=api_key_manager._session_id
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting providers status: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
+@router.delete("/{provider}", response_model=APIKeyResponse)
+async def remove_api_key(
+    provider: str,
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Remove API key for a specific provider
+    
+    Args:
+        provider: AI provider name
+        current_user: Current authenticated user
+        
+    Returns:
+        APIKeyResponse: Result of the operation
+    """
+    try:
+        # Validate provider
+        valid_providers = ['openai', 'anthropic', 'deepseek']
+        if provider not in valid_providers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid provider. Must be one of: {', '.join(valid_providers)}"
+            )
+        
+        # Remove the API key
+        success = api_key_manager.remove_api_key(provider)
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to remove API key for {provider}"
+            )
+        
+        return APIKeyResponse(
+            success=True,
+            message=f"API key removed for {provider}",
+            provider=provider,
+            is_valid=False
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error removing API key for {provider}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
+@router.delete("/", response_model=APIKeyResponse)
+async def clear_all_api_keys(
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Clear all API keys
+    
+    Args:
+        current_user: Current authenticated user
+        
+    Returns:
+        APIKeyResponse: Result of the operation
+    """
+    try:
+        api_key_manager.clear_all_keys()
+        
+        return APIKeyResponse(
+            success=True,
+            message="All API keys cleared",
+            provider=None,
+            is_valid=False
+        )
+        
+    except Exception as e:
+        logger.error(f"Error clearing all API keys: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
