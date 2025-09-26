@@ -1,9 +1,21 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/config/app_config.dart';
 
 class APIKeyService {
   static const String _baseUrl = AppConfig.baseUrl;
+
+  /// Get authentication token from SharedPreferences
+  Future<String?> _getAuthToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('auth_token');
+    } catch (e) {
+      print('Error getting auth token: $e');
+      return null;
+    }
+  }
 
   /// Set API key for a specific provider
   Future<bool> setAPIKey(String provider, String apiKey) async {
@@ -35,12 +47,18 @@ class APIKeyService {
   /// Validate API key for a specific provider
   Future<bool> validateAPIKey(String provider) async {
     try {
+      final authToken = await _getAuthToken();
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+
+      if (authToken != null && authToken.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $authToken';
+      }
+
       final response = await http.post(
         Uri.parse('$_baseUrl/api/api-keys/validate/$provider'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${AppConfig.authToken}',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -58,13 +76,15 @@ class APIKeyService {
   /// Get status of all providers
   Future<Map<String, dynamic>> getProvidersStatus() async {
     try {
-      // Try authenticated endpoint first
-      if (AppConfig.authToken.isNotEmpty) {
+      final authToken = await _getAuthToken();
+
+      // Try authenticated endpoint first if token is available
+      if (authToken != null && authToken.isNotEmpty) {
         final response = await http.get(
           Uri.parse('$_baseUrl/api/api-keys/status'),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${AppConfig.authToken}',
+            'Authorization': 'Bearer $authToken',
           },
         );
 
@@ -97,12 +117,18 @@ class APIKeyService {
   /// Remove API key for a specific provider
   Future<bool> removeAPIKey(String provider) async {
     try {
+      final authToken = await _getAuthToken();
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+
+      if (authToken != null && authToken.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $authToken';
+      }
+
       final response = await http.delete(
         Uri.parse('$_baseUrl/api/api-keys/$provider'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${AppConfig.authToken}',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -120,12 +146,18 @@ class APIKeyService {
   /// Clear all API keys
   Future<bool> clearAllAPIKeys() async {
     try {
+      final authToken = await _getAuthToken();
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+
+      if (authToken != null && authToken.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $authToken';
+      }
+
       final response = await http.delete(
         Uri.parse('$_baseUrl/api/api-keys/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${AppConfig.authToken}',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {

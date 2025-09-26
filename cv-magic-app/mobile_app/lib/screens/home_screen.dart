@@ -4,6 +4,7 @@ import 'dart:async';
 import '../core/theme/app_theme.dart';
 import '../utils/responsive_utils.dart';
 import '../widgets/mobile_bottom_nav.dart';
+import 'intro_screen.dart';
 import 'welcome_home_page.dart';
 import 'cv_magic_organized_page.dart';
 import 'cv_generation_screen.dart';
@@ -27,16 +28,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String _userName = 'User';
   bool _shouldClearCVMagicResults = false;
 
+  final IntroScreen _introScreen = const IntroScreen();
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   late final CVMagicOrganizedPage _cvMagicPage;
   late final CVGenerationScreen _cvGenerationScreen;
   final GlobalKey<JobTrackingScreenState> _jobTrackingKey =
       GlobalKey<JobTrackingScreenState>();
   late final JobTrackingScreen _jobTrackingScreen;
-  int _cvMagicClearVersion = 0;
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
+    TabData(
+      icon: Icons.play_circle_outline,
+      label: 'Tutorial',
+      gradient: AppTheme.primaryGradient,
+      color: AppTheme.primaryTeal,
+    ),
     TabData(
       icon: Icons.home_rounded,
       label: 'Home',
@@ -181,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _onTabTapped(int index) {
     print('🔄 [HOME_SCREEN] Tab tapped: $index');
-    if (index == 3) {
+    if (index == 4) {
       print('📊 [HOME_SCREEN] Job Tracking tab selected - triggering refresh');
       // Trigger refresh of job tracking screen when tab is selected
       _jobTrackingKey.currentState?.refreshJobs();
@@ -192,16 +199,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _navigateToCVGenerationTab() {
-    debugPrint('🚀 HomeScreen: Navigating to CV Generation tab (index 2)');
-    _onTabTapped(2); // Switch to CV Generation tab (index 2)
+    debugPrint('🚀 HomeScreen: Navigating to CV Generation tab (index 3)');
+    _onTabTapped(3); // Switch to CV Generation tab (index 3)
   }
 
   void _navigateToCVMagicTab() {
     debugPrint(
-        '🔄 HomeScreen: Navigating to CV Magic tab (index 1) and clearing results');
+        '🔄 HomeScreen: Navigating to CV Magic tab (index 2) and clearing results');
     _shouldClearCVMagicResults = true; // Set flag to clear results
-    debugPrint('🔄 HomeScreen: Flag set, now switching to tab index 1');
-    _onTabTapped(1); // Switch to CV Magic tab (index 1)
+    debugPrint('🔄 HomeScreen: Flag set, now switching to tab index 2');
+    _onTabTapped(2); // Switch to CV Magic tab (index 2)
   }
 
   @override
@@ -248,10 +255,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return IndexedStack(
       index: _currentIndex,
       children: [
-        _welcomeHomePage, // Index 0: Home
-        _cvMagicPage, // Index 1: CV Magic
-        _cvGenerationScreen, // Index 2: CV Generation
-        _jobTrackingScreen, // Index 3: Job Tracking
+        _introScreen, // Index 0: Tutorial/Intro
+        _welcomeHomePage, // Index 1: Home
+        _cvMagicPage, // Index 2: CV Magic
+        _cvGenerationScreen, // Index 3: CV Generation
+        _jobTrackingScreen, // Index 4: Job Tracking
       ],
     );
   }
