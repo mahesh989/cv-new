@@ -9,7 +9,7 @@ class APIService {
   static const String apiPrefix = '/api';
 
   // Get the current selected model from AI service
-  static String get currentModelId => aiModelService.currentModelId;
+  static String? get currentModelId => aiModelService.currentModelId;
 
   // Get auth token from shared preferences
   static Future<String?> _getAuthToken() async {
@@ -34,8 +34,8 @@ class APIService {
     final requestHeaders = {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
-      // Always include current model in headers
-      'X-Current-Model': currentModelId,
+      // Include current model in headers if available
+      if (currentModelId != null) 'X-Current-Model': currentModelId!,
       ...?headers,
     };
 
@@ -190,8 +190,10 @@ class APIService {
       request.headers['Authorization'] = 'Bearer $token';
     }
 
-    // Add current model header
-    request.headers['X-Current-Model'] = currentModelId;
+    // Add current model header if available
+    if (currentModelId != null) {
+      request.headers['X-Current-Model'] = currentModelId!;
+    }
 
     // Add file
     request.files.add(http.MultipartFile.fromBytes(

@@ -49,12 +49,19 @@ async def get_current_model(
         except Exception as e:
             logger.warning(f"⚠️ Error switching to header model {x_current_model}: {e}")
     
-    # Fall back to current model from AI service if not set
+    # Require model to be specified - no fallback
     if not model_to_use:
         # Import ai_service lazily to avoid circular import
         from app.ai.ai_service import ai_service
         current_status = ai_service.get_current_status()
-        model_to_use = current_status.get('current_model', 'gpt-3.5-turbo')
+        current_model = current_status.get('current_model')
+        
+        if not current_model:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No AI model selected. Please select a provider and model in the homepage first."
+            )
+        model_to_use = current_model
     
     # Store the model in the request context
     request_model.set(model_to_use)

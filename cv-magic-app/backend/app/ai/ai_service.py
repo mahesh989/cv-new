@@ -33,6 +33,12 @@ class AIServiceManager:
         # Initialize available providers
         self._initialize_providers()
     
+    def refresh_providers(self):
+        """Refresh all providers after API keys have been updated"""
+        logger.info("🔄 Refreshing AI providers after API key changes")
+        self._providers.clear()
+        self._initialize_providers()
+    
     def _initialize_providers(self):
         """Initialize all available providers based on API keys"""
         for provider_name, provider_class in self._provider_classes.items():

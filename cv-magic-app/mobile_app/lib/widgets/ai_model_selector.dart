@@ -4,7 +4,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../core/theme/app_theme.dart';
 import '../models/ai_model.dart';
 import '../services/ai_model_service.dart';
-import '../services/api_key_service.dart';
 import 'api_key_input_dialog.dart';
 
 class AIModelSelector extends StatefulWidget {
@@ -27,8 +26,6 @@ class _AIModelSelectorState extends State<AIModelSelector>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  final APIKeyService _apiKeyService = APIKeyService();
-  Map<String, dynamic> _providerStatus = {};
   String _selectedProvider = 'select'; // Track selected provider
 
   @override
@@ -50,30 +47,12 @@ class _AIModelSelectorState extends State<AIModelSelector>
     ));
 
     _animationController.forward();
-    _loadProviderStatus();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadProviderStatus() async {
-    print('🔄 [STATUS] Loading provider status...');
-
-    try {
-      final status = await _apiKeyService.getProvidersStatus();
-      print('📊 [STATUS] Loaded provider status: $status');
-      if (mounted) {
-        setState(() {
-          _providerStatus = status;
-        });
-        print('✅ [STATUS] Provider status updated in state');
-      }
-    } catch (e) {
-      print('❌ [STATUS] Error loading provider status: $e');
-    }
   }
 
   String _getProviderFromModel(String modelId) {
@@ -101,19 +80,6 @@ class _AIModelSelectorState extends State<AIModelSelector>
     }
   }
 
-  bool _hasValidAPIKey(String provider) {
-    final status = _providerStatus[provider];
-    print('🔍 [API_KEY] Checking status for $provider: $status');
-    if (status == null) {
-      print('❌ [API_KEY] No status found for $provider');
-      return false;
-    }
-    final hasKey = status['api_key_configured'] == true;
-    final isValid = status['api_key_valid'] == true;
-    print('🔑 [API_KEY] $provider - hasKey: $hasKey, isValid: $isValid');
-    return hasKey && isValid;
-  }
-
   Future<void> _changeModel(String modelId) async {
     // No API key validation needed here - handled at provider level
     final aiModelService = Provider.of<AIModelService>(context, listen: false);
@@ -127,7 +93,7 @@ class _AIModelSelectorState extends State<AIModelSelector>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '✅ Switched to ${aiModelService.currentModel.name}',
+            '✅ Switched to ${aiModelService.currentModel?.name ?? 'Unknown'}',
           ),
           backgroundColor: AppTheme.primaryTeal,
           behavior: SnackBarBehavior.floating,
@@ -161,6 +127,42 @@ class _AIModelSelectorState extends State<AIModelSelector>
         final currentModel = aiModelService.currentModel;
         final allModels = aiModelService.getAllModels();
         final recommendedModels = aiModelService.getRecommendedModels();
+
+        // If no model is selected, show selection prompt
+        if (currentModel == null) {
+          return AppTheme.createCard(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.smart_toy_rounded,
+                    size: 48,
+                    color: AppTheme.neutralGray400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '🤖 AI Model Configuration',
+                    style: AppTheme.headingSmall.copyWith(
+                      color: AppTheme.primaryCosmic,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please select a provider and configure your API key to use AI features',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.neutralGray600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildProviderDropdown(),
+                ],
+              ),
+            ),
+          );
+        }
 
         return AnimatedBuilder(
           animation: _animationController,
@@ -678,7 +680,6 @@ class _AIModelSelectorState extends State<AIModelSelector>
           provider: provider,
           providerDisplayName: _getProviderDisplayName(provider),
           onSuccess: () async {
-            await _loadProviderStatus();
             // Automatically switch to the provider and select first model after successful API key setup
             final models = aiModelService.getAllModels();
             final providerModels = models

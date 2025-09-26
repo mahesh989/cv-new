@@ -8,12 +8,11 @@ class APIKeyService {
   /// Set API key for a specific provider
   Future<bool> setAPIKey(String provider, String apiKey) async {
     try {
+      // Use set-initial endpoint for first-time setup (no auth required)
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/api-keys/set'),
+        Uri.parse('$_baseUrl/api/api-keys/set-initial'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':
-              'Bearer ${AppConfig.authToken}', // You'll need to get this from your auth service
         },
         body: jsonEncode({
           'provider': provider,

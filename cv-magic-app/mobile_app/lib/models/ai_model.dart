@@ -179,11 +179,6 @@ class AIModelsConfig {
     return availableModels[id];
   }
 
-  // Get default model
-  static AIModel getDefaultModel() {
-    return availableModels[defaultModelId]!;
-  }
-
   // Get all model IDs
   static List<String> getAllModelIds() {
     return availableModels.keys.toList();
@@ -196,7 +191,9 @@ class AIModelsConfig {
 
   // Get recommended models
   static List<AIModel> getRecommendedModels() {
-    return availableModels.values.where((model) => model.isRecommended).toList();
+    return availableModels.values
+        .where((model) => model.isRecommended)
+        .toList();
   }
 
   // Get models by provider
@@ -224,5 +221,11 @@ class AIModelsConfig {
         .map((model) => model.provider)
         .toSet()
         .toList();
+  }
+
+  // Get default model - returns null to force user selection
+  static AIModel? getDefaultModel() {
+    // No default model - user must select provider and configure API key first
+    return null;
   }
 }

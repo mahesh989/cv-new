@@ -95,7 +95,7 @@ class EnhancedAIService:
             'anthropic': 'Anthropic (Claude)',
             'deepseek': 'DeepSeek'
         }
-        return display_names.get(provider, provider.title())
+        return display_names.get(provider, provider.title() if provider else "Unknown")
     
     async def generate_response_with_validation(
         self,

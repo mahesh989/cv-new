@@ -177,19 +177,10 @@ class AIConfig:
                 self._current_model = default_model
                 return
         
-        # Fallback to first available model with API key
-        for provider in ["openai", "anthropic", "deepseek"]:
-            if self.get_api_key(provider):
-                models = list(self._model_configs.get(provider, {}).keys())
-                if models:
-                    self._current_provider = provider
-                    self._current_model = models[0]  # Use first available model
-                    return
-        
-        # Ultimate fallback - use first available provider instead of hardcoding specific model
-        logger.warning("No AI providers available with valid API keys - using default configuration")
-        self._current_provider = "openai"
-        self._current_model = "gpt-4o-mini"
+        # No automatic fallback - require user to configure via frontend
+        logger.warning("No AI providers auto-configured - user must select provider and configure API keys via frontend")
+        self._current_provider = None
+        self._current_model = None
     
     def get_api_key(self, provider: str) -> Optional[str]:
         """Get API key for a specific provider"""
@@ -202,23 +193,7 @@ class AIConfig:
         except Exception as e:
             logger.warning(f"Failed to get dynamic API key for {provider}: {e}")
         
-        # Fallback to environment variables
-        env_vars = {
-            "openai": "OPENAI_API_KEY",
-            "anthropic": ["ANTHROPIC_API_KEY", "CLAUDE_API_KEY"],  # Try both names
-            "deepseek": "DEEPSEEK_API_KEY"
-        }
-        
-        env_var = env_vars.get(provider)
-        if env_var:
-            if isinstance(env_var, list):
-                # Try multiple environment variable names
-                for var_name in env_var:
-                    key = os.getenv(var_name)
-                    if key:
-                        return key
-            else:
-                return os.getenv(env_var)
+        # No environment variable fallback - user must configure via frontend
         return None
     
     def get_current_model(self) -> Tuple[str, str]:

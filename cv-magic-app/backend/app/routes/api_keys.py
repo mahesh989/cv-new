@@ -53,6 +53,17 @@ async def set_api_key(
     request: APIKeyRequest,
     current_user: UserData = Depends(get_current_user)
 ):
+    """Set API key for authenticated users"""
+    return await _set_api_key_internal(request)
+
+
+@router.post("/set-initial", response_model=APIKeyResponse)
+async def set_initial_api_key(request: APIKeyRequest):
+    """Set API key for initial setup (no auth required)"""
+    return await _set_api_key_internal(request)
+
+
+async def _set_api_key_internal(request: APIKeyRequest):
     """
     Set API key for a specific provider
     
@@ -85,6 +96,14 @@ async def set_api_key(
         is_valid, validation_message = api_key_manager.validate_api_key(
             request.provider, request.api_key
         )
+        
+        # Refresh AI providers to pick up the new API key
+        try:
+            from app.ai.ai_service import ai_service
+            ai_service.refresh_providers()
+            logger.info(f"🔄 Refreshed AI providers after setting {request.provider} API key")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to refresh AI providers: {e}")
         
         return APIKeyResponse(
             success=True,

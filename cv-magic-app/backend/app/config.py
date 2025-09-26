@@ -96,11 +96,11 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = "your_app_password"
     SMTP_USE_TLS: bool = True
     
-    # AI/ML Services
-    OPENAI_API_KEY: str = ""
-    ANTHROPIC_API_KEY: str = ""
-    CLAUDE_API_KEY: str = ""  # Alternative name for Anthropic
-    DEEPSEEK_API_KEY: str = ""
+    # AI/ML Services - API keys now handled dynamically via user configuration
+    # OPENAI_API_KEY: str = ""        # Commented out - use dynamic API key management
+    # ANTHROPIC_API_KEY: str = ""     # Commented out - use dynamic API key management  
+    # CLAUDE_API_KEY: str = ""        # Commented out - use dynamic API key management
+    # DEEPSEEK_API_KEY: str = ""      # Commented out - use dynamic API key management
     
     # Logging
     LOG_LEVEL: str = "INFO"
@@ -131,6 +131,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"  # Ignore extra environment variables
 
 
 # Create global settings instance

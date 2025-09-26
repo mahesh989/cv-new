@@ -53,6 +53,22 @@ class _AITestWidgetState extends State<AITestWidget> {
   Widget build(BuildContext context) {
     return Consumer<AIModelService>(
       builder: (context, aiService, child) {
+        final currentModel = aiService.currentModel;
+
+        // Show message if no model is selected
+        if (currentModel == null) {
+          return AppTheme.createCard(
+            child: Center(
+              child: Text(
+                'Please select an AI model first',
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.neutralGray600,
+                ),
+              ),
+            ),
+          );
+        }
+
         return AppTheme.createCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +78,7 @@ class _AITestWidgetState extends State<AITestWidget> {
                 children: [
                   Icon(
                     Icons.psychology_rounded,
-                    color: aiService.currentModel.color,
+                    color: currentModel.color,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -77,10 +93,10 @@ class _AITestWidgetState extends State<AITestWidget> {
                           ),
                         ),
                         Text(
-                          aiService.currentModel.name,
+                          currentModel.name,
                           style: AppTheme.bodyMedium.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: aiService.currentModel.color,
+                            color: currentModel.color,
                           ),
                         ),
                       ],

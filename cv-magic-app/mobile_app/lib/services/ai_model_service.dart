@@ -11,13 +11,16 @@ class AIModelService extends ChangeNotifier {
 
   static const String _selectedModelKey = 'selected_ai_model';
 
-  AIModel _currentModel = AIModelsConfig.getDefaultModel();
+  AIModel? _currentModel = AIModelsConfig.getDefaultModel();
   bool _isInitialized = false;
 
   // Getters
-  AIModel get currentModel => _currentModel;
-  String get currentModelId => _currentModel.id;
+  AIModel? get currentModel => _currentModel;
+  String? get currentModelId => _currentModel?.id;
   bool get isInitialized => _isInitialized;
+
+  // Check if model is selected
+  bool get hasModelSelected => _currentModel != null;
 
   // Initialize service and load saved model
   Future<void> initialize() async {
@@ -31,14 +34,12 @@ class AIModelService extends ChangeNotifier {
         final savedModel = AIModelsConfig.getModel(savedModelId);
         if (savedModel != null) {
           _currentModel = savedModel;
-          debugPrint('🤖 Loaded saved AI model: ${_currentModel.name}');
+          debugPrint('🤖 Loaded saved AI model: ${_currentModel!.name}');
         } else {
-          debugPrint(
-              '⚠️ Saved model not found, using default: ${_currentModel.name}');
+          debugPrint('⚠️ Saved model not found, no default model available');
         }
       } else {
-        debugPrint(
-            '🤖 No saved model found, using default: ${_currentModel.name}');
+        debugPrint('🤖 No saved model found, no default model available');
       }
     } catch (e) {
       debugPrint('❌ Error initializing AI model service: $e');
@@ -50,7 +51,7 @@ class AIModelService extends ChangeNotifier {
 
   // Change the current model
   Future<void> changeModel(String modelId) async {
-    if (modelId == _currentModel.id) return;
+    if (modelId == _currentModel?.id) return;
 
     final newModel = AIModelsConfig.getModel(modelId);
     if (newModel == null) {
@@ -65,7 +66,7 @@ class AIModelService extends ChangeNotifier {
 
       // Update current model
       _currentModel = newModel;
-      debugPrint('✅ Changed AI model to: ${_currentModel.name}');
+      debugPrint('✅ Changed AI model to: ${_currentModel!.name}');
 
       // Sync with backend
       await _syncModelWithBackend(modelId);
@@ -76,9 +77,19 @@ class AIModelService extends ChangeNotifier {
     }
   }
 
-  // Reset to default model
-  Future<void> resetToDefault() async {
-    await changeModel(AIModelsConfig.defaultModelId);
+  // Clear model selection (no default model available)
+  Future<void> clearSelection() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_selectedModelKey);
+
+      _currentModel = null;
+      debugPrint('🗑️ Cleared AI model selection');
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ Error clearing AI model selection: $e');
+    }
   }
 
   // Get all available models
@@ -102,27 +113,30 @@ class AIModelService extends ChangeNotifier {
   }
 
   // Get current model info as map (for API calls)
-  Map<String, dynamic> getCurrentModelInfo() {
+  Map<String, dynamic>? getCurrentModelInfo() {
+    if (_currentModel == null) return null;
     return {
-      'id': _currentModel.id,
-      'name': _currentModel.name,
-      'provider': _currentModel.provider,
+      'id': _currentModel!.id,
+      'name': _currentModel!.name,
+      'provider': _currentModel!.provider,
     };
   }
 
   // Check if model is current
   bool isCurrentModel(String modelId) {
-    return _currentModel.id == modelId;
+    return _currentModel?.id == modelId;
   }
 
   // Get model performance info
-  String getModelPerformanceInfo() {
-    return '${_currentModel.speed} Speed • ${_currentModel.cost} Cost';
+  String? getModelPerformanceInfo() {
+    if (_currentModel == null) return null;
+    return '${_currentModel!.speed} Speed • ${_currentModel!.cost} Cost';
   }
 
   // Get model capabilities as string
-  String getModelCapabilities() {
-    return _currentModel.capabilities.join(', ');
+  String? getModelCapabilities() {
+    if (_currentModel == null) return null;
+    return _currentModel!.capabilities.join(', ');
   }
 
   // Clear saved model preference
@@ -249,12 +263,16 @@ class AIModelService extends ChangeNotifier {
     await initialize();
 
     // Try to sync with backend, but don't fail if not authenticated
-    try {
-      await _syncModelWithBackend(_currentModel.id);
-      debugPrint('✅ AI model synced with backend');
-    } catch (e) {
-      debugPrint(
-          '⚠️ Could not sync AI model with backend (likely not authenticated): $e');
+    if (_currentModel != null) {
+      try {
+        await _syncModelWithBackend(_currentModel!.id);
+        debugPrint('✅ AI model synced with backend');
+      } catch (e) {
+        debugPrint(
+            '⚠️ Could not sync AI model with backend (likely not authenticated): $e');
+      }
+    } else {
+      debugPrint('⚠️ No AI model selected, skipping backend sync');
     }
 
     // Try to get backend status, but don't fail if not authenticated
@@ -271,8 +289,13 @@ class AIModelService extends ChangeNotifier {
 
   // Sync with backend after authentication
   Future<void> syncAfterAuth() async {
+    if (_currentModel == null) {
+      debugPrint('⚠️ No AI model selected, skipping post-auth sync');
+      return;
+    }
+
     try {
-      await _syncModelWithBackend(_currentModel.id);
+      await _syncModelWithBackend(_currentModel!.id);
       debugPrint('✅ AI model synced with backend after authentication');
     } catch (e) {
       debugPrint(
