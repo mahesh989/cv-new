@@ -121,6 +121,16 @@
     });
   </script>
   
+  <!-- Initialize plugins -->
+  <script>
+    // Initialize path_provider for web
+    window.flutterWebPlugins = window.flutterWebPlugins || {};
+    window.flutterWebPlugins.path_provider = {
+      getApplicationDocumentsDirectory: function() {
+        return window.localStorage;
+      }
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

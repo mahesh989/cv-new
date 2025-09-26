@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
+import 'youtube_player_web_widget.dart';
 
 class YouTubePlayerWidget extends StatefulWidget {
   final String videoId;
@@ -18,81 +19,54 @@ class YouTubePlayerWidget extends StatefulWidget {
 }
 
 class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
-  late WebViewController _controller;
+  late YoutubePlayerController _controller;
   bool _isLoading = true;
   bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeWebView();
+    _initializeYoutubePlayer();
   }
 
-  void _initializeWebView() {
+  void _initializeYoutubePlayer() {
     try {
-      // Platform-specific WebView creation
-      late final PlatformWebViewControllerCreationParams params;
-      if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-        params = WebKitWebViewControllerCreationParams(
-          allowsInlineMediaPlayback: true,
-          mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
-        );
-      } else {
-        params = const PlatformWebViewControllerCreationParams();
-      }
+      _controller = YoutubePlayerController(
+        initialVideoId: widget.videoId,
+        flags: YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+          disableDragSeek: true,
+          loop: false,
+          isLive: false,
+          forceHD: false,
+          enableCaption: true,
+          hideControls: false,
+          hideThumbnail: false,
+          showLiveFullscreenButton: false,
+        ),
+      );
 
-      final WebViewController controller =
-          WebViewController.fromPlatformCreationParams(params);
+      // Add listener for player states
+      _controller.addListener(() {
+        if (_controller.value.errorCode != 0) {
+          print('🎬 YouTube player error: ${_controller.value.errorCode}');
+          setState(() {
+            _isLoading = false;
+            _hasError = true;
+          });
+        }
 
-      controller
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(const Color(0x00000000))
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onProgress: (int progress) {
-              print('🎬 WebView loading progress: $progress%');
-            },
-            onPageStarted: (String url) {
-              print('🎬 Page started loading: $url');
-              setState(() {
-                _isLoading = true;
-                _hasError = false;
-              });
-            },
-            onPageFinished: (String url) {
-              print('🎬 Page finished loading: $url');
-              setState(() {
-                _isLoading = false;
-              });
-            },
-            onWebResourceError: (WebResourceError error) {
-              print('🎬 WebView error: ${error.description}');
-              setState(() {
-                _isLoading = false;
-                _hasError = true;
-              });
-            },
-            onNavigationRequest: (NavigationRequest request) {
-              print('🎬 Navigation request: ${request.url}');
-              if (request.url.startsWith('https://www.youtube.com/')) {
-                return NavigationDecision.navigate;
-              }
-              return NavigationDecision.prevent;
-            },
-          ),
-        )
-        ..loadRequest(Uri.parse(_getEmbedUrl()));
+        if (_controller.value.isReady) {
+          setState(() {
+            _isLoading = false;
+            _hasError = false;
+          });
+        }
+      });
 
-      // Platform-specific configuration
-      if (controller.platform is AndroidWebViewController) {
-        AndroidWebViewController.enableDebugging(true);
-        (controller.platform as AndroidWebViewController)
-            .setMediaPlaybackRequiresUserGesture(false);
-      }
-
-      _controller = controller;
     } catch (e) {
-      print('🎬 WebView initialization error: $e');
+      print('🎬 YouTube player initialization error: $e');
       setState(() {
         _isLoading = false;
         _hasError = true;
@@ -100,39 +74,57 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
     }
   }
 
-  String _getEmbedUrl() {
-    // Convert YouTube URL to embed format
-    // From: https://www.youtube.com/watch?v=io-5b07geD4
-    // To: https://www.youtube.com/embed/io-5b07geD4
-    final url =
-        'https://www.youtube.com/embed/${widget.videoId}?autoplay=0&loop=1&controls=1&modestbranding=1&rel=0&enablejsapi=1';
-    print('🎬 YouTube embed URL: $url'); // Debug log
-    return url;
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: AspectRatio(
-          aspectRatio: widget.aspectRatio ?? 16 / 9,
+    if (kIsWeb) {
+      return YouTubePlayerWeb(
+        videoId: widget.videoId,
+        aspectRatio: widget.aspectRatio,
+      );
+    }
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use 90% of available width
+        final width = constraints.maxWidth * 0.9;
+        final height = width * (widget.aspectRatio ?? 9/16);
+        
+        return Center(
           child: Container(
-            color: Colors.black,
-            child: _buildContent(),
+            width: width,
+            height: height * 2,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                color: Colors.black,
+                height: height,
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: widget.aspectRatio ?? 16 / 9,
+                    child: _buildContent(),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -143,7 +135,24 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
 
     return Stack(
       children: [
-        WebViewWidget(controller: _controller),
+        YoutubePlayer(
+          controller: _controller,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.red,
+          progressColors: ProgressBarColors(
+            playedColor: Colors.red,
+            handleColor: Colors.redAccent,
+          ),
+          onReady: () {
+            setState(() {
+              _isLoading = false;
+            });
+          },
+          onEnded: (data) {
+            _controller.seekTo(Duration.zero);
+            _controller.pause();
+          },
+        ),
         if (_isLoading) _buildLoadingWidget(),
       ],
     );
@@ -223,7 +232,7 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
                 _hasError = false;
                 _isLoading = true;
               });
-              _initializeWebView();
+              _initializeYoutubePlayer();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue.shade600,

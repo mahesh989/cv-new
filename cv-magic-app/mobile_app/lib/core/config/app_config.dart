@@ -6,7 +6,7 @@ class AppConfig {
   static const String apiBaseUrl = '$baseUrl/api';
 
   // Video and media paths (now using YouTube embed)
-  static const String youtubeVideoId = 'io-5b07geD4';
+  static const String youtubeVideoId = 'a9IUom_eUGI';
 
   // App constants
   static const String appName = 'CV Magic';
