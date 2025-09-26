@@ -214,6 +214,40 @@ async def get_providers_status(
         )
 
 
+@router.get("/status-initial", response_model=AllProvidersStatusResponse)
+async def get_providers_status_initial():
+    """
+    Get status of all AI providers for initial setup (no auth required)
+    
+    Returns:
+        AllProvidersStatusResponse: Status of all providers
+    """
+    try:
+        status_data = api_key_manager.get_provider_status()
+        
+        providers = {}
+        for provider, data in status_data.items():
+            providers[provider] = ProviderStatusResponse(
+                provider=provider,
+                has_api_key=data['has_api_key'],
+                is_valid=data['is_valid'],
+                last_validated=data['last_validated'],
+                created_at=data['created_at']
+            )
+        
+        return AllProvidersStatusResponse(
+            providers=providers,
+            session_id=api_key_manager._session_id
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting providers status: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
 @router.delete("/{provider}", response_model=APIKeyResponse)
 async def remove_api_key(
     provider: str,

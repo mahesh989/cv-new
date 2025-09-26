@@ -58,11 +58,27 @@ class APIKeyService {
   /// Get status of all providers
   Future<Map<String, dynamic>> getProvidersStatus() async {
     try {
+      // Try authenticated endpoint first
+      if (AppConfig.authToken.isNotEmpty) {
+        final response = await http.get(
+          Uri.parse('$_baseUrl/api/api-keys/status'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${AppConfig.authToken}',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          return data['providers'] ?? {};
+        }
+      }
+
+      // Fallback to unauthenticated endpoint for initial setup
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/api-keys/status'),
+        Uri.parse('$_baseUrl/api/api-keys/status-initial'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${AppConfig.authToken}',
         },
       );
 
