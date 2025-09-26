@@ -502,6 +502,48 @@ async def tailor_cv_with_real_data(
     current_user: User = Depends(get_current_user)
 ):
     """
+    Tailor CV using real CV and recommendation data for a specific company (requires auth)
+    """
+    try:
+        logger.info(f"🎯 Real CV tailoring request for company: {company}")
+        
+        # Load real CV and recommendation data
+        original_cv, recommendations = cv_tailoring_service.load_real_cv_and_recommendation(company)
+        
+        # Create tailoring request
+        request = CVTailoringRequest(
+            original_cv=original_cv,
+            recommendations=recommendations,
+            custom_instructions=custom_instructions,
+            target_ats_score=target_ats_score
+        )
+        
+        # Process the CV tailoring
+        response = await cv_tailoring_service.tailor_cv(request)
+        
+        return response
+        
+    except FileNotFoundError as e:
+        logger.error(f"❌ Files not found for {company}: {e}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"CV or recommendation data not found for company: {company}. Error: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"❌ Real CV tailoring failed for {company}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"CV tailoring failed: {str(e)}"
+        )
+
+
+@router.post("/tailor-real-test")
+async def tailor_cv_with_real_data_test(
+    company: str,
+    custom_instructions: str = None,
+    target_ats_score: int = 85
+):
+    """
     Tailor CV using real CV and recommendation data for a specific company
     
     This endpoint uses the actual CV and recommendation files from cv-analysis folder.

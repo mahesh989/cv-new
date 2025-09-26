@@ -92,13 +92,24 @@ async def get_company_ai_recommendations(company: str):
     """
     try:
         from app.utils.timestamp_utils import TimestampUtils
+        # Try multiple naming patterns for AI recommendations
         ai_file_path = TimestampUtils.find_latest_timestamped_file(
             Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}"),
             f"{company}_ai_recommendation",
             "json",
         )
         if not ai_file_path:
+            # Try input_recommendation pattern
+            ai_file_path = TimestampUtils.find_latest_timestamped_file(
+                Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}"),
+                f"{company}_input_recommendation",
+                "json",
+            )
+        if not ai_file_path:
+            # Try non-timestamped files
             ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_ai_recommendation.json")
+        if not ai_file_path.exists():
+            ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_input_recommendation.json")
         
         if not ai_file_path.exists():
             return JSONResponse(
@@ -110,14 +121,47 @@ async def get_company_ai_recommendations(company: str):
         with open(ai_file_path, 'r', encoding='utf-8') as f:
             ai_data = json.load(f)
         
-        return JSONResponse(content={
-            "success": True,
-            "company": ai_data.get("company"),
-            "generated_at": ai_data.get("generated_at"),
-            "recommendation_content": ai_data.get("recommendation_content"),
-            "ai_model_info": ai_data.get("ai_model_info"),
-            "file_path": str(ai_file_path)
-        })
+        # Handle different file formats
+        if "recommendation_content" in ai_data:
+            # Standard AI recommendation format
+            content = {
+                "success": True,
+                "company": ai_data.get("company"),
+                "generated_at": ai_data.get("generated_at"),
+                "recommendation_content": ai_data.get("recommendation_content"),
+                "ai_model_info": ai_data.get("ai_model_info"),
+                "file_path": str(ai_file_path)
+            }
+        else:
+            # Input recommendation format - extract recommendations from analyze_match_entries
+            recommendations = []
+            
+            # Extract from analyze_match_entries if available
+            if "analyze_match_entries" in ai_data and ai_data["analyze_match_entries"]:
+                for entry in ai_data["analyze_match_entries"]:
+                    if "content" in entry:
+                        recommendations.append(entry["content"])
+            
+            # Extract component analysis strategic priorities
+            if "component_analysis_entries" in ai_data and ai_data["component_analysis_entries"]:
+                for entry in ai_data["component_analysis_entries"]:
+                    if "component_analyses" in entry and "skills" in entry["component_analyses"]:
+                        skills_data = entry["component_analyses"]["skills"]
+                        if "skills_analysis" in skills_data:
+                            for skill in skills_data["skills_analysis"]:
+                                if "jd_application" in skill:
+                                    recommendations.append(f"💡 {skill['skill']}: {skill['jd_application']}")
+            
+            content = {
+                "success": True,
+                "company": ai_data.get("company", "Australia_for_UNHCR"),
+                "generated_at": ai_data.get("timestamp") or (ai_data.get("analyze_match_entries", [{}])[0].get("timestamp") if ai_data.get("analyze_match_entries") else None),
+                "recommendation_content": "\n\n".join(recommendations) if recommendations else "Comprehensive analysis available",
+                "ai_model_info": {"model": "comprehensive_analysis", "source": "input_recommendation"},
+                "file_path": str(ai_file_path)
+            }
+        
+        return JSONResponse(content=content)
         
     except Exception as e:
         logger.error(f"❌ [AI_RECOMMENDATIONS] Error fetching recommendations for {company}: {str(e)}")

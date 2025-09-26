@@ -1875,19 +1875,64 @@ async def get_analysis_results(company: str):
         # Use timestamped AI recommendation file with fallback
         from app.utils.timestamp_utils import TimestampUtils
         company_dir = base_dir / company
+        # Try multiple naming patterns for AI recommendations
         ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
         if not ai_recommendation_file:
+            # Try input_recommendation pattern
+            ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
+        if not ai_recommendation_file:
+            # Try non-timestamped files
             ai_recommendation_file = company_dir / f"{company}_ai_recommendation.json"
+        if not ai_recommendation_file.exists():
+            ai_recommendation_file = company_dir / f"{company}_input_recommendation.json"
         
         if ai_recommendation_file.exists():
             try:
                 with open(ai_recommendation_file, 'r', encoding='utf-8') as f:
                     ai_data = json.load(f)
-                result["ai_recommendation"] = {
-                    "content": ai_data.get("recommendation_content"),
-                    "generated_at": ai_data.get("generated_at"),
-                    "model_info": ai_data.get("ai_model_info", {})
-                }
+                
+                # Handle different file formats
+                if "recommendation_content" in ai_data:
+                    # Standard AI recommendation format
+                    result["ai_recommendation"] = {
+                        "content": ai_data.get("recommendation_content"),
+                        "generated_at": ai_data.get("generated_at"),
+                        "model_info": ai_data.get("ai_model_info", {})
+                    }
+                else:
+                    # Input recommendation format - extract recommendations
+                    recommendations = []
+                    
+                    # Extract strategic decision from analyze_match_entries
+                    if "analyze_match_entries" in ai_data and ai_data["analyze_match_entries"]:
+                        for entry in ai_data["analyze_match_entries"]:
+                            if "content" in entry and "STRATEGIC PURSUE" in entry["content"]:
+                                # Extract strategic priorities section
+                                content = entry["content"]
+                                if "IF PURSUING - STRATEGIC PRIORITIES:" in content:
+                                    priorities_section = content.split("IF PURSUING - STRATEGIC PRIORITIES:")[1]
+                                    if "HONEST BOTTOM LINE:" in priorities_section:
+                                        priorities_section = priorities_section.split("HONEST BOTTOM LINE:")[0]
+                                    recommendations.append(f"🎯 Strategic Priorities:\n{priorities_section.strip()}")
+                    
+                    # Extract component analysis recommendations
+                    if "component_analysis_entries" in ai_data and ai_data["component_analysis_entries"]:
+                        for entry in ai_data["component_analysis_entries"]:
+                            if "component_analyses" in entry and "skills" in entry["component_analyses"]:
+                                skills_data = entry["component_analyses"]["skills"]
+                                if "skills_analysis" in skills_data:
+                                    skill_recommendations = []
+                                    for skill in skills_data["skills_analysis"]:
+                                        if "jd_application" in skill and skill.get("relevance_score", "0").isdigit() and int(skill.get("relevance_score", "0")) >= 80:
+                                            skill_recommendations.append(f"• {skill['skill']}: {skill['jd_application']}")
+                                    if skill_recommendations:
+                                        recommendations.append(f"💡 Key Skills to Highlight:\n" + "\n".join(skill_recommendations))
+                    
+                    result["ai_recommendation"] = {
+                        "content": "\n\n".join(recommendations) if recommendations else "Analysis completed - strategic insights available",
+                        "generated_at": ai_data.get("timestamp") or (ai_data.get("analyze_match_entries", [{}])[0].get("timestamp") if ai_data.get("analyze_match_entries") else None),
+                        "model_info": {"model": "comprehensive_analysis", "source": "input_recommendation"}
+                    }
             except Exception as e:
                 logger.warning(f"Failed to load AI recommendation for {company}: {e}")
                 result["ai_recommendation"] = None
