@@ -23,7 +23,18 @@ def scrape_job_description(url: str) -> str:
             ),
             "Accept-Language": "en-US,en;q=0.9",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
         }
+        
+        # Add Seek-specific headers
+        if 'seek.com.au' in url:
+            headers["Referer"] = "https://www.seek.com.au/"
+            headers["Sec-Fetch-Dest"] = "document"
+            headers["Sec-Fetch-Mode"] = "navigate"
+            headers["Sec-Fetch-Site"] = "same-origin"
 
         # Add timeout to prevent hanging requests
         response = requests.get(url, headers=headers, timeout=30)
@@ -34,6 +45,8 @@ def scrape_job_description(url: str) -> str:
         # Site-specific extraction
         if 'ethicaljobs.com.au' in url:
             return scrape_ethicaljobs(soup)
+        elif 'seek.com.au' in url:
+            return scrape_seek(soup)
         else:
             return scrape_generic(soup)
 
@@ -45,6 +58,74 @@ def scrape_job_description(url: str) -> str:
         return f"Error fetching job description: {str(e)}"
     except Exception as e:
         return f"Unexpected error while scraping job description: {str(e)}"
+
+
+def scrape_seek(soup: BeautifulSoup) -> str:
+    """Specialized scraper for Seek.com.au website"""
+    
+    # Check if job is expired/removed
+    expired_indicators = [
+        "This job is no longer advertised",
+        "Jobs remain on SEEK for 30 days",
+        "no longer advertised",
+        "job is no longer available",
+        "This job has been removed",
+        "Job posting has expired"
+    ]
+    
+    page_text = soup.get_text().lower()
+    for indicator in expired_indicators:
+        if indicator.lower() in page_text:
+            return f"Error: Job posting has expired or been removed from Seek. The job is no longer available for application."
+    
+    # Remove unwanted elements
+    unwanted_selectors = [
+        'nav', 'header', 'footer', 'aside', 'menu',
+        '[class*="navigation"]', '[class*="nav"]', '[class*="menu"]',
+        '[class*="sidebar"]', '[class*="footer"]', '[class*="header"]',
+        'form', 'button', '[class*="search"]', '[class*="filter"]',
+        '[class*="breadcrumb"]', '[class*="pagination"]',
+        'script', 'style', 'noscript',
+        '[class*="advertisement"]', '[class*="ad"]',
+        '[class*="cookie"]', '[class*="consent"]'
+    ]
+    
+    for selector in unwanted_selectors:
+        for element in soup.select(selector):
+            element.decompose()
+    
+    # Look for Seek-specific job content selectors
+    job_content_selectors = [
+        '[data-automation-id="jobAdDetails"]',  # Main job description
+        '[data-automation-id="job-detail-title"]',  # Job title
+        '[data-automation-id="jobAdDetails"] div',  # Job description content
+        '[class*="jobAdDetails"]',
+        '[class*="job-description"]',
+        '[class*="job-details"]',
+        'main', 'article'
+    ]
+    
+    job_text = ""
+    for selector in job_content_selectors:
+        elements = soup.select(selector)
+        if elements:
+            # Get text from the first matching element
+            job_text = elements[0].get_text(separator=' ', strip=True)
+            job_text = re.sub(r'\s+', ' ', job_text).strip()
+            if len(job_text) > 200:  # Ensure we have substantial content
+                break
+    
+    # If no specific job content found, try to extract from the main content area
+    if not job_text or len(job_text) < 100:
+        # Look for main content containers
+        main_containers = soup.find_all(['div', 'section'], class_=re.compile(r'(content|main|body)', re.I))
+        for container in main_containers:
+            text = container.get_text(separator=' ', strip=True)
+            text = re.sub(r'\s+', ' ', text).strip()
+            if len(text) > len(job_text):
+                job_text = text
+    
+    return final_cleanup(job_text)
 
 
 def scrape_ethicaljobs(soup: BeautifulSoup) -> str:
