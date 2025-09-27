@@ -505,8 +505,131 @@ class ComponentAssembler:
         except Exception as e:
             logger.error("[ASSEMBLER] ATS calculation failed: %s", e)
             return {"error": str(e)}
-
-    async def assemble_analysis(self, company: str, cv_text: Optional[str] = None, jd_url: str = "") -> Dict[str, Any]:
+    
+    def _generate_minimal_cv_results(self, minimal_analysis: Dict[str, Any], company: str) -> Dict[str, Any]:
+        """
+        Generate realistic results for minimal CVs.
+        
+        Args:
+            minimal_analysis: Results from minimal CV analyzer
+            company: Company name
+            
+        Returns:
+            Dict with realistic analysis results
+        """
+        try:
+            logger.info("📄 [ASSEMBLER] Generating realistic results for minimal CV")
+            
+            realistic_analysis = minimal_analysis['realistic_analysis']
+            constraints = minimal_analysis['constraints']
+            warnings = minimal_analysis['warnings']
+            
+            # Extract scores with constraints applied
+            core_competency = realistic_analysis['core_competency']
+            experience_analysis = realistic_analysis['experience_analysis']
+            skills_analysis = realistic_analysis['skills_analysis']
+            overall_assessment = realistic_analysis['overall_assessment']
+            
+            # Generate ATS score breakdown
+            ats_breakdown = {
+                "category1_skills_relevance": {
+                    "technical_skills": 15.0,  # Constrained score
+                    "domain_skills": 10.0,
+                    "soft_skills": 5.0,
+                    "total": 30.0
+                },
+                "category2_component_analysis": {
+                    "core_competency": {
+                        "technical_depth": core_competency['technical_depth'],
+                        "core_skills_match_percentage": core_competency['core_skills_match_percentage'],
+                        "technical_stack_fit_percentage": core_competency['technical_stack_fit_percentage'],
+                        "data_familiarity_score": core_competency['data_familiarity_score'],
+                        "total": (core_competency['technical_depth'] + 
+                                core_competency['core_skills_match_percentage'] + 
+                                core_competency['technical_stack_fit_percentage'] + 
+                                core_competency['data_familiarity_score']) / 4
+                    },
+                    "experience_seniority": {
+                        "experience_alignment": experience_analysis['experience_alignment'],
+                        "experience_match_percentage": experience_analysis['experience_match_percentage'],
+                        "responsibility_fit_percentage": experience_analysis['responsibility_fit_percentage'],
+                        "role_seniority": experience_analysis['role_seniority'],
+                        "leadership_readiness_score": experience_analysis['leadership_readiness_score'],
+                        "total": (experience_analysis['experience_alignment'] + 
+                                experience_analysis['experience_match_percentage'] + 
+                                experience_analysis['responsibility_fit_percentage'] + 
+                                experience_analysis['role_seniority'] + 
+                                experience_analysis['leadership_readiness_score']) / 5
+                    },
+                    "potential_ability": {
+                        "growth_trajectory_score": 15.0,  # Constrained
+                        "complexity_readiness_score": 10.0,
+                        "learning_agility_score": 15.0,
+                        "jd_problem_complexity": 5.0,
+                        "total": 45.0
+                    },
+                    "company_fit": {
+                        "industry_fit": 10.0,  # Constrained
+                        "domain_overlap_percentage": 8.0,
+                        "stakeholder_fit_score": 7.0,
+                        "business_cycle_alignment": 5.0,
+                        "total": 30.0
+                    }
+                },
+                "category3_requirement_bonus": {
+                    "bonus_points": 0.0,
+                    "total": 0.0
+                }
+            }
+            
+            # Calculate final ATS score
+            final_ats_score = (
+                ats_breakdown["category1_skills_relevance"]["total"] +
+                ats_breakdown["category2_component_analysis"]["core_competency"]["total"] +
+                ats_breakdown["category2_component_analysis"]["experience_seniority"]["total"] +
+                ats_breakdown["category2_component_analysis"]["potential_ability"]["total"] +
+                ats_breakdown["category2_component_analysis"]["company_fit"]["total"] +
+                ats_breakdown["category3_requirement_bonus"]["total"]
+            )
+            
+            # Generate insights
+            insights = {
+                "key_strengths": [
+                    f"Basic technical skills: {', '.join(core_competency.get('available_skills', []))}",
+                    "Willingness to learn and develop"
+                ],
+                "critical_gaps": [
+                    "Limited experience information",
+                    "Minimal skills demonstration",
+                    "No quantified achievements",
+                    "Lack of detailed work history"
+                ],
+                "recommendations": [
+                    "Add more detailed work experience",
+                    "Include specific projects and achievements",
+                    "Quantify accomplishments with numbers",
+                    "Add more technical skills and certifications",
+                    "Include leadership and teamwork examples"
+                ],
+                "overall_assessment": overall_assessment['realistic_summary']
+            }
+            
+            return {
+                "ats_breakdown": ats_breakdown,
+                "final_ats_score": final_ats_score,
+                "insights": insights,
+                "minimal_cv_analysis": minimal_analysis,
+                "warnings": warnings,
+                "realistic_constraints": constraints,
+                "analysis_type": "minimal_cv_realistic"
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ [ASSEMBLER] Failed to generate minimal CV results: {e}")
+            return {
+                "error": f"Failed to generate minimal CV results: {str(e)}",
+                "minimal_cv_analysis": minimal_analysis
+            }
         """
         Assemble complete ATS component analysis for a company.
         
@@ -529,6 +652,15 @@ class ComponentAssembler:
                 if not isinstance(cv_text, str) or not cv_text.strip():
                     raise ValueError("Provided CV text is empty")
             jd_text = self._read_jd_text(company)
+            
+            # Check if CV is minimal and use appropriate analyzer
+            from app.services.minimal_cv_analyzer import minimal_cv_analyzer
+            minimal_analysis = minimal_cv_analyzer.analyze_minimal_cv(cv_text, jd_text)
+            
+            if minimal_analysis['is_minimal_cv']:
+                logger.info("📄 [ASSEMBLER] CV is minimal - using realistic analysis with constraints")
+                return self._generate_minimal_cv_results(minimal_analysis, company)
+            
             matched_skills = self._read_matched_skills(company)
             
             # Run component analyses
