@@ -1,7 +1,7 @@
 """
 Unified Latest File Selector (App Module)
-Only selects latest tailored CV for a company.
-Raises error if no tailored CV exists. No fallback to original.
+Selects appropriate CV based on JD usage history.
+Uses original CV for first-time JD usage, tailored CV for subsequent uses.
 """
 
 import re
@@ -23,8 +23,8 @@ class FileContext:
 
 class UnifiedLatestFileSelector:
     """
-    Single unified file selector that always picks the latest available tailored CV.
-    Eliminates fresh/rerun logic; if no tailored exists, raises FileNotFoundError.
+    Unified file selector that picks CV based on JD usage history.
+    Uses original CV for first-time JD usage, tailored CV for subsequent uses.
     """
 
     def __init__(self, base_path: str = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"):
@@ -33,22 +33,71 @@ class UnifiedLatestFileSelector:
         self.tailored_path = self.cvs_path / "tailored"
         self.original_path = self.cvs_path / "original"
 
-    def get_latest_cv_for_company(self, company: str) -> FileContext:
+    def get_latest_cv_for_company(self, company: str, jd_url: str = "", jd_text: str = "") -> FileContext:
         """
-        Get the absolute latest CV file for a company (tailored only).
-        Pattern: {company}_tailored_cv_{YYYYMMDD_HHMMSS}.json
+        Get the appropriate CV file for a company based on JD usage history.
+        Uses original CV for first-time JD usage, tailored CV for subsequent uses.
+        
+        Args:
+            company: Company name
+            jd_url: Job description URL (optional)
+            jd_text: Job description text (optional)
         """
-        print(f"🔍 Searching for latest CV for company: {company}")
-
+        print(f"🔍 Searching for appropriate CV for company: {company}")
+        
+        # Check if this is first-time JD usage
+        from app.services.jd_usage_tracker import jd_usage_tracker
+        
+        is_first_time = jd_usage_tracker.is_jd_first_time_usage(jd_url, jd_text)
+        print(f"📊 JD usage status: {'First time' if is_first_time else 'Previously used'}")
+        
+        if is_first_time:
+            # Use original CV for first-time JD usage
+            print("📄 Using original CV for first-time JD usage")
+            return self._get_original_cv_for_company(company)
+        else:
+            # Use tailored CV for subsequent uses
+            print("📄 Using tailored CV for subsequent JD usage")
+            return self._get_tailored_cv_for_company(company)
+    
+    def _get_original_cv_for_company(self, company: str) -> FileContext:
+        """Get original CV for a company"""
+        print(f"🔍 Searching for original CV for company: {company}")
+        
+        candidates = self._find_original_cv_files()
+        print(f"📁 Found {len(candidates)} original CV candidates")
+        
+        if not candidates:
+            print("❌ No original CV candidates found")
+            raise FileNotFoundError(f"No original CV found for company: {company}")
+        
+        # Select the latest original CV
+        candidates.sort(key=lambda c: c[2], reverse=True)
+        json_path, txt_path, timestamp = candidates[0]
+        
+        print(f"✅ Selected original CV: {json_path}")
+        return FileContext(
+            json_path=json_path,
+            txt_path=txt_path,
+            exists=True,
+            file_type="original",
+            timestamp=timestamp if timestamp != "00000000_000000" else None,
+            company=company,
+        )
+    
+    def _get_tailored_cv_for_company(self, company: str) -> FileContext:
+        """Get tailored CV for a company"""
+        print(f"🔍 Searching for tailored CV for company: {company}")
+        
         candidates = self._find_tailored_cv_files(company)
         print(f"📁 Found {len(candidates)} tailored CV candidates")
-
+        
         if not candidates:
             print("❌ No tailored CV candidates found")
             raise FileNotFoundError(f"No tailored CV found for company: {company}")
-
+        
         latest_cv = self._select_best_cv_candidate(candidates, company)
-        print(f"✅ Selected latest CV: {latest_cv.file_type} - {latest_cv.json_path}")
+        print(f"✅ Selected tailored CV: {latest_cv.file_type} - {latest_cv.json_path}")
         return latest_cv
 
     def get_latest_cv_across_all(self, company: str) -> FileContext:

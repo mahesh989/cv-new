@@ -152,10 +152,14 @@ class ContextAwareAnalysisPipeline:
             context = await self._initialize_context(jd_url, company, is_rerun, user_id)
             results.context = context
             
-            # Step 2: CV Selection using unified selector
+            # Step 2: CV Selection using unified selector with JD usage tracking
             from app.unified_latest_file_selector import unified_selector
-            cv_context = unified_selector.get_latest_cv_for_company(company)
+            cv_context = unified_selector.get_latest_cv_for_company(company, jd_url, "")
             context.cv_context = cv_context
+            
+            # Record JD usage for tracking
+            from app.services.jd_usage_tracker import jd_usage_tracker
+            jd_usage_tracker.record_jd_usage(jd_url, "", company, "")
             
             if not cv_context.exists:
                 results.errors.append(f"No CV found for company: {company}")
@@ -479,7 +483,7 @@ class ContextAwareAnalysisPipeline:
         try:
             logger.info("🔧 [CONTEXT_AWARE_PIPELINE] Running component analysis")
             
-            component_result = await self.component_assembler.assemble_analysis(context.company)
+            component_result = await self.component_assembler.assemble_analysis(context.company, jd_url=context.jd_url)
             
             results.component_analysis = component_result
             results.steps_completed.append("component_analysis")

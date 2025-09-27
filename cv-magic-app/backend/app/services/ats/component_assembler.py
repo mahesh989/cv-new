@@ -46,12 +46,23 @@ class ComponentAssembler:
         self.ats_calculator = ATSScoreCalculator()
         self.consistency_validator = ConsistencyValidator()
 
-    def _read_cv_text(self, company_name: str = "Unknown") -> str:
-        """Read CV text from the latest available CV (tailored or original)."""
+    def _read_cv_text(self, company_name: str = "Unknown", jd_url: str = "") -> str:
+        """Read CV text from the appropriate CV based on JD usage history."""
         from app.unified_latest_file_selector import unified_selector
         
-        logger.info("🔍 [COMPONENT_ASSEMBLER] Selecting latest CV across tailored+original")
-        cv_content = unified_selector.get_cv_content_across_all(company_name)
+        logger.info("🔍 [COMPONENT_ASSEMBLER] Selecting appropriate CV based on JD usage")
+        cv_context = unified_selector.get_latest_cv_for_company(company_name, jd_url, "")
+        
+        if not cv_context.exists:
+            raise FileNotFoundError(f"No CV found for company: {company_name}")
+        
+        # Read content from the selected CV
+        cv_file_path = cv_context.txt_path if cv_context.txt_path else cv_context.json_path
+        if not cv_file_path or not cv_file_path.exists():
+            raise FileNotFoundError(f"CV file not found: {cv_file_path}")
+        
+        with open(cv_file_path, 'r', encoding='utf-8') as f:
+            cv_content = f.read()
         
         if not cv_content:
             logger.error("❌ [COMPONENT_ASSEMBLER] Failed to get CV content")
@@ -495,12 +506,14 @@ class ComponentAssembler:
             logger.error("[ASSEMBLER] ATS calculation failed: %s", e)
             return {"error": str(e)}
 
-    async def assemble_analysis(self, company: str, cv_text: Optional[str] = None) -> Dict[str, Any]:
+    async def assemble_analysis(self, company: str, cv_text: Optional[str] = None, jd_url: str = "") -> Dict[str, Any]:
         """
         Assemble complete ATS component analysis for a company.
         
         Args:
             company: Company name for analysis
+            cv_text: Optional CV text (if not provided, will be read from files)
+            jd_url: Job description URL for JD-aware CV selection
             
         Returns:
             Dict containing assembled analysis results
@@ -508,9 +521,9 @@ class ComponentAssembler:
         logger.info("===== [ASSEMBLER] Starting component assembly for: %s =====", company)
         
         try:
-            # Read input data (auto-select latest across tailored+original when not provided)
+            # Read input data (auto-select appropriate CV based on JD usage when not provided)
             if cv_text is None:
-                cv_text = self._read_cv_text(company)
+                cv_text = self._read_cv_text(company, jd_url)
             else:
                 logger.info("📄 [ASSEMBLER] Using CV text provided by caller")
                 if not isinstance(cv_text, str) or not cv_text.strip():

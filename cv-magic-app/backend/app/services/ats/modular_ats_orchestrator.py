@@ -41,7 +41,7 @@ class ModularATSOrchestrator:
         
         try:
             # Use the assembler to run all components and assemble results
-            result = await self.assembler.assemble_analysis(company, cv_text=cv_text)
+            result = await self.assembler.assemble_analysis(company, cv_text=cv_text, jd_url="")
             
             logger.info("===== [MODULAR ATS] Component analysis completed for: %s =====", company)
             return result
