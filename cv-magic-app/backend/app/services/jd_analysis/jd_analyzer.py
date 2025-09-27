@@ -415,13 +415,13 @@ class JDAnalyzer:
             logger.warning(f"Failed to load existing analysis for {company_name}: {e}")
             return None
     
-    async def analyze_jd_text(self, jd_text: str, temperature: float = 0.3) -> JDAnalysisResult:
+    async def analyze_jd_text(self, jd_text: str, temperature: float = 0.0) -> JDAnalysisResult:
         """
         Analyze job description text and extract keywords
         
         Args:
             jd_text: Job description text to analyze
-            temperature: AI temperature for consistency (default: 0.3)
+            temperature: AI temperature for consistency (default: 0.0)
             
         Returns:
             JDAnalysisResult with extracted keywords
@@ -450,13 +450,13 @@ class JDAnalyzer:
             logger.error(f"JD analysis failed: {e}")
             raise Exception(f"Failed to analyze job description: {e}")
     
-    async def analyze_jd_file(self, file_path: Union[str, Path], temperature: float = 0.3) -> JDAnalysisResult:
+    async def analyze_jd_file(self, file_path: Union[str, Path], temperature: float = 0.0) -> JDAnalysisResult:
         """
         Analyze job description from file
         
         Args:
             file_path: Path to job description file
-            temperature: AI temperature for consistency (default: 0.3)
+            temperature: AI temperature for consistency (default: 0.0)
             
         Returns:
             JDAnalysisResult with extracted keywords
@@ -486,14 +486,14 @@ class JDAnalyzer:
             raise Exception(f"Failed to analyze job description file: {e}")
     
     async def analyze_company_jd(self, company_name: str, base_path: Optional[str] = None, 
-                                temperature: float = 0.3) -> JDAnalysisResult:
+                                temperature: float = 0.0) -> JDAnalysisResult:
         """
         Analyze job description using company name pattern
         
         Args:
             company_name: Company name (e.g., "Australia_for_UNHCR")
             base_path: Base path for JD files (optional, uses default if not provided)
-            temperature: AI temperature for consistency (default: 0.3)
+            temperature: AI temperature for consistency (default: 0.0)
             
         Returns:
             JDAnalysisResult with extracted keywords
@@ -515,14 +515,14 @@ class JDAnalyzer:
         return await self.analyze_jd_file(jd_file_path, temperature)
     
     async def analyze_and_save_company_jd(self, company_name: str, force_refresh: bool = False,
-                                        temperature: float = 0.3) -> JDAnalysisResult:
+                                        temperature: float = 0.0) -> JDAnalysisResult:
         """
         Analyze company JD and save result with caching logic
         
         Args:
             company_name: Company name (e.g., "Australia_for_UNHCR")
             force_refresh: Force re-analysis even if cached result exists
-            temperature: AI temperature for consistency (default: 0.3)
+            temperature: AI temperature for consistency (default: 0.0)
             
         Returns:
             JDAnalysisResult with extracted keywords
@@ -607,27 +607,27 @@ class JDAnalyzer:
 
 
 # Convenience functions for easy usage
-async def analyze_jd_text(jd_text: str, temperature: float = 0.3) -> JDAnalysisResult:
+async def analyze_jd_text(jd_text: str, temperature: float = 0.0) -> JDAnalysisResult:
     """Convenience function to analyze JD text"""
     analyzer = JDAnalyzer()
     return await analyzer.analyze_jd_text(jd_text, temperature)
 
 
-async def analyze_jd_file(file_path: Union[str, Path], temperature: float = 0.3) -> JDAnalysisResult:
+async def analyze_jd_file(file_path: Union[str, Path], temperature: float = 0.0) -> JDAnalysisResult:
     """Convenience function to analyze JD file"""
     analyzer = JDAnalyzer()
     return await analyzer.analyze_jd_file(file_path, temperature)
 
 
 async def analyze_company_jd(company_name: str, base_path: Optional[str] = None, 
-                           temperature: float = 0.3) -> JDAnalysisResult:
+                           temperature: float = 0.0) -> JDAnalysisResult:
     """Convenience function to analyze company JD using naming pattern"""
     analyzer = JDAnalyzer()
     return await analyzer.analyze_company_jd(company_name, base_path, temperature)
 
 
 async def analyze_and_save_company_jd(company_name: str, force_refresh: bool = False,
-                                    temperature: float = 0.3) -> JDAnalysisResult:
+                                    temperature: float = 0.0) -> JDAnalysisResult:
     """Convenience function to analyze and save company JD"""
     analyzer = JDAnalyzer()
     return await analyzer.analyze_and_save_company_jd(company_name, force_refresh, temperature)

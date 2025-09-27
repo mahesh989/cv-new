@@ -254,7 +254,7 @@ class AIRecommendationGenerator:
             response = await enhanced_ai_service.generate_response_with_validation(
                 prompt=prompt_content,
                 system_prompt="You are an expert CV strategist and career consultant. Provide detailed, actionable recommendations in the exact format requested.",
-                temperature=0.7,  # Balanced creativity and consistency
+                temperature=0.0,  # Zero temperature for maximum consistency
                 max_tokens=4000   # Allow for detailed responses
             )
             

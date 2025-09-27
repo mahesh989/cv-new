@@ -722,7 +722,7 @@ Updated JSON:"""
         # Generate response using AI
         response = await ai_service.generate_response(
             prompt=parsing_prompt,
-            temperature=0.1,  # Low temperature for consistent parsing
+            temperature=0.0,  # Zero temperature for maximum consistency
             max_tokens=4000
         )
         

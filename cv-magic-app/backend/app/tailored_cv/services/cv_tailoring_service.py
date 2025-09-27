@@ -325,13 +325,13 @@ class CVTailoringService:
         for attempt in range(max_attempts):
             # Use progressively lower temperature for more consistent results
             if attempt == 0:
-                temperature = 0.3
+                temperature = 0.0
             elif attempt == 1:
-                temperature = 0.2
+                temperature = 0.0
             elif attempt == 2:
-                temperature = 0.1
+                temperature = 0.0
             else:
-                temperature = 0.05  # Very low temperature for final attempts
+                temperature = 0.0  # Zero temperature for maximum consistency
             
             logger.info(f"[{request_id}] Attempt {attempt + 1}/{max_attempts} with temp={temperature}")
             logger.info(f"[{request_id}] - System prompt length: {len(system_prompt)}")
@@ -1225,7 +1225,7 @@ FIX: Output ONLY valid JSON!
             response = await ai_service.generate_response(
                 prompt=prompt,
                 system_prompt=system_prompt,
-                temperature=0.1,
+                temperature=0.0,
                 max_tokens=10
             )
             

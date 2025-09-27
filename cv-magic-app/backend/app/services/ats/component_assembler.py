@@ -630,6 +630,8 @@ class ComponentAssembler:
                 "error": f"Failed to generate minimal CV results: {str(e)}",
                 "minimal_cv_analysis": minimal_analysis
             }
+    
+    async def assemble_analysis(self, company: str, cv_text: Optional[str] = None, jd_url: str = "") -> Dict[str, Any]:
         """
         Assemble complete ATS component analysis for a company.
         

@@ -253,7 +253,7 @@ class ContextAwareAnalysisPipeline:
             
             cv_response = await ai_service.generate_response(
                 prompt=cv_prompt,
-                temperature=0.1,
+                temperature=0.0,
                 max_tokens=1000
             )
             

@@ -129,7 +129,7 @@ TEXT TO ANALYZE:
                 ai_response = await enhanced_ai_service.generate_response_with_validation(
                     prompt=prompt,
                     system_prompt="You are a precise job information extractor. CRITICAL: Return ONLY a valid JSON object that starts with { and ends with }. Do NOT wrap in code blocks. Do NOT add any text before or after the JSON. Use double quotes for all keys. If information is not available, use null. Your response must be parsable by json.loads() without modification.",
-                    temperature=0.1,
+                    temperature=0.0,
                     max_tokens=1000
                 )
                 

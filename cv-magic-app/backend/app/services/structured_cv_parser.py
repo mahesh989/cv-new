@@ -132,7 +132,7 @@ class LLMStructuredCVParser:
                 prompt=parsing_prompt,
                 system_prompt="You are an expert CV parser that preserves original content structure. Your primary goal is to maintain the exact formatting, bullet points, and descriptions as they appear in the original CV while organizing them into the specified JSON structure. Do NOT break down, summarize, or restructure the original content - preserve it exactly as written.",
                 max_tokens=4000,
-                temperature=0.1
+                temperature=0.0
             )
             
             # Parse the JSON response

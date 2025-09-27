@@ -25,7 +25,7 @@ class HybridSkillComparator:
         ai_service,
         cv_skills: Dict[str, list],
         jd_skills: Dict[str, list],
-        temperature: float = 0.3,
+        temperature: float = 0.0,
         max_tokens: int = 3000
     ) -> Dict[str, Any]:
         """

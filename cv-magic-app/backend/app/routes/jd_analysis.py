@@ -27,7 +27,7 @@ class JDAnalysisRequest(BaseModel):
     """Request model for JD analysis"""
     company_name: str
     force_refresh: bool = False
-    temperature: float = 0.3
+    temperature: float = 0.0
 
 
 class JDAnalysisResponse(BaseModel):
@@ -44,7 +44,7 @@ async def analyze_jd_endpoint(
     company_name: str,
     request: Request,
     force_refresh: bool = False,
-    temperature: float = 0.3
+    temperature: float = 0.0
 ):
     """
     Analyze job description for a company and save results

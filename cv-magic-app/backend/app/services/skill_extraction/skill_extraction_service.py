@@ -247,7 +247,7 @@ class SkillExtractionService:
         ai_response = await ai_service.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
-            temperature=0.1,
+            temperature=0.0,
             max_tokens=2000
         )
         
@@ -302,7 +302,7 @@ class SkillExtractionService:
         ai_response = await ai_service.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
-            temperature=0.1,
+            temperature=0.0,
             max_tokens=2000
         )
         

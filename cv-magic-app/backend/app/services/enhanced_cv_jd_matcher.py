@@ -22,7 +22,7 @@ class EnhancedCVJDMatcher:
     
     def __init__(self):
         self.max_retries = 3
-        self.temperature = 0.3  # Lower temperature for more consistent JSON
+        self.temperature = 0.0  # Zero temperature for maximum consistency
     
     def _create_strict_json_prompt(self, cv_text: str, jd_analysis: Dict[str, Any]) -> str:
         """Create a prompt that enforces strict JSON format"""

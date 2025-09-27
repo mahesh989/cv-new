@@ -370,7 +370,7 @@ Provide your response in JSON format with the following structure:
         return await self.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
-            temperature=0.3,  # Lower temperature for more consistent analysis
+            temperature=0.0,  # Zero temperature for maximum consistency
             max_tokens=2000
         )
     
@@ -415,7 +415,7 @@ Job Description:
         return await self.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
-            temperature=0.3,
+            temperature=0.0,
             max_tokens=3000
         )
     
@@ -480,7 +480,7 @@ Remember to classify keywords based on the language context they appear in. Focu
         return await self.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
-            temperature=0.3,
+            temperature=0.0,
             max_tokens=2000
         )
     
@@ -568,7 +568,7 @@ Remember to use intelligent matching - look for semantic meaning, synonyms, vari
         return await self.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
-            temperature=0.3,
+            temperature=0.0,
             max_tokens=3000
         )
 

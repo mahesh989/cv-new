@@ -453,7 +453,7 @@ Return only this formatted analysis.
 """
 
 
-async def execute_skills_semantic_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.3, max_tokens: int = 3000) -> str:
+async def execute_skills_semantic_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.0, max_tokens: int = 3000) -> str:
     """Execute the comparison prompt using the centralized AI service and return formatted text."""
     try:
         # Use JSON mode for consistent structured output
@@ -773,7 +773,7 @@ async def execute_skills_comparison_with_json_output(
     ai_service,
     cv_skills: Dict[str, list],
     jd_skills: Dict[str, list],
-    temperature: float = 0.2,
+    temperature: float = 0.0,
     max_tokens: int = 2500,
 ) -> Dict[str, Any]:
     """Execute JSON-mode comparison and return a dict with strict schema.
@@ -953,12 +953,12 @@ Domain Keywords             {cv_raw_counts['domain_keywords']:2d}         {jd_ra
 # BACKWARD COMPATIBILITY WRAPPERS
 # ====================================
 
-async def run_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.3, max_tokens: int = 3000) -> str:
+async def run_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.0, max_tokens: int = 3000) -> str:
     """Legacy wrapper for execute_skills_semantic_comparison - DEPRECATED"""
     logger.warning("⚠️ [DEPRECATED] run_comparison is deprecated, use execute_skills_semantic_comparison instead")
     return await execute_skills_semantic_comparison(ai_service, cv_skills, jd_skills, temperature, max_tokens)
 
-async def run_comparison_json(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.2, max_tokens: int = 2500) -> Dict[str, Any]:
+async def run_comparison_json(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.0, max_tokens: int = 2500) -> Dict[str, Any]:
     """Legacy wrapper for execute_skills_comparison_with_json_output - DEPRECATED"""
     logger.warning("⚠️ [DEPRECATED] run_comparison_json is deprecated, use execute_skills_comparison_with_json_output instead")
     return await execute_skills_comparison_with_json_output(ai_service, cv_skills, jd_skills, temperature, max_tokens)

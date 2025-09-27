@@ -287,7 +287,7 @@ class CVJDMatcher:
         company_name: str,
         cv_file_path: Optional[str] = None,
         jd_analysis_data: Optional[Dict[str, Any]] = None,
-        temperature: float = 0.3,
+        temperature: float = 0.0,
         max_retries: int = 3
     ) -> CVJDMatchResult:
         """

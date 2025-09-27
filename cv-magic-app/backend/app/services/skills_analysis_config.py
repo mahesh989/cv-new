@@ -16,7 +16,7 @@ class SkillsAnalysisConfig:
     """Configuration for skills analysis parameters"""
     
     # AI Model Parameters
-    temperature: float = 0.1
+    temperature: float = 0.0
     max_tokens: int = 4000
     
     # Analysis Parameters
@@ -212,7 +212,7 @@ def setup_predefined_configs():
     # Detailed analysis configuration
     skills_analysis_config_service.create_custom_config(
         "detailed",
-        temperature=0.2,
+        temperature=0.0,
         max_tokens=6000,
         extract_explicit_skills=True,
         extract_implied_skills=True,
@@ -225,7 +225,7 @@ def setup_predefined_configs():
     # Mobile optimized configuration
     skills_analysis_config_service.create_custom_config(
         "mobile",
-        temperature=0.1,
+        temperature=0.0,
         max_tokens=3000,
         save_analysis_results=False,
         enable_detailed_logging=False,

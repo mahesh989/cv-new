@@ -31,7 +31,7 @@ async def match_cv_against_jd(
     company_name: str,
     force_refresh: bool = False,
     cv_file_path: Optional[str] = None,
-    temperature: float = 0.3,
+    temperature: float = 0.0,
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> Dict[str, Any]:
     """

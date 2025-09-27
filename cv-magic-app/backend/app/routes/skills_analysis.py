@@ -2239,7 +2239,7 @@ async def perform_preliminary_skills_analysis(
             # Generate AI response for analyze match
             analyze_match_response = await ai_service.generate_response(
                 prompt=analyze_match_prompt,
-                temperature=0.3,
+                temperature=0.0,
                 max_tokens=4000
             )
             analyze_match_content = analyze_match_response.content
