@@ -164,8 +164,13 @@ class _IntroScreenState extends State<IntroScreen>
               print('🎯 Using YouTube Video ID: ${AppConfig.youtubeVideoId}');
               print(
                   '🎯 Expected URL: https://www.youtube.com/embed/${AppConfig.youtubeVideoId}');
+
+              // Make height responsive: larger on bigger screens, minimum 300px
+              final screenHeight = MediaQuery.of(context).size.height;
+              final videoHeight = (screenHeight * 0.4).clamp(300.0, 500.0);
+
               return Container(
-                height: 200,
+                height: videoHeight,
                 decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(16),
