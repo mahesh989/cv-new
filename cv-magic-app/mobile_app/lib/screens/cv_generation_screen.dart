@@ -21,6 +21,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
   bool _isGenerating = false;
   bool _isEditMode = false;
   String? _currentCompany;
+  String? tailoredCVContent;
   final TextEditingController _editController = TextEditingController();
 
   @override
@@ -86,7 +87,6 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     );
   }
 
-  String? tailoredCVContent;
   bool _isLoadingCV = false;
 
   Future<void> _loadTailoredCV() async {
@@ -700,6 +700,19 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     } else {
       debugPrint('❌ No navigation callback provided');
     }
+  }
+
+  /// Reset tailored CV results when generating new CV
+  void resetTailoredCVResults() {
+    debugPrint('🗑️ [CV_GENERATION] Resetting tailored CV results');
+    setState(() {
+      tailoredCVContent = null;
+      _currentCompany = null;
+      _isGenerating = false;
+      _isEditMode = false;
+      _editController.clear();
+    });
+    debugPrint('✅ [CV_GENERATION] Tailored CV results cleared successfully');
   }
 
   @override

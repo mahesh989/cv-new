@@ -379,11 +379,10 @@ class SkillsAnalysisController extends ChangeNotifier {
   void _startProgressiveDisplay() {
     if (_fullResult == null) return;
 
-    // Reset progressive state
+    // Reset progressive state (but keep ATS states as they're managed by polling)
     _showAnalyzeMatch = false;
     _showPreextractedComparison = false;
-    _showATSLoading = false;
-    _showATSResults = false;
+    // Don't reset ATS loading states here - they're managed by the polling process
 
     // Step 1: Show skills immediately (side-by-side display)
     _result = SkillsAnalysisResult(
@@ -518,6 +517,8 @@ class SkillsAnalysisController extends ChangeNotifier {
         // Check if AI recommendation is now available and trigger display
         if (aiRecommendation != null && !_showAIRecommendationResults) {
           // AI recommendations are already generated, show them immediately with brief loading
+          print(
+              '🔍 [CONTROLLER] Setting AI recommendation loading state to true');
           _showAIRecommendationLoading = true;
           notifyListeners();
           _showNotification('🤖 AI recommendations found!');
@@ -546,6 +547,7 @@ class SkillsAnalysisController extends ChangeNotifier {
         // Step 5: Show ATS loading immediately, then results after 10 seconds
         if (atsResult != null) {
           // Immediately show ATS loading state and notification
+          print('🔍 [CONTROLLER] Setting ATS loading state to true');
           _showATSLoading = true;
           notifyListeners();
           _showNotification('⚡ Generating enhanced ATS analysis...');

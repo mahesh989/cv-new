@@ -31,6 +31,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late final IntroScreen _introScreen;
   final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
   late final CVMagicOrganizedPage _cvMagicPage;
+  final GlobalKey<State<CVGenerationScreen>> _cvGenerationKey =
+      GlobalKey<State<CVGenerationScreen>>();
   late final CVGenerationScreen _cvGenerationScreen;
   final GlobalKey<JobTrackingScreenState> _jobTrackingKey =
       GlobalKey<JobTrackingScreenState>();
@@ -90,8 +92,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onResultsCleared: () => _shouldClearCVMagicResults = false,
     );
 
-    // Initialize CV Generation screen with navigation callback
+    // Initialize CV Generation screen with navigation callback and key
     _cvGenerationScreen = CVGenerationScreen(
+      key: _cvGenerationKey,
       onNavigateToCVMagic: _navigateToCVMagicTab,
     );
 
@@ -205,7 +208,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _navigateToCVGenerationTab() {
     debugPrint('🚀 HomeScreen: Navigating to CV Generation tab (index 3)');
+    // Reset CV Generation results when navigating to the tab
+    _resetCVGenerationResults();
     _onTabTapped(3); // Switch to CV Generation tab (index 3)
+  }
+
+  void _resetCVGenerationResults() {
+    debugPrint('🗑️ HomeScreen: Resetting CV Generation results');
+    final state = _cvGenerationKey.currentState;
+    if (state != null) {
+      // Use dynamic to call the reset method
+      (state as dynamic).resetTailoredCVResults();
+    }
   }
 
   void _navigateToCVMagicTab() {
