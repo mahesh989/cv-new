@@ -35,14 +35,31 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         # Verify the token
         token_data = verify_token(credentials.credentials)
         
-        # For now, since we're using demo users, just return a demo user
-        # In production, you would fetch the user from the database using token_data.user_id
-        user = create_demo_user()
-        user.id = token_data.user_id  # Use the user_id from the token
-        user.email = token_data.email  # Use the email from the token
+        # Check if this is an admin token
+        from app.core.admin_auth import AdminAuth
+        if AdminAuth.is_admin_token(token_data):
+            print(f"✅ Admin auth successful: {token_data.email}")
+            return AdminAuth.create_admin_user()
+        
+        # For regular users, fetch from database
+        from app.database import get_database
+        from app.services.user_service import UserService
+        
+        db = next(get_database())
+        user_service = UserService(db)
+        
+        # Get user from database
+        user = user_service.get_user_by_id(int(token_data.user_id))
+        
+        if not user or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found or inactive",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         
         print(f"✅ Auth successful for user: {user.email}")
-        return user
+        return user_service.to_user_data(user)
         
     except HTTPException as e:
         print(f"❌ Auth failed: {e.detail}")
@@ -64,6 +81,30 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise
 
 
+async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> UserData:
+    """
+    Dependency to get admin user with admin privileges
+    
+    Args:
+        credentials: HTTP Bearer token credentials
+        
+    Returns:
+        UserData object for the admin user
+        
+    Raises:
+        HTTPException: If user is not admin or token is invalid
+    """
+    user = await get_current_user(credentials)
+    
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    
+    return user
+
+
 async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))) -> Optional[UserData]:
     """
     Dependency to optionally get the current authenticated user from JWT token
@@ -80,9 +121,25 @@ async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] 
     
     try:
         token_data = verify_token(credentials.credentials)
-        user = create_demo_user()
-        user.id = token_data.user_id
-        user.email = token_data.email
-        return user
+        
+        # Check if this is an admin token
+        from app.core.admin_auth import AdminAuth
+        if AdminAuth.is_admin_token(token_data):
+            return AdminAuth.create_admin_user()
+        
+        # For regular users, fetch from database
+        from app.database import get_database
+        from app.services.user_service import UserService
+        
+        db = next(get_database())
+        user_service = UserService(db)
+        
+        # Get user from database
+        user = user_service.get_user_by_id(int(token_data.user_id))
+        
+        if user and user.is_active:
+            return user_service.to_user_data(user)
+        
+        return None
     except HTTPException:
         return None

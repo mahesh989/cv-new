@@ -1,0 +1,11 @@
+{
+  "title": "Senior Python Developer",
+  "company": "Tech Corp",
+  "description": "Looking for a senior Python developer with FastAPI experience",
+  "requirements": [
+    "Python",
+    "FastAPI",
+    "PostgreSQL",
+    "5+ years experience"
+  ]
+}

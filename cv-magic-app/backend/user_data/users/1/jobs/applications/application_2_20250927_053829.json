@@ -1,0 +1,9 @@
+{
+  "cv_id": 2,
+  "job_title": "Senior Python Developer",
+  "company": "Tech Corp",
+  "job_url": "https://example.com/job/123",
+  "job_description": "Looking for a senior Python developer",
+  "status": "applied",
+  "notes": "Applied via company website"
+}

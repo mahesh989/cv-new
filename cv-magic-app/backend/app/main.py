@@ -12,8 +12,22 @@ from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import create_tables, check_connection
 
+# Import middleware
+from app.middleware.rate_limiter import create_rate_limit_middleware
+from app.middleware.security import create_security_middleware, create_session_security_middleware
+
 # Import routes
 from app.routes.auth import router as auth_router
+from app.routes.email_auth import router as email_auth_router
+from app.routes.admin import router as admin_router
+from app.routes.security import router as security_router
+from app.routes.monitoring import router as monitoring_router
+from app.routes.advanced_features import router as advanced_features_router
+from app.routes.optimized_api import router as optimized_api_router
+from app.routes.user_data import router as user_data_router
+from app.routes.user_cv_routes import router as user_cv_router
+from app.routes.user_analysis_routes import router as user_analysis_router
+from app.routes.user_job_routes import router as user_job_router
 from app.routes.ai import router as ai_router
 from app.routes.cv_simple import router as cv_router
 from app.routes.cv_organized import router as cv_organized_router
@@ -27,6 +41,7 @@ from app.tailored_cv.routes.cv_tailoring_routes import router as cv_tailoring_ro
 from app.routes.enhanced_skills_analysis import router as enhanced_skills_router  # New enhanced skills routes
 from app.routes.saved_jobs import router as saved_jobs_router  # Saved jobs routes
 from app.routes.api_keys import router as api_keys_router  # API key management routes
+from app.routes.feedback_routes import router as feedback_router  # Feedback routes
 
 # Import dependencies
 from app.core.model_dependency import get_current_model
@@ -89,6 +104,13 @@ app.add_middleware(
     expose_headers=["*"],  # Expose all headers
 )
 
+# Add security middleware
+app.add_middleware(create_security_middleware(app, ["*"]))
+app.add_middleware(create_session_security_middleware(app))
+
+# Add rate limiting middleware
+app.add_middleware(create_rate_limit_middleware(app, default_limit=100, default_window=60))
+
 # Add authentication debugging middleware
 @app.middleware("http")
 async def auth_debug_middleware(request: Request, call_next):
@@ -132,6 +154,16 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(auth_router, prefix="/api")
+app.include_router(email_auth_router, prefix="/api")
+app.include_router(admin_router, prefix="/api")
+app.include_router(security_router, prefix="/api")
+app.include_router(monitoring_router, prefix="/api")
+app.include_router(advanced_features_router, prefix="/api")
+app.include_router(optimized_api_router, prefix="/api")
+app.include_router(user_data_router, prefix="/api")
+app.include_router(user_cv_router, prefix="/api")
+app.include_router(user_analysis_router, prefix="/api")
+app.include_router(user_job_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(cv_router)
 app.include_router(cv_organized_router)  # New organized CV routes
@@ -146,6 +178,7 @@ app.include_router(ai_recommendations_router, prefix="/api")  # AI recommendatio
 app.include_router(cv_tailoring_router, prefix="/api")  # CV tailoring routes
 app.include_router(saved_jobs_router)  # Saved jobs routes
 app.include_router(api_keys_router)  # API key management routes
+app.include_router(feedback_router, prefix="/api")  # Feedback routes
 
 
 # Root endpoint

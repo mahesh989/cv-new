@@ -1,0 +1,17 @@
+{
+  "technical_skills": [
+    "Python",
+    "FastAPI",
+    "PostgreSQL"
+  ],
+  "soft_skills": [
+    "Communication",
+    "Leadership"
+  ],
+  "domain_keywords": [
+    "Backend Development",
+    "API Design"
+  ],
+  "experience_years": 5,
+  "education": "Computer Science Degree"
+}

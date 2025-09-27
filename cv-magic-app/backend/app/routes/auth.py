@@ -4,34 +4,60 @@ Authentication routes
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime
-from app.models.auth import LoginRequest, TokenResponse, UserData
+from app.models.auth import (
+    LoginRequest, TokenResponse, UserData, UserRegistration, 
+    UserResponse, EmailVerificationRequest, AdminLoginRequest
+)
 from app.core.auth import authenticate_user, create_access_token, create_refresh_token
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, get_admin_user
+from app.core.admin_auth import AdminAuth
+from app.database import get_database
+from app.services.user_service import UserService
 from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()
 
 
-@router.post("/register")
-async def register():
+@router.post("/register", response_model=UserResponse)
+async def register(user_data: UserRegistration):
     """User registration endpoint"""
-    return {"message": "Registration endpoint - to be implemented"}
+    db = next(get_database())
+    user_service = UserService(db)
+    
+    try:
+        # Create new user
+        user = user_service.create_user(
+            username=user_data.username,
+            email=user_data.email,
+            password=user_data.password,
+            full_name=user_data.full_name
+        )
+        
+        return user_service.to_user_response(user)
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed: {str(e)}"
+        )
 
 
 @router.post("/login", response_model=TokenResponse)
 async def login(credentials: LoginRequest):
     """
-    User login endpoint - accepts empty credentials for development
+    User login endpoint
     
     Args:
-        credentials: Login credentials (email and password, both can be empty)
+        credentials: Login credentials (email and password)
         
     Returns:
         TokenResponse with access token and user data
     """
-    # Authenticate user (allows empty credentials for now)
-    user = authenticate_user(credentials.email or "", credentials.password or "")
+    # Authenticate user
+    user = authenticate_user(credentials.email, credentials.password)
     
     if not user:
         raise HTTPException(
@@ -53,6 +79,50 @@ async def login(credentials: LoginRequest):
         expires_in=settings.JWT_EXPIRATION_MINUTES * 60,  # Convert to seconds
         user=user
     )
+
+
+@router.post("/admin/login", response_model=TokenResponse)
+async def admin_login(credentials: AdminLoginRequest):
+    """
+    Admin login endpoint
+    
+    Args:
+        credentials: Admin login credentials
+        
+    Returns:
+        TokenResponse with admin access token
+    """
+    # Authenticate admin
+    if not AdminAuth.authenticate_admin(credentials.email, credentials.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid admin credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Create admin user data
+    admin_user = AdminAuth.create_admin_user()
+    
+    # Create admin token
+    access_token = AdminAuth.create_admin_token()
+    refresh_token = create_refresh_token("admin")
+    
+    # Return token response
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=settings.JWT_EXPIRATION_MINUTES * 60,
+        user=admin_user
+    )
+
+
+@router.post("/verify-email")
+async def verify_email(request: EmailVerificationRequest):
+    """Email verification endpoint"""
+    # For now, just return success
+    # In production, you would verify the token and activate the user
+    return {"message": "Email verification endpoint - to be implemented"}
 
 
 @router.post("/logout")

@@ -45,6 +45,15 @@ class Settings(BaseSettings):
     
     # Development Settings
     DEVELOPMENT_MODE: bool = True  # Enable development features
+    
+    # Email Configuration
+    SMTP_SERVER: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    FROM_EMAIL: str = "noreply@cvapp.com"
+    FROM_NAME: str = "CV App"
+    FRONTEND_URL: str = "http://localhost:3000"
     BYPASS_AUTH: bool = False  # For testing without auth
     
     # CORS Settings

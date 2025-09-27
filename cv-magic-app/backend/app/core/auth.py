@@ -135,15 +135,26 @@ def create_demo_user() -> UserData:
 
 def authenticate_user(email: str, password: str) -> Optional[UserData]:
     """
-    Authenticate user - for now, allows empty credentials
+    Authenticate user with database lookup
     
     Args:
-        email: User email (can be empty)
-        password: User password (can be empty)
+        email: User email
+        password: User password
         
     Returns:
         UserData if authentication successful, None otherwise
     """
-    # For development: allow any credentials (including empty ones)
-    # TODO: Replace with proper authentication logic later
-    return create_demo_user()
+    from app.database import get_database
+    from app.services.user_service import UserService
+    
+    # Get database session
+    db = next(get_database())
+    user_service = UserService(db)
+    
+    # Try to authenticate user
+    user = user_service.authenticate_user(email, password)
+    
+    if user:
+        return user_service.to_user_data(user)
+    
+    return None
