@@ -32,7 +32,7 @@
   "education": [
     {
       "degree": "Master of Data Science",
-      "institution": "Charles Darwin University",
+      "institution": "Charles Darwin University, Sydney, Australia",
       "year": "Mar 2023 - Nov 2024",
       "gpa": "GPA",
       "relevant_courses": [],
@@ -41,7 +41,7 @@
     },
     {
       "degree": "PhD in Physics",
-      "institution": "CY Cergy Paris University",
+      "institution": "CY Cergy Paris University, Cergy, France",
       "year": "Oct 2018 - Sep 2022",
       "gpa": "",
       "relevant_courses": [],
@@ -50,7 +50,7 @@
     },
     {
       "degree": "Master of Theoretical Physics",
-      "institution": "CY Cergy Paris University",
+      "institution": "CY Cergy Paris University, Cergy, France",
       "year": "Sep 2016 - Jun 2018",
       "gpa": "",
       "relevant_courses": [],
@@ -61,7 +61,7 @@
   "experience": [
     {
       "title": "Data Analyst",
-      "company": "The Bitrates",
+      "company": "The Bitrates, Sydney, New South Wales, Australia",
       "duration": "Jul 2024 – Present",
       "location": "Sydney, New South Wales, Australia",
       "responsibilities": [
@@ -76,7 +76,7 @@
     },
     {
       "title": "Data Analyst",
-      "company": "iBuild Building Solutions",
+      "company": "iBuild Building Solutions, Victoria, Australia",
       "duration": "Mar 2024 – Jun 2024",
       "location": "Victoria, Australia",
       "responsibilities": [
@@ -90,7 +90,7 @@
     },
     {
       "title": "Software engineer and Analyst",
-      "company": "Property Console",
+      "company": "Property Console, Sydney, Australia",
       "duration": "Jun 2023 - Nov 2023",
       "location": "Sydney, Australia",
       "responsibilities": [
@@ -104,7 +104,7 @@
     },
     {
       "title": "Research Assistant",
-      "company": "CY Cergy Paris University",
+      "company": "CY Cergy Paris University, Cergy-Pontoise, France",
       "duration": "Oct 2018 - Sep 2022",
       "location": "Cergy-Pontoise, France",
       "responsibilities": [
@@ -117,7 +117,7 @@
     },
     {
       "title": "Lecturer and Course Facilitator",
-      "company": "CY Cergy Paris University",
+      "company": "CY Cergy Paris University, Cergy-Pontoise, France",
       "duration": "Sep 2019 - Jun 2022",
       "location": "Cergy-Pontoise, France",
       "responsibilities": [
@@ -130,7 +130,7 @@
     },
     {
       "title": "Research Intern",
-      "company": "CY Cergy Paris University",
+      "company": "CY Cergy Paris University, Cergy-Pontoise, France",
       "duration": "Feb 2018 - Jun 2018",
       "location": "Cergy-Pontoise, France",
       "responsibilities": [
@@ -152,17 +152,17 @@
   "unknown_sections": {},
   "original_sections": {
     "section_headers_found": [
+      "EXPERIENCE",
       "EDUCATION",
-      "TECHNICAL SKILLS",
       "CAREER PROFIL E",
-      "EXPERIENCE"
+      "TECHNICAL SKILLS"
     ],
     "parsing_approach": "content_preserving"
   },
-  "saved_at": "2025-09-26T13:41:51.549763",
+  "saved_at": "2025-09-27T10:56:47.285577",
   "metadata": {
     "source_filename": "maheshwor_tiwari.pdf",
-    "processed_at": "2025-09-26T13:41:51.553162",
+    "processed_at": "2025-09-27T10:56:47.289784",
     "processing_version": "2.0",
     "content_type": "structured_cv"
   }

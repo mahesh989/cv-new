@@ -515,23 +515,26 @@ class SkillsAnalysisController extends ChangeNotifier {
         );
 
         // Check if AI recommendation is now available and trigger display
+        // But wait for ATS analysis to complete first (ATS has 12s + 10s = 22s total)
         if (aiRecommendation != null && !_showAIRecommendationResults) {
-          // AI recommendations are already generated, show them immediately with brief loading
-          print(
-              '🔍 [CONTROLLER] Setting AI recommendation loading state to true');
-          _showAIRecommendationLoading = true;
-          notifyListeners();
-          _showNotification('🤖 AI recommendations found!');
-
-          Timer(Duration(seconds: 2), () {
-            // Reduced delay from 10 to 2 seconds
-            // Show AI recommendations after brief delay for UI smoothness
-            _showAIRecommendationResults = true;
-            _result = _result!.copyWith(
-              aiRecommendation: aiRecommendation,
-            );
+          // Wait for ATS analysis to complete, then show AI recommendations
+          Timer(Duration(seconds: 25), () {
+            // AI recommendations are ready, show them with brief loading
+            print(
+                '🔍 [CONTROLLER] Setting AI recommendation loading state to true');
+            _showAIRecommendationLoading = true;
             notifyListeners();
-            _showNotification('🎯 AI recommendations ready!');
+            _showNotification('🤖 AI recommendations found!');
+
+            Timer(Duration(seconds: 2), () {
+              // Show AI recommendations after brief delay for UI smoothness
+              _showAIRecommendationResults = true;
+              _result = _result!.copyWith(
+                aiRecommendation: aiRecommendation,
+              );
+              notifyListeners();
+              _showNotification('🎯 AI recommendations ready!');
+            });
           });
         }
 
@@ -544,36 +547,40 @@ class SkillsAnalysisController extends ChangeNotifier {
         );
         notifyListeners();
 
-        // Step 5: Show ATS loading immediately, then results after 10 seconds
+        // Step 5: Wait for AI-Powered Skills Analysis to complete, then show ATS loading
         if (atsResult != null) {
-          // Immediately show ATS loading state and notification
-          print('🔍 [CONTROLLER] Setting ATS loading state to true');
-          _showATSLoading = true;
-          notifyListeners();
-          _showNotification('⚡ Generating enhanced ATS analysis...');
-
-          Timer(Duration(seconds: 10), () {
-            // Show ATS results after 10-second delay
-            _showATSResults = true;
-            _result = _result!.copyWith(
-              atsResult: _fullResult!.atsResult,
-              aiRecommendation:
-                  _fullResult!.aiRecommendation, // Keep AI recommendation
-            );
+          // Wait for AI-Powered Skills Analysis to complete (it has a 10s timer)
+          // Then show ATS loading after AI Skills Analysis is done
+          Timer(Duration(seconds: 12), () {
+            // Show ATS loading state and notification
+            print('🔍 [CONTROLLER] Setting ATS loading state to true');
+            _showATSLoading = true;
             notifyListeners();
+            _showNotification('⚡ Generating enhanced ATS analysis...');
 
-            // Use the stored ATS result from _fullResult for notification
-            final finalAtsResult = _fullResult!.atsResult;
-            if (finalAtsResult != null) {
-              _showNotification(
-                  '🎯 ATS Score: ${finalAtsResult.finalATSScore.toStringAsFixed(1)}/100 (${finalAtsResult.categoryStatus})');
-            } else {
-              _showNotification('✅ ATS Analysis completed!');
-            }
+            Timer(Duration(seconds: 10), () {
+              // Show ATS results after 10-second delay
+              _showATSResults = true;
+              _result = _result!.copyWith(
+                atsResult: _fullResult!.atsResult,
+                aiRecommendation:
+                    _fullResult!.aiRecommendation, // Keep AI recommendation
+              );
+              notifyListeners();
 
-            // Step 6: AI recommendations are now handled in the polling process
-            // when they become available, so we can finish analysis here
-            _finishAnalysis();
+              // Use the stored ATS result from _fullResult for notification
+              final finalAtsResult = _fullResult!.atsResult;
+              if (finalAtsResult != null) {
+                _showNotification(
+                    '🎯 ATS Score: ${finalAtsResult.finalATSScore.toStringAsFixed(1)}/100 (${finalAtsResult.categoryStatus})');
+              } else {
+                _showNotification('✅ ATS Analysis completed!');
+              }
+
+              // Step 6: AI recommendations are now handled in the polling process
+              // when they become available, so we can finish analysis here
+              _finishAnalysis();
+            });
           });
         } else {
           _showNotification('✅ Advanced analysis completed!');

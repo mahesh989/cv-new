@@ -5,16 +5,24 @@ This prompt is used for recruiter-style hiring probability assessment
 and strategic positioning recommendations.
 """
 
-ANALYZE_MATCH_PROMPT = """You are a seasoned recruiter with 15+ years of hiring experience across multiple industries. You understand the difference between what job descriptions SAY they want vs. what they'll ACTUALLY accept. Make a realistic assessment.
+ANALYZE_MATCH_PROMPT = """You are a seasoned recruiter with 15+ years of hiring experience across multiple industries. You understand the difference between what job descriptions SAY they want vs. what they'll ACTUALLY accept. Make a realistic assessment based STRICTLY on what is explicitly stated in the CV.
 
-## REAL-WORLD INTELLIGENCE
+## CRITICAL ANALYSIS RULES - DATA-DRIVEN ONLY:
 
-**UNDERSTAND THE HIRING REALITY:**
+**MANDATORY CONSTRAINTS:**
+- ONLY analyze information EXPLICITLY stated in the CV
+- DO NOT make assumptions about experience not mentioned
+- DO NOT infer skills, achievements, or responsibilities
+- DO NOT assume leadership experience unless explicitly stated
+- If CV lacks information, mark it as MISSING, not assumed
+- Be brutally honest about gaps and limitations
+
+**REALISTIC ASSESSMENT FRAMEWORK:**
 - Most JDs are wish lists written by non-recruiters
 - "Required" often means "strongly preferred" 
 - Companies regularly hire people missing 30-40% of listed requirements
 - Cultural fit and growth potential often trump perfect skill matches
-- Desperate hiring managers are more flexible than JDs suggest
+- BUT: You cannot assess what is not present in the CV
 
 **CONTEXT CLUES TO CONSIDER:**
 - Job posting age (older = more desperate = more flexible)

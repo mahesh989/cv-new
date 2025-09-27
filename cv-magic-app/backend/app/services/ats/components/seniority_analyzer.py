@@ -92,10 +92,39 @@ class SeniorityAnalyzer:
         Returns:
             Dict containing seniority analysis results
         """
-        prompt = self.prompt_template.format(
+        # Validate CV content first
+        from app.services.cv_content_validator import cv_content_validator
+        validation_result = cv_content_validator.validate_cv_content(cv_text)
+        
+        # Add content constraints to prompt
+        constraints = validation_result.get('analysis_constraints', {})
+        max_seniority = constraints.get('max_seniority_score', 100)
+        requires_evidence = constraints.get('requires_explicit_evidence', True)
+        
+        # Modify prompt with constraints
+        constrained_prompt = self.prompt_template.format(
             cv_text=cv_text[:5000],
             jd_text=jd_text[:3000]
         )
+        
+        # Add constraint instructions
+        constraint_instructions = f"""
+        
+## CONTENT VALIDATION CONSTRAINTS:
+- Maximum seniority score: {max_seniority}/100
+- Requires explicit evidence: {requires_evidence}
+- CV content length: {len(cv_text)} characters
+- Available sections: {validation_result.get('available_sections', [])}
+- Experience years: {validation_result.get('experience_info', {}).get('explicit_years', 0)}
+
+## MANDATORY SCORING LIMITS:
+- If CV lacks experience details, seniority_score MUST be ≤ {max_seniority}
+- If CV lacks leadership evidence, leadership scores MUST be ≤ 20
+- If CV lacks management experience, management scores MUST be ≤ 15
+- DO NOT exceed these limits regardless of assumptions
+"""
+        
+        prompt = constrained_prompt + constraint_instructions
 
         logger.info("[SENIORITY] Requesting role seniority analysis...")
         try:

@@ -4,12 +4,28 @@ Corporate-focused seniority assessment that reflects market preferences for busi
 """
 
 ROLE_SENIORITY_PROMPT = """
-You are an expert hiring manager with 15+ years of experience. Analyze role seniority fit with REALISTIC market interpretation that heavily prioritizes corporate seniority indicators.
+You are an expert hiring manager with 15+ years of experience. Analyze role seniority fit with STRICT DATA-DRIVEN interpretation based ONLY on what is explicitly stated in the CV.
 
 CV TEXT: {cv_text}
 JD REQUIREMENTS: {jd_text}
 
-## CRITICAL CV INTERPRETATION RULES:
+## CRITICAL CV INTERPRETATION RULES - STRICT DATA ONLY:
+
+### MANDATORY ANALYSIS CONSTRAINTS:
+- ONLY analyze information EXPLICITLY stated in the CV
+- DO NOT make assumptions about experience not mentioned
+- DO NOT infer skills from job titles alone
+- DO NOT assume leadership experience unless explicitly stated
+- DO NOT guess at responsibilities or achievements
+- If information is missing, mark it as MISSING, not assumed
+
+### STRICT CV CONTENT ANALYSIS:
+- Count ONLY explicitly stated years of experience
+- Identify ONLY explicitly mentioned management responsibilities
+- Note ONLY explicitly stated leadership roles
+- Record ONLY explicitly mentioned achievements
+- If CV lacks experience details, score accordingly (0-20/100)
+- If CV lacks leadership evidence, score accordingly (0-20/100)
 
 ### Corporate Seniority Assessment (Primary - 80% weight):
 - Full-time corporate roles = Actual seniority level

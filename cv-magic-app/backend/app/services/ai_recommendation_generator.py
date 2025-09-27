@@ -81,6 +81,11 @@ class AIRecommendationGenerator:
                     # If any error during timestamp checks, fall back to default existence check
                     logger.warning(f"⚠️ [AI GENERATOR] Timestamp check failed, proceeding with generation: {time_err}")
             
+            # Check if CV has been updated since input recommendation was generated
+            if not self._check_cv_freshness(company):
+                logger.warning(f"⚠️ [AI GENERATOR] CV has been updated since input recommendation was generated")
+                logger.warning(f"⚠️ [AI GENERATOR] Input recommendation may be outdated - consider regenerating input recommendation first")
+            
             # Load the AI prompt
             prompt_content = self._load_ai_prompt(company)
             if not prompt_content:
@@ -144,6 +149,48 @@ class AIRecommendationGenerator:
             input_file = company_dir / f"{company}_input_recommendation.json"
         
         return input_file
+    
+    def _check_cv_freshness(self, company: str) -> bool:
+        """
+        Check if the CV has been updated since the input recommendation was generated
+        
+        Args:
+            company: Company name
+            
+        Returns:
+            True if CV is fresh (not updated since input recommendation), False otherwise
+        """
+        try:
+            from app.unified_latest_file_selector import unified_selector
+            
+            # Get the latest CV context
+            cv_context = unified_selector.get_latest_cv_across_all(company)
+            if not cv_context.exists:
+                logger.warning(f"⚠️ [AI GENERATOR] No CV found for {company}")
+                return True  # Assume fresh if no CV found
+            
+            # Get the input recommendation file
+            input_file = self._get_input_recommendation_file_path(company)
+            if not input_file.exists():
+                logger.warning(f"⚠️ [AI GENERATOR] No input recommendation file found for {company}")
+                return True  # Assume fresh if no input recommendation found
+            
+            # Compare timestamps
+            cv_mtime = cv_context.timestamp.timestamp() if cv_context.timestamp else 0
+            input_mtime = input_file.stat().st_mtime
+            
+            if cv_mtime > input_mtime:
+                logger.warning(f"⚠️ [AI GENERATOR] CV is newer than input recommendation")
+                logger.warning(f"   CV timestamp: {cv_context.timestamp}")
+                logger.warning(f"   Input recommendation timestamp: {input_mtime}")
+                return False
+            
+            logger.info(f"✅ [AI GENERATOR] CV is fresh - no updates since input recommendation")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ [AI GENERATOR] Error checking CV freshness: {e}")
+            return True  # Assume fresh on error to avoid blocking generation
     
     def _load_ai_prompt(self, company: str) -> Optional[str]:
         """
