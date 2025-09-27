@@ -1,0 +1,362 @@
+{
+  "generated": "2025-09-27T12:35:26.427",
+  "cv_filename": "maheshwor_tiwari.pdf",
+  "jd_url": "preliminary_analysis",
+  "user_id": "0d9e5f9c-e912-48a7-9f3e-a0cef8de84e6",
+  "company": "au.ey",
+  "model_used": "gpt-4o",
+  "cv_skills": {
+    "technical_skills": [
+      "Excel",
+      "Python",
+      "SQL"
+    ],
+    "soft_skills": [],
+    "domain_keywords": [],
+    "comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Excel - \"Excel\"\n- Python - \"Python\"\n- SQL - \"SQL\"\n\n## SOFT SKILLS:\nNo explicit or strongly implied soft skills are mentioned in the provided text.\n\n## DOMAIN KEYWORDS:\nNo explicit or strongly implied domain keywords are mentioned in the provided text.\n\n**CRITICAL OUTPUT REQUIREMENT:**\n\nSOFT_SKILLS = []\nTECHNICAL_SKILLS = [\"Excel\", \"Python\", \"SQL\"]\nDOMAIN_KEYWORDS = []"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Data Analysis",
+      "Data Analytics",
+      "Data Visualization",
+      "Financial Analysis",
+      "JavaScript",
+      "Microsoft Azure",
+      "Power BI",
+      "Python",
+      "SQL",
+      "Tabular Editor"
+    ],
+    "soft_skills": [
+      "Adaptability",
+      "Analytical Thinking",
+      "Client Service Orientation",
+      "Communication",
+      "Innovation",
+      "Problem-solving",
+      "Professionalism",
+      "Teamwork"
+    ],
+    "domain_keywords": [
+      "Accounting",
+      "Automation",
+      "Business Acumen",
+      "Decision-making",
+      "Finance",
+      "Governance",
+      "Regulatory"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills\"\n- Innovation - \"an innovative mindset\"\n- Problem-solving - \"Be an active problem solver\"\n- Analytical Thinking - \"performing advanced financial analysis\"\n- Professionalism - \"understanding of a professional working environment\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Teamwork - \"join a team of multidisciplinary professionals\"\n- Adaptability - \"work flexibly with reduced hours\"\n- Client Service Orientation - \"Consistently deliver exceptional client service solutions\"\n\n## TECHNICAL SKILLS:\n\n**EXPLICIT (directly stated):**\n- SQL - \"Experience with three or more data analysis tools including, but not limited to SQL\"\n- Python - \"Experience with three or more data analysis tools including, but not limited to Python\"\n- JavaScript - \"Experience with three or more data analysis tools including, but not limited to JavaScript\"\n- Power BI - \"Experience with three or more data analysis tools including, but not limited to Power BI/DAX\"\n- Tabular Editor - \"Experience with three or more data analysis tools including, but not limited to Tabular Editor\"\n- Data Visualization - \"Advanced proficiency in Programming, Analytics, and Data Visualisation\"\n- Microsoft Azure - \"Background in cloud computing such as the Microsoft Azure platform\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Analysis - \"focuses on collecting, combining, and exploring data to create insights\"\n- Data Analytics - \"understanding complex data analytics\"\n- Financial Analysis - \"performing advanced financial analysis and reporting\"\n\n## DOMAIN KEYWORDS:\n\n**EXPLICIT:**\n- Accounting - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Finance - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Governance - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Regulatory - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Automation - \"pursue automation in the process to create efficiencies\"\n\n**STRONGLY IMPLIED:**\n- Decision-making - \"create insights that support our clients with their decision-making processes\"\n- Business Acumen - \"Develop business acumen and a comfort level in designing solutions\"\n\n## CONTEXT EVIDENCE:\n\n**Soft Skills:**\n- Communication: \"Excellent communication skills\"\n- Innovation: \"an innovative mindset\"\n- Problem-solving: \"Be an active problem solver\"\n- Analytical Thinking: \"performing advanced financial analysis\"\n- Professionalism: \"understanding of a professional working environment\"\n\n**Technical Skills:**\n- SQL: \"Experience with three or more data analysis tools including, but not limited to SQL\"\n- Python: \"Experience with three or more data analysis tools including, but not limited to Python\"\n- JavaScript: \"Experience with three or more data analysis tools including, but not limited to JavaScript\"\n- Power BI: \"Experience with three or more data analysis tools including, but not limited to Power BI/DAX\"\n- Tabular Editor: \"Experience with three or more data analysis tools including, but not limited to Tabular Editor\"\n- Data Visualization: \"Advanced proficiency in Programming, Analytics, and Data Visualisation\"\n- Microsoft Azure: \"Background in cloud computing such as the Microsoft Azure platform\"\n\n**Domain Keywords:**\n- Accounting: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Finance: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Governance: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Regulatory: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Automation: \"pursue automation in the process to create efficiencies\"\n\n**CRITICAL OUTPUT REQUIREMENT:**\n\nSOFT_SKILLS = [\"Communication\", \"Innovation\", \"Problem-solving\", \"Analytical Thinking\", \"Professionalism\", \"Teamwork\", \"Adaptability\", \"Client Service Orientation\"]\n\nTECHNICAL_SKILLS = [\"SQL\", \"Python\", \"JavaScript\", \"Power BI\", \"Tabular Editor\", \"Data Visualization\", \"Microsoft Azure\", \"Data Analysis\", \"Data Analytics\", \"Financial Analysis\"]\n\nDOMAIN_KEYWORDS = [\"Accounting\", \"Finance\", \"Governance\", \"Regulatory\", \"Automation\", \"Decision-making\", \"Business Acumen\"]"
+  },
+  "cv_comprehensive_analysis": "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n- Excel - \"Excel\"\n- Python - \"Python\"\n- SQL - \"SQL\"\n\n## SOFT SKILLS:\nNo explicit or strongly implied soft skills are mentioned in the provided text.\n\n## DOMAIN KEYWORDS:\nNo explicit or strongly implied domain keywords are mentioned in the provided text.\n\n**CRITICAL OUTPUT REQUIREMENT:**\n\nSOFT_SKILLS = []\nTECHNICAL_SKILLS = [\"Excel\", \"Python\", \"SQL\"]\nDOMAIN_KEYWORDS = []",
+  "jd_comprehensive_analysis": "## SOFT SKILLS:\n\n**EXPLICIT (directly stated):**\n- Communication - \"Excellent communication skills\"\n- Innovation - \"an innovative mindset\"\n- Problem-solving - \"Be an active problem solver\"\n- Analytical Thinking - \"performing advanced financial analysis\"\n- Professionalism - \"understanding of a professional working environment\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Teamwork - \"join a team of multidisciplinary professionals\"\n- Adaptability - \"work flexibly with reduced hours\"\n- Client Service Orientation - \"Consistently deliver exceptional client service solutions\"\n\n## TECHNICAL SKILLS:\n\n**EXPLICIT (directly stated):**\n- SQL - \"Experience with three or more data analysis tools including, but not limited to SQL\"\n- Python - \"Experience with three or more data analysis tools including, but not limited to Python\"\n- JavaScript - \"Experience with three or more data analysis tools including, but not limited to JavaScript\"\n- Power BI - \"Experience with three or more data analysis tools including, but not limited to Power BI/DAX\"\n- Tabular Editor - \"Experience with three or more data analysis tools including, but not limited to Tabular Editor\"\n- Data Visualization - \"Advanced proficiency in Programming, Analytics, and Data Visualisation\"\n- Microsoft Azure - \"Background in cloud computing such as the Microsoft Azure platform\"\n\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n- Data Analysis - \"focuses on collecting, combining, and exploring data to create insights\"\n- Data Analytics - \"understanding complex data analytics\"\n- Financial Analysis - \"performing advanced financial analysis and reporting\"\n\n## DOMAIN KEYWORDS:\n\n**EXPLICIT:**\n- Accounting - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Finance - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Governance - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Regulatory - \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Automation - \"pursue automation in the process to create efficiencies\"\n\n**STRONGLY IMPLIED:**\n- Decision-making - \"create insights that support our clients with their decision-making processes\"\n- Business Acumen - \"Develop business acumen and a comfort level in designing solutions\"\n\n## CONTEXT EVIDENCE:\n\n**Soft Skills:**\n- Communication: \"Excellent communication skills\"\n- Innovation: \"an innovative mindset\"\n- Problem-solving: \"Be an active problem solver\"\n- Analytical Thinking: \"performing advanced financial analysis\"\n- Professionalism: \"understanding of a professional working environment\"\n\n**Technical Skills:**\n- SQL: \"Experience with three or more data analysis tools including, but not limited to SQL\"\n- Python: \"Experience with three or more data analysis tools including, but not limited to Python\"\n- JavaScript: \"Experience with three or more data analysis tools including, but not limited to JavaScript\"\n- Power BI: \"Experience with three or more data analysis tools including, but not limited to Power BI/DAX\"\n- Tabular Editor: \"Experience with three or more data analysis tools including, but not limited to Tabular Editor\"\n- Data Visualization: \"Advanced proficiency in Programming, Analytics, and Data Visualisation\"\n- Microsoft Azure: \"Background in cloud computing such as the Microsoft Azure platform\"\n\n**Domain Keywords:**\n- Accounting: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Finance: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Governance: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Regulatory: \"enable insights within the accounting, finance, governance, and regulatory space\"\n- Automation: \"pursue automation in the process to create efficiencies\"\n\n**CRITICAL OUTPUT REQUIREMENT:**\n\nSOFT_SKILLS = [\"Communication\", \"Innovation\", \"Problem-solving\", \"Analytical Thinking\", \"Professionalism\", \"Teamwork\", \"Adaptability\", \"Client Service Orientation\"]\n\nTECHNICAL_SKILLS = [\"SQL\", \"Python\", \"JavaScript\", \"Power BI\", \"Tabular Editor\", \"Data Visualization\", \"Microsoft Azure\", \"Data Analysis\", \"Data Analytics\", \"Financial Analysis\"]\n\nDOMAIN_KEYWORDS = [\"Accounting\", \"Finance\", \"Governance\", \"Regulatory\", \"Automation\", \"Decision-making\", \"Business Acumen\"]",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-09-27T12:35:44.956",
+      "model_used": "gpt-4o",
+      "content": "**EXPERIENCED RECRUITER ASSESSMENT:**\n\n**DECISION:** 🟡 STRATEGIC PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** Core skills in data analysis, proficiency in SQL and Python, and experience in data visualization tools. The JD also emphasizes communication skills and an innovative mindset.\n- **Flexibility indicators:** The JD states, \"Ideally, you’ll have the skills and attributes below but don’t worry if you don’t tick all the boxes,\" indicating some flexibility. The role being posted only 2 days ago suggests less urgency, but the large number of applicants may push for flexibility as they sift through candidates.\n- **Hard blockers identified:** None explicitly mentioned in the CV. However, the JD's mention of cloud computing experience (e.g., Microsoft Azure) is not addressed in the CV.\n- **Hiring urgency signals:** No explicit urgency signals like \"immediate start\" or \"urgent need,\" suggesting standard hiring timelines.\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** Maheshwor's current role as a Data Analyst at The Bitrates suggests relevant experience, though details are sparse.\n- **Smart connections:** Proficiency in Excel, Python, and SQL aligns well with the core technical requirements. \n- **Growth potential:** The current role indicates a recent entry into the field, suggesting a trajectory of growth and learning.\n- **Positioning opportunities:** Highlighting any specific projects or achievements at The Bitrates could strengthen the application. Emphasizing any experience with data visualization or advanced analytics would be beneficial.\n\n**REALISTIC ODDS:** 50% chance of getting an interview if CV tailored well, focusing on relevant projects and any exposure to data visualization or cloud platforms.\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight any specific projects or achievements in current Data Analyst role, especially those involving data visualization or complex data analysis.\n2. **Priority 2:** Emphasize proficiency in SQL and Python, and any experience with data visualization tools like Power BI or similar.\n3. **Priority 3:** Address the gap in cloud computing experience by mentioning any relevant coursework, certifications, or self-directed learning.\n\n**HONEST BOTTOM LINE:** Worth the effort if Maheshwor is genuinely interested in the role at EY. The CV needs tailoring to emphasize relevant experience and skills, particularly in data visualization and cloud computing, to increase competitiveness."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-09-27T12:35:58.930",
+      "model_used": "gpt-4o",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 25\nMatched: 2\nMissing: 23\nMatch Rate: 8%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills             3         10         2         8            20\nSoft Skills                   0          8         0         8             0\nDomain Keywords              0          7         0         7             0\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (2 items):\n    1. JD Required: 'Python'\n       → Found in CV: 'Python'\n       💡 brief reasoning: Direct match as both refer to the programming language Python.\n    2. JD Required: 'SQL'\n       → Found in CV: 'SQL'\n       💡 brief reasoning: Direct match as both refer to the SQL database language.\n\n  ❌ MISSING FROM CV (8 items):\n    1. JD Requires: 'Data Analysis'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    2. JD Requires: 'Data Analytics'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    3. JD Requires: 'Data Visualization'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    4. JD Requires: 'Financial Analysis'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    5. JD Requires: 'JavaScript'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    6. JD Requires: 'Microsoft Azure'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    7. JD Requires: 'Power BI'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    8. JD Requires: 'Tabular Editor'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (0 items):\n    [No matches due to CV having 0 soft skills]\n\n  ❌ MISSING FROM CV (8 items):\n    1. JD Requires: 'Adaptability'\n       💡 brief reason why not found: No soft skills listed in CV.\n    2. JD Requires: 'Analytical Thinking'\n       💡 brief reason why not found: No soft skills listed in CV.\n    3. JD Requires: 'Client Service Orientation'\n       💡 brief reason why not found: No soft skills listed in CV.\n    4. JD Requires: 'Communication'\n       💡 brief reason why not found: No soft skills listed in CV.\n    5. JD Requires: 'Innovation'\n       💡 brief reason why not found: No soft skills listed in CV.\n    6. JD Requires: 'Problem-solving'\n       💡 brief reason why not found: No soft skills listed in CV.\n    7. JD Requires: 'Professionalism'\n       💡 brief reason why not found: No soft skills listed in CV.\n    8. JD Requires: 'Teamwork'\n       💡 brief reason why not found: No soft skills listed in CV.\n\n🔹 DOMAIN KEYWORDS\n  ✅ MATCHED JD REQUIREMENTS (0 items):\n    [No matches due to CV having 0 domain keywords]\n\n  ❌ MISSING FROM CV (7 items):\n    1. JD Requires: 'Accounting'\n       💡 brief reason why not found: No domain keywords listed in CV.\n    2. JD Requires: 'Automation'\n       💡 brief reason why not found: No domain keywords listed in CV.\n    3. JD Requires: 'Business Acumen'\n       💡 brief reason why not found: No domain keywords listed in CV.\n    4. JD Requires: 'Decision-making'\n       💡 brief reason why not found: No domain keywords listed in CV.\n    5. JD Requires: 'Finance'\n       💡 brief reason why not found: No domain keywords listed in CV.\n    6. JD Requires: 'Governance'\n       💡 brief reason why not found: No domain keywords listed in CV.\n    7. JD Requires: 'Regulatory'\n       💡 brief reason why not found: No domain keywords listed in CV.\n\n📚 INPUT SUMMARY (normalized, truncated if long)\nCV\n- Technical: ['Excel', 'Python', 'SQL']\n- Soft: []\n- Domain: []\n\nJD\n- Technical: ['Data Analysis', 'Data Analytics', 'Data Visualization', 'Financial Analysis', 'JavaScript', 'Microsoft Azure', 'Power BI', 'Python', 'SQL', 'Tabular Editor']\n- Soft: ['Adaptability', 'Analytical Thinking', 'Client Service Orientation', 'Communication', 'Innovation', 'Problem-solving', 'Professionalism', 'Teamwork']\n- Domain: ['Accounting', 'Automation', 'Business Acumen', 'Decision-making', 'Finance', 'Governance', 'Regulatory']"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-09-27T12:36:27.600",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "SQL",
+              "cv_evidence": "Listed under technical skills.",
+              "jd_application": "Experience with three or more data analysis tools including SQL.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "0.5",
+              "academic_experience_years": "0",
+              "business_impact_evidence": "Not explicitly mentioned.",
+              "relevance_score": "65",
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "N/A",
+              "depth_indicators": [
+                "Used in current role as Data Analyst at The Bitrates."
+              ],
+              "business_application_bonus": "10",
+              "academic_penalty": "0",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Python",
+              "cv_evidence": "Listed under technical skills.",
+              "jd_application": "Advanced proficiency in Programming, Analytics.",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "0.5",
+              "academic_experience_years": "0",
+              "business_impact_evidence": "Not explicitly mentioned.",
+              "relevance_score": "65",
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "N/A",
+              "depth_indicators": [
+                "Used in current role as Data Analyst at The Bitrates."
+              ],
+              "business_application_bonus": "10",
+              "academic_penalty": "0",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "communication",
+              "cv_evidence": "Not explicitly mentioned in CV.",
+              "jd_application": "Excellent communication skills required.",
+              "context_type": "MIXED",
+              "corporate_experience_years": "0",
+              "academic_experience_years": "0",
+              "business_impact_evidence": "Not explicitly mentioned.",
+              "relevance_score": "40",
+              "skill_level_corporate": "Beginner",
+              "skill_level_academic": "N/A",
+              "depth_indicators": [
+                "Potentially used in current role but not detailed."
+              ],
+              "business_application_bonus": "5",
+              "academic_penalty": "0",
+              "synergy_score": "Medium",
+              "transferability_risk": "MEDIUM"
+            }
+          ],
+          "overall_skills_score": "60",
+          "corporate_skills_strength": "Moderate",
+          "academic_skills_discount": "Minimal due to lack of academic context.",
+          "business_readiness_score": "60",
+          "skill_development_timeline": "1-2 years to reach advanced corporate proficiency.",
+          "strength_areas": [
+            "SQL",
+            "Python"
+          ],
+          "critical_gaps": [
+            "Communication"
+          ],
+          "training_investment_needed": [
+            "Communication"
+          ],
+          "immediate_value_skills": [
+            "SQL",
+            "Python"
+          ],
+          "risky_transition_skills": [
+            "Communication"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "0.25",
+            "cv_corporate_years": "0.25",
+            "cv_academic_years": "0",
+            "cv_role_level": "Entry-level",
+            "cv_progression": [
+              "Data Analyst at The Bitrates (Jul 2024 – Present)"
+            ],
+            "jd_required_years": "1-2",
+            "jd_role_level": "Entry to Mid-level",
+            "alignment_score": "40",
+            "experience_gaps": [
+              "Lacks 1-2 years of required experience",
+              "No evidence of advanced proficiency in data visualization tools"
+            ],
+            "experience_strengths": [
+              "Current role as Data Analyst",
+              "Skills in Excel, Python, SQL"
+            ],
+            "quantified_achievements": [
+              "None provided"
+            ],
+            "overqualification_risk": "LOW"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Analysis",
+            "cv_secondary_industries": [],
+            "cv_academic_background": "Not specified",
+            "cv_corporate_exposure": "Less than 1 year",
+            "jd_target_industry": "Consulting",
+            "jd_industry_specificity": "High",
+            "direct_industry_match": "PARTIAL",
+            "industry_alignment_score": "50",
+            "corporate_background_bonus": "10",
+            "industry_penalty_factors": [
+              "Client-Facing Industries"
+            ],
+            "transferable_skills_score": "60",
+            "cultural_adaptation_difficulty": "MODERATE",
+            "regulatory_knowledge_gap": "Potential gap in finance and governance regulations",
+            "client_stakeholder_fit": "Moderate fit due to limited experience",
+            "business_cycle_understanding": "Limited understanding of consulting cycles",
+            "success_probability": "MEDIUM",
+            "adaptation_timeline": "6-12 months",
+            "investment_level_required": "MEDIUM",
+            "industry_strengths": [
+              "Technical skills in Excel, Python, SQL"
+            ],
+            "critical_industry_gaps": [
+              "Client management experience",
+              "Advanced data visualization tools"
+            ],
+            "hiring_risk_assessment": "MEDIUM RISK"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "0.25 years",
+            "cv_academic_years": "MISSING",
+            "cv_total_weighted_years": "0.2 years",
+            "cv_responsibility_scope": "MISSING",
+            "cv_leadership_indicators": "0",
+            "cv_decision_authority": "MISSING",
+            "cv_stakeholder_level": "MISSING",
+            "cv_management_experience": "MISSING",
+            "jd_required_seniority": "1-2 years of experience in a data and analytics role",
+            "jd_leadership_requirements": "MISSING",
+            "jd_decision_authority_needed": "MISSING",
+            "jd_stakeholder_level": "MISSING",
+            "seniority_score": "20",
+            "corporate_seniority_match": "20",
+            "leadership_readiness_score": "0",
+            "decision_authority_match": "0",
+            "stakeholder_management_fit": "0",
+            "overqualification_risk": "LOW",
+            "seniority_strengths": [],
+            "seniority_gaps": [
+              "Lacks required 1-2 years of experience",
+              "No leadership or management experience",
+              "No evidence of decision-making authority",
+              "No stakeholder management experience"
+            ],
+            "leadership_transition_risk": "HIGH",
+            "readiness_assessment": "Not ready for the role due to insufficient corporate experience and lack of leadership evidence"
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Intermediate",
+            "cv_primary_domain": "Data Analysis",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "Excel"
+            ],
+            "cv_problem_complexity": 5,
+            "cv_innovation_indicators": [],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "JavaScript",
+              "Power BI/DAX",
+              "Tabular Editor"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 75,
+            "core_skills_match_percentage": 60,
+            "technical_stack_fit_percentage": 60,
+            "complexity_readiness_score": 70,
+            "learning_agility_score": 80,
+            "technical_strengths": [
+              "Data Analysis",
+              "Python Programming"
+            ],
+            "technical_gaps": [
+              "Advanced Data Visualization",
+              "Power BI/DAX",
+              "JavaScript"
+            ],
+            "overqualification_risk": "Low"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 11,
+            "total_preferred_keywords": 3,
+            "matched_required_count": 3,
+            "matched_preferred_count": 0,
+            "missing_required": 8,
+            "missing_preferred": 3
+          },
+          "bonus_breakdown": {
+            "required_bonus": 1.5,
+            "required_penalty": -4.0,
+            "preferred_bonus": 0.0,
+            "preferred_penalty": -0.45,
+            "total_bonus": -2.95
+          },
+          "coverage_metrics": {
+            "required_coverage": 27.27,
+            "preferred_coverage": 0.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 60.0,
+        "experience_alignment": 40.0,
+        "industry_fit": 50.0,
+        "domain_overlap_percentage": 0.0,
+        "data_familiarity_score": 0.0,
+        "stakeholder_fit_score": 0.0,
+        "business_cycle_alignment": 0.0,
+        "role_seniority": 20.0,
+        "leadership_readiness_score": 0.0,
+        "technical_depth": 75.0,
+        "core_skills_match_percentage": 60.0,
+        "technical_stack_fit_percentage": 60.0,
+        "complexity_readiness_score": 70.0,
+        "learning_agility_score": 80.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": -2.95,
+        "total_bonus": -2.95,
+        "required_bonus": 1.5,
+        "required_penalty": -4.0,
+        "preferred_bonus": 0.0,
+        "preferred_penalty": -0.45,
+        "required_coverage": 27.27,
+        "preferred_coverage": 0.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-09-27T12:36:27.604",
+      "final_ats_score": 21.5125,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally rejected",
+      "breakdown": {
+        "category1": {
+          "score": 4.0,
+          "technical_skills_match_rate": 20.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 0.0,
+          "missing_counts": {
+            "technical": 8,
+            "domain": 7,
+            "soft": 8
+          }
+        },
+        "category2": {
+          "score": 20.4625,
+          "core_competency_avg": 48.75,
+          "experience_seniority_avg": 12.0,
+          "potential_ability_avg": 52.5,
+          "company_fit_avg": 12.5
+        },
+        "ats1_score": 24.4625,
+        "bonus_points": -2.95
+      }
+    }
+  ]
+}

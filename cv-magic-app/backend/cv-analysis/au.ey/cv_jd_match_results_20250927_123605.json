@@ -1,0 +1,41 @@
+{
+  "company_name": "au.ey",
+  "cv_analysis_timestamp": "2025-09-27T12:36:05.340780",
+  "matched_required_keywords": [
+    "SQL",
+    "Python",
+    "communication"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "JavaScript",
+    "Power BI",
+    "DAX",
+    "Tabular Editor",
+    "financial analysis",
+    "data visualisation",
+    "cloud computing",
+    "Microsoft Azure"
+  ],
+  "missed_preferred_keywords": [
+    "innovative mindset",
+    "industry practices",
+    "new technologies"
+  ],
+  "match_counts": {
+    "total_required_keywords": 11,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 3,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "Excel": "Found in technical skills section",
+    "SQL": "Found in technical skills section",
+    "Python": "Found in technical skills section",
+    "communication": "Implicitly matched through general skills context"
+  },
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20250927_122119.txt",
+  "metadata": {}
+}

@@ -1,0 +1,59 @@
+{
+  "experience_years": 1,
+  "required_skills": {
+    "technical": [
+      "SQL",
+      "Python",
+      "JavaScript",
+      "Power BI",
+      "DAX",
+      "Tabular Editor"
+    ],
+    "soft_skills": [
+      "communication"
+    ],
+    "domain_knowledge": [
+      "financial analysis",
+      "data visualisation",
+      "cloud computing",
+      "Microsoft Azure"
+    ],
+    "experience": []
+  },
+  "preferred_skills": {
+    "technical": [],
+    "soft_skills": [
+      "innovative mindset"
+    ],
+    "domain_knowledge": [
+      "industry practices",
+      "new technologies"
+    ],
+    "experience": []
+  },
+  "required_keywords": [
+    "SQL",
+    "Python",
+    "JavaScript",
+    "Power BI",
+    "DAX",
+    "Tabular Editor",
+    "communication",
+    "financial analysis",
+    "data visualisation",
+    "cloud computing",
+    "Microsoft Azure"
+  ],
+  "preferred_keywords": [
+    "innovative mindset",
+    "industry practices",
+    "new technologies"
+  ],
+  "analysis_timestamp": "2025-09-27T12:36:02.135142",
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "company_name": "au.ey",
+  "metadata": {
+    "jd_hash": "21e94ed078f0d417d75c9b239e723f16e33aa8bf2082a6ebe7460f6ab2e0aab2"
+  }
+}

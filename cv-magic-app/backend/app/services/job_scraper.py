@@ -97,7 +97,6 @@ def scrape_seek(soup: BeautifulSoup) -> str:
     # Look for Seek-specific job content selectors
     job_content_selectors = [
         '[data-automation-id="jobAdDetails"]',  # Main job description
-        '[data-automation-id="job-detail-title"]',  # Job title
         '[data-automation-id="jobAdDetails"] div',  # Job description content
         '[class*="jobAdDetails"]',
         '[class*="job-description"]',
@@ -105,15 +104,54 @@ def scrape_seek(soup: BeautifulSoup) -> str:
         'main', 'article'
     ]
     
+    # Also try to extract from JSON data in the page
+    json_data_selectors = [
+        'script[type="application/json"]',
+        'script[type="application/ld+json"]'
+    ]
+    
     job_text = ""
-    for selector in job_content_selectors:
-        elements = soup.select(selector)
-        if elements:
-            # Get text from the first matching element
-            job_text = elements[0].get_text(separator=' ', strip=True)
-            job_text = re.sub(r'\s+', ' ', job_text).strip()
-            if len(job_text) > 200:  # Ensure we have substantial content
-                break
+    
+    # For Seek, prioritize page source extraction as it's most reliable
+    page_source = str(soup)
+    job_content = _extract_job_from_page_source(page_source)
+    if job_content and len(job_content) > 100:
+        job_text = job_content
+    else:
+        # Fallback to JSON data extraction
+        for selector in json_data_selectors:
+            scripts = soup.select(selector)
+            for script in scripts:
+                try:
+                    import json
+                    data = json.loads(script.string)
+                    # Look for job content in the JSON structure
+                    if isinstance(data, dict):
+                        job_content = _extract_job_from_json(data)
+                        if job_content and len(job_content) > len(job_text):
+                            job_text = job_content
+                except (json.JSONDecodeError, AttributeError):
+                    continue
+        
+        # Also try to extract from JavaScript scripts
+        if not job_text or len(job_text) < 100:
+            all_scripts = soup.find_all('script')
+            for script in all_scripts:
+                if script.string and ('jobDetails' in script.string or 'content' in script.string):
+                    job_content = _extract_job_from_script(script.string)
+                    if job_content and len(job_content) > len(job_text):
+                        job_text = job_content
+    
+    # If no JSON content found, try HTML selectors
+    if not job_text or len(job_text) < 100:
+        for selector in job_content_selectors:
+            elements = soup.select(selector)
+            if elements:
+                # Get text from the first matching element
+                job_text = elements[0].get_text(separator=' ', strip=True)
+                job_text = re.sub(r'\s+', ' ', job_text).strip()
+                if len(job_text) > 200:  # Ensure we have substantial content
+                    break
     
     # If no specific job content found, try to extract from the main content area
     if not job_text or len(job_text) < 100:
@@ -213,6 +251,131 @@ def scrape_generic(soup: BeautifulSoup) -> str:
         job_text = re.sub(r'\s+', ' ', job_text).strip()
 
     return final_cleanup(job_text)
+
+
+def _extract_job_from_json(data: dict) -> str:
+    """Extract job description from JSON data structure"""
+    try:
+        # Look for job content in various JSON structures
+        job_content = ""
+        
+        # Check for job details in the data structure
+        if 'jobDetails' in data and 'result' in data['jobDetails']:
+            job_data = data['jobDetails']['result']
+            if 'job' in job_data and 'content' in job_data['job']:
+                job_content = job_data['job']['content']
+        
+        # Check for job content in other possible locations
+        if not job_content:
+            # Look for content field in the data
+            for key in ['content', 'description', 'jobDescription', 'job_content']:
+                if key in data:
+                    job_content = data[key]
+                    break
+        
+        # Clean up HTML tags if present
+        if job_content:
+            import re
+            # Remove HTML tags
+            job_content = re.sub(r'<[^>]+>', ' ', job_content)
+            # Decode HTML entities
+            job_content = job_content.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+            job_content = job_content.replace('&nbsp;', ' ').replace('&rsquo;', "'").replace('&ldquo;', '"').replace('&rdquo;', '"')
+            # Clean up whitespace
+            job_content = re.sub(r'\s+', ' ', job_content).strip()
+        
+        return job_content
+        
+    except Exception:
+        return ""
+
+
+def _extract_job_from_script(script_content: str) -> str:
+    """Extract job content from JavaScript script content"""
+    try:
+        import re
+        
+        # Look for job content in JavaScript variables
+        content_match = re.search(r'"content":"([^"]+)"', script_content)
+        if content_match:
+            content = content_match.group(1)
+            # Decode Unicode escapes
+            content = content.encode().decode('unicode_escape')
+            # Clean up HTML tags
+            content = re.sub(r'<[^>]+>', ' ', content)
+            # Decode HTML entities
+            content = content.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+            content = content.replace('&nbsp;', ' ').replace('&rsquo;', "'").replace('&ldquo;', '"').replace('&rdquo;', '"')
+            # Clean up whitespace
+            content = re.sub(r'\s+', ' ', content).strip()
+            return content
+        
+        return ""
+        
+    except Exception:
+        return ""
+
+
+def _extract_job_from_page_source(page_source: str) -> str:
+    """Extract job content from page source using regex patterns"""
+    try:
+        import re
+        
+        # Look for job content patterns
+        job_patterns = [
+            r'About the Role[^<]*',
+            r'What You.*?Be Doing[^<]*',
+            r'About You[^<]*',
+            r'Why Join Ventura[^<]*'
+        ]
+        
+        job_content = ""
+        for pattern in job_patterns:
+            matches = re.findall(pattern, page_source, re.IGNORECASE | re.DOTALL)
+            for match in matches:
+                # Clean up HTML tags and entities
+                clean_match = re.sub(r'<[^>]+>', ' ', match)
+                # Decode HTML entities
+                clean_match = clean_match.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+                clean_match = clean_match.replace('&nbsp;', ' ').replace('&rsquo;', "'").replace('&ldquo;', '"').replace('&rdquo;', '"')
+                clean_match = clean_match.replace('&bull;', '•').replace('&ndash;', '–').replace('&mdash;', '—')
+                # Decode Unicode escapes
+                clean_match = clean_match.replace('\\u003C', '<').replace('\\u003E', '>').replace('\\u002F', '/')
+                clean_match = clean_match.replace('\\u0026', '&').replace('\\u0027', "'").replace('\\u0022', '"')
+                # Additional HTML entity decoding
+                clean_match = clean_match.replace('&quot;', '"').replace('&apos;', "'")
+                clean_match = re.sub(r'\s+', ' ', clean_match).strip()
+                if len(clean_match) > len(job_content):
+                    job_content = clean_match
+        
+        # If we found content, try to get a larger section
+        if job_content and 'About the Role' in job_content:
+            start_marker = 'About the Role'
+            end_marker = 'Ready to Apply'
+            start_idx = page_source.find(start_marker)
+            if start_idx != -1:
+                end_idx = page_source.find(end_marker, start_idx)
+                if end_idx != -1:
+                    full_content = page_source[start_idx:end_idx + len(end_marker)]
+                    # Clean up the full content
+                    full_content = re.sub(r'<[^>]+>', ' ', full_content)
+                    # Decode HTML entities
+                    full_content = full_content.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+                    full_content = full_content.replace('&nbsp;', ' ').replace('&rsquo;', "'").replace('&ldquo;', '"').replace('&rdquo;', '"')
+                    full_content = full_content.replace('&bull;', '•').replace('&ndash;', '–').replace('&mdash;', '—')
+                    # Decode Unicode escapes
+                    full_content = full_content.replace('\\u003C', '<').replace('\\u003E', '>').replace('\\u002F', '/')
+                    full_content = full_content.replace('\\u0026', '&').replace('\\u0027', "'").replace('\\u0022', '"')
+                    # Additional HTML entity decoding
+                    full_content = full_content.replace('&quot;', '"').replace('&apos;', "'")
+                    full_content = re.sub(r'\s+', ' ', full_content).strip()
+                    if len(full_content) > len(job_content):
+                        job_content = full_content
+        
+        return job_content
+        
+    except Exception:
+        return ""
 
 
 def final_cleanup(text: str) -> str:
