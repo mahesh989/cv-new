@@ -57,14 +57,13 @@ class SkillAnalysisFileSelector:
             base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
         
         self.base_path = Path(base_path)
-        self.skills_path = self.base_path / "skills"
-        self.original_path = self.skills_path / "original"
-        self.rerun_path = self.skills_path / "reruns"
+        # Remove skills folder creation - not needed
+        # self.skills_path = self.base_path / "skills"
+        # self.original_path = self.skills_path / "original"
+        # self.rerun_path = self.skills_path / "reruns"
         
-        # Ensure directories exist
-        self.skills_path.mkdir(parents=True, exist_ok=True)
-        self.original_path.mkdir(parents=True, exist_ok=True)
-        self.rerun_path.mkdir(parents=True, exist_ok=True)
+        # Only ensure base directory exists
+        self.base_path.mkdir(parents=True, exist_ok=True)
         
         logger.info(f"🔧 [SKILL_SELECTOR] Initialized with base path: {self.base_path}")
     
@@ -103,9 +102,10 @@ class SkillAnalysisFileSelector:
     def _get_latest_rerun_analysis(self, company: str) -> SkillAnalysisContext:
         """Get the latest rerun analysis files for a company"""
         try:
-            company_rerun_path = self.rerun_path / company
+            # Use company-specific folder instead of skills/reruns
+            company_path = self.base_path / company
             
-            if not company_rerun_path.exists():
+            if not company_path.exists():
                 return SkillAnalysisContext({
                     'analysis_type': 'rerun',
                     'company': company,
@@ -115,10 +115,10 @@ class SkillAnalysisFileSelector:
             
             # Find all analysis files for this company
             json_files = TimestampUtils.find_all_timestamped_files(
-                company_rerun_path, f"{company}_skills_analysis", "json"
+                company_path, f"{company}_skills_analysis", "json"
             )
             summary_files = TimestampUtils.find_all_timestamped_files(
-                company_rerun_path, f"{company}_skills_summary", "txt"
+                company_path, f"{company}_skills_summary", "txt"
             )
             
             if not json_files:
@@ -161,9 +161,10 @@ class SkillAnalysisFileSelector:
     def _get_original_analysis_context(self, company: str) -> SkillAnalysisContext:
         """Get original analysis context"""
         try:
-            company_path = self.original_path / company
-            json_path = company_path / f"{company}_original_skills.json"
-            summary_path = company_path / f"{company}_original_summary.txt"
+            # Use company-specific folder instead of skills/original
+            company_path = self.base_path / company
+            json_path = company_path / f"{company}_skills_analysis.json"
+            summary_path = company_path / f"{company}_skills_summary.txt"
             
             exists = json_path.exists()
             
