@@ -709,5 +709,12 @@ class ContinuousOptimizationFramework:
         logger.info("Continuous optimization stopped")
 
 
-# Global instance
-optimization_framework = ContinuousOptimizationFramework()
+# Global instance - lazy initialization
+optimization_framework = None
+
+def get_optimization_framework():
+    """Get or create the optimization framework instance"""
+    global optimization_framework
+    if optimization_framework is None:
+        optimization_framework = ContinuousOptimizationFramework()
+    return optimization_framework

@@ -827,5 +827,12 @@ class PostLaunchMonitoringService:
         }
 
 
-# Global instance
-post_launch_monitoring = PostLaunchMonitoringService()
+# Global instance - lazy initialization
+post_launch_monitoring = None
+
+def get_post_launch_monitoring():
+    """Get or create the post-launch monitoring service instance"""
+    global post_launch_monitoring
+    if post_launch_monitoring is None:
+        post_launch_monitoring = PostLaunchMonitoringService()
+    return post_launch_monitoring

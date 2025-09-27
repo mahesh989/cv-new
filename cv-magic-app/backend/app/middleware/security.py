@@ -209,7 +209,7 @@ class SessionSecurityMiddleware(BaseHTTPMiddleware):
 
 def create_security_middleware(app, allowed_origins: List[str] = None):
     """Create security middleware"""
-    return SecurityMiddleware(app, allowed_origins)
+    return SecurityMiddleware(app, allowed_origins=allowed_origins)
 
 
 def create_session_security_middleware(app):

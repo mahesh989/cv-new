@@ -534,5 +534,12 @@ class ContinuousImprovementService:
         logger.info("Continuous improvement stopped")
 
 
-# Global instance
-continuous_improvement = ContinuousImprovementService()
+# Global instance - lazy initialization
+continuous_improvement = None
+
+def get_continuous_improvement():
+    """Get or create the continuous improvement service instance"""
+    global continuous_improvement
+    if continuous_improvement is None:
+        continuous_improvement = ContinuousImprovementService()
+    return continuous_improvement

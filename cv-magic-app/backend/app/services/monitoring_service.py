@@ -62,6 +62,7 @@ class MonitoringService:
         self.health_history: List[HealthStatus] = []
         self.monitoring_enabled = True
         self.metrics_thread = None
+        self.monitoring_thread = None
         self.start_monitoring()
     
     def start_monitoring(self):

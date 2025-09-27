@@ -312,7 +312,7 @@ class APIOptimizationService:
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 try:
-                return await func(*args, **kwargs)
+                    return await func(*args, **kwargs)
                 except Exception as e:
                     logger.error(f"Error in {func.__name__}: {e}")
                     return default_return

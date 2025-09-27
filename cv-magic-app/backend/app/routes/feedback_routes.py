@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from app.database import get_database
 from app.models.auth import UserData
 from app.core.dependencies import get_current_user
-from app.services.post_launch_monitoring import post_launch_monitoring
-from app.services.optimization_framework import optimization_framework
+from app.services.post_launch_monitoring import get_post_launch_monitoring
+from app.services.optimization_framework import get_optimization_framework
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
@@ -78,7 +78,8 @@ async def submit_feedback(
     """
     try:
         # Collect feedback using monitoring service
-        feedback = post_launch_monitoring.collect_user_feedback(
+        monitoring_service = get_post_launch_monitoring()
+        feedback = monitoring_service.collect_user_feedback(
             user_id=int(current_user.id),
             feedback_type=request.feedback_type,
             rating=request.rating,
@@ -125,8 +126,9 @@ async def get_my_feedback(
     """
     try:
         # Get user's feedback from monitoring service
+        monitoring_service = get_post_launch_monitoring()
         user_feedback = [
-            f for f in post_launch_monitoring.user_feedback 
+            f for f in monitoring_service.user_feedback 
             if f.user_id == int(current_user.id)
         ]
         
@@ -170,7 +172,8 @@ async def get_feedback_analysis(
     """
     try:
         # Get feedback analysis from monitoring service
-        analysis = post_launch_monitoring.analyze_user_feedback()
+        monitoring_service = get_post_launch_monitoring()
+        analysis = monitoring_service.analyze_user_feedback()
         
         # Add trends analysis
         trends = _analyze_feedback_trends()
@@ -203,7 +206,8 @@ async def get_optimization_dashboard(
     """
     try:
         # Get dashboard data from optimization framework
-        dashboard_data = optimization_framework.get_optimization_dashboard()
+        optimization_service = get_optimization_framework()
+        dashboard_data = optimization_service.get_optimization_dashboard()
         
         response = OptimizationDashboard(
             total_recommendations=dashboard_data.get("total_recommendations", 0),
@@ -240,7 +244,8 @@ async def get_optimization_recommendations(
     """
     try:
         # Get recommendations from optimization framework
-        recommendations = optimization_framework.recommendations
+        optimization_service = get_optimization_framework()
+        recommendations = optimization_service.recommendations
         
         # Apply filters
         if type_filter:
@@ -292,7 +297,8 @@ async def implement_recommendation(
     """
     try:
         # Implement recommendation using optimization framework
-        result = optimization_framework.implement_recommendation(recommendation_id)
+        optimization_service = get_optimization_framework()
+        result = optimization_service.implement_recommendation(recommendation_id)
         
         response = {
             "recommendation_id": result.recommendation_id,
@@ -329,7 +335,8 @@ async def get_system_health(
     """
     try:
         # Get system health from monitoring service
-        health_score = post_launch_monitoring.get_system_health_score()
+        monitoring_service = get_post_launch_monitoring()
+        health_score = monitoring_service.get_system_health_score()
         
         return health_score
         
@@ -350,7 +357,8 @@ async def get_monitoring_summary(
     """
     try:
         # Get monitoring summary from monitoring service
-        summary = post_launch_monitoring.get_monitoring_summary()
+        monitoring_service = get_post_launch_monitoring()
+        summary = monitoring_service.get_monitoring_summary()
         
         return summary
         
@@ -366,7 +374,8 @@ def _analyze_feedback_trends() -> Dict[str, Any]:
     """Analyze feedback trends over time"""
     try:
         # Get feedback from monitoring service
-        feedback = post_launch_monitoring.user_feedback
+        monitoring_service = get_post_launch_monitoring()
+        feedback = monitoring_service.user_feedback
         
         if not feedback:
             return {"message": "No feedback data available for trend analysis"}
