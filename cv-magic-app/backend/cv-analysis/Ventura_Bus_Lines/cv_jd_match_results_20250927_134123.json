@@ -1,0 +1,45 @@
+{
+  "company_name": "Ventura_Bus_Lines",
+  "cv_analysis_timestamp": "2025-09-27T13:41:23.596634",
+  "matched_required_keywords": [
+    "Excel",
+    "PowerBI",
+    "analytical skills",
+    "data analytics",
+    "reporting"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau",
+    "Python",
+    "tertiary qualifications"
+  ],
+  "missed_required_keywords": [
+    "BusMinder",
+    "Smartrak",
+    "Myki Analytics",
+    "attention to detail",
+    "statistical techniques",
+    "KPI analysis"
+  ],
+  "missed_preferred_keywords": [],
+  "match_counts": {
+    "total_required_keywords": 11,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 5,
+    "matched_preferred_count": 3
+  },
+  "matching_notes": {
+    "Excel": "Found in technical skills section",
+    "PowerBI": "Used in research intern experience",
+    "analytical skills": "Implied through various data analysis tasks",
+    "data analytics": "Mentioned in technical skills and throughout experience",
+    "reporting": "Contextually matched through creation of reports and dashboards",
+    "Tableau": "Used in software engineer and analyst experience",
+    "Python": "Extensively used in multiple roles for data analysis and scripting",
+    "tertiary qualifications": "Implied through Master's and PhD degrees"
+  },
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/tailored/au.ey_tailored_cv_20250927_123741.txt",
+  "metadata": {}
+}

@@ -1,0 +1,59 @@
+{
+  "experience_years": null,
+  "required_skills": {
+    "technical": [
+      "Excel",
+      "PowerBI",
+      "BusMinder",
+      "Smartrak",
+      "Myki Analytics"
+    ],
+    "soft_skills": [
+      "analytical skills",
+      "attention to detail"
+    ],
+    "domain_knowledge": [
+      "data analytics",
+      "reporting",
+      "statistical techniques",
+      "KPI analysis"
+    ],
+    "experience": []
+  },
+  "preferred_skills": {
+    "technical": [
+      "Tableau",
+      "Python"
+    ],
+    "soft_skills": [],
+    "domain_knowledge": [
+      "tertiary qualifications"
+    ],
+    "experience": []
+  },
+  "required_keywords": [
+    "Excel",
+    "PowerBI",
+    "BusMinder",
+    "Smartrak",
+    "Myki Analytics",
+    "analytical skills",
+    "attention to detail",
+    "data analytics",
+    "reporting",
+    "statistical techniques",
+    "KPI analysis"
+  ],
+  "preferred_keywords": [
+    "Tableau",
+    "Python",
+    "tertiary qualifications"
+  ],
+  "analysis_timestamp": "2025-09-27T13:41:16.941121",
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "company_name": "Ventura_Bus_Lines",
+  "metadata": {
+    "jd_hash": "b0a600a00355915f43eb3a8666fcac324cf3b519b4aadb9fd2a932298ca9e42e"
+  }
+}
