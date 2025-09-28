@@ -1,6 +1,6 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-28T22:23:39.238972",
+  "cv_analysis_timestamp": "2025-09-28T22:37:57.377958",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
@@ -10,8 +10,7 @@
     "data warehouse"
   ],
   "matched_preferred_keywords": [
-    "Tableau",
-    "clean data"
+    "Tableau"
   ],
   "missed_required_keywords": [
     "VBA",
@@ -23,23 +22,23 @@
   ],
   "missed_preferred_keywords": [
     "data issues",
-    "de-duplication"
+    "de-duplication",
+    "clean data"
   ],
   "match_counts": {
     "total_required_keywords": 12,
     "total_preferred_keywords": 4,
     "matched_required_count": 6,
-    "matched_preferred_count": 2
+    "matched_preferred_count": 1
   },
   "matching_notes": {
-    "SQL": "Mentioned in technical skills and experience sections for database management",
-    "Power BI": "Used for creating dashboards and presenting research findings",
-    "Excel": "Found in technical skills section for data-driven solutions and reporting",
-    "project management": "Implied through experience in managing data projects and workflows",
+    "SQL": "Mentioned in technical skills section for querying and managing databases",
+    "Power BI": "Used for building dashboards and presenting research findings",
+    "Excel": "Found in technical skills section for data-driven solutions",
+    "project management": "Implied through roles involving project coordination and management",
     "communication": "Demonstrated through presenting research findings and mentoring students",
     "data warehouse": "Mentioned in context of using Snowflake for cloud data warehousing",
-    "Tableau": "Used for creating dashboards and visualizations",
-    "clean data": "Inferred from data cleaning and preprocessing tasks"
+    "Tableau": "Used for creating dashboards and visualizations"
   },
   "ai_model_used": "openai/gpt-4o",
   "processing_status": "completed",

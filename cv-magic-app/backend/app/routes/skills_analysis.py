@@ -1794,8 +1794,8 @@ async def get_analysis_results(company: str):
         logger.info(f"📊 [API] Fetching analysis results for company: {company}")
         
         # Build file path using timestamped files
-        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-        company_dir = base_dir / company
+        base_dir = Path("cv-analysis")
+        company_dir = base_dir / "applied_companies" / company
         
         # Use timestamped analysis file with fallback
         from app.utils.timestamp_utils import TimestampUtils
@@ -1878,7 +1878,7 @@ async def get_analysis_results(company: str):
         # Get AI recommendation content if available
         # Use timestamped AI recommendation file with fallback
         from app.utils.timestamp_utils import TimestampUtils
-        company_dir = base_dir / company
+        # company_dir already set to base_dir / "applied_companies" / company above
         # Try multiple naming patterns for AI recommendations
         ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
         if not ai_recommendation_file:
