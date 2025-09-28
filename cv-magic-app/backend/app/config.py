@@ -80,7 +80,7 @@ class Settings(BaseSettings):
     ]
     
     # File Upload Settings
-    UPLOAD_DIR: str = "uploads"
+    UPLOAD_DIR: str = "cv-analysis/uploads"
     MAX_FILE_SIZE: int = 10485760  # 10MB in bytes
     MAX_FILES_PER_USER: int = 50
     

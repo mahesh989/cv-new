@@ -530,8 +530,8 @@ TEXT TO ANALYZE:
             # Create company slug for folder name
             company_slug = self._create_company_slug(job_info["company_name"])
             
-            # Create company-specific directory
-            company_dir = self.cv_analysis_dir / company_slug
+            # Create company-specific directory under applied_companies subfolder
+            company_dir = self.cv_analysis_dir / "applied_companies" / company_slug
             company_dir.mkdir(parents=True, exist_ok=True)
             
             # Save job_info JSON file with timestamp

@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 logger = logging.getLogger(__name__)
 
 # Constants
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Path("cv-analysis/uploads")
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 
 

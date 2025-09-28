@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
 
 # Constants
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Path("cv-analysis/uploads")
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -455,7 +455,7 @@ async def get_latest_tailored_cv():
             all_tailored_files = list(tailored_folder.glob("*_tailored_cv_*.txt"))
         
         # Fallback: also check company folders for any remaining files
-        for company_dir in cv_analysis_path.iterdir():
+        for company_dir in (cv_analysis_path / "applied_companies").iterdir():
             if company_dir.is_dir() and company_dir.name != "__pycache__" and company_dir.name != "cvs":
                 # Look for company-specific naming pattern first
                 company_files = list(company_dir.glob(f"{company_dir.name}_tailored_cv_*.txt"))
@@ -532,7 +532,7 @@ async def get_available_companies():
         companies = []
         
         if cv_analysis_path.exists():
-            for company_dir in cv_analysis_path.iterdir():
+            for company_dir in (cv_analysis_path / "applied_companies").iterdir():
                 if company_dir.is_dir() and company_dir.name != "__pycache__":
                     # Check if it has tailored CV files with company-specific naming
                     company_name = company_dir.name

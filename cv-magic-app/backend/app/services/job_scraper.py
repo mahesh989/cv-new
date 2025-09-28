@@ -4,29 +4,53 @@ import re
 import asyncio
 from typing import Optional
 
-def scrape_job_description(url: str) -> str:
+def scrape_job_description(url: str, external_context: list = None) -> str:
     """
     Scrape job description from a given URL.
     
     Args:
         url: The URL of the job posting
+        external_context: Optional list of external context documents
         
     Returns:
         Extracted job description text
     """
     try:
+        # First try to extract from external context if available
+        if external_context:
+            combined_content = []
+            for doc in external_context:
+                if isinstance(doc, dict) and doc.get('source', {}).get('id') == url:
+                    content = doc.get('content', '')
+                    if content and isinstance(content, str):
+                        combined_content.append(content)
+            
+            if combined_content:
+                # Combine all content sections and clean up
+                combined_text = ' '.join(combined_content)
+                # Create a soup object from the combined text for consistent processing
+                soup = BeautifulSoup(combined_text, 'html.parser')
+                # Use site-specific extraction
+                if 'ethicaljobs.com.au' in url:
+                    result = scrape_ethicaljobs(soup)
+                    if result and len(result.strip()) > 100:
+                        return result
+                elif 'seek.com.au' in url:
+                    result = scrape_seek(soup)
+                    if result and len(result.strip()) > 100:
+                        return result
+                else:
+                    result = scrape_generic(soup)
+                    if result and len(result.strip()) > 100:
+                        return result
+        
+        # If no valid content from external context, try scraping the URL
         headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
+                "Chrome/91.0.4472.124 Safari/537.36"
             ),
-            "Accept-Language": "en-US,en;q=0.9",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-            "Accept-Encoding": "gzip, deflate, br",
-            "DNT": "1",
-            "Connection": "keep-alive",
-            "Upgrade-Insecure-Requests": "1",
         }
         
         # Add Seek-specific headers
@@ -253,6 +277,9 @@ def scrape_seek(soup: BeautifulSoup) -> str:
 def scrape_ethicaljobs(soup: BeautifulSoup) -> str:
     """Specialized scraper for EthicalJobs website"""
     
+    # First try the standard extraction method
+    job_text = ""
+    
     # Remove all navigation, sidebar, and duplicate elements
     unwanted_selectors = [
         'nav', 'header', 'footer', 'aside', 'menu',
@@ -276,14 +303,14 @@ def scrape_ethicaljobs(soup: BeautifulSoup) -> str:
         'main', 'article'
     ]
     
-    job_text = ""
     for selector in job_content_selectors:
         elements = soup.select(selector)
         if elements:
             # Get text from the first matching element
-            job_text = elements[0].get_text(separator=' ', strip=True)
-            job_text = re.sub(r'\s+', ' ', job_text).strip()
-            if len(job_text) > 200:  # Ensure we have substantial content
+            text = elements[0].get_text(separator=' ', strip=True)
+            text = re.sub(r'\s+', ' ', text).strip()
+            if len(text) > 200:  # Ensure we have substantial content
+                job_text = text
                 break
     
     # If no specific job content found, try to extract from the main content area
@@ -295,6 +322,33 @@ def scrape_ethicaljobs(soup: BeautifulSoup) -> str:
             text = re.sub(r'\s+', ' ', text).strip()
             if len(text) > len(job_text):
                 job_text = text
+    
+    # If still no content found, try to extract job sections by looking for specific keywords
+    if not job_text or len(job_text) < 100:
+        section_texts = []
+        page_text = soup.get_text(separator='\n', strip=True)
+        
+        # Split text into sections based on common job description headers
+        section_headers = [
+            'ABOUT US', 'WHO WE ARE', 'WHO WE ARE LOOKING FOR', 
+            "YOU'LL MAKE AN IMPACT BY", 'WE WOULD LIKE YOU TO HAVE',
+            'WHAT YOU\'LL GET IN RETURN', 'HOW TO APPLY',
+            'Job description', 'Job Summary', 'Requirements',
+            'Responsibilities', 'Qualifications', 'Benefits'
+        ]
+        
+        # Find all sections and their content
+        for header in section_headers:
+            pattern = f"({header}[\s\S]*?)(?={'|'.join(section_headers)}|$)"
+            matches = re.finditer(pattern, page_text, re.IGNORECASE)
+            for match in matches:
+                section_text = match.group(1).strip()
+                if len(section_text) > 50:  # Ignore very short sections
+                    section_texts.append(section_text)
+        
+        if section_texts:
+            # Combine all relevant sections
+            job_text = '\n'.join(section_texts)
     
     return final_cleanup(job_text)
 
@@ -614,18 +668,19 @@ def final_cleanup(text: str) -> str:
     return text
 
 
-async def scrape_job_description_async(url: str) -> str:
+async def scrape_job_description_async(url: str, external_context: list = None) -> str:
     """
     Async wrapper for job description scraping.
     
     Args:
         url: The URL of the job posting
+        external_context: Optional list of external context documents
         
     Returns:
         Extracted job description text
     """
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, scrape_job_description, url)
+    return await loop.run_in_executor(None, lambda: scrape_job_description(url, external_context))
 
 
 def is_valid_job_url(url: str) -> bool:

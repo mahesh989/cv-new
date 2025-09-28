@@ -18,7 +18,7 @@ from ..services.structured_cv_parser import LLMStructuredCVParser
 logger = logging.getLogger(__name__)
 
 # Constants
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Path("cv-analysis/uploads")
 CV_ANALYSIS_DIR = Path("cv-analysis")
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB

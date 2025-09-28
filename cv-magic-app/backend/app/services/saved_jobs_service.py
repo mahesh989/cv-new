@@ -13,7 +13,7 @@ from fastapi.encoders import jsonable_encoder
 logger = logging.getLogger(__name__)
 
 class SavedJobsService:
-    JOBS_FILE = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+    JOBS_FILE = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/saved_jobs/saved_jobs.json")
     
     def __init__(self):
         """Initialize the saved jobs service."""

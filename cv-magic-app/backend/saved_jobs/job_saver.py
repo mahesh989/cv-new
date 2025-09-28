@@ -20,8 +20,8 @@ class JobSaver:
             saved_jobs_path: Path to the saved_jobs directory (defaults to current directory)
         """
         if saved_jobs_path is None:
-            # Default to the saved_jobs directory in the backend
-            self.saved_jobs_path = Path(__file__).parent
+            # Default to the cv-analysis/saved_jobs directory in the backend
+            self.saved_jobs_path = Path(__file__).parent.parent / "cv-analysis" / "saved_jobs"
         else:
             self.saved_jobs_path = Path(saved_jobs_path)
             

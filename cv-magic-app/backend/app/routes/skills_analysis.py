@@ -168,7 +168,7 @@ def _validate_required_analysis_files(company_name: str) -> Optional[str]:
     try:
         from app.utils.timestamp_utils import TimestampUtils
         
-        base_path = Path("cv-analysis") / company_name
+        base_path = Path("cv-analysis") / "applied_companies" / company_name
         
         # Check for timestamped files first, then fallback to non-timestamped
         jd_original_file = TimestampUtils.find_latest_timestamped_file(base_path, "jd_original", "json")
@@ -309,7 +309,7 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
         
         # Step 1: JD Analysis (force refresh to guarantee availability)
         try:
-            company_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / cname
+            company_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / "applied_companies" / cname
             logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
             from app.services.jd_analysis.jd_analyzer import JDAnalyzer
             _analyzer = JDAnalyzer()
@@ -459,6 +459,10 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
 async def analyze_skills(request: Request):
     """Extract skills from CV and JD using AI with caching"""
     try:
+        # Ensure required directories exist before processing
+        from ..utils.directory_utils import ensure_cv_analysis_directories
+        ensure_cv_analysis_directories()
+        
         data = await request.json()
         
         # Extract parameters
@@ -511,7 +515,7 @@ async def analyze_skills(request: Request):
             import json
             from datetime import datetime
             if company_name:
-                company_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / company_name
+                company_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / "applied_companies" / company_name
                 
                 # Check for job_info files and add to saved_jobs.json (same logic as preliminary_analysis)
                 job_info_files = list(company_dir.glob("job_info_*.json"))
@@ -529,7 +533,7 @@ async def analyze_skills(request: Request):
                         job_metadata = json.load(f)
                     
                     # Save to shared jobs file
-                    saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+                    saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/saved_jobs/saved_jobs.json")
                     saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
                     
                     if saved_jobs_file.exists():
@@ -864,7 +868,7 @@ async def preliminary_analysis(
                         job_metadata = json.load(f)
                     
                     # Save to shared jobs file
-                    saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+                    saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/saved_jobs/saved_jobs.json")
                     saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
                     
                     if saved_jobs_file.exists():
@@ -1155,7 +1159,7 @@ async def trigger_complete_pipeline(company: str):
             import json
             from datetime import datetime
 
-            saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs/saved_jobs.json")
+            saved_jobs_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/saved_jobs/saved_jobs.json")
             saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
             
             # Create initial jobs file if it doesn't exist
@@ -1173,7 +1177,7 @@ async def trigger_complete_pipeline(company: str):
                 data = json.load(f)
 
             # Get job info from original JD file
-            job_info_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / company / "job_info.json"
+            job_info_file = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis") / "applied_companies" / company / "job_info.json"
             if job_info_file.exists():
                 with open(job_info_file, 'r', encoding='utf-8') as f:
                     job_info = json.load(f)
@@ -1530,7 +1534,7 @@ async def generate_ai_recommendation(company: str, force_regenerate: bool = Fals
         logger.info(f"🤖 [API] Generating AI recommendation for: {company}")
         
         # Check if input recommendation file exists (no longer need company-specific prompt files)
-        input_file = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_input_recommendation.json")
+        input_file = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/applied_companies/{company}/{company}_input_recommendation.json")
         if not input_file.exists():
             return JSONResponse(
                 status_code=404,
@@ -2165,7 +2169,7 @@ async def perform_preliminary_skills_analysis(
                 if file_params["auto_detect_company"]:
                     try:
                         from pathlib import Path
-                        cv_analysis_dir = Path("cv-analysis")
+                        cv_analysis_dir = Path("cv-analysis") / "applied_companies"
                         if cv_analysis_dir.exists():
                             # Find the most recently created company folder (excluding Unknown_Company)
                             company_folders = []

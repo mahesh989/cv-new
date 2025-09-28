@@ -3,15 +3,23 @@ from fastapi.responses import JSONResponse
 from typing import Dict, Any
 import asyncio
 from datetime import datetime
+from pathlib import Path
+from pydantic import BaseModel, AnyHttpUrl
 
 from ..services.job_scraper import scrape_job_description_async, is_valid_job_url
 from ..services.job_extractor import extract_job_metadata, validate_job_description
+from ..utils.directory_utils import ensure_cv_analysis_directories
+
+class JobScrapeRequest(BaseModel):
+    url: AnyHttpUrl
 
 router = APIRouter(prefix="/api/job", tags=["Job Description"])
 
 
+
+
 @router.post("/scrape")
-async def scrape_job_description(request: Request):
+async def scrape_job_description(request_data: JobScrapeRequest, request: Request):
     """
     Scrape job description from a URL.
     
@@ -28,19 +36,31 @@ async def scrape_job_description(request: Request):
     }
     """
     try:
-        data = await request.json()
-        url = data.get("url")
+        # Ensure required directories exist before processing
+        ensure_cv_analysis_directories()
         
-        if not url:
-            raise HTTPException(status_code=400, detail="No URL provided")
+        url = str(request_data.url)
         
         if not is_valid_job_url(url):
             raise HTTPException(status_code=400, detail="Invalid job URL format")
         
-        # Scrape the job description
-        job_description = await scrape_job_description_async(url)
+        # Get external context if available
+        raw_body = await request.body()
+        if raw_body:
+            try:
+                body = await request.json()
+                external_context = body.get('external_context', [])
+            except:
+                external_context = []
+        else:
+            external_context = []
         
-        if job_description.startswith("Error:"):
+        # Scrape the job description
+        job_description = await scrape_job_description_async(url, external_context)
+        
+        if (job_description.startswith("Error:") or 
+            job_description.startswith("Error fetching") or 
+            job_description.startswith("Unexpected error")):
             raise HTTPException(status_code=422, detail=job_description)
         
         if not job_description or len(job_description.strip()) < 10:
@@ -76,6 +96,9 @@ async def extract_job_info(request: Request):
     }
     """
     try:
+        # Ensure required directories exist before processing
+        ensure_cv_analysis_directories()
+        
         data = await request.json()
         job_description = data.get("job_description", "")
         

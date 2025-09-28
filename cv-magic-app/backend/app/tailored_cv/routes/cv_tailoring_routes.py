@@ -775,7 +775,7 @@ async def save_additional_prompt(
             raise HTTPException(status_code=400, detail="Company and prompt are required")
         
         # Save to analysis folder
-        analysis_path = Path("cv-analysis") / company
+        analysis_path = Path("cv-analysis") / "applied_companies" / company
         analysis_path.mkdir(parents=True, exist_ok=True)
         
         # Generate timestamp for filename

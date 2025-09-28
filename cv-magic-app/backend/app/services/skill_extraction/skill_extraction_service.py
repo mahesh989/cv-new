@@ -117,7 +117,7 @@ class SkillExtractionService:
         
         try:
             # Check if file exists first
-            upload_dir = Path("uploads")
+            upload_dir = Path("cv-analysis/uploads")
             file_path = upload_dir / cv_filename
             
             if not file_path.exists():

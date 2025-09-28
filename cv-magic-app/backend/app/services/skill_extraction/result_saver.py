@@ -71,8 +71,8 @@ class SkillExtractionResultSaver:
                 # Extract company name from JD data when available (preferred), otherwise from URL/skills
                 company_slug = self._extract_company_name(jd_skills, jd_url, jd_data)
             
-            # Create company folder
-            company_folder = self.base_dir / company_slug
+            # Create company folder under applied_companies subfolder
+            company_folder = self.base_dir / "applied_companies" / company_slug
             company_folder.mkdir(parents=True, exist_ok=True)
             
             # Save original CV JSON in root cv-analysis directory if it doesn't exist or doesn't have structured data
