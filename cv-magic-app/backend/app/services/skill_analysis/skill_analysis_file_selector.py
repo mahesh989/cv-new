@@ -54,7 +54,7 @@ class SkillAnalysisFileSelector:
     
     def __init__(self, base_path: str = None):
         if base_path is None:
-            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            base_path = "cv-analysis"
         
         self.base_path = Path(base_path)
         # Remove skills folder creation - not needed

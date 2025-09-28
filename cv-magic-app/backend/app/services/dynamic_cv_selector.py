@@ -21,7 +21,7 @@ class DynamicCVSelector:
     
     def __init__(self, cv_analysis_base_path: str = None):
         if cv_analysis_base_path is None:
-            cv_analysis_base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            cv_analysis_base_path = "cv-analysis"
         
         self.base_path = Path(cv_analysis_base_path)
         self.cvs_path = self.base_path / "cvs"

@@ -58,7 +58,7 @@ class JDCacheManager:
     
     def __init__(self, cv_analysis_base_path: str = None):
         if cv_analysis_base_path is None:
-            cv_analysis_base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            cv_analysis_base_path = "cv-analysis"
         
         self.base_path = Path(cv_analysis_base_path)
         logger.info(f"🗄️ [JD_CACHE_MANAGER] Initialized with base path: {self.base_path}")

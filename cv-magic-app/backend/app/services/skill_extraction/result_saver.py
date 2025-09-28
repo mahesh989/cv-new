@@ -687,7 +687,7 @@ class SkillExtractionResultSaver:
             if saved_file_path:
                 try:
                     p = Path(saved_file_path)
-                    # Expect structure: cv-analysis/<Company>/<Company>_skills_analysis.txt
+                    # Expect structure: cv-analysis/applied_companies/<Company>/<Company>_skills_analysis.txt
                     if p.parent and p.parent.name:
                         company_slug = p.parent.name
                         logger.info(f"🏢 [PREEXTRACTED_COMPARISON] Inferred company from saved_file_path: {company_slug}")

@@ -31,7 +31,7 @@ class AIRecommendationGenerator:
     """Service for generating AI-based CV optimization recommendations"""
     
     def __init__(self):
-        self.base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        self.base_dir = Path("cv-analysis")
         self.prompt_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/prompt")
     
     async def generate_ai_recommendation(self, company: str, force_regenerate: bool = False) -> bool:

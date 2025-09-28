@@ -268,7 +268,7 @@ def _detect_most_recent_company() -> Optional[str]:
     Returns the company folder name or None if not found.
     """
     try:
-        base_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        base_path = Path("cv-analysis")
         if not base_path.exists():
             return None
 
@@ -327,7 +327,7 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
             # Prefer tailored CV if available; else fall back to dynamic latest
             try:
-                base_dir_local = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+                base_dir_local = Path("cv-analysis")
                 tailored_dir = base_dir_local / "cvs" / "tailored"
                 preferred_txt = None
                 if tailored_dir.exists():
@@ -395,7 +395,7 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
                 raise
             
             # Check if we have the minimum required files (JD + skills analysis must exist)
-            base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+            base_dir = Path("cv-analysis")
             from app.utils.timestamp_utils import TimestampUtils
             company_dir = base_dir / cname
             jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
@@ -815,7 +815,7 @@ async def preliminary_analysis(
 
             # If we have a company, ensure required files exist for the pipeline
             if company_name:
-                base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+                base_dir = Path("cv-analysis")
                 company_dir = base_dir / company_name
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)

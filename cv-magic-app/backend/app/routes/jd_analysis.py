@@ -78,7 +78,7 @@ async def analyze_jd_endpoint(
         
         # Short-circuit: if jd_original and an existing jd_analysis are present, reuse without re-analysis
         if not force_refresh:
-            base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+            base_dir = Path("cv-analysis")
             company_dir = base_dir / company_name
             try:
                 jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
@@ -380,7 +380,7 @@ async def get_jd_analysis_status(
             )
         
         # Check if analysis file exists
-        base_path = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        base_path = Path("cv-analysis")
         analysis_file = base_path / company_name / "jd_analysis.json"
         jd_file = base_path / company_name / "jd_original.txt"
         
@@ -463,7 +463,7 @@ async def delete_jd_analysis(
         logger.info(f"🗑️ Deleting JD analysis for {company_name}")
         
         # Delete analysis file
-        base_path = Path("/Users/mahesh/Documents/Github/mahesh/cv-magic-app/backend/cv-analysis")
+        base_path = Path("cv-analysis")
         analysis_file = base_path / company_name / "jd_analysis.json"
         
         if analysis_file.exists():

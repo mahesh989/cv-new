@@ -18,7 +18,7 @@ class ModularATSOrchestrator:
     """Main orchestrator for modular ATS component analysis."""
 
     def __init__(self, base_dir: Optional[Path] = None):
-        self.base_dir: Path = base_dir or Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        self.base_dir: Path = base_dir or Path("cv-analysis")
         self.assembler = ComponentAssembler(base_dir)
 
     async def run_component_analysis(self, company: str, cv_text: Optional[str] = None) -> Dict[str, Any]:

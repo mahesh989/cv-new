@@ -19,7 +19,7 @@ class ATSRecommendationService:
     """Service for extracting ATS data and creating recommendation files"""
     
     def __init__(self):
-        self.base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        self.base_dir = Path("cv-analysis")
     
     def extract_ats_recommendation_data(self, company: str) -> Optional[Dict[str, Any]]:
         """

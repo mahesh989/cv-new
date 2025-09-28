@@ -148,7 +148,7 @@ class CVJDMatcher:
             FileNotFoundError: If analysis file doesn't exist
         """
         if not base_path:
-            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            base_path = "cv-analysis"
         
         company_dir = Path(base_path) / company_name
         analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
@@ -429,7 +429,7 @@ class CVJDMatcher:
             Path to saved file
         """
         if not base_path:
-            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            base_path = "cv-analysis"
         
         # Create company directory if it doesn't exist
         company_dir = Path(base_path) / company_name
@@ -462,7 +462,7 @@ class CVJDMatcher:
             CVJDMatchResult if found, None otherwise
         """
         if not base_path:
-            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            base_path = "cv-analysis"
         
         company_dir = Path(base_path) / company_name
         result_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")

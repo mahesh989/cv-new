@@ -1520,7 +1520,7 @@ FIX: Output ONLY valid JSON!
         """
         try:
             # Path to cv-analysis/cvs/tailored folder
-            cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+            cv_analysis_path = Path("cv-analysis")
             tailored_folder = cv_analysis_path / "cvs" / "tailored"
             tailored_folder.mkdir(parents=True, exist_ok=True)
             
@@ -1564,8 +1564,8 @@ FIX: Output ONLY valid JSON!
         """
         try:
             # Paths
-            cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
-            company_folder = cv_analysis_path / company
+            cv_analysis_path = Path("cv-analysis")
+            company_folder = cv_analysis_path / "applied_companies" / company
 
             logger.info(f"Loading real data for {company}")
             logger.info(f"Company folder: {company_folder}")
@@ -1627,7 +1627,7 @@ FIX: Output ONLY valid JSON!
             List of company names that have recommendation files
         """
         try:
-            cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+            cv_analysis_path = Path("cv-analysis")
             companies = []
             
             if cv_analysis_path.exists():

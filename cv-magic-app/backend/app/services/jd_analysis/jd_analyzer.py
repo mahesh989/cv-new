@@ -236,7 +236,7 @@ class JDAnalyzer:
     
     def __init__(self):
         self.ai_service = ai_service
-        self.base_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        self.base_analysis_path = Path("cv-analysis")
         self.requirements_extractor = RequirementsExtractor()
     
     def _read_jd_file(self, file_path: Union[str, Path]) -> str:
@@ -365,7 +365,7 @@ class JDAnalyzer:
         """
         try:
             # Create company directory if it doesn't exist
-            company_dir = self.base_analysis_path / company_name
+            company_dir = self.base_analysis_path / "applied_companies" / company_name
             company_dir.mkdir(parents=True, exist_ok=True)
             
             # Reuse existing analysis file if present to avoid duplicates for same JD URL/text
@@ -399,7 +399,7 @@ class JDAnalyzer:
             JDAnalysisResult if found, None otherwise
         """
         try:
-            company_dir = self.base_analysis_path / company_name
+            company_dir = self.base_analysis_path / "applied_companies" / company_name
             analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
             
             if not analysis_file or not analysis_file.exists():
@@ -505,7 +505,7 @@ class JDAnalyzer:
         if not base_path:
             base_path = str(self.base_analysis_path)
         
-        company_dir = Path(base_path) / company_name
+        company_dir = Path(base_path) / "applied_companies" / company_name
         jd_file_path = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
         
         # Fallback to non-timestamped file if no timestamped file exists
@@ -538,7 +538,7 @@ class JDAnalyzer:
                 if cached_result:
                     # If we can compute the current JD hash, only reuse cache if hashes match
                     try:
-                        company_dir = self.base_analysis_path / company_name
+                        company_dir = self.base_analysis_path / "applied_companies" / company_name
                         jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json")
                         current_text = self._read_jd_file(jd_file) if jd_file and jd_file.exists() else None
                         current_hash = self._compute_jd_hash(current_text) if current_text else None
@@ -553,7 +553,7 @@ class JDAnalyzer:
                         pass
                 # If a JD original already exists in the company folder and an analysis file also exists,
                 # avoid re-running analysis again. This is a defensive guard against duplicate runs.
-                company_dir = self.base_analysis_path / company_name
+                company_dir = self.base_analysis_path / "applied_companies" / company_name
                 try:
                     jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
                     jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json") or (company_dir / "jd_analysis.json" if (company_dir / "jd_analysis.json").exists() else None)

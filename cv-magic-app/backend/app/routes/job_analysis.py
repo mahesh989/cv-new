@@ -122,7 +122,7 @@ async def get_job_info(company_slug: str):
         import json
         
         # Look for the company directory
-        company_dir = Path("cv-analysis") / company_slug
+        company_dir = Path("cv-analysis") / "applied_companies" / company_slug
         
         if not company_dir.exists():
             raise HTTPException(status_code=404, detail="Company analysis not found")
@@ -169,7 +169,7 @@ async def delete_job_analysis(company_slug: str):
         from pathlib import Path
         
         # Look for the company directory
-        company_dir = Path("cv-analysis") / company_slug
+        company_dir = Path("cv-analysis") / "applied_companies" / company_slug
         
         if not company_dir.exists():
             raise HTTPException(status_code=404, detail="Company analysis not found")

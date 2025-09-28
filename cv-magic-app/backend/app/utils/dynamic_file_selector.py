@@ -16,7 +16,7 @@ class DynamicFileSelector:
     
     def __init__(self, base_path: Optional[str] = None):
         if base_path is None:
-            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            base_path = "cv-analysis"
         self.base_path = Path(base_path)
         self.cvs_path = self.base_path / "cvs"
         self.original_path = self.cvs_path / "original"

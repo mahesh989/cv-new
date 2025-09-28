@@ -48,7 +48,7 @@ class EnhancedDynamicCVSelectorV2:
     
     def __init__(self, base_path: Optional[str] = None):
         if base_path is None:
-            base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+            base_path = "cv-analysis"
         
         self.base_path = Path(base_path)
         self.cvs_path = self.base_path / "cvs"
@@ -447,7 +447,7 @@ class EnhancedDynamicCVSelectorV2:
     """Enhanced CV selector with proper timestamp handling"""
     
     def __init__(self):
-        self.base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs")
+        self.base_dir = Path("cv-analysis/cvs")
     
     def _get_cv_files(self, company: str, cv_type: str = "original") -> List[Dict[str, Any]]:
         """

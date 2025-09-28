@@ -413,7 +413,7 @@ class EnhancedATSOrchestrator:
             # Define paths with enhanced dynamic CV selection
             from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
             
-            base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+            base_dir = Path("cv-analysis")
             company_dir = base_dir / company_name
             
             # Use timestamped analysis file with fallback

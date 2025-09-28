@@ -160,7 +160,7 @@ async def get_cv_jd_matching_status(
         logger.info(f"📊 Checking CV-JD matching status for company: {company_name}")
         
         # Check file existence
-        base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+        base_path = "cv-analysis"
         company_dir = Path(base_path) / company_name
         
         # Check CV file using dynamic selection
@@ -314,7 +314,7 @@ async def delete_cv_jd_match_results(
         logger.info(f"🗑️ Deleting CV-JD match results for company: {company_name}")
         
         # Delete results file
-        base_path = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
+        base_path = "cv-analysis"
         match_results_file = Path(base_path) / company_name / "cv_jd_match_results.json"
         
         if match_results_file.exists():

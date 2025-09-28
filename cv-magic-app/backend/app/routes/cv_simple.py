@@ -438,7 +438,7 @@ async def get_latest_tailored_cv():
         logger.info("📄 Fetching latest tailored CV across all companies")
         
         # Path to cv-analysis folder
-        cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        cv_analysis_path = Path("cv-analysis")
         
         if not cv_analysis_path.exists():
             raise HTTPException(
@@ -528,7 +528,7 @@ async def get_available_companies():
         logger.info("📋 Fetching available companies")
         
         # Path to cv-analysis folder
-        cv_analysis_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        cv_analysis_path = Path("cv-analysis")
         companies = []
         
         if cv_analysis_path.exists():

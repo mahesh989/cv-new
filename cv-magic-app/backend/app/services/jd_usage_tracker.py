@@ -20,7 +20,7 @@ class JDUsageTracker:
     Tracks JD usage history to determine if a JD has been used before
     """
     
-    def __init__(self, base_path: str = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"):
+    def __init__(self, base_path: str = "cv-analysis"):
         self.base_path = Path(base_path)
         self.usage_file = self.base_path / "jd_usage_history.json"
         self._usage_data = self._load_usage_data()

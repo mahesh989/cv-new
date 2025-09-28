@@ -28,7 +28,7 @@ class UnifiedLatestFileSelector:
     """
 
     def __init__(self, base_path: str = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"):
-        self.base_path = Path(base_path)
+        self.base_path = Path("cv-analysis")
         self.cvs_path = self.base_path / "cvs"
         self.tailored_path = self.cvs_path / "tailored"
         self.original_path = self.cvs_path / "original"
