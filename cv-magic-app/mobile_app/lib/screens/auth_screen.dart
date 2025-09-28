@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme/app_theme.dart';
+import '../core/config/app_config.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -16,16 +16,17 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   late TabController _tabController;
-  final _formKey = GlobalKey<FormState>();
+  final _signInFormKey = GlobalKey<FormState>();
+  final _signUpFormKey = GlobalKey<FormState>();
 
   // Controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
 
   // States
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -37,7 +38,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     _tabController = TabController(length: 2, vsync: this);
 
     _animationController = AnimationController(
-      duration: AppTheme.normalAnimation,
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -46,7 +47,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: AppTheme.smoothCurve,
+      curve: Curves.easeInOut,
     ));
 
     _slideAnimation = Tween<Offset>(
@@ -54,7 +55,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: AppTheme.smoothCurve,
+      curve: Curves.easeInOut,
     ));
 
     _animationController.forward();
@@ -67,133 +68,150 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
+    _usernameController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleEmailAuth() async {
+  Future<void> _handleAuth() async {
+    final isSignUp = _tabController.index == 1;
+
+    try {
+      final formKey = isSignUp ? _signUpFormKey : _signInFormKey;
+
+      if (formKey.currentState == null) {
+        print('Form state is null for ${isSignUp ? "signup" : "signin"} form');
+        return;
+      }
+
+      if (!formKey.currentState!.validate()) {
+        return;
+      }
+    } catch (e) {
+      print('Error in form validation: $e');
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      // Call backend login endpoint
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text.isNotEmpty
-              ? _emailController.text
-              : 'demo@cvagent.com',
-          'password': _passwordController.text.isNotEmpty
-              ? _passwordController.text
-              : 'demo123',
-        }),
-      );
+      final endpoint = isSignUp ? 'register' : 'login';
 
-      if (response.statusCode == 200) {
+      Map<String, dynamic> requestBody;
+      if (isSignUp) {
+        requestBody = {
+          'username': _usernameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text.trim(),
+          'full_name': _nameController.text.trim().isNotEmpty
+              ? _nameController.text.trim()
+              : null,
+        };
+      } else {
+        requestBody = {
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text.trim(),
+        };
+      }
+
+      final response = await http
+          .post(
+            Uri.parse('${AppConfig.apiBaseUrl}/auth/$endpoint'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(requestBody),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        final accessToken = data['access_token'];
 
-        // Save authentication data
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_logged_in', true);
-        await prefs.setString('auth_token', accessToken);
-        await prefs.setString(
-          'user_email',
-          _emailController.text.isNotEmpty
-              ? _emailController.text
-              : 'demo@cvagent.com',
-        );
-        await prefs.setString(
-          'user_name',
-          _nameController.text.isNotEmpty ? _nameController.text : 'Demo User',
-        );
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                _tabController.index == 0
-                    ? '🎉 Welcome back!'
-                    : '🎉 Account created successfully!',
+        if (isSignUp) {
+          // Registration successful
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(data['verification_message'] ??
+                    'Account created successfully! Please check your email to verify your account.'),
+                backgroundColor: AppTheme.primaryTeal,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 5),
               ),
-              backgroundColor: AppTheme.primaryTeal,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+            );
+            _tabController.animateTo(0); // Switch to login tab
+          }
+        } else {
+          // Login successful
+          final accessToken = data['access_token'];
+          final userEmail = _emailController.text.trim();
+          final userName = _nameController.text.trim().isNotEmpty
+              ? _nameController.text.trim()
+              : 'User';
 
-          widget.onLogin();
+          // Save authentication data
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('is_logged_in', true);
+          await prefs.setString('auth_token', accessToken);
+          await prefs.setString('user_email', userEmail);
+          await prefs.setString('user_name', userName);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('🎉 Welcome back!'),
+                backgroundColor: AppTheme.primaryTeal,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            widget.onLogin();
+          }
         }
       } else {
-        throw Exception('Login failed: ${response.statusCode}');
+        final errorData = jsonDecode(response.body);
+        String errorMessage = 'Authentication failed';
+
+        if (errorData is Map<String, dynamic>) {
+          if (errorData.containsKey('detail')) {
+            if (errorData['detail'] is List) {
+              // Handle Pydantic validation errors (422 status)
+              final errors = errorData['detail'] as List;
+              final errorMessages = <String>[];
+
+              for (var error in errors) {
+                if (error is Map<String, dynamic> && error.containsKey('msg')) {
+                  errorMessages.add(error['msg']);
+                }
+              }
+
+              if (errorMessages.isNotEmpty) {
+                errorMessage = errorMessages.join('\n• ');
+              }
+            } else if (errorData['detail'] is String) {
+              // Handle simple error messages (401, 400 status)
+              errorMessage = errorData['detail'];
+            }
+          }
+        }
+
+        throw Exception(errorMessage);
       }
     } catch (e) {
       if (mounted) {
+        String errorText = e.toString();
+        if (errorText.startsWith('Exception: ')) {
+          errorText = errorText.substring(11);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Authentication failed: $e'),
+            content: Text('❌ $errorText'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isGoogleLoading = true);
-
-    try {
-      // Call backend login endpoint with Google user credentials
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': 'demo@gmail.com',
-          'password': 'google123',
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final accessToken = data['access_token'];
-
-        // Save authentication data
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_logged_in', true);
-        await prefs.setString('auth_token', accessToken);
-        await prefs.setString('user_email', 'demo@gmail.com');
-        await prefs.setString('user_name', 'Demo User');
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('🎉 Welcome! Signed in with Google'),
-              backgroundColor: AppTheme.primaryTeal,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-
-          widget.onLogin();
-        }
-      } else {
-        throw Exception('Google sign-in failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Google sign-in failed: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -243,12 +261,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                               _buildTabBar(),
                               const SizedBox(height: 24),
                               _buildTabContent(isSmallScreen),
-                              const SizedBox(height: 16),
-                              _buildDivider(),
-                              const SizedBox(height: 16),
-                              _buildGoogleSignInButton(),
-                              const SizedBox(height: 16),
-                              _buildDemoNotice(isSmallScreen),
                             ],
                           ),
                         ),
@@ -291,7 +303,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         ),
         const SizedBox(height: 8),
         Text(
-          'AI-Powered Resume Optimization',
+          'Transform Your Resume with AI-Powered Analysis',
           style: AppTheme.bodyMedium.copyWith(
             color: AppTheme.neutralGray600,
           ),
@@ -330,7 +342,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   Widget _buildTabContent(bool isSmallScreen) {
     return SizedBox(
-      height: isSmallScreen ? 280 : 320,
+      height: isSmallScreen ? 400 : 450,
       child: TabBarView(
         controller: _tabController,
         children: [
@@ -343,201 +355,183 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   Widget _buildSignInForm() {
     return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'Email (Optional)',
-              prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Leave empty for demo mode',
+      key: _signInFormKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email Address',
+                prefixIcon: Icon(Icons.email_outlined),
+                hintText: 'your.email@example.com',
+              ),
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Email is required';
+                }
+                if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                    .hasMatch(value)) {
+                  return 'Please enter a valid email address';
+                }
+                return null;
+              },
             ),
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Password (Optional)',
-              prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Leave empty for demo mode',
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                prefixIcon: const Icon(Icons.lock_outlined),
+                hintText: 'Your password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
                 ),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
+              ),
+              obscureText: _obscurePassword,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Password is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: AppTheme.createGradientButton(
+                text: 'Sign In',
+                onPressed: _handleAuth,
+                isLoading: _isLoading,
+                icon: Icons.login_rounded,
               ),
             ),
-            obscureText: _obscurePassword,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: AppTheme.createGradientButton(
-              text: 'Sign In',
-              onPressed: _handleEmailAuth,
-              isLoading: _isLoading,
-              icon: Icons.login_rounded,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🔗 Password reset email sent (demo)'),
-                  backgroundColor: AppTheme.primaryTeal,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            child: Text(
-              'Forgot Password?',
-              style: AppTheme.labelMedium.copyWith(
-                color: AppTheme.primaryTeal,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSignUpForm() {
     return Form(
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Full Name (Optional)',
-              prefixIcon: Icon(Icons.person_outlined),
-              hintText: 'Leave empty for demo mode',
+      key: _signUpFormKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Full Name',
+                prefixIcon: Icon(Icons.person_outlined),
+                hintText: 'John Doe',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Full name is required';
+                }
+                final trimmedValue = value.trim();
+                if (trimmedValue.length < 2) {
+                  return 'Full name must be at least 2 characters long';
+                }
+                if (trimmedValue.length > 100) {
+                  return 'Full name must be less than 100 characters';
+                }
+                return null;
+              },
             ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'Email (Optional)',
-              prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Leave empty for demo mode',
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                prefixIcon: Icon(Icons.account_circle_outlined),
+                hintText: 'johndoe123',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Username is required';
+                }
+                final trimmedValue = value.trim();
+                if (trimmedValue.length < 3) {
+                  return 'Username must be at least 3 characters long';
+                }
+                if (trimmedValue.length > 50) {
+                  return 'Username must be less than 50 characters';
+                }
+                if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(trimmedValue)) {
+                  return 'Username can only contain letters, numbers, and underscores';
+                }
+                return null;
+              },
             ),
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Password (Optional)',
-              prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Leave empty for demo mode',
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email Address',
+                prefixIcon: Icon(Icons.email_outlined),
+                hintText: 'your.email@example.com',
+              ),
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Email is required';
+                }
+                if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                    .hasMatch(value)) {
+                  return 'Please enter a valid email address';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                prefixIcon: const Icon(Icons.lock_outlined),
+                hintText: 'Create a strong password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
                 ),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
+              ),
+              obscureText: _obscurePassword,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Password is required';
+                }
+                if (value.length < 8) {
+                  return 'Password must be at least 8 characters long';
+                }
+                if (value.length > 100) {
+                  return 'Password must be less than 100 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: AppTheme.createGradientButton(
+                text: 'Create Account',
+                onPressed: _handleAuth,
+                isLoading: _isLoading,
+                icon: Icons.person_add_rounded,
               ),
             ),
-            obscureText: _obscurePassword,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: AppTheme.createGradientButton(
-              text: 'Create Account',
-              onPressed: _handleEmailAuth,
-              isLoading: _isLoading,
-              icon: Icons.person_add_rounded,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        const Expanded(child: Divider(color: AppTheme.neutralGray300)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'OR',
-            style: AppTheme.labelMedium.copyWith(
-              color: AppTheme.neutralGray600,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          ],
         ),
-        const Expanded(child: Divider(color: AppTheme.neutralGray300)),
-      ],
-    );
-  }
-
-  Widget _buildGoogleSignInButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
-        icon: _isGoogleLoading
-            ? const SpinKitFadingCircle(
-                color: AppTheme.primaryTeal,
-                size: 20,
-              )
-            : const Icon(
-                Icons.g_mobiledata,
-                size: 24,
-                color: Colors.red,
-              ),
-        label: Text(
-          _isGoogleLoading ? 'Signing in...' : 'Continue with Google',
-          style: AppTheme.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          side: const BorderSide(color: AppTheme.neutralGray300),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDemoNotice(bool isSmallScreen) {
-    return Container(
-      padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryTeal.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.primaryTeal.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            color: AppTheme.primaryTeal,
-            size: isSmallScreen ? 18 : 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '✨ Demo Mode: Click Sign In to login instantly (no credentials required)',
-              style: AppTheme.bodySmall.copyWith(
-                color: AppTheme.primaryTeal,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

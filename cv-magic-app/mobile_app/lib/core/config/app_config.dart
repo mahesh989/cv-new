@@ -1,9 +1,19 @@
 class AppConfig {
-  // Base URL for API and static assets
-  static const String baseUrl = 'http://localhost:8000';
+  // Base URL for API and static assets - handles different platforms
+  static String get baseUrl {
+    // For web and desktop, use localhost
+    // For mobile devices/simulators, you might need to use your computer's IP
+    // For testing, try: ifconfig (Mac/Linux) or ipconfig (Windows) to get your IP
+    return 'http://localhost:8000';
+
+    // Alternative configurations for different environments:
+    // For Android Emulator: 'http://10.0.2.2:8000'
+    // For iOS Simulator: 'http://localhost:8000' or 'http://127.0.0.1:8000'
+    // For physical devices: 'http://YOUR_COMPUTER_IP:8000' (e.g., 'http://192.168.1.100:8000')
+  }
 
   // API endpoints
-  static const String apiBaseUrl = '$baseUrl/api';
+  static String get apiBaseUrl => '$baseUrl/api';
 
   // Video and media paths (now using YouTube embed)
   static const String youtubeVideoId = 'a9IUom_eUGI';

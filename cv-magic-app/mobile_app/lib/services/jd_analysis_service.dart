@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import '../core/config/app_config.dart';
 
 class JDAnalysisService {
-  static const String baseUrl =
-      'http://localhost:8000'; // Update with your backend URL
+  static String get baseUrl => AppConfig.baseUrl;
 
   // Authentication token - you'll need to implement proper auth
   String? _authToken;

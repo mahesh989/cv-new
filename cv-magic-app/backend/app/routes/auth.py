@@ -21,7 +21,7 @@ security = HTTPBearer()
 
 @router.post("/register", response_model=UserResponse)
 async def register(user_data: UserRegistration):
-    """User registration endpoint"""
+    """User registration endpoint with email verification"""
     db = next(get_database())
     user_service = UserService(db)
     
@@ -34,11 +34,27 @@ async def register(user_data: UserRegistration):
             full_name=user_data.full_name
         )
         
-        return user_service.to_user_response(user)
+        # Return user data with verification message
+        response = user_service.to_user_response(user)
+        
+        # Add verification message to response
+        response_dict = response.dict()
+        response_dict['verification_message'] = f"Account created successfully! Please check your email ({user_data.email}) and click the verification link to activate your account."
+        response_dict['email_sent'] = True
+        
+        return response_dict
         
     except HTTPException as e:
+        # Re-raise HTTP exceptions (like duplicate email/username)
         raise e
+    except ValueError as e:
+        # Handle validation errors from Pydantic
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Validation error: {str(e)}"
+        )
     except Exception as e:
+        # Handle unexpected errors
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Registration failed: {str(e)}"
@@ -48,7 +64,7 @@ async def register(user_data: UserRegistration):
 @router.post("/login", response_model=TokenResponse)
 async def login(credentials: LoginRequest):
     """
-    User login endpoint
+    User login endpoint with comprehensive error handling
     
     Args:
         credentials: Login credentials (email and password)
@@ -56,29 +72,127 @@ async def login(credentials: LoginRequest):
     Returns:
         TokenResponse with access token and user data
     """
-    # Authenticate user
-    user = authenticate_user(credentials.email, credentials.password)
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        # Authenticate user
+        user = authenticate_user(credentials.email, credentials.password)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password. Please check your credentials and try again.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Check if user account is active
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Account is deactivated. Please contact support.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Check if user email is verified
+        if not user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Email not verified. Please check your email ({user.email}) and click the verification link to activate your account. If you didn't receive the email, you can request a new verification email.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Create tokens
+        user_dict = {"id": user.id, "email": user.email}
+        access_token = create_access_token(user_dict)
+        refresh_token = create_refresh_token(user.id)
+        
+        # Return token response
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            expires_in=settings.JWT_EXPIRATION_MINUTES * 60,  # Convert to seconds
+            user=user
         )
+        
+    except HTTPException as e:
+        # Re-raise HTTP exceptions (like invalid credentials)
+        raise e
+    except ValueError as e:
+        # Handle validation errors from Pydantic
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Validation error: {str(e)}"
+        )
+    except Exception as e:
+        # Handle unexpected errors
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
+        )
+
+
+@router.post("/verify-email")
+async def verify_email(token: str):
+    """Verify user email with token"""
+    db = next(get_database())
+    user_service = UserService(db)
     
-    # Create tokens
-    user_dict = {"id": user.id, "email": user.email}
-    access_token = create_access_token(user_dict)
-    refresh_token = create_refresh_token(user.id)
+    try:
+        success = user_service.verify_email(token)
+        
+        if success:
+            return {
+                "message": "Email verified successfully! Your account is now active.",
+                "verified": True
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired verification token. Please request a new verification email."
+            )
+            
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Email verification failed: {str(e)}"
+        )
+
+
+@router.post("/resend-verification")
+async def resend_verification_email(request: dict):
+    """Resend verification email to user"""
+    db = next(get_database())
+    user_service = UserService(db)
     
-    # Return token response
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        expires_in=settings.JWT_EXPIRATION_MINUTES * 60,  # Convert to seconds
-        user=user
-    )
+    try:
+        email = request.get('email')
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email address is required"
+            )
+        
+        success = user_service.resend_verification_email(email)
+        
+        if success:
+            return {
+                "message": f"Verification email sent to {email}. Please check your inbox and spam folder.",
+                "email_sent": True
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No unverified account found with this email address."
+            )
+            
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to resend verification email: {str(e)}"
+        )
 
 
 @router.post("/admin/login", response_model=TokenResponse)

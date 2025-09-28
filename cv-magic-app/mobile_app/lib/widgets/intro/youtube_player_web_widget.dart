@@ -1,6 +1,4 @@
 import 'dart:html' as html;
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:js_interop';
 import 'dart:ui_web' as ui;
 import 'package:flutter/material.dart';
 
@@ -34,10 +32,20 @@ class _YouTubePlayerWebState extends State<YouTubePlayerWeb> {
       _iframeElementId,
       (int viewId) {
         final element = html.IFrameElement()
-          ..src = 'https://www.youtube.com/embed/${widget.videoId}?enablejsapi=1&origin=${Uri.encodeComponent(html.window.location.origin)}'
+          ..src =
+              'https://www.youtube.com/embed/${widget.videoId}?enablejsapi=1&origin=${Uri.encodeComponent(html.window.location.origin)}'
           ..style.border = 'none'
-          ..allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+          ..style.pointerEvents = 'auto'
+          ..style.zIndex = '1'
+          ..allow =
+              'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
           ..allowFullscreen = true;
+
+        // Prevent iframe from capturing events that should go to Flutter
+        element.onClick.listen((event) {
+          // Allow the iframe to handle its own clicks but prevent event bubbling
+          event.stopPropagation();
+        });
 
         return element;
       },
@@ -50,8 +58,8 @@ class _YouTubePlayerWebState extends State<YouTubePlayerWeb> {
       builder: (context, constraints) {
         // Use 90% of available width or 1024px, whichever is smaller
         final width = constraints.maxWidth * 0.9;
-        final height = width * (widget.aspectRatio ?? 9/16);
-        
+        final height = width * (widget.aspectRatio ?? 9 / 16);
+
         return Center(
           child: Container(
             width: width,
@@ -90,8 +98,21 @@ class _YouTubePlayerWebState extends State<YouTubePlayerWeb> {
       return _buildErrorWidget();
     }
 
-    return HtmlElementView(
-      viewType: _iframeElementId,
+    return Container(
+      // Ensure the container doesn't interfere with Flutter's event handling
+      child: AbsorbPointer(
+        absorbing: false, // Allow clicks on the video itself
+        child: GestureDetector(
+          onTap: () {
+            // Prevent iframe from interfering with Flutter gestures
+            print(
+                '🎬 YouTube player container tapped - preventing event conflicts');
+          },
+          child: HtmlElementView(
+            viewType: _iframeElementId,
+          ),
+        ),
+      ),
     );
   }
 
@@ -139,7 +160,9 @@ class _YouTubePlayerWebState extends State<YouTubePlayerWeb> {
             icon: Icon(Icons.launch_rounded, size: 18),
             label: Text('Watch on YouTube'),
             onPressed: () {
-              html.window.open('https://www.youtube.com/watch?v=${widget.videoId}', '_blank');
+              html.window.open(
+                  'https://www.youtube.com/watch?v=${widget.videoId}',
+                  '_blank');
             },
           ),
         ],

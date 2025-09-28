@@ -151,6 +151,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _handleLogout() async {
+    print('🚪 _handleLogout() called');
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -166,7 +168,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () {
+              print('🚪 Cancel button pressed');
+              Navigator.of(context).pop(false);
+            },
             child: Text(
               'Cancel',
               style: AppTheme.bodyMedium.copyWith(
@@ -176,7 +181,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           AppTheme.createGradientButton(
             text: 'Logout',
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              print('🚪 Logout button pressed');
+              Navigator.of(context).pop(true);
+            },
             width: 80,
             height: 36,
           ),
@@ -184,13 +192,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
 
+    print('🚪 Dialog result: $confirmed');
+
     if (confirmed == true) {
+      print('🚪 Proceeding with logout...');
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_logged_in', false);
 
       if (widget.onLogout != null) {
+        print('🚪 Calling widget.onLogout()');
         widget.onLogout!();
       }
+    } else {
+      print('🚪 Logout cancelled');
     }
   }
 
@@ -331,6 +345,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: Colors.white,
                   ),
                 ),
+                // Ensure popup menu appears above all other elements
+                elevation: 1000,
+                tooltip: 'Menu',
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: 'profile',
@@ -358,7 +375,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ],
                 onSelected: (value) {
+                  print('🔍 Popup menu item selected: $value');
                   if (value == 'logout') {
+                    print('🚪 Logout selected - calling _handleLogout()');
                     _handleLogout();
                   } else if (value == 'profile') {
                     ScaffoldMessenger.of(context).showSnackBar(

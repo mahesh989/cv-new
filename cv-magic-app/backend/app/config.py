@@ -49,12 +49,17 @@ class Settings(BaseSettings):
     # Email Configuration
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USERNAME: str = ""
-    SMTP_PASSWORD: str = ""
-    FROM_EMAIL: str = "noreply@cvapp.com"
-    FROM_NAME: str = "CV App"
+    SMTP_USERNAME: str = "maheshtwari99@gmail.com"  # Your Gmail address
+    SMTP_PASSWORD: str = ""  # ⚠️ UPDATE: Generate new Gmail App Password and paste here
+    FROM_EMAIL: str = "noreply@cvagent.com"
+    FROM_NAME: str = "CV Agent"
     FRONTEND_URL: str = "http://localhost:3000"
     BYPASS_AUTH: bool = False  # For testing without auth
+    
+    # Email Development Settings
+    EMAIL_ENABLED: bool = False  # Disabled for development - users auto-verified
+    EMAIL_CONSOLE_OUTPUT: bool = True  # Print email content to console for debugging
+    EMAIL_MOCK_SUCCESS: bool = True  # Always return success in development mode
     
     # CORS Settings
     ALLOWED_ORIGINS: List[str] = [
