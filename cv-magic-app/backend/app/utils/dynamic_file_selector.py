@@ -132,12 +132,13 @@ class DynamicFileSelector:
     
     def _find_latest_tailored_cv(self, company: str) -> Optional[Dict[str, str]]:
         """Find latest tailored CV for company"""
-        if not self.tailored_path.exists():
+        # Find all tailored CVs for this company in company-specific folder
+        company_tailored_path = self.base_path / "applied_companies" / company
+        if not company_tailored_path.exists():
             return None
             
-        # Find all tailored CVs for this company
         pattern = f"{company}_tailored_cv_*.json"
-        json_files = list(self.tailored_path.glob(pattern))
+        json_files = list(company_tailored_path.glob(pattern))
         
         if not json_files:
             return None

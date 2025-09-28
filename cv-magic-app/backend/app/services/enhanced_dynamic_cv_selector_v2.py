@@ -252,9 +252,10 @@ class EnhancedDynamicCVSelectorV2:
     def _get_latest_tailored_cv(self, company: str) -> CVSelectionContext:
         """Get latest tailored CV for a company"""
         try:
-            # Find all tailored CVs for this company
+            # Find all tailored CVs for this company in company-specific folder
+            company_tailored_path = self.base_path / "applied_companies" / company
             json_files = sorted(
-                self.tailored_path.glob(f"{company}_tailored_cv_*.json"),
+                company_tailored_path.glob(f"{company}_tailored_cv_*.json"),
                 key=lambda p: p.stat().st_mtime,
                 reverse=True
             )
@@ -340,10 +341,11 @@ class EnhancedDynamicCVSelectorV2:
                     )
                 })
             
-            # Get tailored CV versions if company specified
+            # Get tailored CV versions if company specified from company-specific folder
             if company:
+                company_tailored_path = self.base_path / "applied_companies" / company
                 tailored_files = sorted(
-                    self.tailored_path.glob(f"{company}_tailored_cv_*.json"),
+                    company_tailored_path.glob(f"{company}_tailored_cv_*.json"),
                     key=lambda p: p.stat().st_mtime,
                     reverse=True
                 )
@@ -393,217 +395,6 @@ class EnhancedDynamicCVSelectorV2:
             'source': cv_files.cv_type,
             'timestamp': cv_files.timestamp
         }
-
-
-# Global instance
-"""
-Enhanced Dynamic CV Selector V2
-
-Provides intelligent CV file selection with proper timestamp handling
-"""
-
-import logging
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional, Any
-
-from app.errors.cv_errors import CVNotFoundError, CVFormatError, CVVersionError
-
-logger = logging.getLogger(__name__)
-
-
-class CVSelectionContext:
-    """Context object for CV selection results"""
-    
-    def __init__(
-        self,
-        exists: bool = False,
-        cv_type: str = "none",
-        json_path: Optional[Path] = None,
-        txt_path: Optional[Path] = None,
-        version: str = "latest",
-        timestamp: Optional[str] = None
-    ):
-        self.exists = exists
-        self.cv_type = cv_type
-        self.json_path = json_path
-        self.txt_path = txt_path
-        self.version = version
-        self.timestamp = timestamp
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary representation"""
-        return {
-            "exists": self.exists,
-            "cv_type": self.cv_type,
-            "json_path": str(self.json_path) if self.json_path else None,
-            "txt_path": str(self.txt_path) if self.txt_path else None,
-            "version": self.version,
-            "timestamp": self.timestamp
-        }
-
-
-class EnhancedDynamicCVSelectorV2:
-    """Enhanced CV selector with proper timestamp handling"""
-    
-    def __init__(self):
-        self.base_dir = Path("cv-analysis/cvs")
-    
-    def _get_cv_files(self, company: str, cv_type: str = "original") -> List[Dict[str, Any]]:
-        """
-        Get all CV files for a company and type
-        
-        Args:
-            company: Company name
-            cv_type: CV type (original/tailored)
-            
-        Returns:
-            List of CV file info
-        """
-        cv_dir = self.base_dir / company / cv_type
-        if not cv_dir.exists():
-            return []
-        
-        cv_files = []
-        
-        # List all JSON files
-        for json_file in cv_dir.glob("*.json"):
-            # Get corresponding TXT file
-            txt_file = json_file.with_suffix(".txt")
-            if not txt_file.exists():
-                continue
-            
-            # Try to extract timestamp from filename
-            try:
-                timestamp = None
-                if "_" in json_file.stem:
-                    # Extract timestamp if present (e.g. test_cv_20250922_235959.json)
-                    ts_parts = json_file.stem.split("_")[-2:]
-                    if len(ts_parts) == 2:
-                        date_str, time_str = ts_parts
-                        timestamp = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]} {time_str[:2]}:{time_str[2:4]}:{time_str[4:]}"
-            
-                cv_files.append({
-                    "json_path": json_file,
-                    "txt_path": txt_file,
-                    "timestamp": timestamp,
-                    "is_timestamped": timestamp is not None
-                })
-                
-            except Exception as e:
-                logger.warning(f"Error parsing timestamp for {json_file}: {e}")
-                continue
-        
-        return cv_files
-    
-    def get_cv_files(
-        self,
-        company: str,
-        prefer_tailored: bool = False,
-        strict: bool = False
-    ) -> CVSelectionContext:
-        """
-        Get appropriate CV files for a company
-        
-        Args:
-            company: Company name
-            prefer_tailored: Whether to prefer tailored CV if available
-            strict: Whether to enforce strict validation
-            
-        Returns:
-            CVSelectionContext with file information
-        """
-        try:
-            # Get all CV files
-            original_files = self._get_cv_files(company, "original")
-            tailored_files = self._get_cv_files(company, "tailored")
-            
-            if not original_files and not tailored_files:
-                raise CVNotFoundError("No valid CV files found")
-            
-            # Sort by timestamp (newest first)
-            for files in [original_files, tailored_files]:
-                files.sort(
-                    key=lambda x: (
-                        x["is_timestamped"],
-                        x["timestamp"] if x["timestamp"] else "",
-                        str(x["json_path"])
-                    ),
-                    reverse=True
-                )
-            
-            # Select appropriate CV type
-            selected_type = "tailored" if prefer_tailored and tailored_files else "original"
-            selected_files = tailored_files if prefer_tailored and tailored_files else original_files
-            
-            if not selected_files:
-                raise CVNotFoundError(f"No valid {selected_type} CV files found")
-            
-            # Get latest version
-            latest = selected_files[0]
-            
-            # Validate timestamp format if strict mode
-            if strict and latest["is_timestamped"]:
-                try:
-                    datetime.strptime(latest["timestamp"], "%Y-%m-%d %H:%M:%S")
-                except ValueError:
-                    raise CVVersionError(f"Invalid timestamp format in {latest['json_path'].name}")
-            
-            return CVSelectionContext(
-                exists=True,
-                cv_type=selected_type,
-                json_path=latest["json_path"],
-                txt_path=latest["txt_path"],
-                version="timestamped" if latest["is_timestamped"] else "non-timestamped",
-                timestamp=latest["timestamp"]
-            )
-            
-        except Exception as e:
-            if isinstance(e, (CVNotFoundError, CVFormatError, CVVersionError)):
-                raise
-            logger.error(f"Error selecting CV files: {e}")
-            raise CVNotFoundError(f"Error selecting CV files: {str(e)}")
-    
-    def get_all_cv_versions(self, company: str) -> List[Dict[str, Any]]:
-        """
-        Get all CV versions for a company
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            List of version information
-        """
-        versions = []
-        
-        try:
-            # Get all versions
-            for cv_type in ["original", "tailored"]:
-                cv_files = self._get_cv_files(company, cv_type)
-                
-                for cv in cv_files:
-                    versions.append({
-                        "type": cv_type,
-                        "path": str(cv["json_path"]),
-                        "timestamp": cv["timestamp"],
-                        "is_timestamped": cv["is_timestamped"]
-                    })
-            
-            # Sort by timestamp (newest first)
-            versions.sort(
-                key=lambda x: (
-                    x["is_timestamped"],
-                    x["timestamp"] if x["timestamp"] else "",
-                    x["path"]
-                ),
-                reverse=True
-            )
-            
-            return versions
-            
-        except Exception as e:
-            logger.error(f"Error getting CV versions: {e}")
-            return []
 
 
 # Global instance

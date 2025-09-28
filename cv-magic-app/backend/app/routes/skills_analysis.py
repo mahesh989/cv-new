@@ -328,10 +328,10 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             # Prefer tailored CV if available; else fall back to dynamic latest
             try:
                 base_dir_local = Path("cv-analysis")
-                tailored_dir = base_dir_local / "cvs" / "tailored"
+                company_tailored_dir = base_dir_local / "applied_companies" / cname
                 preferred_txt = None
-                if tailored_dir.exists():
-                    txt_candidates = list(tailored_dir.glob("*.txt"))
+                if company_tailored_dir.exists():
+                    txt_candidates = list(company_tailored_dir.glob(f"{cname}_tailored_cv_*.txt"))
                     if txt_candidates:
                         preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
                 cv_txt_path_for_match = str(preferred_txt) if preferred_txt else None
@@ -1943,8 +1943,8 @@ async def get_analysis_results(company: str):
         else:
             result["ai_recommendation"] = None
         
-        # Get tailored CV information if available
-        tailored_cv_dir = base_dir / "cvs" / "tailored"
+        # Get tailored CV information if available from company-specific folder
+        tailored_cv_dir = base_dir / "applied_companies" / company
         tailored_cv_file = TimestampUtils.find_latest_timestamped_file(tailored_cv_dir, f"{company}_tailored_cv", "json")
         
         if tailored_cv_file and tailored_cv_file.exists():

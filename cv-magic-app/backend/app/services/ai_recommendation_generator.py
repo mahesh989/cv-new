@@ -612,7 +612,7 @@ class AIRecommendationGenerator:
             response = await cv_tailoring_service.tailor_cv(request)
             
             if response.success:
-                # Save tailored CV ONLY to cv-analysis/cvs/tailored folder
+                # Save tailored CV to company-specific folder in applied_companies
                 file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(response.tailored_cv, company)
                 logger.info(f"✅ [AI GENERATOR] Tailored CV saved automatically to {file_path}")
                 logger.info(f"📊 [AI GENERATOR] Estimated ATS score: {response.tailored_cv.estimated_ats_score}")

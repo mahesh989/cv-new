@@ -112,14 +112,15 @@ class EnhancedDynamicCVSelector:
                     'source': 'tailored_not_found'
                 })
             
-            # Find all tailored CV files for this company
-            logger.info(f"🔍 [ENHANCED_CV_SELECTOR] Searching for {company} tailored CVs in: {self.tailored_path}")
+            # Find all tailored CV files for this company in company-specific folder
+            company_tailored_path = self.base_path / "applied_companies" / company
+            logger.info(f"🔍 [ENHANCED_CV_SELECTOR] Searching for {company} tailored CVs in: {company_tailored_path}")
             
             json_files = TimestampUtils.find_all_timestamped_files(
-                self.tailored_path, f"{company}_tailored_cv", "json"
+                company_tailored_path, f"{company}_tailored_cv", "json"
             )
             txt_files = TimestampUtils.find_all_timestamped_files(
-                self.tailored_path, f"{company}_tailored_cv", "txt"
+                company_tailored_path, f"{company}_tailored_cv", "txt"
             )
             
             logger.info(f"📄 [ENHANCED_CV_SELECTOR] Found {len(json_files)} JSON and {len(txt_files)} TXT tailored CVs for {company}")
@@ -353,10 +354,11 @@ class EnhancedDynamicCVSelector:
                     'created_at': original_json.stat().st_mtime
                 })
             
-            # Add tailored CV versions
-            if self.tailored_path.exists():
+            # Add tailored CV versions from company-specific folder
+            company_tailored_path = self.base_path / "applied_companies" / company
+            if company_tailored_path.exists():
                 tailored_files = TimestampUtils.find_all_timestamped_files(
-                    self.tailored_path, f"{company}_tailored_cv", "json"
+                    company_tailored_path, f"{company}_tailored_cv", "json"
                 )
                 
                 for i, file_path in enumerate(tailored_files):

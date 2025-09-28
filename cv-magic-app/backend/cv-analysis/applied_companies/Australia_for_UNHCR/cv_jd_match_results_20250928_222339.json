@@ -1,13 +1,13 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-28T22:12:12.540536",
+  "cv_analysis_timestamp": "2025-09-28T22:23:39.238972",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
     "Excel",
     "project management",
     "communication",
-    "customer service"
+    "data warehouse"
   ],
   "matched_preferred_keywords": [
     "Tableau",
@@ -16,7 +16,7 @@
   "missed_required_keywords": [
     "VBA",
     "stakeholder management",
-    "data warehouse",
+    "customer service",
     "marketing campaigns",
     "data models",
     "data mining"
@@ -32,13 +32,13 @@
     "matched_preferred_count": 2
   },
   "matching_notes": {
-    "SQL": "Mentioned in technical skills and experience sections",
-    "Power BI": "Used for dashboards and visualizations",
-    "Excel": "Found in technical skills section",
-    "project management": "Implied through experience in managing projects and teams",
-    "communication": "Demonstrated through presenting research findings and mentoring",
-    "customer service": "Addressed through enhancing customer satisfaction and support data analysis",
-    "Tableau": "Used for creating dashboards",
+    "SQL": "Mentioned in technical skills and experience sections for database management",
+    "Power BI": "Used for creating dashboards and presenting research findings",
+    "Excel": "Found in technical skills section for data-driven solutions and reporting",
+    "project management": "Implied through experience in managing data projects and workflows",
+    "communication": "Demonstrated through presenting research findings and mentoring students",
+    "data warehouse": "Mentioned in context of using Snowflake for cloud data warehousing",
+    "Tableau": "Used for creating dashboards and visualizations",
     "clean data": "Inferred from data cleaning and preprocessing tasks"
   },
   "ai_model_used": "openai/gpt-4o",

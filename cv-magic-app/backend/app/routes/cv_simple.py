@@ -446,15 +446,10 @@ async def get_latest_tailored_cv():
                 detail="CV analysis folder not found"
             )
         
-        # Find all tailored CV text files in the centralized tailored folder
-        tailored_folder = cv_analysis_path / "cvs" / "tailored"
+        # Find all tailored CV text files in company-specific folders
         all_tailored_files = []
         
-        if tailored_folder.exists():
-            # Look for all tailored CV text files in the centralized folder
-            all_tailored_files = list(tailored_folder.glob("*_tailored_cv_*.txt"))
-        
-        # Fallback: also check company folders for any remaining files
+        # Check company folders in applied_companies
         for company_dir in (cv_analysis_path / "applied_companies").iterdir():
             if company_dir.is_dir() and company_dir.name != "__pycache__" and company_dir.name != "cvs":
                 # Look for company-specific naming pattern first
@@ -759,16 +754,7 @@ async def save_tailored_cv(request: Request):
         
         logger.info(f"✅ [TAILORED_CV_SAVE] Successfully saved to: {target_file}")
         
-        # Also save to the cvs/tailored directory if it exists
-        tailored_cvs_path = cv_analysis_path / "cvs" / "tailored"
-        if tailored_cvs_path.exists():
-            tailored_file = tailored_cvs_path / target_file.name
-            logger.info(f"🔍 [TAILORED_CV_SAVE] Also saving to: {tailored_file}")
-            with open(tailored_file, 'w', encoding='utf-8') as f:
-                json.dump(updated_data, f, ensure_ascii=False, indent=2)
-            logger.info(f"✅ [TAILORED_CV_SAVE] Also saved to: {tailored_file}")
-        else:
-            logger.info(f"🔍 [TAILORED_CV_SAVE] cvs/tailored directory does not exist: {tailored_cvs_path}")
+        # All tailored CVs are now saved to company-specific folders in applied_companies
         
         logger.info(f"🎉 [TAILORED_CV_SAVE] Tailored CV saved successfully: {target_file}")
         

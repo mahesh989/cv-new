@@ -611,8 +611,8 @@ async def save_edited_cv(
         # 🔍 DEBUG: Log the save process
         logger.info(f"🔍 [SAVE_EDITED] Starting save process for {company}")
         
-        # Only save to tailored folder, not in company-specific folders
-        tailored_path = Path("cv-analysis/cvs/tailored")
+        # Save to company-specific folder in applied_companies
+        tailored_path = Path("cv-analysis/applied_companies") / company
         
         logger.info(f"🔍 [SAVE_EDITED] Tailored path: {tailored_path}")
         
