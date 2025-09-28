@@ -201,11 +201,12 @@ class UnifiedLatestFileSelector:
 
     def _find_tailored_cv_files(self, company: str) -> List[Tuple[Path, Optional[Path], str]]:
         candidates: List[Tuple[Path, Optional[Path], str]] = []
-        company_tailored_path = self.base_path / "applied_companies" / company
-        if not company_tailored_path.exists():
+        # Look in centralized tailored folder
+        tailored_path = self.base_path / "cvs" / "tailored"
+        if not tailored_path.exists():
             return candidates
         pattern = f"{company}_tailored_cv_*.json"
-        for json_file in company_tailored_path.glob(pattern):
+        for json_file in tailored_path.glob(pattern):
             timestamp = self._extract_timestamp_from_filename(json_file.name) or "00000000_000000"
             txt_file = json_file.with_suffix('.txt')
             if not txt_file.exists():
