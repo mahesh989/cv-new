@@ -105,7 +105,7 @@ def analyze_cv_and_save_job(cv_file, job_url):
     }
     
     # Save job_info file
-    job_info_path = f"cv-analysis/{company_name}/job_info_{company_name}_{timestamp}.json"
+    job_info_path = f"cv-analysis/applied_companies/{company_name}/job_info_{company_name}_{timestamp}.json"
     with open(job_info_path, 'w') as f:
         json.dump(job_info, f, indent=2)
     

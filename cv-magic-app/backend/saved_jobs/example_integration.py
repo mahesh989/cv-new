@@ -39,7 +39,7 @@ def example_cv_analysis_workflow():
     job_info_filename = f"job_info_{company_name}_{timestamp}.json"
     
     # Create the directory structure
-    analysis_dir = Path("cv-analysis") / company_name
+    analysis_dir = Path("cv-analysis") / "applied_companies" / company_name
     analysis_dir.mkdir(parents=True, exist_ok=True)
     
     # Save the job_info file

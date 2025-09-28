@@ -107,9 +107,9 @@ async def get_company_ai_recommendations(company: str):
             )
         if not ai_file_path:
             # Try non-timestamped files
-            ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_ai_recommendation.json")
+            ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/applied_companies/{company}/{company}_ai_recommendation.json")
         if not ai_file_path.exists():
-            ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/{company}/{company}_input_recommendation.json")
+            ai_file_path = Path(f"/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/applied_companies/{company}/{company}_input_recommendation.json")
         
         if not ai_file_path.exists():
             return JSONResponse(
