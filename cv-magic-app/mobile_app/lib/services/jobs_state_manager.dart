@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
 class JobsStateManager {
-  static const String _backendJobsPath = 'backend/saved_jobs/saved_jobs.json';
+  static const String _backendJobsPath =
+      'backend/cv-analysis/saved_jobs/saved_jobs.json';
   static const String _assetsJobsPath = 'assets/saved_jobs.json';
 
   static Future<void> saveNewJob({
@@ -18,7 +19,7 @@ class JobsStateManager {
   }) async {
     try {
       debugPrint('🔄 [JOBS_STATE] Saving new job: $companyName - $jobTitle');
-      
+
       // Get current working directory
       final currentDir = Directory.current.path;
       debugPrint('📂 [JOBS_STATE] Working directory: $currentDir');
@@ -42,10 +43,9 @@ class JobsStateManager {
 
       // Check if job already exists
       final jobs = jobsData['jobs'] as List;
-      final existingJobIndex = jobs.indexWhere((job) => 
-        (job['company_name'] == companyName && job['job_url'] == jobUrl) ||
-        (job['company_name'] == companyName && job['job_title'] == jobTitle)
-      );
+      final existingJobIndex = jobs.indexWhere((job) =>
+          (job['company_name'] == companyName && job['job_url'] == jobUrl) ||
+          (job['company_name'] == companyName && job['job_title'] == jobTitle));
 
       if (existingJobIndex >= 0) {
         if (replace) {
@@ -53,7 +53,8 @@ class JobsStateManager {
           jobs[existingJobIndex] = newJob;
           debugPrint('✏️ [JOBS_STATE] Updated existing job: $companyName');
         } else {
-          debugPrint('ℹ️ [JOBS_STATE] Job already exists, skipping: $companyName');
+          debugPrint(
+              'ℹ️ [JOBS_STATE] Job already exists, skipping: $companyName');
           return;
         }
       } else {
@@ -88,7 +89,11 @@ class JobsStateManager {
       final file = File(filePath);
       if (!await file.exists()) {
         debugPrint('⚠️ [JOBS_STATE] Jobs file not found, creating new one');
-        return {'jobs': [], 'total_jobs': 0, 'last_updated': DateTime.now().toIso8601String()};
+        return {
+          'jobs': [],
+          'total_jobs': 0,
+          'last_updated': DateTime.now().toIso8601String()
+        };
       }
 
       final contents = await file.readAsString();
@@ -101,7 +106,8 @@ class JobsStateManager {
     }
   }
 
-  static Future<void> _writeJsonToFile(String filePath, String jsonString) async {
+  static Future<void> _writeJsonToFile(
+      String filePath, String jsonString) async {
     try {
       final file = File(filePath);
       await file.writeAsString('$jsonString\n');
