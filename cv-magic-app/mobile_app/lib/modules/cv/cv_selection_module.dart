@@ -64,35 +64,41 @@ class _CVSelectionModuleState extends State<CVSelectionModule> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Select CV:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            if (isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else
-              DropdownButton<String>(
-                value: widget.selectedCVFilename,
-                hint: const Text('Choose CV'),
-                isExpanded: true,
-                items: availableCVs
-                    .map((cv) => DropdownMenuItem(
-                          value: cv,
-                          child: Text(cv),
-                        ))
-                    .toList(),
-                onChanged: widget.onCVSelected,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Select CV:',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
-          ],
+              const SizedBox(height: 8),
+              if (isLoading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              else
+                DropdownButton<String>(
+                  value: widget.selectedCVFilename,
+                  hint: const Text('Choose CV'),
+                  isExpanded: true,
+                  items: availableCVs
+                      .map((cv) => DropdownMenuItem(
+                            value: cv,
+                            child: Text(
+                              cv,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: widget.onCVSelected,
+                ),
+            ],
+          ),
         ),
       ),
     );
