@@ -397,7 +397,7 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             # Check if we have the minimum required files (JD + skills analysis must exist)
             base_dir = Path("cv-analysis")
             from app.utils.timestamp_utils import TimestampUtils
-            company_dir = base_dir / cname
+            company_dir = base_dir / "applied_companies" / cname
             jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
             if not jd_file:
                 jd_file = company_dir / "jd_original.json"

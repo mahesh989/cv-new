@@ -615,7 +615,7 @@ class SkillExtractionResultSaver:
                         break
             
             # Create company folder path
-            company_folder = self.base_dir / company_slug
+            company_folder = self.base_dir / "applied_companies" / company_slug
             
             # Find the latest timestamped skills analysis file
             import json
@@ -687,7 +687,7 @@ class SkillExtractionResultSaver:
             if saved_file_path:
                 try:
                     p = Path(saved_file_path)
-                    # Expect structure: cv-analysis/applied_companies/<Company>/<Company>_skills_analysis.txt
+                    # Expect structure: cv-analysis/applied_companies/<Company>/<Company>_skills_analysis.json
                     if p.parent and p.parent.name:
                         company_slug = p.parent.name
                         logger.info(f"🏢 [PREEXTRACTED_COMPARISON] Inferred company from saved_file_path: {company_slug}")
@@ -703,7 +703,7 @@ class SkillExtractionResultSaver:
                     if folder.lower() == company_slug.lower():
                         company_slug = folder
                         break
-            company_folder = self.base_dir / company_slug
+            company_folder = self.base_dir / "applied_companies" / company_slug
             import json
             
             # Find the latest timestamped skills analysis file

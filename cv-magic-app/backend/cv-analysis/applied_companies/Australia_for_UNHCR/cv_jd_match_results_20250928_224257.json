@@ -1,6 +1,6 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-28T22:37:57.377958",
+  "cv_analysis_timestamp": "2025-09-28T22:42:57.022478",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
@@ -32,12 +32,12 @@
     "matched_preferred_count": 1
   },
   "matching_notes": {
-    "SQL": "Mentioned in technical skills section for querying and managing databases",
-    "Power BI": "Used for building dashboards and presenting research findings",
-    "Excel": "Found in technical skills section for data-driven solutions",
-    "project management": "Implied through roles involving project coordination and management",
-    "communication": "Demonstrated through presenting research findings and mentoring students",
-    "data warehouse": "Mentioned in context of using Snowflake for cloud data warehousing",
+    "SQL": "Mentioned in technical skills and experience sections",
+    "Power BI": "Used in dashboards and visualizations",
+    "Excel": "Found in technical skills section",
+    "project management": "Inferred from experience in managing projects and teams",
+    "communication": "Demonstrated through presentations and collaboration",
+    "data warehouse": "Mentioned with Snowflake for cloud data warehousing",
     "Tableau": "Used for creating dashboards and visualizations"
   },
   "ai_model_used": "openai/gpt-4o",
