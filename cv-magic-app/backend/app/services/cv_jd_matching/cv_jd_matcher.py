@@ -150,7 +150,7 @@ class CVJDMatcher:
         if not base_path:
             base_path = "cv-analysis"
         
-        company_dir = Path(base_path) / company_name
+        company_dir = Path(base_path) / "applied_companies" / company_name
         analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
         
         # Fallback to non-timestamped file if no timestamped file exists
@@ -432,7 +432,7 @@ class CVJDMatcher:
             base_path = "cv-analysis"
         
         # Create company directory if it doesn't exist
-        company_dir = Path(base_path) / company_name
+        company_dir = Path(base_path) / "applied_companies" / company_name
         company_dir.mkdir(parents=True, exist_ok=True)
         
         # Save result with timestamp
@@ -464,7 +464,7 @@ class CVJDMatcher:
         if not base_path:
             base_path = "cv-analysis"
         
-        company_dir = Path(base_path) / company_name
+        company_dir = Path(base_path) / "applied_companies" / company_name
         result_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
         
         if not result_file or not result_file.exists():

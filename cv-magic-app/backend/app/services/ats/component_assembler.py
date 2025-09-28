@@ -79,7 +79,7 @@ class ComponentAssembler:
 
     def _read_jd_text(self, company: str) -> str:
         """Read JD text for a specific company."""
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         jd_json = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
         
         # Fallback to non-timestamped file if no timestamped file exists
@@ -97,7 +97,7 @@ class ComponentAssembler:
 
     def _read_matched_skills(self, company: str) -> str:
         """Read matched skills for a specific company."""
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
         
         # Fallback to non-timestamped file if no timestamped file exists
@@ -125,7 +125,7 @@ class ComponentAssembler:
         """Calculate requirement bonus from CV-JD match results."""
         # Use timestamped file with robust fallback to newest by mtime
         from app.utils.timestamp_utils import TimestampUtils
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
         try:
             # Scan all possible files and choose newest by modification time
@@ -376,7 +376,7 @@ class ComponentAssembler:
         """Save assembled results to the company's skills analysis file."""
         # Use timestamped analysis file with fallback
         from app.utils.timestamp_utils import TimestampUtils
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
         if not file_path:
             file_path = company_dir / f"{company}_skills_analysis.json"
@@ -418,7 +418,7 @@ class ComponentAssembler:
             # Read preextracted comparison data
             # Use timestamped analysis file with fallback
             from app.utils.timestamp_utils import TimestampUtils
-            company_dir = self.base_dir / company
+            company_dir = self.base_dir / "applied_companies" / company
             file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
             if not file_path:
                 file_path = company_dir / f"{company}_skills_analysis.json"

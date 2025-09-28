@@ -55,11 +55,8 @@
       "work_type": null,
       "extracted_at": "2025-09-27T13:39:19.596342",
       "job_url": "https://www.seek.com.au/job/87023820?ref=search-standalone&type=standard&origin=jobTitle#sol=88428d3285ca5c2a4a8260e896f97dcd1a527acb"
-    },
-    {
-      "error": "Failed to extract job metadata: 'AIResponse' object has no attribute 'strip'"
     }
   ],
-  "last_updated": "2025-09-28T21:10:04.206507",
-  "total_jobs": 5
+  "last_updated": "2025-09-27T13:41:15.063684",
+  "total_jobs": 4
 }

@@ -289,8 +289,8 @@ def start_job_tracking_monitor(cv_analysis_path: str, saved_jobs_path: str):
 
 if __name__ == "__main__":
     # Configuration
-    CV_ANALYSIS_PATH = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"
-    SAVED_JOBS_PATH = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/saved_jobs"
+    CV_ANALYSIS_PATH = "cv-analysis"
+    SAVED_JOBS_PATH = "cv-analysis/saved_jobs"
     
     # Start monitoring
     start_job_tracking_monitor(CV_ANALYSIS_PATH, SAVED_JOBS_PATH)

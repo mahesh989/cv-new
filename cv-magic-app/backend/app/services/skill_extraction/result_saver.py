@@ -559,7 +559,7 @@ class SkillExtractionResultSaver:
             
             if company_name:
                 # List files for specific company
-                company_folder = self.base_dir / self._clean_company_name(company_name)
+                company_folder = self.base_dir / "applied_companies" / self._clean_company_name(company_name)
                 if company_folder.exists():
                     # Look for timestamped JSON skills analysis files
                     files = TimestampUtils.find_all_timestamped_files(company_folder, f"{company_name}_skills_analysis", "json")

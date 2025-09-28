@@ -33,7 +33,7 @@ class ATSRecommendationService:
         """
         try:
             # Construct file paths
-            company_dir = self.base_dir / company
+            company_dir = self.base_dir / "applied_companies" / company
             
             # Use timestamped analysis file with fallback
             from app.utils.timestamp_utils import TimestampUtils
@@ -265,7 +265,7 @@ class ATSRecommendationService:
                 return False
             
             # Construct the output file path with timestamp
-            company_dir = self.base_dir / company
+            company_dir = self.base_dir / "applied_companies" / company
             timestamp = TimestampUtils.get_timestamp()
             recommendation_file = company_dir / f"{company}_input_recommendation_{timestamp}.json"
             
@@ -364,7 +364,7 @@ class ATSRecommendationService:
         Returns:
             Path object for the latest recommendation file
         """
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
         if latest_file:
             return latest_file
@@ -381,7 +381,7 @@ class ATSRecommendationService:
         Returns:
             True if file exists, False otherwise
         """
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
         return latest_file is not None and latest_file.exists()
     
@@ -447,7 +447,7 @@ Format your response as structured recommendations with clear sections and bulle
             
             # Use timestamped analysis file with fallback
             from app.utils.timestamp_utils import TimestampUtils
-            company_dir = self.base_dir / company
+            company_dir = self.base_dir / "applied_companies" / company
             analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
             if not analysis_file:
                 analysis_file = company_dir / f"{company}_skills_analysis.json"

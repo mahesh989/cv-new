@@ -52,7 +52,7 @@ class AIRecommendationGenerator:
             output_file = self._get_output_file_path(company)
             if not force_regenerate:
                 try:
-                    company_dir = self.base_dir / company
+                    company_dir = self.base_dir / "applied_companies" / company
                     # Find latest input recommendation (timestamped preferred)
                     latest_input = TimestampUtils.find_latest_timestamped_file(
                         company_dir, f"{company}_input_recommendation", "json"
@@ -131,7 +131,7 @@ class AIRecommendationGenerator:
     
     def _get_output_file_path(self, company: str) -> Path:
         """Get the latest output file path for AI recommendation"""
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
         if latest_file:
             return latest_file
@@ -140,7 +140,7 @@ class AIRecommendationGenerator:
     
     def _get_input_recommendation_file_path(self, company: str) -> Path:
         """Get the input recommendation file path for a company"""
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         
         # Use timestamped file with fallback
         from app.utils.timestamp_utils import TimestampUtils
@@ -307,7 +307,7 @@ class AIRecommendationGenerator:
         """
         try:
             # Ensure company directory exists
-            company_dir = self.base_dir / company
+            company_dir = self.base_dir / "applied_companies" / company
             company_dir.mkdir(parents=True, exist_ok=True)
             
             # Save to JSON file with timestamp
@@ -331,7 +331,7 @@ class AIRecommendationGenerator:
     
     def check_ai_recommendation_exists(self, company: str) -> bool:
         """Check if AI recommendation file exists"""
-        company_dir = self.base_dir / company
+        company_dir = self.base_dir / "applied_companies" / company
         latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
         return latest_file is not None and latest_file.exists()
     
@@ -479,7 +479,7 @@ class AIRecommendationGenerator:
             True if successful, False otherwise
         """
         try:
-            company_dir = self.base_dir / company
+            company_dir = self.base_dir / "applied_companies" / company
             
             # Use timestamped files with fallback
             from app.utils.timestamp_utils import TimestampUtils

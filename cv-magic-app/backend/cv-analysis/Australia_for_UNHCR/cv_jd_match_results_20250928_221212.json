@@ -1,47 +1,48 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-28T21:10:09.822878",
+  "cv_analysis_timestamp": "2025-09-28T22:12:12.540536",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
     "Excel",
     "project management",
     "communication",
-    "data warehouse"
+    "customer service"
   ],
   "matched_preferred_keywords": [
-    "Tableau"
+    "Tableau",
+    "clean data"
   ],
   "missed_required_keywords": [
     "VBA",
     "stakeholder management",
-    "customer service",
+    "data warehouse",
     "marketing campaigns",
     "data models",
     "data mining"
   ],
   "missed_preferred_keywords": [
     "data issues",
-    "de-duplication",
-    "clean data"
+    "de-duplication"
   ],
   "match_counts": {
     "total_required_keywords": 12,
     "total_preferred_keywords": 4,
     "matched_required_count": 6,
-    "matched_preferred_count": 1
+    "matched_preferred_count": 2
   },
   "matching_notes": {
     "SQL": "Mentioned in technical skills and experience sections",
-    "Power BI": "Used for dashboards in research and technical skills",
+    "Power BI": "Used for dashboards and visualizations",
     "Excel": "Found in technical skills section",
-    "project management": "Implied through experience in managing data projects",
-    "communication": "Demonstrated through presentations and collaboration",
-    "data warehouse": "Mentioned in context of Snowflake",
-    "Tableau": "Used for dashboards in experience section"
+    "project management": "Implied through experience in managing projects and teams",
+    "communication": "Demonstrated through presenting research findings and mentoring",
+    "customer service": "Addressed through enhancing customer satisfaction and support data analysis",
+    "Tableau": "Used for creating dashboards",
+    "clean data": "Inferred from data cleaning and preprocessing tasks"
   },
   "ai_model_used": "openai/gpt-4o",
   "processing_status": "completed",
-  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt",
+  "cv_file_path": "cv-analysis/cvs/original/original_cv.txt",
   "metadata": {}
 }
