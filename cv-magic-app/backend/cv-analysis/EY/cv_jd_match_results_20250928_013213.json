@@ -1,0 +1,43 @@
+{
+  "company_name": "EY",
+  "cv_analysis_timestamp": "2025-09-28T01:32:13.150028",
+  "matched_required_keywords": [
+    "SQL",
+    "Python",
+    "Power BI",
+    "communication",
+    "data visualisation dashboards"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "JavaScript",
+    "DAX",
+    "Tabular Editor",
+    "problem solving",
+    "financial analysis",
+    "cloud computing",
+    "Microsoft Azure"
+  ],
+  "missed_preferred_keywords": [
+    "innovative mindset",
+    "industry practices",
+    "new technologies"
+  ],
+  "match_counts": {
+    "total_required_keywords": 12,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 5,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "SQL": "Mentioned in technical skills section",
+    "Python": "Extensively used in experience for data analysis and automation",
+    "Power BI": "Used in research intern role to present findings",
+    "communication": "Demonstrated in presenting research findings and stakeholder engagement",
+    "data visualisation dashboards": "Built using Python libraries and mentioned in experience"
+  },
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/tailored/EY_tailored_cv_20250928_012301.txt",
+  "metadata": {}
+}

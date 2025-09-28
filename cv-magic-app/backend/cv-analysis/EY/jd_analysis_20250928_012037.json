@@ -1,0 +1,61 @@
+{
+  "experience_years": 1,
+  "required_skills": {
+    "technical": [
+      "SQL",
+      "Python",
+      "JavaScript",
+      "Power BI",
+      "DAX",
+      "Tabular Editor"
+    ],
+    "soft_skills": [
+      "communication",
+      "problem solving"
+    ],
+    "domain_knowledge": [
+      "financial analysis",
+      "data visualisation dashboards",
+      "cloud computing",
+      "Microsoft Azure"
+    ],
+    "experience": []
+  },
+  "preferred_skills": {
+    "technical": [],
+    "soft_skills": [
+      "innovative mindset"
+    ],
+    "domain_knowledge": [
+      "industry practices",
+      "emerging issues"
+    ],
+    "experience": []
+  },
+  "required_keywords": [
+    "SQL",
+    "Python",
+    "JavaScript",
+    "Power BI",
+    "DAX",
+    "Tabular Editor",
+    "communication",
+    "problem solving",
+    "financial analysis",
+    "data visualisation dashboards",
+    "cloud computing",
+    "Microsoft Azure"
+  ],
+  "preferred_keywords": [
+    "innovative mindset",
+    "industry practices",
+    "emerging issues"
+  ],
+  "analysis_timestamp": "2025-09-28T01:20:37.324162",
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "company_name": "EY",
+  "metadata": {
+    "jd_hash": "523db1abd73020956bf54fccd7d3d01ba195f5eac870397f2d8887d51cb7e622"
+  }
+}

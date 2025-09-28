@@ -1,0 +1,45 @@
+{
+  "company_name": "EY",
+  "cv_analysis_timestamp": "2025-09-28T01:20:40.444078",
+  "matched_required_keywords": [
+    "SQL",
+    "Python",
+    "Power BI",
+    "communication",
+    "data visualisation dashboards"
+  ],
+  "matched_preferred_keywords": [
+    "innovative mindset"
+  ],
+  "missed_required_keywords": [
+    "JavaScript",
+    "DAX",
+    "Tabular Editor",
+    "problem solving",
+    "financial analysis",
+    "cloud computing",
+    "Microsoft Azure"
+  ],
+  "missed_preferred_keywords": [
+    "industry practices",
+    "emerging issues"
+  ],
+  "match_counts": {
+    "total_required_keywords": 12,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 5,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "SQL": "Proficient in SQL for querying and managing databases",
+    "Python": "Extensively used in various roles for scripting and data analysis",
+    "Power BI": "Used for creating dashboards and presenting research findings",
+    "communication": "Demonstrated through presenting research findings and mentoring",
+    "data visualisation dashboards": "Built using Power BI and Python libraries",
+    "innovative mindset": "Conducted innovative research and developed new solutions"
+  },
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "cv_file_path": "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}
