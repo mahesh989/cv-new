@@ -1,3 +1,0 @@
-{
-  "error": "Failed to extract job metadata: 'AIResponse' object has no attribute 'strip'"
-}

@@ -64,7 +64,7 @@ class UnifiedLatestFileSelector:
         """Get original CV for a company"""
         print(f"🔍 Searching for original CV for company: {company}")
         
-        candidates = self._find_original_cv_files()
+        candidates = self._find_original_cv_files(company)
         print(f"📁 Found {len(candidates)} original CV candidates")
         
         if not candidates:
@@ -114,7 +114,7 @@ class UnifiedLatestFileSelector:
             candidates.append((json_path, txt_path, ts or "00000000_000000", "tailored"))
 
         # Original candidates (timestamped and base)
-        for json_path, txt_path, ts in self._find_original_cv_files():
+        for json_path, txt_path, ts in self._find_original_cv_files(company):
             candidates.append((json_path, txt_path, ts or "00000000_000000", "original"))
 
         if not candidates:
@@ -201,8 +201,8 @@ class UnifiedLatestFileSelector:
 
     def _find_tailored_cv_files(self, company: str) -> List[Tuple[Path, Optional[Path], str]]:
         candidates: List[Tuple[Path, Optional[Path], str]] = []
-        # Look in centralized tailored folder
-        tailored_path = self.base_path / "cvs" / "tailored"
+        # Look in company-specific tailored folder
+        tailored_path = self.base_path / "applied_companies" / company / "cvs" / "tailored"
         if not tailored_path.exists():
             return candidates
         pattern = f"{company}_tailored_cv_*.json"
@@ -214,24 +214,44 @@ class UnifiedLatestFileSelector:
             candidates.append((json_file, txt_file, timestamp))
         return candidates
 
-    def _find_original_cv_files(self) -> List[Tuple[Path, Optional[Path], str]]:
+    def _find_original_cv_files(self, company: str = "") -> List[Tuple[Path, Optional[Path], str]]:
         """Find original CV files (timestamped and base)."""
         candidates: List[Tuple[Path, Optional[Path], str]] = []
-        if not self.original_path.exists():
-            return candidates
-        # Timestamped originals
-        for json_file in self.original_path.glob("original_cv_*.json"):
-            ts = self._extract_timestamp_from_filename(json_file.name)
-            txt_file = json_file.with_suffix('.txt')
-            if not txt_file.exists():
-                txt_file = None
-            if ts:
-                candidates.append((json_file, txt_file, ts))
-        # Base files as oldest
-        base_json = self.original_path / "original_cv.json"
-        if base_json.exists():
-            base_txt = self.original_path / "original_cv.txt"
-            candidates.append((base_json, base_txt if base_txt.exists() else None, "00000000_000000"))
+        
+        # First try company-specific original CV folder
+        if company:
+            company_original_path = self.base_path / "applied_companies" / company / "cvs" / "original"
+            if company_original_path.exists():
+                # Timestamped originals
+                for json_file in company_original_path.glob("original_cv_*.json"):
+                    ts = self._extract_timestamp_from_filename(json_file.name)
+                    txt_file = json_file.with_suffix('.txt')
+                    if not txt_file.exists():
+                        txt_file = None
+                    if ts:
+                        candidates.append((json_file, txt_file, ts))
+                # Base files as oldest
+                base_json = company_original_path / "original_cv.json"
+                if base_json.exists():
+                    base_txt = company_original_path / "original_cv.txt"
+                    candidates.append((base_json, base_txt if base_txt.exists() else None, "00000000_000000"))
+        
+        # Fallback to global original CV folder
+        if not candidates and self.original_path.exists():
+            # Timestamped originals
+            for json_file in self.original_path.glob("original_cv_*.json"):
+                ts = self._extract_timestamp_from_filename(json_file.name)
+                txt_file = json_file.with_suffix('.txt')
+                if not txt_file.exists():
+                    txt_file = None
+                if ts:
+                    candidates.append((json_file, txt_file, ts))
+            # Base files as oldest
+            base_json = self.original_path / "original_cv.json"
+            if base_json.exists():
+                base_txt = self.original_path / "original_cv.txt"
+                candidates.append((base_json, base_txt if base_txt.exists() else None, "00000000_000000"))
+        
         return candidates
 
     def _find_analysis_files(self, directory: Path, company: str, analysis_type: str) -> List[Tuple[Path, str]]:
