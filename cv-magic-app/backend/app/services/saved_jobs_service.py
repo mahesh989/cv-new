@@ -44,7 +44,12 @@ class SavedJobsService:
                 data = json.load(f)
             return data
         except Exception as e:
+            # Auto-heal: create file and return empty structure
             logger.error(f"❌ Failed to read jobs data: {e}")
+            try:
+                self._ensure_jobs_file_exists()
+            except Exception:
+                pass
             return {"jobs": [], "last_updated": datetime.utcnow().isoformat(), "total_jobs": 0}
     
     def _write_jobs_data(self, data: dict) -> bool:

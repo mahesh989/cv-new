@@ -3,20 +3,23 @@ Saved Jobs API Routes
 
 Endpoints for managing saved job data.
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from typing import Dict, Optional
 from datetime import datetime
 
-from ..services.saved_jobs_service import saved_jobs_service
+from ..services.saved_jobs_service import SavedJobsService
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
 
 router = APIRouter(prefix="/api/jobs", tags=["Saved Jobs"])
 
 @router.get("/saved")
-async def get_saved_jobs():
+async def get_saved_jobs(current_user: UserData = Depends(get_current_user)):
     """Get all saved jobs."""
     try:
-        jobs = saved_jobs_service.get_all_jobs()
+        service = SavedJobsService(current_user.email)
+        jobs = service.get_all_jobs()
         return JSONResponse(content={
             "success": True,
             "jobs": jobs,
@@ -27,10 +30,11 @@ async def get_saved_jobs():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/saved/{job_url:path}")
-async def get_job_by_url(job_url: str):
+async def get_job_by_url(job_url: str, current_user: UserData = Depends(get_current_user)):
     """Get a specific job by its URL."""
     try:
-        job = saved_jobs_service.get_job_by_url(job_url)
+        service = SavedJobsService(current_user.email)
+        job = service.get_job_by_url(job_url)
         if job:
             return JSONResponse(content={
                 "success": True,
@@ -48,7 +52,7 @@ async def get_job_by_url(job_url: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/save")
-async def save_job(job_data: Dict):
+async def save_job(job_data: Dict, current_user: UserData = Depends(get_current_user)):
     """Save a new job."""
     try:
         if not job_data.get("job_url"):
@@ -60,7 +64,8 @@ async def save_job(job_data: Dict):
                 }
             )
 
-        success = saved_jobs_service.save_new_job(job_data)
+        service = SavedJobsService(current_user.email)
+        success = service.save_new_job(job_data)
         if success:
             return JSONResponse(content={
                 "success": True,
@@ -79,10 +84,11 @@ async def save_job(job_data: Dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/saved/{job_url:path}")
-async def delete_job(job_url: str):
+async def delete_job(job_url: str, current_user: UserData = Depends(get_current_user)):
     """Delete a saved job."""
     try:
-        success = saved_jobs_service.delete_job(job_url)
+        service = SavedJobsService(current_user.email)
+        success = service.delete_job(job_url)
         if success:
             return JSONResponse(content={
                 "success": True,
@@ -100,10 +106,11 @@ async def delete_job(job_url: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/saved")
-async def clear_all_jobs():
+async def clear_all_jobs(current_user: UserData = Depends(get_current_user)):
     """Clear all saved jobs."""
     try:
-        success = saved_jobs_service.clear_all_jobs()
+        service = SavedJobsService(current_user.email)
+        success = service.clear_all_jobs()
         if success:
             return JSONResponse(content={
                 "success": True,
