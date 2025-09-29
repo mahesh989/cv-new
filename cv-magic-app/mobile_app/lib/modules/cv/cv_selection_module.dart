@@ -44,14 +44,18 @@ class _CVSelectionModuleState extends State<CVSelectionModule> {
       });
     } catch (e) {
       debugPrint('Error loading CVs: $e');
-      // Fallback to default list
+      // Do NOT fallback to hardcoded list; prompt user to upload instead
       setState(() {
-        availableCVs = [
-          'MichaelPage_v1.pdf',
-          'NoToViolence_v10.pdf',
-          'example_professional_cv.pdf',
-        ];
+        availableCVs = [];
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No CVs found. Please upload a CV to continue.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
       setState(() {
         isLoading = false;
@@ -80,6 +84,11 @@ class _CVSelectionModuleState extends State<CVSelectionModule> {
                     padding: EdgeInsets.all(20),
                     child: CircularProgressIndicator(),
                   ),
+                )
+              else if (availableCVs.isEmpty)
+                const Text(
+                  'No CVs available. Please upload a CV to proceed.',
+                  style: TextStyle(color: Colors.grey),
                 )
               else
                 DropdownButton<String>(
@@ -115,12 +124,8 @@ class CVSelectionService {
       debugPrint('Error loading CVs: $e');
     }
 
-    // Fallback to default list
-    return [
-      'MichaelPage_v1.pdf',
-      'NoToViolence_v10.pdf',
-      'example_professional_cv.pdf',
-    ];
+    // No fallback list; force user to upload
+    return [];
   }
 
   /// Get CV information

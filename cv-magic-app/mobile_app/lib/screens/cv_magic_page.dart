@@ -46,19 +46,18 @@ class _CVMagicPageState extends State<CVMagicPage> {
       }
     } catch (e) {
       debugPrint('Error loading CVs: $e');
-      // Fallback to default list
+      // Do NOT fallback to default list; prompt user to upload instead
       setState(() {
-        availableCVs = [
-          'MichaelPage_v1.pdf',
-          'NoToViolence_v10.pdf',
-          'example_professional_cv.pdf',
-        ];
-        if (selectedCVFilename == null) {
-          selectedCVFilename = availableCVs.first;
-          // Load content for the first CV
-          _loadCVContent(availableCVs.first);
-        }
+        availableCVs = [];
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No CVs found. Please upload a CV to continue.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
