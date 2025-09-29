@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 # Constants
 from app.utils.user_path_utils import get_user_uploads_path
-UPLOAD_DIR = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 
 
@@ -22,7 +23,7 @@ class CVSelectionService:
     """Service class for handling CV selection and listing"""
     
     @staticmethod
-    def list_cvs() -> Dict[str, Any]:
+    def list_cvs(current_user: UserData = None) -> Dict[str, Any]:
         """
         List all uploaded CVs with metadata
         
@@ -35,8 +36,10 @@ class CVSelectionService:
         try:
             cvs = []
             
-            if UPLOAD_DIR.exists():
-                for file_path in UPLOAD_DIR.iterdir():
+            # Resolve user-specific uploads directory
+            upload_dir = get_user_uploads_path(current_user.email) if current_user else get_user_uploads_path("admin@admin.com")
+            if upload_dir.exists():
+                for file_path in upload_dir.iterdir():
                     if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
                         try:
                             stat = file_path.stat()
@@ -80,7 +83,8 @@ class CVSelectionService:
             HTTPException: If file not found
         """
         try:
-            file_path = UPLOAD_DIR / filename
+            # Use admin path by default; callers that need auth should pass current user
+            file_path = get_user_uploads_path("admin@admin.com") / filename
             
             if not file_path.exists():
                 raise HTTPException(status_code=404, detail="CV file not found")

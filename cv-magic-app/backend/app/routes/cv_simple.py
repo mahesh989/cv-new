@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Request
+from fastapi import APIRouter, HTTPException, UploadFile, File, Request, Depends
 from fastapi.responses import JSONResponse
 
 from ..services.cv_processor import cv_processor
@@ -95,15 +95,20 @@ async def upload_cv(cv: UploadFile = File(...), auto_structure: bool = True):
         raise HTTPException(status_code=500, detail=f"Error uploading CV: {str(e)}")
 
 
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
+from app.utils.user_path_utils import get_user_uploads_path
+
+
 @router.get("/list")
-async def list_cvs():
+async def list_cvs(current_user: UserData = Depends(get_current_user)):
     """List all uploaded CVs with metadata"""
     
     try:
         cvs = []
-        
-        if UPLOAD_DIR.exists():
-            for file_path in UPLOAD_DIR.iterdir():
+        upload_dir = get_user_uploads_path(current_user.email)
+        if upload_dir.exists():
+            for file_path in upload_dir.iterdir():
                 if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
                     try:
                         stat = file_path.stat()

@@ -5,13 +5,15 @@ This module provides clean, organized CV API endpoints using modular services.
 Each endpoint uses dedicated service modules for better code organization.
 """
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import os
 import logging
 
 from ..modules.cv import cv_upload_service, cv_selection_service, cv_preview_service
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
 from ..services.enhanced_cv_upload_service import enhanced_cv_upload_service
 
 logger = logging.getLogger(__name__)
@@ -26,9 +28,9 @@ async def upload_cv(cv: UploadFile = File(...)):
 
 
 @router.get("/list")
-async def list_cvs():
+async def list_cvs(current_user: UserData = Depends(get_current_user)):
     """List all uploaded CVs with metadata"""
-    return cv_selection_service.list_cvs()
+    return cv_selection_service.list_cvs(current_user)
 
 
 @router.get("/info/{filename}")
