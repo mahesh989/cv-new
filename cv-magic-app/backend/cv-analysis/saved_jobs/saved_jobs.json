@@ -1,5 +1,9 @@
 {
-  "jobs": [],
-  "last_updated": "2025-09-29T00:24:52.502602",
-  "total_jobs": 0
+  "jobs": [
+    {
+      "error": "Failed to extract job metadata: 'AIResponse' object has no attribute 'strip'"
+    }
+  ],
+  "last_updated": "2025-09-29T10:52:54.957510",
+  "total_jobs": 1
 }

@@ -374,19 +374,19 @@ async def read_tailored_cv(company_name: str):
     try:
         logger.info(f"📄 Tailored CV content request for {company_name}")
         
-        # Use dynamic CV selector to get the latest tailored CV
-        from app.services.dynamic_cv_selector import dynamic_cv_selector
+        # Use unified file selector to get the latest CV for the specific company
+        from app.unified_latest_file_selector import unified_selector
         
-        # Get the latest CV files (could be from original or tailored folder)
-        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+        # Get the latest CV files for the specific company
+        cv_context = unified_selector.get_latest_cv_for_company(company_name)
         
-        if not latest_cv_paths['txt_path']:
+        if not cv_context.exists or not cv_context.txt_path:
             raise HTTPException(
                 status_code=404,
-                detail="No CV text file found in cvs folders"
+                detail=f"No CV text file found for company: {company_name}"
             )
         
-        latest_txt_file = Path(latest_cv_paths['txt_path'])
+        latest_txt_file = cv_context.txt_path
         
         # Check if it exists
         if not latest_txt_file.exists():
@@ -395,23 +395,22 @@ async def read_tailored_cv(company_name: str):
                 detail=f"CV text file not found: {latest_txt_file}"
             )
         
-        # File is already the latest from dynamic selector
-        
         # Read the text content
         with open(latest_txt_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        logger.info(f"✅ Served CV content: {latest_txt_file.name} from {latest_cv_paths['txt_source']} folder ({len(content)} characters)")
+        logger.info(f"✅ Served CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
         
         return JSONResponse(content={
             "success": True,
             "content": content,
             "filename": latest_txt_file.name,
             "company": company_name,
-            "source_folder": latest_cv_paths['txt_source'],
+            "source_folder": cv_context.file_type,
             "metadata": {
                 "file_size": len(content),
                 "last_modified": latest_txt_file.stat().st_mtime,
+                "timestamp": cv_context.timestamp,
                 "dynamic_selection": True
             }
         })
@@ -446,24 +445,23 @@ async def get_latest_tailored_cv():
                 detail="CV analysis folder not found"
             )
         
-        # Find all tailored CV text files in company-specific folders
+        # Find all tailored CV text files in company-specific cvs/tailored folders
         all_tailored_files = []
         
         # Check company folders in applied_companies
         for company_dir in (cv_analysis_path / "applied_companies").iterdir():
-            if company_dir.is_dir() and company_dir.name != "__pycache__" and company_dir.name != "cvs":
-                # Look for company-specific naming pattern first
-                company_files = list(company_dir.glob(f"{company_dir.name}_tailored_cv_*.txt"))
-                if not company_files:
-                    # Fallback to any tailored CV files
-                    company_files = list(company_dir.glob("*tailored_cv_*.txt"))
-                
-                all_tailored_files.extend(company_files)
+            if company_dir.is_dir() and company_dir.name != "__pycache__":
+                # Look in company-specific cvs/tailored folder
+                tailored_dir = company_dir / "cvs" / "tailored"
+                if tailored_dir.exists():
+                    # Look for company-specific naming pattern
+                    company_files = list(tailored_dir.glob(f"{company_dir.name}_tailored_cv_*.txt"))
+                    all_tailored_files.extend(company_files)
         
         if not all_tailored_files:
             raise HTTPException(
                 status_code=404,
-                detail="No tailored CV files found in tailored folder or company folders"
+                detail="No tailored CV files found in company-specific cvs/tailored folders"
             )
         
         # Sort by timestamp in filename first, then by modified time as fallback
