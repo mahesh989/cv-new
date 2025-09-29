@@ -345,13 +345,11 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             ),
             // JD Analysis UI section removed for backend-only focus
 
-            // Loading indicator
+            // Loading indicator for upload
             if (isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(),
-                ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: LinearProgressIndicator(),
               ),
           ],
         ),

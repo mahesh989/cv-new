@@ -41,12 +41,22 @@ class CVUploadService {
     required PlatformFile file,
     required Function(bool) setLoading,
     required Function(String) showMessage,
+    Future<void> Function()? refreshCVList,
+    void Function(String)? onCVSelected,
   }) async {
     setLoading(true);
 
     try {
       await uploadCV(file);
       showMessage('CV uploaded successfully: ${file.name}');
+      // Refresh CV list so dropdown activates immediately
+      if (refreshCVList != null) {
+        await refreshCVList();
+      }
+      // Auto-select the uploaded CV if callback provided
+      if (onCVSelected != null) {
+        onCVSelected(file.name);
+      }
     } catch (e) {
       showMessage('Upload failed: $e');
     } finally {

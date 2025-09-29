@@ -131,6 +131,11 @@ class _CVMagicPageState extends State<CVMagicPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isLoading)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: LinearProgressIndicator(),
+              ),
             const Text('Select CV:',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 8),
@@ -144,16 +149,18 @@ class _CVMagicPageState extends State<CVMagicPage> {
                         child: Text(cv),
                       ))
                   .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedCVFilename = value;
-                  cvContent = null; // Clear previous content
-                });
-                // Load CV content when selection changes
-                if (value != null) {
-                  _loadCVContent(value);
-                }
-              },
+              onChanged: isLoading
+                  ? null
+                  : (value) {
+                      setState(() {
+                        selectedCVFilename = value;
+                        cvContent = null; // Clear previous content
+                      });
+                      // Load CV content when selection changes
+                      if (value != null) {
+                        _loadCVContent(value);
+                      }
+                    },
             ),
           ],
         ),
