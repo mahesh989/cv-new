@@ -23,8 +23,8 @@ def get_user_base_path(user_email: Optional[str] = None) -> Path:
     if not user_email:
         user_email = "admin@admin.com"
     
-    # Create user folder name: user_{email}
-    user_folder = f"user_{user_email.replace('@', '_at_').replace('.', '_')}"
+    # Create user folder name using raw email
+    user_folder = f"user_{user_email}"
     
     # Return path: user/{user_folder}/cv-analysis
     base_path = Path("user") / user_folder / "cv-analysis"

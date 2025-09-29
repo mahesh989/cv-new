@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 
 class JobsStateManager {
   static const String _backendJobsPath =
-      'backend/user/user_admin_at_admin_com/cv-analysis/saved_jobs/saved_jobs.json';
+      'backend/user/user_admin@admin.com/cv-analysis/saved_jobs/saved_jobs.json';
   static const String _assetsJobsPath = 'assets/saved_jobs.json';
 
   static Future<void> saveNewJob({
