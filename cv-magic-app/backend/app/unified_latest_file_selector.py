@@ -35,30 +35,19 @@ class UnifiedLatestFileSelector:
 
     def get_latest_cv_for_company(self, company: str, jd_url: str = "", jd_text: str = "") -> FileContext:
         """
-        Get the appropriate CV file for a company based on JD usage history.
-        Uses original CV for first-time JD usage, tailored CV for subsequent uses.
+        Get the latest CV file for a company by timestamp, regardless of type.
+        Always selects the most recent CV file (original or tailored) based on timestamp.
         
         Args:
             company: Company name
             jd_url: Job description URL (optional)
             jd_text: Job description text (optional)
         """
-        print(f"🔍 Searching for appropriate CV for company: {company}")
+        print(f"🔍 Searching for latest CV for company: {company}")
         
-        # Check if this is first-time JD usage
-        from app.services.jd_usage_tracker import jd_usage_tracker
-        
-        is_first_time = jd_usage_tracker.is_jd_first_time_usage(jd_url, jd_text)
-        print(f"📊 JD usage status: {'First time' if is_first_time else 'Previously used'}")
-        
-        if is_first_time:
-            # Use original CV for first-time JD usage
-            print("📄 Using original CV for first-time JD usage")
-            return self._get_original_cv_for_company(company)
-        else:
-            # Use tailored CV for subsequent uses
-            print("📄 Using tailored CV for subsequent JD usage")
-            return self._get_tailored_cv_for_company(company)
+        # Always get the latest CV across all types (original and tailored)
+        print("📄 Selecting latest CV by timestamp (original or tailored)")
+        return self.get_latest_cv_across_all(company)
     
     def _get_original_cv_for_company(self, company: str) -> FileContext:
         """Get original CV for a company"""
