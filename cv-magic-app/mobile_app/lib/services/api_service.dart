@@ -195,7 +195,7 @@ class APIService {
       request.headers['X-Current-Model'] = currentModelId!;
     }
 
-    // Add file
+    // Replace if exists: backend will overwrite on same filename. We still send the file normally.
     request.files.add(http.MultipartFile.fromBytes(
       'cv',
       file.bytes!,
@@ -222,6 +222,20 @@ class APIService {
     );
 
     return List<String>.from(result['uploaded_cvs'] ?? []);
+  }
+
+  // Check if a CV filename already exists on the backend
+  static Future<bool> cvExists(String filename) async {
+    final list = await fetchUploadedCVs();
+    return list.contains(filename);
+  }
+
+  // Save selected CV for analysis: creates original_cv.txt and original_cv.json
+  static Future<void> saveCVForAnalysis(String filename) async {
+    await makeAuthenticatedCall(
+      endpoint: '/cv/save-for-analysis/$filename',
+      method: 'POST',
+    );
   }
 
   // Job Description functionality

@@ -2,6 +2,7 @@
 Authentication dependencies for FastAPI
 """
 from typing import Optional
+from datetime import datetime, timezone
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.auth import verify_token
@@ -39,7 +40,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             id=token_data.user_id,
             email=token_data.email,
             name=token_data.email.split("@")[0] if token_data.email else "user",
-            created_at=None,
+            created_at=datetime.now(timezone.utc),
             is_active=True
         )
         

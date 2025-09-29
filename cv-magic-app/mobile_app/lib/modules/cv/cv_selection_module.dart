@@ -10,11 +10,13 @@ import '../../services/api_service.dart';
 class CVSelectionModule extends StatefulWidget {
   final String? selectedCVFilename;
   final Function(String?) onCVSelected;
+  final int refreshToken;
 
   const CVSelectionModule({
     super.key,
     required this.selectedCVFilename,
     required this.onCVSelected,
+    this.refreshToken = 0,
   });
 
   @override
@@ -29,6 +31,15 @@ class _CVSelectionModuleState extends State<CVSelectionModule> {
   void initState() {
     super.initState();
     _loadAvailableCVs();
+  }
+
+  @override
+  void didUpdateWidget(covariant CVSelectionModule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Trigger reload when refresh token changes
+    if (oldWidget.refreshToken != widget.refreshToken) {
+      _loadAvailableCVs();
+    }
   }
 
   Future<void> _loadAvailableCVs() async {

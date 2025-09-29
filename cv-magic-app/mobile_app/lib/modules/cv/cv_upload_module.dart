@@ -26,7 +26,8 @@ class CVUploadModule extends StatefulWidget {
 class _CVUploadModuleState extends State<CVUploadModule> {
   @override
   Widget build(BuildContext context) {
-    return CvUploader(onFilePicked: widget.onFilePicked);
+    return CvUploader(
+        onFilePicked: widget.onFilePicked, isLoading: widget.isLoading);
   }
 }
 

@@ -21,6 +21,7 @@ class _CVMagicPageState extends State<CVMagicPage> {
   // Available CVs (dynamic list)
   List<String> availableCVs = [];
   bool isLoading = false;
+  int cvRefreshToken = 0;
 
   @override
   void initState() {
@@ -37,11 +38,7 @@ class _CVMagicPageState extends State<CVMagicPage> {
         final List<dynamic> cvList = data['uploaded_cvs'] ?? [];
         setState(() {
           availableCVs = cvList.map((cv) => cv.toString()).toList();
-          if (availableCVs.isNotEmpty && selectedCVFilename == null) {
-            selectedCVFilename = availableCVs.first;
-            // Load content for the first CV
-            _loadCVContent(availableCVs.first);
-          }
+          // Do not auto-select; let the user choose explicitly
         });
       }
     } catch (e) {
@@ -96,8 +93,23 @@ class _CVMagicPageState extends State<CVMagicPage> {
     });
 
     try {
+      final exists = await APIService.cvExists(file.name);
+      if (exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Replacing existing CV: ${file.name}'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+
       await APIService.uploadCV(file);
+      // Trigger a refresh of the list and try to auto-select the uploaded CV
       await _loadAvailableCVs();
+      setState(() {
+        cvRefreshToken++;
+      });
+      // Do not auto-select after upload; user will choose from dropdown
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -155,9 +167,18 @@ class _CVMagicPageState extends State<CVMagicPage> {
                         selectedCVFilename = value;
                         cvContent = null; // Clear previous content
                       });
-                      // Load CV content when selection changes
+                      // Save selection in backend and load content
                       if (value != null) {
-                        _loadCVContent(value);
+                        APIService.saveCVForAnalysis(value)
+                            .then((_) => _loadCVContent(value))
+                            .catchError((e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to save original CV: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        });
                       }
                     },
             ),
@@ -255,7 +276,7 @@ class _CVMagicPageState extends State<CVMagicPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // CV Upload Section
-            CvUploader(onFilePicked: _onFilePicked),
+            CvUploader(onFilePicked: _onFilePicked, isLoading: isLoading),
             const SizedBox(height: 16),
 
             // CV Selection

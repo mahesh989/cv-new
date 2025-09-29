@@ -39,6 +39,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   // State variables
   String? selectedCVFilename;
   bool isLoading = false;
+  int cvRefreshToken = 0;
   // Removed company selection used for JDAnalysisWidget (backend-only focus)
 
   // Job description controllers
@@ -177,6 +178,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             CVSelectionModule(
               selectedCVFilename: selectedCVFilename,
               onCVSelected: _onCVSelected,
+              refreshToken: cvRefreshToken,
             ),
             const SizedBox(height: 16),
 
@@ -363,8 +365,19 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     });
 
     try {
+      // Check if a CV with same name exists and inform user about replacement
+      final exists = await APIService.cvExists(file.name);
+      if (exists) {
+        _showSnackBar('Replacing existing CV: ${file.name}');
+      }
+
       await APIService.uploadCV(file);
-      await _refreshCVList();
+      // Increment token to trigger CVSelectionModule reload
+      setState(() {
+        cvRefreshToken++;
+      });
+      // Fetch list, but do not auto-select; user will choose the CV
+      await APIService.fetchUploadedCVs();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -394,6 +407,14 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     setState(() {
       selectedCVFilename = filename;
     });
+    // Persist selection by saving original CV artifacts
+    if (filename != null && filename.isNotEmpty) {
+      APIService.saveCVForAnalysis(filename).then((_) {
+        _showSnackBar('Saved original CV files for "$filename"');
+      }).catchError((e) {
+        _showSnackBar('Failed to save original CV: $e', isError: true);
+      });
+    }
   }
 
   /// Analyze skills by comparing CV with Job Description
@@ -463,12 +484,6 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
       _showSnackBar('🚀 Please switch to CV Generation tab manually');
       debugPrint('No navigation callback provided');
     }
-  }
-
-  Future<void> _refreshCVList() async {
-    // This would trigger a refresh of the CV selection module
-    // For now, we'll just update the state
-    setState(() {});
   }
 
   Widget _buildCVContextCard() {
