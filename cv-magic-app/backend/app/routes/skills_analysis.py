@@ -818,7 +818,7 @@ async def preliminary_analysis(
             # If we have a company, ensure required files exist for the pipeline
             if company_name:
                 from app.utils.user_path_utils import get_user_base_path
-            base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+                base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
                 company_dir = base_dir / company_name
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)
