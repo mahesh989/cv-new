@@ -14,6 +14,8 @@ import logging
 from ..modules.cv import cv_upload_service, cv_selection_service, cv_preview_service
 from app.core.dependencies import get_current_user
 from app.models.auth import UserData
+from app.utils.user_path_utils import get_user_base_path
+from pathlib import Path
 from ..services.enhanced_cv_upload_service import enhanced_cv_upload_service
 
 logger = logging.getLogger(__name__)
@@ -52,7 +54,7 @@ async def get_cv_preview(filename: str, max_length: int = 500):
 
 
 @router.post("/save-for-analysis/{filename}")
-async def save_cv_for_analysis(filename: str):
+async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(get_current_user)):
     """Save selected CV as both original_cv.txt and original_cv.json in cv-analysis folder"""
     try:
         # Get CV content
@@ -61,14 +63,14 @@ async def save_cv_for_analysis(filename: str):
         if not cv_content_result.get('content'):
             raise HTTPException(status_code=404, detail=f"CV content not found for: {filename}")
         
-        # Create cv-analysis directory if it doesn't exist
-        analysis_dir = "cv-analysis"
-        os.makedirs(analysis_dir, exist_ok=True)
+        # Create user-scoped cv-analysis directory if it doesn't exist
+        analysis_base: Path = get_user_base_path(current_user.email)
+        analysis_base.mkdir(parents=True, exist_ok=True)
         
-        # Save as original_cv.txt in the new cvs/original folder
-        original_folder = os.path.join(analysis_dir, "cvs", "original")
-        os.makedirs(original_folder, exist_ok=True)
-        txt_filepath = os.path.join(original_folder, "original_cv.txt")
+        # Save as original_cv.txt in the user-scoped cvs/original folder
+        original_folder = analysis_base / "cvs" / "original"
+        original_folder.mkdir(parents=True, exist_ok=True)
+        txt_filepath = original_folder / "original_cv.txt"
         
         with open(txt_filepath, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
@@ -83,7 +85,7 @@ async def save_cv_for_analysis(filename: str):
         
         # Start structured processing in background (non-blocking)
         structured_success = True
-        structured_path = "cv-analysis/cvs/original/original_cv.json (processing in background)"
+        structured_path = str(analysis_base / "cvs" / "original" / "original_cv.json") + " (processing in background)"
         
         # Trigger background structured processing without blocking response
         import asyncio
