@@ -40,6 +40,14 @@ async def login(credentials: LoginRequest):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # Ensure user-specific directories exist immediately on login
+    try:
+        from app.utils.user_path_utils import ensure_user_directories
+        ensure_user_directories(user.email)
+    except Exception:
+        # best-effort; do not block login on filesystem issues
+        pass
+
     # Create tokens
     user_dict = {"id": user.id, "email": user.email}
     access_token = create_access_token(user_dict)
