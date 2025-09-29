@@ -15,7 +15,8 @@ from ...services.cv_processor import cv_processor
 logger = logging.getLogger(__name__)
 
 # Constants
-UPLOAD_DIR = Path("cv-analysis/uploads")
+from app.utils.user_path_utils import get_user_uploads_path
+UPLOAD_DIR = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
 
 
 class CVPreviewService:

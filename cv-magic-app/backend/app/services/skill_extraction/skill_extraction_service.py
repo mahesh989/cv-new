@@ -117,7 +117,8 @@ class SkillExtractionService:
         
         try:
             # Check if file exists first
-            upload_dir = Path("cv-analysis/uploads")
+            from app.utils.user_path_utils import get_user_uploads_path
+            upload_dir = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
             file_path = upload_dir / cv_filename
             
             if not file_path.exists():

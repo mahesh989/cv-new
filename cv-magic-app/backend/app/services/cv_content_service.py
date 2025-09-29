@@ -19,7 +19,8 @@ class CVContentService:
     """Service for dynamic CV content management"""
     
     def __init__(self):
-        self.upload_dir = Path("cv-analysis/uploads")
+        from app.utils.user_path_utils import get_user_uploads_path
+        self.upload_dir = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
         self.fallback_cv_content = self._get_fallback_cv_content()
     
     def get_cv_content(self, cv_filename: str, user_id: int = 1, use_fallback: bool = False) -> Dict[str, Any]:

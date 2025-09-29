@@ -19,23 +19,33 @@ from ..services.structured_cv_parser import LLMStructuredCVParser
 logger = logging.getLogger(__name__)
 
 # Constants
-UPLOAD_DIR = Path("cv-analysis/uploads")
-CV_ANALYSIS_DIR = Path("cv-analysis")
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
-# Ensure directories exist
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-CV_ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
+def get_user_paths(user_email: str = "admin@admin.com"):
+    """Get user-specific paths"""
+    from app.utils.user_path_utils import get_user_base_path, get_user_uploads_path
+    return {
+        'upload_dir': get_user_uploads_path(user_email),
+        'cv_analysis_dir': get_user_base_path(user_email)
+    }
 
 
 class EnhancedCVUploadService:
     """Enhanced CV upload service with structured parsing"""
 
-    def __init__(self):
+    def __init__(self, user_email: str = "admin@admin.com"):
+        self.user_email = user_email
         self.cv_processor = cv_processor
         self.structured_parser = LLMStructuredCVParser()
-        self.original_cv_json_path = CV_ANALYSIS_DIR / "cvs" / "original" / "original_cv.json"
+        paths = get_user_paths(user_email)
+        self.upload_dir = paths['upload_dir']
+        self.cv_analysis_dir = paths['cv_analysis_dir']
+        self.original_cv_json_path = self.cv_analysis_dir / "cvs" / "original" / "original_cv.json"
+        
+        # Ensure directories exist
+        self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.cv_analysis_dir.mkdir(parents=True, exist_ok=True)
 
     async def upload_and_process_cv(
         self, 
@@ -68,7 +78,7 @@ class EnhancedCVUploadService:
         try:
             # Read file content
             file_content = await cv_file.read()
-            file_path = UPLOAD_DIR / cv_file.filename
+            file_path = self.upload_dir / cv_file.filename
             
             # Save original file
             with open(file_path, "wb") as buffer:
@@ -136,7 +146,7 @@ class EnhancedCVUploadService:
             Always saves as original_cv.json (replaces existing file)
         """
         try:
-            file_path = UPLOAD_DIR / filename
+            file_path = self.upload_dir / filename
             if not file_path.exists():
                 raise HTTPException(status_code=404, detail="CV file not found")
             
@@ -200,8 +210,8 @@ class EnhancedCVUploadService:
     def get_cv_processing_status(self, filename: str) -> Dict[str, Any]:
         """Get processing status for a CV file"""
         try:
-            file_path = UPLOAD_DIR / filename
-            structured_cv_path = CV_ANALYSIS_DIR / f"{filename.split('.')[0]}_structured_cv.json"
+            file_path = self.upload_dir / filename
+            structured_cv_path = self.cv_analysis_dir / f"{filename.split('.')[0]}_structured_cv.json"
             
             status = {
                 "filename": filename,
@@ -414,4 +424,4 @@ class EnhancedCVUploadService:
 
 
 # Global instance
-enhanced_cv_upload_service = EnhancedCVUploadService()
+enhanced_cv_upload_service = EnhancedCVUploadService("admin@admin.com")
