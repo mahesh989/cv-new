@@ -6,7 +6,6 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.auth import verify_token
 from app.models.auth import TokenData, UserData
-from app.core.auth import create_demo_user
 
 # Security scheme for extracting Bearer tokens
 security = HTTPBearer()
@@ -35,11 +34,14 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         # Verify the token
         token_data = verify_token(credentials.credentials)
         
-        # For now, since we're using demo users, just return a demo user
-        # In production, you would fetch the user from the database using token_data.user_id
-        user = create_demo_user()
-        user.id = token_data.user_id  # Use the user_id from the token
-        user.email = token_data.email  # Use the email from the token
+        # Build user object from token
+        user = UserData(
+            id=token_data.user_id,
+            email=token_data.email,
+            name=token_data.email.split("@")[0] if token_data.email else "user",
+            created_at=None,
+            is_active=True
+        )
         
         print(f"✅ Auth successful for user: {user.email}")
         return user

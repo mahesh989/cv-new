@@ -41,12 +41,11 @@ async def login(credentials: LoginRequest):
         )
     
     # Ensure user-specific directories exist immediately on login
-    try:
-        from app.utils.user_path_utils import ensure_user_directories
-        ensure_user_directories(user.email)
-    except Exception:
-        # best-effort; do not block login on filesystem issues
-        pass
+    from app.utils.user_path_utils import ensure_user_directories
+    # Enforce user directory creation; raise error on failure
+    base_path = ensure_user_directories(user.email)
+    if not base_path or not base_path.exists():
+        raise HTTPException(status_code=500, detail="Failed to initialize user storage directories")
 
     # Create tokens
     user_dict = {"id": user.id, "email": user.email}

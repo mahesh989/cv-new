@@ -135,15 +135,28 @@ def create_demo_user() -> UserData:
 
 def authenticate_user(email: str, password: str) -> Optional[UserData]:
     """
-    Authenticate user - for now, allows empty credentials
+    Authenticate user.
+    
+    For now, only accepts the explicit admin credentials provided by the app owner.
+    No demo fallback here (quick-login remains available separately).
     
     Args:
-        email: User email (can be empty)
-        password: User password (can be empty)
+        email: User email
+        password: User password
         
     Returns:
         UserData if authentication successful, None otherwise
     """
-    # For development: allow any credentials (including empty ones)
-    # TODO: Replace with proper authentication logic later
-    return create_demo_user()
+    # Accept only admin credentials as per requirement
+    if (email or "").strip().lower() == "admin@admin.com" and (password or "").strip() == "admin123":
+        user_id = str(uuid.uuid4())
+        return UserData(
+            id=user_id,
+            email="admin@admin.com",
+            name="Admin User",
+            created_at=datetime.now(timezone.utc),
+            is_active=True
+        )
+    
+    # Invalid credentials
+    return None
