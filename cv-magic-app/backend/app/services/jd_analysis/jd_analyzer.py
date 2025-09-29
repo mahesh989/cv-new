@@ -515,7 +515,7 @@ class JDAnalyzer:
         return await self.analyze_jd_file(jd_file_path, temperature)
     
     async def analyze_and_save_company_jd(self, company_name: str, force_refresh: bool = False,
-                                        temperature: float = 0.0) -> JDAnalysisResult:
+                                        temperature: float = 0.0, base_path: Optional[str] = None) -> JDAnalysisResult:
         """
         Analyze company JD and save result with caching logic
         
@@ -574,11 +574,14 @@ class JDAnalyzer:
             
             # Perform fresh analysis
             logger.info(f"🔄 Analyzing JD for {company_name} (force_refresh={force_refresh})")
-            result = await self.analyze_company_jd(company_name, temperature=temperature)
+            result = await self.analyze_company_jd(company_name, base_path=base_path, temperature=temperature)
             
             # Set company name and metadata
             result.company_name = company_name
             
+            # Ensure base path is user-scoped when saving if provided
+            if base_path:
+                self.base_analysis_path = Path(base_path)
             # Save result
             saved_path = self._save_analysis_result(company_name, result)
             result.metadata = {"saved_path": saved_path}

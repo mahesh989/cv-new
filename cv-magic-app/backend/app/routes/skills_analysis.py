@@ -314,7 +314,10 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
             from app.services.jd_analysis.jd_analyzer import JDAnalyzer
             _analyzer = JDAnalyzer()
-            jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True)
+            from app.utils.user_path_utils import get_user_base_path
+            user_email = getattr(token_data, 'email', None)
+            base_dir = get_user_base_path(user_email or "admin@admin.com")
+            jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True, base_path=str(base_dir))
             jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
             saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
             logger.info(f"✅ [PIPELINE] JD analysis saved for {cname} at: {saved_path}")
@@ -520,7 +523,13 @@ async def analyze_skills(request: Request):
             import json
             from datetime import datetime
             if company_name:
-                company_dir = Path("cv-analysis") / "applied_companies" / company_name
+                from app.utils.user_path_utils import get_user_base_path
+                try:
+                    user_email = getattr(token_data, 'email', None)
+                except Exception:
+                    user_email = None
+                base_dir_local = get_user_base_path(user_email or "admin@admin.com")
+                company_dir = base_dir_local / "applied_companies" / company_name
                 
                 # Check for job_info files and add to saved_jobs.json (same logic as preliminary_analysis)
                 job_info_files = list(company_dir.glob("job_info_*.json"))
@@ -537,8 +546,8 @@ async def analyze_skills(request: Request):
                     with open(latest_job_info_file, 'r', encoding='utf-8') as f:
                         job_metadata = json.load(f)
                     
-                    # Save to shared jobs file
-                    saved_jobs_file = Path("cv-analysis/saved_jobs/saved_jobs.json")
+                    # Save to user-scoped saved jobs file
+                    saved_jobs_file = base_dir_local / "saved_jobs" / "saved_jobs.json"
                     saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
                     
                     if saved_jobs_file.exists():
@@ -829,7 +838,7 @@ async def preliminary_analysis(
                 except Exception:
                     user_email = None
                 base_dir = get_user_base_path(user_email or "admin@admin.com")
-                company_dir = base_dir / company_name
+                company_dir = base_dir / "applied_companies" / company_name
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)
                 except Exception:
@@ -881,7 +890,8 @@ async def preliminary_analysis(
                         job_metadata = json.load(f)
                     
                     # Save to shared jobs file
-                    saved_jobs_file = Path("cv-analysis/saved_jobs/saved_jobs.json")
+                    # Save jobs under the user-scoped cv-analysis path
+                    saved_jobs_file = base_dir / "saved_jobs" / "saved_jobs.json"
                     saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
                     
                     if saved_jobs_file.exists():
@@ -1208,7 +1218,10 @@ async def trigger_complete_pipeline(company: str):
                             json.dump(data, f, indent=2, ensure_ascii=False)
                         logger.info(f"✅ [JOBS] Added job to shared jobs file: {job_info.get('job_title')} at {job_info.get('company_name')}")
 
-            await analyze_and_save_company_jd(company, force_refresh=True)
+            from app.utils.user_path_utils import get_user_base_path
+            user_email = getattr(token_data, 'email', None)
+            base_dir = get_user_base_path(user_email or "admin@admin.com")
+            await analyze_and_save_company_jd(company, force_refresh=True, base_path=str(base_dir))
             results["steps"].append({"step": "jd_analysis", "status": "success"})
         except Exception as e:
             logger.error(f"❌ [MANUAL] JD Analysis failed: {e}")
