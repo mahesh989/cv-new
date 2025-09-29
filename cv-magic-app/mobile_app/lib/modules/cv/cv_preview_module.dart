@@ -59,9 +59,6 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
         setState(() {
           cvContent = data['content'];
         });
-
-        // Automatically save for analysis when content is loaded
-        _autoSaveForAnalysis(filename);
       } else {
         setState(() {
           cvContent = 'Failed to load CV content';
@@ -78,28 +75,7 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
     }
   }
 
-  Future<void> _autoSaveForAnalysis(String filename) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/api/cv/save-for-analysis/$filename'),
-      );
-
-      if (response.statusCode == 200) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('CV automatically saved for analysis'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      // Silent fail for auto-save - don't show error to user
-      debugPrint('Auto-save failed: $e');
-    }
-  }
+  // Removed auto-save for analysis here; saving now happens on explicit selection
 
   String _formatCVContent(String content) {
     if (content.isEmpty) return content;
