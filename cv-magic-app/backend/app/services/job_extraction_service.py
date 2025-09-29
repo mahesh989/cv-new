@@ -557,6 +557,39 @@ TEXT TO ANALYZE:
                     "text": job_description
                 }, f, ensure_ascii=False, indent=2)
             
+            # Save to shared saved_jobs.json file
+            try:
+                saved_jobs_file = Path("cv-analysis/saved_jobs/saved_jobs.json")
+                saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
+                
+                if saved_jobs_file.exists():
+                    with open(saved_jobs_file, 'r', encoding='utf-8') as f:
+                        saved_jobs_data = json.load(f)
+                else:
+                    saved_jobs_data = {"jobs": [], "last_updated": datetime.now().isoformat(), "total_jobs": 0}
+                
+                # Check if job already exists (by job_url or company_name + job_title)
+                job_exists = False
+                for existing_job in saved_jobs_data["jobs"]:
+                    if (existing_job.get("job_url") == job_url and job_url) or \
+                       (existing_job.get("company_name") == job_info["company_name"] and 
+                        existing_job.get("job_title") == job_info["job_title"]):
+                        job_exists = True
+                        break
+                
+                if not job_exists:
+                    saved_jobs_data["jobs"].append(job_info_data)
+                    saved_jobs_data["last_updated"] = datetime.now().isoformat()
+                    saved_jobs_data["total_jobs"] = len(saved_jobs_data["jobs"])
+                    
+                    with open(saved_jobs_file, 'w', encoding='utf-8') as f:
+                        json.dump(saved_jobs_data, f, indent=2, ensure_ascii=False)
+                    logger.info(f"✅ [JOB_EXTRACTION] Added job to shared jobs file: {job_info.get('job_title')} at {job_info.get('company_name')}")
+                else:
+                    logger.info(f"♻️ [JOB_EXTRACTION] Job already exists in saved_jobs.json: {job_info.get('job_title')} at {job_info.get('company_name')}")
+            except Exception as e:
+                logger.warning(f"⚠️ [JOB_EXTRACTION] Failed to save job to shared jobs file: {e}")
+            
             return {
                 "success": True,
                 "company_slug": company_slug,
