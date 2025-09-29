@@ -19,15 +19,23 @@ class SavedJobsService {
     // Try multiple possible paths
     final paths = [
       // Path 1: Relative from current directory
-      path.join(currentDir, '..', 'backend', 'user', 'user_admin@admin.com', 'cv-analysis', 'saved_jobs',
-          'saved_jobs.json'),
+      path.join(currentDir, '..', 'backend', 'user', 'user_admin@admin.com',
+          'cv-analysis', 'saved_jobs', 'saved_jobs.json'),
       // Path 2: Absolute path
       '/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/user/user_admin@admin.com/cv-analysis/saved_jobs/saved_jobs.json',
       // Path 3: From mobile_app directory
-      path.join(currentDir, 'backend', 'user', 'user_admin@admin.com', 'cv-analysis', 'saved_jobs',
-          'saved_jobs.json'),
+      path.join(currentDir, 'backend', 'user', 'user_admin@admin.com',
+          'cv-analysis', 'saved_jobs', 'saved_jobs.json'),
       // Path 4: From project root
-      path.join(currentDir, '..', '..', 'backend', 'user', 'user_admin@admin.com', 'cv-analysis', 'saved_jobs',
+      path.join(
+          currentDir,
+          '..',
+          '..',
+          'backend',
+          'user',
+          'user_admin@admin.com',
+          'cv-analysis',
+          'saved_jobs',
           'saved_jobs.json'),
     ];
 
