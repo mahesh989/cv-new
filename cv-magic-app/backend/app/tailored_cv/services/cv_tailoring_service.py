@@ -29,7 +29,10 @@ class CVTailoringService:
     Service for tailoring CVs based on job recommendations and optimization framework
     """
     
-    def __init__(self):
+    def __init__(self, user_email: str = "admin@admin.com"):
+        from app.utils.user_path_utils import get_user_base_path
+        self.user_email = user_email
+        self.cv_analysis_path = get_user_base_path(user_email)
         self.framework_path = Path(__file__).parent.parent / "prompts" / "framework.md"
         self._load_framework()
     
@@ -1520,8 +1523,7 @@ FIX: Output ONLY valid JSON!
         """
         try:
             # Path to cv-analysis/applied_companies/{company}/cvs/tailored folder (company-specific location)
-            cv_analysis_path = Path("cv-analysis")
-            tailored_folder = cv_analysis_path / "applied_companies" / company / "cvs" / "tailored"
+            tailored_folder = self.cv_analysis_path / "applied_companies" / company / "cvs" / "tailored"
             tailored_folder.mkdir(parents=True, exist_ok=True)
             
             # Use company-specific naming pattern with consistent timestamp format
@@ -1564,8 +1566,7 @@ FIX: Output ONLY valid JSON!
         """
         try:
             # Paths
-            cv_analysis_path = Path("cv-analysis")
-            company_folder = cv_analysis_path / "applied_companies" / company
+            company_folder = self.cv_analysis_path / "applied_companies" / company
 
             logger.info(f"Loading real data for {company}")
             logger.info(f"Company folder: {company_folder}")
@@ -1584,7 +1585,7 @@ FIX: Output ONLY valid JSON!
             except Exception as sel_err:
                 # Fallback to original JSON path if selector fails
                 logger.warning(f"⚠️ [TAILORING] Unified selector failed: {sel_err}. Falling back to original CV path")
-                selected_cv_path = str(cv_analysis_path / "cvs" / "original" / "original_cv.json")
+                selected_cv_path = str(self.cv_analysis_path / "cvs" / "original" / "original_cv.json")
 
             # Debug logging for CV loading
             try:
@@ -1627,11 +1628,10 @@ FIX: Output ONLY valid JSON!
             List of company names that have recommendation files
         """
         try:
-            cv_analysis_path = Path("cv-analysis")
             companies = []
             
-            if cv_analysis_path.exists():
-                for company_dir in cv_analysis_path.iterdir():
+            if self.cv_analysis_path.exists():
+                for company_dir in self.cv_analysis_path.iterdir():
                     if company_dir.is_dir() and company_dir.name != "Unknown_Company":
                         ai_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
                         if ai_file.exists():

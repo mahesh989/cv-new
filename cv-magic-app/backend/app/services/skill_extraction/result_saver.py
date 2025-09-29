@@ -19,8 +19,10 @@ logger = logging.getLogger(__name__)
 class SkillExtractionResultSaver:
     """Service for saving skill extraction results to organized files"""
     
-    def __init__(self, base_dir: str = "cv-analysis"):
-        self.base_dir = Path(base_dir)
+    def __init__(self, base_dir: str = "cv-analysis", user_email: str = "admin@admin.com"):
+        from app.utils.user_path_utils import get_user_base_path
+        self.user_email = user_email
+        self.base_dir = get_user_base_path(user_email)
         # Ensure base directory exists
         self.base_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"📁 Result saver initialized with base directory: {self.base_dir}")

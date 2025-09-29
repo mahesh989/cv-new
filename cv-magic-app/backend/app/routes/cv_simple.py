@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
 
 # Constants
-UPLOAD_DIR = Path("cv-analysis/uploads")
+from app.utils.user_path_utils import get_user_uploads_path
+UPLOAD_DIR = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -437,7 +438,8 @@ async def get_latest_tailored_cv():
         logger.info("📄 Fetching latest tailored CV across all companies")
         
         # Path to cv-analysis folder
-        cv_analysis_path = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        cv_analysis_path = get_user_base_path("admin@admin.com")  # TODO: Get from user context
         
         if not cv_analysis_path.exists():
             raise HTTPException(
@@ -521,7 +523,8 @@ async def get_available_companies():
         logger.info("📋 Fetching available companies")
         
         # Path to cv-analysis folder
-        cv_analysis_path = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        cv_analysis_path = get_user_base_path("admin@admin.com")  # TODO: Get from user context
         companies = []
         
         if cv_analysis_path.exists():
@@ -661,7 +664,8 @@ async def save_tailored_cv(request: Request):
             )
         
         # Determine the file to save to
-        cv_analysis_path = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        cv_analysis_path = get_user_base_path("admin@admin.com")  # TODO: Get from user context
         company_path = cv_analysis_path / company_name
         
         # 🔍 DEBUG: Log path information

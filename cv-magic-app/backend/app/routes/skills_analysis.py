@@ -327,7 +327,8 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
             # Prefer tailored CV if available; else fall back to dynamic latest
             try:
-                base_dir_local = Path("cv-analysis")
+                from app.utils.user_path_utils import get_user_base_path
+                base_dir_local = get_user_base_path("admin@admin.com")  # TODO: Get from user context
                 company_tailored_dir = base_dir_local / "applied_companies" / cname
                 preferred_txt = None
                 if company_tailored_dir.exists():
@@ -395,7 +396,8 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
                 raise
             
             # Check if we have the minimum required files (JD + skills analysis must exist)
-            base_dir = Path("cv-analysis")
+            from app.utils.user_path_utils import get_user_base_path
+            base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
             from app.utils.timestamp_utils import TimestampUtils
             company_dir = base_dir / "applied_companies" / cname
             jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
@@ -815,7 +817,8 @@ async def preliminary_analysis(
 
             # If we have a company, ensure required files exist for the pipeline
             if company_name:
-                base_dir = Path("cv-analysis")
+                from app.utils.user_path_utils import get_user_base_path
+            base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
                 company_dir = base_dir / company_name
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)
@@ -1086,7 +1089,8 @@ async def trigger_component_analysis(company: str):
         logger.info(f"🔧 [MANUAL] Using dynamic CV: {latest_cv_paths['json_source']} folder")
         
         # Check if required files exist
-        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
         
         # Use timestamped files with fallback
         from app.utils.timestamp_utils import TimestampUtils
@@ -1346,7 +1350,8 @@ async def list_recommendation_files():
     try:
         from app.services.ats_recommendation_service import ats_recommendation_service
         
-        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
         companies_with_recommendations = []
         
         if base_dir.exists():
@@ -1725,7 +1730,8 @@ async def list_analysis_configs():
 async def list_companies_with_results():
     """List all companies that have analysis results"""
     try:
-        base_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
         
         if not base_dir.exists():
             return JSONResponse(content={
@@ -1794,7 +1800,8 @@ async def get_analysis_results(company: str):
         logger.info(f"📊 [API] Fetching analysis results for company: {company}")
         
         # Build file path using timestamped files
-        base_dir = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
         company_dir = base_dir / "applied_companies" / company
         
         # Use timestamped analysis file with fallback

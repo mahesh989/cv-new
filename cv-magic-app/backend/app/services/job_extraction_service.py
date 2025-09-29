@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 class JobExtractionService:
     """Service for extracting job information and saving to organized folders"""
     
-    def __init__(self):
-        self.cv_analysis_dir = Path("cv-analysis")
+    def __init__(self, user_email: str = "admin@admin.com"):
+        from app.utils.user_path_utils import get_user_base_path
+        self.user_email = user_email
+        self.cv_analysis_dir = get_user_base_path(user_email)
         self.prompt_file = Path("prompt/job_extraction_prompt.txt")
     
     def _load_prompt(self) -> str:
@@ -559,7 +561,8 @@ TEXT TO ANALYZE:
             
             # Save to shared saved_jobs.json file
             try:
-                saved_jobs_file = Path("cv-analysis/saved_jobs/saved_jobs.json")
+                from app.utils.user_path_utils import get_user_saved_jobs_path
+                saved_jobs_file = get_user_saved_jobs_path(self.user_email)
                 saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
                 
                 if saved_jobs_file.exists():

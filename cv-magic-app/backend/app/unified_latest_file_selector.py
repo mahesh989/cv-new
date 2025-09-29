@@ -27,8 +27,10 @@ class UnifiedLatestFileSelector:
     Uses original CV for first-time JD usage, tailored CV for subsequent uses.
     """
 
-    def __init__(self, base_path: str = "/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/cv-analysis"):
-        self.base_path = Path("cv-analysis")
+    def __init__(self, base_path: str = "cv-analysis", user_email: str = "admin@admin.com"):
+        from app.utils.user_path_utils import get_user_base_path
+        self.user_email = user_email
+        self.base_path = get_user_base_path(user_email)
         self.cvs_path = self.base_path / "cvs"
         self.tailored_path = self.cvs_path / "tailored"
         self.original_path = self.cvs_path / "original"

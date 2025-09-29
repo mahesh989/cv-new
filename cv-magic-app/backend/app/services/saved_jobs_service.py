@@ -13,10 +13,11 @@ from fastapi.encoders import jsonable_encoder
 logger = logging.getLogger(__name__)
 
 class SavedJobsService:
-    JOBS_FILE = Path("cv-analysis/saved_jobs/saved_jobs.json")
-    
-    def __init__(self):
+    def __init__(self, user_email: str = "admin@admin.com"):
         """Initialize the saved jobs service."""
+        from app.utils.user_path_utils import get_user_saved_jobs_path
+        self.user_email = user_email
+        self.JOBS_FILE = get_user_saved_jobs_path(user_email)
         self._ensure_jobs_file_exists()
     
     def _ensure_jobs_file_exists(self) -> None:

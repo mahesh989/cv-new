@@ -11,18 +11,20 @@ from typing import List, Optional
 logger = logging.getLogger(__name__)
 
 
-def ensure_cv_analysis_directories(additional_dirs: Optional[List[Path]] = None) -> bool:
+def ensure_cv_analysis_directories(additional_dirs: Optional[List[Path]] = None, user_email: str = "admin@admin.com") -> bool:
     """
-    Ensure all required cv-analysis directories exist.
+    Ensure all required cv-analysis directories exist for a user.
     
     Args:
         additional_dirs: Optional list of additional directories to create
+        user_email: User email address
         
     Returns:
         True if all directories were created successfully, False otherwise
     """
     try:
-        cv_analysis_base = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        cv_analysis_base = get_user_base_path(user_email)
         
         # Core required directories
         required_directories = [
@@ -52,22 +54,24 @@ def ensure_cv_analysis_directories(additional_dirs: Optional[List[Path]] = None)
         return False
 
 
-def ensure_company_directory(company_name: str) -> Path:
+def ensure_company_directory(company_name: str, user_email: str = "admin@admin.com") -> Path:
     """
     Ensure a company-specific directory exists under applied_companies.
     
     Args:
         company_name: Name of the company
+        user_email: User email address
         
     Returns:
         Path to the company directory
     """
     try:
         # First ensure base directories exist
-        ensure_cv_analysis_directories()
+        ensure_cv_analysis_directories(user_email=user_email)
         
         # Create company-specific directory
-        company_dir = Path("cv-analysis") / "applied_companies" / company_name
+        from app.utils.user_path_utils import get_user_base_path
+        company_dir = get_user_base_path(user_email) / "applied_companies" / company_name
         company_dir.mkdir(parents=True, exist_ok=True)
         
         logger.info(f"✅ Company directory ensured: {company_dir}")
@@ -78,38 +82,53 @@ def ensure_company_directory(company_name: str) -> Path:
         raise
 
 
-def ensure_cv_directories() -> bool:
+def ensure_cv_directories(user_email: str = "admin@admin.com") -> bool:
     """
     Ensure CV processing directories exist.
     
+    Args:
+        user_email: User email address
+        
     Returns:
         True if directories were created successfully
     """
+    from app.utils.user_path_utils import get_user_base_path
+    base_path = get_user_base_path(user_email)
     return ensure_cv_analysis_directories([
-        Path("cv-analysis") / "cvs" / "original",
-        Path("cv-analysis") / "cvs" / "tailored"
-    ])
+        base_path / "cvs" / "original",
+        base_path / "cvs" / "tailored"
+    ], user_email=user_email)
 
 
-def ensure_job_tracking_directories() -> bool:
+def ensure_job_tracking_directories(user_email: str = "admin@admin.com") -> bool:
     """
     Ensure job tracking directories exist.
     
+    Args:
+        user_email: User email address
+        
     Returns:
         True if directories were created successfully
     """
+    from app.utils.user_path_utils import get_user_base_path
+    base_path = get_user_base_path(user_email)
     return ensure_cv_analysis_directories([
-        Path("cv-analysis") / "saved_jobs"
-    ])
+        base_path / "saved_jobs"
+    ], user_email=user_email)
 
 
-def ensure_upload_directories() -> bool:
+def ensure_upload_directories(user_email: str = "admin@admin.com") -> bool:
     """
     Ensure upload directories exist.
     
+    Args:
+        user_email: User email address
+        
     Returns:
         True if directories were created successfully
     """
+    from app.utils.user_path_utils import get_user_base_path
+    base_path = get_user_base_path(user_email)
     return ensure_cv_analysis_directories([
-        Path("cv-analysis") / "uploads"
-    ])
+        base_path / "uploads"
+    ], user_email=user_email)
