@@ -62,6 +62,14 @@ async def lifespan(app: FastAPI):
         raise e
     
     logger.info(f"🎯 API Server started successfully on {settings.HOST}:{settings.PORT}")
+
+    # Ensure user-specific cv-analysis directories exist on startup (admin default)
+    try:
+        from app.utils.user_path_utils import ensure_user_directories
+        ensure_user_directories("admin@admin.com")
+        logger.info("✅ Ensured user directories for admin@admin.com")
+    except Exception as e:
+        logger.warning(f"⚠️ Could not ensure user directories on startup: {e}")
     
     yield
     
