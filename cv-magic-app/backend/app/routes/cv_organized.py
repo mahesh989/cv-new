@@ -112,8 +112,8 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
         return JSONResponse(content={
             "message": "CV saved for analysis successfully",
             "filename": filename,
-            "txt_path": txt_filepath,
-            "structured_path": structured_path,
+            "txt_path": str(txt_filepath),
+            "structured_path": str(structured_path),
             "structured_success": structured_success,
             "content_length": len(cv_content_result['content']),
             "note": "Both original_cv.txt and original_cv.json have been saved for analysis and CV tailoring"

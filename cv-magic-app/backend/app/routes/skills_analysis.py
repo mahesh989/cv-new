@@ -163,12 +163,13 @@ def _find_company_in_existing_folders(jd_text: str) -> Optional[str]:
         logger.warning(f"⚠️ Error finding company in existing folders: {e}")
         return None
 
-def _validate_required_analysis_files(company_name: str) -> Optional[str]:
-    """Validate that required analysis files exist for the company"""
+def _validate_required_analysis_files(company_name: str, user_email: Optional[str] = None) -> Optional[str]:
+    """Validate that required analysis files exist for the company under the user-scoped path"""
     try:
         from app.utils.timestamp_utils import TimestampUtils
+        from app.utils.user_path_utils import get_user_base_path
         
-        base_path = Path("cv-analysis") / "applied_companies" / company_name
+        base_path = get_user_base_path(user_email or "admin@admin.com") / "applied_companies" / company_name
         
         # Check for timestamped files first, then fallback to non-timestamped
         jd_original_file = TimestampUtils.find_latest_timestamped_file(base_path, "jd_original", "json")
@@ -328,7 +329,8 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             # Prefer tailored CV if available; else fall back to dynamic latest
             try:
                 from app.utils.user_path_utils import get_user_base_path
-                base_dir_local = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+                user_email = getattr(token_data, 'email', None)
+                base_dir_local = get_user_base_path(user_email or "admin@admin.com")
                 company_tailored_dir = base_dir_local / "applied_companies" / cname
                 preferred_txt = None
                 if company_tailored_dir.exists():
@@ -397,7 +399,8 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
             
             # Check if we have the minimum required files (JD + skills analysis must exist)
             from app.utils.user_path_utils import get_user_base_path
-            base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+            user_email = getattr(token_data, 'email', None)
+            base_dir = get_user_base_path(user_email or "admin@admin.com")
             from app.utils.timestamp_utils import TimestampUtils
             company_dir = base_dir / "applied_companies" / cname
             jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
@@ -754,7 +757,9 @@ async def preliminary_analysis(
         logger.info(f"🏢 Extracted company name: {company_name}")
         
         # Validate required files exist before proceeding
-        file_validation_error = _validate_required_analysis_files(company_name)
+        # Validate files under the authenticated user's path
+        user_email = getattr(token_data, 'email', None)
+        file_validation_error = _validate_required_analysis_files(company_name, user_email)
         if file_validation_error:
             logger.warning(f"❌ Required files validation failed: {file_validation_error}")
             return JSONResponse(
@@ -818,7 +823,12 @@ async def preliminary_analysis(
             # If we have a company, ensure required files exist for the pipeline
             if company_name:
                 from app.utils.user_path_utils import get_user_base_path
-                base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+                # Use authenticated user's email for user-scoped path
+                try:
+                    user_email = getattr(token_data, 'email', None)
+                except Exception:
+                    user_email = None
+                base_dir = get_user_base_path(user_email or "admin@admin.com")
                 company_dir = base_dir / company_name
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)
@@ -1090,7 +1100,8 @@ async def trigger_component_analysis(company: str):
         
         # Check if required files exist
         from app.utils.user_path_utils import get_user_base_path
-        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+        user_email = getattr(token_data, 'email', None)
+        base_dir = get_user_base_path(user_email or "admin@admin.com")
         
         # Use timestamped files with fallback
         from app.utils.timestamp_utils import TimestampUtils
@@ -1351,7 +1362,8 @@ async def list_recommendation_files():
         from app.services.ats_recommendation_service import ats_recommendation_service
         
         from app.utils.user_path_utils import get_user_base_path
-        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+        user_email = getattr(token_data, 'email', None)
+        base_dir = get_user_base_path(user_email or "admin@admin.com")
         companies_with_recommendations = []
         
         if base_dir.exists():
@@ -1731,7 +1743,8 @@ async def list_companies_with_results():
     """List all companies that have analysis results"""
     try:
         from app.utils.user_path_utils import get_user_base_path
-        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+        user_email = getattr(token_data, 'email', None)
+        base_dir = get_user_base_path(user_email or "admin@admin.com")
         
         if not base_dir.exists():
             return JSONResponse(content={
@@ -1801,7 +1814,8 @@ async def get_analysis_results(company: str):
         
         # Build file path using timestamped files
         from app.utils.user_path_utils import get_user_base_path
-        base_dir = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+        user_email = getattr(token_data, 'email', None)
+        base_dir = get_user_base_path(user_email or "admin@admin.com")
         company_dir = base_dir / "applied_companies" / company
         
         # Use timestamped analysis file with fallback
