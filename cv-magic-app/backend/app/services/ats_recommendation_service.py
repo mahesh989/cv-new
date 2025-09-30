@@ -20,7 +20,9 @@ class ATSRecommendationService:
     
     def __init__(self):
         from app.utils.user_path_utils import get_user_base_path
-        self.base_dir = get_user_base_path("admin@admin.com") / "cv-analysis"
+        # get_user_base_path already returns the per-user cv-analysis directory
+        # Avoid duplicating "cv-analysis" in the path
+        self.base_dir = get_user_base_path("admin@admin.com")
     
     def extract_ats_recommendation_data(self, company: str) -> Optional[Dict[str, Any]]:
         """

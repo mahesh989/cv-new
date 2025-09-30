@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 
 from app.services.ats.component_assembler import ComponentAssembler
+from app.utils.user_path_utils import get_user_base_path
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,17 @@ logger = logging.getLogger(__name__)
 class ModularATSOrchestrator:
     """Main orchestrator for modular ATS component analysis."""
 
-    def __init__(self, base_dir: Optional[Path] = None):
-        self.base_dir: Path = base_dir or Path("cv-analysis")
-        self.assembler = ComponentAssembler(base_dir)
+    def __init__(self, base_dir: Optional[Path] = None, user_email: str = "admin@admin.com"):
+        # Use per-user base path by default so timestamped JD/CV files resolve correctly
+        resolved_base = base_dir
+        if resolved_base is None:
+            try:
+                resolved_base = get_user_base_path(user_email)
+            except Exception:
+                # Fallback to legacy relative path if user path resolution fails
+                resolved_base = Path("cv-analysis")
+        self.base_dir: Path = Path(resolved_base)
+        self.assembler = ComponentAssembler(self.base_dir)
 
     async def run_component_analysis(self, company: str, cv_text: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -94,5 +103,5 @@ class ModularATSOrchestrator:
             return {"error": str(e), "company": company}
 
 
-# Global instance
+# Global instance (defaults to admin user unless overridden by callers)
 modular_ats_orchestrator = ModularATSOrchestrator()

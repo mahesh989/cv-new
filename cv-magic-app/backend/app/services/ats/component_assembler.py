@@ -123,46 +123,14 @@ class ComponentAssembler:
 
     def _calculate_requirement_bonus(self, company: str) -> Dict[str, Any]:
         """Calculate requirement bonus from CV-JD match results."""
-        # Use timestamped file with robust fallback to newest by mtime
+        # Strictly use the per-user cv_jd_matching file pattern
         from app.utils.timestamp_utils import TimestampUtils
         company_dir = self.base_dir / "applied_companies" / company
-        match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
-        try:
-            # Scan all possible files and choose newest by modification time
-            candidates = list(company_dir.glob("cv_jd_match_results*.json"))
-            if candidates:
-                newest = max(candidates, key=lambda p: p.stat().st_mtime)
-                if not match_file or newest.stat().st_mtime > match_file.stat().st_mtime:
-                    match_file = newest
-        except Exception:
-            # Fallback to non-timestamped file if no timestamped file exists
-            if not match_file:
-                match_file = company_dir / "cv_jd_match_results.json"
+        match_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_cv_jd_matching", "json")
         
         try:
             if not match_file or not match_file.exists():
-                logger.warning("[ASSEMBLER] Match results not found for bonus calculation: %s", match_file)
-                return {
-                    "match_counts": {
-                        "total_required_keywords": 0,
-                        "total_preferred_keywords": 0,
-                        "matched_required_count": 0,
-                        "matched_preferred_count": 0,
-                        "missing_required": 0,
-                        "missing_preferred": 0,
-                    },
-                    "bonus_breakdown": {
-                        "required_bonus": 0.0,
-                        "required_penalty": 0.0,
-                        "preferred_bonus": 0.0,
-                        "preferred_penalty": 0.0,
-                        "total_bonus": 0.0,
-                    },
-                    "coverage_metrics": {
-                        "required_coverage": 0.0,
-                        "preferred_coverage": 0.0,
-                    },
-                }
+                raise FileNotFoundError(f"CV-JD matching file not found for bonus calculation: expected pattern '{company}_cv_jd_matching_<timestamp>.json' in {company_dir}")
             
             logger.info("[ASSEMBLER] Requirement bonus using match file: %s", match_file)
             with open(match_file, "r", encoding="utf-8") as f:
@@ -194,27 +162,7 @@ class ComponentAssembler:
             
         except Exception as e:
             logger.error("[ASSEMBLER] Failed to calculate requirement bonus: %s", e)
-            return {
-                "match_counts": {
-                    "total_required_keywords": 0,
-                    "total_preferred_keywords": 0,
-                    "matched_required_count": 0,
-                    "matched_preferred_count": 0,
-                    "missing_required": 0,
-                    "missing_preferred": 0,
-                },
-                "bonus_breakdown": {
-                    "required_bonus": 0.0,
-                    "required_penalty": 0.0,
-                    "preferred_bonus": 0.0,
-                    "preferred_penalty": 0.0,
-                    "total_bonus": 0.0,
-                },
-                "coverage_metrics": {
-                    "required_coverage": 0.0,
-                    "preferred_coverage": 0.0,
-                },
-            }
+            raise
 
     async def _run_batched_component_analyses(self, cv_text: str, jd_text: str, matched_skills: str, company: str) -> Dict[str, Any]:
         """Run component analyses using batched approach (2 LLM calls instead of 5)."""

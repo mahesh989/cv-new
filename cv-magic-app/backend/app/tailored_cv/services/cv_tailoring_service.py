@@ -1512,7 +1512,7 @@ FIX: Output ONLY valid JSON!
     
     def save_tailored_cv_to_analysis_folder(self, tailored_cv: TailoredCV, company: str) -> str:
         """
-        Save tailored CV to the company-specific cvs/tailored folder in cv-analysis with proper naming
+        Save tailored CV to the per-user cvs/tailored folder in cv-analysis with proper naming
         
         Args:
             tailored_cv: The tailored CV to save
@@ -1522,8 +1522,8 @@ FIX: Output ONLY valid JSON!
             File path where CV was saved (JSON file)
         """
         try:
-            # Path to cv-analysis/applied_companies/{company}/cvs/tailored folder (company-specific location)
-            tailored_folder = self.cv_analysis_path / "applied_companies" / company / "cvs" / "tailored"
+            # Path to cv-analysis/cvs/tailored folder (per-user location)
+            tailored_folder = self.cv_analysis_path / "cvs" / "tailored"
             tailored_folder.mkdir(parents=True, exist_ok=True)
             
             # Use company-specific naming pattern with consistent timestamp format

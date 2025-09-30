@@ -100,7 +100,7 @@ class UnifiedLatestFileSelector:
         print(f"🔍 Searching for latest CV across tailored+original for company: {company}")
         candidates: List[Tuple[Path, Optional[Path], str, str]] = []  # (json, txt, ts, type)
 
-        # Tailored candidates
+        # Tailored candidates (per-user cvs/tailored folder)
         for json_path, txt_path, ts in self._find_tailored_cv_files(company):
             candidates.append((json_path, txt_path, ts or "00000000_000000", "tailored"))
 
@@ -111,8 +111,15 @@ class UnifiedLatestFileSelector:
         if not candidates:
             raise FileNotFoundError(f"No CV found in tailored or original folders for company: {company}")
 
-        # Sort by timestamp desc
-        candidates.sort(key=lambda c: c[2], reverse=True)
+        # Sort by (timestamp desc, mtime desc) to always pick the freshest file
+        def _candidate_key(c):
+            json_path, _txt_path, ts, _ftype = c
+            try:
+                mtime = json_path.stat().st_mtime if json_path and json_path.exists() else 0
+            except Exception:
+                mtime = 0
+            return (ts, mtime)
+        candidates.sort(key=_candidate_key, reverse=True)
         json_path, txt_path, ts, ftype = candidates[0]
         print(f"📄 [UNIFIED] Latest CV resolved → type={ftype}, ts={ts}, json={json_path}, txt={txt_path}")
         return FileContext(
@@ -192,11 +199,12 @@ class UnifiedLatestFileSelector:
 
     def _find_tailored_cv_files(self, company: str) -> List[Tuple[Path, Optional[Path], str]]:
         candidates: List[Tuple[Path, Optional[Path], str]] = []
-        # Look in company-specific tailored folder
-        tailored_path = self.base_path / "applied_companies" / company / "cvs" / "tailored"
+        # Look in per-user tailored folder (cv-analysis/cvs/tailored)
+        tailored_path = self.tailored_path
         if not tailored_path.exists():
             return candidates
-        pattern = f"{company}_tailored_cv_*.json"
+        # Tailored CVs saved globally no longer include company prefix in filename
+        pattern = f"*_tailored_cv_*.json"
         for json_file in tailored_path.glob(pattern):
             timestamp = self._extract_timestamp_from_filename(json_file.name) or "00000000_000000"
             txt_file = json_file.with_suffix('.txt')
@@ -262,7 +270,15 @@ class UnifiedLatestFileSelector:
     def _select_best_cv_candidate(self, candidates: List[Tuple[Path, Optional[Path], str]], company: str) -> FileContext:
         if not candidates:
             return FileContext(exists=False, company=company)
-        candidates.sort(key=lambda c: c[2], reverse=True)
+        # Sort by (timestamp desc, mtime desc)
+        def _cv_key(c):
+            json_path, _txt_path, ts = c
+            try:
+                mtime = json_path.stat().st_mtime if json_path and json_path.exists() else 0
+            except Exception:
+                mtime = 0
+            return (ts, mtime)
+        candidates.sort(key=_cv_key, reverse=True)
         json_path, txt_path, timestamp = candidates[0]
         return FileContext(
             json_path=json_path,
@@ -274,7 +290,15 @@ class UnifiedLatestFileSelector:
         )
 
     def _select_best_analysis_candidate(self, candidates: List[Tuple[Path, str]], company: str, analysis_type: str) -> FileContext:
-        candidates.sort(key=lambda x: x[1], reverse=True)
+        # Sort by (timestamp desc, mtime desc)
+        def _analysis_key(x):
+            file_path, ts = x
+            try:
+                mtime = file_path.stat().st_mtime if file_path and file_path.exists() else 0
+            except Exception:
+                mtime = 0
+            return (ts, mtime)
+        candidates.sort(key=_analysis_key, reverse=True)
         file_path, timestamp = candidates[0]
         return FileContext(
             json_path=file_path,

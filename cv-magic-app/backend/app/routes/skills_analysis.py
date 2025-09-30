@@ -2203,20 +2203,37 @@ async def perform_preliminary_skills_analysis(
             try:
                 result_saver = SkillExtractionResultSaver()
                 
-                # Get the most recent company folder (created during JD analysis)
+                # Get the company name from existing job info files (reuse already extracted company name)
                 company_name = None
                 if file_params["auto_detect_company"]:
                     try:
                         from pathlib import Path
-                        cv_analysis_dir = Path("cv-analysis") / "applied_companies"
-                        if cv_analysis_dir.exists():
-                            # Find the most recently created company folder (excluding Unknown_Company)
+                        from app.utils.user_path_utils import get_user_base_path
+                        from app.utils.timestamp_utils import TimestampUtils
+                        import json
+                        
+                        # Use user-scoped path
+                        user_email = "admin@admin.com"  # Default fallback
+                        base_dir = get_user_base_path(user_email)
+                        applied_companies_dir = base_dir / "applied_companies"
+                        
+                        if logging_params["enable_detailed_logging"]:
+                            logger.info(f"🔍 [COMPANY_DETECTION] Looking in: {applied_companies_dir}")
+                        
+                        if applied_companies_dir.exists():
+                            # Find the most recently created company folder with job_info files
                             company_folders = []
-                            for company_folder in cv_analysis_dir.iterdir():
+                            for company_folder in applied_companies_dir.iterdir():
                                 if (company_folder.is_dir() and 
                                     company_folder.name != "Unknown_Company" and
-                                    list(company_folder.glob("job_info_*.json"))):
-                                    company_folders.append(company_folder)
+                                    not company_folder.name.startswith("Unknown_Company_")):
+                                    
+                                    # Check for job_info files
+                                    job_info_files = list(company_folder.glob("job_info_*.json"))
+                                    if job_info_files:
+                                        company_folders.append(company_folder)
+                                        if logging_params["enable_detailed_logging"]:
+                                            logger.info(f"📁 [COMPANY_DETECTION] Found company folder: {company_folder.name} with {len(job_info_files)} job_info files")
                             
                             if company_folders:
                                 # Sort by creation time (most recent first)
@@ -2224,9 +2241,23 @@ async def perform_preliminary_skills_analysis(
                                 company_name = most_recent_folder.name
                                 if logging_params["enable_detailed_logging"]:
                                     logger.info(f"🏢 [COMPANY_DETECTION] Using most recent company folder: {company_name}")
+                                    
+                                    # Also log the job_info content for debugging
+                                    job_info_files = list(most_recent_folder.glob("job_info_*.json"))
+                                    if job_info_files:
+                                        latest_job_info = max(job_info_files, key=lambda p: p.stat().st_mtime)
+                                        try:
+                                            with open(latest_job_info, 'r', encoding='utf-8') as f:
+                                                job_data = json.load(f)
+                                                logger.info(f"📋 [COMPANY_DETECTION] Job info company: {job_data.get('company_name', 'N/A')}")
+                                        except Exception as e:
+                                            logger.warning(f"⚠️ [COMPANY_DETECTION] Could not read job_info: {e}")
                             else:
                                 if logging_params["enable_detailed_logging"]:
-                                    logger.warning(f"⚠️ [COMPANY_DETECTION] No valid company folders found")
+                                    logger.warning(f"⚠️ [COMPANY_DETECTION] No valid company folders found in {applied_companies_dir}")
+                                    # List all folders for debugging
+                                    all_folders = [f.name for f in applied_companies_dir.iterdir() if f.is_dir()]
+                                    logger.info(f"📂 [COMPANY_DETECTION] Available folders: {all_folders}")
                     except Exception as e:
                         if logging_params["enable_detailed_logging"]:
                             logger.warning(f"⚠️ [COMPANY_DETECTION] Failed to detect company folder: {e}")
@@ -2292,10 +2323,30 @@ async def perform_preliminary_skills_analysis(
             
             # Save analyze match to the same file
             try:
-                analyze_match_file_path = result_saver.append_analyze_match(analyze_match_content, company_name)
-                if logging_params["enable_detailed_logging"]:
-                    logger.info(f"📁 [ANALYZE_MATCH] Results appended to: {analyze_match_file_path}")
-                result["analyze_match_file_path"] = analyze_match_file_path
+                # Ensure we have a valid company name before saving
+                if not company_name or company_name == "Unknown_Company":
+                    # Fallback: try to extract company name from JD text if not found
+                    company_name = await _extract_company_name_from_jd(jd_text)
+                    if logging_params["enable_detailed_logging"]:
+                        logger.info(f"🏢 [ANALYZE_MATCH] Using fallback company name: {company_name}")
+                
+                # Final validation - ensure we have a valid company name
+                if company_name and company_name != "Unknown_Company" and not company_name.startswith("Unknown_Company_"):
+                    try:
+                        from app.utils.user_path_utils import validate_company_name
+                        validate_company_name(company_name)
+                        analyze_match_file_path = result_saver.append_analyze_match(analyze_match_content, company_name)
+                        if logging_params["enable_detailed_logging"]:
+                            logger.info(f"📁 [ANALYZE_MATCH] Results appended to: {analyze_match_file_path}")
+                        result["analyze_match_file_path"] = analyze_match_file_path
+                    except ValueError as ve:
+                        if logging_params["enable_detailed_logging"]:
+                            logger.warning(f"⚠️ [ANALYZE_MATCH] Company name validation failed: {ve}")
+                        result["analyze_match_file_path"] = None
+                else:
+                    if logging_params["enable_detailed_logging"]:
+                        logger.warning(f"⚠️ [ANALYZE_MATCH] No valid company name found (got: {company_name}), skipping save")
+                    result["analyze_match_file_path"] = None
             except Exception as e:
                 if logging_params["enable_detailed_logging"]:
                     logger.warning(f"⚠️ [ANALYZE_MATCH] Failed to save analyze match: {str(e)}")
