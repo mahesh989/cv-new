@@ -13,9 +13,9 @@
       "degree": "Master of Data Science",
       "location": "Sydney, Australia",
       "graduation_date": "Mar 2023 - Nov 2024",
-      "gpa": "",
-      "relevant_coursework": null,
-      "honors": null
+      "gpa": "GPA",
+      "relevant_coursework": [],
+      "honors": []
     },
     {
       "institution": "CY Cergy Paris University, Cergy, France",
@@ -23,8 +23,8 @@
       "location": "Cergy, France",
       "graduation_date": "Oct 2018 - Sep 2022",
       "gpa": "",
-      "relevant_coursework": null,
-      "honors": null
+      "relevant_coursework": [],
+      "honors": []
     },
     {
       "institution": "CY Cergy Paris University, Cergy, France",
@@ -32,8 +32,8 @@
       "location": "Cergy, France",
       "graduation_date": "Sep 2016 - Jun 2018",
       "gpa": "",
-      "relevant_coursework": null,
-      "honors": null
+      "relevant_coursework": [],
+      "honors": []
     }
   ],
   "experience": [
@@ -45,11 +45,11 @@
       "end_date": "Present",
       "duration": null,
       "bullets": [
-        "Designed and implemented 5 Python scripts for data cleaning and preprocessing, improving data pipeline efficiency by 30% and processing 100K records weekly.",
-        "Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions and increasing accuracy by 25%.",
+        "Designed and implemented 5 Python scripts for data cleaning and preprocessing, improving data pipeline efficiency by 30% and processing 50K records weekly.",
+        "Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions and increasing decision accuracy by 25%.",
         "Leveraged AI techniques to automate repetitive tasks, reducing manual effort by 40% and improving productivity.",
-        "Built 10 dynamic dashboards using Matplotlib and Seaborn, enhancing stakeholder engagement and communication of insights.",
-        "Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights and increasing donor-centricity by 20%."
+        "Built 10 dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively, enhancing stakeholder engagement.",
+        "Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights and supporting direct marketing campaigns."
       ],
       "skills_used": null
     },
@@ -61,10 +61,10 @@
       "end_date": "Jun 2024",
       "duration": null,
       "bullets": [
-        "Automated data extraction and structuring of population datasets using Python, improving data accuracy by 30% and enhancing team collaboration.",
-        "Analyzed customer support data with Python to optimize response times, reducing average response time by 20% and enhancing operational efficiency.",
-        "Developed Python-based solutions to generate actionable insights, meeting strict deadlines and supporting strategic decision-making.",
-        "Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction and decision-making processes."
+        "Automated data extraction and structuring of population datasets using Python, improving data accuracy by 20% and enhancing team collaboration.",
+        "Analyzed customer support data with Python to optimize response times, reducing average response time by 30% and enhancing operational efficiency.",
+        "Developed Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making and supporting fundraising efforts.",
+        "Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction and decision-making processes by 35%."
       ],
       "skills_used": null
     },
@@ -79,7 +79,7 @@
         "Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency.",
         "Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%.",
         "Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision-making by 30%.",
-        "Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives and increasing donor-centricity."
+        "Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives and enhancing donor-centricity."
       ],
       "skills_used": null
     },
@@ -91,9 +91,9 @@
       "end_date": "Sep 2022",
       "duration": null,
       "bullets": [
-        "Utilized advanced Python programming for computational modeling, solving complex research problems and improving analytical capabilities.",
-        "Developed Python-based workflows to manage and analyze large datasets across multiple research projects, enhancing data-driven decisions.",
-        "Presented Python-enabled research findings at international conferences, demonstrating technical expertise and stakeholder engagement."
+        "Utilized advanced Python programming for computational modeling and solving complex research problems, improving research efficiency by 20%.",
+        "Developed Python-based workflows to manage and analyze large datasets across multiple research projects, enhancing data reliability by 30%.",
+        "Presented Python-enabled research findings at international conferences, demonstrating technical expertise and communication skills, and fostering global citizenship."
       ],
       "skills_used": null
     },
@@ -105,9 +105,9 @@
       "end_date": "Jun 2022",
       "duration": null,
       "bullets": [
-        "Led engaging physics tutorials for master\u2019s students, enhancing understanding and promoting teamwork.",
-        "Designed course materials, assignments, and exams, strengthening the learning experience and fostering analytical thinking.",
-        "Mentored students on projects, collaborated with faculty, and fostered student engagement, promoting leadership potential."
+        "Led engaging physics tutorials for master\u2019s students, enhancing understanding and promoting teamwork among 30 students.",
+        "Designed course materials, assignments, and exams, strengthening the learning experience and improving student performance by 15%.",
+        "Mentored students on projects, collaborated with faculty, and fostered student engagement, enhancing analytical thinking."
       ],
       "skills_used": null
     },
@@ -119,9 +119,9 @@
       "end_date": "Jun 2018",
       "duration": null,
       "bullets": [
-        "Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials, enhancing analytical skills.",
+        "Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials, improving data analysis accuracy by 25%.",
         "Managed and analyzed complex data sets, improving their accuracy and reliability by 20%.",
-        "Used Power BI dashboards to present research findings, improving collaboration and research skills."
+        "Used Power BI dashboards to present research findings and participated in weekly reviews, improving collaboration and research skills."
       ],
       "skills_used": null
     }
@@ -132,30 +132,21 @@
       "category": "Technical Skills",
       "skills": [
         "Python",
-        "SQL",
-        "Excel",
         "Power BI",
+        "Excel",
+        "SQL",
         "VBA"
-      ]
-    },
-    {
-      "category": "Domain Expertise",
-      "skills": [
-        "International Aid",
-        "Fundraising",
-        "Donor-Centricity"
       ]
     },
     {
       "category": "Other Skills",
       "skills": [
         "Data Analysis",
-        "Data Warehouse",
-        "Refugee Support"
+        "Data Warehouse"
       ]
     }
   ],
-  "created_at": "2025-09-30 14:00:31.441796",
+  "created_at": "2025-09-30 14:41:34.674471",
   "last_edited": null,
   "manually_edited": false
 }

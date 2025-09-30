@@ -377,9 +377,13 @@ class SkillsAnalysisService {
         endpoint: '/analysis-results/$company',
         method: 'GET',
       );
+      try {
+        print('📦 [POLLING] analysis-results keys: ${result.keys.toList()}');
+      } catch (_) {}
 
       if (result['success'] == true && result['data'] != null) {
         final data = result['data'] as Map<String, dynamic>;
+        print('📊 [POLLING] data keys: ${data.keys.toList()}');
         print(
             '📊 [POLLING] Component analysis present: ${data['component_analysis'] != null}');
         print('📊 [POLLING] ATS score present: ${data['ats_score'] != null}');
@@ -387,6 +391,21 @@ class SkillsAnalysisService {
             '📊 [POLLING] AI recommendation present: ${data['ai_recommendation'] != null}');
         print(
             '📊 [POLLING] Tailored CV present: ${data['tailored_cv'] != null}');
+        try {
+          final ats = data['ats_score'] as Map<String, dynamic>?;
+          if (ats != null) {
+            print('🧩 [POLLING] ats_score keys: ${ats.keys.toList()}');
+            print('🧩 [POLLING] final_ats_score: ${ats['final_ats_score']}');
+            final breakdown = ats['breakdown'] as Map<String, dynamic>?;
+            print('🧩 [POLLING] breakdown present: ${breakdown != null}');
+          }
+          final ai = data['ai_recommendation'] as Map<String, dynamic>?;
+          if (ai != null) {
+            print('🤖 [POLLING] ai_recommendation keys: ${ai.keys.toList()}');
+            print(
+                '🤖 [POLLING] content length: ${(ai['content'] as String?)?.length ?? 0}');
+          }
+        } catch (_) {}
 
         // Relaxed gate: return as soon as any major section is available
         final hasAny = data['ats_score'] != null ||

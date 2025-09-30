@@ -1,13 +1,13 @@
 {
   "company_name": "Australia_for_UNHCR",
-  "cv_analysis_timestamp": "2025-09-30T23:56:38.128122",
+  "cv_analysis_timestamp": "2025-10-01T00:38:04.713501",
   "matched_required_keywords": [
     "SQL",
     "Power BI",
     "Excel",
     "project management",
     "communication",
-    "customer service"
+    "data warehouse"
   ],
   "matched_preferred_keywords": [
     "Tableau"
@@ -15,7 +15,7 @@
   "missed_required_keywords": [
     "VBA",
     "stakeholder management",
-    "data warehouse",
+    "customer service",
     "marketing campaigns",
     "data models",
     "data mining"
@@ -32,13 +32,13 @@
     "matched_preferred_count": 1
   },
   "matching_notes": {
-    "SQL": "Mentioned in technical skills and experience",
-    "Power BI": "Used for dashboards and visualizations",
-    "Excel": "Found in technical skills section",
-    "project management": "Inferred from experience in managing data projects",
-    "communication": "Demonstrated through presentation and collaboration experiences",
-    "customer service": "Improving customer satisfaction mentioned in experience",
-    "Tableau": "Used for creating dashboards"
+    "SQL": "Proficient in SQL for querying, modeling, and managing databases",
+    "Power BI": "Used Power BI for creating dashboards and visualizations",
+    "Excel": "Mentioned in technical skills for data-driven solutions",
+    "project management": "Inferred from experience in designing and implementing data solutions",
+    "communication": "Demonstrated through presentation of research findings and collaboration",
+    "data warehouse": "Experience with Snowflake for cloud data warehousing",
+    "Tableau": "Skilled in creating dashboards using Tableau"
   },
   "ai_model_used": "openai/gpt-4o",
   "processing_status": "completed",

@@ -320,7 +320,8 @@ async def _run_pipeline(cname: str, token_data=None):
         from app.services.jd_analysis.jd_analyzer import JDAnalyzer
         _analyzer = JDAnalyzer()
         from app.utils.user_path_utils import get_user_base_path
-        user_email = getattr(token_data, 'email', None)
+        # token_data may not be available in this route; default to admin for now
+        user_email = None
         base_dir = get_user_base_path(user_email or "admin@admin.com")
         jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True, base_path=str(base_dir))
         jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
@@ -407,7 +408,8 @@ async def _run_pipeline(cname: str, token_data=None):
         
         # Check if we have the minimum required files (JD + skills analysis must exist)
         from app.utils.user_path_utils import get_user_base_path
-        user_email = getattr(token_data, 'email', None)
+        # token_data may not be available in this route; default to admin for now
+        user_email = None
         base_dir = get_user_base_path(user_email or "admin@admin.com")
         from app.utils.timestamp_utils import TimestampUtils
         company_dir = base_dir / "applied_companies" / cname
