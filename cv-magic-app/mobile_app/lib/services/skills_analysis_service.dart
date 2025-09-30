@@ -381,22 +381,26 @@ class SkillsAnalysisService {
       if (result['success'] == true && result['data'] != null) {
         final data = result['data'] as Map<String, dynamic>;
         print(
-            '📊 [POLLING] Component analysis present: ${data.containsKey("component_analysis")}');
+            '📊 [POLLING] Component analysis present: ${data['component_analysis'] != null}');
         print(
-            '📊 [POLLING] ATS score present: ${data.containsKey("ats_score")}');
+            '📊 [POLLING] ATS score present: ${data['ats_score'] != null}');
         print(
-            '📊 [POLLING] AI recommendation present: ${data.containsKey("ai_recommendation")}');
+            '📊 [POLLING] AI recommendation present: ${data['ai_recommendation'] != null}');
         print(
-            '📊 [POLLING] Tailored CV present: ${data.containsKey("tailored_cv")}');
+            '📊 [POLLING] Tailored CV present: ${data['tailored_cv'] != null}');
 
-        if (data.containsKey('component_analysis') &&
-            data.containsKey('ats_score')) {
-          print('✅ [POLLING] Complete results found!');
+        // Relaxed gate: return as soon as any major section is available
+        final hasAny = data['ats_score'] != null ||
+            data['component_analysis'] != null ||
+            data['ai_recommendation'] != null;
+
+        if (hasAny) {
+          print('✅ [POLLING] Results available (partial or complete)');
           return data;
-        } else {
-          print('⏳ [POLLING] Still waiting for complete results...');
-          return null;
         }
+
+        print('⏳ [POLLING] Still waiting for results...');
+        return null;
       }
 
       return null;
