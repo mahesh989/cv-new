@@ -1,0 +1,46 @@
+diff --git a/app/routes/skills_analysis.py b/app/routes/skills_analysis.py
+--- a/app/routes/skills_analysis.py
++++ b/app/routes/skills_analysis.py
+@@ -2050,12 +2050,16 @@ async def perform_preliminary_skills_analysis(cv_content: str, jd_text: str, cv_fil
+     """Execute preliminary skills analysis with the specified configuration"""
+     try:
++        # Extract company name from JD text before analysis
++        company = await _extract_company_name_from_jd(jd_text)
++        logger.info(f"🏢 Using company name for skills analysis: {company}")
++
++        # Ensure result saver has company info
++        result_saver.current_company = company
++
+         # Extract config if specified
+         config = None
+@@ -2290,14 +2294,32 @@ async def perform_preliminary_skills_analysis(cv_content: str, jd_text: str, cv_fil
+         # Save analyze match result if available 
+         if analyze_match_output:
+             try:
+-                saved_path = await result_saver.append_analyze_match(analyze_match_output, company)
+-                logger.info(f"📁 [ANALYZE_MATCH] Results saved to: {saved_path}")
+-            except Exception as e:
+-                logger.warning(f"⚠️ [ANALYZE_MATCH] Failed to save analyze match: {e}")
++                # Use already extracted company name
++                saved_path = await result_saver.append_analyze_match(analyze_match_output, company)
++                logger.info(f"✅ [ANALYZE_MATCH] Results saved to: {saved_path}")
+                 
+-            # Still return the text response since it was successfully generated
+-            response_data = {
+-                "success": True,
+-                "analyze_match": analyze_match_output
+-            }
++                response_data = {
++                    "success": True,
++                    "analyze_match": analyze_match_output,
++                    "company": company,
++                    "saved_path": saved_path
++                }
++            except Exception as save_err:
++                logger.error(f"❌ [ANALYZE_MATCH] Failed to save results: {save_err}")
++                response_data = {
++                    "success": True,
++                    "analyze_match": analyze_match_output,
++                    "error": f"Failed to save results: {str(save_err)}"
++                }
+             return JSONResponse(content=response_data)

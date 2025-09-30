@@ -619,7 +619,11 @@ class SkillExtractionResultSaver:
         Raises:
             ValueError: If company name is invalid
         """        
-        # Validate company name
+        # Ensure company name is provided and valid
+        if not company_name or company_name == "Unknown_Company":
+            raise ValueError("Valid company name must be provided for saving analyze match")
+            
+        # Clean and validate company name 
         from app.utils.user_path_utils import validate_company_name, get_user_company_analysis_paths
         validate_company_name(company_name)
         
