@@ -19,11 +19,11 @@
   },
   "skills": {
     "technical_skills": [
-      "• Specialized in Python programming, including data analysis, automation, and machine learning using libraries such as Pandas, NumPy, and scikit-learn.",
-      "• Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.",
-      "• Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib.",
-      "• Experienced with GitHub for version control, Docker for containerization, and Snowflake for cloud data warehousing.",
-      "• Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting."
+      "Specialized in Python programming, including data analysis, automation, and machine learning using libraries such as Pandas, NumPy, and scikit-learn.",
+      "Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.",
+      "Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib.",
+      "Experienced with GitHub for version control, Docker for containerization, and Snowflake for cloud data warehousing.",
+      "Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting."
     ],
     "key_skills": [],
     "soft_skills": [],
@@ -63,13 +63,13 @@
       "title": "Data Analyst",
       "company": "The Bitrates, Sydney, New South Wales, Australia",
       "duration": "Jul 2024 – Present",
-      "location": "Sydney, New South Wales, Australia",
+      "location": "",
       "responsibilities": [
-        "• Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%.",
-        "• Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions.",
-        "• Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity.",
-        "• Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively.",
-        "• Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights."
+        "Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%.",
+        "Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions.",
+        "Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity.",
+        "Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively.",
+        "Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights."
       ],
       "achievements": [],
       "technologies": []
@@ -78,12 +78,12 @@
       "title": "Data Analyst",
       "company": "iBuild Building Solutions, Victoria, Australia",
       "duration": "Mar 2024 – Jun 2024",
-      "location": "Victoria, Australia",
+      "location": "",
       "responsibilities": [
-        "• Automated data extraction and structuring of population datasets using Python, improving data accuracy and team collaboration.",
-        "• Analyzed customer support data with Python to optimize response times and enhance operational efficiency.",
-        "• Developed Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making.",
-        "• Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction and decision-making processes."
+        "Automated data extraction and structuring of population datasets using Python, improving data accuracy and team collaboration.",
+        "Analyzed customer support data with Python to optimize response times and enhance operational efficiency.",
+        "Developed Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making.",
+        "Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction and decision-making processes."
       ],
       "achievements": [],
       "technologies": []
@@ -92,12 +92,12 @@
       "title": "Software engineer and Analyst",
       "company": "Property Console, Sydney, Australia",
       "duration": "Jun 2023 - Nov 2023",
-      "location": "Sydney, Australia",
+      "location": "",
       "responsibilities": [
-        "• Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency.",
-        "• Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%.",
-        "• Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision-making.",
-        "• Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives."
+        "Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency.",
+        "Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%.",
+        "Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision-making.",
+        "Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives."
       ],
       "achievements": [],
       "technologies": []
@@ -106,11 +106,11 @@
       "title": "Research Assistant",
       "company": "CY Cergy Paris University, Cergy-Pontoise, France",
       "duration": "Oct 2018 - Sep 2022",
-      "location": "Cergy-Pontoise, France",
+      "location": "",
       "responsibilities": [
-        "• Utilized advanced Python programming for computational modeling and solving complex research problems.",
-        "• Developed Python-based workflows to manage and analyze large datasets across multiple research projects.",
-        "• Presented Python-enabled research findings at international conferences, demonstrating technical expertise and communication skills."
+        "Utilized advanced Python programming for computational modeling and solving complex research problems.",
+        "Developed Python-based workflows to manage and analyze large datasets across multiple research projects.",
+        "Presented Python-enabled research findings at international conferences, demonstrating technical expertise and communication skills."
       ],
       "achievements": [],
       "technologies": []
@@ -119,11 +119,11 @@
       "title": "Lecturer and Course Facilitator",
       "company": "CY Cergy Paris University, Cergy-Pontoise, France",
       "duration": "Sep 2019 - Jun 2022",
-      "location": "Cergy-Pontoise, France",
+      "location": "",
       "responsibilities": [
-        "• Led engaging physics tutorials for master’s students, enhancing understanding and promoting teamwork.",
-        "• Designed course materials, assignments, and exams, strengthening the learning experience.",
-        "• Mentored students on projects, collaborated with faculty, and fostered student engagement."
+        "Led engaging physics tutorials for master’s students, enhancing understanding and promoting teamwork.",
+        "Designed course materials, assignments, and exams, strengthening the learning experience.",
+        "Mentored students on projects, collaborated with faculty, and fostered student engagement."
       ],
       "achievements": [],
       "technologies": []
@@ -132,11 +132,11 @@
       "title": "Research Intern",
       "company": "CY Cergy Paris University, Cergy-Pontoise, France",
       "duration": "Feb 2018 - Jun 2018",
-      "location": "Cergy-Pontoise, France",
+      "location": "",
       "responsibilities": [
-        "• Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials.",
-        "• Managed and analysed complex data sets, improving their accuracy and reliability.",
-        "• Used dashboard using Power BI to present research findings and participated in weekly reviews, improving collaboration and research skills."
+        "Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials.",
+        "Managed and analyzed complex data sets, improving their accuracy and reliability.",
+        "Used dashboard using Power BI to present research findings and participated in weekly reviews, improving collaboration and research skills."
       ],
       "achievements": [],
       "technologies": []
@@ -159,10 +159,10 @@
     ],
     "parsing_approach": "content_preserving"
   },
-  "saved_at": "2025-10-01T00:31:49.039603",
+  "saved_at": "2025-10-01T01:04:47.181619",
   "metadata": {
     "source_filename": "maheshwor_tiwari.pdf",
-    "processed_at": "2025-10-01T00:31:49.042092",
+    "processed_at": "2025-10-01T01:04:47.181943",
     "processing_version": "2.0",
     "content_type": "structured_cv"
   }

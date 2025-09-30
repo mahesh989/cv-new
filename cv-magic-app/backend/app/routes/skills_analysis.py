@@ -1827,15 +1827,29 @@ async def list_companies_with_results():
 
 
 @router.get("/analysis-results/{company}")
-async def get_analysis_results(company: str):
+async def get_analysis_results(company: str, request: Request = None):
     """Get complete analysis results for a company (skills, components, ATS) for frontend display"""
     try:
         logger.info(f"📊 [API] Fetching analysis results for company: {company}")
         
         # Build file path using timestamped files
         from app.utils.user_path_utils import get_user_base_path
-        user_email = getattr(token_data, 'email', None)
-        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        
+        # Try to get user email from token, default to admin if not available
+        user_email = "admin@admin.com"
+        if request:
+            try:
+                auth_header = request.headers.get("authorization")
+                if auth_header and auth_header.startswith("Bearer "):
+                    token = auth_header.replace("Bearer ", "")
+                    from app.core.auth import verify_token
+                    token_data = verify_token(token)
+                    if token_data:
+                        user_email = getattr(token_data, 'email', "admin@admin.com")
+            except Exception as e:
+                logger.warning(f"Failed to get user email from token, using default: {e}")
+        
+        base_dir = get_user_base_path(user_email)
         company_dir = base_dir / "applied_companies" / company
         
         # Use timestamped analysis file with fallback
@@ -1875,15 +1889,45 @@ async def get_analysis_results(company: str):
             "domain_keywords": _sorted(jd_skills_raw.get("domain_keywords", [])),
         }
 
+        # Get latest preextracted comparison
+        latest_preextracted = None
+        preextracted_entries = data.get("preextracted_comparison_entries", [])
+        if preextracted_entries:
+            latest = preextracted_entries[-1]
+            content = latest.get("content", "")
+            latest_preextracted = {
+                "timestamp": latest.get("timestamp"),
+                "model_used": latest.get("model_used"),
+                "raw_content": content,
+                "match_rates": _extract_match_rates_from_content(content)
+            }
+
+        # Get latest component analysis
+        latest_component = None
+        component_entries = data.get("component_analysis_entries", [])
+        if component_entries:
+            latest = component_entries[-1]
+            latest_component = {
+                "timestamp": latest.get("timestamp"),
+                "extracted_scores": latest.get("extracted_scores", {}),
+                "component_details": latest.get("component_analyses", {})
+            }
+
+        # Get latest ATS calculation
+        latest_ats = None
+        ats_entries = data.get("ats_calculation_entries", [])
+        if ats_entries:
+            latest_ats = ats_entries[-1]
+
         result = {
             "company": company,
             "skills_analysis": {
                 "cv_skills": cv_skills_sorted,
                 "jd_skills": jd_skills_sorted
             },
-            "preextracted_comparison": None,
-            "component_analysis": None,
-            "ats_score": None
+            "preextracted_comparison": latest_preextracted,
+            "component_analysis": latest_component,
+            "ats_score": latest_ats
         }
         
         # Get latest preextracted comparison
