@@ -106,7 +106,7 @@ async def auth_debug_middleware(request: Request, call_next):
         return response
     
     path = request.url.path
-1       auth_header = request.headers.get("authorization")
+    auth_header = request.headers.get("authorization")
     
     # Define public endpoints that don't need auth
     public_endpoints = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh-session", "/api/quick-login", "/health", "/api/info", "/api/ai/health", "/api/tailored-cv/save-edited"]
