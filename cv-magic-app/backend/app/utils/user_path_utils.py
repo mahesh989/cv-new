@@ -129,9 +129,9 @@ def get_user_company_analysis_paths(user_email: Optional[str], company: str) -> 
     return {
         "jd_original": lambda ts: company_dir / f"jd_original_{ts}.json",
         "job_info": lambda ts: company_dir / f"job_info_{company}_{ts}.json",
-        "jd_analysis": lambda ts: company_dir / f"jd_analysis_{ts}.json",
-        "cv_jd_matching": lambda ts: company_dir / f"cv_jd_matching_{ts}.json",
-        "component_analysis": lambda ts: company_dir / f"component_analysis_{ts}.json",
+        "jd_analysis": lambda ts: company_dir / f"{company}_jd_analysis_{ts}.json",
+        "cv_jd_matching": lambda ts: company_dir / f"{company}_cv_jd_matching_{ts}.json",
+        "component_analysis": lambda ts: company_dir / f"{company}_component_analysis_{ts}.json",
         "skills_analysis": lambda ts: company_dir / f"{company}_skills_analysis_{ts}.json",
         "input_recommendation": lambda ts: company_dir / f"{company}_input_recommendation_{ts}.json",
         "ai_recommendation": lambda ts: company_dir / f"{company}_ai_recommendation_{ts}.json",

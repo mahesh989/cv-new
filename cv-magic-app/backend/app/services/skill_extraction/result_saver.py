@@ -20,13 +20,12 @@ class SkillExtractionResultSaver:
     """Service for saving skill extraction results to organized files"""
     
     def __init__(self, user_email: str = "admin@admin.com"):
-        from app.utils.user_path_utils import get_user_base_path
+        from app.utils.user_path_utils import get_user_base_path, get_user_company_analysis_paths
         self.user_email = user_email
         self.base_dir = get_user_base_path(user_email)
+        self.paths = lambda company_name: get_user_company_analysis_paths(user_email, company_name)
         # Ensure required directories exist
-        analysis_dir = self.base_dir / "cv-analysis"
-        companies_dir = analysis_dir / "applied_companies"
-        for directory in [self.base_dir, analysis_dir, companies_dir]:
+        for directory in [self.base_dir]:
             directory.mkdir(parents=True, exist_ok=True)
         logger.info(f"📁 Result saver initialized with base directory: {self.base_dir}")
     
@@ -84,10 +83,16 @@ class SkillExtractionResultSaver:
             company_folder = self.base_dir / "applied_companies" / company_slug
             company_folder.mkdir(parents=True, exist_ok=True)
             
-            # Save original CV JSON in root cv-analysis directory if it doesn't exist or doesn't have structured data
+            # Ensure all required directories exist
+            from app.utils.user_path_utils import ensure_user_directories
+            ensure_user_directories(self.user_email)
+            
+            # Save original CV JSON in cvs/original directory if it doesn't exist or doesn't have structured data
             if cv_data and cv_data.get('text'):
                 import json
-                cv_file_path = self.base_dir / "cvs" / "original" / "original_cv.json"
+                from app.utils.user_path_utils import get_user_cv_paths
+                cv_paths = get_user_cv_paths(self.user_email)
+                cv_file_path = cv_paths["original"] / "original_cv.json"
                 should_save = True
                 
                 if cv_file_path.exists():
@@ -626,7 +631,7 @@ class SkillExtractionResultSaver:
             skills_file.parent.mkdir(parents=True, exist_ok=True)
             
             # Create company folder path
-            company_folder = self.base_dir / "cv-analysis" / "applied_companies" / company_name
+            company_folder = self.base_dir / "applied_companies" / company_name
             
             # First try to find an existing analysis file
             import json
@@ -791,4 +796,4 @@ class SkillExtractionResultSaver:
 
 
 # Global instance
-result_saver = SkillExtractionResultSaver("cv-analysis", "admin@admin.com")
+result_saver = SkillExtractionResultSaver(user_email="admin@admin.com")

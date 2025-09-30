@@ -1,13 +1,20 @@
 {
   "jobs": [
     {
-      "company": "Test_Company_XYZ",
-      "title": "Senior Software Engineer",
-      "location": "Remote",
-      "salary_range": "120k-150k",
-      "posted_date": "2025-09-30T14:55:14.210909"
+      "company_name": "Australia for UNHCR",
+      "job_title": "Data Analyst",
+      "location": "Sydney, Australia",
+      "experience_required": "Unknown",
+      "seniority_level": "Unknown",
+      "industry": "International Aid and Development",
+      "phone_number": null,
+      "email": null,
+      "website": null,
+      "work_type": "Hybrid",
+      "extracted_at": "2025-09-30T15:17:31.359724",
+      "job_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst"
     }
   ],
-  "last_updated": "2025-09-30T14:55:14.216245",
+  "last_updated": "2025-09-30T15:17:31.361996",
   "total_jobs": 1
 }

@@ -152,11 +152,16 @@ class CVJDMatcher:
             base_path = get_user_base_path("admin@admin.com")
         
         company_dir = Path(base_path) / "applied_companies" / company_name
-        analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
+        # Try to find timestamped file with company name pattern first
+        analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json")
         
-        # Fallback to non-timestamped file if no timestamped file exists
+        # Fallback to old pattern without company name if not found
         if not analysis_file:
-            analysis_file = company_dir / "jd_analysis.json"
+            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
+        
+        # Fallback to non-timestamped file if still not found
+        if not analysis_file:
+            analysis_file = company_dir / f"{company_name}_jd_analysis.json"
         
         if not analysis_file.exists():
             raise FileNotFoundError(f"JD analysis file not found: {analysis_file}")

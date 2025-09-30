@@ -292,7 +292,7 @@ def _detect_most_recent_company() -> Optional[str]:
         return None
 
 
-def _schedule_post_skill_pipeline(company_name: Optional[str]):
+def _schedule_post_skill_pipeline(company_name: Optional[str], token_data=None):
     """Fire-and-forget JD analysis and CV–JD match pipeline for the given company."""
     if not company_name:
         logger.warning("⚠️ [PIPELINE] No company detected; skipping JD analysis & CV–JD matching.")
@@ -300,168 +300,168 @@ def _schedule_post_skill_pipeline(company_name: Optional[str]):
 
     logger.info(f"🚀 [PIPELINE] Scheduling JD analysis and CV–JD matching for '{company_name}'...")
 
-    async def _run_pipeline(cname: str):
-        """Run the complete analysis pipeline with error recovery"""
-        pipeline_results = {
-            "jd_analysis": False,
-            "cv_jd_matching": False,
-            "component_analysis": False
-        }
-        
-        # Step 1: JD Analysis (force refresh to guarantee availability)
-        try:
-            company_dir = Path("cv-analysis") / "applied_companies" / cname
-            logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
-            from app.services.jd_analysis.jd_analyzer import JDAnalyzer
-            _analyzer = JDAnalyzer()
-            from app.utils.user_path_utils import get_user_base_path
-            user_email = getattr(token_data, 'email', None)
-            base_dir = get_user_base_path(user_email or "admin@admin.com")
-            jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True, base_path=str(base_dir))
-            jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
-            saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
-            logger.info(f"✅ [PIPELINE] JD analysis saved for {cname} at: {saved_path}")
-            pipeline_results["jd_analysis"] = True
-        except Exception as e:
-            logger.error(f"❌ [PIPELINE] JD analysis failed for {cname}: {e}")
-            # Continue with next steps even if this fails
-
-        # Step 2: CV-JD Matching
-        try:
-            logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
-            # Prefer tailored CV if available; else fall back to dynamic latest
-            try:
-                from app.utils.user_path_utils import get_user_base_path
-                user_email = getattr(token_data, 'email', None)
-                base_dir_local = get_user_base_path(user_email or "admin@admin.com")
-                company_tailored_dir = base_dir_local / "applied_companies" / cname
-                preferred_txt = None
-                if company_tailored_dir.exists():
-                    txt_candidates = list(company_tailored_dir.glob(f"{cname}_tailored_cv_*.txt"))
-                    if txt_candidates:
-                        preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
-                cv_txt_path_for_match = str(preferred_txt) if preferred_txt else None
-                if not cv_txt_path_for_match:
-                    from app.services.dynamic_cv_selector import dynamic_cv_selector as _dyn
-                    latest_cv_paths_for_match = _dyn.get_latest_cv_paths_for_services()
-                    cv_txt_path_for_match = latest_cv_paths_for_match.get('txt_path')
-                if cv_txt_path_for_match:
-                    logger.info(f"📄 [PIPELINE] CV–JD matching will use CV TXT: {cv_txt_path_for_match}")
-            except Exception as _sel_err:
-                logger.warning(f"⚠️ [PIPELINE] Could not preselect CV TXT for matching: {_sel_err}")
-                cv_txt_path_for_match = None
-
-            # Pass JD analysis data directly when available
-            jd_data_for_match = None
-            try:
-                jd_data_for_match = jd_result if 'jd_result' in locals() else None
-            except Exception:
-                jd_data_for_match = None
-
-            # Force refresh so requirement bonus uses the newest match_counts
-            await match_and_save_cv_jd(
-                cname,
-                cv_file_path=cv_txt_path_for_match,
-                force_refresh=True,
-                jd_analysis_data=jd_data_for_match
-            )
-            logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
-            pipeline_results["cv_jd_matching"] = True
-        except Exception as e:
-            logger.error(f"❌ [PIPELINE] CV-JD matching failed for {cname}: {e}")
-            # Log detailed error for debugging
-            import traceback
-            logger.error(f"[PIPELINE] CV-JD matching traceback: {traceback.format_exc()}")
-            # Continue with component analysis even if matching fails
-
-        # Step 3: Component Analysis (includes ATS calculation) - Tailored-only via unified selector
-        try:
-            logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
-            from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
-            from app.unified_latest_file_selector import unified_selector
-            
-            # Get latest CV context across tailored+original, log paths, then read content
-            try:
-                cv_ctx_debug = unified_selector.get_latest_cv_across_all(cname)
-                logger.info(
-                    "📄 [PIPELINE] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
-                    cv_ctx_debug.file_type,
-                    cv_ctx_debug.timestamp,
-                    cv_ctx_debug.json_path,
-                    cv_ctx_debug.txt_path,
-                )
-                cv_text_for_analysis = unified_selector.get_cv_content_across_all(cname)
-                try:
-                    _preview = (cv_text_for_analysis or "")[:400].replace('\n', ' ')
-                    logger.info("🧪 [PIPELINE] CV content length=%d, preview='%s'", len(cv_text_for_analysis or ""), _preview)
-                except Exception:
-                    pass
-            except Exception as sel_err:
-                logger.error(f"❌ [PIPELINE] CV selection failed for component analysis: {sel_err}")
-                raise
-            
-            # Check if we have the minimum required files (JD + skills analysis must exist)
-            from app.utils.user_path_utils import get_user_base_path
-            user_email = getattr(token_data, 'email', None)
-            base_dir = get_user_base_path(user_email or "admin@admin.com")
-            from app.utils.timestamp_utils import TimestampUtils
-            company_dir = base_dir / "applied_companies" / cname
-            jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
-            if not jd_file:
-                jd_file = company_dir / "jd_original.json"
-            
-            skills_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{cname}_skills_analysis", "json")
-            if not skills_file:
-                skills_file = company_dir / f"{cname}_skills_analysis.json"
-            
-            # We can run component analysis if we have CV text, JD, and skills analysis
-            if cv_text_for_analysis and jd_file.exists() and skills_file.exists():
-                logger.info(f"📄 [PIPELINE] Required files found, proceeding with component analysis")
-                component_result = await modular_ats_orchestrator.run_component_analysis(cname, cv_text=cv_text_for_analysis or None)
-                logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
-                pipeline_results["component_analysis"] = True
-                
-                # Log extracted scores if available
-                if isinstance(component_result, dict) and 'extracted_scores' in component_result:
-                    scores = component_result['extracted_scores']
-                    logger.info(f"📊 [PIPELINE] Component scores extracted: {len(scores)} scores")
-                    # Log key scores
-                    for key in ['skills_relevance', 'experience_alignment', 'industry_fit', 'role_seniority', 'technical_depth']:
-                        if key in scores:
-                            logger.info(f"📊 [PIPELINE] {key}: {scores[key]:.1f}")
-                
-                # Check if ATS was calculated
-                if isinstance(component_result, dict) and 'ats_results' in component_result:
-                    final_score = component_result['ats_results'].get('final_ats_score')
-                    logger.info(f"🎯 [PIPELINE] ATS Score calculated: {final_score}")
-            else:
-                missing = []
-                if not cv_text_for_analysis: missing.append("CV")
-                if not jd_file.exists(): missing.append("JD")
-                if not skills_file.exists(): missing.append("Skills")
-                logger.warning(f"⚠️ [PIPELINE] Missing files for component analysis: {missing}")
-                logger.info(f"🔄 [PIPELINE] Skipping component analysis for {cname} due to missing files")
-                
-        except Exception as component_error:
-            logger.error(f"❌ [PIPELINE] Component analysis failed for {cname}: {component_error}")
-            import traceback
-            logger.error(f"[PIPELINE] Component analysis traceback: {traceback.format_exc()}")
-        
-        # Log pipeline summary
-        successful_steps = [step for step, success in pipeline_results.items() if success]
-        failed_steps = [step for step, success in pipeline_results.items() if not success]
-        
-        logger.info(f"📋 [PIPELINE] Pipeline summary for {cname}:")
-        logger.info(f"   ✅ Successful: {successful_steps}")
-        if failed_steps:
-            logger.info(f"   ❌ Failed: {failed_steps}")
-        else:
-            logger.info(f"   🎉 All steps completed successfully!")
-
     try:
-        asyncio.create_task(_run_pipeline(company_name))
+        # Pass token_data to pipeline
+        asyncio.create_task(_run_pipeline(company_name, token_data))
     except Exception as e:
         logger.warning(f"⚠️ [PIPELINE] Failed to schedule background pipeline: {e}")
+
+async def _run_pipeline(cname: str, token_data=None):
+    pipeline_results = {
+        "jd_analysis": False,
+        "cv_jd_matching": False,
+        "component_analysis": False
+    }
+    
+    # Step 1: JD Analysis (force refresh to guarantee availability)
+    try:
+        company_dir = Path("cv-analysis") / "applied_companies" / cname
+        logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
+        from app.services.jd_analysis.jd_analyzer import JDAnalyzer
+        _analyzer = JDAnalyzer()
+        from app.utils.user_path_utils import get_user_base_path
+        user_email = getattr(token_data, 'email', None)
+        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True, base_path=str(base_dir))
+        jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
+        saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
+        logger.info(f"✅ [PIPELINE] JD analysis saved for {cname} at: {saved_path}")
+        pipeline_results["jd_analysis"] = True
+    except Exception as e:
+        logger.error(f"❌ [PIPELINE] JD analysis failed for {cname}: {e}")
+        # Continue with next steps even if this fails
+
+    # Step 2: CV-JD Matching
+    try:
+        logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
+        # Prefer tailored CV if available; else fall back to dynamic latest
+        try:
+            from app.utils.user_path_utils import get_user_base_path
+            user_email = getattr(token_data, 'email', None)
+            base_dir_local = get_user_base_path(user_email or "admin@admin.com")
+            company_tailored_dir = base_dir_local / "applied_companies" / cname
+            preferred_txt = None
+            if company_tailored_dir.exists():
+                txt_candidates = list(company_tailored_dir.glob(f"{cname}_tailored_cv_*.txt"))
+                if txt_candidates:
+                    preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
+            cv_txt_path_for_match = str(preferred_txt) if preferred_txt else None
+            if not cv_txt_path_for_match:
+                from app.services.dynamic_cv_selector import dynamic_cv_selector as _dyn
+                latest_cv_paths_for_match = _dyn.get_latest_cv_paths_for_services()
+                cv_txt_path_for_match = latest_cv_paths_for_match.get('txt_path')
+            if cv_txt_path_for_match:
+                logger.info(f"📄 [PIPELINE] CV–JD matching will use CV TXT: {cv_txt_path_for_match}")
+        except Exception as _sel_err:
+            logger.warning(f"⚠️ [PIPELINE] Could not preselect CV TXT for matching: {_sel_err}")
+            cv_txt_path_for_match = None
+
+        # Pass JD analysis data directly when available
+        jd_data_for_match = None
+        try:
+            jd_data_for_match = jd_result if 'jd_result' in locals() else None
+        except Exception:
+            jd_data_for_match = None
+
+        # Force refresh so requirement bonus uses the newest match_counts
+        await match_and_save_cv_jd(
+            cname,
+            cv_file_path=cv_txt_path_for_match,
+            force_refresh=True,
+            jd_analysis_data=jd_data_for_match
+        )
+        logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
+        pipeline_results["cv_jd_matching"] = True
+    except Exception as e:
+        logger.error(f"❌ [PIPELINE] CV-JD matching failed for {cname}: {e}")
+        # Log detailed error for debugging
+        import traceback
+        logger.error(f"[PIPELINE] CV-JD matching traceback: {traceback.format_exc()}")
+        # Continue with component analysis even if matching fails
+
+    # Step 3: Component Analysis (includes ATS calculation) - Tailored-only via unified selector
+    try:
+        logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
+        from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+        from app.unified_latest_file_selector import unified_selector
+        
+        # Get latest CV context across tailored+original, log paths, then read content
+        try:
+            cv_ctx_debug = unified_selector.get_latest_cv_across_all(cname)
+            logger.info(
+                "📄 [PIPELINE] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
+                cv_ctx_debug.file_type,
+                cv_ctx_debug.timestamp,
+                cv_ctx_debug.json_path,
+                cv_ctx_debug.txt_path,
+            )
+            cv_text_for_analysis = unified_selector.get_cv_content_across_all(cname)
+            try:
+                _preview = (cv_text_for_analysis or "")[:400].replace('\n', ' ')
+                logger.info("🧪 [PIPELINE] CV content length=%d, preview='%s'", len(cv_text_for_analysis or ""), _preview)
+            except Exception:
+                pass
+        except Exception as sel_err:
+            logger.error(f"❌ [PIPELINE] CV selection failed for component analysis: {sel_err}")
+            raise
+        
+        # Check if we have the minimum required files (JD + skills analysis must exist)
+        from app.utils.user_path_utils import get_user_base_path
+        user_email = getattr(token_data, 'email', None)
+        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        from app.utils.timestamp_utils import TimestampUtils
+        company_dir = base_dir / "applied_companies" / cname
+        jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+        if not jd_file:
+            jd_file = company_dir / "jd_original.json"
+        
+        skills_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{cname}_skills_analysis", "json")
+        if not skills_file:
+            skills_file = company_dir / f"{cname}_skills_analysis.json"
+        
+        # We can run component analysis if we have CV text, JD, and skills analysis
+        if cv_text_for_analysis and jd_file.exists() and skills_file.exists():
+            logger.info(f"📄 [PIPELINE] Required files found, proceeding with component analysis")
+            component_result = await modular_ats_orchestrator.run_component_analysis(cname, cv_text=cv_text_for_analysis or None)
+            logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
+            pipeline_results["component_analysis"] = True
+            
+            # Log extracted scores if available
+            if isinstance(component_result, dict) and 'extracted_scores' in component_result:
+                scores = component_result['extracted_scores']
+                logger.info(f"📊 [PIPELINE] Component scores extracted: {len(scores)} scores")
+                # Log key scores
+                for key in ['skills_relevance', 'experience_alignment', 'industry_fit', 'role_seniority', 'technical_depth']:
+                    if key in scores:
+                        logger.info(f"📊 [PIPELINE] {key}: {scores[key]:.1f}")
+            
+            # Check if ATS was calculated
+            if isinstance(component_result, dict) and 'ats_results' in component_result:
+                final_score = component_result['ats_results'].get('final_ats_score')
+                logger.info(f"🎯 [PIPELINE] ATS Score calculated: {final_score}")
+        else:
+            missing = []
+            if not cv_text_for_analysis: missing.append("CV")
+            if not jd_file.exists(): missing.append("JD")
+            if not skills_file.exists(): missing.append("Skills")
+            logger.warning(f"⚠️ [PIPELINE] Missing files for component analysis: {missing}")
+            logger.info(f"🔄 [PIPELINE] Skipping component analysis for {cname} due to missing files")
+            
+    except Exception as component_error:
+        logger.error(f"❌ [PIPELINE] Component analysis failed for {cname}: {component_error}")
+        import traceback
+        logger.error(f"[PIPELINE] Component analysis traceback: {traceback.format_exc()}")
+    
+    # Log pipeline summary
+    successful_steps = [step for step, success in pipeline_results.items() if success]
+    failed_steps = [step for step, success in pipeline_results.items() if not success]
+    
+    logger.info(f"📋 [PIPELINE] Pipeline summary for {cname}:")
+    logger.info(f"   ✅ Successful: {successful_steps}")
+    if failed_steps:
+        logger.info(f"   ❌ Failed: {failed_steps}")
+    else:
+        logger.info(f"   🎉 All steps completed successfully!")
 
 @router.post("/skill-extraction/analyze")
 async def analyze_skills(request: Request):
@@ -516,7 +516,11 @@ async def analyze_skills(request: Request):
 
         # Fire-and-forget: run JD analysis and CV–JD matching pipeline in background
         company_name = _detect_most_recent_company()
-        _schedule_post_skill_pipeline(company_name)
+        try:
+            token_data = getattr(request, 'user', None)
+        except Exception:
+            token_data = None
+        _schedule_post_skill_pipeline(company_name, token_data)
         
         # ALSO trigger job saving logic for the analyze endpoint
         try:
