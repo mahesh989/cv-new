@@ -106,7 +106,7 @@ async def auth_debug_middleware(request: Request, call_next):
         return response
     
     path = request.url.path
-    auth_header = request.headers.get("authorization")
+1       auth_header = request.headers.get("authorization")
     
     # Define public endpoints that don't need auth
     public_endpoints = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh-session", "/api/quick-login", "/health", "/api/info", "/api/ai/health", "/api/tailored-cv/save-edited"]
@@ -147,6 +147,8 @@ app.include_router(cv_structured_router)  # New structured CV routes
 app.include_router(job_router)  # Job description routes
 app.include_router(job_analysis_router)  # Job analysis routes
 app.include_router(skills_analysis_router)  # Skills analysis routes
+# Expose the same skills analysis routes under /api for frontend compatibility
+app.include_router(skills_analysis_router, prefix="/api")
 app.include_router(enhanced_skills_router)  # Enhanced skills analysis routes
 app.include_router(jd_analysis_router)  # Job description analysis routes
 app.include_router(cv_jd_matching_router)  # CV-JD matching routes

@@ -382,8 +382,7 @@ class SkillsAnalysisService {
         final data = result['data'] as Map<String, dynamic>;
         print(
             '📊 [POLLING] Component analysis present: ${data['component_analysis'] != null}');
-        print(
-            '📊 [POLLING] ATS score present: ${data['ats_score'] != null}');
+        print('📊 [POLLING] ATS score present: ${data['ats_score'] != null}');
         print(
             '📊 [POLLING] AI recommendation present: ${data['ai_recommendation'] != null}');
         print(
