@@ -160,8 +160,10 @@ async def get_cv_jd_matching_status(
         logger.info(f"📊 Checking CV-JD matching status for company: {company_name}")
         
         # Check file existence
-        base_path = "cv-analysis"
-        company_dir = Path(base_path) / company_name
+        # Use correct base path with user directory
+        from app.utils.user_path_utils import get_user_base_path
+        base_path = get_user_base_path("admin@admin.com") / "cv-analysis"
+        company_dir = base_path / "applied_companies" / company_name
         
         # Check CV file using dynamic selection
         from app.services.dynamic_cv_selector import dynamic_cv_selector
@@ -314,8 +316,9 @@ async def delete_cv_jd_match_results(
         logger.info(f"🗑️ Deleting CV-JD match results for company: {company_name}")
         
         # Delete results file
-        base_path = "cv-analysis"
-        match_results_file = Path(base_path) / company_name / "cv_jd_match_results.json"
+        from app.utils.user_path_utils import get_user_base_path
+        base_path = get_user_base_path("admin@admin.com") / "cv-analysis"
+        match_results_file = base_path / "applied_companies" / company_name / "cv_jd_match_results.json"
         
         if match_results_file.exists():
             match_results_file.unlink()

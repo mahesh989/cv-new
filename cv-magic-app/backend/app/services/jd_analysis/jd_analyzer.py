@@ -236,7 +236,8 @@ class JDAnalyzer:
     
     def __init__(self):
         self.ai_service = ai_service
-        self.base_analysis_path = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        self.base_analysis_path = get_user_base_path("admin@admin.com") / "cv-analysis"
         self.requirements_extractor = RequirementsExtractor()
     
     def _read_jd_file(self, file_path: Union[str, Path]) -> str:

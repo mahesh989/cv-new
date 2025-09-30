@@ -867,7 +867,8 @@ async def preliminary_analysis(
                     # Extract and save job metadata
                     job_metadata = await extract_job_metadata(jd_text)
                     if job_metadata:
-                        job_info_file = company_dir / "job_info.json"
+                        # Save with timestamped, company-specific filename
+                        job_info_file = company_dir / f"job_info_{company_name}_{timestamp}.json"
                         with open(job_info_file, 'w', encoding='utf-8') as f:
                             json.dump(job_metadata, f, indent=2, ensure_ascii=False)
                         logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")

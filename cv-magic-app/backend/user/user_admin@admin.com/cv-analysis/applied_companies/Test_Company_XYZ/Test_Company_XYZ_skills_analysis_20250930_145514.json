@@ -1,0 +1,14 @@
+{
+  "matched_skills": [
+    "Python",
+    "AWS",
+    "React",
+    "TypeScript"
+  ],
+  "missing_skills": [
+    "Docker",
+    "Kubernetes"
+  ],
+  "score": 85,
+  "analysis_timestamp": "2025-09-30T14:55:14.211911"
+}

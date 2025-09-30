@@ -1,23 +1,13 @@
 {
   "jobs": [
     {
-      "company_name": "Australia for UNHCR",
-      "job_title": "Data Analyst",
-      "location": "Sydney, Australia",
-      "experience_required": "Unknown",
-      "seniority_level": "Unknown",
-      "industry": "International Aid and Development",
-      "phone_number": null,
-      "email": null,
-      "website": null,
-      "work_type": "Hybrid",
-      "extracted_at": "2025-09-29T20:43:04.284730",
-      "job_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst"
-    },
-    {
-      "error": "Failed to extract job metadata: 'AIResponse' object has no attribute 'strip'"
+      "company": "Test_Company_XYZ",
+      "title": "Senior Software Engineer",
+      "location": "Remote",
+      "salary_range": "120k-150k",
+      "posted_date": "2025-09-30T14:55:14.210909"
     }
   ],
-  "last_updated": "2025-09-29T20:46:31.782373",
-  "total_jobs": 2
+  "last_updated": "2025-09-30T14:55:14.216245",
+  "total_jobs": 1
 }

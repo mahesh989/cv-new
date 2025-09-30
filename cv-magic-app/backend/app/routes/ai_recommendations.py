@@ -29,7 +29,8 @@ async def get_latest_ai_recommendations():
         JSON response with recommendation content
     """
     try:
-        ai_recommendations_dir = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        ai_recommendations_dir = get_user_base_path("admin@admin.com") / "cv-analysis"
         
         if not ai_recommendations_dir.exists():
             return JSONResponse(
@@ -94,20 +95,20 @@ async def get_company_ai_recommendations(company: str):
         from app.utils.timestamp_utils import TimestampUtils
         # Try multiple naming patterns for AI recommendations
         ai_file_path = TimestampUtils.find_latest_timestamped_file(
-            Path(f"cv-analysis/applied_companies/{company}"),
+            get_user_base_path("admin@admin.com") / "cv-analysis/applied_companies" / company,
             f"{company}_ai_recommendation",
             "json",
         )
         if not ai_file_path:
             # Try input_recommendation pattern
             ai_file_path = TimestampUtils.find_latest_timestamped_file(
-                Path(f"cv-analysis/applied_companies/{company}"),
+                get_user_base_path("admin@admin.com") / "cv-analysis/applied_companies" / company,
                 f"{company}_input_recommendation",
                 "json",
             )
         if not ai_file_path:
             # Try non-timestamped files
-            ai_file_path = Path(f"cv-analysis/applied_companies/{company}/{company}_ai_recommendation.json")
+            ai_file_path = get_user_base_path("admin@admin.com") / "cv-analysis/applied_companies" / company / f"{company}_ai_recommendation.json"
         if not ai_file_path.exists():
             ai_file_path = Path(f"cv-analysis/applied_companies/{company}/{company}_input_recommendation.json")
         
@@ -180,7 +181,8 @@ async def list_available_ai_recommendations():
         JSON response with list of companies and their recommendation info
     """
     try:
-        ai_recommendations_dir = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        ai_recommendations_dir = get_user_base_path("admin@admin.com") / "cv-analysis"
         
         if not ai_recommendations_dir.exists():
             return JSONResponse(content={
@@ -350,7 +352,7 @@ async def generate_ai_recommendation_and_tailor_cv(company: str):
         await asyncio.sleep(2)  # Give time for CV tailoring to complete
         
         # Check if tailored CV was created
-        cv_analysis_path = Path("cv-analysis")
+        cv_analysis_path = get_user_base_path("admin@admin.com") / "cv-analysis"
         tailored_cv_file = cv_analysis_path / "tailored_cv.json"
         company_tailored_files = list((cv_analysis_path / company).glob("tailored_cv_*.json"))
         

@@ -19,7 +19,8 @@ class ATSRecommendationService:
     """Service for extracting ATS data and creating recommendation files"""
     
     def __init__(self):
-        self.base_dir = Path("cv-analysis")
+        from app.utils.user_path_utils import get_user_base_path
+        self.base_dir = get_user_base_path("admin@admin.com") / "cv-analysis"
     
     def extract_ats_recommendation_data(self, company: str) -> Optional[Dict[str, Any]]:
         """

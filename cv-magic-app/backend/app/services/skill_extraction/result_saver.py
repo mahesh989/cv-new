@@ -19,12 +19,15 @@ logger = logging.getLogger(__name__)
 class SkillExtractionResultSaver:
     """Service for saving skill extraction results to organized files"""
     
-    def __init__(self, base_dir: str = "cv-analysis", user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str = "admin@admin.com"):
         from app.utils.user_path_utils import get_user_base_path
         self.user_email = user_email
         self.base_dir = get_user_base_path(user_email)
-        # Ensure base directory exists
-        self.base_dir.mkdir(parents=True, exist_ok=True)
+        # Ensure required directories exist
+        analysis_dir = self.base_dir / "cv-analysis"
+        companies_dir = analysis_dir / "applied_companies"
+        for directory in [self.base_dir, analysis_dir, companies_dir]:
+            directory.mkdir(parents=True, exist_ok=True)
         logger.info(f"📁 Result saver initialized with base directory: {self.base_dir}")
     
     def save_analysis_results(
@@ -70,8 +73,12 @@ class SkillExtractionResultSaver:
                             break
                 logger.info(f"🏢 Using provided company name: {company_name} -> {company_slug}")
             else:
-                # Extract company name from JD data when available (preferred), otherwise from URL/skills
-                company_slug = self._extract_company_name(jd_skills, jd_url, jd_data)
+            # Use JD data company name or extract from URL/skills
+                if jd_data and isinstance(jd_data, dict) and jd_data.get('company_name'):
+                    company_slug = self._create_company_slug(jd_data['company_name'])
+                    logger.info(f"🏢 Using company name from JD data: {jd_data['company_name']} -> {company_slug}")
+                else:
+                    company_slug = self._extract_company_name(jd_skills, jd_url, jd_data)
             
             # Create company folder under applied_companies subfolder
             company_folder = self.base_dir / "applied_companies" / company_slug
@@ -414,7 +421,7 @@ class SkillExtractionResultSaver:
             Cleaned company slug suitable for folder names
         """
         if not company_name or company_name.lower() in ['unknown', 'null', '']:
-            return f"Unknown_Company_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            return "Unknown_Company"
         
         # Remove special characters except alphanumeric, spaces, &, ., -
         company_slug = re.sub(r'[^\w\s&.-]', '', company_name)
@@ -603,39 +610,62 @@ class SkillExtractionResultSaver:
             
         Returns:
             str: Path to the updated file
-        """
-        try:
-            # Create company slug using the same logic as save_analysis_results
-            company_slug = self._create_company_slug(company_name)
             
-            # Check if folder exists and use exact folder name if found
-            if self.base_dir.exists():
-                existing_folders = [f.name for f in self.base_dir.iterdir() if f.is_dir()]
-                for folder in existing_folders:
-                    if folder.lower() == company_slug.lower():
-                        company_slug = folder
-                        break
+        Raises:
+            ValueError: If company name is invalid
+        """        
+        # Validate company name
+        from app.utils.user_path_utils import validate_company_name, get_user_company_analysis_paths
+        validate_company_name(company_name)
+        
+        try:
+            # Get correct paths using user path utils
+            paths = get_user_company_analysis_paths("admin@admin.com", company_name)
+            timestamp = TimestampUtils.get_timestamp()
+            skills_file = paths["skills_analysis"](timestamp)
+            skills_file.parent.mkdir(parents=True, exist_ok=True)
             
             # Create company folder path
-            company_folder = self.base_dir / "applied_companies" / company_slug
+            company_folder = self.base_dir / "cv-analysis" / "applied_companies" / company_name
             
-            # Find the latest timestamped skills analysis file
+            # First try to find an existing analysis file
             import json
-            file_path = TimestampUtils.find_latest_timestamped_file(company_folder, f"{company_slug}_skills_analysis", "json")
+            file_path = None
+            
+            # Look for existing analysis file with exact company name
+            exact_name_pattern = f"{company_name}_skills_analysis_*.json"
+            matching_files = list(company_folder.glob(exact_name_pattern))
+            if matching_files:
+                # Sort by modification time to get the latest
+                file_path = sorted(matching_files, key=lambda f: f.stat().st_mtime, reverse=True)[0]
+                logger.info(f"📂 Found existing analysis file: {file_path}")
+            
+            # If no file found, try timestamped file search
+            if not file_path:
+                file_path = TimestampUtils.find_latest_timestamped_file(company_folder, f"{company_name}_skills_analysis", "json")
+                if file_path:
+                    logger.info(f"📂 Found timestamped analysis file: {file_path}")
             
             # If no timestamped file exists, create a new one
             if not file_path:
                 timestamp = TimestampUtils.get_timestamp()
-                filename = f"{company_slug}_skills_analysis_{timestamp}.json"
+                filename = f"{company_name}_skills_analysis_{timestamp}.json"
                 file_path = company_folder / filename
             
             # Ensure directory exists
             company_folder.mkdir(parents=True, exist_ok=True)
             
+            # Debug logging
+            logger.info(f"🔍 Looking for analysis file in: {company_folder}")
+            if file_path:
+                logger.info(f"📄 Using existing file: {file_path}")
+            else:
+                logger.info("❌ No existing file found, will create new")
+            
             # Append analyze match output to the JSON file
             try:
                 data = {}
-                if file_path.exists():
+                if file_path and file_path.exists():
                     with open(file_path, 'r', encoding='utf-8') as f:
                         data = json.load(f)
                 else:
@@ -644,7 +674,7 @@ class SkillExtractionResultSaver:
                         "cv_filename": None,
                         "jd_url": None,
                         "user_id": None,
-                        "company": company_slug,
+                        "company": company_name,
                         "cv_skills": {},
                         "jd_skills": {},
                         "analyze_match_entries": [],
@@ -679,6 +709,7 @@ class SkillExtractionResultSaver:
         Args:
             raw_analysis: The raw formatted comparison text
             company_name: Company name for file path
+            saved_file_path: Optional path to an existing file to append to
         
         Returns:
             str: Path to the updated file
@@ -760,4 +791,4 @@ class SkillExtractionResultSaver:
 
 
 # Global instance
-result_saver = SkillExtractionResultSaver("cv-analysis")
+result_saver = SkillExtractionResultSaver("cv-analysis", "admin@admin.com")

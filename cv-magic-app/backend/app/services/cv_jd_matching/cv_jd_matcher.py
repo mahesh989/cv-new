@@ -148,7 +148,8 @@ class CVJDMatcher:
             FileNotFoundError: If analysis file doesn't exist
         """
         if not base_path:
-            base_path = "cv-analysis"
+            from app.utils.user_path_utils import get_user_base_path
+            base_path = get_user_base_path("admin@admin.com")
         
         company_dir = Path(base_path) / "applied_companies" / company_name
         analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
@@ -429,15 +430,15 @@ class CVJDMatcher:
             Path to saved file
         """
         if not base_path:
-            base_path = "cv-analysis"
+            from app.utils.user_path_utils import get_user_base_path, get_user_company_analysis_paths, validate_company_name
+            validate_company_name(company_name)
+            base_path = get_user_base_path("admin@admin.com")
         
-        # Create company directory if it doesn't exist
-        company_dir = Path(base_path) / "applied_companies" / company_name
-        company_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Save result with timestamp
+        # Get correct paths
+        paths = get_user_company_analysis_paths("admin@admin.com", company_name)
         timestamp = TimestampUtils.get_timestamp()
-        result_file = company_dir / f"cv_jd_match_results_{timestamp}.json"
+        result_file = paths["cv_jd_matching"](timestamp)
+        result_file.parent.mkdir(parents=True, exist_ok=True)
         
         try:
             with open(result_file, 'w', encoding='utf-8') as file:
@@ -462,7 +463,8 @@ class CVJDMatcher:
             CVJDMatchResult if found, None otherwise
         """
         if not base_path:
-            base_path = "cv-analysis"
+            from app.utils.user_path_utils import get_user_base_path
+            base_path = get_user_base_path("admin@admin.com")
         
         company_dir = Path(base_path) / "applied_companies" / company_name
         result_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")

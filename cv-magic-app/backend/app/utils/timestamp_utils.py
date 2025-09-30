@@ -94,7 +94,7 @@ class TimestampUtils:
         return base_name
     
     @staticmethod
-    def find_latest_timestamped_file(directory: Path, base_name: str, extension: str = "json") -> Optional[Path]:
+    def find_latest_timestamped_file(directory: Path, base_name: str, extension: str = "json", create_if_missing: bool = False) -> Optional[Path]:
         """
         Find the latest timestamped file in a directory
         
@@ -102,9 +102,10 @@ class TimestampUtils:
             directory: Directory to search in
             base_name: Base filename to look for
             extension: File extension
+            create_if_missing: Whether to create a new timestamped file if none found
             
         Returns:
-            Path to latest file or None if no files found
+            Path to latest file or None if no files found and create_if_missing=False
         """
         if not directory.exists():
             return None
@@ -119,6 +120,13 @@ class TimestampUtils:
                 matching_files.append(file_path)
         
         if not matching_files:
+            if create_if_missing:
+                # Create new timestamped file
+                timestamp = TimestampUtils.get_timestamp()
+                new_file = directory / f"{base_name}_{timestamp}.{extension}"
+                directory.mkdir(parents=True, exist_ok=True)
+                logger.info(f"Creating new timestamped file: {new_file}")
+                return new_file
             return None
         
         # Sort by timestamp in filename (newest first)
