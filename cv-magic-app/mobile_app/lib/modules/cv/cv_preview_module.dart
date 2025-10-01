@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../core/config/environment_config.dart';
 
 class CVPreviewModule extends StatefulWidget {
   final String? selectedCVFilename;
@@ -53,7 +54,7 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
 
     try {
       final response = await http
-          .get(Uri.parse('http://localhost:8000/api/cv/content/$filename'));
+          .get(Uri.parse('EnvironmentConfig.baseUrl/api/cv/content/$filename'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -287,7 +288,7 @@ class CVPreviewService {
   static Future<String?> loadCVContent(String filename) async {
     try {
       final response = await http
-          .get(Uri.parse('http://localhost:8000/api/cv/content/$filename'));
+          .get(Uri.parse('EnvironmentConfig.baseUrl/api/cv/content/$filename'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data['content'];
@@ -303,7 +304,7 @@ class CVPreviewService {
       {int maxLength = 500}) async {
     try {
       final response = await http.get(Uri.parse(
-          'http://localhost:8000/api/cv/preview/$filename?max_length=$maxLength'));
+          'EnvironmentConfig.baseUrl/api/cv/preview/$filename?max_length=$maxLength'));
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }

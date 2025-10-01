@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme/app_theme.dart';
+import '../core/config/environment_config.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -116,7 +117,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       // Call backend registration endpoint
       final response = await http.post(
-        Uri.parse('http://localhost:8000/auth/register'),
+        Uri.parse('${EnvironmentConfig.baseUrl}/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),
@@ -173,7 +174,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       // Call backend login endpoint
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
+        Uri.parse('${EnvironmentConfig.baseUrl}/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': _emailController.text.isNotEmpty
@@ -245,7 +246,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       // Call backend login endpoint with Google user credentials
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
+        Uri.parse('${EnvironmentConfig.baseUrl}/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': 'demo@gmail.com',

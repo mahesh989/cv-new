@@ -5,8 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
 
+import '../core/config/environment_config.dart';
+
 class APIService {
-  static const String baseUrl = 'http://localhost:8000';
+  static String get baseUrl => EnvironmentConfig.baseUrl;
   static const String apiPrefix = '/api';
 
   // Get the current selected model from AI service

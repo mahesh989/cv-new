@@ -24,12 +24,12 @@ class Settings(BaseSettings):
     PORT: int = 8000
     
     # Database Configuration
-    DATABASE_URL: str = "postgresql://mahesh@localhost:5432/cv_app"
-    DATABASE_HOST: str = "localhost"
+    DATABASE_URL: str = "postgresql://postgres:Nepalibabu989@myapp-database.cbo28oqgs6o8.ap-southeast-2.rds.amazonaws.com:5432/myappdb"
+    DATABASE_HOST: str = "myapp-database.cbo28oqgs6o8.ap-southeast-2.rds.amazonaws.com"
     DATABASE_PORT: int = 5432
-    DATABASE_NAME: str = "cv_app"
-    DATABASE_USER: str = "mahesh"
-    DATABASE_PASSWORD: str = ""
+    DATABASE_NAME: str = "myappdb"
+    DATABASE_USER: str = "postgres"
+    DATABASE_PASSWORD: str = "password"
     
     # Redis Configuration
     REDIS_URL: str = "redis://localhost:6379/0"

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import '../core/config/environment_config.dart';
 
 /// Popup widget to display backend connection errors
 class BackendErrorPopup extends StatelessWidget {
@@ -154,7 +155,7 @@ class BackendErrorPopup extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Make sure the backend server is running on http://localhost:8000',
+                    'Make sure the backend server is running on ${EnvironmentConfig.baseUrl}',
                     style: AppTheme.bodySmall.copyWith(
                       color: AppTheme.primaryTeal,
                       fontWeight: FontWeight.w500,

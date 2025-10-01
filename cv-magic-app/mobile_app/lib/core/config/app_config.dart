@@ -1,9 +1,18 @@
+import 'package:flutter/foundation.dart';
+
 class AppConfig {
   // Base URL for API and static assets
-  static const String baseUrl = 'http://localhost:8000';
+  static String get baseUrl => kDebugMode
+      ? 'http://localhost:8000' // Development
+      : 'https://your-production-url.com'; // Production
+
+  // Alternative: Use environment-based configuration
+  // static const String baseUrl = kDebugMode
+  //     ? 'http://localhost:8000'  // Development
+  //     : 'https://your-production-url.com';  // Production
 
   // API endpoints
-  static const String apiBaseUrl = '$baseUrl/api';
+  static String get apiBaseUrl => '$baseUrl/api';
 
   // Video and media paths (now using YouTube embed)
   static const String youtubeVideoId = 'a9IUom_eUGI';

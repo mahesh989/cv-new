@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 import '../core/theme/app_theme.dart';
 import '../services/skills_analysis_handler.dart';
+import '../core/config/environment_config.dart';
 
 class CVGenerationScreen extends StatefulWidget {
   final VoidCallback? onNavigateToCVMagic;
@@ -99,7 +100,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     try {
       // Load the latest tailored CV across all companies
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cv/latest-tailored-cv'),
+        Uri.parse('EnvironmentConfig.baseUrl/api/cv/latest-tailored-cv'),
       );
 
       if (response.statusCode == 200) {
@@ -538,7 +539,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/tailored-cv/save-edited'),
+        Uri.parse('EnvironmentConfig.baseUrl/api/tailored-cv/save-edited'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'company': _currentCompany,
@@ -625,7 +626,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     try {
       final response = await http.post(
         Uri.parse(
-            'http://localhost:8000/api/tailored-cv/save-additional-prompt'),
+            'EnvironmentConfig.baseUrl/api/tailored-cv/save-additional-prompt'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'company': _currentCompany,

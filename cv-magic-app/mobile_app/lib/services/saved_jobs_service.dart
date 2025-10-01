@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
+import '../core/config/environment_config.dart';
 import 'package:http/http.dart' as http;
 
 class SavedJobsService {
@@ -63,8 +64,8 @@ class SavedJobsService {
     try {
       debugPrint('🌐 [SAVED_JOBS] Loading from API...');
 
-      // Use localhost for development
-      const baseUrl = 'http://localhost:8000';
+      // Use environment-based configuration
+      final baseUrl = EnvironmentConfig.baseUrl;
 
       // Add timeout to prevent hanging during analysis
       final response = await http.get(

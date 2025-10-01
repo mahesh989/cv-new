@@ -2,9 +2,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/config/app_config.dart';
+import '../core/config/environment_config.dart';
 
 class APIKeyService {
-  static const String _baseUrl = AppConfig.baseUrl;
+  static String get _baseUrl => EnvironmentConfig.baseUrl;
 
   /// Get authentication token from SharedPreferences
   Future<String?> _getAuthToken() async {
