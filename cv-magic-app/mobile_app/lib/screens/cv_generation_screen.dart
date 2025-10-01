@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:async';
 import '../core/theme/app_theme.dart';
@@ -97,21 +98,80 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     });
 
     try {
-      // Load the latest tailored CV across all companies
-      final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cv/latest-tailored-cv'),
+      // Get auth token
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      
+      if (token == null) {
+        setState(() {
+          tailoredCVContent = 'Please log in to view your tailored CVs';
+          _isLoadingCV = false;
+          _isGenerating = false;
+        });
+        return;
+      }
+
+      // Set up headers with auth token
+      final headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      };
+
+      // First, get the list of available companies to find the latest CV
+      final companiesResponse = await http.get(
+        Uri.parse('http://localhost:8000/tailored-cv/available-companies-real'),
+        headers: headers,
       );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      if (companiesResponse.statusCode == 200) {
+        final companiesData = json.decode(companiesResponse.body);
+        final companies = List<Map<String, dynamic>>.from(companiesData['companies'] ?? []);
+
+        if (companies.isEmpty) {
+          setState(() {
+            tailoredCVContent = 'No tailored CVs available for your account';
+            _isLoadingCV = false;
+            _isGenerating = false;
+          });
+          return;
+        }
+
+        // Sort companies by last_updated and get the most recent one
+        companies.sort((a, b) => b['last_updated'].compareTo(a['last_updated']));
+        final latestCompany = companies.first;
+        final companyName = latestCompany['company'];
+
+        // Now get the content for this company
+        final response = await http.get(
+          Uri.parse('http://localhost:8000/tailored-cv/content/$companyName'),
+          headers: headers,
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          setState(() {
+            tailoredCVContent = data['content'] ?? 'No content available';
+            _currentCompany = data['company'] ?? companyName;
+          });
+        } else if (response.statusCode == 401) {
+          setState(() {
+            tailoredCVContent = 'Your session has expired. Please log in again.';
+          });
+          // Optionally trigger a logout or re-authentication flow here
+        } else {
+          setState(() {
+            tailoredCVContent =
+                'Failed to load tailored CV. Status: ${response.statusCode}';
+          });
+        }
+      } else if (companiesResponse.statusCode == 401) {
         setState(() {
-          tailoredCVContent = data['content'] ?? 'No content available';
-          _currentCompany = data['company'] ?? 'Unknown';
+          tailoredCVContent = 'Your session has expired. Please log in again.';
         });
+        // Optionally trigger a logout or re-authentication flow here
       } else {
         setState(() {
-          tailoredCVContent =
-              'Failed to load tailored CV. Status: ${response.statusCode}';
+          tailoredCVContent = 'Failed to get companies list. Status: ${companiesResponse.statusCode}';
         });
       }
     } catch (e) {

@@ -25,7 +25,7 @@ from app.ai.ai_service import ai_service
 from app.services.jd_analysis import analyze_and_save_company_jd
 from app.services.cv_jd_matching import match_and_save_cv_jd
 from app.services.context_aware_analysis_pipeline import context_aware_pipeline
-from app.unified_latest_file_selector import unified_selector
+from app.unified_latest_file_selector import get_selector_for_user
 from app.services.jd_cache_manager import jd_cache_manager
 from pathlib import Path
 import asyncio
