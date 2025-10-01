@@ -70,7 +70,104 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  bool _isValidEmail(String email) {
+    // Simple email validation - must contain @ and end with .com
+    return RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(email) &&
+        email.endsWith('.com');
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleRegistration() async {
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Check if we have required fields
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter both email and password');
+      return;
+    }
+
+    // Validate email format
+    if (!_isValidEmail(_emailController.text.trim())) {
+      _showErrorDialog('Please enter a valid email address ending with .com');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Call backend registration endpoint
+      final response = await http.post(
+        Uri.parse('http://localhost:8000/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+          'full_name': _nameController.text.trim().isNotEmpty
+              ? _nameController.text.trim()
+              : null,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        // Store auth data
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('is_logged_in', true);
+        await prefs.setString('auth_token', data['access_token']);
+        await prefs.setString('user_email', data['user']['email']);
+        await prefs.setString('user_name', data['user']['name']);
+
+        // Call the login callback
+        widget.onLogin();
+      } else {
+        final errorData = json.decode(response.body);
+        _showErrorDialog(errorData['detail'] ?? 'Registration failed');
+      }
+    } catch (e) {
+      _showErrorDialog('Network error: ${e.toString()}');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _handleEmailAuth() async {
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Check if we have required fields
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter both email and password');
+      return;
+    }
+
+    // Validate email format
+    if (!_isValidEmail(_emailController.text.trim())) {
+      _showErrorDialog('Please enter a valid email address ending with .com');
+      return;
+    }
     setState(() => _isLoading = true);
 
     try {
@@ -248,7 +345,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                               const SizedBox(height: 16),
                               _buildGoogleSignInButton(),
                               const SizedBox(height: 16),
-                              _buildDemoNotice(isSmallScreen),
+                              _buildAuthNotice(isSmallScreen),
                             ],
                           ),
                         ),
@@ -349,19 +446,28 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           TextFormField(
             controller: _emailController,
             decoration: const InputDecoration(
-              labelText: 'Email (Optional)',
+              labelText: 'Email *',
               prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your email address',
             ),
             keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Email is required';
+              }
+              if (!_isValidEmail(value.trim())) {
+                return 'Please enter a valid email ending with .com';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _passwordController,
             decoration: InputDecoration(
-              labelText: 'Password (Optional)',
+              labelText: 'Password *',
               prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your password',
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -372,6 +478,12 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               ),
             ),
             obscureText: _obscurePassword,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Password is required';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -408,6 +520,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   Widget _buildSignUpForm() {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
           TextFormField(
@@ -415,26 +528,35 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             decoration: const InputDecoration(
               labelText: 'Full Name (Optional)',
               prefixIcon: Icon(Icons.person_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your full name',
             ),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _emailController,
             decoration: const InputDecoration(
-              labelText: 'Email (Optional)',
+              labelText: 'Email *',
               prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your email address',
             ),
             keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Email is required';
+              }
+              if (!_isValidEmail(value.trim())) {
+                return 'Please enter a valid email ending with .com';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _passwordController,
             decoration: InputDecoration(
-              labelText: 'Password (Optional)',
+              labelText: 'Password *',
               prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your password',
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -445,13 +567,19 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               ),
             ),
             obscureText: _obscurePassword,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Password is required';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: AppTheme.createGradientButton(
               text: 'Create Account',
-              onPressed: _handleEmailAuth,
+              onPressed: _handleRegistration,
               isLoading: _isLoading,
               icon: Icons.person_add_rounded,
             ),
@@ -509,7 +637,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildDemoNotice(bool isSmallScreen) {
+  Widget _buildAuthNotice(bool isSmallScreen) {
     return Container(
       padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
       decoration: BoxDecoration(
@@ -530,7 +658,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              '✨ Demo Mode: Click Sign In to login instantly (no credentials required)',
+              '🔐 Create an account to get started. Use admin@admin.com for admin access.',
               style: AppTheme.bodySmall.copyWith(
                 color: AppTheme.primaryTeal,
                 fontWeight: FontWeight.w500,

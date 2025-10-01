@@ -198,15 +198,16 @@ class SkillsAnalysisService {
       print('❌ [SERVICE_ERROR] Stack trace: $stackTrace');
 
       // Enhanced error handling for different error types
-      if (e.toString().contains('404') || e.toString().contains('not found')) {
+      if (e is BackendConnectionException) {
+        return SkillsAnalysisResult.error(
+            'Backend connection error: ${e.message}');
+      } else if (e is AuthenticationException) {
+        return SkillsAnalysisResult.error('Authentication error: ${e.message}');
+      } else if (e is ServerException) {
+        return SkillsAnalysisResult.error('Server error: ${e.message}');
+      } else if (e is NotFoundException) {
         return SkillsAnalysisResult.error(
             'CV file not found. Please upload a CV file first.');
-      } else if (e.toString().contains('401')) {
-        return SkillsAnalysisResult.error(
-            'Authentication required. Please log in again.');
-      } else if (e.toString().contains('500')) {
-        return SkillsAnalysisResult.error(
-            'Server error. Please try again later.');
       } else if (e.toString().contains('analyze the job description first')) {
         return SkillsAnalysisResult.error(
             'Please analyze the job description first before running skills analysis.');

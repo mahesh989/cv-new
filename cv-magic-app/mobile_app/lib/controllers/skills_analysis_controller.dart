@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/skills_analysis_model.dart';
 import '../services/skills_analysis_service.dart';
 import '../services/skills_analysis_handler.dart';
 import '../services/job_parser.dart';
 import '../services/jobs_state_manager.dart';
+import '../services/api_service.dart';
+import '../widgets/backend_error_popup.dart';
 
 /// States for skills analysis
 enum SkillsAnalysisState {
@@ -220,6 +223,15 @@ class SkillsAnalysisController extends ChangeNotifier {
     } catch (e) {
       _setError('Skills analysis failed: $e');
       debugPrint('❌ [SKILLS_ANALYSIS] Error: $e');
+
+      // Show appropriate error popup based on error type
+      if (e is BackendConnectionException) {
+        _showBackendErrorPopup(e.message);
+      } else if (e is AuthenticationException) {
+        _showAuthErrorPopup();
+      } else if (e is ServerException) {
+        _showServerErrorPopup(e.message);
+      }
     }
   }
 
@@ -311,6 +323,15 @@ class SkillsAnalysisController extends ChangeNotifier {
       _setError('Context-aware analysis failed: $e');
       _showNotification('Context-aware analysis failed: $e', isError: true);
       debugPrint('❌ [SKILLS_ANALYSIS_CONTROLLER] Error: $e');
+
+      // Show appropriate error popup based on error type
+      if (e is BackendConnectionException) {
+        _showBackendErrorPopup(e.message);
+      } else if (e is AuthenticationException) {
+        _showAuthErrorPopup();
+      } else if (e is ServerException) {
+        _showServerErrorPopup(e.message);
+      }
     }
   }
 
@@ -626,6 +647,27 @@ class SkillsAnalysisController extends ChangeNotifier {
     _executionDuration = _fullResult?.executionDuration ?? Duration.zero;
     notifyListeners();
     debugPrint('🏁 [CONTROLLER] Analysis fully completed');
+  }
+
+  /// Show backend connection error popup
+  void _showBackendErrorPopup(String message) {
+    // We need a BuildContext to show the popup, so we'll store the error
+    // and let the UI handle showing the popup
+    _setError('Backend connection error: $message');
+    _showNotification('Backend connection error: $message', isError: true);
+  }
+
+  /// Show authentication error popup
+  void _showAuthErrorPopup() {
+    _setError('Authentication required. Please log in again.');
+    _showNotification('Authentication required. Please log in again.',
+        isError: true);
+  }
+
+  /// Show server error popup
+  void _showServerErrorPopup(String message) {
+    _setError('Server error: $message');
+    _showNotification('Server error: $message', isError: true);
   }
 
   void _triggerClearResults() {

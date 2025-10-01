@@ -5,6 +5,7 @@ import '../widgets/skills_display_widget.dart';
 import '../widgets/job_input.dart';
 import '../modules/cv/cv_selection_module.dart';
 import '../core/theme/app_theme.dart';
+import '../widgets/backend_error_popup.dart';
 
 /// Screen for performing and displaying skills analysis results
 class SkillsAnalysisScreen extends StatefulWidget {
@@ -32,14 +33,58 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
         // This will trigger a rebuild and update the button state
       });
     });
+
+    // Listen to controller changes to check for connection errors
+    _controller.addListener(_checkAndShowErrorPopup);
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_checkAndShowErrorPopup);
     _controller.dispose();
     _jdController.dispose();
     _jdUrlController.dispose();
     super.dispose();
+  }
+
+  /// Check if the current error is a connection error and show popup
+  void _checkAndShowErrorPopup() {
+    final error = _controller.errorMessage;
+    if (error != null) {
+      if (error.contains('Backend connection error') ||
+          error.contains('Unable to connect to backend') ||
+          error.contains('Connection refused') ||
+          error.contains('Connection timed out')) {
+        BackendErrorPopup.showConnectionError(
+          context: context,
+          onRetry: () {
+            // Retry the last operation
+            if (_controller.hasError) {
+              _controller.refreshAnalysis();
+            }
+          },
+        );
+      } else if (error.contains('Authentication error') ||
+          error.contains('Authentication required')) {
+        BackendErrorPopup.showAuthError(
+          context: context,
+          onRetry: () {
+            // Navigate to login or refresh auth
+            Navigator.of(context).pushReplacementNamed('/auth');
+          },
+        );
+      } else if (error.contains('Server error')) {
+        BackendErrorPopup.showServerError(
+          context: context,
+          onRetry: () {
+            // Retry the last operation
+            if (_controller.hasError) {
+              _controller.refreshAnalysis();
+            }
+          },
+        );
+      }
+    }
   }
 
   @override

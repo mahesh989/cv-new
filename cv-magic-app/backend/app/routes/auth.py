@@ -4,53 +4,73 @@ Authentication routes
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime
-from app.models.auth import LoginRequest, TokenResponse, UserData
+from sqlalchemy.orm import Session
+from app.models.auth import LoginRequest, RegisterRequest, TokenResponse, UserData
+from app.models.user import User
 from app.core.auth import authenticate_user, create_access_token, create_refresh_token
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, get_database
 from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()
 
 
-@router.post("/register")
-async def register():
-    """User registration endpoint"""
-    return {"message": "Registration endpoint - to be implemented"}
-
-
-@router.post("/login", response_model=TokenResponse)
-async def login(credentials: LoginRequest):
+@router.post("/register", response_model=TokenResponse)
+async def register(register_data: RegisterRequest, db: Session = Depends(get_database)):
     """
-    User login endpoint - accepts empty credentials for development
+    User registration endpoint
     
     Args:
-        credentials: Login credentials (email and password, both can be empty)
+        register_data: Registration data (email, password, full_name)
+        db: Database session
         
     Returns:
         TokenResponse with access token and user data
     """
-    # Authenticate user (allows empty credentials for now)
-    user = authenticate_user(credentials.email or "", credentials.password or "")
-    
-    if not user:
+    # Check if user already exists
+    existing_user = db.query(User).filter(User.email == register_data.email).first()
+    if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
         )
     
-    # Ensure user-specific directories exist immediately on login
+    # Create new user
+    new_user = User(
+        email=register_data.email,
+        username=register_data.email.split('@')[0],  # Use email prefix as username
+        full_name=register_data.full_name or register_data.email.split('@')[0],
+        is_active=True,
+        is_verified=True  # Auto-verify for now
+    )
+    
+    # Set password (this will hash it)
+    new_user.set_password(register_data.password)
+    
+    # Save to database
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Create user data for response
+    user_data = UserData(
+        id=str(new_user.id),
+        email=new_user.email,
+        name=new_user.full_name or new_user.email.split('@')[0],
+        created_at=new_user.created_at,
+        is_active=new_user.is_active
+    )
+    
+    # Create tokens
+    user_dict = {"id": user_data.id, "email": user_data.email}
+    access_token = create_access_token(user_dict)
+    refresh_token = create_refresh_token(user_data.id)
+    
+    # Ensure user-specific directories exist
     from app.utils.user_path_utils import ensure_user_directories
-    # Enforce user directory creation; raise error on failure
-    base_path = ensure_user_directories(user.email)
+    base_path = ensure_user_directories(user_data.email)
     if not base_path or not base_path.exists():
         raise HTTPException(status_code=500, detail="Failed to initialize user storage directories")
-
-    # Create tokens
-    user_dict = {"id": user.id, "email": user.email}
-    access_token = create_access_token(user_dict)
-    refresh_token = create_refresh_token(user.id)
     
     # Return token response
     return TokenResponse(
@@ -58,7 +78,71 @@ async def login(credentials: LoginRequest):
         refresh_token=refresh_token,
         token_type="bearer",
         expires_in=settings.JWT_EXPIRATION_MINUTES * 60,  # Convert to seconds
-        user=user
+        user=user_data
+    )
+
+
+@router.post("/login", response_model=TokenResponse)
+async def login(credentials: LoginRequest, db: Session = Depends(get_database)):
+    """
+    User login endpoint - requires valid credentials
+    
+    Args:
+        credentials: Login credentials (email and password)
+        db: Database session
+        
+    Returns:
+        TokenResponse with access token and user data
+    """
+    # Find user in database
+    user = db.query(User).filter(User.email == credentials.email.lower().strip()).first()
+    
+    if not user or not user.verify_password(credentials.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Check if user is active
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is deactivated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Update last login
+    user.last_login = datetime.utcnow()
+    db.commit()
+    
+    # Create user data for response
+    user_data = UserData(
+        id=str(user.id),
+        email=user.email,
+        name=user.full_name or user.email.split('@')[0],
+        created_at=user.created_at,
+        is_active=user.is_active
+    )
+    
+    # Ensure user-specific directories exist immediately on login
+    from app.utils.user_path_utils import ensure_user_directories
+    base_path = ensure_user_directories(user_data.email)
+    if not base_path or not base_path.exists():
+        raise HTTPException(status_code=500, detail="Failed to initialize user storage directories")
+
+    # Create tokens
+    user_dict = {"id": user_data.id, "email": user_data.email}
+    access_token = create_access_token(user_dict)
+    refresh_token = create_refresh_token(user_data.id)
+    
+    # Return token response
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=settings.JWT_EXPIRATION_MINUTES * 60,  # Convert to seconds
+        user=user_data
     )
 
 

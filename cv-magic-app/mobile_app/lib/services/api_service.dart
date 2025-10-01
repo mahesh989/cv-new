@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
@@ -41,34 +42,61 @@ class APIService {
 
     http.Response response;
 
-    switch (method.toUpperCase()) {
-      case 'GET':
-        response = await http.get(url, headers: requestHeaders);
-        break;
-      case 'POST':
-        response = await http.post(
-          url,
-          headers: requestHeaders,
-          body: body != null ? jsonEncode(body) : null,
-        );
-        break;
-      case 'PUT':
-        response = await http.put(
-          url,
-          headers: requestHeaders,
-          body: body != null ? jsonEncode(body) : null,
-        );
-        break;
-      case 'DELETE':
-        response = await http.delete(url, headers: requestHeaders);
-        break;
-      default:
-        throw Exception('Unsupported HTTP method: $method');
+    try {
+      switch (method.toUpperCase()) {
+        case 'GET':
+          response = await http.get(url, headers: requestHeaders);
+          break;
+        case 'POST':
+          response = await http.post(
+            url,
+            headers: requestHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          );
+          break;
+        case 'PUT':
+          response = await http.put(
+            url,
+            headers: requestHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          );
+          break;
+        case 'DELETE':
+          response = await http.delete(url, headers: requestHeaders);
+          break;
+        default:
+          throw Exception('Unsupported HTTP method: $method');
+      }
+    } catch (e) {
+      // Handle connection errors
+      if (e is SocketException) {
+        throw BackendConnectionException(
+            'Unable to connect to backend server. Please check if the server is running.');
+      } else if (e is HttpException) {
+        throw BackendConnectionException('HTTP error occurred: ${e.message}');
+      } else if (e.toString().contains('Connection refused') ||
+          e.toString().contains('Connection timed out') ||
+          e.toString().contains('No route to host')) {
+        throw BackendConnectionException(
+            'Backend server is not reachable. Please check if the server is running on http://localhost:8000');
+      }
+      rethrow;
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     } else {
+      // Handle specific HTTP error codes
+      if (response.statusCode == 401) {
+        throw AuthenticationException(
+            'Authentication required. Please log in again.');
+      } else if (response.statusCode >= 500) {
+        throw ServerException(
+            'Server error (${response.statusCode}). Please try again later.');
+      } else if (response.statusCode == 404) {
+        throw NotFoundException('Resource not found (${response.statusCode})');
+      }
+
       // Try to parse error response for better error handling
       try {
         final errorData = jsonDecode(response.body);
@@ -334,4 +362,37 @@ class AIAPI {
       jobDescription: jobDescription,
     );
   }
+}
+
+// Custom exception classes for better error handling
+class BackendConnectionException implements Exception {
+  final String message;
+  BackendConnectionException(this.message);
+
+  @override
+  String toString() => 'BackendConnectionException: $message';
+}
+
+class AuthenticationException implements Exception {
+  final String message;
+  AuthenticationException(this.message);
+
+  @override
+  String toString() => 'AuthenticationException: $message';
+}
+
+class ServerException implements Exception {
+  final String message;
+  ServerException(this.message);
+
+  @override
+  String toString() => 'ServerException: $message';
+}
+
+class NotFoundException implements Exception {
+  final String message;
+  NotFoundException(this.message);
+
+  @override
+  String toString() => 'NotFoundException: $message';
 }

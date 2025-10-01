@@ -69,15 +69,17 @@ class ContextAwareAnalysisService {
       print('❌ [CONTEXT_AWARE_SERVICE] Stack trace: $stackTrace');
 
       // Enhanced error handling for different error types
-      if (e.toString().contains('404') || e.toString().contains('not found')) {
+      if (e is BackendConnectionException) {
+        return ContextAwareAnalysisResult.error(
+            'Backend connection error: ${e.message}');
+      } else if (e is AuthenticationException) {
+        return ContextAwareAnalysisResult.error(
+            'Authentication error: ${e.message}');
+      } else if (e is ServerException) {
+        return ContextAwareAnalysisResult.error('Server error: ${e.message}');
+      } else if (e is NotFoundException) {
         return ContextAwareAnalysisResult.error(
             'Analysis resources not found. Please check your inputs.');
-      } else if (e.toString().contains('401')) {
-        return ContextAwareAnalysisResult.error(
-            'Authentication required. Please log in again.');
-      } else if (e.toString().contains('500')) {
-        return ContextAwareAnalysisResult.error(
-            'Server error. Please try again later.');
       } else {
         // Try to extract just the error message from API responses
         String errorMsg = e.toString();
