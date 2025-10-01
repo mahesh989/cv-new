@@ -14,13 +14,30 @@ logger = logging.getLogger(__name__)
 class DynamicFileSelector:
     """Dynamic file selector for CV analysis system"""
     
-    def __init__(self, base_path: Optional[str] = None):
-        if base_path is None:
-            base_path = "cv-analysis"
-        self.base_path = Path(base_path)
+    def __init__(self, user_email: str):
+        """
+        Initialize file selector with user-specific paths
+        
+        Args:
+            user_email: User's email address
+            
+        Raises:
+            ValueError: If user_email is not provided
+        """
+        if not user_email:
+            raise ValueError("user_email must be provided for file selection")
+            
+        # Get user-specific base path
+        from app.utils.user_path_utils import get_user_base_path
+        self.user_email = user_email.strip().lower()
+        self.base_path = get_user_base_path(self.user_email)
         self.cvs_path = self.base_path / "cvs"
         self.original_path = self.cvs_path / "original"
         self.tailored_path = self.cvs_path / "tailored"
+        
+        # Ensure user directories exist
+        from app.utils.user_path_utils import ensure_user_directories
+        ensure_user_directories(self.user_email)
     
     def get_latest_cv_files(self, company: str) -> Dict[str, Dict[str, str]]:
         """
@@ -231,5 +248,6 @@ class DynamicFileSelector:
         return result
 
 
-# Global instance
-dynamic_file_selector = DynamicFileSelector()
+# Factory to get selector per user
+def get_dynamic_file_selector(user_email: str) -> DynamicFileSelector:
+    return DynamicFileSelector(user_email=user_email)

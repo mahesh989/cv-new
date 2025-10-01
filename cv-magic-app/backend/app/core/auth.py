@@ -133,30 +133,57 @@ def create_demo_user() -> UserData:
     )
 
 
-def authenticate_user(email: str, password: str) -> Optional[UserData]:
+from sqlalchemy.orm import Session
+from app.database import get_database
+from app.models.user import User, pwd_context
+
+
+def authenticate_user(email: str, password: str, db: Optional[Session] = None) -> Optional[UserData]:
     """
-    Authenticate user.
-    
-    For now, only accepts the explicit admin credentials provided by the app owner.
-    No demo fallback here (quick-login remains available separately).
+    Authenticate user against the database, with admin fallback.
     
     Args:
         email: User email
         password: User password
+        db: Optional SQLAlchemy session (if not provided, a temporary one is used)
         
     Returns:
         UserData if authentication successful, None otherwise
     """
-    # Accept only admin credentials as per requirement
-    if (email or "").strip().lower() == "admin@admin.com" and (password or "").strip() == "admin123":
-        user_id = str(uuid.uuid4())
+    # Normalize inputs
+    email = (email or "").strip().lower()
+    password = (password or "").strip()
+
+    # Admin fallback for development compatibility
+    if email == "admin@admin.com" and password == "admin123":
         return UserData(
-            id=user_id,
+            id=str(uuid.uuid4()),
             email="admin@admin.com",
             name="Admin User",
             created_at=datetime.now(timezone.utc),
             is_active=True
         )
-    
-    # Invalid credentials
+
+    # Use provided DB session or a temporary one
+    def _query_user(session: Session) -> Optional[UserData]:
+        user = session.query(User).filter(User.email == email).first()
+        if not user:
+            return None
+        if not user.verify_password(password):
+            return None
+        return UserData(
+            id=str(user.id),
+            email=user.email,
+            name=user.full_name or user.username,
+            created_at=user.created_at.replace(tzinfo=timezone.utc) if user.created_at.tzinfo is None else user.created_at,
+            is_active=user.is_active,
+        )
+
+    if db is not None:
+        return _query_user(db)
+
+    # Fallback: use context-managed session
+    for session in get_database():
+        return _query_user(session)
+
     return None

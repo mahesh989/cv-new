@@ -15,16 +15,29 @@ def get_user_base_path(user_email: Optional[str] = None) -> Path:
     Get user-specific base path for cv-analysis
     
     Args:
-        user_email: User email address (defaults to admin@admin.com)
+        user_email: User email address
         
     Returns:
         Path to user-specific cv-analysis directory
+        
+    Raises:
+        ValueError: If no user email is provided
     """
     if not user_email:
-        user_email = "admin@admin.com"
+        raise ValueError("User email must be provided")
     
-    # Use standard user-scoped path structure: user/{user_email}/cv-analysis
-    user_folder = f"user_{user_email}"
+    # Normalize email
+    user_email = user_email.strip().lower()
+    
+    # Special case for admin user to maintain compatibility
+    if user_email == "admin@admin.com":
+        user_folder = "user_admin@admin.com"
+    else:
+        # Create unique and safe user folder name
+        safe_email = user_email.replace('@', '_at_').replace('.', '_dot_')
+        user_folder = f"user_{safe_email}"
+    
+    # Use standard user-scoped path structure: user/{user_folder}/cv-analysis
     base_path = Path("user") / user_folder / "cv-analysis"
     
     # Create the base path if it doesn't exist

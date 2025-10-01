@@ -4,25 +4,72 @@ Authentication routes
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime
-from app.models.auth import LoginRequest, TokenResponse, UserData
+from app.models.auth import LoginRequest, TokenResponse, UserData, RegisterRequest
 from app.core.auth import authenticate_user, create_access_token, create_refresh_token
 from app.core.dependencies import get_current_user
 from app.config import settings
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from app.database import get_database
+from app.models.user import User
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()
 
 
-@router.post("/register")
-async def register():
-    """User registration endpoint"""
-    return {"message": "Registration endpoint - to be implemented"}
+@router.post("/register", response_model=TokenResponse)
+async def register(payload: RegisterRequest, db: Session = Depends(get_database)):
+    """Register a new user and return auth tokens"""
+    # Normalize email
+    email = payload.email.strip().lower()
+
+    # Check if user already exists
+    existing = db.query(User).filter(User.email == email).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
+
+    # Create new user
+    user = User(
+        username=email.split("@")[0],
+        email=email,
+        full_name=payload.name,
+        is_active=True,
+        is_verified=False,
+    )
+    user.set_password(payload.password)
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    # Ensure user-specific directories exist
+    from app.utils.user_path_utils import ensure_user_directories
+    ensure_user_directories(user.email)
+
+    # Create tokens
+    user_data = {"id": str(user.id), "email": user.email}
+    access_token = create_access_token(user_data)
+    refresh_token = create_refresh_token(str(user.id))
+
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=settings.JWT_EXPIRATION_MINUTES * 60,
+        user=UserData(
+            id=str(user.id),
+            email=user.email,
+            name=user.full_name or user.username,
+            created_at=user.created_at,
+            is_active=user.is_active,
+        ),
+    )
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(credentials: LoginRequest):
+async def login(credentials: LoginRequest, db: Session = Depends(get_database)):
     """
-    User login endpoint - accepts empty credentials for development
+    User login endpoint
     
     Args:
         credentials: Login credentials (email and password, both can be empty)
@@ -30,8 +77,8 @@ async def login(credentials: LoginRequest):
     Returns:
         TokenResponse with access token and user data
     """
-    # Authenticate user (allows empty credentials for now)
-    user = authenticate_user(credentials.email or "", credentials.password or "")
+    # Authenticate user (checks DB; admin fallback supported)
+    user = authenticate_user(credentials.email, credentials.password, db)
     
     if not user:
         raise HTTPException(

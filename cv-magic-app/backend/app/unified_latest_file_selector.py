@@ -27,13 +27,29 @@ class UnifiedLatestFileSelector:
     Uses original CV for first-time JD usage, tailored CV for subsequent uses.
     """
 
-    def __init__(self, base_path: str = "cv-analysis", user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: Optional[str] = None):
+        """
+        Initialize file selector with user-specific paths
+        
+        Args:
+            user_email: User's email address. Must be provided.
+            
+        Raises:
+            ValueError: If user_email is not provided
+        """
+        if not user_email:
+            raise ValueError("user_email must be provided for file selection")
+            
         from app.utils.user_path_utils import get_user_base_path
-        self.user_email = user_email
-        self.base_path = get_user_base_path(user_email)
+        self.user_email = user_email.strip().lower()
+        self.base_path = get_user_base_path(self.user_email)
         self.cvs_path = self.base_path / "cvs"
         self.tailored_path = self.cvs_path / "tailored"
         self.original_path = self.cvs_path / "original"
+        
+        # Ensure paths exist
+        from app.utils.user_path_utils import ensure_user_directories
+        ensure_user_directories(self.user_email)
 
     def get_latest_cv_for_company(self, company: str, jd_url: str = "", jd_text: str = "") -> FileContext:
         """
@@ -316,18 +332,30 @@ class UnifiedLatestFileSelector:
         return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
-# Global singleton instance
-unified_selector = UnifiedLatestFileSelector()
+def get_selector_for_user(user_email: str) -> UnifiedLatestFileSelector:
+    """
+    Get a file selector instance for a specific user
+    
+    Args:
+        user_email: User's email address
+        
+    Returns:
+        UnifiedLatestFileSelector instance scoped to the user
+    """
+    return UnifiedLatestFileSelector(user_email=user_email)
 
 
-# Backward-compatible helpers
-def get_latest_cv_content_for_analysis(company: str = "") -> str:
-    return unified_selector.get_cv_content_for_analysis(company)
+# Backward-compatible helpers - these now require user_email
+def get_latest_cv_content_for_analysis(company: str, user_email: str) -> str:
+    selector = get_selector_for_user(user_email)
+    return selector.get_cv_content_for_analysis(company)
 
-def get_latest_cv_paths_for_services(company: str = "") -> Dict[str, str]:
-    return unified_selector.get_latest_cv_paths_for_services(company)
+def get_latest_cv_paths_for_services(company: str, user_email: str) -> Dict[str, str]:
+    selector = get_selector_for_user(user_email)
+    return selector.get_latest_cv_paths_for_services(company)
 
-def get_cv_for_analysis(company: str, is_rerun: bool = False) -> FileContext:
-    return unified_selector.get_latest_cv_for_company(company)
+def get_cv_for_analysis(company: str, user_email: str, is_rerun: bool = False) -> FileContext:
+    selector = get_selector_for_user(user_email)
+    return selector.get_latest_cv_for_company(company)
 
 

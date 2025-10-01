@@ -6,10 +6,16 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 
+class RegisterRequest(BaseModel):
+    """Registration request model"""
+    email: EmailStr
+    password: str
+    name: str
+
 class LoginRequest(BaseModel):
-    """Login request model - allows empty credentials for now"""
-    email: Optional[str] = ""
-    password: Optional[str] = ""
+    """Login request model"""
+    email: EmailStr
+    password: str
 
 
 class UserData(BaseModel):

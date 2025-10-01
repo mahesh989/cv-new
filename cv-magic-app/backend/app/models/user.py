@@ -6,6 +6,9 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
 from sqlalchemy.sql import func
 from passlib.context import CryptContext
 from app.database import Base
+from sqlalchemy.orm import validates
+from email_validator import validate_email, EmailNotValidError
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -33,6 +36,15 @@ class User(Base):
         """Verify a password against the hashed password"""
         return pwd_context.verify(password, self.hashed_password)
     
+    @validates('email')
+    def validate_email(self, key, address):
+        try:
+            # Validate and normalize the email
+            valid = validate_email(address)
+            return valid.email
+        except EmailNotValidError as e:
+            raise ValueError(f"Invalid email address: {str(e)}")
+
     def __repr__(self):
         return f"<User(username='{self.username}', email='{self.email}')>"
 
