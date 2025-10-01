@@ -5,8 +5,9 @@ from typing import Optional
 from datetime import datetime, timezone
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.core.auth import verify_token
+from app.core.auth import verify_token, create_demo_user
 from app.models.auth import TokenData, UserData
+from app.database import get_database
 
 # Security scheme for extracting Bearer tokens
 security = HTTPBearer()
