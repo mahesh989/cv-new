@@ -24,41 +24,53 @@ router = APIRouter(prefix="/api/cv", tags=["CV Management"])
 
 
 @router.post("/upload")
-async def upload_cv(cv: UploadFile = File(...)):
-    """Upload a CV file with validation and processing"""
-    return await cv_upload_service.upload_cv(cv)
+async def upload_cv(cv: UploadFile = File(...), current_user: UserData = Depends(get_current_user)):
+    """Upload a CV file with validation and processing - user-specific path isolated"""
+    from app.modules.cv.upload import CVUploadService
+    user_cv_upload_service = CVUploadService(user_email=current_user.email)
+    return await user_cv_upload_service.upload_cv(cv)
 
 
 @router.get("/list")
 async def list_cvs(current_user: UserData = Depends(get_current_user)):
-    """List all uploaded CVs with metadata"""
-    return cv_selection_service.list_cvs(current_user)
+    """List all uploaded CVs with metadata - user-specific path isolated"""
+    from app.modules.cv.selection import CVSelectionService
+    user_cv_selection_service = CVSelectionService(user_email=current_user.email)
+    return user_cv_selection_service.list_cvs(current_user)
 
 
 @router.get("/info/{filename}")
-async def get_cv_info(filename: str):
-    """Get information about a specific CV file"""
-    return cv_selection_service.get_cv_info(filename)
+async def get_cv_info(filename: str, current_user: UserData = Depends(get_current_user)):
+    """Get information about a specific CV file - user-specific path isolated"""
+    from app.modules.cv.selection import CVSelectionService
+    user_cv_selection_service = CVSelectionService(user_email=current_user.email)
+    return user_cv_selection_service.get_cv_info(filename)
 
 
 @router.get("/content/{filename}")
-async def get_cv_content(filename: str):
-    """Get CV text content with improved extraction"""
-    return cv_preview_service.get_cv_content(filename)
+async def get_cv_content(filename: str, current_user: UserData = Depends(get_current_user)):
+    """Get CV text content with improved extraction - user-specific path isolated"""
+    from app.modules.cv.preview import CVPreviewService
+    user_cv_preview_service = CVPreviewService(user_email=current_user.email)
+    return user_cv_preview_service.get_cv_content(filename)
 
 
 @router.get("/preview/{filename}")
-async def get_cv_preview(filename: str, max_length: int = 500):
-    """Get CV content preview with customizable length"""
-    return cv_preview_service.get_cv_preview(filename, max_length)
+async def get_cv_preview(filename: str, max_length: int = 500, current_user: UserData = Depends(get_current_user)):
+    """Get CV content preview with customizable length - user-specific path isolated"""
+    from app.modules.cv.preview import CVPreviewService
+    user_cv_preview_service = CVPreviewService(user_email=current_user.email)
+    return user_cv_preview_service.get_cv_preview(filename, max_length)
 
 
 @router.post("/save-for-analysis/{filename}")
 async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(get_current_user)):
     """Save selected CV as both original_cv.txt and original_cv.json in cv-analysis folder"""
     try:
-        # Get CV content
-        cv_content_result = cv_preview_service.get_cv_content(filename)
+        # Get CV content using user-specific service instance
+        from app.modules.cv.preview import CVPreviewService
+        user_cv_preview_service = CVPreviewService(user_email=current_user.email)
+        cv_content_result = user_cv_preview_service.get_cv_content(filename)
         
         if not cv_content_result.get('content'):
             raise HTTPException(status_code=404, detail=f"CV content not found for: {filename}")
