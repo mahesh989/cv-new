@@ -64,18 +64,13 @@ class _CVMagicPageState extends State<CVMagicPage> {
     });
 
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:8000/api/cv/content/$filename'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          cvContent = data['content'];
-        });
-      } else {
-        setState(() {
-          cvContent = 'Failed to load CV content';
-        });
-      }
+      final data = await APIService.makeAuthenticatedCall(
+        endpoint: '/cv/content/$filename',
+        method: 'GET',
+      );
+      setState(() {
+        cvContent = data['content'];
+      });
     } catch (e) {
       setState(() {
         cvContent = 'Error loading CV content: $e';

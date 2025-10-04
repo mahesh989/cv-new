@@ -31,6 +31,12 @@ class APIService {
     final token = await _getAuthToken();
     final url = Uri.parse('$baseUrl$apiPrefix$endpoint');
 
+    print('🔍 [API_SERVICE] Making authenticated call to: $endpoint');
+    print('🔍 [API_SERVICE] Token available: ${token != null}');
+    print(
+      '🔍 [API_SERVICE] Token preview: ${token?.substring(0, 20) ?? "null"}...',
+    );
+
     final requestHeaders = {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -66,6 +72,11 @@ class APIService {
         throw Exception('Unsupported HTTP method: $method');
     }
 
+    print('🔍 [API_SERVICE] Response status: ${response.statusCode}');
+    print(
+      '🔍 [API_SERVICE] Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...',
+    );
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     } else {
@@ -83,7 +94,8 @@ class APIService {
       }
 
       throw Exception(
-          'API call failed: ${response.statusCode} - ${response.body}');
+        'API call failed: ${response.statusCode} - ${response.body}',
+      );
     }
   }
 
@@ -158,10 +170,7 @@ class APIService {
 
   // Get current AI status
   static Future<Map<String, dynamic>> getAIStatus() async {
-    return await makeAuthenticatedCall(
-      endpoint: '/ai/status',
-      method: 'GET',
-    );
+    return await makeAuthenticatedCall(endpoint: '/ai/status', method: 'GET');
   }
 
   // Switch model (this will also update the frontend service)
@@ -196,11 +205,9 @@ class APIService {
     }
 
     // Replace if exists: backend will overwrite on same filename. We still send the file normally.
-    request.files.add(http.MultipartFile.fromBytes(
-      'cv',
-      file.bytes!,
-      filename: file.name,
-    ));
+    request.files.add(
+      http.MultipartFile.fromBytes('cv', file.bytes!, filename: file.name),
+    );
 
     final response = await request.send();
 
@@ -210,7 +217,8 @@ class APIService {
     } else {
       final responseBody = await response.stream.bytesToString();
       throw Exception(
-          'CV upload failed: ${response.statusCode} - $responseBody');
+        'CV upload failed: ${response.statusCode} - $responseBody',
+      );
     }
   }
 
@@ -253,7 +261,8 @@ class APIService {
   }
 
   static Future<Map<String, dynamic>> extractJobMetadata(
-      String jobDescription) async {
+    String jobDescription,
+  ) async {
     return await makeAuthenticatedCall(
       endpoint: '/job/extract-metadata',
       method: 'POST',
@@ -269,10 +278,7 @@ class APIService {
     return await makeAuthenticatedCall(
       endpoint: '/job-analysis/extract-and-save',
       method: 'POST',
-      body: {
-        'job_description': jobDescription,
-        'job_url': jobUrl,
-      },
+      body: {'job_description': jobDescription, 'job_url': jobUrl},
     );
   }
 

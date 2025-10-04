@@ -5,16 +5,12 @@
 ///
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../services/api_service.dart';
 
 class CVPreviewModule extends StatefulWidget {
   final String? selectedCVFilename;
 
-  const CVPreviewModule({
-    super.key,
-    required this.selectedCVFilename,
-  });
+  const CVPreviewModule({super.key, required this.selectedCVFilename});
 
   @override
   State<CVPreviewModule> createState() => _CVPreviewModuleState();
@@ -52,19 +48,18 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
     });
 
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:8000/api/cv/content/$filename'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          cvContent = data['content'];
-        });
-      } else {
-        setState(() {
-          cvContent = 'Failed to load CV content';
-        });
-      }
+      print('🔍 [CV_PREVIEW] Loading CV content for: $filename');
+      final data = await APIService.makeAuthenticatedCall(
+        endpoint: '/cv/content/$filename',
+        method: 'GET',
+      );
+      print('🔍 [CV_PREVIEW] API response received: ${data.keys}');
+      print('🔍 [CV_PREVIEW] Content length: ${data['content']?.length ?? 0}');
+      setState(() {
+        cvContent = data['content'];
+      });
     } catch (e) {
+      print('❌ [CV_PREVIEW] Error loading CV content: $e');
       setState(() {
         cvContent = 'Error loading CV content: $e';
       });
@@ -209,11 +204,7 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.file_copy,
-                          color: Colors.blue,
-                          size: 16,
-                        ),
+                        Icon(Icons.file_copy, color: Colors.blue, size: 16),
                         const SizedBox(width: 8),
                         Text(
                           'CV Content',
@@ -225,8 +216,10 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
                         const Spacer(),
                         Text(
                           '${cvContent!.length} characters',
-                          style:
-                              TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -286,12 +279,11 @@ class CVPreviewService {
   /// Load CV content from backend
   static Future<String?> loadCVContent(String filename) async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:8000/api/cv/content/$filename'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['content'];
-      }
+      final data = await APIService.makeAuthenticatedCall(
+        endpoint: '/cv/content/$filename',
+        method: 'GET',
+      );
+      return data['content'];
     } catch (e) {
       debugPrint('Error loading CV content: $e');
     }
@@ -299,14 +291,16 @@ class CVPreviewService {
   }
 
   /// Load CV preview from backend
-  static Future<Map<String, dynamic>?> loadCVPreview(String filename,
-      {int maxLength = 500}) async {
+  static Future<Map<String, dynamic>?> loadCVPreview(
+    String filename, {
+    int maxLength = 500,
+  }) async {
     try {
-      final response = await http.get(Uri.parse(
-          'http://localhost:8000/api/cv/preview/$filename?max_length=$maxLength'));
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      }
+      final data = await APIService.makeAuthenticatedCall(
+        endpoint: '/cv/preview/$filename?max_length=$maxLength',
+        method: 'GET',
+      );
+      return data;
     } catch (e) {
       debugPrint('Error loading CV preview: $e');
     }
