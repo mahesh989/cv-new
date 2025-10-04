@@ -115,7 +115,7 @@ class ContextAwareAnalysisPipeline:
         self.cv_jd_matcher = CVJDMatcher(user_email=user_email)
         self.jd_analyzer = JDAnalyzer(user_email=user_email)
         self.job_extractor = JobExtractionService(user_email=user_email)
-        self.component_assembler = ComponentAssembler()
+        self.component_assembler = ComponentAssembler(user_email=user_email)
         self.ats_recommender = ATSRecommendationService(user_email=user_email)
         self.ai_recommender = AIRecommendationGenerator(user_email=user_email)
         

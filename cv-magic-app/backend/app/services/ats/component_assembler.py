@@ -31,8 +31,13 @@ logger = logging.getLogger(__name__)
 class ComponentAssembler:
     """Assembles individual component analyses into unified results."""
 
-    def __init__(self, base_dir: Optional[Path] = None):
-        self.base_dir: Path = base_dir or Path("cv-analysis")
+    def __init__(self, base_dir: Optional[Path] = None, user_email: str = "admin@admin.com"):
+        if base_dir:
+            self.base_dir: Path = base_dir
+        else:
+            from app.utils.user_path_utils import get_user_base_path
+            self.base_dir: Path = get_user_base_path(user_email)
+        self.user_email = user_email
         
         # Initialize analyzers
         self.skills_analyzer = SkillsAnalyzer()
