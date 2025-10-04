@@ -74,12 +74,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     print('🔵 [FRONTEND] Starting authentication process');
     setState(() => _isLoading = true);
 
+    // Determine if this is login or registration based on tab index
+    final isLogin = _tabController.index == 0;
+    final endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    print(
+        '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
+
     try {
-      // Determine if this is login or registration based on tab index
-      final isLogin = _tabController.index == 0;
-      final endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      print(
-          '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
 
       // Get trimmed values
       final email = _emailController.text.trim();
