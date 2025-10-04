@@ -495,10 +495,11 @@ async def match_cv_against_company_jd(
     company_name: str,
     cv_file_path: Optional[str] = None,
     force_refresh: bool = False,
-    temperature: float = 0.3
+    temperature: float = 0.3,
+    user_email: str = None
 ) -> CVJDMatchResult:
     """Convenience function to match CV against company JD"""
-    matcher = CVJDMatcher()
+    matcher = CVJDMatcher(user_email=user_email)
     return await matcher.match_cv_against_jd(company_name, cv_file_path, None, temperature)
 
 async def match_and_save_cv_jd(
@@ -506,10 +507,11 @@ async def match_and_save_cv_jd(
     cv_file_path: Optional[str] = None,
     force_refresh: bool = False,
     temperature: float = 0.3,
-    jd_analysis_data: Optional[Dict[str, Any]] = None
+    jd_analysis_data: Optional[Dict[str, Any]] = None,
+    user_email: str = None
 ) -> CVJDMatchResult:
     """Convenience function to match CV against JD and save results"""
-    matcher = CVJDMatcher()
+    matcher = CVJDMatcher(user_email=user_email)
     
     # Check for existing results
     if not force_refresh:

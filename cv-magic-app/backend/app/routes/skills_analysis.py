@@ -106,7 +106,7 @@ async def _extract_company_name_from_jd(jd_text: str) -> str:
         logger.warning(f"⚠️ Failed to extract company name: {e}")
         return "Unknown_Company"
 
-def _find_matching_company_folder(extracted_name: str) -> Optional[str]:
+def _find_matching_company_folder(extracted_name: str, user_email: str) -> Optional[str]:
     """Find matching company folder for extracted name"""
     try:
         cv_analysis_path = get_user_base_path(user_email)
@@ -133,7 +133,7 @@ def _find_matching_company_folder(extracted_name: str) -> Optional[str]:
         logger.warning(f"⚠️ Error finding matching company folder: {e}")
         return None
 
-def _find_company_in_existing_folders(jd_text: str) -> Optional[str]:
+def _find_company_in_existing_folders(jd_text: str, user_email: str) -> Optional[str]:
     """Find company name by checking if existing folder names appear in JD text"""
     try:
         cv_analysis_path = get_user_base_path(user_email)
@@ -317,17 +317,19 @@ async def _run_pipeline(cname: str, token_data=None):
         "component_analysis": False
     }
     
+    # Get user email and base directory first
+    from app.utils.user_path_utils import get_user_base_path
+    user_email = getattr(token_data, 'email', None) if token_data else None
+    if not user_email:
+        raise ValueError("User authentication required for pipeline operations")
+    base_dir = get_user_base_path(user_email)
+    
     # Step 1: JD Analysis (force refresh to guarantee availability)
     try:
         company_dir = base_dir / "applied_companies" / cname
         logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
         from app.services.jd_analysis.jd_analyzer import JDAnalyzer
         _analyzer = JDAnalyzer(user_email=user_email)
-        from app.utils.user_path_utils import get_user_base_path
-        # This route requires authentication - user_email should be provided
-        if not user_email:
-            raise ValueError("User authentication required for JD analysis")
-        base_dir = get_user_base_path(user_email)
         jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True, base_path=str(base_dir))
         jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
         saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
@@ -376,7 +378,8 @@ async def _run_pipeline(cname: str, token_data=None):
             cname,
             cv_file_path=cv_txt_path_for_match,
             force_refresh=True,
-            jd_analysis_data=jd_data_for_match
+            jd_analysis_data=jd_data_for_match,
+            user_email=user_email
         )
         logger.info(f"✅ [PIPELINE] CV–JD match results saved for {cname}")
         pipeline_results["cv_jd_matching"] = True
@@ -1214,7 +1217,7 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
             import json
             from datetime import datetime
 
-            saved_jobs_file = Path("cv-analysis/saved_jobs/saved_jobs.json")
+            saved_jobs_file = get_user_base_path(current_user.email) / "saved_jobs" / "saved_jobs.json"
             saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
             
             # Create initial jobs file if it doesn't exist
@@ -1232,7 +1235,7 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
                 data = json.load(f)
 
             # Get job info from original JD file
-            job_info_file = get_user_base_path(user_email) / "applied_companies" / company / "job_info.json"
+            job_info_file = get_user_base_path(current_user.email) / "applied_companies" / company / "job_info.json"
             if job_info_file.exists():
                 with open(job_info_file, 'r', encoding='utf-8') as f:
                     job_info = json.load(f)
@@ -1249,10 +1252,7 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
                         logger.info(f"✅ [JOBS] Added job to shared jobs file: {job_info.get('job_title')} at {job_info.get('company_name')}")
 
             from app.utils.user_path_utils import get_user_base_path
-            user_email = getattr(token_data, 'email', None)
-            if not user_email:
-                raise ValueError("User authentication required for JD analysis")
-            base_dir = get_user_base_path(user_email)
+            base_dir = get_user_base_path(current_user.email)
             await analyze_and_save_company_jd(company, force_refresh=True, base_path=str(base_dir))
             results["steps"].append({"step": "jd_analysis", "status": "success"})
         except Exception as e:
@@ -1262,7 +1262,7 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
         # Step 2: CV-JD Matching
         try:
             logger.info(f"🔧 [MANUAL] Step 2: CV-JD Matching for {company}")
-            await match_and_save_cv_jd(company, cv_file_path=None, force_refresh=True)
+            await match_and_save_cv_jd(company, cv_file_path=None, force_refresh=True, user_email=current_user.email)
             results["steps"].append({"step": "cv_jd_matching", "status": "success"})
         except Exception as e:
             logger.error(f"❌ [MANUAL] CV-JD Matching failed: {e}")
