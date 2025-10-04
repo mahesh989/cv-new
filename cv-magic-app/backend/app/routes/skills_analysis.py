@@ -13,6 +13,8 @@ from app.exceptions import TailoredCVNotFoundError
 from fastapi.responses import JSONResponse
 
 from app.core.auth import verify_token
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
 from app.core.model_dependency import get_current_model
 from app.services.skill_extraction import skill_extraction_service
 from app.services.cv_content_service import cv_content_service
@@ -466,7 +468,7 @@ async def _run_pipeline(cname: str, token_data=None):
         logger.info(f"   🎉 All steps completed successfully!")
 
 @router.post("/skill-extraction/analyze")
-async def analyze_skills(request: Request):
+async def analyze_skills(request: Request, current_user: UserData = Depends(get_current_user)):
     """Extract skills from CV and JD using AI with caching"""
     try:
         # Ensure required directories exist before processing
