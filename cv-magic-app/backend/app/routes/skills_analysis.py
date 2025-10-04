@@ -1847,7 +1847,7 @@ async def get_analysis_results(company: str, request: Request = None):
         from app.utils.user_path_utils import get_user_base_path
         
         # Try to get user email from token, default to admin if not available
-        user_email = "admin@admin.com"
+        user_email = None
         if request:
             try:
                 auth_header = request.headers.get("authorization")
@@ -1856,7 +1856,7 @@ async def get_analysis_results(company: str, request: Request = None):
                     from app.core.auth import verify_token
                     token_data = verify_token(token)
                     if token_data:
-                        user_email = getattr(token_data, 'email', "admin@admin.com")
+                        user_email = getattr(token_data, 'email', None)
             except Exception as e:
                 logger.warning(f"Failed to get user email from token, using default: {e}")
         
@@ -2269,8 +2269,10 @@ async def perform_preliminary_skills_analysis(
                         from app.utils.timestamp_utils import TimestampUtils
                         import json
                         
-                        # Use user-scoped path
-                        user_email = "admin@admin.com"  # Default fallback
+                        # Use user-scoped path - require valid user email
+                        if not user_email:
+                            logger.error("❌ [COMPANY_DETECTION] No user email provided - cannot access user directories")
+                            return {"error": "User authentication required"}
                         base_dir = get_user_base_path(user_email)
                         applied_companies_dir = base_dir / "applied_companies"
                         
