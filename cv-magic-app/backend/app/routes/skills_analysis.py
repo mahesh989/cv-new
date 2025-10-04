@@ -44,7 +44,7 @@ class CVSkillsEmptyError(Exception):
     pass
 
 # Helper functions for file validation
-async def _extract_company_name_from_jd(jd_text: str) -> str:
+async def _extract_company_name_from_jd(jd_text: str, user_email: str) -> str:
     """Extract company name from job description text using AI with fallback to existing folders"""
     try:
         from app.services.job_extractor import extract_job_metadata
@@ -87,7 +87,7 @@ async def _extract_company_name_from_jd(jd_text: str) -> str:
                 company_name = re.sub(r'\s+', '_', company_name)
                 
                 # Check if this matches any existing company folder
-                existing_company = _find_matching_company_folder(company_name)
+                existing_company = _find_matching_company_folder(company_name, user_email)
                 if existing_company:
                     logger.info(f"🎯 Found matching company folder: {existing_company}")
                     return existing_company
@@ -95,7 +95,7 @@ async def _extract_company_name_from_jd(jd_text: str) -> str:
                 return company_name
         
         # Final fallback: check if any existing company folders match parts of the JD text
-        existing_company = _find_company_in_existing_folders(jd_text)
+        existing_company = _find_company_in_existing_folders(jd_text, user_email)
         if existing_company:
             logger.info(f"🎯 Found company in existing folders: {existing_company}")
             return existing_company
@@ -784,13 +784,15 @@ async def preliminary_analysis(
         
         logger.info(f"🎯 Preliminary analysis request: CV={cv_filename}, JD_length={len(jd_text)}, CONFIG={config_name}")
         
+        # Get user email first for company name extraction
+        user_email = getattr(token_data, 'email', None)
+        
         # Extract company name from JD text to validate required files
-        company_name = await _extract_company_name_from_jd(jd_text)
+        company_name = await _extract_company_name_from_jd(jd_text, user_email)
         logger.info(f"🏢 Extracted company name: {company_name}")
         
         # Validate required files exist before proceeding
         # Validate files under the authenticated user's path
-        user_email = getattr(token_data, 'email', None)
         file_validation_error = _validate_required_analysis_files(company_name, user_email)
         if file_validation_error:
             logger.warning(f"❌ Required files validation failed: {file_validation_error}")
