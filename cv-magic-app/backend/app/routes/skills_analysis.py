@@ -1085,10 +1085,12 @@ async def get_preliminary_analysis_status(request: Request):
 
 
 @router.get("/skill-extraction/files")
-async def list_analysis_files(company_name: Optional[str] = None):
-    """List saved skill extraction analysis files"""
+async def list_analysis_files(company_name: Optional[str] = None, current_user: UserData = Depends(get_current_user)):
+    """List saved skill extraction analysis files - user-specific path isolated"""
     try:
-        files_info = skill_extraction_service.result_saver.list_saved_analyses(company_name)
+        from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
+        user_result_saver = SkillExtractionResultSaver(user_email=current_user.email)
+        files_info = user_result_saver.list_saved_analyses(company_name)
         
         return JSONResponse(content={
             "success": True,
@@ -1105,7 +1107,7 @@ async def list_analysis_files(company_name: Optional[str] = None):
 
 
 @router.post("/trigger-component-analysis/{company}")
-async def trigger_component_analysis(company: str):
+async def trigger_component_analysis(company: str, current_user: UserData = Depends(get_current_user)):
     """Manually trigger component analysis for a specific company (for testing/debugging)"""
     try:
         logger.info(f"🔧 [MANUAL] Triggering component analysis for company: {company}")
@@ -1175,7 +1177,7 @@ async def trigger_component_analysis(company: str):
 
 
 @router.post("/trigger-complete-pipeline/{company}")
-async def trigger_complete_pipeline(company: str):
+async def trigger_complete_pipeline(company: str, current_user: UserData = Depends(get_current_user)):
     """Manually trigger the complete analysis pipeline for a company (JD analysis → CV-JD matching → Component analysis → ATS calculation)"""
     try:
         logger.info(f"🚀 [MANUAL] Triggering complete pipeline for company: {company}")
@@ -1572,8 +1574,10 @@ async def generate_ai_recommendation(company: str, force_regenerate: bool = Fals
         
         logger.info(f"🤖 [API] Generating AI recommendation for: {company}")
         
-        # Check if input recommendation file exists (no longer need company-specific prompt files)
-        input_file = Path(f"cv-analysis/applied_companies/{company}/{company}_input_recommendation.json")
+        # Check if input recommendation file exists using user-specific path
+        from app.utils.user_path_utils import get_user_base_path
+        user_base_path = get_user_base_path(current_user.email)
+        input_file = user_base_path / "applied_companies" / company / f"{company}_input_recommendation.json"
         if not input_file.exists():
             return JSONResponse(
                 status_code=404,
@@ -1585,12 +1589,14 @@ async def generate_ai_recommendation(company: str, force_regenerate: bool = Fals
                 }
             )
         
-        # Generate AI recommendation
-        success = await ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate)
+        # Generate AI recommendation using user-specific service
+        from app.services.ai_recommendation_generator import AIRecommendationGenerator
+        user_ai_recommendation_generator = AIRecommendationGenerator(user_email=current_user.email)
+        success = await user_ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate)
         
         if success:
-            ai_file = ai_recommendation_generator.get_ai_recommendation_path(company)
-            ai_info = ai_recommendation_generator.get_ai_recommendation_info(company)
+            ai_file = user_ai_recommendation_generator.get_ai_recommendation_path(company)
+            ai_info = user_ai_recommendation_generator.get_ai_recommendation_info(company)
             
             return JSONResponse(content={
                 "success": True,
@@ -1624,19 +1630,21 @@ async def generate_ai_recommendation(company: str, force_regenerate: bool = Fals
 async def batch_generate_ai_recommendations(
     companies: Optional[List[str]] = None, 
     force_regenerate: bool = False,
-    max_concurrent: int = 2
+    max_concurrent: int = 2,
+    current_user: UserData = Depends(get_current_user)
 ):
-    """Generate AI recommendations for multiple companies in batch"""
+    """Generate AI recommendations for multiple companies in batch - user-specific path isolated"""
     try:
-        from app.services.ai_recommendation_generator import ai_recommendation_generator
+        from app.services.ai_recommendation_generator import AIRecommendationGenerator
         
-        logger.info(f"🚀 [BATCH API] Starting batch AI recommendation generation")
+        logger.info(f"🚀 [BATCH API] Starting batch AI recommendation generation for user: {current_user.email}")
         logger.info(f"   Companies: {companies or 'All with prompts'}")
         logger.info(f"   Force regenerate: {force_regenerate}")
         logger.info(f"   Max concurrent: {max_concurrent}")
         
-        # Generate recommendations
-        results = await ai_recommendation_generator.batch_generate_recommendations(
+        # Generate recommendations using user-specific service
+        user_ai_recommendation_generator = AIRecommendationGenerator(user_email=current_user.email)
+        results = await user_ai_recommendation_generator.batch_generate_recommendations(
             companies=companies,
             force_regenerate=force_regenerate,
             max_concurrent=max_concurrent
@@ -1672,16 +1680,17 @@ async def batch_generate_ai_recommendations(
 
 
 @router.get("/ai-recommendation-files")
-async def list_ai_recommendation_files():
-    """List all AI recommendation files"""
+async def list_ai_recommendation_files(current_user: UserData = Depends(get_current_user)):
+    """List all AI recommendation files - user-specific path isolated"""
     try:
-        from app.services.ai_recommendation_generator import ai_recommendation_generator
+        from app.services.ai_recommendation_generator import AIRecommendationGenerator
         
-        companies_with_ai = ai_recommendation_generator.list_companies_with_ai_recommendations()
+        user_ai_recommendation_generator = AIRecommendationGenerator(user_email=current_user.email)
+        companies_with_ai = user_ai_recommendation_generator.list_companies_with_ai_recommendations()
         ai_files_info = []
         
         for company in companies_with_ai:
-            ai_info = ai_recommendation_generator.get_ai_recommendation_info(company)
+            ai_info = user_ai_recommendation_generator.get_ai_recommendation_info(company)
             if ai_info:
                 ai_files_info.append(ai_info)
         

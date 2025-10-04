@@ -106,7 +106,9 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
         async def background_structured_processing():
             try:
                 logger.info(f"Processing {filename} for structured CV format (background)...")
-                processing_result = await enhanced_cv_upload_service.process_existing_cv(
+                from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
+                user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
+                processing_result = await user_enhanced_cv_upload_service.process_existing_cv(
                     filename=filename
                 )
                 
