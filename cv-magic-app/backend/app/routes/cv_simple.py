@@ -24,6 +24,14 @@ router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
+# Helper function to get user-specific upload directory
+def get_user_upload_dir(user_email: str) -> Path:
+    """Get user-specific upload directory"""
+    from app.utils.user_path_utils import get_user_uploads_path
+    upload_dir = get_user_uploads_path(user_email)
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    return upload_dir
+
 
 @router.post("/upload")
 async def upload_cv(
@@ -111,11 +119,16 @@ async def list_cvs(current_user: UserData = Depends(get_current_user)):
 
 
 @router.get("/content/{filename}")
-async def get_cv_content(filename: str, auto_structure: bool = False):
-    """Get CV content with optional structured processing"""
+async def get_cv_content(
+    filename: str, 
+    auto_structure: bool = False,
+    current_user: UserData = Depends(get_current_user)
+):
+    """Get CV content with optional structured processing - user-specific path isolated"""
     
     try:
-        file_path = UPLOAD_DIR / filename
+        upload_dir = get_user_upload_dir(current_user.email)
+        file_path = upload_dir / filename
         
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
@@ -197,11 +210,15 @@ async def get_cv_content(filename: str, auto_structure: bool = False):
 
 
 @router.post("/process-structured/{filename}")
-async def process_cv_structured(filename: str):
-    """Process CV into structured format and save as original_cv.json"""
+async def process_cv_structured(
+    filename: str,
+    current_user: UserData = Depends(get_current_user)
+):
+    """Process CV into structured format and save as original_cv.json - user-specific path isolated"""
     
     try:
-        file_path = UPLOAD_DIR / filename
+        upload_dir = get_user_upload_dir(current_user.email)
+        file_path = upload_dir / filename
         
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
@@ -239,11 +256,16 @@ async def process_cv_structured(filename: str):
 
 
 @router.get("/preview/{filename}")
-async def get_cv_preview(filename: str, max_length: int = 500):
-    """Get CV content preview with customizable length"""
+async def get_cv_preview(
+    filename: str, 
+    max_length: int = 500,
+    current_user: UserData = Depends(get_current_user)
+):
+    """Get CV content preview with customizable length - user-specific path isolated"""
     
     try:
-        file_path = UPLOAD_DIR / filename
+        upload_dir = get_user_upload_dir(current_user.email)
+        file_path = upload_dir / filename
         
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
@@ -538,11 +560,15 @@ async def get_available_companies():
 
 
 @router.delete("/{filename}")
-async def delete_cv(filename: str):
-    """Delete a CV file"""
+async def delete_cv(
+    filename: str,
+    current_user: UserData = Depends(get_current_user)
+):
+    """Delete a CV file - user-specific path isolated"""
     
     try:
-        file_path = UPLOAD_DIR / filename
+        upload_dir = get_user_upload_dir(current_user.email)
+        file_path = upload_dir / filename
         
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
@@ -566,19 +592,21 @@ async def delete_cv(filename: str):
 
 
 @router.get("/stats")
-async def get_upload_stats():
-    """Get upload directory statistics"""
+async def get_upload_stats(current_user: UserData = Depends(get_current_user)):
+    """Get upload directory statistics - user-specific path isolated"""
     
     try:
+        upload_dir = get_user_upload_dir(current_user.email)
         stats = {
             "total_files": 0,
             "total_size": 0,
             "file_types": {},
-            "upload_directory": str(UPLOAD_DIR.absolute())
+            "upload_directory": str(upload_dir.absolute()),
+            "user_email": current_user.email
         }
         
-        if UPLOAD_DIR.exists():
-            for file_path in UPLOAD_DIR.iterdir():
+        if upload_dir.exists():
+            for file_path in upload_dir.iterdir():
                 if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
                     stats["total_files"] += 1
                     file_size = file_path.stat().st_size

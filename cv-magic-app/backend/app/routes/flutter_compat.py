@@ -12,9 +12,9 @@ from .cv_simple import (
     upload_cv,
     list_cvs,
     get_cv_content,
-    UPLOAD_DIR,
     ALLOWED_EXTENSIONS,
-    MAX_FILE_SIZE
+    MAX_FILE_SIZE,
+    get_user_upload_dir
 )
 from ..services.cv_processor import cv_processor
 from ..services.jd_extractor import jd_extractor
