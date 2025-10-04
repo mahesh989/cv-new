@@ -813,21 +813,26 @@ async def get_available_companies_real(
     Get list of companies with real recommendation data available
     """
     try:
-        cv_analysis_path = Path(__file__).parent.parent.parent.parent.parent / "cv-analysis"
+        # Use user-specific path
+        from app.utils.user_path_utils import get_user_base_path
+        cv_analysis_path = get_user_base_path(current_user.email).resolve()
         
         companies = []
         if cv_analysis_path.exists():
-            for company_dir in cv_analysis_path.iterdir():
-                if company_dir.is_dir() and company_dir.name != "__pycache__":
-                    # Check if it has a recommendation file
-                    rec_files = list(company_dir.glob("*_ai_recommendation.json"))
-                    if rec_files:
-                        companies.append({
-                            "company": company_dir.name,
-                            "display_name": company_dir.name.replace('_', ' '),
-                            "recommendation_file": str(rec_files[0]),
-                            "last_updated": datetime.fromtimestamp(rec_files[0].stat().st_mtime).isoformat()
-                        })
+            # Look in applied_companies directory
+            applied_companies_dir = cv_analysis_path / "applied_companies"
+            if applied_companies_dir.exists():
+                for company_dir in applied_companies_dir.iterdir():
+                    if company_dir.is_dir() and company_dir.name != "__pycache__":
+                        # Check if it has a recommendation file
+                        rec_files = list(company_dir.glob("*ai_recommendation*.json"))
+                        if rec_files:
+                            companies.append({
+                                "company": company_dir.name,
+                                "display_name": company_dir.name.replace('_', ' '),
+                                "recommendation_file": str(rec_files[0]),
+                                "last_updated": datetime.fromtimestamp(rec_files[0].stat().st_mtime).isoformat()
+                            })
         
         return {
             "companies": companies,
@@ -885,19 +890,19 @@ async def get_tailored_cv_content(
     try:
         logger.info(f"📄 Tailored CV content request for {company_name} from user {current_user.id}")
         
-        # Use dynamic CV selector to get the latest CV
-        from app.services.dynamic_cv_selector import dynamic_cv_selector
+        # Use user-specific unified selector to get the latest CV for the company
+        from app.unified_latest_file_selector import get_selector_for_user
         
-        # Get the latest CV files (could be from original or tailored folder)
-        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
+        user_selector = get_selector_for_user(current_user.email)
+        cv_context = user_selector.get_latest_cv_for_company(company_name)
         
-        if not latest_cv_paths['txt_path']:
+        if not cv_context.exists or not cv_context.txt_path:
             raise HTTPException(
                 status_code=404,
-                detail="No CV text file found in cvs folders"
+                detail=f"No CV text file found for company: {company_name}"
             )
         
-        latest_txt_file = Path(latest_cv_paths['txt_path'])
+        latest_txt_file = cv_context.txt_path
         
         # Check if it exists
         if not latest_txt_file.exists():
@@ -912,14 +917,14 @@ async def get_tailored_cv_content(
         with open(latest_txt_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        logger.info(f"✅ Served CV content: {latest_txt_file.name} from {latest_cv_paths['txt_source']} folder ({len(content)} characters)")
+        logger.info(f"✅ Served CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
         
         return JSONResponse(content={
             "success": True,
             "content": content,
             "filename": latest_txt_file.name,
             "company": company_name,
-            "source_folder": latest_cv_paths['txt_source'],
+            "source_folder": cv_context.file_type,
             "metadata": {
                 "file_size": len(content),
                 "last_modified": latest_txt_file.stat().st_mtime,
