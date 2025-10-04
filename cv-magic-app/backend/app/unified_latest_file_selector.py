@@ -32,24 +32,27 @@ class UnifiedLatestFileSelector:
         Initialize file selector with user-specific paths
         
         Args:
-            user_email: User's email address. Must be provided.
-            
-        Raises:
-            ValueError: If user_email is not provided
+            user_email: User's email address. Required for actual operations.
         """
-        if not user_email:
-            raise ValueError("user_email must be provided for file selection")
-            
-        from app.utils.user_path_utils import get_user_base_path
-        self.user_email = user_email.strip().lower()
-        self.base_path = get_user_base_path(self.user_email)
-        self.cvs_path = self.base_path / "cvs"
-        self.tailored_path = self.cvs_path / "tailored"
-        self.original_path = self.cvs_path / "original"
+        self.user_email = user_email.strip().lower() if user_email else None
         
-        # Ensure paths exist
-        from app.utils.user_path_utils import ensure_user_directories
-        ensure_user_directories(self.user_email)
+        if user_email:
+            from app.utils.user_path_utils import get_user_base_path
+            self.base_path = get_user_base_path(self.user_email)
+            self.cvs_path = self.base_path / "cvs"
+            self.tailored_path = self.cvs_path / "tailored"
+            self.original_path = self.cvs_path / "original"
+        else:
+            # For global instance - paths will be set when user_email is provided
+            self.base_path = None
+            self.cvs_path = None
+            self.tailored_path = None
+            self.original_path = None
+        
+        # Ensure paths exist (only if user_email is provided)
+        if self.user_email:
+            from app.utils.user_path_utils import ensure_user_directories
+            ensure_user_directories(self.user_email)
 
     def get_latest_cv_for_company(self, company: str, jd_url: str = "", jd_text: str = "") -> FileContext:
         """
@@ -61,6 +64,9 @@ class UnifiedLatestFileSelector:
             jd_url: Job description URL (optional)
             jd_text: Job description text (optional)
         """
+        if not self.user_email:
+            raise ValueError("user_email must be provided for file selection operations")
+            
         print(f"🔍 Searching for latest CV for company: {company}")
         
         # Always get the latest CV across all types (original and tailored)
@@ -113,6 +119,9 @@ class UnifiedLatestFileSelector:
         If both exist, whichever has the newest timestamp wins.
         Base files without timestamp are treated as oldest.
         """
+        if not self.user_email:
+            raise ValueError("user_email must be provided for file selection operations")
+            
         print(f"🔍 Searching for latest CV across tailored+original for company: {company}")
         candidates: List[Tuple[Path, Optional[Path], str, str]] = []  # (json, txt, ts, type)
 
@@ -188,6 +197,9 @@ class UnifiedLatestFileSelector:
 
     def get_cv_content_across_all(self, company: str) -> str:
         """Get CV content from the latest CV across tailored and original."""
+        if not self.user_email:
+            raise ValueError("user_email must be provided for file selection operations")
+            
         cv_context = self.get_latest_cv_across_all(company)
         print(f"📄 [UNIFIED] Reading CV content from: txt={cv_context.txt_path}, json={cv_context.json_path}")
         for file_path in [cv_context.txt_path, cv_context.json_path]:
