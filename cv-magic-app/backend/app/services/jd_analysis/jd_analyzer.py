@@ -238,7 +238,7 @@ class JDAnalyzer:
         self.ai_service = ai_service
         self.user_email = user_email
         from app.utils.user_path_utils import get_user_base_path
-        self.base_analysis_path = get_user_base_path(user_email) / "cv-analysis"
+        self.base_analysis_path = get_user_base_path(user_email)
         self.requirements_extractor = RequirementsExtractor()
     
     def _read_jd_file(self, file_path: Union[str, Path]) -> str:
@@ -371,7 +371,7 @@ class JDAnalyzer:
             company_dir.mkdir(parents=True, exist_ok=True)
             
             # Reuse existing analysis file if present to avoid duplicates for same JD URL/text
-            existing = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
+            existing = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json")
             if existing and existing.exists():
                 logger.info(f"♻️ JD analysis already exists, reusing: {existing}")
                 return str(existing)
@@ -402,7 +402,7 @@ class JDAnalyzer:
         """
         try:
             company_dir = self.base_analysis_path / "applied_companies" / company_name
-            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json")
+            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json")
             
             if not analysis_file or not analysis_file.exists():
                 return None
@@ -558,7 +558,7 @@ class JDAnalyzer:
                 company_dir = self.base_analysis_path / "applied_companies" / company_name
                 try:
                     jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
-                    jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json") or (company_dir / "jd_analysis.json" if (company_dir / "jd_analysis.json").exists() else None)
+                    jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json") or (company_dir / f"{company_name}_jd_analysis.json" if (company_dir / f"{company_name}_jd_analysis.json").exists() else None)
                     if jd_original and jd_analysis and jd_analysis.exists():
                         # If hash matches, reuse; else proceed to fresh analysis
                         try:
