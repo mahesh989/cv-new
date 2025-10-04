@@ -248,6 +248,10 @@ class AIModelService extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
+      } else if (response.statusCode == 403) {
+        debugPrint(
+            '🔐 AI status requires authentication (403) - this is normal when not logged in');
+        return null;
       } else {
         debugPrint('⚠️ Failed to get backend status: ${response.statusCode}');
         return null;
@@ -280,11 +284,32 @@ class AIModelService extends ChangeNotifier {
       final status = await getBackendStatus();
       if (status != null) {
         debugPrint('🔄 Backend status: $status');
+      } else {
+        debugPrint('🔐 Backend status unavailable (authentication required)');
+        // Show user-friendly notification
+        _showAuthRequiredNotification();
       }
     } catch (e) {
       debugPrint(
           '⚠️ Could not get backend status (likely not authenticated): $e');
+      _showAuthRequiredNotification();
     }
+  }
+
+  // Show user-friendly notification about authentication requirement
+  void _showAuthRequiredNotification() {
+    // This will be called from the UI context, so we'll use a callback
+    if (_onAuthRequired != null) {
+      _onAuthRequired!();
+    }
+  }
+
+  // Callback for when authentication is required
+  Function()? _onAuthRequired;
+
+  // Set callback for authentication required notifications
+  void setAuthRequiredCallback(Function() callback) {
+    _onAuthRequired = callback;
   }
 
   // Sync with backend after authentication

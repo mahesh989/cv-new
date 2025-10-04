@@ -150,12 +150,19 @@ def authenticate_user(email: str, password: str, db: Optional[Session] = None) -
     Returns:
         UserData if authentication successful, None otherwise
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"🔵 [AUTH] Starting authentication for email: '{email}'")
+    
     # Normalize inputs
     email = (email or "").strip().lower()
     password = (password or "").strip()
+    logger.info(f"🔵 [AUTH] Normalized inputs - email: '{email}', password length: {len(password)}")
 
     # Admin fallback for development compatibility
     if email == "admin@admin.com" and password == "admin123":
+        logger.info(f"🔵 [AUTH] Using admin fallback for admin@admin.com")
         return UserData(
             id=str(uuid.uuid4()),
             email="admin@admin.com",
@@ -166,11 +173,19 @@ def authenticate_user(email: str, password: str, db: Optional[Session] = None) -
 
     # Use provided DB session or a temporary one
     def _query_user(session: Session) -> Optional[UserData]:
+        logger.info(f"🔵 [AUTH] Querying database for user: '{email}'")
         user = session.query(User).filter(User.email == email).first()
         if not user:
+            logger.warning(f"🔴 [AUTH] User not found in database: '{email}'")
             return None
+        
+        logger.info(f"🔵 [AUTH] User found: {user.email} (ID: {user.id}, Active: {user.is_active})")
+        logger.info(f"🔵 [AUTH] Verifying password")
         if not user.verify_password(password):
+            logger.warning(f"🔴 [AUTH] Password verification failed for user: '{email}'")
             return None
+        
+        logger.info(f"🔵 [AUTH] Password verification successful for user: '{email}'")
         return UserData(
             id=str(user.id),
             email=user.email,
@@ -180,10 +195,23 @@ def authenticate_user(email: str, password: str, db: Optional[Session] = None) -
         )
 
     if db is not None:
-        return _query_user(db)
+        logger.info(f"🔵 [AUTH] Using provided database session")
+        result = _query_user(db)
+        if result:
+            logger.info(f"✅ [AUTH] Authentication successful")
+        else:
+            logger.warning(f"🔴 [AUTH] Authentication failed")
+        return result
 
     # Fallback: use context-managed session
+    logger.info(f"🔵 [AUTH] Using context-managed database session")
     for session in get_database():
-        return _query_user(session)
+        result = _query_user(session)
+        if result:
+            logger.info(f"✅ [AUTH] Authentication successful")
+        else:
+            logger.warning(f"🔴 [AUTH] Authentication failed")
+        return result
 
+    logger.warning(f"🔴 [AUTH] No database session available")
     return None

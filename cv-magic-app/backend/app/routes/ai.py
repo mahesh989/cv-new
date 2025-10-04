@@ -72,10 +72,15 @@ async def get_ai_status(current_user: UserData = Depends(get_current_user)):
     """
     Get current AI service status including available providers and models
     """
+    logger.info(f"🔵 [AI_STATUS] Getting AI status for user: {current_user.email}")
     try:
         current_status = ai_service.get_current_status()
         provider_status = ai_service.get_provider_status()
         available_models = ai_service.get_all_available_models()
+        
+        logger.info(f"🔵 [AI_STATUS] Current status: {current_status}")
+        logger.info(f"🔵 [AI_STATUS] Provider status: {provider_status}")
+        logger.info(f"🔵 [AI_STATUS] Available models: {available_models}")
         
         return {
             "current_status": current_status,
@@ -83,7 +88,7 @@ async def get_ai_status(current_user: UserData = Depends(get_current_user)):
             "available_models": available_models
         }
     except Exception as e:
-        logger.error(f"Failed to get AI status: {e}")
+        logger.error(f"🔴 [AI_STATUS] Failed to get AI status: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve AI status"

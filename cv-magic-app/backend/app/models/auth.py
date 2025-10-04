@@ -36,6 +36,14 @@ class TokenResponse(BaseModel):
     user: UserData
 
 
+class RegisterResponse(BaseModel):
+    """Registration response model"""
+    message: str
+    user_id: str
+    email: str
+    success: bool = True
+
+
 class TokenData(BaseModel):
     """Token payload data"""
     user_id: str

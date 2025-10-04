@@ -370,7 +370,7 @@ async def get_latest_cv_content():
 
 
 @router.get("/read-tailored-cv/{company_name}")
-async def read_tailored_cv(company_name: str):
+async def read_tailored_cv(company_name: str, current_user: UserData = Depends(get_current_user)):
     """
     Read tailored CV content for frontend preview
     
@@ -380,11 +380,12 @@ async def read_tailored_cv(company_name: str):
     try:
         logger.info(f"📄 Tailored CV content request for {company_name}")
         
-        # Use unified file selector to get the latest CV for the specific company
-        from app.unified_latest_file_selector import unified_selector
+        # Use unified file selector (user-scoped) to get the latest CV for the specific company
+        from app.unified_latest_file_selector import get_selector_for_user
+        selector = get_selector_for_user(current_user.email)
         
         # Get the latest CV files for the specific company
-        cv_context = unified_selector.get_latest_cv_for_company(company_name)
+        cv_context = selector.get_latest_cv_for_company(company_name)
         
         if not cv_context.exists or not cv_context.txt_path:
             raise HTTPException(
@@ -432,7 +433,7 @@ async def read_tailored_cv(company_name: str):
 
 
 @router.get("/latest-tailored-cv")
-async def get_latest_tailored_cv():
+async def get_latest_tailored_cv(current_user: UserData = Depends(get_current_user)):
     """
     Get the most recent tailored CV across all companies
     
@@ -442,9 +443,9 @@ async def get_latest_tailored_cv():
     try:
         logger.info("📄 Fetching latest tailored CV across all companies")
         
-        # Path to cv-analysis folder
+        # Path to cv-analysis folder (user-isolated)
         from app.utils.user_path_utils import get_user_base_path
-        cv_analysis_path = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+        cv_analysis_path = get_user_base_path(current_user.email)
         
         if not cv_analysis_path.exists():
             raise HTTPException(
@@ -452,18 +453,16 @@ async def get_latest_tailored_cv():
                 detail="CV analysis folder not found"
             )
         
-        # Find all tailored CV text files in company-specific cvs/tailored folders
+        # Find all tailored CV text files in the cvs/tailored folder
         all_tailored_files = []
         
-        # Check company folders in applied_companies
-        for company_dir in (cv_analysis_path / "applied_companies").iterdir():
-            if company_dir.is_dir() and company_dir.name != "__pycache__":
-                # Look in company-specific cvs/tailored folder
-                tailored_dir = company_dir / "cvs" / "tailored"
-                if tailored_dir.exists():
-                    # Look for company-specific naming pattern
-                    company_files = list(tailored_dir.glob(f"{company_dir.name}_tailored_cv_*.txt"))
-                    all_tailored_files.extend(company_files)
+        # Check in the global cvs/tailored directory
+        tailored_dir = cv_analysis_path / "cvs" / "tailored"
+        if tailored_dir.exists():
+            # Look for all tailored CV files
+            company_files = list(tailored_dir.glob("*_tailored_cv_*.txt"))
+            all_tailored_files.extend(company_files)
+            logger.info(f"Found {len(company_files)} tailored CV files in {tailored_dir}")
         
         if not all_tailored_files:
             raise HTTPException(

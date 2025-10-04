@@ -56,6 +56,39 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void initState() {
     super.initState();
     _checkAuthStatus();
+    _setupAIServiceNotifications();
+  }
+
+  void _setupAIServiceNotifications() {
+    // Set up callback for AI service authentication notifications
+    aiModelService.setAuthRequiredCallback(() {
+      if (mounted && !_isLoggedIn) {
+        _showAuthInfoNotification();
+      }
+    });
+  }
+
+  void _showAuthInfoNotification() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          '🔐 AI features require login. Please sign in to access full functionality.',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Got it',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _checkAuthStatus() async {
@@ -90,6 +123,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     // Sync AI model with backend after authentication
     aiModelService.syncAfterAuth();
+
+    // Show success notification
+    _showLoginSuccessNotification();
+  }
+
+  void _showLoginSuccessNotification() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          '🎉 Welcome! AI features are now available.',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   void _onLogout() async {
@@ -104,6 +156,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
       _isLoggedIn = false;
     });
     debugPrint('👋 User logged out');
+
+    // Show logout notification
+    _showLogoutNotification();
+  }
+
+  void _showLogoutNotification() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          '👋 Logged out. AI features require login to access.',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.blue,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override

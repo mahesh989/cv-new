@@ -1,20 +1,5 @@
 {
-  "jobs": [
-    {
-      "company_name": "Australia for UNHCR",
-      "job_title": "Data Analyst",
-      "location": "Sydney, Australia",
-      "experience_required": "Unknown",
-      "seniority_level": "Unknown",
-      "industry": "International Aid and Development",
-      "phone_number": null,
-      "email": null,
-      "website": null,
-      "work_type": "Hybrid",
-      "extracted_at": "2025-10-02T06:29:48.745175",
-      "job_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst"
-    }
-  ],
-  "last_updated": "2025-10-02T06:29:48.753897",
-  "total_jobs": 1
+  "jobs": [],
+  "last_updated": "2025-10-04T06:00:15.567008",
+  "total_jobs": 0
 }

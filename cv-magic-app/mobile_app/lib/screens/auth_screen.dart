@@ -71,71 +71,277 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _handleEmailAuth() async {
+    print('🔵 [FRONTEND] Starting authentication process');
     setState(() => _isLoading = true);
 
     try {
-      // Call backend login endpoint
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text.isNotEmpty
-              ? _emailController.text
-              : 'demo@cvagent.com',
-          'password': _passwordController.text.isNotEmpty
-              ? _passwordController.text
-              : 'demo123',
-        }),
-      );
+      // Determine if this is login or registration based on tab index
+      final isLogin = _tabController.index == 0;
+      final endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      print(
+          '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final accessToken = data['access_token'];
+      // Get trimmed values
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+      final name = _nameController.text.trim();
 
-        // Save authentication data
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_logged_in', true);
-        await prefs.setString('auth_token', accessToken);
-        await prefs.setString(
-          'user_email',
-          _emailController.text.isNotEmpty
-              ? _emailController.text
-              : 'demo@cvagent.com',
-        );
-        await prefs.setString(
-          'user_name',
-          _nameController.text.isNotEmpty ? _nameController.text : 'Demo User',
-        );
+      print('🔵 [FRONTEND] Raw form values:');
+      print('  - Email: "${_emailController.text}" -> trimmed: "$email"');
+      print(
+          '  - Password: "${_passwordController.text}" -> trimmed: "$password" (length: ${password.length})');
+      print('  - Name: "${_nameController.text}" -> trimmed: "$name"');
 
+      // Validate required fields with early return
+      if (email.isEmpty) {
+        print('🔴 [FRONTEND] Validation failed: Email is empty');
+        setState(() => _isLoading = false);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
-                _tabController.index == 0
-                    ? '🎉 Welcome back!'
-                    : '🎉 Account created successfully!',
+                '❌ Email is required to create your account',
+                style: TextStyle(color: Colors.white),
               ),
-              backgroundColor: AppTheme.primaryTeal,
+              backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
             ),
           );
+        }
+        return;
+      }
 
-          widget.onLogin();
+      if (password.isEmpty) {
+        print('🔴 [FRONTEND] Validation failed: Password is empty');
+        setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                '❌ Password is required for security',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!isLogin && name.isEmpty) {
+        print(
+            '🔴 [FRONTEND] Validation failed: Name is empty for registration');
+        setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                '❌ Name is required to personalize your account',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Additional validation for password length
+      if (password.length < 6) {
+        print(
+            '🔴 [FRONTEND] Validation failed: Password too short (${password.length} characters)');
+        setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                '❌ Password must be at least 6 characters for security',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Basic email format validation
+      if (!email.contains('@') || !email.contains('.')) {
+        print('🔴 [FRONTEND] Validation failed: Invalid email format');
+        setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                '❌ Please enter a valid email address (e.g., user@example.com)',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      print('✅ [FRONTEND] All validations passed');
+
+      // Prepare request body based on endpoint
+      Map<String, dynamic> requestBody;
+      if (isLogin) {
+        requestBody = {
+          'email': email,
+          'password': password,
+        };
+        print('🔵 [FRONTEND] Login request body: $requestBody');
+      } else {
+        // Registration requires name field
+        requestBody = {
+          'email': email,
+          'password': password,
+          'name': name,
+        };
+        print('🔵 [FRONTEND] Registration request body: $requestBody');
+      }
+
+      // Call backend endpoint
+      final url = 'http://localhost:8000$endpoint';
+      print('🔵 [FRONTEND] Making HTTP request to: $url');
+      print(
+          '🔵 [FRONTEND] Request headers: {\'Content-Type\': \'application/json\'}');
+      print('🔵 [FRONTEND] Request body: ${jsonEncode(requestBody)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+
+      print('🔵 [FRONTEND] HTTP response received:');
+      print('  - Status code: ${response.statusCode}');
+      print('  - Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('✅ [FRONTEND] HTTP 200 - Success response');
+        final data = jsonDecode(response.body);
+        print('🔵 [FRONTEND] Parsed response data: $data');
+
+        if (isLogin) {
+          print('🔵 [FRONTEND] Processing login response');
+          // Login response includes tokens
+          final accessToken = data['access_token'];
+          print(
+              '🔵 [FRONTEND] Access token received: ${accessToken.substring(0, 20)}...');
+
+          // Save authentication data
+          print(
+              '🔵 [FRONTEND] Saving authentication data to SharedPreferences');
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('is_logged_in', true);
+          await prefs.setString('auth_token', accessToken);
+          await prefs.setString('user_email', email);
+          await prefs.setString('user_name', name);
+          print('✅ [FRONTEND] Authentication data saved successfully');
+
+          if (mounted) {
+            print('🔵 [FRONTEND] Showing success message and calling onLogin');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  '🎉 Welcome back! AI features are now available.',
+                  style: TextStyle(color: Colors.white),
+                ),
+                backgroundColor: AppTheme.primaryTeal,
+                behavior: SnackBarBehavior.floating,
+                duration: Duration(seconds: 3),
+              ),
+            );
+
+            widget.onLogin();
+          }
+        } else {
+          print('🔵 [FRONTEND] Processing registration response');
+          // Registration response - no tokens, just success message
+          if (mounted) {
+            print(
+                '🔵 [FRONTEND] Showing registration success message and switching to login tab');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text(
+                  '🎉 Account created successfully! Please sign in to access AI features.',
+                  style: TextStyle(color: Colors.white),
+                ),
+                backgroundColor: AppTheme.primaryTeal,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 4),
+                action: SnackBarAction(
+                  label: 'Sign In',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                ),
+              ),
+            );
+
+            // Switch to login tab after successful registration
+            _tabController.animateTo(0);
+          }
         }
       } else {
-        throw Exception('Login failed: ${response.statusCode}');
+        print('🔴 [FRONTEND] HTTP Error - Status code: ${response.statusCode}');
+        // Handle specific error responses
+        String errorMessage = '${isLogin ? "Login" : "Registration"} failed';
+        try {
+          final errorData = jsonDecode(response.body);
+          print('🔵 [FRONTEND] Error response data: $errorData');
+          if (errorData['detail'] != null) {
+            errorMessage = errorData['detail'].toString();
+            print('🔵 [FRONTEND] Extracted error message: $errorMessage');
+          }
+        } catch (e) {
+          // If we can't parse the error, use the status code
+          errorMessage =
+              '${isLogin ? "Login" : "Registration"} failed: ${response.statusCode}';
+          print('🔴 [FRONTEND] Could not parse error response: $e');
+        }
+        print('🔴 [FRONTEND] Throwing exception with message: $errorMessage');
+        throw Exception(errorMessage);
       }
     } catch (e) {
+      print('🔴 [FRONTEND] Exception caught: $e');
       if (mounted) {
+        print('🔵 [FRONTEND] Showing error message to user');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Authentication failed: $e'),
+            content: Text(
+              '❌ ${isLogin ? "Login" : "Registration"} failed: $e',
+              style: const TextStyle(color: Colors.white),
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Try Again',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
           ),
         );
       }
     } finally {
+      print(
+          '🔵 [FRONTEND] Authentication process completed, setting loading to false');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -349,9 +555,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           TextFormField(
             controller: _emailController,
             decoration: const InputDecoration(
-              labelText: 'Email (Optional)',
+              labelText: 'Email *',
               prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your email address',
             ),
             keyboardType: TextInputType.emailAddress,
           ),
@@ -359,9 +565,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           TextFormField(
             controller: _passwordController,
             decoration: InputDecoration(
-              labelText: 'Password (Optional)',
+              labelText: 'Password *',
               prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your password',
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -413,18 +619,18 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           TextFormField(
             controller: _nameController,
             decoration: const InputDecoration(
-              labelText: 'Full Name (Optional)',
+              labelText: 'Full Name *',
               prefixIcon: Icon(Icons.person_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your full name',
             ),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _emailController,
             decoration: const InputDecoration(
-              labelText: 'Email (Optional)',
+              labelText: 'Email *',
               prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your email address',
             ),
             keyboardType: TextInputType.emailAddress,
           ),
@@ -432,9 +638,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           TextFormField(
             controller: _passwordController,
             decoration: InputDecoration(
-              labelText: 'Password (Optional)',
+              labelText: 'Password *',
               prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Leave empty for demo mode',
+              hintText: 'Enter your password (min 6 characters)',
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,

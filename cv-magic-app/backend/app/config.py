@@ -24,12 +24,12 @@ class Settings(BaseSettings):
     PORT: int = 8000
     
     # Database Configuration
-    DATABASE_URL: str = "postgresql://mahesh@localhost:5432/cv_app"
+    DATABASE_URL: str = "postgresql://mahesh:password123@localhost:5432/cv_app"
     DATABASE_HOST: str = "localhost"
     DATABASE_PORT: int = 5432
     DATABASE_NAME: str = "cv_app"
     DATABASE_USER: str = "mahesh"
-    DATABASE_PASSWORD: str = ""
+    DATABASE_PASSWORD: str = "password123"
     
     # Redis Configuration
     REDIS_URL: str = "redis://localhost:6379/0"
