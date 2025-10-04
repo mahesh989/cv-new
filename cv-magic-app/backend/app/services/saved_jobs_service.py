@@ -133,5 +133,5 @@ class SavedJobsService:
             logger.error(f"❌ Failed to clear jobs: {e}")
             return False
 
-# Create a singleton instance
-saved_jobs_service = SavedJobsService()
+# Note: SavedJobsService should be instantiated per user with their email
+# Example: service = SavedJobsService(user_email)
