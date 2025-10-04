@@ -1,0 +1,169 @@
+{
+  "personal_information": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "location": "Hurstville, NSW, 2220",
+    "linkedin": "LinkedIn",
+    "github": "GitHub",
+    "portfolio_links": {
+      "blogs": "Blogs on Medium",
+      "dashboard_portfolio": "Dashboard Portfolio",
+      "website": ""
+    },
+    "residency_status": "",
+    "open_to": ""
+  },
+  "career_profile": {
+    "summary": "I hold a PhD in Physics and completed a Master's in Data Science, bringing over three years of experience in Python coding, AI, and machine learning. My expertise encompasses modeling and training AI models, writing efficient Python scripts, designing and deploying robust data pipelines, conducting innovative research, and creating advanced visualizations that convert complex data into actionable insights. I am also proficient in SQL, Tableau, and Power BI, building comprehensive dashboards that support data-driven decision-making."
+  },
+  "skills": {
+    "technical_skills": [
+      "• Specialized in Python programming, including data analysis, automation, and machine learning using libraries such as Pandas, NumPy, and scikit-learn.",
+      "• Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.",
+      "• Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib.",
+      "• Experienced with GitHub for version control, Docker for containerization, and Snowflake for cloud data warehousing.",
+      "• Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting."
+    ],
+    "key_skills": [],
+    "soft_skills": [],
+    "domain_expertise": []
+  },
+  "education": [
+    {
+      "degree": "Master of Data Science",
+      "institution": "Charles Darwin University, Sydney, Australia",
+      "year": "Mar 2023 - Nov 2024",
+      "gpa": "GPA",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Sydney, Australia"
+    },
+    {
+      "degree": "PhD in Physics",
+      "institution": "CY Cergy Paris University, Cergy, France",
+      "year": "Oct 2018 - Sep 2022",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Cergy, France"
+    },
+    {
+      "degree": "Master of Theoretical Physics",
+      "institution": "CY Cergy Paris University, Cergy, France",
+      "year": "Sep 2016 - Jun 2018",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Cergy, France"
+    }
+  ],
+  "experience": [
+    {
+      "title": "Data Analyst",
+      "company": "The Bitrates, Sydney, New South Wales, Australia",
+      "duration": "Jul 2024 – Present",
+      "location": "Sydney, New South Wales, Australia",
+      "responsibilities": [
+        "• Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%.",
+        "• Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions.",
+        "• Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity.",
+        "• Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively.",
+        "• Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights."
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Data Analyst",
+      "company": "iBuild Building Solutions, Victoria, Australia",
+      "duration": "Mar 2024 – Jun 2024",
+      "location": "Victoria, Australia",
+      "responsibilities": [
+        "• Automated data extraction and structuring of population datasets using Python, improving data accuracy and team collaboration.",
+        "• Analyzed customer support data with Python to optimize response times and enhance operational efficiency.",
+        "• Developed Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making.",
+        "• Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction and decision-making processes."
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Software engineer and Analyst",
+      "company": "Property Console, Sydney, Australia",
+      "duration": "Jun 2023 - Nov 2023",
+      "location": "Sydney, Australia",
+      "responsibilities": [
+        "• Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency.",
+        "• Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%.",
+        "• Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision-making.",
+        "• Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives."
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Research Assistant",
+      "company": "CY Cergy Paris University, Cergy-Pontoise, France",
+      "duration": "Oct 2018 - Sep 2022",
+      "location": "Cergy-Pontoise, France",
+      "responsibilities": [
+        "• Utilized advanced Python programming for computational modeling and solving complex research problems.",
+        "• Developed Python-based workflows to manage and analyze large datasets across multiple research projects.",
+        "• Presented Python-enabled research findings at international conferences, demonstrating technical expertise and communication skills."
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Lecturer and Course Facilitator",
+      "company": "CY Cergy Paris University, Cergy-Pontoise, France",
+      "duration": "Sep 2019 - Jun 2022",
+      "location": "Cergy-Pontoise, France",
+      "responsibilities": [
+        "• Led engaging physics tutorials for master’s students, enhancing understanding and promoting teamwork.",
+        "• Designed course materials, assignments, and exams, strengthening the learning experience.",
+        "• Mentored students on projects, collaborated with faculty, and fostered student engagement."
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Research Intern",
+      "company": "CY Cergy Paris University, Cergy-Pontoise, France",
+      "duration": "Feb 2018 - Jun 2018",
+      "location": "Cergy-Pontoise, France",
+      "responsibilities": [
+        "• Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials.",
+        "• Managed and analysed complex data sets, improving their accuracy and reliability.",
+        "• Used dashboard using Power BI to present research findings and participated in weekly reviews, improving collaboration and research skills."
+      ],
+      "achievements": [],
+      "technologies": []
+    }
+  ],
+  "projects": [],
+  "certifications": [],
+  "languages": [],
+  "awards": [],
+  "publications": [],
+  "volunteer_work": [],
+  "professional_memberships": [],
+  "unknown_sections": {},
+  "original_sections": {
+    "section_headers_found": [
+      "CAREER PROFIL E",
+      "EDUCATION",
+      "EXPERIENCE",
+      "TECHNICAL SKILLS"
+    ],
+    "parsing_approach": "content_preserving"
+  },
+  "saved_at": "2025-10-04T16:27:29.343301",
+  "metadata": {
+    "source_filename": "maheshwor_tiwari.pdf",
+    "processed_at": "2025-10-04T16:27:29.343844",
+    "processing_version": "2.0",
+    "content_type": "structured_cv"
+  }
+}
