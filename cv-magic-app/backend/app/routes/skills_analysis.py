@@ -825,7 +825,8 @@ async def preliminary_analysis(
             cv_filename=cv_filename,
             current_model=current_model,
             config_name=config_name,
-            user_id=user_id
+            user_id=user_id,
+            user_email=user_email
         )
         # Attach CV selection info for frontend display (under expandable_analysis)
         try:
@@ -2146,7 +2147,8 @@ async def perform_preliminary_skills_analysis(
     cv_filename: str, 
     current_model: str,
     config_name: Optional[str] = None,
-    user_id: int = 1
+    user_id: int = 1,
+    user_email: str = None
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
