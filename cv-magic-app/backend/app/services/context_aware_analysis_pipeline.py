@@ -108,17 +108,18 @@ class ContextAwareAnalysisPipeline:
     Main pipeline orchestrator with context awareness
     """
     
-    def __init__(self):
-        # Initialize services
+    def __init__(self, user_email: str = "admin@admin.com"):
+        self.user_email = user_email
+        # Initialize services with user context
         self.skill_extraction_service = SkillExtractionService()
-        self.cv_jd_matcher = CVJDMatcher()
-        self.jd_analyzer = JDAnalyzer()
-        self.job_extractor = JobExtractionService()
+        self.cv_jd_matcher = CVJDMatcher(user_email=user_email)
+        self.jd_analyzer = JDAnalyzer(user_email=user_email)
+        self.job_extractor = JobExtractionService(user_email=user_email)
         self.component_assembler = ComponentAssembler()
-        self.ats_recommender = ATSRecommendationService()
-        self.ai_recommender = AIRecommendationGenerator()
+        self.ats_recommender = ATSRecommendationService(user_email=user_email)
+        self.ai_recommender = AIRecommendationGenerator(user_email=user_email)
         
-        logger.info("🏗️ [CONTEXT_AWARE_PIPELINE] Initialized all services")
+        logger.info(f"🏗️ [CONTEXT_AWARE_PIPELINE] Initialized all services for user: {user_email}")
     
     async def run_full_analysis(
         self, 

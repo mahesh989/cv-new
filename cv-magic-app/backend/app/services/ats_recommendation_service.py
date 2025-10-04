@@ -18,11 +18,12 @@ logger = logging.getLogger(__name__)
 class ATSRecommendationService:
     """Service for extracting ATS data and creating recommendation files"""
     
-    def __init__(self):
+    def __init__(self, user_email: str = "admin@admin.com"):
         from app.utils.user_path_utils import get_user_base_path
+        self.user_email = user_email
         # get_user_base_path already returns the per-user cv-analysis directory
         # Avoid duplicating "cv-analysis" in the path
-        self.base_dir = get_user_base_path("admin@admin.com")
+        self.base_dir = get_user_base_path(user_email)
     
     def extract_ats_recommendation_data(self, company: str) -> Optional[Dict[str, Any]]:
         """

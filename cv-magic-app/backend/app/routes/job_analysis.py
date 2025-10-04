@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from typing import Dict, Any, Optional
 
-from ..services.job_extraction_service import job_extraction_service
+from ..services.job_extraction_service import JobExtractionService
 from ..core.dependencies import get_current_user
 from ..models.auth import UserData
 
@@ -42,9 +42,10 @@ async def extract_and_save_job(request: Request, current_user: UserData = Depend
         # Extract auth token from request headers
         auth_token = request.headers.get("authorization", "").replace("Bearer ", "")
         
-        # Extract and save job information with LLM
+        # Extract and save job information with LLM using user-specific service
         try:
-            result = await job_extraction_service.save_job_analysis(
+            user_job_extraction_service = JobExtractionService(user_email=current_user.email)
+            result = await user_job_extraction_service.save_job_analysis(
                 job_description=job_description,
                 job_url=job_url if job_url else None,
                 auth_token=auth_token if auth_token else None
@@ -70,9 +71,9 @@ async def extract_and_save_job(request: Request, current_user: UserData = Depend
 
 
 @router.get("/list")
-async def list_analyzed_jobs():
+async def list_analyzed_jobs(current_user: UserData = Depends(get_current_user)):
     """
-    List all analyzed jobs in the cv-analysis directory.
+    List all analyzed jobs in the cv-analysis directory - user-specific path isolated.
     
     Returns:
     {
@@ -92,7 +93,8 @@ async def list_analyzed_jobs():
     }
     """
     try:
-        result = job_extraction_service.list_analyzed_jobs()
+        user_job_extraction_service = JobExtractionService(user_email=current_user.email)
+        result = user_job_extraction_service.list_analyzed_jobs()
         
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])

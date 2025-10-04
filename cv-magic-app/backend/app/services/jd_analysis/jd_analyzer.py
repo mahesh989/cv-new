@@ -234,10 +234,11 @@ class RequirementsExtractor:
 class JDAnalyzer:
     """Job Description Analyzer using centralized AI system"""
     
-    def __init__(self):
+    def __init__(self, user_email: str = "admin@admin.com"):
         self.ai_service = ai_service
+        self.user_email = user_email
         from app.utils.user_path_utils import get_user_base_path
-        self.base_analysis_path = get_user_base_path("admin@admin.com") / "cv-analysis"
+        self.base_analysis_path = get_user_base_path(user_email) / "cv-analysis"
         self.requirements_extractor = RequirementsExtractor()
     
     def _read_jd_file(self, file_path: Union[str, Path]) -> str:

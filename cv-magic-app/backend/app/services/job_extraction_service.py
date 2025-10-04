@@ -648,4 +648,5 @@ TEXT TO ANALYZE:
             return {"error": f"Failed to list analyzed jobs: {str(e)}"}
 
 # Create a global instance
-job_extraction_service = JobExtractionService()
+# Global instance - will be initialized with proper user email when needed
+job_extraction_service = None
