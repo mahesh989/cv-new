@@ -85,8 +85,9 @@ class CVJDMatchResult:
 class CVJDMatcher:
     """CV-JD Matcher using centralized AI system"""
     
-    def __init__(self):
+    def __init__(self, user_email: str = "admin@admin.com"):
         self.ai_service = ai_service
+        self.user_email = user_email
     
     def _read_cv_file(self, file_path: Union[str, Path]) -> str:
         """
@@ -149,7 +150,7 @@ class CVJDMatcher:
         """
         if not base_path:
             from app.utils.user_path_utils import get_user_base_path
-            base_path = get_user_base_path("admin@admin.com")
+            base_path = get_user_base_path(self.user_email)
         
         company_dir = Path(base_path) / "applied_companies" / company_name
         # Try to find timestamped file with company name pattern first
@@ -437,10 +438,10 @@ class CVJDMatcher:
         if not base_path:
             from app.utils.user_path_utils import get_user_base_path, get_user_company_analysis_paths, validate_company_name
             validate_company_name(company_name)
-            base_path = get_user_base_path("admin@admin.com")
+            base_path = get_user_base_path(self.user_email)
         
         # Get correct paths
-        paths = get_user_company_analysis_paths("admin@admin.com", company_name)
+        paths = get_user_company_analysis_paths(self.user_email, company_name)
         timestamp = TimestampUtils.get_timestamp()
         result_file = paths["cv_jd_matching"](timestamp)
         result_file.parent.mkdir(parents=True, exist_ok=True)
@@ -469,7 +470,7 @@ class CVJDMatcher:
         """
         if not base_path:
             from app.utils.user_path_utils import get_user_base_path
-            base_path = get_user_base_path("admin@admin.com")
+            base_path = get_user_base_path(self.user_email)
         
         company_dir = Path(base_path) / "applied_companies" / company_name
         result_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")

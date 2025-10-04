@@ -629,7 +629,7 @@ class SkillExtractionResultSaver:
         
         try:
             # Get correct paths using user path utils
-            paths = get_user_company_analysis_paths("admin@admin.com", company_name)
+            paths = get_user_company_analysis_paths(self.user_email, company_name)
             timestamp = TimestampUtils.get_timestamp()
             skills_file = paths["skills_analysis"](timestamp)
             skills_file.parent.mkdir(parents=True, exist_ok=True)
@@ -800,4 +800,5 @@ class SkillExtractionResultSaver:
 
 
 # Global instance
-result_saver = SkillExtractionResultSaver(user_email="admin@admin.com")
+# Global instance - will be initialized with proper user email when needed
+result_saver = None

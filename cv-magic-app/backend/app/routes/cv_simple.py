@@ -511,18 +511,18 @@ async def get_latest_tailored_cv(current_user: UserData = Depends(get_current_us
         )
 
 @router.get("/available-companies")
-async def get_available_companies():
+async def get_available_companies(current_user: UserData = Depends(get_current_user)):
     """
-    Get list of available companies with tailored CVs
+    Get list of available companies with tailored CVs - user-specific path isolated
     
     Returns companies that have tailored CV files available for preview.
     """
     try:
-        logger.info("📋 Fetching available companies")
+        logger.info(f"📋 Fetching available companies for user: {current_user.email}")
         
         # Path to cv-analysis folder
         from app.utils.user_path_utils import get_user_base_path
-        cv_analysis_path = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+        cv_analysis_path = get_user_base_path(current_user.email)
         companies = []
         
         if cv_analysis_path.exists():
@@ -632,8 +632,8 @@ async def get_upload_stats(current_user: UserData = Depends(get_current_user)):
 
 
 @router.put("/tailored-cv/save")
-async def save_tailored_cv(request: Request):
-    """Save edited tailored CV content back to the file"""
+async def save_tailored_cv(request: Request, current_user: UserData = Depends(get_current_user)):
+    """Save edited tailored CV content back to the file - user-specific path isolated"""
     try:
         data = await request.json()
         
@@ -669,7 +669,7 @@ async def save_tailored_cv(request: Request):
         
         # Determine the file to save to
         from app.utils.user_path_utils import get_user_base_path
-        cv_analysis_path = get_user_base_path("admin@admin.com")  # TODO: Get from user context
+        cv_analysis_path = get_user_base_path(current_user.email)
         company_path = cv_analysis_path / company_name
         
         # 🔍 DEBUG: Log path information
