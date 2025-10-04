@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 
 from ..services.cv_processor import cv_processor
 from ..services.enhanced_cv_upload_service import EnhancedCVUploadService
-from ..core.auth import get_current_user
+from ..core.dependencies import get_current_user
 from ..models.auth import UserData
 
 logger = logging.getLogger(__name__)
