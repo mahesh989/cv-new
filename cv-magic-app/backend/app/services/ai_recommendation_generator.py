@@ -18,11 +18,11 @@ from app.utils.timestamp_utils import TimestampUtils
 
 # Import CV tailoring service with conditional import to avoid circular dependencies
 try:
-    from app.tailored_cv.services.cv_tailoring_service import cv_tailoring_service
+    from app.tailored_cv.services.cv_tailoring_service import CVTailoringService
     CV_TAILORING_AVAILABLE = True
 except ImportError:
     CV_TAILORING_AVAILABLE = False
-    cv_tailoring_service = None
+    CVTailoringService = None
 
 logger = logging.getLogger(__name__)
 
@@ -598,6 +598,9 @@ class AIRecommendationGenerator:
         try:
             logger.info(f"🚀 [AI GENERATOR] Starting automatic CV tailoring for {company}")
             
+            # Create user-specific CV tailoring service instance
+            cv_tailoring_service = CVTailoringService(user_email=self.user_email)
+            
             # Load the original CV and the recommendation we just generated
             original_cv, recommendation = cv_tailoring_service.load_real_cv_and_recommendation(company)
             
@@ -631,5 +634,5 @@ class AIRecommendationGenerator:
             return False
 
 
-# Global instance
-ai_recommendation_generator = AIRecommendationGenerator()
+# Global instance removed - service now requires user_email parameter
+# Create instances per request with proper user context

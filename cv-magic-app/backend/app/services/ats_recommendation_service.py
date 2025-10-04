@@ -548,5 +548,5 @@ Format your response as structured recommendations with clear sections and bulle
         return results
 
 
-# Global instance
-ats_recommendation_service = ATSRecommendationService()
+# Global instance removed - service now requires user_email parameter
+# Create instances per request with proper user context

@@ -17,7 +17,7 @@ from app.core.dependencies import get_current_user
 from app.models.auth import UserData
 from app.core.model_dependency import get_current_model
 from app.services.skill_extraction import skill_extraction_service
-from app.services.cv_content_service import cv_content_service
+from app.services.cv_content_service import CVContentService
 from app.services.dynamic_cv_selector import dynamic_cv_selector
 from app.services.skills_analysis_config import skills_analysis_config_service
 from app.services.skill_extraction.prompt_templates import get_prompt as get_skill_prompt
@@ -26,7 +26,7 @@ from app.services.skill_extraction.result_saver import SkillExtractionResultSave
 from app.ai.ai_service import ai_service
 from app.services.jd_analysis import analyze_and_save_company_jd
 from app.services.cv_jd_matching import match_and_save_cv_jd
-from app.services.context_aware_analysis_pipeline import context_aware_pipeline
+from app.services.context_aware_analysis_pipeline import ContextAwareAnalysisPipeline
 from app.unified_latest_file_selector import get_selector_for_user
 from app.services.jd_cache_manager import jd_cache_manager
 from pathlib import Path
@@ -660,7 +660,9 @@ async def context_aware_analysis(
         
         # Run the context-aware analysis pipeline
         try:
-            results = await context_aware_pipeline.run_full_analysis(
+            # Create user-specific pipeline instance
+            pipeline = ContextAwareAnalysisPipeline(user_email=current_user.email)
+            results = await pipeline.run_full_analysis(
                 jd_url=jd_url,
                 company=company,
                 is_rerun=is_rerun,
@@ -1312,12 +1314,15 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
 async def create_recommendation_file(company: str, force_update: bool = False):
     """Manually create or update a recommendation file for a company"""
     try:
-        from app.services.ats_recommendation_service import ats_recommendation_service
+        from app.services.ats_recommendation_service import ATSRecommendationService
         
         logger.info(f"🔧 [MANUAL] Creating recommendation file for company: {company}")
         
+        # Create user-specific service instance
+        ats_service = ATSRecommendationService(user_email=current_user.email)
+        
         # Check if company has ATS data first
-        companies_with_ats = ats_recommendation_service.list_companies_with_ats_data()
+        companies_with_ats = ats_service.list_companies_with_ats_data()
         if company not in companies_with_ats:
             return JSONResponse(
                 status_code=404,
@@ -1329,10 +1334,10 @@ async def create_recommendation_file(company: str, force_update: bool = False):
             )
         
         # Create/update the recommendation file
-        success = ats_recommendation_service.update_existing_recommendation(company, force_update)
+        success = ats_service.update_existing_recommendation(company, force_update)
         
         if success:
-            recommendation_file = ats_recommendation_service.get_recommendation_file_path(company)
+            recommendation_file = ats_service.get_recommendation_file_path(company)
             return JSONResponse(content={
                 "success": True,
                 "message": f"Recommendation file created/updated for {company}",
@@ -1365,12 +1370,15 @@ async def create_recommendation_file(company: str, force_update: bool = False):
 async def batch_create_recommendations(companies: Optional[List[str]] = None, force_update: bool = False):
     """Batch create recommendation files for multiple companies"""
     try:
-        from app.services.ats_recommendation_service import ats_recommendation_service
+        from app.services.ats_recommendation_service import ATSRecommendationService
         
         logger.info(f"🔧 [BATCH] Creating recommendation files - Force update: {force_update}")
         
+        # Create user-specific service instance
+        ats_service = ATSRecommendationService(user_email=current_user.email)
+        
         # Process companies
-        results = ats_recommendation_service.batch_create_recommendations(companies, force_update)
+        results = ats_service.batch_create_recommendations(companies, force_update)
         
         successful_count = sum(1 for success in results.values() if success)
         total_count = len(results)
@@ -1401,7 +1409,7 @@ async def batch_create_recommendations(companies: Optional[List[str]] = None, fo
 async def list_recommendation_files():
     """List all companies with recommendation files"""
     try:
-        from app.services.ats_recommendation_service import ats_recommendation_service
+        from app.services.ats_recommendation_service import ATSRecommendationService
         
         from app.utils.user_path_utils import get_user_base_path
         user_email = getattr(token_data, 'email', None)
@@ -1411,9 +1419,12 @@ async def list_recommendation_files():
         companies_with_recommendations = []
         
         if base_dir.exists():
+            # Create user-specific service instance
+            ats_service = ATSRecommendationService(user_email=user_email)
+            
             for company_dir in base_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    recommendation_file = ats_recommendation_service.get_recommendation_file_path(company_dir.name)
+                    recommendation_file = ats_service.get_recommendation_file_path(company_dir.name)
                     
                     if recommendation_file.exists():
                         # Get file info
@@ -1467,12 +1478,15 @@ async def list_recommendation_files():
 async def create_ai_recommendation_prompt(company: str):
     """Create AI recommendation prompt file for a company"""
     try:
-        from app.services.ats_recommendation_service import ats_recommendation_service
+        from app.services.ats_recommendation_service import ATSRecommendationService
         
         logger.info(f"🤖 [AI PROMPT] Creating AI recommendation prompt for: {company}")
         
+        # Create user-specific service instance
+        ats_service = ATSRecommendationService(user_email=current_user.email)
+        
         # Check if recommendation file exists
-        recommendation_file = ats_recommendation_service.get_recommendation_file_path(company)
+        recommendation_file = ats_service.get_recommendation_file_path(company)
         if not recommendation_file.exists():
             return JSONResponse(
                 status_code=404,

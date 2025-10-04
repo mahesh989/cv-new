@@ -32,7 +32,7 @@ from .models.cv_models import (
     CVTailoringResponse
 )
 
-from .services.cv_tailoring_service import cv_tailoring_service
+from .services.cv_tailoring_service import CVTailoringService
 from .routes.cv_tailoring_routes import router
 
 __all__ = [
@@ -41,6 +41,6 @@ __all__ = [
     "RecommendationAnalysis",
     "CVTailoringRequest",
     "CVTailoringResponse",
-    "cv_tailoring_service",
+    "CVTailoringService",
     "router"
 ]

@@ -21,7 +21,7 @@ from app.tailored_cv.models.cv_models import (
     AvailableCompanies, CompanyRecommendation,
     ProcessingStatus, CVValidationResult
 )
-from app.tailored_cv.services.cv_tailoring_service import cv_tailoring_service
+from app.tailored_cv.services.cv_tailoring_service import CVTailoringService
 
 logger = logging.getLogger(__name__)
 
@@ -43,15 +43,18 @@ async def tailor_cv(
     try:
         logger.info(f"🎯 CV tailoring request for user {current_user.id} - {request.recommendations.company}")
         
+        # Create user-specific service instance
+        cv_service = CVTailoringService(user_email=current_user.email)
+        
         # Process the CV tailoring
-        response = await cv_tailoring_service.tailor_cv(request)
+        response = await cv_service.tailor_cv(request)
         
         # Save tailored CV if successful - ONLY to tailored folder
         if response.success:
             try:
                 # Extract company name from recommendations
                 company = request.recommendations.company if hasattr(request.recommendations, 'company') else "Unknown"
-                file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(
+                file_path = cv_service.save_tailored_cv_to_analysis_folder(
                     response.tailored_cv, 
                     company
                 )

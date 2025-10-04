@@ -554,5 +554,5 @@ class ContextAwareAnalysisPipeline:
             return None
 
 
-# Global instance
-context_aware_pipeline = ContextAwareAnalysisPipeline()
+# Global instance removed - service now requires user_email parameter
+# Create instances per request with proper user context

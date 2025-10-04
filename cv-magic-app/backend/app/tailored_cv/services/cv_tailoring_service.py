@@ -1677,5 +1677,5 @@ FIX: Output ONLY valid JSON!
         return extracted_skills
 
 
-# Create service instance
-cv_tailoring_service = CVTailoringService()
+# Global instance removed - service now requires user_email parameter
+# Create instances per request with proper user context

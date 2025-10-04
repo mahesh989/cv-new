@@ -13,7 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
-from app.services.ai_recommendation_generator import ai_recommendation_generator
+from app.services.ai_recommendation_generator import AIRecommendationGenerator
 from app.core.dependencies import get_current_user
 from app.models.auth import UserData
 
@@ -252,8 +252,11 @@ async def convert_txt_to_json():
     try:
         logger.info("🔄 [AI_RECOMMENDATIONS] Starting TXT to JSON conversion")
         
+        # Create user-specific service instance
+        ai_service = AIRecommendationGenerator(user_email=current_user.email)
+        
         # Convert all TXT files to JSON
-        conversion_results = ai_recommendation_generator.batch_convert_txt_to_json()
+        conversion_results = ai_service.batch_convert_txt_to_json()
         
         successful_count = sum(1 for success in conversion_results.values() if success)
         total_count = len(conversion_results)
@@ -288,8 +291,11 @@ async def convert_company_txt_to_json(company: str):
     try:
         logger.info(f"🔄 [AI_RECOMMENDATIONS] Converting TXT to JSON for: {company}")
         
+        # Create user-specific service instance
+        ai_service = AIRecommendationGenerator(user_email=current_user.email)
+        
         # Convert TXT file to JSON for the specific company
-        success = ai_recommendation_generator.convert_txt_to_json(company)
+        success = ai_service.convert_txt_to_json(company)
         
         if success:
             return JSONResponse(content={
@@ -332,8 +338,11 @@ async def generate_ai_recommendation_and_tailor_cv(company: str, current_user: U
     try:
         logger.info(f"🚀 [AI_RECOMMENDATIONS] Starting AI generation and CV tailoring for: {company}")
         
+        # Create user-specific service instance
+        ai_service = AIRecommendationGenerator(user_email=current_user.email)
+        
         # Step 1: Generate AI recommendation
-        ai_success = await ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate=True)
+        ai_success = await ai_service.generate_ai_recommendation(company, force_regenerate=True)
         
         if not ai_success:
             return JSONResponse(

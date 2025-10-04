@@ -254,5 +254,5 @@ insights effectively.
             }
 
 
-# Global instance
-cv_content_service = CVContentService()
+# Global instance removed - service now requires user_email parameter
+# Create instances per request with proper user context
