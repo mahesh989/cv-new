@@ -18,7 +18,8 @@ class PipelineDeduplicator:
     """Service to prevent duplicate pipeline runs"""
     
     def __init__(self):
-        self.base_dir = Path("cv-analysis")
+        # Base dir will be set per user instance
+        self.base_dir = None
         self.dedup_window_minutes = 5  # Prevent duplicates within 5 minutes
     
     def _get_session_hash(self, company: str, cv_content: str, jd_content: str) -> str:

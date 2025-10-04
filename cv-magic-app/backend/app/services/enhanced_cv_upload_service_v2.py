@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Constants
 from app.utils.user_path_utils import get_user_uploads_path
 # UPLOAD_DIR will be set per user instance
-CV_ANALYSIS_DIR = Path("cv-analysis")
+# CV_ANALYSIS_DIR will be set per user instance
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 

@@ -109,7 +109,7 @@ async def _extract_company_name_from_jd(jd_text: str) -> str:
 def _find_matching_company_folder(extracted_name: str) -> Optional[str]:
     """Find matching company folder for extracted name"""
     try:
-        cv_analysis_path = Path("cv-analysis")
+        cv_analysis_path = get_user_base_path(user_email)
         if not cv_analysis_path.exists():
             return None
         
@@ -136,7 +136,7 @@ def _find_matching_company_folder(extracted_name: str) -> Optional[str]:
 def _find_company_in_existing_folders(jd_text: str) -> Optional[str]:
     """Find company name by checking if existing folder names appear in JD text"""
     try:
-        cv_analysis_path = Path("cv-analysis")
+        cv_analysis_path = get_user_base_path(user_email)
         if not cv_analysis_path.exists():
             return None
         
@@ -273,7 +273,7 @@ def _detect_most_recent_company() -> Optional[str]:
     Returns the company folder name or None if not found.
     """
     try:
-        base_path = Path("cv-analysis")
+        base_path = get_user_base_path(user_email)
         if not base_path.exists():
             return None
 
@@ -319,7 +319,7 @@ async def _run_pipeline(cname: str, token_data=None):
     
     # Step 1: JD Analysis (force refresh to guarantee availability)
     try:
-        company_dir = Path("cv-analysis") / "applied_companies" / cname
+        company_dir = base_dir / "applied_companies" / cname
         logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
         from app.services.jd_analysis.jd_analyzer import JDAnalyzer
         _analyzer = JDAnalyzer(user_email=user_email)
@@ -1232,7 +1232,7 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
                 data = json.load(f)
 
             # Get job info from original JD file
-            job_info_file = Path("cv-analysis") / "applied_companies" / company / "job_info.json"
+            job_info_file = get_user_base_path(user_email) / "applied_companies" / company / "job_info.json"
             if job_info_file.exists():
                 with open(job_info_file, 'r', encoding='utf-8') as f:
                     job_info = json.load(f)

@@ -334,7 +334,7 @@ class ContextAwareAnalysisPipeline:
                         from pathlib import Path
                         from app.utils.timestamp_utils import TimestampUtils
                         
-                        company_dir = Path("cv-analysis") / context.company
+                        company_dir = self.base_dir / "applied_companies" / context.company
                         job_info_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"job_info_{context.company.replace(' ', '_')}", "json")
                         if job_info_file and job_info_file.exists():
                             import json
@@ -360,7 +360,7 @@ class ContextAwareAnalysisPipeline:
                     from pathlib import Path
                     from app.utils.timestamp_utils import TimestampUtils
                     
-                    company_dir = Path("cv-analysis") / context.company
+                    company_dir = self.base_dir / "applied_companies" / context.company
                     jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
                     
                     if jd_file and jd_file.exists():

@@ -378,7 +378,7 @@ class JDAnalyzer:
 
             # Otherwise save analysis result with timestamp
             timestamp = TimestampUtils.get_timestamp()
-            analysis_file = company_dir / f"jd_analysis_{timestamp}.json"
+            analysis_file = company_dir / f"{company_name}_jd_analysis_{timestamp}.json"
 
             with open(analysis_file, 'w', encoding='utf-8') as f:
                 json.dump(result.to_dict(), f, indent=2, ensure_ascii=False)
