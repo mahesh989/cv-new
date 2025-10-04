@@ -20,94 +20,55 @@ from ..models.auth import UserData
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
 
-# Constants
-from app.utils.user_path_utils import get_user_uploads_path
-UPLOAD_DIR = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
+# Constants - now handled by EnhancedCVUploadService
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-
-# Ensure upload directory exists
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("/upload")
 async def upload_cv(
     cv: UploadFile = File(...), 
-    auto_structure: bool = True,
     current_user: UserData = Depends(get_current_user)
 ):
-    """Upload a CV file with automatic structured processing"""
+    """Upload a CV file with automatic structured processing - user-specific path isolated"""
     
     if not cv.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     
     try:
-        # Use the enhanced upload service for automatic structured processing
-        if auto_structure:
-            logger.info(f"Uploading {cv.filename} with structured processing for user: {current_user.email}")
-            # Create service instance with current user's email
-            upload_service = EnhancedCVUploadService(user_email=current_user.email)
-            result = await upload_service.upload_and_process_cv(
-                cv_file=cv
-                # Always saves as original_cv.json (replaces existing)
-            )
-            
-            logger.info(f"✅ {cv.filename} uploaded and processed into structured format")
-            
-            return JSONResponse(content={
-                "message": "CV uploaded and processed successfully",
-                "filename": result['filename'],
-                "size": result['file_size'],
-                "type": result['file_type'],
-                "structured_processing": True,
-                "structured_cv_path": result['structured_cv_path'],
-                "sections_found": result['sections_found'],
-                "unknown_sections": result['unknown_sections'],
-                "validation_report": result['validation_report'],
-                "processing_timestamp": result['processing_timestamp']
-            })
-        else:
-            # Fallback to basic upload without structured processing
-            file_extension = Path(cv.filename).suffix.lower()
-            if file_extension not in ALLOWED_EXTENSIONS:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Unsupported file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
-                )
-            
-            # Read and validate file size
-            file_content = await cv.read()
-            if len(file_content) > MAX_FILE_SIZE:
-                raise HTTPException(
-                    status_code=400, 
-                    detail="File too large. Maximum size is 10MB"
-                )
-            
-            # Save file to current user's upload directory
-            from app.utils.user_path_utils import get_user_uploads_path
-            user_upload_dir = get_user_uploads_path(current_user.email)
-            user_upload_dir.mkdir(parents=True, exist_ok=True)
-            file_path = user_upload_dir / cv.filename
-            with open(file_path, "wb") as buffer:
-                buffer.write(file_content)
-            
-            logger.info(f"CV uploaded successfully: {cv.filename} ({len(file_content)} bytes)")
-            
-            return JSONResponse(content={
-                "message": "CV uploaded successfully",
-                "filename": cv.filename,
-                "size": len(file_content),
-                "type": file_extension[1:].upper(),
-                "structured_processing": False
-            })
+        logger.info(f"Uploading {cv.filename} with structured processing for user: {current_user.email}")
+        
+        # Create service instance with current user's email - user-specific path isolated
+        upload_service = EnhancedCVUploadService(user_email=current_user.email)
+        result = await upload_service.upload_and_process_cv(
+            cv_file=cv
+            # Always saves as original_cv.json (replaces existing)
+        )
+        
+        logger.info(f"✅ {cv.filename} uploaded and processed into structured format for user: {current_user.email}")
+        
+        return JSONResponse(content={
+            "message": "CV uploaded and processed successfully",
+            "filename": result['filename'],
+            "size": result['file_size'],
+            "type": result['file_type'],
+            "structured_processing": True,
+            "structured_cv_path": result['structured_cv_path'],
+            "sections_found": result['sections_found'],
+            "unknown_sections": result['unknown_sections'],
+            "validation_report": result['validation_report'],
+            "processing_timestamp": result['processing_timestamp'],
+            "user_email": current_user.email
+        })
         
     except Exception as e:
-        logger.error(f"Error uploading CV: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error uploading CV: {str(e)}")
+        logger.error(f"Error uploading CV for user {current_user.email}: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error uploading CV: {str(e)}"
+        )
 
 
-from app.core.dependencies import get_current_user
-from app.models.auth import UserData
 from app.utils.user_path_utils import get_user_uploads_path
 
 
