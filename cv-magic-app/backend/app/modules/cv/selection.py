@@ -22,8 +22,10 @@ ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 class CVSelectionService:
     """Service class for handling CV selection and listing"""
     
-    @staticmethod
-    def list_cvs(current_user: UserData = None) -> Dict[str, Any]:
+    def __init__(self, user_email: str = "admin@admin.com"):
+        self.user_email = user_email
+    
+    def list_cvs(self, current_user: UserData = None) -> Dict[str, Any]:
         """
         List all uploaded CVs with metadata
         
@@ -37,7 +39,7 @@ class CVSelectionService:
             cvs = []
             
             # Resolve user-specific uploads directory
-            upload_dir = get_user_uploads_path(current_user.email) if current_user else get_user_uploads_path("admin@admin.com")
+            upload_dir = get_user_uploads_path(current_user.email) if current_user else get_user_uploads_path(self.user_email)
             if upload_dir.exists():
                 for file_path in upload_dir.iterdir():
                     if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
@@ -68,8 +70,7 @@ class CVSelectionService:
             logger.error(f"Error listing CVs: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error listing CVs: {str(e)}")
     
-    @staticmethod
-    def get_cv_info(filename: str) -> Dict[str, Any]:
+    def get_cv_info(self, filename: str) -> Dict[str, Any]:
         """
         Get information about a specific CV file
         
@@ -83,8 +84,8 @@ class CVSelectionService:
             HTTPException: If file not found
         """
         try:
-            # Use admin path by default; callers that need auth should pass current user
-            file_path = get_user_uploads_path("admin@admin.com") / filename
+            # Use user-specific path
+            file_path = get_user_uploads_path(self.user_email) / filename
             
             if not file_path.exists():
                 raise HTTPException(status_code=404, detail="CV file not found")
@@ -106,5 +107,5 @@ class CVSelectionService:
             raise HTTPException(status_code=500, detail=f"Error getting CV info: {str(e)}")
 
 
-# Global instance
-cv_selection_service = CVSelectionService()
+# Global instance - will be initialized with proper user email when needed
+cv_selection_service = None

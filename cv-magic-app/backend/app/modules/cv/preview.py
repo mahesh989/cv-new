@@ -14,16 +14,15 @@ from ...services.cv_processor import cv_processor
 
 logger = logging.getLogger(__name__)
 
-# Constants
-from app.utils.user_path_utils import get_user_uploads_path
-UPLOAD_DIR = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
-
-
 class CVPreviewService:
     """Service class for handling CV preview and content extraction"""
     
-    @staticmethod
-    def get_cv_content(filename: str) -> Dict[str, Any]:
+    def __init__(self, user_email: str = "admin@admin.com"):
+        self.user_email = user_email
+        from app.utils.user_path_utils import get_user_uploads_path
+        self.upload_dir = get_user_uploads_path(user_email)
+    
+    def get_cv_content(self, filename: str) -> Dict[str, Any]:
         """
         Get CV text content with improved extraction
         
@@ -37,7 +36,7 @@ class CVPreviewService:
             HTTPException: If extraction fails
         """
         try:
-            file_path = UPLOAD_DIR / filename
+            file_path = self.upload_dir / filename
             
             if not file_path.exists():
                 raise HTTPException(status_code=404, detail="CV file not found")
@@ -78,8 +77,7 @@ class CVPreviewService:
             logger.error(f"Error extracting CV content: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error extracting CV content: {str(e)}")
     
-    @staticmethod
-    def get_cv_preview(filename: str, max_length: int = 500) -> Dict[str, Any]:
+def get_cv_preview(self, filename: str, max_length: int = 500) -> Dict[str, Any]:
         """
         Get CV content preview with customizable length
         
@@ -94,7 +92,7 @@ class CVPreviewService:
             HTTPException: If extraction fails
         """
         try:
-            file_path = UPLOAD_DIR / filename
+            file_path = self.upload_dir / filename
             
             if not file_path.exists():
                 raise HTTPException(status_code=404, detail="CV file not found")
@@ -134,5 +132,5 @@ class CVPreviewService:
             raise HTTPException(status_code=500, detail=f"Error generating CV preview: {str(e)}")
 
 
-# Global instance
-cv_preview_service = CVPreviewService()
+# Global instance - will be initialized with proper user email when needed
+cv_preview_service = None

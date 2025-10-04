@@ -424,4 +424,5 @@ class EnhancedCVUploadService:
 
 
 # Global instance
-enhanced_cv_upload_service = EnhancedCVUploadService("admin@admin.com")
+# Global instance - will be initialized with proper user email when needed
+enhanced_cv_upload_service = None

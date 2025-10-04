@@ -14,20 +14,21 @@ from fastapi.responses import JSONResponse
 logger = logging.getLogger(__name__)
 
 # Constants
-from app.utils.user_path_utils import get_user_uploads_path
-UPLOAD_DIR = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-
-# Ensure upload directory exists
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class CVUploadService:
     """Service class for handling CV uploads"""
     
-    @staticmethod
-    async def upload_cv(cv: UploadFile) -> Dict[str, Any]:
+    def __init__(self, user_email: str = "admin@admin.com"):
+        self.user_email = user_email
+        from app.utils.user_path_utils import get_user_uploads_path
+        self.upload_dir = get_user_uploads_path(user_email)
+        # Ensure upload directory exists
+        self.upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    async def upload_cv(self, cv: UploadFile) -> Dict[str, Any]:
         """
         Upload a CV file with validation and processing
         
@@ -61,7 +62,7 @@ class CVUploadService:
                 )
             
             # Save file to upload directory
-            file_path = UPLOAD_DIR / cv.filename
+            file_path = self.upload_dir / cv.filename
             with open(file_path, "wb") as buffer:
                 buffer.write(file_content)
             
@@ -79,5 +80,5 @@ class CVUploadService:
             raise HTTPException(status_code=500, detail=f"Error uploading CV: {str(e)}")
 
 
-# Global instance
-cv_upload_service = CVUploadService()
+# Global instance - will be initialized with proper user email when needed
+cv_upload_service = None
