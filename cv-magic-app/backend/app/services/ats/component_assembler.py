@@ -443,8 +443,9 @@ class ComponentAssembler:
             
             # Create recommendation file after ATS calculation is completed
             try:
-                from app.services.ats_recommendation_service import ats_recommendation_service
-                recommendation_created = ats_recommendation_service.create_recommendation_file(company)
+                from app.services.ats_recommendation_service import ATSRecommendationService
+                recommendation_service = ATSRecommendationService(self.user_email)
+                recommendation_created = recommendation_service.create_recommendation_file(company)
                 
                 if recommendation_created:
                     logger.info("[ASSEMBLER] Recommendation file created for %s", company)
