@@ -1571,14 +1571,20 @@ FIX: Output ONLY valid JSON!
             logger.info(f"Loading real data for {company}")
             logger.info(f"Company folder: {company_folder}")
 
-            # Use unified latest file selector to choose the latest CV across tailored+original
+            # Use user-specific unified latest file selector to choose the latest CV across tailored+original
             try:
-                from app.unified_latest_file_selector import unified_selector
-                cv_ctx = unified_selector.get_latest_cv_across_all(company)
+                from app.unified_latest_file_selector import get_selector_for_user
+                user_selector = get_selector_for_user(self.user_email)
+                cv_ctx = user_selector.get_latest_cv_across_all(company)
                 if not cv_ctx.exists:
                     raise FileNotFoundError("No CV file found via unified selector")
-                # Prefer JSON when available; fall back to TXT
-                selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
+                # Prefer TXT file if JSON is empty, otherwise use JSON
+                if cv_ctx.json_path and cv_ctx.json_path.exists() and cv_ctx.json_path.stat().st_size > 1000:
+                    selected_cv_path = str(cv_ctx.json_path)
+                elif cv_ctx.txt_path and cv_ctx.txt_path.exists():
+                    selected_cv_path = str(cv_ctx.txt_path)
+                else:
+                    selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
                 logger.info(
                     f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
                 )
@@ -1603,6 +1609,29 @@ FIX: Output ONLY valid JSON!
             # Parse CV (RecommendationParser handles json/txt)
             cv_data = RecommendationParser.load_original_cv(selected_cv_path)
             logger.info(f"- Parsed CV data keys: {list(cv_data.keys() if isinstance(cv_data, dict) else [])}")
+            
+            # Check if CV data is empty and fall back to original_text if available
+            if (isinstance(cv_data, dict) and 
+                (not cv_data.get('contact', {}).get('name') or 
+                 not cv_data.get('contact', {}).get('email') or
+                 not cv_data.get('experience') or
+                 not cv_data.get('skills'))):
+                
+                logger.warning("⚠️ [TAILORING] CV data is empty, checking for original_text fallback")
+                
+                # Try to load the JSON file and extract original_text
+                if selected_cv_path.endswith('.json'):
+                    try:
+                        with open(selected_cv_path, 'r', encoding='utf-8') as f:
+                            json_data = json.load(f)
+                        
+                        if 'original_text' in json_data and json_data['original_text']:
+                            logger.info("📄 [TAILORING] Found original_text, parsing as raw text")
+                            # Parse the original_text as raw text
+                            cv_data = RecommendationParser._parse_cv_text(json_data['original_text'])
+                            logger.info(f"- Re-parsed CV data keys: {list(cv_data.keys() if isinstance(cv_data, dict) else [])}")
+                    except Exception as e:
+                        logger.warning(f"⚠️ [TAILORING] Failed to parse original_text: {e}")
             
             original_cv = OriginalCV(**cv_data)
             logger.info(f"- Final CV object attributes: {dir(original_cv)}")

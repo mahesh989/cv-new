@@ -126,7 +126,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
       // First, get the list of available companies to find the latest CV
       final companiesResponse = await http.get(
-        Uri.parse('http://localhost:8000/api/tailored-cv/available-companies-real'),
+        Uri.parse(
+            'http://localhost:8000/api/tailored-cv/available-companies-real'),
         headers: headers,
       );
 
@@ -152,7 +153,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
         // Now get the content for this company
         final response = await http.get(
-          Uri.parse('http://localhost:8000/api/tailored-cv/content/$companyName'),
+          Uri.parse(
+              'http://localhost:8000/api/tailored-cv/content/$companyName'),
           headers: headers,
         );
 
