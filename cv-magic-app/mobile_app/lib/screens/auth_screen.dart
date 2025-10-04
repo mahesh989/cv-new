@@ -81,7 +81,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
 
     try {
-
       // Get trimmed values
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
