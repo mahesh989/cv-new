@@ -26,6 +26,13 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
   final TextEditingController _editController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Automatically load tailored CV when screen loads
+    _loadTailoredCV();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
