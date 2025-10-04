@@ -29,13 +29,9 @@ def get_user_base_path(user_email: Optional[str] = None) -> Path:
     # Normalize email
     user_email = user_email.strip().lower()
     
-    # Special case for admin user to maintain compatibility
-    if user_email == "admin@admin.com":
-        user_folder = "user_admin@admin.com"
-    else:
-        # Create unique and safe user folder name
-        safe_email = user_email.replace('@', '_at_').replace('.', '_dot_')
-        user_folder = f"user_{safe_email}"
+    # Create user folder name using the actual email address
+    # This is safe for modern filesystems and more readable
+    user_folder = f"user_{user_email}"
     
     # Use standard user-scoped path structure: user/{user_folder}/cv-analysis
     base_path = Path("user") / user_folder / "cv-analysis"
