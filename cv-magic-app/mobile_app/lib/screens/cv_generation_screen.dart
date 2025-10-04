@@ -108,7 +108,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
       // Get auth token
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
-      
+
       if (token == null) {
         setState(() {
           tailoredCVContent = 'Please log in to view your tailored CVs';
@@ -126,13 +126,14 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
       // First, get the list of available companies to find the latest CV
       final companiesResponse = await http.get(
-        Uri.parse('http://localhost:8000/tailored-cv/available-companies-real'),
+        Uri.parse('http://localhost:8000/api/tailored-cv/available-companies-real'),
         headers: headers,
       );
 
       if (companiesResponse.statusCode == 200) {
         final companiesData = json.decode(companiesResponse.body);
-        final companies = List<Map<String, dynamic>>.from(companiesData['companies'] ?? []);
+        final companies =
+            List<Map<String, dynamic>>.from(companiesData['companies'] ?? []);
 
         if (companies.isEmpty) {
           setState(() {
@@ -144,13 +145,14 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         }
 
         // Sort companies by last_updated and get the most recent one
-        companies.sort((a, b) => b['last_updated'].compareTo(a['last_updated']));
+        companies
+            .sort((a, b) => b['last_updated'].compareTo(a['last_updated']));
         final latestCompany = companies.first;
         final companyName = latestCompany['company'];
 
         // Now get the content for this company
         final response = await http.get(
-          Uri.parse('http://localhost:8000/tailored-cv/content/$companyName'),
+          Uri.parse('http://localhost:8000/api/tailored-cv/content/$companyName'),
           headers: headers,
         );
 
@@ -162,7 +164,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
           });
         } else if (response.statusCode == 401) {
           setState(() {
-            tailoredCVContent = 'Your session has expired. Please log in again.';
+            tailoredCVContent =
+                'Your session has expired. Please log in again.';
           });
           // Optionally trigger a logout or re-authentication flow here
         } else {
@@ -178,7 +181,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         // Optionally trigger a logout or re-authentication flow here
       } else {
         setState(() {
-          tailoredCVContent = 'Failed to get companies list. Status: ${companiesResponse.statusCode}';
+          tailoredCVContent =
+              'Failed to get companies list. Status: ${companiesResponse.statusCode}';
         });
       }
     } catch (e) {
