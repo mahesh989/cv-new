@@ -393,8 +393,11 @@ async def _run_pipeline(cname: str, token_data=None):
     # Step 3: Component Analysis (includes ATS calculation) - Tailored-only via unified selector
     try:
         logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
-        from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+        from app.services.ats.modular_ats_orchestrator import ModularATSOrchestrator
         from app.unified_latest_file_selector import get_selector_for_user
+        
+        # Create user-specific orchestrator
+        user_orchestrator = ModularATSOrchestrator(user_email=user_email)
         
         # Get latest CV context across tailored+original, log paths, then read content
         try:
@@ -437,7 +440,7 @@ async def _run_pipeline(cname: str, token_data=None):
         # We can run component analysis if we have CV text, JD, and skills analysis
         if cv_text_for_analysis and jd_file.exists() and skills_file.exists():
             logger.info(f"📄 [PIPELINE] Required files found, proceeding with component analysis")
-            component_result = await modular_ats_orchestrator.run_component_analysis(cname, cv_text=cv_text_for_analysis or None)
+            component_result = await user_orchestrator.run_component_analysis(cname, cv_text=cv_text_for_analysis or None)
             logger.info(f"✅ [PIPELINE] Component analysis completed for {cname}")
             pipeline_results["component_analysis"] = True
             
@@ -980,7 +983,7 @@ async def preliminary_analysis(
                     logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save CV file: {e}")
 
             logger.info(f"🚀 [PIPELINE] (preliminary-analysis) scheduling for company: {company_name}")
-            _schedule_post_skill_pipeline(company_name)
+            _schedule_post_skill_pipeline(company_name, token_data)
         except Exception as e:
             logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to schedule: {e}")
         

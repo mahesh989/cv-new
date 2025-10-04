@@ -318,10 +318,11 @@ class CVJDMatcher:
             if not cv_file_path:
                 logger.info(f"🔍 [CV_JD_MATCHER] No explicit CV path provided, using unified selector for {company_name}")
                 
-                from app.unified_latest_file_selector import unified_selector
+                from app.unified_latest_file_selector import get_selector_for_user
                 # Get JD URL from analysis data if available
                 jd_url = jd_analysis_data.get('jd_url', '') if jd_analysis_data else ''
-                cv_context = unified_selector.get_latest_cv_for_company(company_name, jd_url, "")
+                user_selector = get_selector_for_user(self.user_email)
+                cv_context = user_selector.get_latest_cv_for_company(company_name, jd_url, "")
                 
                 if not cv_context.exists:
                     raise FileNotFoundError(f"No CV found for company: {company_name}")

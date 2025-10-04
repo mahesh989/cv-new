@@ -28,7 +28,7 @@ class ModularATSOrchestrator:
                 # Fallback to legacy relative path if user path resolution fails
                 resolved_base = Path("cv-analysis")
         self.base_dir: Path = Path(resolved_base)
-        self.assembler = ComponentAssembler(self.base_dir)
+        self.assembler = ComponentAssembler(self.base_dir, user_email)
 
     async def run_component_analysis(self, company: str, cv_text: Optional[str] = None) -> Dict[str, Any]:
         """
