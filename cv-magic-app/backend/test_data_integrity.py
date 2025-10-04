@@ -78,7 +78,7 @@ def check_skills_content(file_path: Path) -> List[str]:
         return [f"Error reading skills file: {str(e)}"]
 
 def verify_file_data() -> Dict[str, Any]:
-    base_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/user/user_admin@admin.com/cv-analysis")
+    base_path = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/user/user_test@example.com/cv-analysis")
     company = "Australia_for_UNHCR"
     
     results = {

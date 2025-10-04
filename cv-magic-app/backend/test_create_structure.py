@@ -7,10 +7,10 @@ import shutil
 
 def create_test_structure():
     # Configuration
-    user_email = "admin@admin.com"
+    user_email = "test@example.com"
     company = "Test_Company_XYZ"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    base_dir = Path("user/user_admin@admin.com/cv-analysis")
+    base_dir = Path("user/user_test@example.com/cv-analysis")
 
     print(f"\n🔨 Creating test structure for {company} at {timestamp}\n")
 

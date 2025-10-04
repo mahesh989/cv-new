@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ModularATSOrchestrator:
     """Main orchestrator for modular ATS component analysis."""
 
-    def __init__(self, base_dir: Optional[Path] = None, user_email: str = "admin@admin.com"):
+    def __init__(self, base_dir: Optional[Path] = None, user_email: str = "test@example.com"):
         # Use per-user base path by default so timestamped JD/CV files resolve correctly
         resolved_base = base_dir
         if resolved_base is None:

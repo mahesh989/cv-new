@@ -29,7 +29,7 @@ class CVTailoringService:
     Service for tailoring CVs based on job recommendations and optimization framework
     """
     
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         from app.utils.user_path_utils import get_user_base_path
         self.user_email = user_email
         self.cv_analysis_path = get_user_base_path(user_email)

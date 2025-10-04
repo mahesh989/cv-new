@@ -14,7 +14,7 @@ from .user_path_utils import (
     ensure_user_directories
 )
 
-def verify_company_paths(company: str, user_email: str = "admin@admin.com") -> Dict[str, bool]:
+def verify_company_paths(company: str, user_email: str = "test@example.com") -> Dict[str, bool]:
     """Verify that all required paths exist for a company."""
     # Ensure base directories exist
     ensure_user_directories(user_email)
@@ -77,7 +77,7 @@ def verify_company_paths(company: str, user_email: str = "admin@admin.com") -> D
             
     return results
 
-def print_company_structure(company: str, user_email: str = "admin@admin.com") -> None:
+def print_company_structure(company: str, user_email: str = "test@example.com") -> None:
     """Print the expected directory structure for a company."""
     base_path = get_user_base_path(user_email)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

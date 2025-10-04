@@ -162,7 +162,10 @@ async def get_cv_jd_matching_status(
         # Check file existence
         # Use correct base path with user directory
         from app.utils.user_path_utils import get_user_base_path
-        base_path = get_user_base_path("admin@admin.com") / "cv-analysis"
+        # This route requires authentication - user_email should be provided
+        if not user_email:
+            raise ValueError("User authentication required for CV-JD matching")
+        base_path = get_user_base_path(user_email)
         company_dir = base_path / "applied_companies" / company_name
         
         # Check CV file using dynamic selection
@@ -317,7 +320,10 @@ async def delete_cv_jd_match_results(
         
         # Delete results file
         from app.utils.user_path_utils import get_user_base_path
-        base_path = get_user_base_path("admin@admin.com") / "cv-analysis"
+        # This route requires authentication - user_email should be provided
+        if not user_email:
+            raise ValueError("User authentication required for CV-JD matching results")
+        base_path = get_user_base_path(user_email)
         match_results_file = base_path / "applied_companies" / company_name / "cv_jd_match_results.json"
         
         if match_results_file.exists():

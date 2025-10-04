@@ -13,7 +13,7 @@ from fastapi.encoders import jsonable_encoder
 logger = logging.getLogger(__name__)
 
 class SavedJobsService:
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         """Initialize the saved jobs service."""
         from app.utils.user_path_utils import get_user_saved_jobs_path
         self.user_email = user_email

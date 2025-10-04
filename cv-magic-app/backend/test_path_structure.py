@@ -41,7 +41,7 @@ def test_analysis_paths():
 
     for path, expected_name in expected_files:
         assert path.name == expected_name, f"Wrong filename: {path.name} != {expected_name}"
-        assert "user_admin@admin.com/cv-analysis" in str(path), f"Wrong path structure: {path}"
+        assert "user_test@example.com/cv-analysis" in str(path), f"Wrong path structure: {path}"
         print(f"✅ File path correct: {path}")
 
     # 3. Test non-timestamped files

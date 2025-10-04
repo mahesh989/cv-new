@@ -18,9 +18,10 @@ logger = logging.getLogger(__name__)
 class CVContentService:
     """Service for dynamic CV content management"""
     
-    def __init__(self):
+    def __init__(self, user_email: str):
         from app.utils.user_path_utils import get_user_uploads_path
-        self.upload_dir = get_user_uploads_path("admin@admin.com")  # TODO: Get from user context
+        self.user_email = user_email
+        self.upload_dir = get_user_uploads_path(self.user_email)  # Use user context
         self.fallback_cv_content = self._get_fallback_cv_content()
     
     def get_cv_content(self, cv_filename: str, user_id: int = 1, use_fallback: bool = False) -> Dict[str, Any]:
