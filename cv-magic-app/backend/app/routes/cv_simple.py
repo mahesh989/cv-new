@@ -13,7 +13,9 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Request, Depends
 from fastapi.responses import JSONResponse
 
 from ..services.cv_processor import cv_processor
-from ..services.enhanced_cv_upload_service import enhanced_cv_upload_service
+from ..services.enhanced_cv_upload_service import EnhancedCVUploadService
+from ..core.auth import get_current_user
+from ..models.auth import UserData
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
@@ -29,7 +31,11 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("/upload")
-async def upload_cv(cv: UploadFile = File(...), auto_structure: bool = True):
+async def upload_cv(
+    cv: UploadFile = File(...), 
+    auto_structure: bool = True,
+    current_user: UserData = Depends(get_current_user)
+):
     """Upload a CV file with automatic structured processing"""
     
     if not cv.filename:
@@ -38,8 +44,10 @@ async def upload_cv(cv: UploadFile = File(...), auto_structure: bool = True):
     try:
         # Use the enhanced upload service for automatic structured processing
         if auto_structure:
-            logger.info(f"Uploading {cv.filename} with structured processing...")
-            result = await enhanced_cv_upload_service.upload_and_process_cv(
+            logger.info(f"Uploading {cv.filename} with structured processing for user: {current_user.email}")
+            # Create service instance with current user's email
+            upload_service = EnhancedCVUploadService(user_email=current_user.email)
+            result = await upload_service.upload_and_process_cv(
                 cv_file=cv
                 # Always saves as original_cv.json (replaces existing)
             )
@@ -75,8 +83,11 @@ async def upload_cv(cv: UploadFile = File(...), auto_structure: bool = True):
                     detail="File too large. Maximum size is 10MB"
                 )
             
-            # Save file to upload directory
-            file_path = UPLOAD_DIR / cv.filename
+            # Save file to current user's upload directory
+            from app.utils.user_path_utils import get_user_uploads_path
+            user_upload_dir = get_user_uploads_path(current_user.email)
+            user_upload_dir.mkdir(parents=True, exist_ok=True)
+            file_path = user_upload_dir / cv.filename
             with open(file_path, "wb") as buffer:
                 buffer.write(file_content)
             
