@@ -332,6 +332,9 @@ class UnifiedLatestFileSelector:
         return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
+# Global singleton instance (defaults to admin; prefer creating per-user instances)
+unified_selector = UnifiedLatestFileSelector()
+
 def get_selector_for_user(user_email: str) -> UnifiedLatestFileSelector:
     """
     Get a file selector instance for a specific user

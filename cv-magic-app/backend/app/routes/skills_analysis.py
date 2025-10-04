@@ -386,11 +386,13 @@ async def _run_pipeline(cname: str, token_data=None):
     try:
         logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
         from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
-        from app.unified_latest_file_selector import unified_selector
+        from app.unified_latest_file_selector import get_selector_for_user
         
         # Get latest CV context across tailored+original, log paths, then read content
         try:
-            cv_ctx_debug = unified_selector.get_latest_cv_across_all(cname)
+            # Create user-specific selector
+            user_selector = get_selector_for_user(user_email)
+            cv_ctx_debug = user_selector.get_latest_cv_across_all(cname)
             logger.info(
                 "📄 [PIPELINE] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
                 cv_ctx_debug.file_type,
@@ -398,7 +400,7 @@ async def _run_pipeline(cname: str, token_data=None):
                 cv_ctx_debug.json_path,
                 cv_ctx_debug.txt_path,
             )
-            cv_text_for_analysis = unified_selector.get_cv_content_across_all(cname)
+            cv_text_for_analysis = user_selector.get_cv_content_across_all(cname)
             try:
                 _preview = (cv_text_for_analysis or "")[:400].replace('\n', ' ')
                 logger.info("🧪 [PIPELINE] CV content length=%d, preview='%s'", len(cv_text_for_analysis or ""), _preview)
@@ -785,14 +787,16 @@ async def preliminary_analysis(
             )
         
         # NEW: Always use unified latest-across-all CV (tailored or original by newest timestamp)
-        from app.unified_latest_file_selector import unified_selector
+        from app.unified_latest_file_selector import get_selector_for_user
         try:
-            cv_ctx = unified_selector.get_latest_cv_across_all(company_name)
+            # Create user-specific selector
+            user_selector = get_selector_for_user(user_email)
+            cv_ctx = user_selector.get_latest_cv_across_all(company_name)
             logger.info(
                 "📄 [PRELIM_ANALYSIS] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
                 cv_ctx.file_type, cv_ctx.timestamp, cv_ctx.json_path, cv_ctx.txt_path
             )
-            cv_content = unified_selector.get_cv_content_across_all(company_name)
+            cv_content = user_selector.get_cv_content_across_all(company_name)
             preview = (cv_content or "")[:400].replace('\n', ' ')
             logger.info("🧪 [PRELIM_ANALYSIS] CV content length=%d, preview='%s'", len(cv_content or ""), preview)
             cv_selection_info = {
@@ -2258,7 +2262,7 @@ async def perform_preliminary_skills_analysis(
         file_params = skills_analysis_config_service.get_file_parameters(config_name)
         if file_params["save_analysis_results"]:
             try:
-                result_saver = SkillExtractionResultSaver()
+                result_saver = SkillExtractionResultSaver(user_email=user_email)
                 
                 # Get the company name from existing job info files (reuse already extracted company name)
                 company_name = None
