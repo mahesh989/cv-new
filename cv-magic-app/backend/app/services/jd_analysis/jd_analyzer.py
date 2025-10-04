@@ -234,7 +234,7 @@ class RequirementsExtractor:
 class JDAnalyzer:
     """Job Description Analyzer using centralized AI system"""
     
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         self.ai_service = ai_service
         self.user_email = user_email
         from app.utils.user_path_utils import get_user_base_path

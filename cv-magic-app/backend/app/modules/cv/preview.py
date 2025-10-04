@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class CVPreviewService:
     """Service class for handling CV preview and content extraction"""
     
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         self.user_email = user_email
         from app.utils.user_path_utils import get_user_uploads_path
         self.upload_dir = get_user_uploads_path(user_email)

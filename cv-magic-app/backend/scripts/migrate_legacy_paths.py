@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def migrate_legacy_paths(legacy_base: str = "cv-analysis", user_email: str = "admin@admin.com"):
+def migrate_legacy_paths(legacy_base: str = "cv-analysis", user_email: str = "test@example.com"):
     """
     Migrate files from legacy path structure to new user-scoped structure.
     

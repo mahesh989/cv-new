@@ -15,8 +15,8 @@ def test_real_analysis():
 
     # 1. Get paths from utility
     from app.utils.user_path_utils import get_user_base_path, get_user_company_analysis_paths
-    base_dir = get_user_base_path("admin@admin.com")
-    paths = get_user_company_analysis_paths("admin@admin.com", company)
+    base_dir = get_user_base_path("test@example.com")
+    paths = get_user_company_analysis_paths("test@example.com", company)
 
     # 2. Create test analysis files
     from app.utils.timestamp_utils import TimestampUtils
@@ -33,7 +33,7 @@ def test_real_analysis():
         
         # Verify file exists and has correct structure
         assert file_path.exists(), f"File not created: {file_path}"
-        assert "user_admin@admin.com/cv-analysis" in str(file_path), f"Wrong path structure: {file_path}"
+        assert "user_test@example.com/cv-analysis" in str(file_path), f"Wrong path structure: {file_path}"
         assert TimestampUtils.is_timestamped_filename(file_path.name), f"Not timestamped: {file_path.name}"
 
     print("\n✨ Real analysis test passed - all files created with correct structure!")

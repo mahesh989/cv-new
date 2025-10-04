@@ -9,12 +9,12 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 def test_analysis_paths():
     # Test configuration
-    user_email = "admin@admin.com"
+    user_email = "test@example.com"
     company = "Test_Company"
     timestamp = "20250929_211755"  # Using fixed timestamp for testing
 
     # Expected path structure - use relative path
-    base_path = Path("user/user_admin@admin.com/cv-analysis")
+    base_path = Path("user/user_test@example.com/cv-analysis")
     
     # 1. Test directory creation
     from app.utils.user_path_utils import get_user_base_path

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
-def get_user_paths(user_email: str = "admin@admin.com"):
+def get_user_paths(user_email: str):
     """Get user-specific paths"""
     from app.utils.user_path_utils import get_user_base_path, get_user_uploads_path
     return {
@@ -34,7 +34,7 @@ def get_user_paths(user_email: str = "admin@admin.com"):
 class EnhancedCVUploadService:
     """Enhanced CV upload service with structured parsing"""
 
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         self.user_email = user_email
         self.cv_processor = cv_processor
         self.structured_parser = LLMStructuredCVParser()

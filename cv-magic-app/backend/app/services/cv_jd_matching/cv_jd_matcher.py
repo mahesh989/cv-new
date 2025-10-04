@@ -85,7 +85,7 @@ class CVJDMatchResult:
 class CVJDMatcher:
     """CV-JD Matcher using centralized AI system"""
     
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         self.ai_service = ai_service
         self.user_email = user_email
     

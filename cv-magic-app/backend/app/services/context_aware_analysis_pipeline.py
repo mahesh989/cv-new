@@ -108,7 +108,7 @@ class ContextAwareAnalysisPipeline:
     Main pipeline orchestrator with context awareness
     """
     
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         self.user_email = user_email
         # Initialize services with user context
         self.skill_extraction_service = SkillExtractionService()

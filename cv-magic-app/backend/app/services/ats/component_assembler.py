@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class ComponentAssembler:
     """Assembles individual component analyses into unified results."""
 
-    def __init__(self, base_dir: Optional[Path] = None, user_email: str = "admin@admin.com"):
+    def __init__(self, base_dir: Optional[Path] = None, user_email: str = None):
         if base_dir:
             self.base_dir: Path = base_dir
         else:

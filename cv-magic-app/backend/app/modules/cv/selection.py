@@ -22,7 +22,7 @@ ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
 class CVSelectionService:
     """Service class for handling CV selection and listing"""
     
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         self.user_email = user_email
     
     def list_cvs(self, current_user: UserData = None) -> Dict[str, Any]:

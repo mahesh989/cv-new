@@ -80,7 +80,7 @@ class Settings(BaseSettings):
     ]
     
     # File Upload Settings
-    UPLOAD_DIR: str = "user/user_admin@admin.com/cv-analysis/uploads"  # Will be updated dynamically per user
+    UPLOAD_DIR: str = "uploads"  # Will be updated dynamically per user via get_user_uploads_path()
     MAX_FILE_SIZE: int = 10485760  # 10MB in bytes
     MAX_FILES_PER_USER: int = 50
     

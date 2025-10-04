@@ -47,7 +47,7 @@ def ensure_user_directories(user_email: Optional[str] = None) -> Path:
     Ensure user-specific directories exist
     
     Args:
-        user_email: User email address (defaults to admin@admin.com)
+        user_email: User email address
         
     Returns:
         Path to user-specific cv-analysis directory
@@ -147,7 +147,7 @@ def get_user_company_analysis_paths(user_email: Optional[str], company: str) -> 
         "tailored_cv": lambda ts: get_user_cv_paths(user_email)["tailored"] / f"{company}_tailored_cv_{ts}.json"
     }
 
-def verify_company_file_structure(company: str, user_email: str = "admin@admin.com", create_dirs: bool = True) -> Dict[str, Path]:
+def verify_company_file_structure(company: str, user_email: str = "test@example.com", create_dirs: bool = True) -> Dict[str, Path]:
     """
     Verify and optionally create the complete file structure for a company
     

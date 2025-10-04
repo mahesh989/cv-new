@@ -160,17 +160,6 @@ def authenticate_user(email: str, password: str, db: Optional[Session] = None) -
     password = (password or "").strip()
     logger.info(f"🔵 [AUTH] Normalized inputs - email: '{email}', password length: {len(password)}")
 
-    # Admin fallback for development compatibility
-    if email == "admin@admin.com" and password == "admin123":
-        logger.info(f"🔵 [AUTH] Using admin fallback for admin@admin.com")
-        return UserData(
-            id=str(uuid.uuid4()),
-            email="admin@admin.com",
-            name="Admin User",
-            created_at=datetime.now(timezone.utc),
-            is_active=True
-        )
-
     # Use provided DB session or a temporary one
     def _query_user(session: Session) -> Optional[UserData]:
         logger.info(f"🔵 [AUTH] Querying database for user: '{email}'")

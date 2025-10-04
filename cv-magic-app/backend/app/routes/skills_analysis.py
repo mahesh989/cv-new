@@ -171,7 +171,9 @@ def _validate_required_analysis_files(company_name: str, user_email: Optional[st
         from app.utils.timestamp_utils import TimestampUtils
         from app.utils.user_path_utils import get_user_base_path
         
-        base_path = get_user_base_path(user_email or "admin@admin.com") / "applied_companies" / company_name
+        if not user_email:
+            raise ValueError("User authentication required for file operations")
+        base_path = get_user_base_path(user_email) / "applied_companies" / company_name
         
         # Check for timestamped files first, then fallback to non-timestamped
         jd_original_file = TimestampUtils.find_latest_timestamped_file(base_path, "jd_original", "json")
@@ -320,11 +322,12 @@ async def _run_pipeline(cname: str, token_data=None):
         company_dir = Path("cv-analysis") / "applied_companies" / cname
         logger.info(f"🔧 [PIPELINE] Starting JD analysis for {cname} (force_refresh=True)")
         from app.services.jd_analysis.jd_analyzer import JDAnalyzer
-        _analyzer = JDAnalyzer()
+        _analyzer = JDAnalyzer(user_email=user_email)
         from app.utils.user_path_utils import get_user_base_path
-        # token_data may not be available in this route; default to admin for now
-        user_email = None
-        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        # This route requires authentication - user_email should be provided
+        if not user_email:
+            raise ValueError("User authentication required for JD analysis")
+        base_dir = get_user_base_path(user_email)
         jd_result_obj = await _analyzer.analyze_and_save_company_jd(cname, force_refresh=True, base_path=str(base_dir))
         jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
         saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
@@ -341,7 +344,9 @@ async def _run_pipeline(cname: str, token_data=None):
         try:
             from app.utils.user_path_utils import get_user_base_path
             user_email = getattr(token_data, 'email', None)
-            base_dir_local = get_user_base_path(user_email or "admin@admin.com")
+            if not user_email:
+                raise ValueError("User authentication required for CV operations")
+            base_dir_local = get_user_base_path(user_email)
             company_tailored_dir = base_dir_local / "applied_companies" / cname
             preferred_txt = None
             if company_tailored_dir.exists():
@@ -412,9 +417,10 @@ async def _run_pipeline(cname: str, token_data=None):
         
         # Check if we have the minimum required files (JD + skills analysis must exist)
         from app.utils.user_path_utils import get_user_base_path
-        # token_data may not be available in this route; default to admin for now
-        user_email = None
-        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        # This route requires authentication - user_email should be provided
+        if not user_email:
+            raise ValueError("User authentication required for file validation")
+        base_dir = get_user_base_path(user_email)
         from app.utils.timestamp_utils import TimestampUtils
         company_dir = base_dir / "applied_companies" / cname
         jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
@@ -538,7 +544,9 @@ async def analyze_skills(request: Request, current_user: UserData = Depends(get_
                     user_email = getattr(token_data, 'email', None)
                 except Exception:
                     user_email = None
-                base_dir_local = get_user_base_path(user_email or "admin@admin.com")
+                if not user_email:
+                    raise ValueError("User authentication required for job saving")
+                base_dir_local = get_user_base_path(user_email)
                 company_dir = base_dir_local / "applied_companies" / company_name
                 
                 # Check for job_info files and add to saved_jobs.json (same logic as preliminary_analysis)
@@ -849,7 +857,9 @@ async def preliminary_analysis(
                     user_email = getattr(token_data, 'email', None)
                 except Exception:
                     user_email = None
-                base_dir = get_user_base_path(user_email or "admin@admin.com")
+                if not user_email:
+                    raise ValueError("User authentication required for pipeline operations")
+                base_dir = get_user_base_path(user_email)
                 company_dir = base_dir / "applied_companies" / company_name
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)
@@ -1126,7 +1136,9 @@ async def trigger_component_analysis(company: str, current_user: UserData = Depe
         # Check if required files exist
         from app.utils.user_path_utils import get_user_base_path
         user_email = getattr(token_data, 'email', None)
-        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        if not user_email:
+            raise ValueError("User authentication required for analysis listing")
+        base_dir = get_user_base_path(user_email)
         
         # Use timestamped files with fallback
         from app.utils.timestamp_utils import TimestampUtils
@@ -1235,7 +1247,9 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
 
             from app.utils.user_path_utils import get_user_base_path
             user_email = getattr(token_data, 'email', None)
-            base_dir = get_user_base_path(user_email or "admin@admin.com")
+            if not user_email:
+                raise ValueError("User authentication required for JD analysis")
+            base_dir = get_user_base_path(user_email)
             await analyze_and_save_company_jd(company, force_refresh=True, base_path=str(base_dir))
             results["steps"].append({"step": "jd_analysis", "status": "success"})
         except Exception as e:
@@ -1391,7 +1405,9 @@ async def list_recommendation_files():
         
         from app.utils.user_path_utils import get_user_base_path
         user_email = getattr(token_data, 'email', None)
-        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        if not user_email:
+            raise ValueError("User authentication required for recommendations listing")
+        base_dir = get_user_base_path(user_email)
         companies_with_recommendations = []
         
         if base_dir.exists():
@@ -1779,7 +1795,9 @@ async def list_companies_with_results():
     try:
         from app.utils.user_path_utils import get_user_base_path
         user_email = getattr(token_data, 'email', None)
-        base_dir = get_user_base_path(user_email or "admin@admin.com")
+        if not user_email:
+            raise ValueError("User authentication required for companies listing")
+        base_dir = get_user_base_path(user_email)
         
         if not base_dir.exists():
             return JSONResponse(content={

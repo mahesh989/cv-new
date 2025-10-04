@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class JobExtractionService:
     """Service for extracting job information and saving to organized folders"""
     
-    def __init__(self, user_email: str = "admin@admin.com"):
+    def __init__(self, user_email: str):
         from app.utils.user_path_utils import get_user_base_path
         self.user_email = user_email
         self.cv_analysis_dir = get_user_base_path(user_email)

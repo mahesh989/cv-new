@@ -6,7 +6,7 @@ from app.services.path_verifier import path_verifier
 def test_verify_paths():
     # Test company and paths
     company = "Test_Company_XYZ"
-    user_email = "admin@admin.com"
+    user_email = "test@example.com"
 
     print("\n🔍 Testing path verification during analysis\n")
 
