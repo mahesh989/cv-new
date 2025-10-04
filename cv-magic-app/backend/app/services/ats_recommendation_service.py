@@ -296,9 +296,12 @@ class ATSRecommendationService:
                 
                 # Trigger AI recommendation generation after prompt file creation
                 try:
-                    from .ai_recommendation_generator import ai_recommendation_generator
+                    from .ai_recommendation_generator import AIRecommendationGenerator
                     
                     logger.info(f"🤖 [TRIGGER] Starting AI recommendation generation for {company}")
+                    
+                    # Create user-specific AI recommendation generator
+                    ai_generator = AIRecommendationGenerator(user_email=self.user_email)
                     
                     # Schedule AI generation as a background task (if event loop exists)
                     try:
@@ -308,7 +311,7 @@ class ATSRecommendationService:
                             # Create background task without blocking
                             async def background_ai_generation():
                                 try:
-                                    success = await ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate=False)
+                                    success = await ai_generator.generate_ai_recommendation(company, force_regenerate=False)
                                     if success:
                                         logger.info(f"✅ [TRIGGER] AI recommendation generated successfully for {company}")
                                     else:
@@ -326,7 +329,7 @@ class ATSRecommendationService:
                                 asyncio.set_event_loop(new_loop)
                                 try:
                                     success = new_loop.run_until_complete(
-                                        ai_recommendation_generator.generate_ai_recommendation(company, force_regenerate=False)
+                                        ai_generator.generate_ai_recommendation(company, force_regenerate=False)
                                     )
                                     if success:
                                         logger.info(f"✅ [TRIGGER] AI recommendation generated successfully for {company}")

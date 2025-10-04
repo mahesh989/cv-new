@@ -165,10 +165,11 @@ class AIRecommendationGenerator:
             True if CV is fresh (not updated since input recommendation), False otherwise
         """
         try:
-            from app.unified_latest_file_selector import unified_selector
+            from app.unified_latest_file_selector import get_selector_for_user
             
-            # Get the latest CV context
-            cv_context = unified_selector.get_latest_cv_across_all(company)
+            # Get the latest CV context using user-specific selector
+            user_selector = get_selector_for_user(self.user_email)
+            cv_context = user_selector.get_latest_cv_across_all(company)
             if not cv_context.exists:
                 logger.warning(f"⚠️ [AI GENERATOR] No CV found for {company}")
                 return True  # Assume fresh if no CV found
@@ -252,10 +253,8 @@ class AIRecommendationGenerator:
             AIResponse object or None if failed
         """
         try:
-            # Use the enhanced AI service with API key validation
-            from app.services.enhanced_ai_service import enhanced_ai_service
-            
-            response = await enhanced_ai_service.generate_response_with_validation(
+            # Use the centralized AI service
+            response = await ai_service.generate_response(
                 prompt=prompt_content,
                 system_prompt="You are an expert CV strategist and career consultant. Provide detailed, actionable recommendations in the exact format requested.",
                 temperature=0.0,  # Zero temperature for maximum consistency

@@ -314,7 +314,8 @@ async def _run_pipeline(cname: str, token_data=None):
     pipeline_results = {
         "jd_analysis": False,
         "cv_jd_matching": False,
-        "component_analysis": False
+        "component_analysis": False,
+        "input_recommendation": False
     }
     
     # Get user email and base directory first
@@ -469,6 +470,23 @@ async def _run_pipeline(cname: str, token_data=None):
         logger.error(f"❌ [PIPELINE] Component analysis failed for {cname}: {component_error}")
         import traceback
         logger.error(f"[PIPELINE] Component analysis traceback: {traceback.format_exc()}")
+    
+    # Step 4: Create Input Recommendation File (required for AI recommendation generation)
+    try:
+        logger.info(f"📋 [PIPELINE] Creating input recommendation file for {cname}")
+        from app.services.ats_recommendation_service import ATSRecommendationService
+        recommendation_service = ATSRecommendationService(user_email=user_email)
+        recommendation_created = recommendation_service.create_recommendation_file(cname)
+        
+        if recommendation_created:
+            logger.info(f"✅ [PIPELINE] Input recommendation file created for {cname}")
+            pipeline_results["input_recommendation"] = True
+        else:
+            logger.warning(f"⚠️ [PIPELINE] Failed to create input recommendation file for {cname}")
+            pipeline_results["input_recommendation"] = False
+    except Exception as rec_error:
+        logger.error(f"❌ [PIPELINE] Input recommendation creation failed for {cname}: {rec_error}")
+        pipeline_results["input_recommendation"] = False
     
     # Log pipeline summary
     successful_steps = [step for step, success in pipeline_results.items() if success]
