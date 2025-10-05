@@ -17,6 +17,7 @@ import '../widgets/job_input.dart';
 import '../services/api_service.dart';
 import '../controllers/skills_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
+import '../services/results_clearing_service.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
@@ -59,6 +60,9 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
+
+    // Register controller for external clear operations (keeps CV/JD inputs intact)
+    ResultsClearingService.registerSkillsController(_skillsController);
 
     // Start periodic timer to check if we need to clear results
     _clearCheckTimer =
@@ -119,6 +123,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   void dispose() {
     _clearCheckTimer?.cancel();
+    // Unregister controller when page is disposed
+    ResultsClearingService.unregisterSkillsController();
     _skillsController.dispose();
     jdController.dispose();
     jdUrlController.dispose();
