@@ -1,0 +1,39 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-10-04T22:45:14.111143",
+  "matched_required_keywords": [
+    "SQL",
+    "VBA",
+    "Power BI",
+    "communication",
+    "project management"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "SQL data warehouse",
+    "stakeholder management"
+  ],
+  "missed_preferred_keywords": [
+    "Tableau",
+    "customer service",
+    "data issues",
+    "marketing campaigns"
+  ],
+  "match_counts": {
+    "total_required_keywords": 7,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 5,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "SQL": "Found in technical skills section and mentioned in experience",
+    "VBA": "Found in technical skills section and used for automated reporting",
+    "Power BI": "Found in experience section, used for dynamic reports and dashboards",
+    "communication": "Demonstrated in experience through presenting research findings and collaborations",
+    "project management": "Evident in experience through leading projects and meeting deadlines"
+  },
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "cv_file_path": "user/user_shiva@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251004_223328.txt",
+  "metadata": {}
+}

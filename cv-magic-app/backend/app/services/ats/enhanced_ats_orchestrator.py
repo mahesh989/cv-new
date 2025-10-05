@@ -425,7 +425,16 @@ class EnhancedATSOrchestrator:
             # Use user-specific unified latest file selector
             from app.unified_latest_file_selector import get_selector_for_user
             user_selector = get_selector_for_user(self.user_email)
-            cv_context = user_selector.get_latest_cv_for_company(company_name)
+            # Get JD URL from analysis data if available for company uniqueness
+            jd_url = ""
+            try:
+                if analysis_file.exists():
+                    with open(analysis_file, 'r', encoding='utf-8') as f:
+                        analysis_data = json.load(f)
+                        jd_url = analysis_data.get('jd_url', '')
+            except Exception as e:
+                logger.warning(f"Could not extract JD URL from analysis file: {e}")
+            cv_context = user_selector.get_latest_cv_for_company(company_name, jd_url, "")
             cv_file = cv_context.txt_path if cv_context.exists else None
             
             # Use timestamped JD file with fallback

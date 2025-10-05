@@ -61,17 +61,19 @@ class UnifiedLatestFileSelector:
         
         Args:
             company: Company name
-            jd_url: Job description URL (optional)
+            jd_url: Job description URL (optional) - used for company uniqueness if provided
             jd_text: Job description text (optional)
         """
         if not self.user_email:
             raise ValueError("user_email must be provided for file selection operations")
-            
-        print(f"🔍 Searching for latest CV for company: {company}")
+        
+        # Use JD URL for company uniqueness if provided, otherwise use company name
+        effective_company = self._get_effective_company_name(company, jd_url)
+        print(f"🔍 Searching for latest CV for company: {company} (effective: {effective_company})")
         
         # Always get the latest CV across all types (original and tailored)
         print("📄 Selecting latest CV by timestamp (original or tailored)")
-        return self.get_latest_cv_across_all(company)
+        return self.get_latest_cv_across_all(effective_company)
     
     def _get_original_cv_for_company(self, company: str) -> FileContext:
         """Get original CV for a company"""
@@ -342,6 +344,41 @@ class UnifiedLatestFileSelector:
 
     def get_timestamp(self) -> str:
         return datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    def _get_effective_company_name(self, company: str, jd_url: str = "") -> str:
+        """
+        Get the effective company name for file operations.
+        Uses JD URL for uniqueness if provided, otherwise uses company name.
+        
+        Args:
+            company: Company name
+            jd_url: Job description URL (optional)
+            
+        Returns:
+            Effective company name for file operations
+        """
+        if jd_url and jd_url.strip():
+            # Use JD URL for company uniqueness
+            # Extract domain or use full URL as company identifier
+            try:
+                from urllib.parse import urlparse
+                parsed_url = urlparse(jd_url)
+                if parsed_url.netloc:
+                    # Use domain as company identifier
+                    domain = parsed_url.netloc.replace('www.', '')
+                    effective_company = f"{company}_for_{domain}"
+                else:
+                    # Fallback to full URL hash for uniqueness
+                    import hashlib
+                    url_hash = hashlib.md5(jd_url.encode()).hexdigest()[:8]
+                    effective_company = f"{company}_for_{url_hash}"
+            except Exception as e:
+                print(f"⚠️ Error parsing JD URL {jd_url}: {e}, using company name")
+                effective_company = company
+        else:
+            effective_company = company
+            
+        return effective_company
 
 
 # DEPRECATED: Global singleton instance - DO NOT USE

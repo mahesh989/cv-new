@@ -1,0 +1,43 @@
+{
+  "contact": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "linkedin": null,
+    "location": "Hurstville, NSW, 2220",
+    "website": null
+  },
+  "education": [],
+  "experience": [
+    {
+      "company": "The Bitrates",
+      "title": "Senior Data Analyst",
+      "location": "The Bitrates",
+      "start_date": "Jul 2024",
+      "end_date": "Present",
+      "duration": null,
+      "bullets": [
+        "Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%.",
+        "Developed machine learning models in Python for predictive analytics, enabling datadriven business decisions.",
+        "Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity.",
+        "Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively.",
+        "Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights.",
+        "Enhanced business intelligence processes by incorporating VBA for automated reporting, streamlining data visualization workflows."
+      ]
+    }
+  ],
+  "projects": [],
+  "skills": [
+    "Excel",
+    "SQL",
+    "Power BI",
+    "Python",
+    "VBA",
+    "Analytical",
+    "Data Analysis",
+    "Business Intelligence"
+  ],
+  "created_at": null,
+  "last_edited": "2025-10-04T22:44:30.457696",
+  "manually_edited": true
+}
