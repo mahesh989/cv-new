@@ -229,18 +229,27 @@ class UnifiedLatestFileSelector:
 
     def _find_tailored_cv_files(self, company: str) -> List[Tuple[Path, Optional[Path], str]]:
         candidates: List[Tuple[Path, Optional[Path], str]] = []
-        # Look in per-user tailored folder (cv-analysis/cvs/tailored)
-        tailored_path = self.tailored_path
-        if not tailored_path.exists():
-            return candidates
-        # Tailored CVs include company prefix in filename for company isolation
         pattern = f"{company}_tailored_cv_*.json"
-        for json_file in tailored_path.glob(pattern):
-            timestamp = self._extract_timestamp_from_filename(json_file.name) or "00000000_000000"
-            txt_file = json_file.with_suffix('.txt')
-            if not txt_file.exists():
-                txt_file = None
-            candidates.append((json_file, txt_file, timestamp))
+
+        # 1) Look in per-user global tailored folder: cv-analysis/cvs/tailored
+        if self.tailored_path.exists():
+            for json_file in self.tailored_path.glob(pattern):
+                timestamp = self._extract_timestamp_from_filename(json_file.name) or "00000000_000000"
+                txt_file = json_file.with_suffix('.txt')
+                if not txt_file.exists():
+                    txt_file = None
+                candidates.append((json_file, txt_file, timestamp))
+
+        # 2) Look in company-specific tailored folder: cv-analysis/applied_companies/<company>/cvs/tailored
+        company_tailored = self.base_path / "applied_companies" / company / "cvs" / "tailored"
+        if company_tailored.exists():
+            for json_file in company_tailored.glob(pattern):
+                timestamp = self._extract_timestamp_from_filename(json_file.name) or "00000000_000000"
+                txt_file = json_file.with_suffix('.txt')
+                if not txt_file.exists():
+                    txt_file = None
+                candidates.append((json_file, txt_file, timestamp))
+
         return candidates
 
     def _find_original_cv_files(self, company: str = "") -> List[Tuple[Path, Optional[Path], str]]:

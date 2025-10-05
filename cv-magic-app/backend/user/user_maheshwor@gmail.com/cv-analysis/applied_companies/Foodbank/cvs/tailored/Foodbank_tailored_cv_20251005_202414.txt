@@ -1,0 +1,12 @@
+Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+
+TECHNICAL SKILLS
+• Excel, SQL, Python, Power BI, Analytical Models, Data Analysis
+
+EXPERIENCE
+Senior Data Analyst         Jul 2024 – Present
+The Bitrates
+
+• Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%.
+• Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions.
+• Leveraged AI techniques to automate repetitive

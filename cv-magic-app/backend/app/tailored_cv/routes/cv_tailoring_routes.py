@@ -683,6 +683,42 @@ async def save_edited_cv(
         except Exception as json_error:
             logger.warning(f"⚠️ [SAVE_EDITED] Failed to create JSON file: {json_error}")
         
+        # SYNC: Also update the latest file in global cvs/tailored so editors viewing
+        # cv-analysis/cvs/tailored/<company>_tailored_cv_*.{txt,json} see the changes
+        try:
+            user_base_global = user_base / "cvs" / "tailored"
+            user_base_global.mkdir(parents=True, exist_ok=True)
+
+            # Overwrite latest TXT in global folder if present
+            global_txt_matches = list(user_base_global.glob(f"{company}_tailored_cv_*.txt"))
+            if global_txt_matches:
+                latest_global_txt = max(global_txt_matches, key=lambda x: x.stat().st_mtime)
+                with open(latest_global_txt, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                files_updated.append(str(latest_global_txt))
+                logger.info(f"✅ [SAVE_EDITED] Synced TXT to global folder: {latest_global_txt}")
+
+            # Overwrite latest JSON in global folder by parsing edited content into existing structure
+            global_json_matches = list(user_base_global.glob(f"{company}_tailored_cv_*.json"))
+            if global_json_matches:
+                latest_global_json = max(global_json_matches, key=lambda x: x.stat().st_mtime)
+                try:
+                    with open(latest_global_json, 'r', encoding='utf-8') as f:
+                        existing_global_json = json.load(f)
+                except Exception:
+                    existing_global_json = {
+                        'contact': {}, 'skills': {}, 'experience': [], 'education': [], 'projects': []
+                    }
+                updated_global_json = _parse_cv_content_to_json(content, existing_global_json)
+                updated_global_json['last_edited'] = datetime.now().isoformat()
+                updated_global_json['manually_edited'] = True
+                with open(latest_global_json, 'w', encoding='utf-8') as f:
+                    json.dump(updated_global_json, f, indent=2, ensure_ascii=False)
+                files_updated.append(str(latest_global_json))
+                logger.info(f"✅ [SAVE_EDITED] Synced JSON to global folder: {latest_global_json}")
+        except Exception as sync_err:
+            logger.warning(f"⚠️ [SAVE_EDITED] Global folder sync skipped: {sync_err}")
+
         logger.info(f"✅ [SAVE_EDITED] Completed saving for {company}")
         
         return {
