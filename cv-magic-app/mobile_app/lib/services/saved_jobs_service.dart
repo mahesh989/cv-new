@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SavedJobsService {
   static String get _savedJobsPath {
@@ -67,9 +68,14 @@ class SavedJobsService {
       const baseUrl = 'http://localhost:8000';
 
       // Add timeout to prevent hanging during analysis
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
       final response = await http.get(
         Uri.parse('$baseUrl/api/jobs/saved'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
       ).timeout(
         const Duration(seconds: 10), // 10 second timeout
         onTimeout: () {
