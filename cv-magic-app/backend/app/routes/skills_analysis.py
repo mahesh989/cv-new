@@ -33,6 +33,7 @@ import asyncio
 import json
 import re
 from app.utils.timestamp_utils import TimestampUtils
+from app.utils.user_path_utils import get_user_base_path
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Skills Analysis"])
@@ -53,6 +54,7 @@ async def _extract_company_name_from_jd(jd_text: str, user_email: str) -> str:
             ai_company_name = metadata["company"].strip()
             
             # Clean and limit the AI-extracted name
+            ai_company_name = re.sub(r'^(?i)(organisation_|organization_|company_|org_)', '', ai_company_name)
             ai_company_name = re.sub(r'[^\w\s-]', '', ai_company_name)
             ai_company_name = re.sub(r'\s+', '_', ai_company_name)
             
@@ -90,7 +92,6 @@ async def _extract_company_name_from_jd(jd_text: str, user_email: str) -> str:
                 if existing_company:
                     logger.info(f"🎯 Found matching company folder: {existing_company}")
                     return existing_company
-                
                 return company_name
         
         # Final fallback: check if any existing company folders match parts of the JD text
@@ -266,12 +267,13 @@ def _extract_match_rates_from_content(content: str) -> dict:
     return rates
 
 
-def _detect_most_recent_company() -> Optional[str]:
-    """Detect the most recent company folder in cv-analysis with a job_info_*.json or jd_original.txt.
+def _detect_most_recent_company(user_email: str) -> Optional[str]:
+    """Detect the most recent company folder in the user's cv-analysis with a job_info_*.json or jd_original.json.
 
     Returns the company folder name or None if not found.
     """
     try:
+        from app.utils.user_path_utils import get_user_base_path
         base_path = get_user_base_path(user_email)
         if not base_path.exists():
             return None
@@ -550,7 +552,7 @@ async def analyze_skills(request: Request, current_user: UserData = Depends(get_
             )
 
         # Fire-and-forget: run JD analysis and CV–JD matching pipeline in background
-        company_name = _detect_most_recent_company()
+        company_name = _detect_most_recent_company(user_email)
         try:
             token_data = getattr(request, 'user', None)
         except Exception:
@@ -811,15 +813,15 @@ async def preliminary_analysis(
         company_name = await _extract_company_name_from_jd(jd_text, user_email)
         logger.info(f"🏢 Extracted company name: {company_name}")
         
-        # Validate required files exist before proceeding
-        # Validate files under the authenticated user's path
-        file_validation_error = _validate_required_analysis_files(company_name, user_email)
-        if file_validation_error:
-            logger.warning(f"❌ Required files validation failed: {file_validation_error}")
-            return JSONResponse(
-                status_code=400,
-                content={"error": file_validation_error}
-            )
+        # Validate required files exist before proceeding (non-blocking for preliminary flow)
+        # In preliminary analysis, we can proceed even if JD hasn't been analyzed yet;
+        # the route will save JD content and metadata shortly after.
+        try:
+            file_validation_error = _validate_required_analysis_files(company_name, user_email)
+            if file_validation_error:
+                logger.warning(f"⚠️ Proceeding without prior JD analysis: {file_validation_error}")
+        except Exception as e:
+            logger.warning(f"⚠️ Skipping pre-check due to error: {e}")
         
         # NEW: Always use unified latest-across-all CV (tailored or original by newest timestamp)
         from app.unified_latest_file_selector import get_selector_for_user
@@ -874,7 +876,7 @@ async def preliminary_analysis(
 
             # Fallback to detector if we couldn't extract from saved path
             if not company_name:
-                company_name = _detect_most_recent_company()
+                company_name = _detect_most_recent_company(user_email)
                 logger.info(f"🏢 [PIPELINE] (preliminary-analysis) fallback detected company: {company_name}")
 
             # If we have a company, ensure required files exist for the pipeline
