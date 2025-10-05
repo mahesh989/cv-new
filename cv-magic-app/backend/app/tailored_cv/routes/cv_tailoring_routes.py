@@ -587,7 +587,7 @@ async def tailor_cv_with_real_data_test(
 @router.post("/save-edited")
 async def save_edited_cv(
     request: Request,
-    # current_user: User = Depends(get_current_user)  # Temporarily disabled for debugging
+    current_user: User = Depends(get_current_user)
 ):
     """
     Save edited CV content to both JSON and TXT files

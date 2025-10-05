@@ -610,9 +610,16 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     if (_currentCompany == null || tailoredCVContent == null) return;
 
     try {
+      // Include auth token like in load calls
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
       final response = await http.post(
         Uri.parse('http://localhost:8000/api/tailored-cv/save-edited'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
         body: json.encode({
           'company': _currentCompany,
           'content': tailoredCVContent,
