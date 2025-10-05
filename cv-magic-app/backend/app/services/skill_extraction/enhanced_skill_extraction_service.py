@@ -17,7 +17,11 @@ from app.models.cv import CV, JobApplication
 from app.services.cv_processor import cv_processor
 from app.services.job_scraper import scrape_job_description_async
 from app.ai.ai_service import ai_service
-from app.services.skill_analysis.skill_analysis_file_selector import skill_analysis_file_selector
+# Optional legacy selector (module may not exist); guarded usage below
+try:
+    from app.services.skill_analysis.skill_analysis_file_selector import skill_analysis_file_selector  # type: ignore
+except Exception:
+    skill_analysis_file_selector = None  # type: ignore
 from .prompt_templates import SkillExtractionPrompts
 from .response_parser import SkillExtractionParser
 
@@ -111,14 +115,17 @@ class EnhancedSkillExtractionService:
         """Perform skill analysis with proper file selection"""
         try:
             # Step 1: Check if we can use existing analysis
-            if not force_refresh and not is_rerun:
-                existing_analysis = self.file_selector.get_analysis_content(
-                    company=company,
-                    is_rerun=False
-                )
-                if existing_analysis["success"]:
-                    logger.info("📂 Using existing analysis")
-                    return existing_analysis["json_content"]
+            if not force_refresh and not is_rerun and self.file_selector:
+                try:
+                    existing_analysis = self.file_selector.get_analysis_content(
+                        company=company,
+                        is_rerun=False
+                    )
+                    if existing_analysis.get("success"):
+                        logger.info("📂 Using existing analysis")
+                        return existing_analysis.get("json_content", {})
+                except Exception:
+                    pass
             
             # Step 2: Extract CV skills
             cv_skills = await self._extract_cv_skills(
@@ -163,15 +170,20 @@ class EnhancedSkillExtractionService:
         """Save analysis files with proper versioning"""
         try:
             # Get appropriate file paths from selector
-            analysis_context = self.file_selector.get_analysis_files(
-                company=company,
-                is_rerun=is_rerun
-            )
+            analysis_context = None
+            if self.file_selector:
+                try:
+                    analysis_context = self.file_selector.get_analysis_files(
+                        company=company,
+                        is_rerun=is_rerun
+                    )
+                except Exception:
+                    analysis_context = None
             
             saved_files = {}
             
             # Save JSON analysis
-            if analysis_context.json_path:
+            if analysis_context and getattr(analysis_context, 'json_path', None):
                 json_path = analysis_context.json_path
                 json_path.parent.mkdir(parents=True, exist_ok=True)
                 
@@ -180,7 +192,7 @@ class EnhancedSkillExtractionService:
                 saved_files["json_path"] = str(json_path)
             
             # Save summary
-            if analysis_context.summary_path:
+            if analysis_context and getattr(analysis_context, 'summary_path', None):
                 summary_path = analysis_context.summary_path
                 summary_path.parent.mkdir(parents=True, exist_ok=True)
                 

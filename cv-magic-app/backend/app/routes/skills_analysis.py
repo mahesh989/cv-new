@@ -18,7 +18,6 @@ from app.models.auth import UserData
 from app.core.model_dependency import get_current_model
 from app.services.skill_extraction import skill_extraction_service
 from app.services.cv_content_service import CVContentService
-from app.services.dynamic_cv_selector import dynamic_cv_selector
 from app.services.skills_analysis_config import skills_analysis_config_service
 from app.services.skill_extraction.prompt_templates import get_prompt as get_skill_prompt
 from app.services.skill_extraction.response_parser import SkillExtractionParser

@@ -24,9 +24,9 @@ class ModularATSOrchestrator:
         if resolved_base is None:
             try:
                 resolved_base = get_user_base_path(user_email)
-            except Exception:
-                # Fallback to legacy relative path if user path resolution fails
-                resolved_base = Path("cv-analysis")
+            except Exception as e:
+                # Do not create global cv-analysis; require valid user path
+                raise ValueError(f"Failed to resolve user base path: {e}")
         self.base_dir: Path = Path(resolved_base)
         self.assembler = ComponentAssembler(self.base_dir, user_email)
 

@@ -410,9 +410,6 @@ class EnhancedATSOrchestrator:
         try:
             logger.info(f"[Enhanced ATS] Starting analysis for company: {company_name}")
             
-            # Define paths with enhanced dynamic CV selection
-            from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector
-            
             base_dir = self.base_dir
             company_dir = base_dir / company_name
             
@@ -443,7 +440,7 @@ class EnhancedATSOrchestrator:
             if not jd_file:
                 jd_file = company_dir / "jd_original.json"
             
-            logger.info(f"📄 [Enhanced ATS] Using dynamic CV from {latest_cv_paths['txt_source']} folder: {cv_file}")
+            logger.info(f"📄 [Enhanced ATS] Using CV from {cv_context.file_type} folder: {cv_file}")
             
             # Check if required files exist
             if not analysis_file.exists():

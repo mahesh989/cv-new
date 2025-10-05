@@ -168,13 +168,14 @@ async def get_cv_jd_matching_status(
         base_path = get_user_base_path(user_email)
         company_dir = base_path / "applied_companies" / company_name
         
-        # Check CV file using dynamic selection
-        from app.services.dynamic_cv_selector import dynamic_cv_selector
-        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
-        cv_file_path = Path(latest_cv_paths['txt_path']) if latest_cv_paths['txt_path'] else None
+        # Check CV file using unified selection for the specific company and user
+        from app.unified_latest_file_selector import get_selector_for_user
+        selector = get_selector_for_user(current_user.email)
+        cv_ctx = selector.get_latest_cv_for_company(company_name)
+        cv_file_path = Path(str(cv_ctx.txt_path)) if cv_ctx and cv_ctx.txt_path else None
         cv_file_exists = cv_file_path and cv_file_path.exists()
         
-        logger.info(f"📄 [CV_JD_MATCHING] Using dynamic CV from {latest_cv_paths['txt_source']} folder")
+        logger.info(f"📄 [CV_JD_MATCHING] Using CV from {cv_ctx.file_type if cv_ctx else 'unknown'} folder")
         
         # Check JD analysis file
         jd_analysis_file = company_dir / "jd_analysis.json"

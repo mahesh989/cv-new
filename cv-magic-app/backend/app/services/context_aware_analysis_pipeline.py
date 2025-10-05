@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 from pathlib import Path
 
-from app.services.enhanced_dynamic_cv_selector import enhanced_dynamic_cv_selector, CVSelectionContext
+from app.unified_latest_file_selector import FileContext
 from app.services.jd_cache_manager import jd_cache_manager, JDCacheData
 from app.services.skill_extraction.skill_extraction_service import SkillExtractionService
 from app.services.cv_jd_matching.cv_jd_matcher import CVJDMatcher
@@ -36,7 +36,7 @@ class AnalysisContext:
         self.company: str = data.get('company', '')
         self.jd_url: str = data.get('jd_url', '')
         self.is_rerun: bool = data.get('is_rerun', False)
-        self.cv_context: Optional[CVSelectionContext] = data.get('cv_context')
+        self.cv_context: Optional[FileContext] = data.get('cv_context')
         self.jd_cached: bool = data.get('jd_cached', False)
         self.jd_cache_data: Optional[JDCacheData] = data.get('jd_cache_data')
         self.analysis_id: str = data.get('analysis_id', TimestampUtils.get_timestamp())
@@ -409,32 +409,24 @@ class ContextAwareAnalysisPipeline:
     async def _extract_cv_skills(self, context: AnalysisContext, results: AnalysisResults) -> Optional[Dict[str, Any]]:
         """Extract CV skills (always fresh for context-aware analysis)"""
         try:
-            logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Extracting skills from {context.cv_context.cv_type} CV")
-            
-            # Get CV content
-            cv_content_data = enhanced_dynamic_cv_selector.get_cv_content_for_analysis(
-                context.company, context.is_rerun
-            )
-            
-            if not cv_content_data['success']:
-                logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] Failed to get CV content: {cv_content_data}")
-                return None
-            
-            # Use the skill extraction service with the selected CV
-            # Note: This will need modification to accept CV content directly
-            # Get the actual CV file path from the enhanced dynamic CV selector
-            cv_paths = enhanced_dynamic_cv_selector.get_latest_cv_paths_for_services(
-                company=context.company, is_rerun=context.is_rerun
-            )
-            
-            if not cv_paths['txt_path']:
+            logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Extracting skills from {context.cv_context.file_type} CV")
+
+            # Get CV content using unified selector
+            from app.unified_latest_file_selector import get_selector_for_user
+            user_selector = get_selector_for_user(self.user_email)
+            cv_content = user_selector.get_cv_content_across_all(context.company)
+
+            # Determine path to pass to extractor (prefer TXT path when available)
+            cv_paths = user_selector.get_latest_cv_paths_for_services(context.company)
+            if not cv_paths.get('txt_path') and not cv_paths.get('json_path'):
                 logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] No CV file found for {context.company}")
                 return None
-            
+
+            cv_path_to_use = cv_paths.get('txt_path') or cv_paths.get('json_path')
+
             # Use the existing service with the correct file path
-            # We need to pass the file path instead of filename
             skill_results = await self._extract_cv_skills_from_path(
-                cv_path=cv_paths['txt_path'],
+                cv_path=cv_path_to_use,
                 jd_url=context.jd_url,
                 user_id=context.user_id,
                 force_refresh=context.is_rerun

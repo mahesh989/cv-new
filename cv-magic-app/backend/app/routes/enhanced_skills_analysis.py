@@ -8,7 +8,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Optional, List
 
 from app.services.skill_extraction.enhanced_skill_extraction_service import enhanced_skill_extraction_service
-from app.services.skill_analysis.skill_analysis_file_selector import skill_analysis_file_selector
+# Optional legacy selector; endpoints guard when unavailable
+try:
+    from app.services.skill_analysis.skill_analysis_file_selector import skill_analysis_file_selector  # type: ignore
+except Exception:  # pragma: no cover
+    skill_analysis_file_selector = None  # type: ignore
 
 router = APIRouter(prefix="/api/enhanced-skills", tags=["Enhanced Skills Analysis"])
 
@@ -62,6 +66,8 @@ async def list_analysis_versions(company: str) -> List[Dict]:
         List of analysis versions with metadata
     """
     try:
+        if not skill_analysis_file_selector:
+            return []
         versions = skill_analysis_file_selector.list_available_versions(company)
         return versions
     except Exception as e:
@@ -84,6 +90,8 @@ async def get_analysis_content(
         Analysis content with metadata
     """
     try:
+        if not skill_analysis_file_selector:
+            raise HTTPException(status_code=404, detail="Analysis content not found (selector missing)")
         content = skill_analysis_file_selector.get_analysis_content(
             company=company,
             is_rerun=is_rerun
@@ -114,6 +122,8 @@ async def get_analysis_summary(
         Analysis summary with metadata
     """
     try:
+        if not skill_analysis_file_selector:
+            raise HTTPException(status_code=404, detail="Analysis files not found (selector missing)")
         files = skill_analysis_file_selector.get_analysis_files(
             company=company,
             is_rerun=is_rerun

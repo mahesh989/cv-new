@@ -314,19 +314,18 @@ async def get_latest_cv_content():
     try:
         logger.info("📄 Latest CV content request")
         
-        # Use dynamic CV selector to get the latest CV
-        from app.services.dynamic_cv_selector import dynamic_cv_selector
+        # Use unified CV selector to get the latest CV for this user (no company context)
+        from app.unified_latest_file_selector import get_selector_for_user
+        selector = get_selector_for_user(current_user.email)
+        cv_ctx = selector.get_latest_cv_across_all("") if hasattr(selector, 'get_latest_cv_across_all') else None
         
-        # Get the latest CV files (could be from original or tailored folder)
-        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
-        
-        if not latest_cv_paths['txt_path']:
+        if not cv_ctx or not cv_ctx.txt_path:
             raise HTTPException(
                 status_code=404,
                 detail="No CV text file found in cvs folders"
             )
         
-        latest_txt_file = Path(latest_cv_paths['txt_path'])
+        latest_txt_file = Path(str(cv_ctx.txt_path))
         
         # Check if it exists
         if not latest_txt_file.exists():
@@ -339,13 +338,13 @@ async def get_latest_cv_content():
         with open(latest_txt_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        logger.info(f"✅ Served latest CV content: {latest_txt_file.name} from {latest_cv_paths['txt_source']} folder ({len(content)} characters)")
+        logger.info(f"✅ Served latest CV content: {latest_txt_file.name} from {cv_ctx.file_type} folder ({len(content)} characters)")
         
         return JSONResponse(content={
             "success": True,
             "content": content,
             "filename": latest_txt_file.name,
-            "source_folder": latest_cv_paths['txt_source'],
+            "source_folder": cv_ctx.file_type,
             "metadata": {
                 "file_size": len(content),
                 "last_modified": latest_txt_file.stat().st_mtime,
