@@ -53,10 +53,11 @@ class ComponentAssembler:
 
     def _read_cv_text(self, company_name: str = "Unknown", jd_url: str = "") -> str:
         """Read CV text from the appropriate CV based on JD usage history."""
-        from app.unified_latest_file_selector import unified_selector
+        from app.unified_latest_file_selector import get_selector_for_user
         
         logger.info("🔍 [COMPONENT_ASSEMBLER] Selecting appropriate CV based on JD usage")
-        cv_context = unified_selector.get_latest_cv_for_company(company_name, jd_url, "")
+        user_selector = get_selector_for_user(self.user_email)
+        cv_context = user_selector.get_latest_cv_for_company(company_name, jd_url, "")
         
         if not cv_context.exists:
             raise FileNotFoundError(f"No CV found for company: {company_name}")

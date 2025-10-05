@@ -231,8 +231,8 @@ class UnifiedLatestFileSelector:
         tailored_path = self.tailored_path
         if not tailored_path.exists():
             return candidates
-        # Tailored CVs saved globally no longer include company prefix in filename
-        pattern = f"*_tailored_cv_*.json"
+        # Tailored CVs include company prefix in filename for company isolation
+        pattern = f"{company}_tailored_cv_*.json"
         for json_file in tailored_path.glob(pattern):
             timestamp = self._extract_timestamp_from_filename(json_file.name) or "00000000_000000"
             txt_file = json_file.with_suffix('.txt')
@@ -344,7 +344,9 @@ class UnifiedLatestFileSelector:
         return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
-# Global singleton instance (defaults to admin; prefer creating per-user instances)
+# DEPRECATED: Global singleton instance - DO NOT USE
+# This instance has no user context and will fail for actual operations
+# Always use get_selector_for_user(user_email) instead
 unified_selector = UnifiedLatestFileSelector()
 
 def get_selector_for_user(user_email: str) -> UnifiedLatestFileSelector:

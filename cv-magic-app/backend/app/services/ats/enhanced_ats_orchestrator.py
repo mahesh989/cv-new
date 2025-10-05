@@ -422,9 +422,10 @@ class EnhancedATSOrchestrator:
             if not analysis_file:
                 analysis_file = company_dir / f"{company_name}_skills_analysis.json"
             
-            # Use unified latest file selector
-            from app.unified_latest_file_selector import unified_selector
-            cv_context = unified_selector.get_latest_cv_for_company(company_name)
+            # Use user-specific unified latest file selector
+            from app.unified_latest_file_selector import get_selector_for_user
+            user_selector = get_selector_for_user(self.user_email)
+            cv_context = user_selector.get_latest_cv_for_company(company_name)
             cv_file = cv_context.txt_path if cv_context.exists else None
             
             # Use timestamped JD file with fallback

@@ -153,9 +153,10 @@ class ContextAwareAnalysisPipeline:
             context = await self._initialize_context(jd_url, company, is_rerun, user_id)
             results.context = context
             
-            # Step 2: CV Selection using unified selector with JD usage tracking
-            from app.unified_latest_file_selector import unified_selector
-            cv_context = unified_selector.get_latest_cv_for_company(company, jd_url, "")
+            # Step 2: CV Selection using user-specific unified selector with JD usage tracking
+            from app.unified_latest_file_selector import get_selector_for_user
+            user_selector = get_selector_for_user(self.user_email)
+            cv_context = user_selector.get_latest_cv_for_company(company, jd_url, "")
             context.cv_context = cv_context
             
             # Record JD usage for tracking
