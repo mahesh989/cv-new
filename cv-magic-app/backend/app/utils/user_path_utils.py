@@ -152,7 +152,7 @@ def get_user_company_analysis_paths(user_email: Optional[str], company: str) -> 
         "tailored_cv": lambda ts: get_user_cv_paths(user_email)["tailored"] / f"{company}_tailored_cv_{ts}.json"
     }
 
-def verify_company_file_structure(company: str, user_email: str = "test@example.com", create_dirs: bool = True) -> Dict[str, Path]:
+def verify_company_file_structure(company: str, user_email: Optional[str] = None, create_dirs: bool = True) -> Dict[str, Path]:
     """
     Verify and optionally create the complete file structure for a company
     

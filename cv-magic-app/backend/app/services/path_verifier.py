@@ -21,7 +21,7 @@ class PathVerifier:
             indent = "  " * self._indent
             logger.info(f"{indent}{message}")
 
-    def verify_analysis_paths(self, company: str, user_email: str = "test@example.com"):
+    def verify_analysis_paths(self, company: str, user_email: Optional[str] = None):
         """Verify all analysis-related paths for a company"""
         self._log(f"\n📌 Verifying paths for {company}")
         self._indent += 1

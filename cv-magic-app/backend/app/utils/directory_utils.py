@@ -11,7 +11,7 @@ from typing import List, Optional
 logger = logging.getLogger(__name__)
 
 
-def ensure_cv_analysis_directories(additional_dirs: Optional[List[Path]] = None, user_email: str = "test@example.com") -> bool:
+def ensure_cv_analysis_directories(additional_dirs: Optional[List[Path]] = None, user_email: Optional[str] = None) -> bool:
     """
     Ensure all required cv-analysis directories exist for a user.
     
@@ -54,7 +54,7 @@ def ensure_cv_analysis_directories(additional_dirs: Optional[List[Path]] = None,
         return False
 
 
-def ensure_company_directory(company_name: str, user_email: str = "test@example.com") -> Path:
+def ensure_company_directory(company_name: str, user_email: Optional[str] = None) -> Path:
     """
     Ensure a company-specific directory exists under applied_companies.
     
@@ -82,7 +82,7 @@ def ensure_company_directory(company_name: str, user_email: str = "test@example.
         raise
 
 
-def ensure_cv_directories(user_email: str = "test@example.com") -> bool:
+def ensure_cv_directories(user_email: Optional[str] = None) -> bool:
     """
     Ensure CV processing directories exist.
     
@@ -100,7 +100,7 @@ def ensure_cv_directories(user_email: str = "test@example.com") -> bool:
     ], user_email=user_email)
 
 
-def ensure_job_tracking_directories(user_email: str = "test@example.com") -> bool:
+def ensure_job_tracking_directories(user_email: Optional[str] = None) -> bool:
     """
     Ensure job tracking directories exist.
     
@@ -117,7 +117,7 @@ def ensure_job_tracking_directories(user_email: str = "test@example.com") -> boo
     ], user_email=user_email)
 
 
-def ensure_upload_directories(user_email: str = "test@example.com") -> bool:
+def ensure_upload_directories(user_email: Optional[str] = None) -> bool:
     """
     Ensure upload directories exist.
     
