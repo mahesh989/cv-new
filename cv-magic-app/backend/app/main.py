@@ -2,6 +2,8 @@
 Main FastAPI application
 """
 import logging
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 from datetime import datetime
 from fastapi import FastAPI, Request, status, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +29,7 @@ from app.tailored_cv.routes.cv_tailoring_routes import router as cv_tailoring_ro
 from app.routes.enhanced_skills_analysis import router as enhanced_skills_router  # New enhanced skills routes
 from app.routes.saved_jobs import router as saved_jobs_router  # Saved jobs routes
 from app.routes.api_keys import router as api_keys_router  # API key management routes
+from app.routes.ingest_files import router as ingest_router  # Ingestion routes
 
 # Import dependencies
 from app.core.model_dependency import get_current_model
@@ -37,6 +40,22 @@ logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
     format=settings.LOG_FORMAT
 )
+
+# Add rotating file handler to write backend terminal output to backend/log.txt
+try:
+    backend_root = Path(__file__).resolve().parents[1]  # cv-magic-app/backend
+    log_file = backend_root / "log.txt"
+    file_handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
+    file_handler.setLevel(getattr(logging, settings.LOG_LEVEL))
+    file_handler.setFormatter(logging.Formatter(settings.LOG_FORMAT))
+    root_logger = logging.getLogger()
+    # Avoid duplicate handlers on reload
+    if not any(isinstance(h, RotatingFileHandler) and getattr(h, 'baseFilename', '') == str(log_file) for h in root_logger.handlers):
+        root_logger.addHandler(file_handler)
+except Exception as e:
+    # Fall back silently if file handler cannot be added
+    logging.getLogger(__name__).warning(f"Unable to attach file log handler: {e}")
+
 logger = logging.getLogger(__name__)
 
 
@@ -151,6 +170,7 @@ app.include_router(ai_recommendations_router, prefix="/api")  # AI recommendatio
 app.include_router(cv_tailoring_router, prefix="/api")  # CV tailoring routes
 app.include_router(saved_jobs_router)  # Saved jobs routes
 app.include_router(api_keys_router)  # API key management routes
+app.include_router(ingest_router)  # Ingestion routes
 
 
 # Root endpoint
