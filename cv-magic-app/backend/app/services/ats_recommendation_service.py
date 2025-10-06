@@ -281,6 +281,22 @@ class ATSRecommendationService:
                 json.dump(recommendation_data, f, indent=2)
             
             logger.info(f"Successfully created recommendation file: {recommendation_file}")
+
+            # Register in DB (best-effort)
+            try:
+                from app.database import SessionLocal
+                from app.services.file_registry_service import FileRegistryService
+                db = SessionLocal()
+                try:
+                    registry = FileRegistryService.from_email(db, self.user_email)
+                    company_id = registry.upsert_company(company, display_name=company.replace('_', ' '))
+                    file_id = registry.register_file(company_id, "input_recommendation", recommendation_file, timestamp=timestamp)
+                    registry.record_analysis_run(company_id, kind="input_reco", output_file_id=file_id)
+                    db.commit()
+                finally:
+                    db.close()
+            except Exception as reg_err:
+                logger.warning(f"⚠️ [DB] Failed to register input recommendation: {reg_err}")
             
             # Create the AI recommendation prompt file in company directory
             try:

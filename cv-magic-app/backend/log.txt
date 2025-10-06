@@ -1,0 +1,273 @@
+2025-10-06 18:28:09,262 - app.main - INFO - 🚀 Starting CV Management API...
+2025-10-06 18:28:09,590 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2025-10-06 18:28:09,591 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-06 18:28:09,668 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2025-10-06 18:28:09,669 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-06 18:28:09,719 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2025-10-06 18:28:09,721 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-06 18:28:09,770 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-06 18:28:09,770 - sqlalchemy.engine.Engine - INFO - SELECT 1
+2025-10-06 18:28:09,772 - sqlalchemy.engine.Engine - INFO - [generated in 0.00154s] {}
+2025-10-06 18:28:09,812 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-10-06 18:28:09,830 - app.database - INFO - Database connection successful
+2025-10-06 18:28:09,830 - app.main - INFO - ✅ Database connection successful
+2025-10-06 18:28:09,860 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-06 18:28:09,872 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:09,873 - sqlalchemy.engine.Engine - INFO - [generated in 0.00125s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:09,916 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:09,916 - sqlalchemy.engine.Engine - INFO - [cached since 0.04489s ago] {'table_name': 'user_sessions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:09,936 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:09,936 - sqlalchemy.engine.Engine - INFO - [cached since 0.0649s ago] {'table_name': 'cvs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:09,959 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:09,959 - sqlalchemy.engine.Engine - INFO - [cached since 0.08756s ago] {'table_name': 'job_applications', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:09,982 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:09,983 - sqlalchemy.engine.Engine - INFO - [cached since 0.1115s ago] {'table_name': 'cv_analyses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:10,008 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:10,009 - sqlalchemy.engine.Engine - INFO - [cached since 0.1372s ago] {'table_name': 'job_comparisons', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:10,031 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:10,031 - sqlalchemy.engine.Engine - INFO - [cached since 0.1596s ago] {'table_name': 'companies', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:10,054 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:10,054 - sqlalchemy.engine.Engine - INFO - [cached since 0.1828s ago] {'table_name': 'company_files', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:10,077 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:10,078 - sqlalchemy.engine.Engine - INFO - [cached since 0.2058s ago] {'table_name': 'analysis_runs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:10,099 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:10,100 - sqlalchemy.engine.Engine - INFO - [cached since 0.228s ago] {'table_name': 'cv_versions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:10,121 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:10,122 - sqlalchemy.engine.Engine - INFO - [cached since 0.2505s ago] {'table_name': 'user_api_keys', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:10,145 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-10-06 18:28:10,171 - app.database - INFO - Database tables created successfully
+2025-10-06 18:28:10,172 - app.main - INFO - ✅ Database tables ready
+2025-10-06 18:28:10,172 - app.main - INFO - 🎯 API Server started successfully on 0.0.0.0:8000
+2025-10-06 18:28:10,172 - app.main - INFO - ✅ User directories will be created on-demand during login
+2025-10-06 18:28:20,915 - app.routes.skills_analysis - INFO - 📊 [API] Fetching analysis results for company: Australia_for_UNHCR
+2025-10-06 18:28:20,916 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:28:31,693 - app.main - INFO - ⏹️ Shutting down CV Management API...
+2025-10-06 18:28:37,896 - app.main - INFO - 🚀 Starting CV Management API...
+2025-10-06 18:28:38,185 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2025-10-06 18:28:38,186 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-06 18:28:38,249 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2025-10-06 18:28:38,249 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-06 18:28:38,290 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2025-10-06 18:28:38,291 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-06 18:28:38,333 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-06 18:28:38,334 - sqlalchemy.engine.Engine - INFO - SELECT 1
+2025-10-06 18:28:38,334 - sqlalchemy.engine.Engine - INFO - [generated in 0.00056s] {}
+2025-10-06 18:28:38,379 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-10-06 18:28:38,397 - app.database - INFO - Database connection successful
+2025-10-06 18:28:38,398 - app.main - INFO - ✅ Database connection successful
+2025-10-06 18:28:38,425 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-06 18:28:38,433 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,435 - sqlalchemy.engine.Engine - INFO - [generated in 0.00240s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,486 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,487 - sqlalchemy.engine.Engine - INFO - [cached since 0.0543s ago] {'table_name': 'user_sessions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,511 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,511 - sqlalchemy.engine.Engine - INFO - [cached since 0.07906s ago] {'table_name': 'cvs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,535 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,536 - sqlalchemy.engine.Engine - INFO - [cached since 0.1033s ago] {'table_name': 'job_applications', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,569 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,570 - sqlalchemy.engine.Engine - INFO - [cached since 0.1375s ago] {'table_name': 'cv_analyses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,602 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,603 - sqlalchemy.engine.Engine - INFO - [cached since 0.1703s ago] {'table_name': 'job_comparisons', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,624 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,625 - sqlalchemy.engine.Engine - INFO - [cached since 0.1925s ago] {'table_name': 'companies', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,648 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,648 - sqlalchemy.engine.Engine - INFO - [cached since 0.2157s ago] {'table_name': 'company_files', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,674 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,675 - sqlalchemy.engine.Engine - INFO - [cached since 0.2427s ago] {'table_name': 'analysis_runs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,697 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,697 - sqlalchemy.engine.Engine - INFO - [cached since 0.2647s ago] {'table_name': 'cv_versions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,721 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-06 18:28:38,723 - sqlalchemy.engine.Engine - INFO - [cached since 0.2907s ago] {'table_name': 'user_api_keys', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-06 18:28:38,780 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-10-06 18:28:38,795 - app.database - INFO - Database tables created successfully
+2025-10-06 18:28:38,795 - app.main - INFO - ✅ Database tables ready
+2025-10-06 18:28:38,795 - app.main - INFO - 🎯 API Server started successfully on 0.0.0.0:8000
+2025-10-06 18:28:38,795 - app.main - INFO - ✅ User directories will be created on-demand during login
+2025-10-06 18:28:56,501 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:28:56,560 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 📄 Tailored CV content request for Australia_for_UNHCR from user 40c6f4c1-7edc-496c-bec9-39c93812d7d2
+2025-10-06 18:28:56,560 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:28:56,561 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:28:56,561 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/mahesh@gmail.com/cv-analysis
+2025-10-06 18:28:56,563 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ Served TAILORED CV content: Australia_for_UNHCR_tailored_cv_20251006_182800.txt from tailored folder (3557 characters)
+2025-10-06 18:29:09,358 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Received request data keys: ['company', 'content']
+2025-10-06 18:29:09,359 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Request data: {
+  "company": "Australia_for_UNHCR",
+  "content": "Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220\n\nTECHNICAL SKILLS\n\u2022 SQL, Power BI, Python, Excel, Fundraising, NFP, Donor-Centricity, Data Analysis, Business Intelligence, Detail-oriented\n\nEXPERIENCE\nSenior Data Analyst         Jul 2024 \u2013 Present\nThe Bitrates\n\n\u2022 Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency b...
+2025-10-06 18:29:09,360 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Company: Australia_for_UNHCR
+2025-10-06 18:29:09,360 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content type: <class 'str'>
+2025-10-06 18:29:09,360 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content length: 3229
+2025-10-06 18:29:09,360 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Starting save process for Australia_for_UNHCR
+2025-10-06 18:29:09,361 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:29:09,361 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Tailored path: user/mahesh@gmail.com/cv-analysis/cvs/tailored
+2025-10-06 18:29:09,363 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Found 1 existing TXT files in tailored folder
+2025-10-06 18:29:09,363 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] - user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:29:09,364 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated TXT: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:29:09,365 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Starting CV content parsing
+2025-10-06 18:29:09,365 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Content length: 3229
+2025-10-06 18:29:09,365 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Existing JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:29:09,366 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Processing 51 lines
+2025-10-06 18:29:09,366 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing contact line: Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+2025-10-06 18:29:09,366 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: technical_skills
+2025-10-06 18:29:09,366 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsed 10 skills
+2025-10-06 18:29:09,366 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: experience
+2025-10-06 18:29:09,367 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Senior Data Analyst at The Bitrates (5 bullets)
+2025-10-06 18:29:09,367 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Data Analyst at iBuild Building Solutions (4 bullets)
+2025-10-06 18:29:09,367 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Software engineer and Analyst at Property Console (4 bullets)
+2025-10-06 18:29:09,367 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Research Assistant at CY Cergy Paris University (3 bullets)
+2025-10-06 18:29:09,367 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Lecturer and Course Facilitator at CY Cergy Paris University (3 bullets)
+2025-10-06 18:29:09,368 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Research Intern at CY Cergy Paris University (3 bullets)
+2025-10-06 18:29:09,368 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing completed successfully
+2025-10-06 18:29:09,368 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Updated JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:29:09,370 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated JSON: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.json
+2025-10-06 18:29:09,371 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Completed saving for Australia_for_UNHCR
+2025-10-06 18:29:11,422 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Received request data keys: ['company', 'content']
+2025-10-06 18:29:11,423 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Request data: {
+  "company": "Australia_for_UNHCR",
+  "content": "Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220\n\nTECHNICAL SKILLS\n\u2022 SQL, Power BI, Python, Excel, Fundraising, NFP, Donor-Centricity, Data Analysis, Business Intelligence, Detail-oriented\n\nEXPERIENCE\nSenior Data Analyst         Jul 2024 \u2013 Present\nThe Bitrates\n\n\u2022 Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency b...
+2025-10-06 18:29:11,423 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Company: Australia_for_UNHCR
+2025-10-06 18:29:11,423 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content type: <class 'str'>
+2025-10-06 18:29:11,423 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content length: 3229
+2025-10-06 18:29:11,424 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Starting save process for Australia_for_UNHCR
+2025-10-06 18:29:11,424 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:29:11,424 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Tailored path: user/mahesh@gmail.com/cv-analysis/cvs/tailored
+2025-10-06 18:29:11,425 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Found 1 existing TXT files in tailored folder
+2025-10-06 18:29:11,425 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] - user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:29:11,427 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated TXT: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:29:11,428 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Starting CV content parsing
+2025-10-06 18:29:11,429 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Content length: 3229
+2025-10-06 18:29:11,429 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Existing JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:29:11,429 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Processing 51 lines
+2025-10-06 18:29:11,430 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing contact line: Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+2025-10-06 18:29:11,430 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: technical_skills
+2025-10-06 18:29:11,430 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsed 10 skills
+2025-10-06 18:29:11,430 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: experience
+2025-10-06 18:29:11,430 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Senior Data Analyst at The Bitrates (5 bullets)
+2025-10-06 18:29:11,430 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Data Analyst at iBuild Building Solutions (4 bullets)
+2025-10-06 18:29:11,431 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Software engineer and Analyst at Property Console (4 bullets)
+2025-10-06 18:29:11,431 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Research Assistant at CY Cergy Paris University (3 bullets)
+2025-10-06 18:29:11,431 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Lecturer and Course Facilitator at CY Cergy Paris University (3 bullets)
+2025-10-06 18:29:11,431 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Added experience: Research Intern at CY Cergy Paris University (3 bullets)
+2025-10-06 18:29:11,431 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing completed successfully
+2025-10-06 18:29:11,431 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Updated JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:29:11,433 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated JSON: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.json
+2025-10-06 18:29:11,435 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Completed saving for Australia_for_UNHCR
+2025-10-06 18:30:06,095 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Received request data keys: ['company', 'content']
+2025-10-06 18:30:06,098 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Request data: {
+  "company": "Australia_for_UNHCR",
+  "content": "Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220\n\nTECHNICAL SKILLS\n\u2022 SQL, Power BI, Python, Excel, Fundraising, NFP, Donor-Centricity, Data Analysis, Business Intelligence, Detail-oriented\n\nEXPERIENCE\n\n"
+}...
+2025-10-06 18:30:06,098 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Company: Australia_for_UNHCR
+2025-10-06 18:30:06,098 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content type: <class 'str'>
+2025-10-06 18:30:06,099 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content length: 238
+2025-10-06 18:30:06,099 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Starting save process for Australia_for_UNHCR
+2025-10-06 18:30:06,112 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:30:06,113 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Tailored path: user/mahesh@gmail.com/cv-analysis/cvs/tailored
+2025-10-06 18:30:06,114 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Found 1 existing TXT files in tailored folder
+2025-10-06 18:30:06,114 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] - user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:30:06,115 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated TXT: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:30:06,118 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Starting CV content parsing
+2025-10-06 18:30:06,118 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Content length: 238
+2025-10-06 18:30:06,118 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Existing JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:30:06,119 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Processing 6 lines
+2025-10-06 18:30:06,119 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing contact line: Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+2025-10-06 18:30:06,119 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: technical_skills
+2025-10-06 18:30:06,119 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsed 10 skills
+2025-10-06 18:30:06,119 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: experience
+2025-10-06 18:30:06,119 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing completed successfully
+2025-10-06 18:30:06,120 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Updated JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:30:06,130 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated JSON: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.json
+2025-10-06 18:30:06,133 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Completed saving for Australia_for_UNHCR
+2025-10-06 18:30:08,346 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Received request data keys: ['company', 'content']
+2025-10-06 18:30:08,346 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Request data: {
+  "company": "Australia_for_UNHCR",
+  "content": "Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220\n\nTECHNICAL SKILLS\n\u2022 SQL, Power BI, Python, Excel, Fundraising, NFP, Donor-Centricity, Data Analysis, Business Intelligence, Detail-oriented\n\n\n\n"
+}...
+2025-10-06 18:30:08,346 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Company: Australia_for_UNHCR
+2025-10-06 18:30:08,346 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content type: <class 'str'>
+2025-10-06 18:30:08,346 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content length: 228
+2025-10-06 18:30:08,347 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Starting save process for Australia_for_UNHCR
+2025-10-06 18:30:08,347 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:30:08,350 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Tailored path: user/mahesh@gmail.com/cv-analysis/cvs/tailored
+2025-10-06 18:30:08,351 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Found 1 existing TXT files in tailored folder
+2025-10-06 18:30:08,353 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] - user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:30:08,353 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated TXT: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:30:08,354 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Starting CV content parsing
+2025-10-06 18:30:08,354 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Content length: 228
+2025-10-06 18:30:08,354 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Existing JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:30:08,354 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Processing 4 lines
+2025-10-06 18:30:08,355 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing contact line: Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+2025-10-06 18:30:08,355 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: technical_skills
+2025-10-06 18:30:08,356 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsed 10 skills
+2025-10-06 18:30:08,356 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing completed successfully
+2025-10-06 18:30:08,356 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Updated JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:30:08,357 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated JSON: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.json
+2025-10-06 18:30:08,359 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Completed saving for Australia_for_UNHCR
+2025-10-06 18:30:09,707 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Received request data keys: ['company', 'content']
+2025-10-06 18:30:09,707 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Request data: {
+  "company": "Australia_for_UNHCR",
+  "content": "Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220\n\nTECHNICAL SKILLS\n\u2022 SQL, Power BI, Python, Excel, Fundraising, NFP, Donor-Centricity, Data Analysis, Business Intelligence, Detail-oriented\n\n\n\n"
+}...
+2025-10-06 18:30:09,707 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Company: Australia_for_UNHCR
+2025-10-06 18:30:09,707 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content type: <class 'str'>
+2025-10-06 18:30:09,708 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Extracted - Content length: 228
+2025-10-06 18:30:09,708 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Starting save process for Australia_for_UNHCR
+2025-10-06 18:30:09,708 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/mahesh@gmail.com/cv-analysis for mahesh@gmail.com
+2025-10-06 18:30:09,708 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Tailored path: user/mahesh@gmail.com/cv-analysis/cvs/tailored
+2025-10-06 18:30:09,709 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] Found 1 existing TXT files in tailored folder
+2025-10-06 18:30:09,709 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [SAVE_EDITED] - user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:30:09,710 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated TXT: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.txt
+2025-10-06 18:30:09,714 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Starting CV content parsing
+2025-10-06 18:30:09,716 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Content length: 228
+2025-10-06 18:30:09,716 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Existing JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:30:09,717 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Processing 4 lines
+2025-10-06 18:30:09,717 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing contact line: Maheshwor Tiwari  | 0414 032 507  | maheshtwari99@gmail.com  | Hurstville, NSW, 2220
+2025-10-06 18:30:09,717 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Found section: technical_skills
+2025-10-06 18:30:09,718 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsed 10 skills
+2025-10-06 18:30:09,719 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Parsing completed successfully
+2025-10-06 18:30:09,720 - app.tailored_cv.routes.cv_tailoring_routes - INFO - 🔍 [CV_PARSER] Updated JSON keys: ['contact', 'education', 'experience', 'projects', 'skills', 'created_at', 'last_edited', 'manually_edited']
+2025-10-06 18:30:09,728 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Updated JSON: user/mahesh@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251006_182800.json
+2025-10-06 18:30:09,734 - app.tailored_cv.routes.cv_tailoring_routes - INFO - ✅ [SAVE_EDITED] Completed saving for Australia_for_UNHCR

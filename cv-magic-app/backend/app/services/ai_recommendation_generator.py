@@ -321,6 +321,21 @@ class AIRecommendationGenerator:
             
             file_size = output_file.stat().st_size / 1024
             logger.info(f"💾 [AI GENERATOR] Saved AI recommendation: {output_file} ({file_size:.1f}KB)")
+            # Register in DB (best-effort)
+            try:
+                from app.database import SessionLocal
+                from app.services.file_registry_service import FileRegistryService
+                db = SessionLocal()
+                try:
+                    registry = FileRegistryService.from_email(db, self.user_email)
+                    company_id = registry.upsert_company(company, display_name=company.replace('_', ' '))
+                    file_id = registry.register_file(company_id, "ai_recommendation", output_file, timestamp=timestamp)
+                    registry.record_analysis_run(company_id, kind="ai_reco", output_file_id=file_id)
+                    db.commit()
+                finally:
+                    db.close()
+            except Exception as reg_err:
+                logger.warning(f"⚠️ [DB] Failed to register AI recommendation: {reg_err}")
             
             return True
             
