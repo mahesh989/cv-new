@@ -644,19 +644,26 @@ async def save_edited_cv(
             files_updated.append(str(latest_txt_file))
             logger.info(f"✅ [SAVE_EDITED] Updated existing file: {latest_txt_file}")
             
-            # Update the corresponding JSON file
+            # Update the corresponding JSON file with parsed content so JSON stays in sync
             latest_json_file = latest_txt_file.with_suffix('.json')
             if latest_json_file.exists():
                 try:
                     with open(latest_json_file, 'r', encoding='utf-8') as f:
                         existing_json = json.load(f)
-                    
-                    # Update the last_edited timestamp
-                    existing_json['last_edited'] = datetime.now().isoformat()
-                    existing_json['manually_edited'] = True
-                    
+
+                    # Parse edited TXT back into JSON structure
+                    try:
+                        updated_json = await _update_json_with_edited_content(existing_json, content, company)
+                    except Exception as parse_err:
+                        logger.warning(f"⚠️ [SAVE_EDITED] JSON parse update failed, falling back to metadata-only update: {parse_err}")
+                        updated_json = existing_json
+
+                    # Always refresh metadata
+                    updated_json['last_edited'] = datetime.now().isoformat()
+                    updated_json['manually_edited'] = True
+
                     with open(latest_json_file, 'w', encoding='utf-8') as f:
-                        json.dump(existing_json, f, indent=2, default=str)
+                        json.dump(updated_json, f, indent=2, ensure_ascii=False)
                     files_updated.append(str(latest_json_file))
                     logger.info(f"✅ [SAVE_EDITED] Updated JSON file: {latest_json_file}")
                 except Exception as e:
