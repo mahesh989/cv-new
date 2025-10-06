@@ -1588,33 +1588,27 @@ FIX: Output ONLY valid JSON!
             logger.info(f"Loading real data for {company}")
             logger.info(f"Company folder: {company_folder}")
 
-            # For CV tailoring, always use the original CV as the source, not tailored CVs
-            original_cv_path = self.cv_analysis_path / "cvs" / "original" / "original_cv.json"
-            if original_cv_path.exists():
-                selected_cv_path = str(original_cv_path)
-                logger.info(f"📄 [TAILORING] Using original CV as source for tailoring: {selected_cv_path}")
-            else:
-                # Fallback to unified selector if no original CV found
-                try:
-                    from app.unified_latest_file_selector import get_selector_for_user
-                    user_selector = get_selector_for_user(self.user_email)
-                    cv_ctx = user_selector.get_latest_cv_across_all(company)
-                    if not cv_ctx.exists:
-                        raise FileNotFoundError("No CV file found via unified selector")
-                    # Prefer TXT file if JSON is empty, otherwise use JSON
-                    if cv_ctx.json_path and cv_ctx.json_path.exists() and cv_ctx.json_path.stat().st_size > 1000:
-                        selected_cv_path = str(cv_ctx.json_path)
-                    elif cv_ctx.txt_path and cv_ctx.txt_path.exists():
-                        selected_cv_path = str(cv_ctx.txt_path)
-                    else:
-                        selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
-                    logger.info(
-                        f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
-                    )
-                except Exception as sel_err:
-                    # Final fallback
-                    logger.warning(f"⚠️ [TAILORING] Unified selector failed: {sel_err}. Falling back to original CV path")
-                    selected_cv_path = str(original_cv_path)
+            # Use user-specific unified latest file selector to choose the latest CV across tailored+original
+            try:
+                from app.unified_latest_file_selector import get_selector_for_user
+                user_selector = get_selector_for_user(self.user_email)
+                cv_ctx = user_selector.get_latest_cv_across_all(company)
+                if not cv_ctx.exists:
+                    raise FileNotFoundError("No CV file found via unified selector")
+                # Prefer TXT file if JSON is empty, otherwise use JSON
+                if cv_ctx.json_path and cv_ctx.json_path.exists() and cv_ctx.json_path.stat().st_size > 1000:
+                    selected_cv_path = str(cv_ctx.json_path)
+                elif cv_ctx.txt_path and cv_ctx.txt_path.exists():
+                    selected_cv_path = str(cv_ctx.txt_path)
+                else:
+                    selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
+                logger.info(
+                    f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
+                )
+            except Exception as sel_err:
+                # Fallback to original JSON path if selector fails
+                logger.warning(f"⚠️ [TAILORING] Unified selector failed: {sel_err}. Falling back to original CV path")
+                selected_cv_path = str(self.cv_analysis_path / "cvs" / "original" / "original_cv.json")
 
             # Debug logging for CV loading
             try:
@@ -1671,6 +1665,35 @@ FIX: Output ONLY valid JSON!
                         logger.info("✅ Skills already in SkillCategory format")
                     else:
                         logger.warning(f"⚠️ Unknown skills format: {type(skills_data[0])}")
+            
+            # Validate CV data completeness and fallback to original CV if needed
+            if isinstance(cv_data, dict):
+                # Check if CV data is incomplete (missing essential fields)
+                is_incomplete = (
+                    not cv_data.get('contact', {}).get('name') or 
+                    not cv_data.get('contact', {}).get('email') or
+                    not cv_data.get('experience') or
+                    not cv_data.get('skills')
+                )
+                
+                if is_incomplete:
+                    logger.warning("⚠️ [TAILORING] CV data is incomplete, falling back to original CV")
+                    # Try to load the original CV as fallback
+                    original_cv_path = self.cv_analysis_path / "cvs" / "original" / "original_cv.json"
+                    if original_cv_path.exists() and str(original_cv_path) != selected_cv_path:
+                        logger.info(f"📄 [TAILORING] Loading original CV as fallback: {original_cv_path}")
+                        try:
+                            cv_data = RecommendationParser.load_original_cv(str(original_cv_path))
+                            logger.info("✅ [TAILORING] Successfully loaded original CV as fallback")
+                            
+                            # Re-apply skills conversion if needed
+                            if isinstance(cv_data, dict) and 'skills' in cv_data:
+                                skills_data = cv_data['skills']
+                                if isinstance(skills_data, list) and len(skills_data) > 0 and isinstance(skills_data[0], str):
+                                    from app.tailored_cv.models.cv_models import SkillCategory
+                                    cv_data['skills'] = [SkillCategory(category="Technical Skills", skills=skills_data)]
+                        except Exception as fallback_err:
+                            logger.error(f"❌ [TAILORING] Failed to load original CV fallback: {fallback_err}")
             
             original_cv = OriginalCV(**cv_data)
             logger.info(f"- Final CV object attributes: {dir(original_cv)}")
