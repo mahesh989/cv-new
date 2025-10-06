@@ -1028,6 +1028,9 @@ BULLETS NEEDING IMPROVEMENT:
             raise ValueError("Skills field must be an array")
         
         logger.info(f"✅ JSON structure and Impact Formula validation passed ({bullets_with_quantification}/{total_bullets} bullets with quantification)")
+
+        # Return assessment so callers can make decisions (e.g., retry to improve quantification)
+        return quality_assessment
     
     def _add_correction_instructions(self, user_prompt: str, error_message: str) -> str:
         """Add specific correction instructions based on validation failure"""
