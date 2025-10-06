@@ -1,0 +1,39 @@
+{
+  "company_name": "Cause_Recruitment",
+  "cv_analysis_timestamp": "2025-10-06T18:51:27.273523",
+  "matched_required_keywords": [
+    "SQL",
+    "Data cleaning",
+    "Excel",
+    "analytical thinking",
+    "communication"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "Power BI",
+    "Data warehousing",
+    "problem-solving",
+    "interpersonal skills",
+    "attention to detail"
+  ],
+  "missed_preferred_keywords": [
+    "MSSQL",
+    "collaboration",
+    "innovative solutions"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 5,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "Excel": "Found in technical skills section",
+    "SQL": "Mentioned in technical skills and extensively used in experience",
+    "Python": "Although not a required keyword, it is mentioned in technical skills and used in various experiences"
+  },
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "cv_file_path": "user/mahesh@gmail.com/cv-analysis/cvs/tailored/Cause_Recruitment_tailored_cv_20251006_183942.txt",
+  "metadata": {}
+}

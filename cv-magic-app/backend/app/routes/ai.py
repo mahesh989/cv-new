@@ -12,6 +12,8 @@ from typing import Dict, List, Optional, Any
 from pydantic import BaseModel
 from app.ai.ai_service import ai_service
 from app.core.dependencies import get_current_user
+from app.database import get_database
+from sqlalchemy.orm import Session
 from app.core.model_dependency import get_current_model
 from app.models.auth import UserData
 import logging
@@ -197,34 +199,49 @@ async def switch_provider(
         )
 
 
-@router.post("/switch-model")
-async def switch_model(
+@router.post("/set-current-model")
+async def set_current_model(
     request: ModelSwitchRequest,
-    current_user: UserData = Depends(get_current_user)
+    current_user: UserData = Depends(get_current_user),
+    db: Session = Depends(get_database)
 ):
     """
-    Switch to a different model within the current provider
+    Persist per-user selected provider+model. The frontend should call this on login or when switching.
     """
     try:
-        success = ai_service.switch_model(request.model)
-        
-        if success:
-            current_status = ai_service.get_current_status()
-            return {
-                "message": f"Successfully switched to model {request.model}",
-                "current_status": current_status
-            }
+        from app.services.user_model_service import user_model_service
+        if not hasattr(request, "model") or not request.model:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Model is required")
+        if not hasattr(request, "provider"):
+            # Try using current provider if not supplied
+            current_provider = ai_service.config.get_current_provider()
+            if not current_provider:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Provider is required")
+            provider = current_provider
         else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to switch to model {request.model}"
-            )
+            provider = getattr(request, "provider") or ai_service.config.get_current_provider()
+        if not provider:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Provider is required")
+
+        # Validate by switching in-memory
+        ok = ai_service.switch_provider(provider, request.model)
+        if not ok:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid provider/model: {provider}/{request.model}")
+
+        # Persist for the user
+        user_model_service.set_user_model(db, str(current_user.id), provider, request.model)
+
+        return {
+            "message": "Current model set",
+            "provider": provider,
+            "model": request.model,
+            "current_status": ai_service.get_current_status()
+        }
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Failed to switch model: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        logger.error(f"Failed to set current model: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 # AI Generation Endpoints
@@ -240,6 +257,7 @@ async def chat_completion(
     Automatically uses the model specified in X-Current-Model header
     """
     try:
+        logger.info(f"🟢 [AI_CHAT] user={current_user.email} provider={ai_service.config.get_current_provider()} model={ai_service.get_current_model_name()}")
         response = await ai_service.generate_response(
             prompt=request.prompt,
             system_prompt=request.system_prompt,
@@ -270,12 +288,14 @@ async def chat_completion(
 @router.post("/analyze-cv")
 async def analyze_cv(
     request: CVAnalysisRequest,
-    current_user: UserData = Depends(get_current_user)
+    current_user: UserData = Depends(get_current_user),
+    current_model: str = Depends(get_current_model)
 ):
     """
     Analyze CV content to extract skills, experience, and other information
     """
     try:
+        logger.info(f"🟢 [AI_ANALYZE_CV] user={current_user.email} provider={ai_service.config.get_current_provider()} model={ai_service.get_current_model_name()}")
         response = await ai_service.analyze_cv_content(request.cv_text)
         
         return {
@@ -298,12 +318,14 @@ async def analyze_cv(
 @router.post("/compare-cv-job")
 async def compare_cv_with_job(
     request: JobComparisonRequest,
-    current_user: UserData = Depends(get_current_user)
+    current_user: UserData = Depends(get_current_user),
+    current_model: str = Depends(get_current_model)
 ):
     """
     Compare CV with job description to find matches and provide recommendations
     """
     try:
+        logger.info(f"🟢 [AI_COMPARE_CV_JOB] user={current_user.email} provider={ai_service.config.get_current_provider()} model={ai_service.get_current_model_name()}")
         response = await ai_service.compare_cv_with_job(
             request.cv_text, 
             request.job_description

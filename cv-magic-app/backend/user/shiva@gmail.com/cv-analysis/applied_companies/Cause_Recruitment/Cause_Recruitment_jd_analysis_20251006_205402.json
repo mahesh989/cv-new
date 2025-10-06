@@ -1,0 +1,59 @@
+{
+  "experience_years": null,
+  "required_skills": {
+    "technical": [
+      "Power BI",
+      "SQL",
+      "Data warehousing",
+      "Data cleaning",
+      "Excel"
+    ],
+    "soft_skills": [
+      "analytical thinking",
+      "problem-solving",
+      "communication",
+      "interpersonal skills",
+      "attention to detail"
+    ],
+    "experience": [],
+    "domain_knowledge": []
+  },
+  "preferred_skills": {
+    "technical": [
+      "MSSQL"
+    ],
+    "soft_skills": [
+      "collaboration",
+      "innovative solutions"
+    ],
+    "domain_knowledge": [
+      "not-for-profit sector"
+    ],
+    "experience": []
+  },
+  "required_keywords": [
+    "Power BI",
+    "SQL",
+    "Data warehousing",
+    "Data cleaning",
+    "Excel",
+    "analytical thinking",
+    "problem-solving",
+    "communication",
+    "interpersonal skills",
+    "attention to detail"
+  ],
+  "preferred_keywords": [
+    "MSSQL",
+    "collaboration",
+    "innovative solutions",
+    "not-for-profit sector"
+  ],
+  "analysis_timestamp": "2025-10-06T20:54:02.642559",
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "company_name": "Cause_Recruitment",
+  "metadata": {
+    "jd_hash": "adf63a22cc6a030a25ec0792350fd7a7cfb1fd16b1edbe3a29dfce80d80797fb"
+  }
+}

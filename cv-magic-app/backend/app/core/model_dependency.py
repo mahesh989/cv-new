@@ -2,7 +2,7 @@
 Model selection dependency for handling dynamic model switching via headers
 """
 
-from fastapi import Header, HTTPException, status, Request
+from fastapi import Header, HTTPException, status, Request, Depends
 from typing import Optional
 import logging
 from contextvars import ContextVar
@@ -14,6 +14,7 @@ request_model: ContextVar[Optional[str]] = ContextVar('request_model', default=N
 
 
 async def get_current_model(
+    request: Request,
     x_current_model: Optional[str] = Header(None, alias="X-Current-Model")
 ) -> str:
     """
@@ -34,34 +35,53 @@ async def get_current_model(
     model_to_use = None
     
     if x_current_model:
-        # Validate that the model exists and switch to it
         try:
-            # Import ai_service lazily to avoid circular import
             from app.ai.ai_service import ai_service
-            
-            # Try to switch to the model specified in header
+            # Optional: allow header override after validating
             success = ai_service.switch_model(x_current_model)
             if success:
                 logger.info(f"🔄 Switched to model from header: {x_current_model}")
                 model_to_use = x_current_model
             else:
-                logger.warning(f"⚠️ Failed to switch to header model {x_current_model}, using current")
+                logger.warning(f"⚠️ Failed to switch to header model {x_current_model}")
         except Exception as e:
             logger.warning(f"⚠️ Error switching to header model {x_current_model}: {e}")
     
-    # Require model to be specified - no fallback
+    # If still not set, resolve from persisted user preference
     if not model_to_use:
-        # Import ai_service lazily to avoid circular import
-        from app.ai.ai_service import ai_service
-        current_status = ai_service.get_current_status()
-        current_model = current_status.get('current_model')
-        
-        if not current_model:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No AI model selected. Please select a provider and model in the homepage first."
-            )
-        model_to_use = current_model
+        try:
+            user = request.state.user if hasattr(request.state, "user") else None
+        except Exception:
+            user = None
+
+        if not user or not getattr(user, "id", None):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authenticated")
+
+        try:
+            from app.database import SessionLocal
+            from app.services.user_model_service import user_model_service
+            db = SessionLocal()
+            try:
+                pref = user_model_service.get_user_model(db, str(user.id))
+            finally:
+                db.close()
+            if pref:
+                provider, model = pref
+                # Validate by switching in-memory so providers are aligned
+                from app.ai.ai_service import ai_service
+                ok = ai_service.switch_provider(provider, model)
+                if ok:
+                    model_to_use = model
+            if not model_to_use:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No AI model selected. Please set provider and model via /ai/set-current-model."
+                )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"❌ Error resolving user model preference: {e}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to resolve AI model")
     
     # Store the model in the request context
     request_model.set(model_to_use)
