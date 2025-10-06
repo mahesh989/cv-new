@@ -1350,6 +1350,23 @@ FIX: Output ONLY valid JSON!
             
             logger.info(f"✅ Saved tailored CV to {json_file_path}")
             logger.info(f"✅ Saved tailored CV text to {txt_file_path}")
+
+            # Register files in DB (best-effort)
+            try:
+                from app.database import SessionLocal
+                from app.services.file_registry_service import FileRegistryService
+                db = SessionLocal()
+                try:
+                    registry = FileRegistryService.from_email(db, self.user_email)
+                    company_id = registry.upsert_company(company, display_name=company.replace('_', ' '))
+                    file_id = registry.register_file(company_id, "tailored_cv", json_file_path, timestamp=timestamp)
+                    registry.set_cv_pointer(company_id, "tailored", file_id)
+                    registry.record_analysis_run(company_id, kind="tailoring", output_file_id=file_id)
+                    db.commit()
+                finally:
+                    db.close()
+            except Exception as reg_err:
+                logger.warning(f"⚠️ [DB] Failed to register tailored CV: {reg_err}")
             return str(json_file_path)
             
         except Exception as e:
@@ -1571,27 +1588,33 @@ FIX: Output ONLY valid JSON!
             logger.info(f"Loading real data for {company}")
             logger.info(f"Company folder: {company_folder}")
 
-            # Use user-specific unified latest file selector to choose the latest CV across tailored+original
-            try:
-                from app.unified_latest_file_selector import get_selector_for_user
-                user_selector = get_selector_for_user(self.user_email)
-                cv_ctx = user_selector.get_latest_cv_across_all(company)
-                if not cv_ctx.exists:
-                    raise FileNotFoundError("No CV file found via unified selector")
-                # Prefer TXT file if JSON is empty, otherwise use JSON
-                if cv_ctx.json_path and cv_ctx.json_path.exists() and cv_ctx.json_path.stat().st_size > 1000:
-                    selected_cv_path = str(cv_ctx.json_path)
-                elif cv_ctx.txt_path and cv_ctx.txt_path.exists():
-                    selected_cv_path = str(cv_ctx.txt_path)
-                else:
-                    selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
-                logger.info(
-                    f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
-                )
-            except Exception as sel_err:
-                # Fallback to original JSON path if selector fails
-                logger.warning(f"⚠️ [TAILORING] Unified selector failed: {sel_err}. Falling back to original CV path")
-                selected_cv_path = str(self.cv_analysis_path / "cvs" / "original" / "original_cv.json")
+            # For CV tailoring, always use the original CV as the source, not tailored CVs
+            original_cv_path = self.cv_analysis_path / "cvs" / "original" / "original_cv.json"
+            if original_cv_path.exists():
+                selected_cv_path = str(original_cv_path)
+                logger.info(f"📄 [TAILORING] Using original CV as source for tailoring: {selected_cv_path}")
+            else:
+                # Fallback to unified selector if no original CV found
+                try:
+                    from app.unified_latest_file_selector import get_selector_for_user
+                    user_selector = get_selector_for_user(self.user_email)
+                    cv_ctx = user_selector.get_latest_cv_across_all(company)
+                    if not cv_ctx.exists:
+                        raise FileNotFoundError("No CV file found via unified selector")
+                    # Prefer TXT file if JSON is empty, otherwise use JSON
+                    if cv_ctx.json_path and cv_ctx.json_path.exists() and cv_ctx.json_path.stat().st_size > 1000:
+                        selected_cv_path = str(cv_ctx.json_path)
+                    elif cv_ctx.txt_path and cv_ctx.txt_path.exists():
+                        selected_cv_path = str(cv_ctx.txt_path)
+                    else:
+                        selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
+                    logger.info(
+                        f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
+                    )
+                except Exception as sel_err:
+                    # Final fallback
+                    logger.warning(f"⚠️ [TAILORING] Unified selector failed: {sel_err}. Falling back to original CV path")
+                    selected_cv_path = str(original_cv_path)
 
             # Debug logging for CV loading
             try:
@@ -1632,6 +1655,22 @@ FIX: Output ONLY valid JSON!
                             logger.info(f"- Re-parsed CV data keys: {list(cv_data.keys() if isinstance(cv_data, dict) else [])}")
                     except Exception as e:
                         logger.warning(f"⚠️ [TAILORING] Failed to parse original_text: {e}")
+            
+            # Convert skills format if needed (from List[str] to List[SkillCategory])
+            if isinstance(cv_data, dict) and 'skills' in cv_data:
+                skills_data = cv_data['skills']
+                if isinstance(skills_data, list) and len(skills_data) > 0:
+                    # Check if skills are strings (need conversion) or already SkillCategory objects
+                    if isinstance(skills_data[0], str):
+                        logger.info("🔄 Converting skills from List[str] to List[SkillCategory]")
+                        # Convert List[str] to List[SkillCategory]
+                        from app.tailored_cv.models.cv_models import SkillCategory
+                        cv_data['skills'] = [SkillCategory(category="Technical Skills", skills=skills_data)]
+                    elif isinstance(skills_data[0], dict) and 'skills' in skills_data[0]:
+                        # Already in SkillCategory format
+                        logger.info("✅ Skills already in SkillCategory format")
+                    else:
+                        logger.warning(f"⚠️ Unknown skills format: {type(skills_data[0])}")
             
             original_cv = OriginalCV(**cv_data)
             logger.info(f"- Final CV object attributes: {dir(original_cv)}")
