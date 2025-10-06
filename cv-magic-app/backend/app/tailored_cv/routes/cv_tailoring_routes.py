@@ -614,10 +614,10 @@ async def save_edited_cv(
         # 🔍 DEBUG: Log the save process
         logger.info(f"🔍 [SAVE_EDITED] Starting save process for {company}")
         
-        # Save to company-specific tailored folder under the authenticated user's base path
+        # Save to global tailored folder under the authenticated user's base path
         from app.utils.user_path_utils import get_user_base_path
         user_base = get_user_base_path(current_user.email)
-        tailored_path = user_base / "applied_companies" / company / "cvs" / "tailored"
+        tailored_path = user_base / "cvs" / "tailored"
         
         logger.info(f"🔍 [SAVE_EDITED] Tailored path: {tailored_path}")
         
@@ -632,31 +632,49 @@ async def save_edited_cv(
         
         files_updated = []
         
-        # Always create new timestamped files instead of updating existing ones
-        logger.info(f"🔍 [SAVE_EDITED] Creating new timestamped file in tailored folder")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
         # Create tailored directory if it doesn't exist
         tailored_path.mkdir(parents=True, exist_ok=True)
         
-        # Save TXT file with new timestamp
-        tailored_txt_file = tailored_path / f"{company}_tailored_cv_{timestamp}.txt"
-        with open(tailored_txt_file, 'w', encoding='utf-8') as f:
-            f.write(content)
-        files_updated.append(str(tailored_txt_file))
-        logger.info(f"✅ [SAVE_EDITED] Created new timestamped file: {tailored_txt_file}")
+        # Update existing files instead of creating new timestamped files
+        if existing_txt_files:
+            # Update the most recent existing file
+            latest_txt_file = max(existing_txt_files, key=lambda x: x.stat().st_mtime)
+            with open(latest_txt_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            files_updated.append(str(latest_txt_file))
+            logger.info(f"✅ [SAVE_EDITED] Updated existing file: {latest_txt_file}")
+            
+            # Update the corresponding JSON file
+            latest_json_file = latest_txt_file.with_suffix('.json')
+            if latest_json_file.exists():
+                try:
+                    with open(latest_json_file, 'r', encoding='utf-8') as f:
+                        existing_json = json.load(f)
+                    
+                    # Update the last_edited timestamp
+                    existing_json['last_edited'] = datetime.now().isoformat()
+                    existing_json['manually_edited'] = True
+                    
+                    with open(latest_json_file, 'w', encoding='utf-8') as f:
+                        json.dump(existing_json, f, indent=2, default=str)
+                    files_updated.append(str(latest_json_file))
+                    logger.info(f"✅ [SAVE_EDITED] Updated JSON file: {latest_json_file}")
+                except Exception as e:
+                    logger.warning(f"⚠️ [SAVE_EDITED] Failed to update JSON file: {e}")
+        else:
+            # Create new file if no existing files found
+            logger.info(f"🔍 [SAVE_EDITED] No existing files found, creating new file")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            tailored_txt_file = tailored_path / f"{company}_tailored_cv_{timestamp}.txt"
+            with open(tailored_txt_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            files_updated.append(str(tailored_txt_file))
+            logger.info(f"✅ [SAVE_EDITED] Created new file: {tailored_txt_file}")
         
-        # Create new timestamped JSON file instead of updating existing ones
-        try:
-            # Load the most recent JSON file to get the structure
-            json_files = list(tailored_path.glob(f"{company}_tailored_cv_*.json"))
-            if json_files:
-                # Use the most recent JSON file as template
-                latest_json_file = max(json_files, key=lambda x: x.stat().st_mtime)
-                with open(latest_json_file, 'r', encoding='utf-8') as f:
-                    existing_json = json.load(f)
-            else:
-                # Create basic structure if no existing JSON files
+        # Create new JSON file if no existing files found
+        if not existing_txt_files:
+            try:
+                # Create basic structure for new JSON file
                 existing_json = {
                     'contact': {},
                     'skills': {},
@@ -664,60 +682,24 @@ async def save_edited_cv(
                     'education': [],
                     'projects': []
                 }
-            
-            # Parse the edited content back into structured JSON format
-            updated_json = _parse_cv_content_to_json(content, existing_json)
-            
-            # Add metadata
-            updated_json['last_edited'] = datetime.now().isoformat()
-            updated_json['manually_edited'] = True
-            
-            # Create new timestamped JSON file
-            tailored_json_file = tailored_path / f"{company}_tailored_cv_{timestamp}.json"
-            with open(tailored_json_file, 'w', encoding='utf-8') as f:
-                json.dump(updated_json, f, indent=2, ensure_ascii=False)
-            
-            files_updated.append(str(tailored_json_file))
-            logger.info(f"✅ [SAVE_EDITED] Created new timestamped JSON file: {tailored_json_file}")
-            
-        except Exception as json_error:
-            logger.warning(f"⚠️ [SAVE_EDITED] Failed to create JSON file: {json_error}")
-        
-        # SYNC: Also update the latest file in global cvs/tailored so editors viewing
-        # cv-analysis/cvs/tailored/<company>_tailored_cv_*.{txt,json} see the changes
-        try:
-            user_base_global = user_base / "cvs" / "tailored"
-            user_base_global.mkdir(parents=True, exist_ok=True)
-
-            # Overwrite latest TXT in global folder if present
-            global_txt_matches = list(user_base_global.glob(f"{company}_tailored_cv_*.txt"))
-            if global_txt_matches:
-                latest_global_txt = max(global_txt_matches, key=lambda x: x.stat().st_mtime)
-                with open(latest_global_txt, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                files_updated.append(str(latest_global_txt))
-                logger.info(f"✅ [SAVE_EDITED] Synced TXT to global folder: {latest_global_txt}")
-
-            # Overwrite latest JSON in global folder by parsing edited content into existing structure
-            global_json_matches = list(user_base_global.glob(f"{company}_tailored_cv_*.json"))
-            if global_json_matches:
-                latest_global_json = max(global_json_matches, key=lambda x: x.stat().st_mtime)
-                try:
-                    with open(latest_global_json, 'r', encoding='utf-8') as f:
-                        existing_global_json = json.load(f)
-                except Exception:
-                    existing_global_json = {
-                        'contact': {}, 'skills': {}, 'experience': [], 'education': [], 'projects': []
-                    }
-                updated_global_json = _parse_cv_content_to_json(content, existing_global_json)
-                updated_global_json['last_edited'] = datetime.now().isoformat()
-                updated_global_json['manually_edited'] = True
-                with open(latest_global_json, 'w', encoding='utf-8') as f:
-                    json.dump(updated_global_json, f, indent=2, ensure_ascii=False)
-                files_updated.append(str(latest_global_json))
-                logger.info(f"✅ [SAVE_EDITED] Synced JSON to global folder: {latest_global_json}")
-        except Exception as sync_err:
-            logger.warning(f"⚠️ [SAVE_EDITED] Global folder sync skipped: {sync_err}")
+                
+                # Parse the edited content back into structured JSON format
+                updated_json = _parse_cv_content_to_json(content, existing_json)
+                
+                # Add metadata
+                updated_json['last_edited'] = datetime.now().isoformat()
+                updated_json['manually_edited'] = True
+                
+                # Create new JSON file with same timestamp as TXT file
+                tailored_json_file = tailored_path / f"{company}_tailored_cv_{timestamp}.json"
+                with open(tailored_json_file, 'w', encoding='utf-8') as f:
+                    json.dump(updated_json, f, indent=2, ensure_ascii=False)
+                
+                files_updated.append(str(tailored_json_file))
+                logger.info(f"✅ [SAVE_EDITED] Created new JSON file: {tailored_json_file}")
+                
+            except Exception as json_error:
+                logger.warning(f"⚠️ [SAVE_EDITED] Failed to create JSON file: {json_error}")
 
         logger.info(f"✅ [SAVE_EDITED] Completed saving for {company}")
         
