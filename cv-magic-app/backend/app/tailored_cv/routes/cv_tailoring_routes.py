@@ -729,6 +729,32 @@ async def _update_json_with_edited_content(existing_json: dict, edited_content: 
     try:
         from app.ai.ai_service import ai_service
         
+        # 0) Heuristic fast-path: parse common contact line formats like
+        #    "Name | PHONE | EMAIL | LOCATION" and update contact fields deterministically
+        try:
+            lines = [l.strip() for l in edited_content.splitlines() if l.strip()]
+            if lines:
+                first = lines[0]
+                parts = [p.strip() for p in first.split('|')]
+                if len(parts) >= 3:
+                    contact = existing_json.get('contact', {}) or {}
+                    # Name (part 0)
+                    if parts[0] and (not contact.get('name') or parts[0] != contact.get('name')):
+                        contact['name'] = parts[0]
+                    # Phone (part 1)
+                    if len(parts) > 1 and parts[1]:
+                        contact['phone'] = parts[1]
+                    # Email (part 2)
+                    if len(parts) > 2 and parts[2]:
+                        contact['email'] = parts[2]
+                    # Location (part 3)
+                    if len(parts) > 3 and parts[3]:
+                        contact['location'] = parts[3]
+                    existing_json['contact'] = contact
+        except Exception:
+            # Heuristic is best-effort; ignore failures
+            pass
+        
         # Create a prompt to parse the edited content back into JSON structure
         parsing_prompt = f"""
 You are a CV parser. I need you to update an existing CV JSON structure with new edited content.
@@ -749,7 +775,7 @@ INSTRUCTIONS:
 
 Updated JSON:"""
 
-        # Generate response using AI
+        # 1) Generate response using AI to fully map free text back to structure
         response = await ai_service.generate_response(
             prompt=parsing_prompt,
             temperature=0.0,  # Zero temperature for maximum consistency
