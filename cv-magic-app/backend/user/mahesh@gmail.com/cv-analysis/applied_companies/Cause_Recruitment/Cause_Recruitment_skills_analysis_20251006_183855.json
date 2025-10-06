@@ -1,0 +1,128 @@
+{
+  "generated": "2025-10-06T18:38:55.691",
+  "cv_filename": "maheshwor_tiwari.pdf",
+  "jd_url": "preliminary_analysis",
+  "user_id": "40c6f4c1-7edc-496c-bec9-39c93812d7d2",
+  "company": "Cause_Recruitment",
+  "model_used": "gpt-3.5-turbo",
+  "cv_skills": {
+    "technical_skills": [
+      "Docker",
+      "Excel",
+      "GitHub",
+      "Google Analytics",
+      "Matplotlib",
+      "MySQL",
+      "NumPy",
+      "Pandas",
+      "PostgreSQL",
+      "Power BI",
+      "Python",
+      "scikit-learn",
+      "Snowflake",
+      "SQL",
+      "Tableau",
+      "Visual Studio Code"
+    ],
+    "soft_skills": [
+      "Adaptability",
+      "Analytical Thinking",
+      "Collaboration",
+      "Communication",
+      "Creativity",
+      "Critical Thinking",
+      "Detail-oriented",
+      "Innovation",
+      "Leadership",
+      "Organization",
+      "Proactive",
+      "Problem-solving",
+      "Results-driven",
+      "Self-motivated",
+      "Teamwork",
+      "Time Management"
+    ],
+    "domain_keywords": [
+      "AI",
+      "Automation",
+      "Cloud Data Warehousing",
+      "Computational Modeling",
+      "Customer Behavior Insights",
+      "Data Analysis",
+      "Data Cleaning",
+      "Data Pipelines",
+      "Data Science",
+      "Data Visualization",
+      "Machine Learning",
+      "Physics",
+      "Predictive Analytics",
+      "Research",
+      "Version Control"
+    ],
+    "comprehensive_analysis": "\n**SOFT SKILLS:**\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n**TECHNICAL SKILLS:**\n- Python\n- Pandas\n- NumPy\n- scikit-learn\n- SQL\n- PostgreSQL\n- MySQL\n- Tableau\n- Power BI\n- Matplotlib\n- GitHub\n- Docker\n- Snowflake\n- Visual Studio Code\n- Google Analytics\n- Excel\n\n**DOMAIN KEYWORDS:**\n- Data Analysis\n- Data Science\n- Machine Learning\n- AI\n- Data Pipelines\n- Predictive Analytics\n- Data Visualization\n- Version Control\n- Cloud Data Warehousing\n- Computational Modeling\n- Research\n- Physics\n- Data Cleaning\n- Automation\n- Customer Behavior Insights"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Data Analysis",
+      "Data Cleaning",
+      "Data Collection",
+      "Data Mining",
+      "Data Transformation",
+      "Data Visualization",
+      "Data Warehousing Concepts",
+      "Excel",
+      "Interpersonal Skills",
+      "Power BI",
+      "Presentation Skills",
+      "Reporting",
+      "SQL",
+      "Statistical Methods"
+    ],
+    "soft_skills": [
+      "Analytical Thinking",
+      "Collaboration",
+      "Communication",
+      "Detail-oriented",
+      "Leadership",
+      "Proactive",
+      "Problem-solving",
+      "Self-motivated",
+      "Teamwork"
+    ],
+    "domain_keywords": [
+      "Business Processes",
+      "Charity Sector",
+      "Data Accuracy",
+      "Data Analytics",
+      "Data Insights",
+      "Food Relief Charity",
+      "Growth Opportunity",
+      "Information Technology",
+      "National Charity",
+      "Nonprofit Organization",
+      "Numeracy Skills",
+      "Remote Work",
+      "Research Information",
+      "School Breakfast Programs",
+      "Stakeholder Communication",
+      "Trends Identification"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Problem-solving\n- Analytical Thinking\n- Detail-oriented\n- Self-motivated\n- Proactive\n\n## TECHNICAL SKILLS:\n- Data Collection\n- Data Cleaning\n- Data Analysis\n- Statistical Methods\n- Data Mining\n- Reporting\n- Data Visualization\n- Power BI\n- SQL\n- Excel\n- Data Warehousing Concepts\n- Data Transformation\n- Presentation Skills\n- Interpersonal Skills\n\n## DOMAIN KEYWORDS:\n- Numeracy Skills\n- Food Relief Charity\n- Nonprofit Organization\n- Information Technology\n- Data Analytics\n- Business Processes\n- Trends Identification\n- Stakeholder Communication\n- Data Accuracy\n- Remote Work\n- Charity Sector\n- School Breakfast Programs\n- National Charity\n- Data Insights\n- Research Information\n- Growth Opportunity\n\n**DETAILED EXTRACTION EXAMPLE:**\n\nSOFT_SKILLS = [\"Communication\", \"Leadership\", \"Teamwork\", \"Collaboration\", \"Problem-solving\", \"Analytical Thinking\", \"Detail-oriented\", \"Self-motivated\", \"Proactive\"]\nTECHNICAL_SKILLS = [\"Data Collection\", \"Data Cleaning\", \"Data Analysis\", \"Statistical Methods\", \"Data Mining\", \"Reporting\", \"Data Visualization\", \"Power BI\", \"SQL\", \"Excel\", \"Data Warehousing Concepts\", \"Data Transformation\", \"Presentation Skills\", \"Interpersonal Skills\"]  \nDOMAIN_KEYWORDS = [\"Numeracy Skills\", \"Food Relief Charity\", \"Nonprofit Organization\", \"Information Technology\", \"Data Analytics\", \"Business Processes\", \"Trends Identification\", \"Stakeholder Communication\", \"Data Accuracy\", \"Remote Work\", \"Charity Sector\", \"School Breakfast Programs\", \"National Charity\", \"Data Insights\", \"Research Information\", \"Growth Opportunity\"]"
+  },
+  "cv_comprehensive_analysis": "\n**SOFT SKILLS:**\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n**TECHNICAL SKILLS:**\n- Python\n- Pandas\n- NumPy\n- scikit-learn\n- SQL\n- PostgreSQL\n- MySQL\n- Tableau\n- Power BI\n- Matplotlib\n- GitHub\n- Docker\n- Snowflake\n- Visual Studio Code\n- Google Analytics\n- Excel\n\n**DOMAIN KEYWORDS:**\n- Data Analysis\n- Data Science\n- Machine Learning\n- AI\n- Data Pipelines\n- Predictive Analytics\n- Data Visualization\n- Version Control\n- Cloud Data Warehousing\n- Computational Modeling\n- Research\n- Physics\n- Data Cleaning\n- Automation\n- Customer Behavior Insights",
+  "jd_comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Problem-solving\n- Analytical Thinking\n- Detail-oriented\n- Self-motivated\n- Proactive\n\n## TECHNICAL SKILLS:\n- Data Collection\n- Data Cleaning\n- Data Analysis\n- Statistical Methods\n- Data Mining\n- Reporting\n- Data Visualization\n- Power BI\n- SQL\n- Excel\n- Data Warehousing Concepts\n- Data Transformation\n- Presentation Skills\n- Interpersonal Skills\n\n## DOMAIN KEYWORDS:\n- Numeracy Skills\n- Food Relief Charity\n- Nonprofit Organization\n- Information Technology\n- Data Analytics\n- Business Processes\n- Trends Identification\n- Stakeholder Communication\n- Data Accuracy\n- Remote Work\n- Charity Sector\n- School Breakfast Programs\n- National Charity\n- Data Insights\n- Research Information\n- Growth Opportunity\n\n**DETAILED EXTRACTION EXAMPLE:**\n\nSOFT_SKILLS = [\"Communication\", \"Leadership\", \"Teamwork\", \"Collaboration\", \"Problem-solving\", \"Analytical Thinking\", \"Detail-oriented\", \"Self-motivated\", \"Proactive\"]\nTECHNICAL_SKILLS = [\"Data Collection\", \"Data Cleaning\", \"Data Analysis\", \"Statistical Methods\", \"Data Mining\", \"Reporting\", \"Data Visualization\", \"Power BI\", \"SQL\", \"Excel\", \"Data Warehousing Concepts\", \"Data Transformation\", \"Presentation Skills\", \"Interpersonal Skills\"]  \nDOMAIN_KEYWORDS = [\"Numeracy Skills\", \"Food Relief Charity\", \"Nonprofit Organization\", \"Information Technology\", \"Data Analytics\", \"Business Processes\", \"Trends Identification\", \"Stakeholder Communication\", \"Data Accuracy\", \"Remote Work\", \"Charity Sector\", \"School Breakfast Programs\", \"National Charity\", \"Data Insights\", \"Research Information\", \"Growth Opportunity\"]",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-10-06T18:39:00.297",
+      "model_used": "gpt-3.5-turbo",
+      "content": "**DECISION:** 🟢 STRONG PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** Strong numeracy skills, data analysis, Power BI, SQL\n- **Flexibility indicators:** Entry-level role, recent graduate considered, competitive salary\n- **Hard blockers identified:** None present\n- **Hiring urgency signals:** Exciting time of growth, remote work available\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** PhD in Physics, Master's in Data Science, Python expertise\n- **Smart connections:** Data analysis experience, Python scripting, AI/ML knowledge\n- **Growth potential:** Continuous learning shown, adaptable to new tools/processes\n- **Positioning opportunities:** Emphasize data analysis, Python skills, AI/ML experience\n\n**REALISTIC ODDS:** 70-80% chance of getting an interview if CV tailored well\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight strong numeracy skills and data analysis experience\n2. **Priority 2:** Showcase Python expertise and AI/ML knowledge\n3. **Priority 3:** Emphasize adaptability to new tools and processes\n\n**HONEST BOTTOM LINE:** With a strong background in data analysis, Python programming, and AI/ML, along with a solid educational foundation, Maheshwor Tiwari is a strong candidate for the Data Analytics Officer role at Foodbank. Tailoring the CV to highlight relevant skills and experiences should result in a high probability of securing an interview."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-10-06T18:39:09.229",
+      "model_used": "gpt-3.5-turbo",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 39\nMatched: 15\nMissing: 23\nMatch Rate: 38%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            16         14          6          8           43\nSoft Skills                  16          9          9          0           100\nDomain Keywords             15         16          0         15            0\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (6 items):\n    1. JD Required: 'Data Analysis'\n       → Found in CV: 'Data Analytics'\n       💡 synonym match\n    2. JD Required: 'Data Cleaning'\n       → Found in CV: 'Data Cleaning'\n       💡 exact match\n    3. JD Required: 'Data Visualization'\n       → Found in CV: 'Data Visualization'\n       💡 exact match\n    4. JD Required: 'Excel'\n       → Found in CV: 'Excel'\n       💡 exact match\n    5. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 exact match\n    6. JD Required: 'Sql'\n       → Found in CV: 'Sql'\n       💡 exact match\n  ❌ MISSING FROM CV (8 items):\n    1. JD Requires: 'Data Collection'\n       💡 no equivalent found\n    2. JD Requires: 'Data Mining'\n       💡 no equivalent found\n    3. JD Requires: 'Data Transformation'\n       💡 no equivalent found\n    4. JD Requires: 'Data Warehousing Concepts'\n       💡 no equivalent found\n    5. JD Requires: 'Interpersonal Skills'\n       💡 no equivalent found\n    6. JD Requires: 'Presentation Skills'\n       💡 no equivalent found\n    7. JD Requires: 'Reporting'\n       💡 no equivalent found\n    8. JD Requires: 'Statistical Methods'\n       💡 no equivalent found\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (9 items):\n    1. JD Required: 'Analytical Thinking'\n       → Found in CV: 'Analytical Thinking'\n       💡 exact match\n    2. JD Required: 'Collaboration'\n       → Found in CV: 'Collaboration'\n       💡 exact match\n    3. JD Required: 'Communication'\n       → Found in CV: 'Communication'\n       💡 exact match\n    4. JD Required: 'Detail-Oriented'\n       → Found in CV: 'Detail-Oriented'\n       💡 exact match\n    5. JD Required: 'Leadership'\n       → Found in CV: 'Leadership'\n       💡 exact match\n    6. JD Required: 'Proactive'\n       → Found in CV: 'Proactive'\n       💡 exact match\n    7. JD Required: 'Problem-Solving'\n       → Found in CV: 'Problem-Solving'\n       💡 exact match\n    8. JD Required: 'Self-Motivated'\n       → Found in CV: 'Self-Motivated'\n       💡 exact match\n    9. JD Required: 'Teamwork'\n       → Found in CV: 'Teamwork'\n       💡 exact match\n\n🔹 DOMAIN KEYWORDS\n  ❌ MISSING FROM CV (15 items):\n    1. JD Requires: 'Business Processes'\n       💡 no equivalent found\n    2. JD Requires: 'Charity Sector'\n       💡 no equivalent found\n    3. JD Requires: 'Data Accuracy'\n       💡 no equivalent found\n    4. JD Requires: 'Data Insights'\n       💡 no equivalent found\n    5. JD Requires: 'Food Relief Charity'\n       💡 no equivalent found\n    6. JD Requires: 'Growth Opportunity'\n       💡 no equivalent found\n    7. JD Requires: 'Information Technology'\n       💡 no equivalent found\n    8. JD Requires: 'National Charity'\n       💡 no equivalent found\n    9. JD Requires: 'Nonprofit Organization'\n       💡 no equivalent found\n    10. JD Requires: 'Numeracy Skills'\n       💡 no equivalent found\n    11. JD Requires: 'Remote Work'\n       💡 no equivalent found\n    12. JD Requires: 'Research Information'\n       💡 no equivalent found\n    13. JD Requires: 'School Breakfast Programs'\n       💡 no equivalent found\n    14. JD Requires: 'Stakeholder Communication'\n       💡 no equivalent found\n    15. JD Requires: 'Trends Identification'\n       💡 no equivalent found\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Docker, Excel, GitHub, Google Analytics, Matplotlib, MySQL, NumPy, Pandas, PostgreSQL, Power BI...\n- Soft: Adaptability, Analytical Thinking, Collaboration, Communication, Creativity, Critical Thinking, Detail-oriented, Innovation, Leadership, Organization...\n- Domain: AI, Automation, Cloud Data Warehousing, Computational Modeling, Customer Behavior Insights, Data Analysis, Data Cleaning, Data Pipelines, Data Science, Data Visualization...\n\nJD\n- Technical: Data Analysis, Data Cleaning, Data Collection, Data Mining, Data Transformation, Data Visualization, Data Warehousing Concepts, Excel, Interpersonal Skills, Power BI...\n- Soft: Analytical Thinking, Collaboration, Communication, Detail-oriented, Leadership, Proactive, Problem-solving, Self-motivated, Teamwork\n- Domain: Business Processes, Charity Sector, Data Accuracy, Data Analytics, Data Insights, Food Relief Charity, Growth Opportunity, Information Technology, National Charity, Nonprofit Organization...\n"
+    }
+  ]
+}
