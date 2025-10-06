@@ -355,7 +355,7 @@ class CVTailoringService:
             # Try to parse and validate
             try:
                 tailored_data = self._extract_and_parse_json(ai_response.content)
-                self._validate_tailored_json(tailored_data, request_id=request_id)
+                assessment = self._validate_tailored_json(tailored_data, request_id=request_id)
                 self._validate_real_cv_data_used(tailored_data, original_cv)
                 self._validate_keyword_integration(tailored_data, recommendations, request_id=request_id)
                 
@@ -373,7 +373,34 @@ class CVTailoringService:
                     logger.info(f"[{request_id}] 🔁 Added correction instructions and retrying...")
                     continue
         
-        # Build tailored CV from validated data
+        # If quantification is below 60%, run up to 3 targeted enhancement attempts
+        try:
+            quant_ratio = assessment.get("quantification_ratio", 0.0)
+        except Exception:
+            quant_ratio = 0.0
+
+        enhancement_tries = 0
+        while quant_ratio < 0.60 and enhancement_tries < 3:
+            enhancement_tries += 1
+            logger.info(f"[{request_id}] 🔁 Quantification below 60% ({quant_ratio:.1%}). Enhancement attempt {enhancement_tries}/3")
+            missing_list = "\n".join(assessment.get("missing_bullets", [])[:8])
+            fix_msg = f"quantification: Add numbers to these bullets:\n{missing_list}"
+            user_prompt = self._add_correction_instructions(user_prompt, fix_msg)
+            ai_response = await ai_service.generate_response(
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                temperature=0.0,
+                max_tokens=4000
+            )
+            try:
+                tailored_data = self._extract_and_parse_json(ai_response.content)
+                assessment = self._validate_tailored_json(tailored_data, request_id=request_id)
+                quant_ratio = assessment.get("quantification_ratio", 0.0)
+            except Exception as e:
+                logger.warning(f"[{request_id}] Enhancement attempt failed: {e}")
+                break
+
+        # Build tailored CV from validated (and possibly enhanced) data
         tailored_cv = self._construct_tailored_cv(
             original_cv,
             tailored_data,
