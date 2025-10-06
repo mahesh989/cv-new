@@ -29,18 +29,23 @@ def get_user_base_path(user_email: Optional[str] = None) -> Path:
     # Normalize email
     user_email = user_email.strip().lower()
     
-    # Create user folder name using the actual email address
-    # This is safe for modern filesystems and more readable
-    user_folder = user_email
-    
-    # Use standard user-scoped path structure: user/{user_folder}/cv-analysis
-    base_path = Path("user") / user_folder / "cv-analysis"
-    
-    # Create the base path if it doesn't exist
-    base_path.mkdir(parents=True, exist_ok=True)
-    
-    logger.info(f"✅ User base path: {base_path} for {user_email}")
-    return base_path
+    # Preferred modern layout: user/{email}/cv-analysis
+    preferred_path = Path("user") / user_email / "cv-analysis"
+    # Legacy layout (backward-compat): user/user_{email}/cv-analysis
+    legacy_path = Path("user") / f"user_{user_email}" / "cv-analysis"
+
+    # If either exists, use it without creating a new sibling folder
+    if preferred_path.exists():
+        logger.info(f"✅ User base path (preferred): {preferred_path} for {user_email}")
+        return preferred_path
+    if legacy_path.exists():
+        logger.info(f"↩️  Using legacy user base path: {legacy_path} for {user_email}")
+        return legacy_path
+
+    # Otherwise create the preferred layout
+    preferred_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f"✅ Created user base path (preferred): {preferred_path} for {user_email}")
+    return preferred_path
 
 def ensure_user_directories(user_email: Optional[str] = None) -> Path:
     """
