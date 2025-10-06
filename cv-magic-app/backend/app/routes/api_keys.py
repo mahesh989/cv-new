@@ -11,6 +11,7 @@ from typing import Dict, Any, Optional
 import logging
 
 from app.services.api_key_manager import api_key_manager
+from app.services.user_api_key_manager import user_api_key_manager
 from app.core.dependencies import get_current_user
 from app.models.auth import UserData
 
@@ -54,13 +55,74 @@ async def set_api_key(
     current_user: UserData = Depends(get_current_user)
 ):
     """Set API key for authenticated users"""
-    return await _set_api_key_internal(request)
+    return await _set_user_api_key_internal(request, current_user)
 
 
 @router.post("/set-initial", response_model=APIKeyResponse)
 async def set_initial_api_key(request: APIKeyRequest):
     """Set API key for initial setup (no auth required)"""
     return await _set_api_key_internal(request)
+
+
+async def _set_user_api_key_internal(request: APIKeyRequest, current_user: UserData):
+    """
+    Set API key for a specific user and provider
+    
+    Args:
+        request: API key request data
+        current_user: Current authenticated user
+        
+    Returns:
+        APIKeyResponse: Result of the operation
+    """
+    try:
+        # Validate provider
+        valid_providers = ['openai', 'anthropic', 'deepseek']
+        if request.provider not in valid_providers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid provider. Must be one of: {', '.join(valid_providers)}"
+            )
+        
+        # Set the API key using user-specific manager
+        success, message = user_api_key_manager.set_api_key(
+            current_user, request.provider, request.api_key
+        )
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=message
+            )
+        
+        # Validate the key
+        is_valid, validation_message = user_api_key_manager.validate_api_key(
+            current_user, request.provider, request.api_key
+        )
+        
+        # Refresh AI providers to pick up the new API key
+        try:
+            from app.ai.ai_service import ai_service
+            ai_service.refresh_providers()
+            logger.info(f"🔄 Refreshed AI providers after setting {request.provider} API key for user {current_user.email}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to refresh AI providers: {e}")
+        
+        return APIKeyResponse(
+            success=True,
+            message=f"{message}. {validation_message}",
+            provider=request.provider,
+            is_valid=is_valid
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting API key for user {current_user.email} and provider {request.provider}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 
 async def _set_api_key_internal(request: APIKeyRequest):
@@ -128,7 +190,7 @@ async def validate_api_key(
     current_user: UserData = Depends(get_current_user)
 ):
     """
-    Validate API key for a specific provider
+    Validate API key for a specific provider and user
     
     Args:
         provider: AI provider name
@@ -146,8 +208,8 @@ async def validate_api_key(
                 detail=f"Invalid provider. Must be one of: {', '.join(valid_providers)}"
             )
         
-        # Check if API key exists
-        if not api_key_manager.has_api_key(provider):
+        # Check if API key exists for this user
+        if not user_api_key_manager.has_api_key(current_user, provider):
             return APIKeyResponse(
                 success=False,
                 message=f"No API key found for {provider}",
@@ -156,7 +218,7 @@ async def validate_api_key(
             )
         
         # Validate the key
-        is_valid, message = api_key_manager.validate_api_key(provider)
+        is_valid, message = user_api_key_manager.validate_api_key(current_user, provider)
         
         return APIKeyResponse(
             success=True,
@@ -168,7 +230,7 @@ async def validate_api_key(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error validating API key for {provider}: {e}")
+        logger.error(f"Error validating API key for user {current_user.email} and provider {provider}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
@@ -180,7 +242,7 @@ async def get_providers_status(
     current_user: UserData = Depends(get_current_user)
 ):
     """
-    Get status of all AI providers
+    Get status of all AI providers for the current user
     
     Args:
         current_user: Current authenticated user
@@ -189,7 +251,7 @@ async def get_providers_status(
         AllProvidersStatusResponse: Status of all providers
     """
     try:
-        status_data = api_key_manager.get_provider_status()
+        status_data = user_api_key_manager.get_provider_status(current_user)
         
         providers = {}
         for provider, data in status_data.items():
@@ -203,11 +265,11 @@ async def get_providers_status(
         
         return AllProvidersStatusResponse(
             providers=providers,
-            session_id=api_key_manager._session_id
+            session_id=f"user_{current_user.id}"
         )
         
     except Exception as e:
-        logger.error(f"Error getting providers status: {e}")
+        logger.error(f"Error getting providers status for user {current_user.email}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
@@ -254,7 +316,7 @@ async def remove_api_key(
     current_user: UserData = Depends(get_current_user)
 ):
     """
-    Remove API key for a specific provider
+    Remove API key for a specific provider and user
     
     Args:
         provider: AI provider name
@@ -272,18 +334,18 @@ async def remove_api_key(
                 detail=f"Invalid provider. Must be one of: {', '.join(valid_providers)}"
             )
         
-        # Remove the API key
-        success = api_key_manager.remove_api_key(provider)
+        # Remove the API key using user-specific manager
+        success, message = user_api_key_manager.remove_api_key(current_user, provider)
         
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to remove API key for {provider}"
+                detail=message
             )
         
         return APIKeyResponse(
             success=True,
-            message=f"API key removed for {provider}",
+            message=message,
             provider=provider,
             is_valid=False
         )
@@ -291,7 +353,7 @@ async def remove_api_key(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error removing API key for {provider}: {e}")
+        logger.error(f"Error removing API key for user {current_user.email} and provider {provider}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
@@ -303,7 +365,7 @@ async def clear_all_api_keys(
     current_user: UserData = Depends(get_current_user)
 ):
     """
-    Clear all API keys
+    Clear all API keys for the current user
     
     Args:
         current_user: Current authenticated user
@@ -312,17 +374,25 @@ async def clear_all_api_keys(
         APIKeyResponse: Result of the operation
     """
     try:
-        api_key_manager.clear_all_keys()
+        success, message = user_api_key_manager.clear_all_keys(current_user)
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=message
+            )
         
         return APIKeyResponse(
             success=True,
-            message="All API keys cleared",
+            message=message,
             provider=None,
             is_valid=False
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error clearing all API keys: {e}")
+        logger.error(f"Error clearing all API keys for user {current_user.email}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"

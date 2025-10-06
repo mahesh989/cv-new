@@ -6,7 +6,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
 from sqlalchemy.sql import func
 from passlib.context import CryptContext
 from app.database import Base
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 from email_validator import validate_email, EmailNotValidError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -27,6 +27,8 @@ class User(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     last_login = Column(DateTime, nullable=True)
+    
+    # Note: API keys relationship removed due to type mismatch (UUID vs String)
     
     def set_password(self, password: str) -> None:
         """Hash and set the user's password"""

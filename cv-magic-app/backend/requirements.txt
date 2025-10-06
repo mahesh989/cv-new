@@ -12,6 +12,7 @@ alembic==1.13.1
 pyjwt==2.8.0
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
+cryptography==41.0.7
 
 # Validation and serialization
 pydantic[email]==2.5.0

@@ -182,9 +182,19 @@ class AIConfig:
         self._current_provider = None
         self._current_model = None
     
-    def get_api_key(self, provider: str) -> Optional[str]:
-        """Get API key for a specific provider"""
-        # First try dynamic API key manager
+    def get_api_key(self, provider: str, user: Optional[Any] = None) -> Optional[str]:
+        """Get API key for a specific provider and user"""
+        # First try user-specific API key manager if user is provided
+        if user:
+            try:
+                from app.services.user_api_key_manager import user_api_key_manager
+                user_key = user_api_key_manager.get_api_key(user, provider)
+                if user_key:
+                    return user_key
+            except Exception as e:
+                logger.warning(f"Failed to get user-specific API key for {provider}: {e}")
+        
+        # Fallback to dynamic API key manager (for backward compatibility)
         try:
             from app.services.api_key_manager import api_key_manager
             dynamic_key = api_key_manager.get_api_key(provider)
