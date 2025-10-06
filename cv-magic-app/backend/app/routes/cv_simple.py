@@ -306,7 +306,7 @@ async def get_cv_preview(
 
 
 @router.get("/latest-cv-content")
-async def get_latest_cv_content():
+async def get_latest_cv_content(current_user: UserData = Depends(get_current_user)):
     """
     Get the latest CV content (from either original or tailored folder) for frontend preview
     This is a general endpoint that doesn't require a company name
@@ -317,7 +317,9 @@ async def get_latest_cv_content():
         # Use unified CV selector to get the latest CV for this user (no company context)
         from app.unified_latest_file_selector import get_selector_for_user
         selector = get_selector_for_user(current_user.email)
-        cv_ctx = selector.get_latest_cv_across_all("") if hasattr(selector, 'get_latest_cv_across_all') else None
+        # Use company-agnostic latest across all by scanning original folder when no company is provided
+        # Fallback: if no tailored found, original base file will be considered
+        cv_ctx = selector.get_latest_cv_across_all("__any__")
         
         if not cv_ctx or not cv_ctx.txt_path:
             raise HTTPException(
@@ -365,25 +367,26 @@ async def get_latest_cv_content():
 @router.get("/read-tailored-cv/{company_name}")
 async def read_tailored_cv(company_name: str, current_user: UserData = Depends(get_current_user)):
     """
-    Read tailored CV content for frontend preview
+    Read tailored CV content for frontend preview - STRICT MODE
     
-    This endpoint serves the most recent tailored CV text content for a company,
-    compatible with the frontend CV preview functionality.
+    This endpoint serves the most recent tailored CV text content for a company.
+    It ONLY looks in the tailored folder and raises an error if no tailored CV is found.
+    NO FALLBACK to original CV.
     """
     try:
         logger.info(f"📄 Tailored CV content request for {company_name}")
         
-        # Use unified file selector (user-scoped) to get the latest CV for the specific company
+        # Use unified file selector (user-scoped) to get the latest TAILORED CV ONLY
         from app.unified_latest_file_selector import get_selector_for_user
         selector = get_selector_for_user(current_user.email)
         
-        # Get the latest CV files for the specific company
-        cv_context = selector.get_latest_cv_for_company(company_name)
+        # Use the strict method that only looks in tailored folder
+        cv_context = selector.get_latest_tailored_cv_only(company_name)
         
         if not cv_context.exists or not cv_context.txt_path:
             raise HTTPException(
                 status_code=404,
-                detail=f"No CV text file found for company: {company_name}"
+                detail=f"No tailored CV found for company: {company_name}. Please generate a tailored CV first."
             )
         
         latest_txt_file = cv_context.txt_path
@@ -392,14 +395,14 @@ async def read_tailored_cv(company_name: str, current_user: UserData = Depends(g
         if not latest_txt_file.exists():
             raise HTTPException(
                 status_code=404,
-                detail=f"CV text file not found: {latest_txt_file}"
+                detail=f"Tailored CV text file not found: {latest_txt_file}"
             )
         
         # Read the text content
         with open(latest_txt_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        logger.info(f"✅ Served CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
+        logger.info(f"✅ Served TAILORED CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
         
         return JSONResponse(content={
             "success": True,

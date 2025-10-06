@@ -920,24 +920,27 @@ async def get_tailored_cv_content(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get tailored CV content for frontend preview
+    Get tailored CV content for frontend preview - STRICT MODE
     
-    This endpoint serves the most recent tailored CV text content for a company,
-    compatible with the frontend CV preview functionality.
+    This endpoint serves the most recent tailored CV text content for a company.
+    It ONLY looks in the tailored folder and raises an error if no tailored CV is found.
+    NO FALLBACK to original CV.
     """
     try:
         logger.info(f"📄 Tailored CV content request for {company_name} from user {current_user.id}")
         
-        # Use user-specific unified selector to get the latest CV for the company
+        # Use user-specific unified selector to get the latest TAILORED CV ONLY
         from app.unified_latest_file_selector import get_selector_for_user
         
         user_selector = get_selector_for_user(current_user.email)
-        cv_context = user_selector.get_latest_cv_for_company(company_name)
+        
+        # Use the strict method that only looks in tailored folder
+        cv_context = user_selector.get_latest_tailored_cv_only(company_name)
         
         if not cv_context.exists or not cv_context.txt_path:
             raise HTTPException(
                 status_code=404,
-                detail=f"No CV text file found for company: {company_name}"
+                detail=f"No tailored CV found for company: {company_name}. Please generate a tailored CV first."
             )
         
         latest_txt_file = cv_context.txt_path
@@ -946,16 +949,14 @@ async def get_tailored_cv_content(
         if not latest_txt_file.exists():
             raise HTTPException(
                 status_code=404,
-                detail=f"CV text file not found: {latest_txt_file}"
+                detail=f"Tailored CV text file not found: {latest_txt_file}"
             )
-        
-        # File is already the latest from dynamic selector
         
         # Read the text content
         with open(latest_txt_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        logger.info(f"✅ Served CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
+        logger.info(f"✅ Served TAILORED CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
         
         return JSONResponse(content={
             "success": True,

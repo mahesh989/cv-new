@@ -100,20 +100,39 @@ class UnifiedLatestFileSelector:
             company=company,
         )
     
-    def _get_tailored_cv_for_company(self, company: str) -> FileContext:
-        """Get tailored CV for a company"""
-        print(f"🔍 Searching for tailored CV for company: {company}")
+    def get_latest_tailored_cv_only(self, company: str) -> FileContext:
+        """
+        Get the latest tailored CV for a company - NO FALLBACK to original CV.
+        This method only looks in the tailored folder and raises an error if no tailored CV is found.
+        
+        Args:
+            company: Company name
+            
+        Returns:
+            FileContext: The latest tailored CV
+            
+        Raises:
+            FileNotFoundError: If no tailored CV is found for the company
+        """
+        if not self.user_email:
+            raise ValueError("user_email must be provided for file selection operations")
+            
+        print(f"🔍 Searching for tailored CV ONLY for company: {company}")
         
         candidates = self._find_tailored_cv_files(company)
         print(f"📁 Found {len(candidates)} tailored CV candidates")
         
         if not candidates:
             print("❌ No tailored CV candidates found")
-            raise FileNotFoundError(f"No tailored CV found for company: {company}")
+            raise FileNotFoundError(f"No tailored CV found for company: {company}. Please generate a tailored CV first.")
         
         latest_cv = self._select_best_cv_candidate(candidates, company)
         print(f"✅ Selected tailored CV: {latest_cv.file_type} - {latest_cv.json_path}")
         return latest_cv
+
+    def _get_tailored_cv_for_company(self, company: str) -> FileContext:
+        """Get tailored CV for a company (internal method)"""
+        return self.get_latest_tailored_cv_only(company)
 
     def get_latest_cv_across_all(self, company: str) -> FileContext:
         """
