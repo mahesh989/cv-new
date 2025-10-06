@@ -830,7 +830,7 @@ async def get_available_companies_real(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get list of companies with real recommendation data available
+    Get list of companies that have tailored CVs available in the global tailored folder
     """
     try:
         # Use user-specific path
@@ -839,20 +839,31 @@ async def get_available_companies_real(
         
         companies = []
         if cv_analysis_path.exists():
-            # Look in applied_companies directory
-            applied_companies_dir = cv_analysis_path / "applied_companies"
-            if applied_companies_dir.exists():
-                for company_dir in applied_companies_dir.iterdir():
-                    if company_dir.is_dir() and company_dir.name != "__pycache__":
-                        # Check if it has a recommendation file
-                        rec_files = list(company_dir.glob("*ai_recommendation*.json"))
-                        if rec_files:
-                            companies.append({
-                                "company": company_dir.name,
-                                "display_name": company_dir.name.replace('_', ' '),
-                                "recommendation_file": str(rec_files[0]),
-                                "last_updated": datetime.fromtimestamp(rec_files[0].stat().st_mtime).isoformat()
-                            })
+            # Look in global tailored CV folder
+            tailored_cv_dir = cv_analysis_path / "cvs" / "tailored"
+            if tailored_cv_dir.exists():
+                # Find all tailored CV files
+                tailored_cv_files = list(tailored_cv_dir.glob("*_tailored_cv_*.txt"))
+                
+                for cv_file in tailored_cv_files:
+                    # Extract company name from filename (e.g., "Company_tailored_cv_timestamp.txt")
+                    filename = cv_file.stem  # Remove .txt extension
+                    parts = filename.split('_tailored_cv_')
+                    if len(parts) >= 2:
+                        company_name = parts[0]
+                        
+                        # Get the corresponding JSON file for metadata
+                        json_file = cv_file.with_suffix('.json')
+                        
+                        companies.append({
+                            "company": company_name,
+                            "display_name": company_name.replace('_', ' '),
+                            "tailored_cv_file": str(cv_file),
+                            "last_updated": datetime.fromtimestamp(cv_file.stat().st_mtime).isoformat()
+                        })
+                
+                # Sort by last_updated (most recent first)
+                companies.sort(key=lambda x: x['last_updated'], reverse=True)
         
         return {
             "companies": companies,
