@@ -316,7 +316,9 @@ async def _run_pipeline(cname: str, token_data=None):
         "jd_analysis": False,
         "cv_jd_matching": False,
         "component_analysis": False,
-        "input_recommendation": False
+        "input_recommendation": False,
+        "ai_recommendation": False,
+        "tailored_cv": False
     }
     
     # Get user email and base directory first
@@ -395,11 +397,11 @@ async def _run_pipeline(cname: str, token_data=None):
     # Step 3: Component Analysis (includes ATS calculation) - Tailored-only via unified selector
     try:
         logger.info(f"🔍 [PIPELINE] Starting component analysis for {cname}")
-        from app.services.ats.modular_ats_orchestrator import ModularATSOrchestrator
+        from app.services.ats.modular_ats_orchestrator import get_modular_ats_orchestrator
         from app.unified_latest_file_selector import get_selector_for_user
         
         # Create user-specific orchestrator
-        user_orchestrator = ModularATSOrchestrator(user_email=user_email)
+        user_orchestrator = get_modular_ats_orchestrator(user_email=user_email)
         
         # Get latest CV context across tailored+original, log paths, then read content
         try:
@@ -488,6 +490,72 @@ async def _run_pipeline(cname: str, token_data=None):
     except Exception as rec_error:
         logger.error(f"❌ [PIPELINE] Input recommendation creation failed for {cname}: {rec_error}")
         pipeline_results["input_recommendation"] = False
+    
+    # Step 5: AI Recommendation Generation (if input recommendation was successful)
+    if pipeline_results["input_recommendation"]:
+        try:
+            logger.info(f"🤖 [PIPELINE] Starting AI recommendation generation for {cname}")
+            from app.services.ai_recommendation_generator import AIRecommendationGenerator
+            
+            ai_service = AIRecommendationGenerator(user_email=user_email)
+            ai_success = await ai_service.generate_ai_recommendation(cname, force_regenerate=False)
+            
+            if ai_success:
+                logger.info(f"✅ [PIPELINE] AI recommendation generated for {cname}")
+                pipeline_results["ai_recommendation"] = True
+            else:
+                logger.warning(f"⚠️ [PIPELINE] AI recommendation generation failed for {cname}")
+                pipeline_results["ai_recommendation"] = False
+        except Exception as ai_error:
+            logger.error(f"❌ [PIPELINE] AI recommendation generation failed for {cname}: {ai_error}")
+            pipeline_results["ai_recommendation"] = False
+    else:
+        logger.info(f"⏭️ [PIPELINE] Skipping AI recommendation generation for {cname} (input recommendation failed)")
+        pipeline_results["ai_recommendation"] = False
+    
+    # Step 6: Tailored CV Generation (if AI recommendation was successful)
+    if pipeline_results["ai_recommendation"]:
+        try:
+            logger.info(f"🎯 [PIPELINE] Starting tailored CV generation for {cname}")
+            from app.tailored_cv.services.cv_tailoring_service import CVTailoringService
+            
+            cv_service = CVTailoringService(user_email=user_email)
+            
+            # Check if we have the required files for CV tailoring
+            from app.utils.user_path_utils import get_user_base_path
+            base_dir = get_user_base_path(user_email)
+            company_dir = base_dir / "applied_companies" / cname
+            
+            # Check for AI recommendation file
+            ai_rec_file = None
+            for pattern in [f"{cname}_ai_recommendation_*.json", f"{cname}_ai_recommendation.json"]:
+                files = list(company_dir.glob(pattern))
+                if files:
+                    ai_rec_file = max(files, key=lambda f: f.stat().st_mtime)
+                    break
+            
+            if ai_rec_file and ai_rec_file.exists():
+                logger.info(f"📄 [PIPELINE] Found AI recommendation file: {ai_rec_file}")
+                
+                # The AI recommendation generator should have already triggered CV tailoring
+                # Let's check if a tailored CV was created
+                tailored_cv_files = list(company_dir.glob(f"{cname}_tailored_cv_*.txt"))
+                if tailored_cv_files:
+                    latest_tailored = max(tailored_cv_files, key=lambda f: f.stat().st_mtime)
+                    logger.info(f"✅ [PIPELINE] Tailored CV found: {latest_tailored}")
+                    pipeline_results["tailored_cv"] = True
+                else:
+                    logger.warning(f"⚠️ [PIPELINE] No tailored CV found for {cname}")
+                    pipeline_results["tailored_cv"] = False
+            else:
+                logger.warning(f"⚠️ [PIPELINE] No AI recommendation file found for {cname}")
+                pipeline_results["tailored_cv"] = False
+        except Exception as cv_error:
+            logger.error(f"❌ [PIPELINE] Tailored CV generation failed for {cname}: {cv_error}")
+            pipeline_results["tailored_cv"] = False
+    else:
+        logger.info(f"⏭️ [PIPELINE] Skipping tailored CV generation for {cname} (AI recommendation failed)")
+        pipeline_results["tailored_cv"] = False
     
     # Log pipeline summary
     successful_steps = [step for step, success in pipeline_results.items() if success]
@@ -1156,7 +1224,7 @@ async def trigger_component_analysis(company: str, current_user: UserData = Depe
     try:
         logger.info(f"🔧 [MANUAL] Triggering component analysis for company: {company}")
         
-        from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
+        from app.services.ats.modular_ats_orchestrator import get_modular_ats_orchestrator
         from app.services.dynamic_cv_selector import dynamic_cv_selector
         
         # Use dynamic CV selection for the latest CV file
@@ -1165,7 +1233,7 @@ async def trigger_component_analysis(company: str, current_user: UserData = Depe
         
         # Check if required files exist
         from app.utils.user_path_utils import get_user_base_path
-        user_email = getattr(token_data, 'email', None)
+        user_email = current_user.email
         if not user_email:
             raise ValueError("User authentication required for analysis listing")
         base_dir = get_user_base_path(user_email)
@@ -1200,7 +1268,8 @@ async def trigger_component_analysis(company: str, current_user: UserData = Depe
             )
         
         # Run component analysis
-        result = await modular_ats_orchestrator.run_component_analysis(company)
+        user_orchestrator = get_modular_ats_orchestrator(user_email=user_email)
+        result = await user_orchestrator.run_component_analysis(company)
         
         return JSONResponse(content={
             "success": True,
@@ -1295,8 +1364,9 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
         # Step 3: Component Analysis (includes ATS calculation)
         try:
             logger.info(f"🔧 [MANUAL] Step 3: Component Analysis for {company}")
-            from app.services.ats.modular_ats_orchestrator import modular_ats_orchestrator
-            component_result = await modular_ats_orchestrator.run_component_analysis(company)
+            from app.services.ats.modular_ats_orchestrator import get_modular_ats_orchestrator
+            user_orchestrator = get_modular_ats_orchestrator(user_email=current_user.email)
+            component_result = await user_orchestrator.run_component_analysis(company)
             
             if isinstance(component_result, dict) and 'extracted_scores' in component_result:
                 results["steps"].append({

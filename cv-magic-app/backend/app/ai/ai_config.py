@@ -182,6 +182,25 @@ class AIConfig:
         self._current_provider = None
         self._current_model = None
     
+    def _auto_select_provider(self):
+        """Auto-select a provider if none is currently set"""
+        # Check for available API keys and select the first available provider
+        for provider in self._model_configs.keys():
+            api_key = self.get_api_key(provider)
+            if api_key:
+                # Get the first available model for this provider
+                available_models = self.get_available_models(provider)
+                if available_models:
+                    self._current_provider = provider
+                    self._current_model = available_models[0]
+                    logger.info(f"Auto-selected provider: {provider} with model: {self._current_model}")
+                    return
+        
+        # If no provider with API key is found, log warning
+        logger.warning("No AI providers available - please configure API keys")
+        self._current_provider = None
+        self._current_model = None
+    
     def get_api_key(self, provider: str, user: Optional[Any] = None) -> Optional[str]:
         """Get API key for a specific provider and user"""
         # First try user-specific API key manager if user is provided
@@ -212,6 +231,9 @@ class AIConfig:
     
     def get_current_provider(self) -> str:
         """Get current provider name"""
+        if self._current_provider is None:
+            # Try to auto-select a provider if none is set
+            self._auto_select_provider()
         return self._current_provider
     
     def get_current_model_name(self) -> str:

@@ -103,5 +103,38 @@ class ModularATSOrchestrator:
             return {"error": str(e), "company": company}
 
 
-# Global instance (defaults to admin user unless overridden by callers)
-modular_ats_orchestrator = ModularATSOrchestrator()
+# Global instance factory function (lazy initialization)
+def get_modular_ats_orchestrator(user_email: str = None) -> ModularATSOrchestrator:
+    """
+    Get a ModularATSOrchestrator instance with proper user context.
+    
+    Args:
+        user_email: User email for user-specific path resolution
+        
+    Returns:
+        ModularATSOrchestrator instance
+    """
+    return ModularATSOrchestrator(user_email=user_email)
+
+# For backward compatibility, create a default instance only when needed
+# This prevents the import-time failure
+def _get_default_orchestrator():
+    """Get default orchestrator for legacy code that doesn't provide user_email"""
+    try:
+        # Try to get a default user email from environment or use a fallback
+        import os
+        default_user = os.getenv('DEFAULT_USER_EMAIL', 'admin@example.com')
+        return ModularATSOrchestrator(user_email=default_user)
+    except Exception:
+        # If all else fails, create with None and let it fail gracefully
+        return ModularATSOrchestrator(user_email=None)
+
+# Global instance for backward compatibility (lazy creation)
+modular_ats_orchestrator = None
+
+def _ensure_global_orchestrator():
+    """Ensure global orchestrator exists (lazy initialization)"""
+    global modular_ats_orchestrator
+    if modular_ats_orchestrator is None:
+        modular_ats_orchestrator = _get_default_orchestrator()
+    return modular_ats_orchestrator
