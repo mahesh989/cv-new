@@ -7,12 +7,7 @@ import '../services/job_parser.dart';
 import '../services/jobs_state_manager.dart';
 
 /// States for skills analysis
-enum SkillsAnalysisState {
-  idle,
-  loading,
-  completed,
-  error,
-}
+enum SkillsAnalysisState { idle, loading, completed, error }
 
 /// Controller for managing skills analysis operations and state
 class SkillsAnalysisController extends ChangeNotifier {
@@ -132,7 +127,8 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   // Notification methods
   void setNotificationCallback(
-      Function(String message, {bool isError}) callback) {
+    Function(String message, {bool isError}) callback,
+  ) {
     _onNotification = callback;
   }
 
@@ -179,7 +175,8 @@ class SkillsAnalysisController extends ChangeNotifier {
         return;
       } else {
         print(
-            '🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis');
+          '🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis',
+        );
       }
 
       // Perform fresh analysis
@@ -304,8 +301,9 @@ class SkillsAnalysisController extends ChangeNotifier {
       } else {
         _setError(_result!.errorMessage ?? 'Context-aware analysis failed');
         _showNotification(
-            _result!.errorMessage ?? 'Context-aware analysis failed',
-            isError: true);
+          _result!.errorMessage ?? 'Context-aware analysis failed',
+          isError: true,
+        );
       }
     } catch (e) {
       _setError('Context-aware analysis failed: $e');
@@ -414,9 +412,7 @@ class SkillsAnalysisController extends ChangeNotifier {
 
       Timer(Duration(seconds: 10), () {
         // Show analyze match results
-        _result = _result!.copyWith(
-          analyzeMatch: _fullResult!.analyzeMatch,
-        );
+        _result = _result!.copyWith(analyzeMatch: _fullResult!.analyzeMatch);
         notifyListeners();
         _showNotification('🎯 Recruiter assessment completed!');
 
@@ -473,7 +469,8 @@ class SkillsAnalysisController extends ChangeNotifier {
 
     print('🔄 [POLLING] Starting polling for complete results...');
     _showNotification(
-        '🔧 Running advanced analysis (component analysis & ATS calculation)...');
+      '🔧 Running advanced analysis (component analysis & ATS calculation)...',
+    );
 
     try {
       final completeResults =
@@ -486,9 +483,11 @@ class SkillsAnalysisController extends ChangeNotifier {
         ComponentAnalysisResult? componentAnalysis;
         if (completeResults['component_analysis'] != null) {
           componentAnalysis = ComponentAnalysisResult.fromJson(
-              completeResults['component_analysis']);
+            completeResults['component_analysis'],
+          );
           print(
-              '📊 [POLLING] Component analysis parsed: ${componentAnalysis.extractedScores.length} scores');
+            '📊 [POLLING] Component analysis parsed: ${componentAnalysis.extractedScores.length} scores',
+          );
         }
 
         // Parse ATS result
@@ -502,9 +501,11 @@ class SkillsAnalysisController extends ChangeNotifier {
         AIRecommendationResult? aiRecommendation;
         if (completeResults['ai_recommendation'] != null) {
           aiRecommendation = AIRecommendationResult.fromJson(
-              completeResults['ai_recommendation']);
+            completeResults['ai_recommendation'],
+          );
           print(
-              '🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars');
+            '🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars',
+          );
         }
 
         // Store the complete results for progressive reveal
@@ -515,26 +516,22 @@ class SkillsAnalysisController extends ChangeNotifier {
         );
 
         // Check if AI recommendation is now available and trigger display
-        // But wait for ATS analysis to complete first (ATS has 12s + 10s = 22s total)
+        // Show AI recommendations immediately when available (no need to wait for ATS)
         if (aiRecommendation != null && !_showAIRecommendationResults) {
-          // Wait for ATS analysis to complete, then show AI recommendations
-          Timer(Duration(seconds: 25), () {
-            // AI recommendations are ready, show them with brief loading
-            print(
-                '🔍 [CONTROLLER] Setting AI recommendation loading state to true');
-            _showAIRecommendationLoading = true;
-            notifyListeners();
-            _showNotification('🤖 AI recommendations found!');
+          // Show AI recommendations with brief loading for UI smoothness
+          print(
+            '🔍 [CONTROLLER] Setting AI recommendation loading state to true',
+          );
+          _showAIRecommendationLoading = true;
+          notifyListeners();
+          _showNotification('🤖 AI recommendations found!');
 
-            Timer(Duration(seconds: 2), () {
-              // Show AI recommendations after brief delay for UI smoothness
-              _showAIRecommendationResults = true;
-              _result = _result!.copyWith(
-                aiRecommendation: aiRecommendation,
-              );
-              notifyListeners();
-              _showNotification('🎯 AI recommendations ready!');
-            });
+          Timer(Duration(seconds: 2), () {
+            // Show AI recommendations after brief delay for UI smoothness
+            _showAIRecommendationResults = true;
+            _result = _result!.copyWith(aiRecommendation: aiRecommendation);
+            notifyListeners();
+            _showNotification('🎯 AI recommendations ready!');
           });
         }
 
@@ -570,7 +567,8 @@ class SkillsAnalysisController extends ChangeNotifier {
               final finalAtsResult = _fullResult!.atsResult;
               if (finalAtsResult != null) {
                 _showNotification(
-                    '🎯 ATS Score: ${finalAtsResult.finalATSScore.toStringAsFixed(1)}/100 (${finalAtsResult.categoryStatus})');
+                  '🎯 ATS Score: ${finalAtsResult.finalATSScore.toStringAsFixed(1)}/100 (${finalAtsResult.categoryStatus})',
+                );
               } else {
                 _showNotification('✅ ATS Analysis completed!');
               }
@@ -587,13 +585,15 @@ class SkillsAnalysisController extends ChangeNotifier {
       } else {
         print('⚠️ [POLLING] Polling timed out, analysis incomplete');
         _showNotification(
-            '⚠️ Advanced analysis timed out - basic analysis complete');
+          '⚠️ Advanced analysis timed out - basic analysis complete',
+        );
         _finishAnalysis();
       }
     } catch (e) {
       print('❌ [POLLING] Error during polling: $e');
       _showNotification(
-          '⚠️ Advanced analysis failed - basic analysis complete');
+        '⚠️ Advanced analysis failed - basic analysis complete',
+      );
       _finishAnalysis();
     }
   }

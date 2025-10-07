@@ -24,8 +24,7 @@
     ],
     "domain_knowledge": [
       "data issues",
-      "communication purposes",
-      "governing regulations"
+      "marketing campaigns"
     ],
     "experience": []
   },
@@ -42,10 +41,9 @@
     "Tableau",
     "customer service",
     "data issues",
-    "communication purposes",
-    "governing regulations"
+    "marketing campaigns"
   ],
-  "analysis_timestamp": "2025-10-07T14:35:31.421350",
+  "analysis_timestamp": "2025-10-07T17:08:08.722090",
   "ai_model_used": "openai/gpt-3.5-turbo",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",

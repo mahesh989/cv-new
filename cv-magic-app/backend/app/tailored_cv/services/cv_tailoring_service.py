@@ -369,7 +369,13 @@ class CVTailoringService:
                     raise Exception(f"AI failed to generate compliant CV after {max_attempts} attempts: {str(e)}")
                 else:
                     # Add more specific instructions for next attempt
-                    user_prompt = self._add_correction_instructions(user_prompt, str(e))
+                    user_prompt = self._add_correction_instructions(
+                        user_prompt, 
+                        str(e),
+                        assessment.get("total_bullets", 0),
+                        assessment.get("bullets_with_quantification", 0),
+                        0.5
+                    )
                     logger.info(f"[{request_id}] 🔁 Added correction instructions and retrying...")
                     continue
         
@@ -385,7 +391,13 @@ class CVTailoringService:
             logger.info(f"[{request_id}] 🔁 Quantification below 60% ({quant_ratio:.1%}). Enhancement attempt {enhancement_tries}/3")
             missing_list = "\n".join(assessment.get("missing_bullets", [])[:8])
             fix_msg = f"quantification: Add numbers to these bullets:\n{missing_list}"
-            user_prompt = self._add_correction_instructions(user_prompt, fix_msg)
+            user_prompt = self._add_correction_instructions(
+                user_prompt, 
+                fix_msg,
+                assessment.get("total_bullets", 0),
+                assessment.get("bullets_with_quantification", 0),
+                0.5
+            )
             ai_response = await ai_service.generate_response(
                 prompt=user_prompt,
                 system_prompt=system_prompt,
@@ -1032,7 +1044,7 @@ BULLETS NEEDING IMPROVEMENT:
         # Return assessment so callers can make decisions (e.g., retry to improve quantification)
         return quality_assessment
     
-    def _add_correction_instructions(self, user_prompt: str, error_message: str) -> str:
+    def _add_correction_instructions(self, user_prompt: str, error_message: str, total_bullets: int = 0, bullets_with_quantification: int = 0, minimum_ratio: float = 0.5) -> str:
         """Add specific correction instructions based on validation failure"""
         
         correction = "\n\nCORRECTION REQUIRED - THIS IS CRITICAL:\n"

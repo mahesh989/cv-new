@@ -555,8 +555,9 @@ async def _run_pipeline(cname: str, token_data=None):
                 logger.info(f"📄 [PIPELINE] Found AI recommendation file: {ai_rec_file}")
                 
                 # The AI recommendation generator should have already triggered CV tailoring
-                # Let's check if a tailored CV was created
-                tailored_cv_files = list(company_dir.glob(f"{cname}_tailored_cv_*.txt"))
+                # Let's check if a tailored CV was created in the correct location
+                tailored_cv_dir = base_dir / "cvs" / "tailored"
+                tailored_cv_files = list(tailored_cv_dir.glob(f"{cname}_tailored_cv_*.txt"))
                 if tailored_cv_files:
                     latest_tailored = max(tailored_cv_files, key=lambda f: f.stat().st_mtime)
                     logger.info(f"✅ [PIPELINE] Tailored CV found: {latest_tailored}")

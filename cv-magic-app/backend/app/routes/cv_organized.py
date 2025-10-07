@@ -85,12 +85,6 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
         txt_filepath = original_folder / "original_cv.txt"
         
         with open(txt_filepath, 'w', encoding='utf-8') as f:
-            f.write("=" * 80 + "\n")
-            f.write("ORIGINAL CV TEXT\n")
-            f.write(f"CV File: {filename}\n")
-            f.write(f"Extracted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write(f"Length: {len(cv_content_result['content'])} characters\n")
-            f.write("=" * 80 + "\n\n")
             f.write(cv_content_result['content'])
         
         logger.info(f"CV saved as text: {txt_filepath}")

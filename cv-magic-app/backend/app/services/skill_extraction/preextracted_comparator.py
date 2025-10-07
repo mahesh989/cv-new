@@ -24,17 +24,57 @@ logger = logging.getLogger(__name__)
 
 # SEMANTIC SKILL MAPPING for improved matching accuracy
 SEMANTIC_SKILL_MAPPING = {
-    # Soft Skills Equivalents
+    # Soft Skills Equivalents - FIXED MATCHING
+    "communication": [
+        "communication",
+        "communication skills",
+        "interpersonal skills",
+        "verbal communication",
+        "written communication",
+        "presentation skills"
+    ],
+    "leadership": [
+        "leadership",
+        "team leadership",
+        "mentoring",
+        "course facilitation",
+        "student engagement",
+        "team management"
+    ],
+    "teamwork": [
+        "teamwork",
+        "collaboration",
+        "collaborative",
+        "team collaboration",
+        "cross-functional collaboration"
+    ],
+    "collaboration": [
+        "collaboration",
+        "teamwork",
+        "collaborative",
+        "team collaboration",
+        "cross-functional collaboration"
+    ],
+    "problem-solving": [
+        "problem-solving",
+        "problem solving",
+        "analytical thinking",
+        "critical thinking",
+        "troubleshooting",
+        "solution-oriented"
+    ],
     "organised": [
+        "organised",
+        "organized",
         "manage and prioritise multiple tasks",
         "task management", 
         "time management",
         "prioritization",
-        "organized",
         "manage multiple tasks",
         "priority management"
     ],
     "project management": [
+        "project management",
         "manage multiple projects", 
         "task prioritization",
         "deliver multiple projects",
@@ -45,6 +85,8 @@ SEMANTIC_SKILL_MAPPING = {
         "manage multiple tasks"
     ],
     "detail-oriented": [
+        "detail-oriented",
+        "detail oriented",
         "attention to detail",
         "accuracy",
         "precision",
@@ -53,6 +95,8 @@ SEMANTIC_SKILL_MAPPING = {
         "quality assurance"
     ],
     "motivated": [
+        "motivated",
+        "self-motivated",
         "proactive",
         "self-driven",
         "initiative",
@@ -60,6 +104,7 @@ SEMANTIC_SKILL_MAPPING = {
         "dynamic"
     ],
     "stakeholder management": [
+        "stakeholder management",
         "stakeholder engagement",
         "work with stakeholders",
         "stakeholder interaction",
@@ -68,47 +113,117 @@ SEMANTIC_SKILL_MAPPING = {
         "interpersonal skills"
     ],
     "adaptability": [
+        "adaptability",
+        "adaptable",
         "flexible",
         "dynamic environments",
         "diverse industries",
         "cross-functional"
     ],
     
-    # Technical Skills Equivalents  
-    "business intelligence": [
-        "data science",
-        "analytics", 
+    # Technical Skills Equivalents - IMPROVED MATCHING
+    "sql": [
+        "sql",
+        "database management",
+        "database querying",
+        "relational databases",
+        "postgresql",
+        "mysql"
+    ],
+    "excel": [
+        "excel",
+        "spreadsheets",
+        "microsoft excel"
+    ],
+    "power bi": [
+        "power bi",
+        "business intelligence",
         "data visualization",
         "dashboard creation",
-        "reporting",
-        "bi",
-        "data analytics"
+        "reporting"
     ],
-    "data warehouse": [
-        "database",
-        "data storage",
-        "relational databases",
-        "dwh",
-        "data warehouse (dwh)"
-    ],
-    "reporting": [
+    "tableau": [
+        "tableau",
+        "data visualization",
         "dashboard creation",
-        "data visualization", 
-        "insights delivery",
-        "report generation",
-        "data reporting"
+        "business intelligence"
     ],
-    "data extraction": [
+    "vba": [
+        "vba",
+        "visual basic for applications",
+        "excel vba",
+        "macro programming"
+    ],
+    "data analysis": [
         "data analysis",
+        "data analytics",
+        "analytics",
+        "statistical analysis"
+    ],
+    "data mining": [
+        "data mining",
+        "machine learning",
+        "predictive analytics",
+        "data science"
+    ],
+    "data modeling": [
+        "data modeling",
+        "data science",
+        "machine learning",
+        "statistical modeling"
+    ],
+    "data segmentation": [
+        "data segmentation",
+        "statistical analysis",
+        "data analysis",
+        "customer segmentation"
+    ],
+    "data warehousing": [
+        "data warehousing",
+        "data warehouse",
+        "sql",
+        "database management",
+        "relational databases"
+    ],
+    "database management": [
+        "database management",
+        "sql",
+        "relational databases",
+        "postgresql",
+        "mysql"
+    ],
+    "extracting data": [
+        "extracting data",
+        "data extraction",
         "sql",
         "database querying",
         "data retrieval"
     ],
-    "segmentation strategies": [
-        "data segmentation",
-        "customer analytics",
-        "data analysis",
-        "statistical analysis"
+    "querying": [
+        "querying",
+        "sql",
+        "database querying",
+        "data retrieval"
+    ],
+    "relational databases": [
+        "relational databases",
+        "sql",
+        "database management",
+        "postgresql",
+        "mysql"
+    ],
+    "report creation": [
+        "report creation",
+        "reporting",
+        "data visualization",
+        "dashboard creation",
+        "power bi",
+        "tableau"
+    ],
+    "spreadsheets": [
+        "spreadsheets",
+        "excel",
+        "microsoft excel"
     ],
     
     # Domain Keywords Equivalents
@@ -516,7 +631,8 @@ def _normalize_list(values: List[str], max_items: int = 200) -> List[str]:
             'react', 'angular', 'vue', 'node.js', 'express.js', 'django', 'flask',
             'tensorflow', 'pytorch', 'scikit-learn', 'pandas', 'numpy', 'matplotlib',
             'seaborn', 'plotly', 'jupyter', 'git', 'github', 'gitlab', 'jenkins',
-            'terraform', 'ansible', 'chef', 'puppet', 'splunk', 'datadog', 'newrelic'
+            'terraform', 'ansible', 'chef', 'puppet', 'splunk', 'datadog', 'newrelic',
+            'sql', 'vba', 'excel', 'python', 'java', 'javascript', 'html', 'css'
         }
         
         # Clean up whitespace but preserve original case for known brands
@@ -586,29 +702,32 @@ def build_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) ->
         f"JD.soft_skills ({jd_soft_count} items) = {jd['soft_skills']}\n"
         f"JD.domain_keywords ({jd_domain_count} items) = {jd['domain_keywords']}\n\n"
         "INTELLIGENT MATCHING RULES (apply in order):\n"
-        "1. EXACT MATCH: Case-insensitive identical skills (e.g., 'SQL' = 'sql')\n"
+        "1. EXACT MATCH: Case-insensitive identical skills (e.g., 'SQL' = 'sql', 'Communication' = 'communication')\n"
+        "   ⚠️ CRITICAL: If CV has 'Communication' and JD requires 'Communication' → EXACT MATCH\n"
+        "   ⚠️ CRITICAL: If CV has 'Leadership' and JD requires 'Leadership' → EXACT MATCH\n"
+        "   ⚠️ CRITICAL: If CV has 'Teamwork' and JD requires 'Teamwork' → EXACT MATCH\n"
+        "   ⚠️ CRITICAL: If CV has 'Collaboration' and JD requires 'Collaboration' → EXACT MATCH\n"
+        "   ⚠️ CRITICAL: If CV has 'Problem-solving' and JD requires 'Problem-solving' → EXACT MATCH\n"
         "2. SYNONYM MATCH: Professional equivalents:\n"
-        "   • 'Data Analysis' = 'Data Analytics' = 'Analytical Skills' = 'Analytics'\n"
-        "   • 'Problem Solving' = 'Problem-Solving' = 'Analytical Thinking'\n"
-        "   • 'Machine Learning' = 'ML' = 'Predictive Modeling'\n"
-        "   • 'Business Intelligence' = 'BI' = 'Data Science' = 'Data Warehousing'\n"
-        "   • 'Communication' = 'Interpersonal Skills' = 'Communication Skills'\n"
-        "   • 'Collaboration' = 'Teamwork' = 'Collaborative'\n"
-        "   • 'Time Management' = 'Prioritization' = 'Manage and prioritise multiple tasks'\n"
-        "   • 'Organised' = 'Task Management' = 'Manage multiple tasks' = 'Priority Management'\n"
-        "   • 'Project Management' = 'Deliver multiple projects' = 'Task coordination'\n"
-        "   • 'Detail-oriented' = 'Attention to detail' = '99% accuracy' = 'Data integrity'\n"
-        "   • 'Stakeholder Management' = 'Work with stakeholders' = 'Stakeholder engagement'\n"
+        "   • 'Data Analysis' = 'Data Analytics' = 'Analytics' = 'Statistical Analysis'\n"
+        "   • 'Problem Solving' = 'Problem-Solving' = 'Analytical Thinking' = 'Critical Thinking'\n"
+        "   • 'Machine Learning' = 'ML' = 'Predictive Analytics' = 'Data Science'\n"
+        "   • 'Communication' = 'Communication Skills' = 'Interpersonal Skills'\n"
+        "   • 'Collaboration' = 'Teamwork' = 'Collaborative' = 'Team Collaboration'\n"
+        "   • 'Leadership' = 'Team Leadership' = 'Mentoring' = 'Course Facilitation'\n"
+        "   • 'SQL' = 'Database Management' = 'Relational Databases' = 'PostgreSQL' = 'MySQL'\n"
+        "   • 'Power BI' = 'Business Intelligence' = 'Data Visualization' = 'Dashboard Creation'\n"
+        "   • 'Tableau' = 'Data Visualization' = 'Dashboard Creation' = 'Business Intelligence'\n"
+        "   • 'Excel' = 'Spreadsheets' = 'Microsoft Excel'\n"
+        "   • 'VBA' = 'Visual Basic for Applications' = 'Excel VBA' = 'Macro Programming'\n"
         "3. HIERARCHICAL MATCH: Specific skills demonstrate broader capabilities:\n"
         "   • 'Machine Learning' demonstrates 'Data Mining', 'Data Analysis', and 'Statistical Analysis'\n"
-        "   • 'Deep Learning' demonstrates 'Machine Learning', 'Neural Networks', and 'AI'\n"
+        "   • 'SQL' demonstrates 'Database Management', 'Data Extraction', 'Querying', and 'Relational Databases'\n"
+        "   • 'Data Science' demonstrates 'Data Analysis', 'Statistical Analysis', and 'Machine Learning'\n"
         "   • 'Python' demonstrates 'Programming', 'Scripting', and 'Data Analysis' skills\n"
-        "   • 'Random Forests' demonstrates 'Statistical Analysis', 'Data Mining', and 'Predictive Modeling'\n"
-        "   • 'Object Detection' demonstrates 'Computer Vision', 'Machine Learning', and 'Image Processing'\n"
-        "   • 'SQL' demonstrates 'Database Management', 'Data Extraction', and 'Data Querying'\n"
         "   • 'Tableau/Power BI' demonstrates 'Data Visualization', 'Business Intelligence', and 'Reporting'\n"
         "4. DOMAIN CONTEXT: Skills in same professional domain:\n"
-        "   • Data Science: SQL, Python, Tableau, Power BI, Statistical Analysis, Business Intelligence\n"
+        "   • Data Science: SQL, Python, Tableau, Power BI, Statistical Analysis, Machine Learning\n"
         "   • Business Intelligence: Data Science, Analytics, Data Visualization, Dashboard creation, Reporting\n"
         "   • Analytics: Data Analysis, Statistical Analysis, Data Mining, Business Intelligence, Data Science\n"
         "   • Database: SQL, Data Warehouse, Relational Databases, Data Storage, Data Extraction\n"
@@ -625,21 +744,23 @@ def build_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) ->
         f"- Soft: matched + missing must = {jd_soft_count}\n"
         f"- Domain: matched + missing must = {jd_domain_count}\n\n"
         "EXAMPLES OF GOOD MATCHES:\n"
+        "✅ JD: 'Communication' → CV: 'Communication' (exact match)\n"
+        "✅ JD: 'Leadership' → CV: 'Leadership' (exact match)\n"
+        "✅ JD: 'Teamwork' → CV: 'Collaboration' (synonym)\n"
+        "✅ JD: 'Problem-Solving' → CV: 'Problem Solving' (exact, ignore punctuation)\n"
+        "✅ JD: 'SQL' → CV: 'SQL' (exact match)\n"
+        "✅ JD: 'Power BI' → CV: 'Power BI' (exact match)\n"
+        "✅ JD: 'Excel' → CV: 'Excel' (exact match)\n"
         "✅ JD: 'Data Analysis' → CV: 'Data Analytics' (synonym)\n"
         "✅ JD: 'Data Mining' → CV: 'Machine Learning' (hierarchical - ML includes data mining)\n"
-        "✅ JD: 'Problem-Solving' → CV: 'Problem Solving' (exact, ignore punctuation)\n"
-        "✅ JD: 'Analytical Thinking' → CV: 'Data Analysis' (synonym)\n"
         "✅ JD: 'Database Management' → CV: 'SQL' (hierarchical - SQL demonstrates DB management)\n"
-        "✅ JD: 'Business Intelligence' → CV: 'Data Science' (domain context - related fields)\n"
-        "✅ JD: 'Report Creation' → CV: 'Data visualization' (synonym - both involve creating reports)\n"
-        "✅ JD: 'Organised' → CV: 'Strong ability to manage and prioritise multiple tasks' (semantic match)\n"
-        "✅ JD: 'Project Management' → CV: 'Deliver multiple projects' (semantic match)\n"
-        "✅ JD: 'Detail-oriented' → CV: 'Ensured 99% accuracy' (demonstrates attention to detail)\n"
-        "✅ JD: 'Stakeholder Management' → CV: 'Work effectively with stakeholders' (semantic match)\n"
-        "✅ JD: 'Data Extraction' → CV: 'SQL' (hierarchical - SQL enables data extraction)\n"
-        "✅ JD: 'Segmentation Strategies' → CV: 'Statistical Analysis' (enables segmentation)\n"
-        "❌ DON'T match: JD: 'Fundraising' → CV: 'Data Science' (unrelated despite same domain)\n"
+        "✅ JD: 'Report Creation' → CV: 'Data Visualization' (synonym - both involve creating reports)\n"
+        "✅ JD: 'Tableau' → CV: 'Power BI' (domain context - both are BI tools)\n"
+        "✅ JD: 'Relational Databases' → CV: 'SQL' (hierarchical - SQL works with relational databases)\n"
+        "✅ JD: 'Extracting Data' → CV: 'SQL' (hierarchical - SQL enables data extraction)\n"
+        "✅ JD: 'Querying' → CV: 'SQL' (hierarchical - SQL is used for querying)\n"
         "❌ DON'T match: JD: 'VBA' → CV: 'Python' (different programming languages)\n"
+        "❌ DON'T match: JD: 'Fundraising' → CV: 'Data Science' (unrelated domains)\n"
         "❌ DON'T match: JD: 'Direct Marketing' → CV: 'Machine Learning' (different domains)\n\n"
         "OUTPUT (JSON ONLY, no prose, no markdown):\n"
         "{\n"
@@ -769,6 +890,68 @@ def _sort_section(section: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _identify_exact_matches(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> Dict[str, List[Dict[str, str]]]:
+    """Identify exact matches between CV and JD skills before AI processing."""
+    exact_matches = {
+        "technical_skills": [],
+        "soft_skills": [],
+        "domain_keywords": []
+    }
+    
+    for category in ["technical_skills", "soft_skills", "domain_keywords"]:
+        cv_list = [skill.lower().strip() for skill in cv_skills.get(category, [])]
+        jd_list = jd_skills.get(category, [])
+        
+        for jd_skill in jd_list:
+            jd_normalized = jd_skill.lower().strip()
+            if jd_normalized in cv_list:
+                # Find the original CV skill (preserve case)
+                cv_skill = next((skill for skill in cv_skills.get(category, []) 
+                               if skill.lower().strip() == jd_normalized), jd_skill)
+                
+                exact_matches[category].append({
+                    "jd_skill": jd_skill,
+                    "cv_skill": cv_skill,
+                    "match_type": "exact",
+                    "confidence": 1.0,
+                    "reasoning": "Exact match - identical skills"
+                })
+    
+    return exact_matches
+
+
+def _ensure_exact_matches_included(
+    result: Dict[str, Any], 
+    exact_matches: Dict[str, List[Dict[str, str]]], 
+    cv_skills: Dict[str, list], 
+    jd_skills: Dict[str, list]
+) -> Dict[str, Any]:
+    """Ensure that exact matches are included in the final result."""
+    
+    for category in ["technical_skills", "soft_skills", "domain_keywords"]:
+        if category not in result:
+            result[category] = {"matched": [], "missing": []}
+        
+        # Get current matched JD skills
+        current_matched = {match.get("jd_skill", "").lower() for match in result[category].get("matched", [])}
+        
+        # Add exact matches that aren't already included
+        for exact_match in exact_matches.get(category, []):
+            jd_skill = exact_match["jd_skill"]
+            if jd_skill.lower() not in current_matched:
+                result[category]["matched"].append(exact_match)
+                logger.info(f"✅ [EXACT_MATCH] Added exact match: {jd_skill} → {exact_match['cv_skill']}")
+        
+        # Remove exact matches from missing list
+        exact_jd_skills = {match["jd_skill"].lower() for match in exact_matches.get(category, [])}
+        result[category]["missing"] = [
+            miss for miss in result[category].get("missing", [])
+            if miss.get("jd_skill", "").lower() not in exact_jd_skills
+        ]
+    
+    return result
+
+
 async def execute_skills_comparison_with_json_output(
     ai_service,
     cv_skills: Dict[str, list],
@@ -780,6 +963,10 @@ async def execute_skills_comparison_with_json_output(
 
     Does not alter the legacy text path used by the frontend.
     """
+    # Pre-process to identify obvious exact matches
+    exact_matches = _identify_exact_matches(cv_skills, jd_skills)
+    logger.info(f"🔍 [EXACT_MATCHES] Found {len(exact_matches)} exact matches: {exact_matches}")
+    
     prompt = build_json_prompt(cv_skills, jd_skills)
     response = await ai_service.generate_response(
         prompt=prompt,
@@ -795,6 +982,10 @@ async def execute_skills_comparison_with_json_output(
         "soft_skills": _sort_section(parsed.get("soft_skills", {})),
         "domain_keywords": _sort_section(parsed.get("domain_keywords", {})),
     }
+    
+    # Post-process to ensure exact matches are included
+    result = _ensure_exact_matches_included(result, exact_matches, cv_skills, jd_skills)
+    
     return result
 
 
@@ -889,6 +1080,22 @@ def _format_json_to_text(json_result: Dict[str, Any], cv_skills: Dict[str, list]
     # Calculate match rate as matched / total_requirements
     match_rate = round((total_matched / max(jd_total, 1)) * 100)
     
+    # Calculate match rates for each category correctly
+    tech_matched = len(json_result.get('technical_skills', {}).get('matched', []))
+    tech_missing = len(json_result.get('technical_skills', {}).get('missing', []))
+    tech_total = tech_matched + tech_missing
+    tech_rate = round((tech_matched / max(tech_total, 1)) * 100) if tech_total > 0 else 0
+    
+    soft_matched = len(json_result.get('soft_skills', {}).get('matched', []))
+    soft_missing = len(json_result.get('soft_skills', {}).get('missing', []))
+    soft_total = soft_matched + soft_missing
+    soft_rate = round((soft_matched / max(soft_total, 1)) * 100) if soft_total > 0 else 0
+    
+    domain_matched = len(json_result.get('domain_keywords', {}).get('matched', []))
+    domain_missing = len(json_result.get('domain_keywords', {}).get('missing', []))
+    domain_total = domain_matched + domain_missing
+    domain_rate = round((domain_matched / max(domain_total, 1)) * 100) if domain_total > 0 else 0
+
     # Build formatted output using RAW counts to match initial extraction
     output = f"""🎯 OVERALL SUMMARY
 ----------------------------------------
@@ -900,9 +1107,9 @@ Match Rate: {match_rate}%
 📊 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Category              CV Total  JD Total   Matched   Missing  Match Rate (%)
-Technical Skills            {cv_raw_counts['technical_skills']:2d}         {jd_raw_counts['technical_skills']:2d}         {len(json_result.get('technical_skills', {}).get('matched', [])):2d}         {len(json_result.get('technical_skills', {}).get('missing', [])):2d}           {round((len(json_result.get('technical_skills', {}).get('matched', [])) / max(len(json_result.get('technical_skills', {}).get('matched', [])) + len(json_result.get('technical_skills', {}).get('missing', [])), 1)) * 100):2d}
-Soft Skills                  {cv_raw_counts['soft_skills']:2d}         {jd_raw_counts['soft_skills']:2d}         {len(json_result.get('soft_skills', {}).get('matched', [])):2d}         {len(json_result.get('soft_skills', {}).get('missing', [])):2d}           {round((len(json_result.get('soft_skills', {}).get('matched', [])) / max(len(json_result.get('soft_skills', {}).get('matched', [])) + len(json_result.get('soft_skills', {}).get('missing', [])), 1)) * 100):2d}
-Domain Keywords             {cv_raw_counts['domain_keywords']:2d}         {jd_raw_counts['domain_keywords']:2d}         {len(json_result.get('domain_keywords', {}).get('matched', [])):2d}         {len(json_result.get('domain_keywords', {}).get('missing', [])):2d}           {round((len(json_result.get('domain_keywords', {}).get('matched', [])) / max(len(json_result.get('domain_keywords', {}).get('matched', [])) + len(json_result.get('domain_keywords', {}).get('missing', [])), 1)) * 100):2d}
+Technical Skills            {cv_raw_counts['technical_skills']:2d}         {jd_raw_counts['technical_skills']:2d}         {tech_matched:2d}         {tech_missing:2d}           {tech_rate:2d}
+Soft Skills                  {cv_raw_counts['soft_skills']:2d}         {jd_raw_counts['soft_skills']:2d}         {soft_matched:2d}         {soft_missing:2d}           {soft_rate:2d}
+Domain Keywords             {cv_raw_counts['domain_keywords']:2d}         {jd_raw_counts['domain_keywords']:2d}         {domain_matched:2d}         {domain_missing:2d}           {domain_rate:2d}
 
 🧠 DETAILED AI ANALYSIS
 --------------------------------------------------------------------------------"""
