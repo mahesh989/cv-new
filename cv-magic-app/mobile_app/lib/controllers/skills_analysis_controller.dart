@@ -539,11 +539,10 @@ class SkillsAnalysisController extends ChangeNotifier {
         }
 
         // Update result with component analysis first (component analysis can show immediately)
-        // Also include AI recommendation if available (don't lose it in this update)
+        // DO NOT include AI recommendation yet - it will be added when it's time to display
         _result = _result!.copyWith(
           componentAnalysis: componentAnalysis,
-          aiRecommendation:
-              aiRecommendation, // Keep AI recommendation in the result
+          // aiRecommendation: aiRecommendation, // ❌ REMOVED - Don't add until display time
         );
         notifyListeners();
 
@@ -563,8 +562,7 @@ class SkillsAnalysisController extends ChangeNotifier {
               _showATSResults = true;
               _result = _result!.copyWith(
                 atsResult: _fullResult!.atsResult,
-                aiRecommendation:
-                    _fullResult!.aiRecommendation, // Keep AI recommendation
+                // aiRecommendation: _fullResult!.aiRecommendation, // ❌ REMOVED - Don't add until display time
               );
               notifyListeners();
 
