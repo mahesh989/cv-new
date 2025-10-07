@@ -1,0 +1,18 @@
+{
+  "jd_usage": {
+    "53fc0ddeeb56d7c9de3e400c0b88673a": {
+      "jd_url": "https://example.com/job/testcorp-software-engineer",
+      "jd_text_preview": "",
+      "company": "TestCorp",
+      "job_title": "Software Engineer",
+      "first_used": "2025-10-07T11:22:26.586561",
+      "last_used": "2025-10-07T11:22:26.586561",
+      "usage_count": 1,
+      "companies_used_with": [
+        "TestCorp"
+      ]
+    }
+  },
+  "last_updated": "2025-10-07T11:22:26.586584",
+  "version": "1.0"
+}

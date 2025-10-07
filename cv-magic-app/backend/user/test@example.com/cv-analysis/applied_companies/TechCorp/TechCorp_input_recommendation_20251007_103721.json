@@ -1,0 +1,365 @@
+{
+  "cv_comprehensive_analysis": "CV analysis not available",
+  "jd_comprehensive_analysis": "JD analysis not available",
+  "analyze_match_entries": [],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-10-07T10:33:30.071942",
+      "content": "\nCV-JD Skills Comparison\n\nCategory    CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills    8    6    5    1    83.3\nSoft Skills    3    2    2    0    100.0\nDomain Keywords    5    4    3    1    75.0\n\n\u2705 MATCHED SKILLS:\n\u2022 SQL, Python, Power BI, Data Analysis, Business Intelligence, Machine Learning, Tableau, Excel\n\n\u274c MISSING FROM CV (1 items):\n\u2022 Advanced Statistics\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-10-07T10:37:21.577",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "SQL",
+              "cv_evidence": "Analyzed construction project data using SQL and Python, identifying cost optimization opportunities worth $2M annually",
+              "jd_application": "Proficiency in SQL for data analysis",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "1.5",
+              "academic_experience_years": "3",
+              "business_impact_evidence": "Identified cost optimization opportunities worth $2M annually",
+              "relevance_score": "85",
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "Advanced",
+              "depth_indicators": [
+                "Cost optimization",
+                "Cross-functional team collaboration"
+              ],
+              "business_application_bonus": "20",
+              "academic_penalty": "0",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Python",
+              "cv_evidence": "Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 40%",
+              "jd_application": "Proficiency in Python for data analysis and predictive modeling",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "1.5",
+              "academic_experience_years": "3",
+              "business_impact_evidence": "Improved data pipeline efficiency by 40%",
+              "relevance_score": "88",
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "Advanced",
+              "depth_indicators": [
+                "Data pipeline efficiency",
+                "Predictive analytics"
+              ],
+              "business_application_bonus": "20",
+              "academic_penalty": "0",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Power BI",
+              "cv_evidence": "Created interactive Power BI dashboards for executive reporting, reducing report generation time from 4 hours to 30 minutes",
+              "jd_application": "Experience with business intelligence tools and dashboard creation",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "1.5",
+              "academic_experience_years": "0",
+              "business_impact_evidence": "Reduced report generation time significantly",
+              "relevance_score": "90",
+              "skill_level_corporate": "Advanced",
+              "skill_level_academic": "N/A",
+              "depth_indicators": [
+                "Executive reporting",
+                "Efficiency optimization"
+              ],
+              "business_application_bonus": "20",
+              "academic_penalty": "0",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Machine Learning",
+              "cv_evidence": "Developed machine learning models for predictive analytics, achieving 85% accuracy in forecasting business metrics",
+              "jd_application": "Experience with machine learning and predictive analytics",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "0.5",
+              "academic_experience_years": "3",
+              "business_impact_evidence": "Achieved 85% accuracy in forecasting business metrics",
+              "relevance_score": "75",
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "Advanced",
+              "depth_indicators": [
+                "Predictive analytics",
+                "Business forecasting"
+              ],
+              "business_application_bonus": "20",
+              "academic_penalty": "0",
+              "synergy_score": "Medium",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Data Analysis",
+              "cv_evidence": "Analyzed construction project data using SQL and Python, identifying cost optimization opportunities worth $2M annually",
+              "jd_application": "Analyze large datasets to identify trends and insights",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "1.5",
+              "academic_experience_years": "3",
+              "business_impact_evidence": "Identified cost optimization opportunities worth $2M annually",
+              "relevance_score": "85",
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "Advanced",
+              "depth_indicators": [
+                "Cost optimization",
+                "Trend identification"
+              ],
+              "business_application_bonus": "20",
+              "academic_penalty": "0",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            }
+          ],
+          "overall_skills_score": "85",
+          "corporate_skills_strength": "Strong corporate application with measurable business impact",
+          "academic_skills_discount": "Minimal due to strong corporate evidence",
+          "business_readiness_score": "85",
+          "skill_development_timeline": "6-12 months to reach advanced corporate proficiency",
+          "strength_areas": [
+            "SQL",
+            "Python",
+            "Power BI",
+            "Data Analysis"
+          ],
+          "critical_gaps": [
+            "None identified"
+          ],
+          "training_investment_needed": [
+            "Machine Learning for deeper corporate application"
+          ],
+          "immediate_value_skills": [
+            "SQL",
+            "Python",
+            "Power BI",
+            "Data Analysis"
+          ],
+          "risky_transition_skills": [
+            "None identified"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "2.0",
+            "cv_corporate_years": "2.0",
+            "cv_academic_years": "0.0",
+            "cv_role_level": "Mid-level",
+            "cv_progression": [
+              "Senior Data Analyst at The Bitrates (Jul 2024 \u2013 Present)",
+              "Data Analyst at iBuild Building Solutions (Jan 2023 \u2013 Jun 2024)",
+              "Bachelor of Information Technology, University of Technology Sydney (2020 - 2023)"
+            ],
+            "jd_required_years": "3+",
+            "jd_role_level": "Mid-level",
+            "alignment_score": "75",
+            "experience_gaps": [
+              "Less than 3 years of corporate experience"
+            ],
+            "experience_strengths": [
+              "Proficiency in SQL, Python, and Power BI",
+              "Experience with machine learning and predictive analytics",
+              "Strong analytical and problem-solving skills",
+              "Experience with business intelligence tools",
+              "Knowledge of data visualization and dashboard creation"
+            ],
+            "quantified_achievements": [
+              "Improved data pipeline efficiency by 40%",
+              "Reduced report generation time from 4 hours to 30 minutes",
+              "Achieved 85% accuracy in forecasting business metrics",
+              "Identified cost optimization opportunities worth $2M annually"
+            ],
+            "overqualification_risk": "LOW"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Analysis",
+            "cv_secondary_industries": [
+              "Construction"
+            ],
+            "cv_academic_background": "Information Technology",
+            "cv_corporate_exposure": "1.5 years",
+            "jd_target_industry": "Tech",
+            "jd_industry_specificity": "Moderate",
+            "direct_industry_match": "PARTIAL",
+            "industry_alignment_score": "65",
+            "corporate_background_bonus": "15",
+            "industry_penalty_factors": [],
+            "transferable_skills_score": "80",
+            "cultural_adaptation_difficulty": "MODERATE",
+            "regulatory_knowledge_gap": "None",
+            "client_stakeholder_fit": "GOOD",
+            "business_cycle_understanding": "MODERATE",
+            "success_probability": "MEDIUM",
+            "adaptation_timeline": "6-12 months",
+            "investment_level_required": "MEDIUM",
+            "industry_strengths": [
+              "SQL",
+              "Python",
+              "Power BI",
+              "Machine Learning"
+            ],
+            "critical_industry_gaps": [
+              "Limited direct tech industry experience"
+            ],
+            "hiring_risk_assessment": "MEDIUM RISK"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "1.5 years",
+            "cv_academic_years": "3 years",
+            "cv_total_weighted_years": "1.5 * 0.8 + 3 * 0.2 = 1.8 years",
+            "cv_responsibility_scope": "Data analysis, dashboard creation, predictive modeling",
+            "cv_leadership_indicators": "2",
+            "cv_decision_authority": "Limited to data analysis and reporting",
+            "cv_stakeholder_level": "Moderate, involves collaboration with cross-functional teams",
+            "cv_management_experience": "MISSING",
+            "jd_required_seniority": "3+ years experience in data analysis",
+            "jd_leadership_requirements": "MISSING",
+            "jd_decision_authority_needed": "Develop predictive models for business forecasting",
+            "jd_stakeholder_level": "Collaborate with stakeholders to understand business requirements",
+            "seniority_score": "45",
+            "corporate_seniority_match": "45",
+            "leadership_readiness_score": "10",
+            "decision_authority_match": "30",
+            "stakeholder_management_fit": "50",
+            "overqualification_risk": "LOW",
+            "seniority_strengths": [
+              "Proficiency in SQL, Python, Power BI",
+              "Experience with machine learning and predictive analytics"
+            ],
+            "seniority_gaps": [
+              "Lacks 3+ years of experience",
+              "No explicit management experience"
+            ],
+            "leadership_transition_risk": "LOW",
+            "readiness_assessment": "Candidate has foundational skills but lacks required years of experience and management exposure for the role."
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Advanced",
+            "cv_primary_domain": "Machine Learning & Data Science",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "Power BI",
+              "Machine Learning"
+            ],
+            "cv_problem_complexity": 8,
+            "cv_innovation_indicators": [
+              "Efficiency Improvement",
+              "Predictive Model Development"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "Power BI",
+              "Machine Learning"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 90,
+            "core_skills_match_percentage": 90,
+            "technical_stack_fit_percentage": 95,
+            "complexity_readiness_score": 95,
+            "learning_agility_score": 85,
+            "technical_strengths": [
+              "Advanced Analytics",
+              "ML Implementation",
+              "Data Pipeline Optimization"
+            ],
+            "technical_gaps": [
+              "Tableau Proficiency",
+              "Business Domain Context"
+            ],
+            "overqualification_risk": "Moderate"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 9,
+            "total_preferred_keywords": 2,
+            "matched_required_count": 7,
+            "matched_preferred_count": 2,
+            "missing_required": 2,
+            "missing_preferred": 0
+          },
+          "bonus_breakdown": {
+            "required_bonus": 3.0,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.4,
+            "preferred_penalty": -0.0,
+            "total_bonus": 1.9
+          },
+          "coverage_metrics": {
+            "required_coverage": 77.78,
+            "preferred_coverage": 100.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 85.0,
+        "experience_alignment": 75.0,
+        "industry_fit": 65.0,
+        "domain_overlap_percentage": 0.0,
+        "data_familiarity_score": 0.0,
+        "stakeholder_fit_score": 0.0,
+        "business_cycle_alignment": 0.0,
+        "role_seniority": 45.0,
+        "leadership_readiness_score": 10.0,
+        "technical_depth": 90.0,
+        "core_skills_match_percentage": 90.0,
+        "technical_stack_fit_percentage": 95.0,
+        "complexity_readiness_score": 95.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": 1.9,
+        "total_bonus": 1.9,
+        "required_bonus": 3.0,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.4,
+        "preferred_penalty": -0.0,
+        "required_coverage": 77.78,
+        "preferred_coverage": 100.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-10-07T10:37:21.584",
+      "final_ats_score": 66.51,
+      "category_status": "\u26a0\ufe0f Moderate fit",
+      "recommendation": "Consider if other factors are strong",
+      "breakdown": {
+        "category1": {
+          "score": 35.41,
+          "technical_skills_match_rate": 83.3,
+          "domain_keywords_match_rate": 75.0,
+          "soft_skills_match_rate": 100.0,
+          "missing_counts": {
+            "technical": 1,
+            "domain": 1,
+            "soft": 0
+          }
+        },
+        "category2": {
+          "score": 29.2,
+          "core_competency_avg": 68.75,
+          "experience_seniority_avg": 26.0,
+          "potential_ability_avg": 60.0,
+          "company_fit_avg": 16.25
+        },
+        "ats1_score": 64.61,
+        "bonus_points": 1.9
+      }
+    }
+  ]
+}

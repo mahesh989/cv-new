@@ -1,0 +1,23 @@
+
+Maheshwor Tiwari | 0414 032 507 | maheshtwari99@gmail.com | Hurstville, NSW, 2220
+
+TECHNICAL SKILLS
+• SQL, Power BI, Python, Excel, Data Analysis, Business Intelligence, Machine Learning, Tableau
+
+EXPERIENCE
+Senior Data Analyst         Jul 2024 – Present
+The Bitrates
+• Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 40%
+• Created interactive Power BI dashboards for executive reporting, reducing report generation time from 4 hours to 30 minutes
+• Developed machine learning models for predictive analytics, achieving 85% accuracy in forecasting business metrics
+
+Data Analyst         Jan 2023 – Jun 2024
+iBuild Building Solutions
+• Analyzed construction project data using SQL and Python, identifying cost optimization opportunities worth $2M annually
+• Built automated reporting systems using Power BI, serving 50+ stakeholders across multiple departments
+• Collaborated with cross-functional teams to implement data-driven decision making processes
+
+EDUCATION
+Bachelor of Information Technology
+University of Technology Sydney
+2020 - 2023

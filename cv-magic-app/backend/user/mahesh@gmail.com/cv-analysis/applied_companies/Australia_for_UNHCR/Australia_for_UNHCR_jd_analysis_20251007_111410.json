@@ -3,18 +3,21 @@
   "required_skills": {
     "technical": [
       "SQL",
-      "VBA",
-      "SQL data warehouse",
-      "Power BI"
+      "Power BI",
+      "Excel",
+      "VBA"
     ],
     "soft_skills": [
-      "communication",
       "project management",
-      "stakeholder management"
+      "stakeholder management",
+      "communication",
+      "customer service"
     ],
     "domain_knowledge": [
       "data warehouse",
-      "marketing campaigns"
+      "marketing campaigns",
+      "data models",
+      "data mining"
     ],
     "experience": []
   },
@@ -22,34 +25,36 @@
     "technical": [
       "Tableau"
     ],
-    "soft_skills": [
-      "customer service"
-    ],
+    "soft_skills": [],
     "domain_knowledge": [
-      "communication purposes",
-      "governing regulations"
+      "data issues",
+      "de-duplication",
+      "clean data"
     ],
     "experience": []
   },
   "required_keywords": [
     "SQL",
-    "VBA",
-    "SQL data warehouse",
     "Power BI",
-    "communication",
+    "Excel",
+    "VBA",
     "project management",
     "stakeholder management",
+    "communication",
+    "customer service",
     "data warehouse",
-    "marketing campaigns"
+    "marketing campaigns",
+    "data models",
+    "data mining"
   ],
   "preferred_keywords": [
     "Tableau",
-    "customer service",
-    "communication purposes",
-    "governing regulations"
+    "data issues",
+    "de-duplication",
+    "clean data"
   ],
-  "analysis_timestamp": "2025-10-06T18:27:38.887881",
-  "ai_model_used": "openai/gpt-3.5-turbo",
+  "analysis_timestamp": "2025-10-07T11:14:10.467611",
+  "ai_model_used": "openai/gpt-4o",
   "processing_status": "completed",
   "company_name": "Australia_for_UNHCR",
   "metadata": {

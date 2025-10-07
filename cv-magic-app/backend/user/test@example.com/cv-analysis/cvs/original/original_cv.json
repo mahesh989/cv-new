@@ -1,0 +1,48 @@
+{
+  "contact": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "location": "Hurstville, NSW, 2220"
+  },
+  "technical_skills": [
+    "SQL",
+    "Power BI",
+    "Python",
+    "Excel",
+    "Data Analysis",
+    "Business Intelligence",
+    "Machine Learning",
+    "Tableau"
+  ],
+  "experience": [
+    {
+      "title": "Senior Data Analyst",
+      "company": "The Bitrates",
+      "duration": "Jul 2024 \u2013 Present",
+      "bullets": [
+        "Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 40%",
+        "Created interactive Power BI dashboards for executive reporting, reducing report generation time from 4 hours to 30 minutes",
+        "Developed machine learning models for predictive analytics, achieving 85% accuracy in forecasting business metrics"
+      ]
+    },
+    {
+      "title": "Data Analyst",
+      "company": "iBuild Building Solutions",
+      "duration": "Jan 2023 \u2013 Jun 2024",
+      "bullets": [
+        "Analyzed construction project data using SQL and Python, identifying cost optimization opportunities worth $2M annually",
+        "Built automated reporting systems using Power BI, serving 50+ stakeholders across multiple departments",
+        "Collaborated with cross-functional teams to implement data-driven decision making processes"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Information Technology",
+      "institution": "University of Technology Sydney",
+      "duration": "2020 - 2023"
+    }
+  ],
+  "created_at": "2025-10-07T10:34:46.851920"
+}

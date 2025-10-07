@@ -1,0 +1,52 @@
+{
+  "experience_years": null,
+  "required_skills": {
+    "technical": [
+      "Power BI",
+      "SQL",
+      "Excel"
+    ],
+    "soft_skills": [
+      "analytical thinking",
+      "problem-solving",
+      "communication",
+      "interpersonal skills"
+    ],
+    "domain_knowledge": [
+      "data cleaning",
+      "data transformation",
+      "data warehousing"
+    ],
+    "experience": []
+  },
+  "preferred_skills": {
+    "technical": [
+      "MSSQL"
+    ],
+    "soft_skills": [],
+    "domain_knowledge": [],
+    "experience": []
+  },
+  "required_keywords": [
+    "Power BI",
+    "SQL",
+    "Excel",
+    "analytical thinking",
+    "problem-solving",
+    "communication",
+    "interpersonal skills",
+    "data cleaning",
+    "data transformation",
+    "data warehousing"
+  ],
+  "preferred_keywords": [
+    "MSSQL"
+  ],
+  "analysis_timestamp": "2025-10-07T10:49:56.946050",
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "company_name": "Foodbank",
+  "metadata": {
+    "jd_hash": "adf63a22cc6a030a25ec0792350fd7a7cfb1fd16b1edbe3a29dfce80d80797fb"
+  }
+}

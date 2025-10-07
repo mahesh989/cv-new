@@ -589,11 +589,18 @@ async def _run_pipeline(cname: str, token_data=None):
 async def analyze_skills(request: Request, current_user: UserData = Depends(get_current_user)):
     """Extract skills from CV and JD using AI with caching"""
     try:
+        # Comprehensive logging for debugging
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Starting skills analysis request")
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Current user: {current_user.email if current_user else 'None'}")
+        logger.info(f"🔍 [SKILLS_ANALYSIS] User ID: {current_user.id if current_user else 'None'}")
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Request headers: {dict(request.headers)}")
+        
         # Ensure required directories exist before processing
         from ..utils.directory_utils import ensure_cv_analysis_directories
         ensure_cv_analysis_directories()
         
         data = await request.json()
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Request data: {data}")
         
         # Extract parameters
         cv_filename = data.get("cv_filename")
@@ -705,7 +712,10 @@ async def analyze_skills(request: Request, current_user: UserData = Depends(get_
         })
         
     except Exception as e:
-        logger.error(f"❌ Skill extraction endpoint error: {str(e)}")
+        logger.error(f"❌ [SKILLS_ANALYSIS] Skill extraction endpoint error: {str(e)}")
+        logger.error(f"❌ [SKILLS_ANALYSIS] Exception type: {type(e).__name__}")
+        import traceback
+        logger.error(f"❌ [SKILLS_ANALYSIS] Full traceback: {traceback.format_exc()}")
         return JSONResponse(
             status_code=500,
             content={"error": f"Skill extraction failed: {str(e)}"}
@@ -719,17 +729,32 @@ async def context_aware_analysis(
 ):
     """Context-aware analysis that intelligently selects CV and caches JD data"""
     try:
+        # Comprehensive logging for debugging
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Starting context-aware analysis request")
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Request headers: {dict(request.headers)}")
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Current model: {current_model}")
+        
         # Verify authentication
         auth_header = request.headers.get("authorization")
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Auth header present: {bool(auth_header)}")
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Auth header starts with Bearer: {auth_header.startswith('Bearer ') if auth_header else False}")
+        
         if not auth_header or not auth_header.startswith("Bearer "):
+            logger.error(f"❌ [CONTEXT_ANALYSIS] Missing or invalid auth header")
             return JSONResponse(
                 status_code=401,
                 content={"detail": "Authentication required"}
             )
         
         token = auth_header.replace("Bearer ", "")
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Token extracted, length: {len(token)}")
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Calling verify_token...")
+        
         token_data = verify_token(token)
+        logger.info(f"🔍 [CONTEXT_ANALYSIS] Token verification result: {bool(token_data)}")
+        
         if not token_data:
+            logger.error(f"❌ [CONTEXT_ANALYSIS] Token verification failed")
             return JSONResponse(
                 status_code=401,
                 content={"detail": "Invalid token"}

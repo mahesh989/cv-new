@@ -642,7 +642,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     _skillsController.clearResults();
 
     // CLEAR JD inputs as requested
-    jdController.clear();  // ✅ Clear the JD text
+    jdController.clear(); // ✅ Clear the JD text
     jdUrlController.clear(); // ✅ Clear the JD URL
 
     debugPrint(

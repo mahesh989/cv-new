@@ -25,15 +25,23 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     Raises:
         HTTPException: If token is invalid or user not found
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     from app.config import settings
     
     try:
-        # Debug logging
+        # Comprehensive debug logging
         token_preview = credentials.credentials[:20] + "..." if len(credentials.credentials) > 20 else credentials.credentials
-        print(f"Auth attempt with token: {token_preview}")
+        logger.info(f"🔒 [AUTH] Authentication attempt with token: {token_preview}")
+        logger.info(f"🔒 [AUTH] Token length: {len(credentials.credentials)}")
+        logger.info(f"🔒 [AUTH] Token scheme: {credentials.scheme}")
         
         # Verify the token
+        logger.info(f"🔒 [AUTH] Calling verify_token...")
         token_data = verify_token(credentials.credentials)
+        logger.info(f"🔒 [AUTH] Token verification successful")
+        logger.info(f"🔒 [AUTH] Token data: user_id={token_data.user_id}, email={token_data.email}")
         
         # Build user object from token
         user = UserData(
@@ -44,27 +52,41 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             is_active=True
         )
         
-        print(f"✅ Auth successful for user: {user.email}")
+        logger.info(f"✅ [AUTH] Authentication successful for user: {user.email} (ID: {user.id})")
         return user
         
     except HTTPException as e:
-        print(f"❌ Auth failed: {e.detail}")
+        logger.error(f"❌ [AUTH] Authentication failed: {e.detail}")
+        logger.error(f"❌ [AUTH] HTTPException status: {e.status_code}")
+        logger.error(f"❌ [AUTH] HTTPException headers: {e.headers}")
         
         # In development mode, provide more helpful error messages
         if settings.DEVELOPMENT_MODE:
             if "expired" in str(e.detail).lower():
+                logger.error(f"❌ [AUTH] Token expired - user needs to log in again")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token expired - please log in again",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
             else:
+                logger.error(f"❌ [AUTH] Invalid token - user needs to log in again")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid authentication token - please log in again",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
         raise
+    except Exception as e:
+        logger.error(f"❌ [AUTH] Unexpected authentication error: {e}")
+        logger.error(f"❌ [AUTH] Exception type: {type(e).__name__}")
+        import traceback
+        logger.error(f"❌ [AUTH] Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed - please log in again",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))) -> Optional[UserData]:

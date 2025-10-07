@@ -1,0 +1,39 @@
+{
+  "company_name": "Foodbank",
+  "cv_analysis_timestamp": "2025-10-07T10:50:00.940786",
+  "matched_required_keywords": [
+    "Power BI",
+    "SQL",
+    "Excel",
+    "communication",
+    "data cleaning"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "analytical thinking",
+    "problem-solving",
+    "interpersonal skills",
+    "data transformation",
+    "data warehousing"
+  ],
+  "missed_preferred_keywords": [
+    "MSSQL"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 1,
+    "matched_required_count": 5,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "Power BI": "Mentioned in technical skills and research intern section",
+    "SQL": "Proficient in SQL for querying and managing databases",
+    "Excel": "Leveraged for data-driven solutions and reporting",
+    "communication": "Demonstrated through presenting research findings and leading tutorials",
+    "data cleaning": "Implemented Python scripts for data cleaning in experience section"
+  },
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "cv_file_path": "user/mahesh@gmail.com/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}

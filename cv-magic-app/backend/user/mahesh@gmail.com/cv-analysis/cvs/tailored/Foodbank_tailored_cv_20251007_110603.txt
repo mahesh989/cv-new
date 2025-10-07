@@ -1,0 +1,11 @@
+Maheshwor Tiwari  | maheshtwari99@gmail.com  | Sydney, NSW, Australia
+
+TECHNICAL SKILLS
+• Python, SQL, Power BI, Analytical
+
+EXPERIENCE
+Data Analyst         Jul 2024 – Present
+The Bitrates, The Bitrates, Sydney, New South Wales, Australia
+
+• Designed and implemented 5 Python scripts for data cleaning and preprocessing, improving data pipeline efficiency by 30% and processing 50K records weekly, enhancing data-driven decision-making.
+• Collaborated with cross-functional teams to deliver analytical insights, supporting evidence-based decision-making and improving stakeholder engagement by 20%.

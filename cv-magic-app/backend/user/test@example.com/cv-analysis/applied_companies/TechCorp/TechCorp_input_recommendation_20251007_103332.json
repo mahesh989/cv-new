@@ -1,0 +1,13 @@
+{
+  "cv_comprehensive_analysis": "CV analysis not available",
+  "jd_comprehensive_analysis": "JD analysis not available",
+  "analyze_match_entries": [],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-10-07T10:33:30.071942",
+      "content": "\nCV-JD Skills Comparison\n\nCategory    CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills    8    6    5    1    83.3\nSoft Skills    3    2    2    0    100.0\nDomain Keywords    5    4    3    1    75.0\n\n\u2705 MATCHED SKILLS:\n\u2022 SQL, Python, Power BI, Data Analysis, Business Intelligence, Machine Learning, Tableau, Excel\n\n\u274c MISSING FROM CV (1 items):\n\u2022 Advanced Statistics\n"
+    }
+  ],
+  "component_analysis_entries": [],
+  "ats_calculation_entries": []
+}
