@@ -1,0 +1,67 @@
+================================================================================
+CV CONTENT FOR ANALYSIS
+================================================================================
+
+
+EXPERIENCE
+Data Analyst
+The Bitrates, Sydney, New South Wales, Australia
+Jul 2024 – Present
+
+Data Analyst
+iBuild Building Solutions, Victoria, Australia
+Mar 2024 – Jun 2024
+
+Software engineer and Analyst
+Property Console, Sydney, Australia
+Jun 2023 - Nov 2023
+
+Research Assistant
+CY Cergy Paris University, Cergy-Pontoise, France
+Oct 2018 - Sep 2022
+
+Lecturer and Course Facilitator
+CY Cergy Paris University, Cergy-Pontoise, France
+Sep 2019 - Jun 2022
+
+Research Intern
+CY Cergy Paris University, Cergy-Pontoise, France
+Feb 2018 - Jun 2018
+
+
+EDUCATION
+Master of Data Science
+Charles Darwin University, Sydney, Australia
+Mar 2023 - Nov 2024
+
+PhD in Physics
+CY Cergy Paris University, Cergy, France
+Oct 2018 - Sep 2022
+
+Master of Theoretical Physics
+CY Cergy Paris University, Cergy, France
+Sep 2016 - Jun 2018
+
+
+SKILLS
+
+technical_skills:
+• Specialized in Python programming, including data analysis, automation, and machine learning using libraries such as Pandas, NumPy, and scikit-learn.
+• Proficient in SQL for querying, modeling, and managing complex relational databases like PostgreSQL and MySQL.
+• Skilled in creating interactive dashboards and visualizations using Tableau, Power BI, and Matplotlib.
+• Experienced with GitHub for version control, Docker for containerization, and Snowflake for cloud data warehousing.
+• Adept at leveraging tools like Visual Studio Code, Google Analytics, and Excel for data-driven solutions and reporting.
+
+key_skills:
+
+soft_skills:
+
+domain_expertise:
+
+SAVED_AT
+2025-10-07T14:22:43.379669
+
+================================================================================
+Processed at: 2025-10-07T14:22:43.382786
+Source: maheshwor_tiwari.pdf
+================================================================================

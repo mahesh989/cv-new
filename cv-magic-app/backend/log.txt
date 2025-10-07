@@ -10668,3 +10668,590 @@ WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relki
 2025-10-07 12:03:40,567 - app.main - INFO - 🎯 API Server started successfully on 0.0.0.0:8000
 2025-10-07 12:03:40,567 - app.main - INFO - ✅ User directories will be created on-demand during login
 2025-10-07 12:03:59,569 - app.main - INFO - ⏹️ Shutting down CV Management API...
+2025-10-07 14:30:45,674 - app.main - INFO - 🚀 Starting CV Management API...
+2025-10-07 14:30:45,960 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2025-10-07 14:30:45,960 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:30:46,001 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2025-10-07 14:30:46,002 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:30:46,039 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2025-10-07 14:30:46,041 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:30:46,077 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:30:46,078 - sqlalchemy.engine.Engine - INFO - SELECT 1
+2025-10-07 14:30:46,079 - sqlalchemy.engine.Engine - INFO - [generated in 0.00154s] {}
+2025-10-07 14:30:46,115 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-10-07 14:30:46,135 - app.database - INFO - Database connection successful
+2025-10-07 14:30:46,135 - app.main - INFO - ✅ Database connection successful
+2025-10-07 14:30:46,165 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:30:46,173 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,174 - sqlalchemy.engine.Engine - INFO - [generated in 0.00068s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,209 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,209 - sqlalchemy.engine.Engine - INFO - [cached since 0.03639s ago] {'table_name': 'user_sessions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,232 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,232 - sqlalchemy.engine.Engine - INFO - [cached since 0.05911s ago] {'table_name': 'cvs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,255 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,255 - sqlalchemy.engine.Engine - INFO - [cached since 0.08245s ago] {'table_name': 'job_applications', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,279 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,280 - sqlalchemy.engine.Engine - INFO - [cached since 0.1071s ago] {'table_name': 'cv_analyses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,302 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,303 - sqlalchemy.engine.Engine - INFO - [cached since 0.1301s ago] {'table_name': 'job_comparisons', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,325 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,325 - sqlalchemy.engine.Engine - INFO - [cached since 0.152s ago] {'table_name': 'companies', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,347 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,348 - sqlalchemy.engine.Engine - INFO - [cached since 0.1747s ago] {'table_name': 'company_files', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,369 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,370 - sqlalchemy.engine.Engine - INFO - [cached since 0.1968s ago] {'table_name': 'analysis_runs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,390 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,391 - sqlalchemy.engine.Engine - INFO - [cached since 0.218s ago] {'table_name': 'cv_versions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,412 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:30:46,413 - sqlalchemy.engine.Engine - INFO - [cached since 0.24s ago] {'table_name': 'user_api_keys', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:30:46,437 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-10-07 14:30:46,454 - app.database - INFO - Database tables created successfully
+2025-10-07 14:30:46,454 - app.main - INFO - ✅ Database tables ready
+2025-10-07 14:30:46,455 - app.main - INFO - 🎯 API Server started successfully on 0.0.0.0:8000
+2025-10-07 14:30:46,455 - app.main - INFO - ✅ User directories will be created on-demand during login
+2025-10-07 14:30:56,975 - app.main - INFO - ⏹️ Shutting down CV Management API...
+2025-10-07 14:31:02,024 - app.main - INFO - 🚀 Starting CV Management API...
+2025-10-07 14:31:02,272 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2025-10-07 14:31:02,272 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:31:02,307 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2025-10-07 14:31:02,308 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:31:02,344 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2025-10-07 14:31:02,344 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:31:02,384 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:31:02,385 - sqlalchemy.engine.Engine - INFO - SELECT 1
+2025-10-07 14:31:02,385 - sqlalchemy.engine.Engine - INFO - [generated in 0.00105s] {}
+2025-10-07 14:31:02,417 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-10-07 14:31:02,434 - app.database - INFO - Database connection successful
+2025-10-07 14:31:02,434 - app.main - INFO - ✅ Database connection successful
+2025-10-07 14:31:02,450 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:31:02,457 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,457 - sqlalchemy.engine.Engine - INFO - [generated in 0.00055s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,499 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,499 - sqlalchemy.engine.Engine - INFO - [cached since 0.04231s ago] {'table_name': 'user_sessions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,520 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,521 - sqlalchemy.engine.Engine - INFO - [cached since 0.06413s ago] {'table_name': 'cvs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,543 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,544 - sqlalchemy.engine.Engine - INFO - [cached since 0.08713s ago] {'table_name': 'job_applications', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,567 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,567 - sqlalchemy.engine.Engine - INFO - [cached since 0.1107s ago] {'table_name': 'cv_analyses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,590 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,590 - sqlalchemy.engine.Engine - INFO - [cached since 0.1336s ago] {'table_name': 'job_comparisons', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,613 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,613 - sqlalchemy.engine.Engine - INFO - [cached since 0.1567s ago] {'table_name': 'companies', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,636 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,636 - sqlalchemy.engine.Engine - INFO - [cached since 0.1794s ago] {'table_name': 'company_files', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,659 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,660 - sqlalchemy.engine.Engine - INFO - [cached since 0.2029s ago] {'table_name': 'analysis_runs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,681 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,681 - sqlalchemy.engine.Engine - INFO - [cached since 0.2247s ago] {'table_name': 'cv_versions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,702 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:31:02,703 - sqlalchemy.engine.Engine - INFO - [cached since 0.2465s ago] {'table_name': 'user_api_keys', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:31:02,726 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-10-07 14:31:02,747 - app.database - INFO - Database tables created successfully
+2025-10-07 14:31:02,747 - app.main - INFO - ✅ Database tables ready
+2025-10-07 14:31:02,748 - app.main - INFO - 🎯 API Server started successfully on 0.0.0.0:8000
+2025-10-07 14:31:02,748 - app.main - INFO - ✅ User directories will be created on-demand during login
+2025-10-07 14:33:10,933 - app.main - INFO - ⏹️ Shutting down CV Management API...
+2025-10-07 14:33:17,674 - app.main - INFO - 🚀 Starting CV Management API...
+2025-10-07 14:33:17,968 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2025-10-07 14:33:17,968 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:33:18,002 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2025-10-07 14:33:18,003 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:33:18,035 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2025-10-07 14:33:18,036 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2025-10-07 14:33:18,077 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:33:18,078 - sqlalchemy.engine.Engine - INFO - SELECT 1
+2025-10-07 14:33:18,078 - sqlalchemy.engine.Engine - INFO - [generated in 0.00095s] {}
+2025-10-07 14:33:18,118 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-10-07 14:33:18,134 - app.database - INFO - Database connection successful
+2025-10-07 14:33:18,135 - app.main - INFO - ✅ Database connection successful
+2025-10-07 14:33:18,156 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:33:18,170 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,171 - sqlalchemy.engine.Engine - INFO - [generated in 0.00083s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,214 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,215 - sqlalchemy.engine.Engine - INFO - [cached since 0.04448s ago] {'table_name': 'user_sessions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,236 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,237 - sqlalchemy.engine.Engine - INFO - [cached since 0.06668s ago] {'table_name': 'cvs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,262 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,263 - sqlalchemy.engine.Engine - INFO - [cached since 0.09295s ago] {'table_name': 'job_applications', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,285 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,285 - sqlalchemy.engine.Engine - INFO - [cached since 0.1153s ago] {'table_name': 'cv_analyses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,305 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,310 - sqlalchemy.engine.Engine - INFO - [cached since 0.1398s ago] {'table_name': 'job_comparisons', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,332 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,332 - sqlalchemy.engine.Engine - INFO - [cached since 0.1621s ago] {'table_name': 'companies', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,359 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,360 - sqlalchemy.engine.Engine - INFO - [cached since 0.1894s ago] {'table_name': 'company_files', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,383 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,383 - sqlalchemy.engine.Engine - INFO - [cached since 0.2133s ago] {'table_name': 'analysis_runs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,402 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,403 - sqlalchemy.engine.Engine - INFO - [cached since 0.2324s ago] {'table_name': 'cv_versions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,429 - sqlalchemy.engine.Engine - INFO - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-10-07 14:33:18,430 - sqlalchemy.engine.Engine - INFO - [cached since 0.2596s ago] {'table_name': 'user_api_keys', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-10-07 14:33:18,456 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-10-07 14:33:18,478 - app.database - INFO - Database tables created successfully
+2025-10-07 14:33:18,479 - app.main - INFO - ✅ Database tables ready
+2025-10-07 14:33:18,480 - app.main - INFO - 🎯 API Server started successfully on 0.0.0.0:8000
+2025-10-07 14:33:18,480 - app.main - INFO - ✅ User directories will be created on-demand during login
+2025-10-07 14:33:50,014 - app.main - WARNING - 🚫 Auth failed (403) for GET /api/ai/status
+2025-10-07 14:34:02,976 - app.routes.auth - INFO - 🔵 [LOGIN] Starting login process
+2025-10-07 14:34:02,977 - app.routes.auth - INFO - 🔵 [LOGIN] Raw credentials: email='shankar@gmail.com' password='shankar'
+2025-10-07 14:34:02,977 - app.routes.auth - INFO - 🔵 [LOGIN] Email: 'shankar@gmail.com', Password length: 7
+2025-10-07 14:34:02,978 - app.routes.auth - INFO - 🔵 [LOGIN] Attempting authentication
+2025-10-07 14:34:02,979 - app.core.auth - INFO - 🔵 [AUTH] Starting authentication for email: 'shankar@gmail.com'
+2025-10-07 14:34:02,980 - app.core.auth - INFO - 🔵 [AUTH] Normalized inputs - email: 'shankar@gmail.com', password length: 7
+2025-10-07 14:34:02,980 - app.core.auth - INFO - 🔵 [AUTH] Using provided database session
+2025-10-07 14:34:02,980 - app.core.auth - INFO - 🔵 [AUTH] Querying database for user: 'shankar@gmail.com'
+2025-10-07 14:34:03,130 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:34:03,144 - sqlalchemy.engine.Engine - INFO - SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.full_name AS users_full_name, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at, users.last_login AS users_last_login 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2025-10-07 14:34:03,145 - sqlalchemy.engine.Engine - INFO - [generated in 0.00112s] {'email_1': 'shankar@gmail.com', 'param_1': 1}
+2025-10-07 14:34:03,191 - app.core.auth - INFO - 🔵 [AUTH] User found: shankar@gmail.com (ID: 0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed, Active: True)
+2025-10-07 14:34:03,192 - app.core.auth - INFO - 🔵 [AUTH] Verifying password
+2025-10-07 14:34:03,627 - app.core.auth - INFO - 🔵 [AUTH] Password verification successful for user: 'shankar@gmail.com'
+2025-10-07 14:34:03,628 - app.core.auth - INFO - ✅ [AUTH] Authentication successful
+2025-10-07 14:34:03,628 - app.routes.auth - INFO - 🔵 [LOGIN] Authentication successful for user: shankar@gmail.com (ID: 0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed)
+2025-10-07 14:34:03,628 - app.routes.auth - INFO - 🔵 [LOGIN] Ensuring user directories exist for: shankar@gmail.com
+2025-10-07 14:34:03,629 - app.utils.user_path_utils - INFO - ✅ Created user base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:03,630 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:34:03,630 - app.routes.auth - INFO - 🔵 [LOGIN] User directories verified/created successfully
+2025-10-07 14:34:03,630 - app.routes.auth - INFO - 🔵 [LOGIN] Creating JWT tokens
+2025-10-07 14:34:03,633 - app.routes.auth - INFO - 🔵 [LOGIN] Tokens created successfully
+2025-10-07 14:34:03,633 - app.routes.auth - INFO - ✅ [LOGIN] Login successful for user: shankar@gmail.com (ID: 0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed)
+2025-10-07 14:34:03,637 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-10-07 14:34:04,701 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:04,729 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:04,730 - app.routes.cv_simple - INFO - Listed 0 CV files
+2025-10-07 14:34:04,733 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:04,734 - app.services.saved_jobs_service - INFO - ✨ Created new jobs file at user/shankar@gmail.com/cv-analysis/saved_jobs/saved_jobs.json
+2025-10-07 14:34:19,442 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:19,445 - app.routes.cv_simple - INFO - Listed 0 CV files
+2025-10-07 14:34:19,683 - app.routes.cv_simple - INFO - Uploading maheshwor_tiwari.pdf with structured processing for user: shankar@gmail.com
+2025-10-07 14:34:19,684 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:19,684 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:19,685 - app.services.enhanced_cv_upload_service - INFO - CV file saved: maheshwor_tiwari.pdf (130169 bytes)
+2025-10-07 14:34:20,020 - app.services.enhanced_cv_upload_service - INFO - Text extracted successfully: 4864 characters
+2025-10-07 14:34:20,021 - app.ai.ai_config - INFO - Auto-selected provider: openai with model: gpt-4o
+2025-10-07 14:34:20,022 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-4o
+2025-10-07 14:34:31,532 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:34:31,575 - app.services.structured_cv_parser - ERROR - Failed to parse LLM response as JSON: Expecting value: line 1 column 1 (char 0)
+2025-10-07 14:34:31,579 - app.services.enhanced_cv_upload_service - INFO - CV parsed from raw text content
+2025-10-07 14:34:31,583 - app.services.structured_cv_parser - INFO - Successfully saved structured CV to user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:34:31,583 - app.services.enhanced_cv_upload_service - INFO - Structured CV saved as original_cv.json: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json (replaced existing)
+2025-10-07 14:34:31,583 - app.services.enhanced_cv_upload_service - INFO - CV processed successfully: maheshwor_tiwari.pdf
+2025-10-07 14:34:31,585 - app.routes.cv_simple - INFO - ✅ maheshwor_tiwari.pdf uploaded and processed into structured format for user: shankar@gmail.com
+2025-10-07 14:34:31,602 - app.utils.directory_utils - ERROR - ❌ Failed to create cv-analysis directories: User email must be provided
+2025-10-07 14:34:31,618 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:31,625 - app.routes.cv_simple - INFO - Listed 1 CV files
+2025-10-07 14:34:31,743 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:31,743 - app.routes.cv_simple - INFO - Listed 1 CV files
+2025-10-07 14:34:40,768 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:41,035 - app.modules.cv.preview - INFO - CV content extracted: maheshwor_tiwari.pdf (4864 characters)
+2025-10-07 14:34:41,038 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:41,039 - app.routes.cv_organized - INFO - CV saved as text: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.txt
+2025-10-07 14:34:41,040 - app.routes.cv_organized - INFO - Processing maheshwor_tiwari.pdf for structured CV format (background)...
+2025-10-07 14:34:41,040 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:41,041 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:41,497 - app.services.enhanced_cv_upload_service - INFO - Text extracted successfully: 4864 characters
+2025-10-07 14:34:41,498 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-4o
+2025-10-07 14:34:53,764 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:34:53,770 - app.services.structured_cv_parser - ERROR - Failed to parse LLM response as JSON: Expecting value: line 1 column 1 (char 0)
+2025-10-07 14:34:53,772 - app.services.enhanced_cv_upload_service - INFO - CV parsed from raw text content
+2025-10-07 14:34:53,774 - app.services.structured_cv_parser - INFO - Successfully saved structured CV to user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:34:53,774 - app.services.enhanced_cv_upload_service - INFO - Structured CV saved as original_cv.json: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json (replaced existing)
+2025-10-07 14:34:53,775 - app.services.enhanced_cv_upload_service - INFO - Existing CV processed successfully: maheshwor_tiwari.pdf
+2025-10-07 14:34:53,775 - app.routes.cv_organized - INFO - ✅ Background: CV saved as structured JSON: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:34:53,789 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:54,378 - app.routes.cv_simple - INFO - CV content extracted: maheshwor_tiwari.pdf (4864 characters)
+2025-10-07 14:34:54,384 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:55,170 - httpx - INFO - HTTP Request: GET https://api.openai.com/v1/models "HTTP/1.1 200 OK"
+2025-10-07 14:34:55,199 - app.ai.ai_service - INFO - ✅ Initialized openai provider with model gpt-4o
+2025-10-07 14:34:55,890 - httpx - INFO - HTTP Request: GET https://api.openai.com/v1/models "HTTP/1.1 200 OK"
+2025-10-07 14:34:55,914 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-4o
+2025-10-07 14:34:57,217 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:34:57,221 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:34:57,225 - app.services.job_extraction_service - INFO - ✅ [JOB_EXTRACTION] Added job to shared jobs file: Data Analyst at Australia for UNHCR
+2025-10-07 14:35:08,162 - app.ai.ai_service - INFO - ✅ Switched to model gpt-3.5-turbo
+2025-10-07 14:35:08,163 - app.core.model_dependency - INFO - 🔄 Switched to model from header: gpt-3.5-turbo
+2025-10-07 14:35:08,165 - app.routes.skills_analysis - INFO - 🎯 Preliminary analysis request: CV=maheshwor_tiwari.pdf, JD_length=6014, CONFIG=None
+2025-10-07 14:35:08,165 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:08,995 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:08,999 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:09,000 - app.routes.skills_analysis - INFO - 🏢 Extracted company name: Australia_for_UNHCR
+2025-10-07 14:35:09,001 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:09,007 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:09,008 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:09,008 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:35:09,011 - app.routes.skills_analysis - INFO - 📄 [PRELIM_ANALYSIS] Latest CV selected → type=original, ts=None, json=user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json, txt=user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.txt
+2025-10-07 14:35:09,013 - app.routes.skills_analysis - INFO - 🧪 [PRELIM_ANALYSIS] CV content length=5129, preview='================================================================================ ORIGINAL CV TEXT CV File: maheshwor_tiwari.pdf Extracted: 2025-10-07 14:34:41 Length: 4864 characters ================================================================================  Maheshwor Tiwari   0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220   Blogs on Medium  | GitHub  | Dashboard '
+2025-10-07 14:35:09,014 - app.services.skills_analysis_config - INFO - 🔧 [CONFIG] Using default configuration
+2025-10-07 14:35:09,014 - app.services.skills_analysis_config - INFO - 🔧 [CONFIG] Using default configuration
+2025-10-07 14:35:09,014 - app.services.skills_analysis_config - INFO - 🔧 [CONFIG] Using default configuration
+2025-10-07 14:35:09,015 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Starting AI-powered skills analysis for maheshwor_tiwari.pdf
+2025-10-07 14:35:09,015 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] CV content length: 5129 chars
+2025-10-07 14:35:09,015 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] JD content length: 6014 chars
+2025-10-07 14:35:09,015 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Using config: default
+2025-10-07 14:35:09,015 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Current AI provider: openai
+2025-10-07 14:35:09,016 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Current AI model: gpt-3.5-turbo
+2025-10-07 14:35:09,016 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Provider available: True
+2025-10-07 14:35:09,016 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Model from header: gpt-3.5-turbo
+2025-10-07 14:35:09,016 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Extracting CV skills with detailed structured analysis...
+2025-10-07 14:35:09,017 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:10,939 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:10,941 - app.services.skill_extraction.response_parser - INFO - 🔍 [CV] Starting response parsing...
+2025-10-07 14:35:10,941 - app.services.skill_extraction.response_parser - INFO - 🔍 [CV] Raw response preview: **SOFT SKILLS:**
+- Communication
+- Leadership
+- Teamwork
+- Collaboration
+- Problem-solving
+
+**TECHNICAL SKILLS:**
+- Python
+- Pandas
+- NumPy
+- scikit-learn
+- SQL
+- PostgreSQL
+- MySQL
+- Tableau
+- Power BI
+- Matplotlib
+- GitHub
+- Docker
+- Snowflake
+- Visual Studio Code
+- Google Analytics
+- Excel
+
+**DOMAIN KEYWORDS:**
+- Data Analysis
+- Machine Learning
+- AI
+- Data Pipelines
+- Data Visualization
+- Predictive Analytics
+- Cloud Data Warehousing
+- Version Control
+- Data Cleaning
+- Automation
+- Computati...
+2025-10-07 14:35:10,942 - app.services.skill_extraction.response_parser - INFO - 🔍 [CV] FULL CV RESPONSE: **SOFT SKILLS:**
+- Communication
+- Leadership
+- Teamwork
+- Collaboration
+- Problem-solving
+
+**TECHNICAL SKILLS:**
+- Python
+- Pandas
+- NumPy
+- scikit-learn
+- SQL
+- PostgreSQL
+- MySQL
+- Tableau
+- Power BI
+- Matplotlib
+- GitHub
+- Docker
+- Snowflake
+- Visual Studio Code
+- Google Analytics
+- Excel
+
+**DOMAIN KEYWORDS:**
+- Data Analysis
+- Machine Learning
+- AI
+- Data Pipelines
+- Data Visualization
+- Predictive Analytics
+- Cloud Data Warehousing
+- Version Control
+- Data Cleaning
+- Automation
+- Computational Modeling
+- Research Analysis
+- Physics
+- Data Science
+- Research Projects
+- Customer Behavior Insights
+- Population Datasets
+- Operational Efficiency
+- Strategic Decision-making
+- Key Metrics Tracking
+- Analytics Capabilities
+- Data Preprocessing
+- Course Facilitation
+- Student Engagement
+2025-10-07 14:35:10,942 - app.services.skill_extraction.response_parser - WARNING - ⚠️ [CV] No SOFT_SKILLS variable found in response
+2025-10-07 14:35:10,943 - app.services.skill_extraction.response_parser - WARNING - ⚠️ [CV] No TECHNICAL_SKILLS variable found in response
+2025-10-07 14:35:10,943 - app.services.skill_extraction.response_parser - WARNING - ⚠️ [CV] No DOMAIN_KEYWORDS variable found in response
+2025-10-07 14:35:10,943 - app.services.skill_extraction.response_parser - INFO - 🔄 [CV] Python format not found, trying markdown format...
+2025-10-07 14:35:10,947 - app.services.skill_extraction.response_parser - INFO - ✅ [CV] Successfully extracted 45 total skills using multi-format parser
+2025-10-07 14:35:10,947 - app.services.skill_extraction.response_parser - INFO - ✅ [CV] Validated soft_skills: 5 valid skills
+2025-10-07 14:35:10,947 - app.services.skill_extraction.response_parser - INFO - ✅ [CV] Validated technical_skills: 16 valid skills
+2025-10-07 14:35:10,948 - app.services.skill_extraction.response_parser - INFO - ✅ [CV] Validated domain_keywords: 24 valid skills
+2025-10-07 14:35:10,948 - app.services.skill_extraction.response_parser - INFO - 📊 [CV] Parsing completed:
+2025-10-07 14:35:10,948 - app.services.skill_extraction.response_parser - INFO -    Soft Skills (5): ['Communication', 'Leadership', 'Teamwork']...
+2025-10-07 14:35:10,948 - app.services.skill_extraction.response_parser - INFO -    Technical Skills (16): ['Python', 'Pandas', 'NumPy']...
+2025-10-07 14:35:10,948 - app.services.skill_extraction.response_parser - INFO -    Domain Keywords (24): ['Data Analysis', 'Machine Learning', 'AI']...
+2025-10-07 14:35:10,948 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Extracting JD skills with detailed structured analysis...
+2025-10-07 14:35:10,948 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:14,626 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:14,628 - app.services.skill_extraction.response_parser - INFO - 🔍 [JD] Starting response parsing...
+2025-10-07 14:35:14,628 - app.services.skill_extraction.response_parser - INFO - 🔍 [JD] Raw response preview: ## SOFT SKILLS:
+- Communication
+- Leadership
+- Teamwork
+- Collaboration
+- Negotiation
+- Time Management
+- Organization
+- Adaptability
+- Problem-solving
+- Analytical Thinking
+- Critical Thinking
+- Creativity
+- Innovation
+- Detail-oriented
+- Self-motivated
+- Proactive
+- Results-driven
+
+## TECHNICAL SKILLS:
+- Data Analysis
+- Data Mining
+- Business Intelligence
+- Power BI
+- SQL
+- Excel
+- Database Management
+- Data Modeling
+- Data Warehousing
+- Spreadsheets
+- VBA
+- Querying
+- Extracting Data
+- Relati...
+2025-10-07 14:35:14,630 - app.services.skill_extraction.response_parser - INFO - ✅ [JD] Successfully extracted 49 total skills using multi-format parser
+2025-10-07 14:35:14,630 - app.services.skill_extraction.response_parser - INFO - ✅ [JD] Validated soft_skills: 17 valid skills
+2025-10-07 14:35:14,630 - app.services.skill_extraction.response_parser - INFO - ✅ [JD] Validated technical_skills: 17 valid skills
+2025-10-07 14:35:14,631 - app.services.skill_extraction.response_parser - INFO - ✅ [JD] Validated domain_keywords: 15 valid skills
+2025-10-07 14:35:14,631 - app.services.skill_extraction.response_parser - INFO - 📊 [JD] Parsing completed:
+2025-10-07 14:35:14,631 - app.services.skill_extraction.response_parser - INFO -    Soft Skills (17): ['Communication', 'Leadership', 'Teamwork']...
+2025-10-07 14:35:14,631 - app.services.skill_extraction.response_parser - INFO -    Technical Skills (17): ['Data Analysis', 'Data Mining', 'Business Intelligence']...
+2025-10-07 14:35:14,631 - app.services.skill_extraction.response_parser - INFO -    Domain Keywords (15): ['Fundraising', 'Humanitarian Aid', 'Refugee Support']...
+2025-10-07 14:35:14,631 - app.routes.skills_analysis - INFO - 🔍 [SKILLS_ANALYSIS] Using structured analysis as comprehensive analysis...
+2025-10-07 14:35:14,631 - app.routes.skills_analysis - INFO - ✅ [SKILLS_ANALYSIS] CV Technical Skills (16): ['Python', 'Pandas', 'NumPy', 'scikit-learn', 'SQL', 'PostgreSQL', 'MySQL', 'Tableau', 'Power BI', 'Matplotlib', 'GitHub', 'Docker', 'Snowflake', 'Visual Studio Code', 'Google Analytics', 'Excel']
+2025-10-07 14:35:14,631 - app.routes.skills_analysis - INFO - ✅ [SKILLS_ANALYSIS] CV Soft Skills (5): ['Communication', 'Leadership', 'Teamwork', 'Collaboration', 'Problem-solving']
+2025-10-07 14:35:14,632 - app.routes.skills_analysis - INFO - ✅ [SKILLS_ANALYSIS] CV Domain Keywords (24): ['Data Analysis', 'Machine Learning', 'AI', 'Data Pipelines', 'Data Visualization', 'Predictive Analytics', 'Cloud Data Warehousing', 'Version Control', 'Data Cleaning', 'Automation', 'Computational Modeling', 'Research Analysis', 'Physics', 'Data Science', 'Research Projects', 'Customer Behavior Insights', 'Population Datasets', 'Operational Efficiency', 'Strategic Decision-making', 'Key Metrics Tracking', 'Analytics Capabilities', 'Data Preprocessing', 'Course Facilitation', 'Student Engagement']
+2025-10-07 14:35:14,632 - app.routes.skills_analysis - INFO - ✅ [SKILLS_ANALYSIS] JD Technical Skills (17): ['Data Analysis', 'Data Mining', 'Business Intelligence', 'Power BI', 'SQL', 'Excel', 'Database Management', 'Data Modeling', 'Data Warehousing', 'Spreadsheets', 'VBA', 'Querying', 'Extracting Data', 'Relational Databases', 'Data Segmentation', 'Report Creation', 'Project Management']
+2025-10-07 14:35:14,632 - app.routes.skills_analysis - INFO - ✅ [SKILLS_ANALYSIS] JD Soft Skills (17): ['Communication', 'Leadership', 'Teamwork', 'Collaboration', 'Negotiation', 'Time Management', 'Organization', 'Adaptability', 'Problem-solving', 'Analytical Thinking', 'Critical Thinking', 'Creativity', 'Innovation', 'Detail-oriented', 'Self-motivated', 'Proactive', 'Results-driven']
+2025-10-07 14:35:14,633 - app.routes.skills_analysis - INFO - ✅ [SKILLS_ANALYSIS] JD Domain Keywords (15): ['Fundraising', 'Humanitarian Aid', 'Refugee Support', 'Donor Management', 'Direct Marketing', 'Multi-channel Communication', 'Stakeholder Management', 'Data Governance', 'Data Quality', 'Campaign Optimization', 'Business Decision-making', 'Data-driven Strategies', 'Data Warehouse Administration', 'Business Intelligence Requirements', 'Evidence-based Decision Making']
+2025-10-07 14:35:14,633 - app.routes.skills_analysis - INFO - ✅ [SKILLS_ANALYSIS] Analysis completed successfully
+2025-10-07 14:35:14,633 - app.services.skills_analysis_config - INFO - 🔧 [CONFIG] Using default configuration
+2025-10-07 14:35:14,633 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:14,636 - app.services.skill_extraction.result_saver - INFO - 📁 Result saver initialized with base directory: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:35:14,640 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:14,640 - app.routes.skills_analysis - INFO - 🔍 [COMPANY_DETECTION] Looking in: user/shankar@gmail.com/cv-analysis/applied_companies
+2025-10-07 14:35:14,642 - app.routes.skills_analysis - INFO - 📁 [COMPANY_DETECTION] Found company folder: Australia_for_UNHCR with 1 job_info files
+2025-10-07 14:35:14,643 - app.routes.skills_analysis - INFO - 🏢 [COMPANY_DETECTION] Using most recent company folder: Australia_for_UNHCR
+2025-10-07 14:35:14,643 - app.routes.skills_analysis - INFO - 📋 [COMPANY_DETECTION] Job info company: Australia for UNHCR
+2025-10-07 14:35:14,644 - app.services.skill_extraction.result_saver - INFO - 🏢 Using provided company name: Australia_for_UNHCR -> Australia_for_UNHCR
+2025-10-07 14:35:14,644 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:14,646 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:35:14,646 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:14,647 - app.services.skill_extraction.result_saver - INFO - 💾 Structured CV already exists, preserving it: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:35:14,647 - app.services.skill_extraction.result_saver - INFO - 💾 Structured CV preserved, skipping save: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:35:14,648 - app.services.skill_extraction.result_saver - INFO - 💾 Analysis results saved (JSON) to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:14,648 - app.routes.skills_analysis - INFO - 📁 [FILE_SAVE] Results saved to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:14,648 - app.routes.skills_analysis - INFO - 🔍 [ANALYZE_MATCH] Starting analyze match assessment...
+2025-10-07 14:35:14,657 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:19,336 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:19,339 - app.routes.skills_analysis - INFO - ✅ [ANALYZE_MATCH] Analysis completed (length: 1533 chars)
+2025-10-07 14:35:19,340 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:19,341 - app.services.skill_extraction.result_saver - INFO - 📂 Found existing analysis file: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:19,342 - app.services.skill_extraction.result_saver - INFO - 🔍 Looking for analysis file in: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR
+2025-10-07 14:35:19,343 - app.services.skill_extraction.result_saver - INFO - 📄 Using existing file: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:19,345 - app.services.skill_extraction.result_saver - INFO - 📁 [ANALYZE_MATCH] Results appended to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:19,346 - app.routes.skills_analysis - INFO - 📁 [ANALYZE_MATCH] Results appended to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:19,346 - app.routes.skills_analysis - INFO - 🔍 [PREEXTRACTED_COMPARISON] Starting pre-extracted skills semantic comparison...
+2025-10-07 14:35:19,353 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:29,883 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:29,905 - app.services.skill_extraction.preextracted_comparator - INFO - ℹ️ [VALIDATION] technical_skills: matched 12 + missing 2 = 14 vs JD count 17 (acceptable variance)
+2025-10-07 14:35:29,905 - app.services.skill_extraction.preextracted_comparator - INFO - ℹ️ [VALIDATION] soft_skills: matched 0 + missing 0 = 0 vs JD count 17 (acceptable variance)
+2025-10-07 14:35:29,906 - app.services.skill_extraction.preextracted_comparator - WARNING - ❌ [VALIDATION] soft_skills: extreme variance - processed 0 vs expected 17
+2025-10-07 14:35:29,906 - app.services.skill_extraction.preextracted_comparator - INFO - 📊 [VALIDATION_DETAIL] CV Skills: Tech=16, Soft=5, Domain=24
+2025-10-07 14:35:29,906 - app.services.skill_extraction.preextracted_comparator - INFO - 📊 [VALIDATION_DETAIL] JD Skills: Tech=17, Soft=17, Domain=15
+2025-10-07 14:35:29,907 - app.services.skill_extraction.preextracted_comparator - WARNING - ❌ [VALIDATION] 1 validation error(s) found
+2025-10-07 14:35:29,907 - app.services.skill_extraction.preextracted_comparator - WARNING - ⚠️ [COMPARISON] JSON results failed validation, attempting to fix inconsistencies
+2025-10-07 14:35:29,907 - app.services.skill_extraction.preextracted_comparator - INFO - 🔧 [FIX] Attempting to fix inconsistent AI response
+2025-10-07 14:35:29,908 - app.services.skill_extraction.preextracted_comparator - INFO - 🔧 [FIX] technical_skills: Adding 3 missing JD skills
+2025-10-07 14:35:29,908 - app.services.skill_extraction.preextracted_comparator - INFO - 🔧 [FIX] soft_skills: Adding 17 missing JD skills
+2025-10-07 14:35:29,909 - app.services.skill_extraction.preextracted_comparator - INFO - ✅ [FIX] Finished fixing AI response inconsistencies
+2025-10-07 14:35:29,909 - app.services.skill_extraction.preextracted_comparator - INFO - ℹ️ [VALIDATION] technical_skills: matched 12 + missing 6 = 18 vs JD count 17 (acceptable variance)
+2025-10-07 14:35:29,909 - app.services.skill_extraction.preextracted_comparator - INFO - 📊 [VALIDATION_DETAIL] CV Skills: Tech=16, Soft=5, Domain=24
+2025-10-07 14:35:29,909 - app.services.skill_extraction.preextracted_comparator - INFO - 📊 [VALIDATION_DETAIL] JD Skills: Tech=17, Soft=17, Domain=15
+2025-10-07 14:35:29,909 - app.services.skill_extraction.preextracted_comparator - INFO - ✅ [VALIDATION] Comparison results passed validation
+2025-10-07 14:35:29,910 - app.services.skill_extraction.preextracted_comparator - INFO - ✅ [COMPARISON] Successfully fixed AI response inconsistencies
+2025-10-07 14:35:29,910 - app.routes.skills_analysis - INFO - ✅ [PREEXTRACTED_COMPARISON] Completed (length: 6261 chars)
+2025-10-07 14:35:29,910 - app.services.skill_extraction.result_saver - INFO - 🏢 [PREEXTRACTED_COMPARISON] Inferred company from saved_file_path: Australia_for_UNHCR
+2025-10-07 14:35:29,914 - app.services.skill_extraction.result_saver - INFO - 📁 [PREEXTRACTED_COMPARISON] Results appended to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:29,914 - app.routes.skills_analysis - INFO - 📁 [PREEXTRACTED_COMPARISON] Results appended to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:29,915 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:29,915 - app.routes.skills_analysis - INFO - ♻️ [PIPELINE] (preliminary-analysis) JD file already exists: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/jd_original_20251007_143457.json
+2025-10-07 14:35:29,917 - app.routes.skills_analysis - INFO - ♻️ [JOBS] Job already exists in saved_jobs.json: Data Analyst at Australia for UNHCR
+2025-10-07 14:35:29,917 - app.routes.skills_analysis - INFO - 🚀 [PIPELINE] (preliminary-analysis) scheduling for company: Australia_for_UNHCR
+2025-10-07 14:35:29,918 - app.routes.skills_analysis - INFO - 🚀 [PIPELINE] Scheduling JD analysis and CV–JD matching for 'Australia_for_UNHCR'...
+2025-10-07 14:35:29,919 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:29,919 - app.routes.skills_analysis - INFO - 🔧 [PIPELINE] Starting JD analysis for Australia_for_UNHCR (force_refresh=True)
+2025-10-07 14:35:29,920 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:29,920 - app.services.jd_analysis.jd_analyzer - INFO - 🔄 Analyzing JD for Australia_for_UNHCR (force_refresh=True)
+2025-10-07 14:35:29,922 - app.services.jd_analysis.jd_analyzer - INFO - 📄 Analyzing JD file: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/jd_original_20251007_143457.json
+2025-10-07 14:35:29,922 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:31,416 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:31,421 - app.services.jd_analysis.jd_analyzer - INFO - ✅ JD analysis completed. Found 0 required and 0 preferred keywords
+2025-10-07 14:35:31,425 - app.services.jd_analysis.jd_analyzer - INFO - 💾 Analysis result saved to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_jd_analysis_20251007_143531.json
+2025-10-07 14:35:31,426 - app.routes.skills_analysis - INFO - ✅ [PIPELINE] JD analysis saved for Australia_for_UNHCR at: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_jd_analysis_20251007_143531.json
+2025-10-07 14:35:31,446 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:31,446 - app.services.jd_usage_tracker - ERROR - ❌ [JD_TRACKER] Error recording JD usage: Either jd_url or jd_text must be provided
+2025-10-07 14:35:31,447 - app.routes.skills_analysis - INFO - 📝 [PIPELINE] JD usage recorded for Australia_for_UNHCR
+2025-10-07 14:35:31,447 - app.routes.skills_analysis - INFO - 🔧 [PIPELINE] Starting CV–JD matching for Australia_for_UNHCR
+2025-10-07 14:35:31,447 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:31,449 - app.routes.skills_analysis - WARNING - ⚠️ [PIPELINE] Could not preselect CV TXT for matching: No module named 'app.services.dynamic_cv_selector'
+2025-10-07 14:35:31,449 - app.services.cv_jd_matching.cv_jd_matcher - INFO - 🔍 [CV_JD_MATCHER] No explicit CV path provided, using unified selector for Australia_for_UNHCR
+2025-10-07 14:35:31,449 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:31,449 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:31,450 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:35:31,452 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:31,455 - app.services.jd_usage_tracker - ERROR - ❌ [JD_TRACKER] Error checking JD usage: Either jd_url or jd_text must be provided
+2025-10-07 14:35:31,458 - app.services.cv_jd_matching.cv_jd_matcher - INFO - ✅ [CV_JD_MATCHER] Selected CV → type=original, ts=None, path=user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.txt
+2025-10-07 14:35:31,460 - app.services.cv_jd_matching.cv_jd_matcher - INFO - 📄 [CV_JD_MATCHER] Read CV from: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.txt
+2025-10-07 14:35:31,462 - app.services.cv_jd_matching.cv_jd_matcher - INFO - 🧪 [CV_JD_MATCHER] CV content length=5129, preview='================================================================================ ORIGINAL CV TEXT CV File: maheshwor_tiwari.pdf Extracted: 2025-10-07 14:34:41 Length: 4864 characters ================================================================================  Maheshwor Tiwari   0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220   Blogs on Medium  | GitHub  | Dashboard '
+2025-10-07 14:35:31,463 - app.services.cv_jd_matching.cv_jd_matcher - INFO - 🔍 Found 7 required and 5 preferred keywords
+2025-10-07 14:35:31,463 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:33,712 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:33,719 - app.services.cv_jd_matching.cv_jd_matcher - INFO - ✅ CV-JD matching completed. Found 6 matched required keywords
+2025-10-07 14:35:33,719 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:33,720 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:33,722 - app.services.cv_jd_matching.cv_jd_matcher - INFO - 💾 Saved CV-JD match results to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_cv_jd_matching_20251007_143533.json
+2025-10-07 14:35:33,722 - app.routes.skills_analysis - INFO - ✅ [PIPELINE] CV–JD match results saved for Australia_for_UNHCR
+2025-10-07 14:35:33,723 - app.routes.skills_analysis - INFO - 🔍 [PIPELINE] Starting component analysis for Australia_for_UNHCR
+2025-10-07 14:35:33,730 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:33,731 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:33,732 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:33,732 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:35:33,739 - app.routes.skills_analysis - INFO - 📄 [PIPELINE] Latest CV selected → type=original, ts=None, json=user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json, txt=user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.txt
+2025-10-07 14:35:33,743 - app.routes.skills_analysis - INFO - 🧪 [PIPELINE] CV content length=5129, preview='================================================================================ ORIGINAL CV TEXT CV File: maheshwor_tiwari.pdf Extracted: 2025-10-07 14:34:41 Length: 4864 characters ================================================================================  Maheshwor Tiwari   0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220   Blogs on Medium  | GitHub  | Dashboard '
+2025-10-07 14:35:33,744 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:33,745 - app.routes.skills_analysis - INFO - 📄 [PIPELINE] Required files found, proceeding with component analysis
+2025-10-07 14:35:33,745 - app.services.ats.modular_ats_orchestrator - INFO - ===== [MODULAR ATS] Starting component analysis for: Australia_for_UNHCR =====
+2025-10-07 14:35:33,745 - app.services.ats.component_assembler - INFO - ===== [ASSEMBLER] Starting component assembly for: Australia_for_UNHCR =====
+2025-10-07 14:35:33,745 - app.services.ats.component_assembler - INFO - 📄 [ASSEMBLER] Using CV text provided by caller
+2025-10-07 14:35:33,759 - app.services.ats.component_assembler - WARNING - [ASSEMBLER] Match results not found: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/cv_jd_match_results.json
+2025-10-07 14:35:33,761 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Starting parallel component analyses...
+2025-10-07 14:35:33,763 - app.services.ats.components.skills_relevance_analyzer - INFO - [SKILLS] Requesting skills relevance analysis...
+2025-10-07 14:35:33,763 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Requirement bonus using match file: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_cv_jd_matching_20251007_143533.json
+2025-10-07 14:35:33,763 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:33,786 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Using existing match_counts from file
+2025-10-07 14:35:33,787 - app.services.ats.requirement_bonus_calculator - INFO - [ATS][BONUS] required_total=7 matched_required=6 missing_required=1 required_bonus=3.00 required_penalty=0.00 preferred_total=5 matched_preferred=0 missing_preferred=5 preferred_bonus=0.00 preferred_penalty=-0.75 total_bonus=2.25
+2025-10-07 14:35:33,790 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Requirement bonus calculated: 2.25 points
+2025-10-07 14:35:46,266 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:46,276 - app.services.ats.components.skills_relevance_analyzer - INFO - [SKILLS] Raw response length: 4034
+2025-10-07 14:35:46,276 - app.services.ats.components.skills_relevance_analyzer - INFO - [SKILLS] Raw response preview: {
+  "skills_analysis": [
+    {
+      "skill": "Python Programming",
+      "cv_evidence": "Specialized in Python programming, including data analysis, automation, and machine learning using libraries s
+2025-10-07 14:35:46,278 - app.services.ats.components.skills_relevance_analyzer - INFO - [SKILLS] Cleaned response: {
+  "skills_analysis": [
+    {
+      "skill": "Python Programming",
+      "cv_evidence": "Specialized in Python programming, including data analysis, automation, and machine learning using libraries s
+2025-10-07 14:35:46,278 - app.services.ats.components.skills_relevance_analyzer - INFO - [SKILLS] Direct parse successful
+2025-10-07 14:35:46,279 - app.services.ats.components.skills_relevance_analyzer - INFO - [SKILLS] Analysis completed. Score: 85.0
+2025-10-07 14:35:46,279 - app.services.ats.components.experience_analyzer - INFO - [EXPERIENCE] Requesting experience alignment analysis...
+2025-10-07 14:35:46,279 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:48,664 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:48,675 - app.services.ats.components.experience_analyzer - INFO - [EXPERIENCE] Analysis completed. Score: 85.0
+2025-10-07 14:35:48,678 - app.services.ats.components.industry_analyzer - INFO - [INDUSTRY] Requesting industry fit analysis...
+2025-10-07 14:35:48,678 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:52,603 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:52,696 - app.services.ats.components.industry_analyzer - INFO - [INDUSTRY] Analysis completed. Score: 55.0
+2025-10-07 14:35:52,713 - app.services.ats.components.seniority_analyzer - INFO - [SENIORITY] Requesting role seniority analysis...
+2025-10-07 14:35:52,714 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:55,193 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:55,205 - app.services.ats.components.seniority_analyzer - INFO - [SENIORITY] Analysis completed. Score: 20.0
+2025-10-07 14:35:55,206 - app.services.ats.components.technical_analyzer - INFO - [TECHNICAL] Requesting technical depth analysis...
+2025-10-07 14:35:55,206 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo

@@ -111,10 +111,10 @@ app.add_middleware(
     expose_headers=["*"],  # Expose all headers
 )
 
-# Add comprehensive request logging middleware
+# Add authentication debugging middleware
 @app.middleware("http")
-async def comprehensive_logging_middleware(request: Request, call_next):
-    # Skip logging for OPTIONS requests (CORS preflight)
+async def auth_debug_middleware(request: Request, call_next):
+    # Skip auth logging for OPTIONS requests (CORS preflight)
     if request.method == "OPTIONS":
         response = await call_next(request)
         return response
@@ -125,40 +125,20 @@ async def comprehensive_logging_middleware(request: Request, call_next):
     # Define public endpoints that don't need auth
     public_endpoints = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh-session", "/api/quick-login", "/health", "/api/info", "/api/ai/health", "/api/tailored-cv/save-edited"]
     
-    # Log all requests to skills analysis endpoints
-    if "/skill-extraction/analyze" in path or "/context-aware-analysis" in path:
-        logger.info(f"🔍 [REQUEST] {request.method} {path}")
-        logger.info(f"🔍 [REQUEST] Headers: {dict(request.headers)}")
-        logger.info(f"🔍 [REQUEST] Auth header present: {bool(auth_header)}")
-        if auth_header:
-            token_preview = auth_header[:30] + "..." if len(auth_header) > 30 else auth_header
-            logger.info(f"🔍 [REQUEST] Auth token preview: {token_preview}")
-    
-    # Log auth attempts for protected API routes
+    # Only log auth attempts for protected API routes
     if path.startswith("/api/") and path not in public_endpoints:
         if not auth_header:
-            logger.warning(f"❌ [AUTH] No auth header on {request.method} {path}")
+            logger.debug(f"❌ No auth header on {request.method} {path}")
         else:
-            logger.info(f"🔑 [AUTH] Auth attempt on {request.method} {path}")
+            logger.debug(f"🔑 Auth attempt on {request.method} {path}")
     
-    try:
-        response = await call_next(request)
-        
-        # Log response status for skills analysis endpoints
-        if "/skill-extraction/analyze" in path or "/context-aware-analysis" in path:
-            logger.info(f"🔍 [RESPONSE] Status: {response.status_code} for {request.method} {path}")
-        
-        # Log auth failures
-        if response.status_code in [401, 403] and path not in public_endpoints:
-            logger.error(f"🚫 [AUTH] Auth failed ({response.status_code}) for {request.method} {path}")
-        
-        return response
-        
-    except Exception as e:
-        logger.error(f"❌ [MIDDLEWARE] Exception in request {request.method} {path}: {e}")
-        import traceback
-        logger.error(f"❌ [MIDDLEWARE] Traceback: {traceback.format_exc()}")
-        raise
+    response = await call_next(request)
+    
+    # Log auth failures only for non-public endpoints
+    if response.status_code == 403 and path not in public_endpoints:
+        logger.warning(f"🚫 Auth failed (403) for {request.method} {path}")
+    
+    return response
 
 
 # Global exception handler

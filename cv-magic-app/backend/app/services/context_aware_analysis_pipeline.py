@@ -416,13 +416,15 @@ class ContextAwareAnalysisPipeline:
             user_selector = get_selector_for_user(self.user_email)
             cv_content = user_selector.get_cv_content_across_all(context.company)
 
-            # Determine path to pass to extractor (prefer TXT path when available)
+            # Determine path to pass to extractor (prefer JSON path for complete structured data)
             cv_paths = user_selector.get_latest_cv_paths_for_services(context.company)
             if not cv_paths.get('txt_path') and not cv_paths.get('json_path'):
                 logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] No CV file found for {context.company}")
                 return None
 
-            cv_path_to_use = cv_paths.get('txt_path') or cv_paths.get('json_path')
+            # Use JSON path for complete structured data, fallback to TXT if JSON not available
+            cv_path_to_use = cv_paths.get('json_path') or cv_paths.get('txt_path')
+            logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Using CV file: {cv_path_to_use}")
 
             # Use the existing service with the correct file path
             skill_results = await self._extract_cv_skills_from_path(
