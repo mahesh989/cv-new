@@ -20,9 +20,18 @@ class JDUsageTracker:
     Tracks JD usage history to determine if a JD has been used before
     """
     
-    def __init__(self, base_path: str = "cv-analysis"):
-        self.base_path = Path(base_path)
+    def __init__(self, user_email: str = None):
+        if user_email:
+            from app.utils.user_path_utils import get_user_base_path
+            self.base_path = get_user_base_path(user_email)
+        else:
+            self.base_path = Path("cv-analysis")
+        
         self.usage_file = self.base_path / "jd_usage_history.json"
+        
+        # Ensure directory exists
+        self.usage_file.parent.mkdir(parents=True, exist_ok=True)
+        
         self._usage_data = self._load_usage_data()
     
     def _load_usage_data(self) -> Dict[str, Dict]:

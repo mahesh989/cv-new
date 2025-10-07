@@ -53,11 +53,39 @@ class UnifiedLatestFileSelector:
         if self.user_email:
             from app.utils.user_path_utils import ensure_user_directories
             ensure_user_directories(self.user_email)
+    
+    def _is_jd_first_time_usage(self, jd_url: str, jd_text: str = "") -> bool:
+        """
+        Check if this JD is being used for the first time
+        
+        Args:
+            jd_url: Job description URL
+            jd_text: Job description text (fallback if no URL)
+            
+        Returns:
+            True if this is first-time usage, False if JD has been used before
+        """
+        try:
+            from app.services.jd_usage_tracker import JDUsageTracker
+            
+            # Create JD usage tracker for this user
+            tracker = JDUsageTracker(self.user_email)
+            
+            # Check if this is first-time usage
+            is_first_time = tracker.is_jd_first_time_usage(jd_url, jd_text)
+            
+            print(f"🔍 [UNIFIED_SELECTOR] JD usage check: first_time={is_first_time}")
+            return is_first_time
+            
+        except Exception as e:
+            print(f"⚠️ [UNIFIED_SELECTOR] Error checking JD usage, defaulting to first-time: {e}")
+            # Default to first-time usage on error to be safe
+            return True
 
     def get_latest_cv_for_company(self, company: str, jd_url: str = "", jd_text: str = "") -> FileContext:
         """
-        Get the latest CV file for a company by timestamp, regardless of type.
-        Always selects the most recent CV file (original or tailored) based on timestamp.
+        Get the appropriate CV file for a company based on JD usage history.
+        Uses original CV for first-time JD usage, latest CV for subsequent uses.
         
         Args:
             company: Company name
@@ -69,11 +97,17 @@ class UnifiedLatestFileSelector:
         
         # Use JD URL for company uniqueness if provided, otherwise use company name
         effective_company = self._get_effective_company_name(company, jd_url)
-        print(f"🔍 Searching for latest CV for company: {company} (effective: {effective_company})")
+        print(f"🔍 Searching for CV for company: {company} (effective: {effective_company})")
         
-        # Always get the latest CV across all types (original and tailored)
-        print("📄 Selecting latest CV by timestamp (original or tailored)")
-        return self.get_latest_cv_across_all(effective_company)
+        # Check if this is first-time JD usage
+        is_first_time = self._is_jd_first_time_usage(jd_url, jd_text)
+        
+        if is_first_time:
+            print("🆕 First-time JD usage detected - using original CV")
+            return self._get_original_cv_for_company(effective_company)
+        else:
+            print("🔄 Subsequent JD usage - using latest CV (original or tailored)")
+            return self.get_latest_cv_across_all(effective_company)
     
     def _get_original_cv_for_company(self, company: str) -> FileContext:
         """Get original CV for a company"""

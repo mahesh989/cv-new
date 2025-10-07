@@ -338,6 +338,23 @@ async def _run_pipeline(cname: str, token_data=None):
         jd_result = jd_result_obj.model_dump() if hasattr(jd_result_obj, 'model_dump') else jd_result_obj.__dict__
         saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
         logger.info(f"✅ [PIPELINE] JD analysis saved for {cname} at: {saved_path}")
+        
+        # Record JD usage for tracking first-time vs subsequent usage
+        try:
+            from app.services.jd_usage_tracker import JDUsageTracker
+            tracker = JDUsageTracker(user_email)
+            
+            # Get JD URL and text from the analysis result
+            jd_url = jd_result.get('jd_url', '') or ''
+            jd_text = jd_result.get('jd_text', '') or ''
+            job_title = jd_result.get('job_title', '') or ''
+            
+            # Record the JD usage
+            tracker.record_jd_usage(jd_url, jd_text, cname, job_title)
+            logger.info(f"📝 [PIPELINE] JD usage recorded for {cname}")
+        except Exception as e:
+            logger.warning(f"⚠️ [PIPELINE] Failed to record JD usage: {e}")
+        
         pipeline_results["jd_analysis"] = True
     except Exception as e:
         logger.error(f"❌ [PIPELINE] JD analysis failed for {cname}: {e}")
