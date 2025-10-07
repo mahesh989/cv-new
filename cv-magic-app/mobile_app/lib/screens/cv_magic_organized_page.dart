@@ -601,7 +601,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
         return AlertDialog(
           title: const Text('Clear All Results'),
           content: const Text(
-            'This will clear all analysis results but keep your selected CV and CV preview. Are you sure?',
+            'This will clear all analysis results, JD URL, and JD text but keep your selected CV and CV preview. Are you sure?',
           ),
           actions: [
             TextButton(
@@ -626,13 +626,13 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   }
 
   /// Clear all analysis results and reset the controller
-  /// Preserves selected CV, CV preview, and JD inputs as requested
+  /// Preserves selected CV and CV preview, but clears JD inputs
   void clearAnalysisResults() {
     debugPrint('🧹 [CV_MAGIC] Clearing analysis results in CV Magic tab');
     debugPrint('🧹 [CV_MAGIC] Preserving selected CV: $selectedCVFilename');
-    debugPrint('🧹 [CV_MAGIC] Preserving JD URL: ${jdUrlController.text}');
+    debugPrint('🧹 [CV_MAGIC] Clearing JD URL: ${jdUrlController.text}');
     debugPrint(
-        '🧹 [CV_MAGIC] Preserving JD text length: ${jdController.text.length}');
+        '🧹 [CV_MAGIC] Clearing JD text length: ${jdController.text.length}');
     debugPrint(
         '🧹 [CV_MAGIC] Controller has results before clear: ${_skillsController.hasResults}');
     debugPrint(
@@ -641,18 +641,18 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     // Clear the skills analysis results
     _skillsController.clearResults();
 
-    // PRESERVE JD inputs - DO NOT clear them during re-runs
-    // jdController.clear();  // ❌ REMOVED: This was clearing the JD text
-    // jdUrlController.clear(); // ❌ REMOVED: This was clearing the JD URL
+    // CLEAR JD inputs as requested
+    jdController.clear();  // ✅ Clear the JD text
+    jdUrlController.clear(); // ✅ Clear the JD URL
 
     debugPrint(
         '🧹 [CV_MAGIC] Controller has results after clear: ${_skillsController.hasResults}');
     debugPrint(
         '🧹 [CV_MAGIC] Controller state after clear: ${_skillsController.state}');
     debugPrint('🧹 [CV_MAGIC] Selected CV preserved: $selectedCVFilename');
-    debugPrint('🧹 [CV_MAGIC] JD URL preserved: ${jdUrlController.text}');
+    debugPrint('🧹 [CV_MAGIC] JD URL cleared: ${jdUrlController.text}');
     debugPrint(
-        '🧹 [CV_MAGIC] JD text preserved: ${jdController.text.length} characters');
+        '🧹 [CV_MAGIC] JD text cleared: ${jdController.text.length} characters');
 
     // Clear any other state if needed
     setState(() {
@@ -664,7 +664,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-            '✅ All analysis results cleared. CV preview and JD inputs preserved.'),
+            '✅ All analysis results, JD URL, and JD text cleared. CV preview preserved.'),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 3),
       ),
