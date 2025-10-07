@@ -11255,3 +11255,378 @@ WHERE users.email = %(email_1)s
 2025-10-07 14:35:55,205 - app.services.ats.components.seniority_analyzer - INFO - [SENIORITY] Analysis completed. Score: 20.0
 2025-10-07 14:35:55,206 - app.services.ats.components.technical_analyzer - INFO - [TECHNICAL] Requesting technical depth analysis...
 2025-10-07 14:35:55,206 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:35:57,181 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:35:57,197 - app.services.ats.components.technical_analyzer - INFO - [TECHNICAL] Analysis completed. Score: 90.0
+2025-10-07 14:35:57,212 - app.services.ats.component_assembler - INFO - [ASSEMBLER] All component analyses completed successfully
+2025-10-07 14:35:57,212 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Validating cross-analyzer consistency...
+2025-10-07 14:35:57,212 - app.services.ats.components.consistency_validator - ERROR - [CONSISTENCY] Validation failed: unsupported operand type(s) for -: 'str' and 'int'
+2025-10-07 14:35:57,212 - app.services.ats.component_assembler - WARNING - [ASSEMBLER] Inconsistencies detected in analysis results
+2025-10-07 14:35:57,213 - app.services.ats.component_assembler - WARNING - [ASSEMBLER] Confidence score: 100%
+2025-10-07 14:35:57,224 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Results saved to: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_skills_analysis_20251007_143514.json
+2025-10-07 14:35:57,225 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Starting ATS score calculation...
+2025-10-07 14:35:57,229 - app.services.ats.ats_score_calculator - INFO - [ATS] Starting comprehensive ATS score calculation
+2025-10-07 14:35:57,230 - app.services.ats.ats_score_calculator - INFO - [ATS] Match rates - Tech: 67.0%, Domain: 0.0%, Soft: 0.0%
+2025-10-07 14:35:57,230 - app.services.ats.ats_score_calculator - INFO - [ATS] Missing counts - Tech: 6, Domain: 15, Soft: 17
+2025-10-07 14:35:57,230 - app.services.ats.ats_score_calculator - INFO - [ATS] Category 1 - Tech: 13.4, Domain: 0.0, Soft: 0.0, Total: 13.4
+2025-10-07 14:35:57,231 - app.services.ats.ats_score_calculator - INFO - [ATS] Category 2 - Core: 15.9, Exp: 4.6, Potential: 6.0, Company: 0.7, Total: 27.2
+2025-10-07 14:35:57,232 - app.services.ats.ats_score_calculator - INFO - [ATS] Final ATS Score: 42.9/100 (❌ Poor fit)
+2025-10-07 14:35:57,245 - app.services.ats.component_assembler - INFO - [ASSEMBLER] ATS calculation completed. Score: 42.9/100 (❌ Poor fit)
+2025-10-07 14:35:57,246 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:57,251 - app.services.ats_recommendation_service - INFO - Final ATS Score: 42.875
+2025-10-07 14:35:57,253 - app.services.ats_recommendation_service - INFO - Category Status: ❌ Poor fit
+2025-10-07 14:35:57,253 - app.services.ats_recommendation_service - INFO - Successfully extracted comprehensive recommendation data for Australia_for_UNHCR
+2025-10-07 14:35:57,268 - app.services.ats_recommendation_service - INFO - Successfully created recommendation file: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_input_recommendation_20251007_143557.json
+2025-10-07 14:35:57,297 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:35:57,302 - sqlalchemy.engine.Engine - INFO - SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.full_name AS users_full_name, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at, users.last_login AS users_last_login 
+FROM users 
+WHERE users.email = %(email_1)s
+2025-10-07 14:35:57,302 - sqlalchemy.engine.Engine - INFO - [generated in 0.00068s] {'email_1': 'shankar@gmail.com'}
+2025-10-07 14:35:57,353 - sqlalchemy.engine.Engine - INFO - SELECT companies.id AS companies_id, companies.user_id AS companies_user_id, companies.name AS companies_name, companies.display_name AS companies_display_name, companies.jd_url AS companies_jd_url, companies.created_at AS companies_created_at, companies.updated_at AS companies_updated_at 
+FROM companies 
+WHERE companies.user_id = %(user_id_1)s AND companies.name = %(name_1)s
+2025-10-07 14:35:57,353 - sqlalchemy.engine.Engine - INFO - [generated in 0.00065s] {'user_id_1': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'name_1': 'Australia_for_UNHCR'}
+2025-10-07 14:35:57,389 - sqlalchemy.engine.Engine - INFO - INSERT INTO company_files (user_id, company_id, file_type, file_format, filename, file_path, file_size, sha256, timestamp, created_at) VALUES (%(user_id)s, %(company_id)s, %(file_type)s, %(file_format)s, %(filename)s, %(file_path)s, %(file_size)s, %(sha256)s, %(timestamp)s, now()) RETURNING company_files.id, company_files.created_at
+2025-10-07 14:35:57,391 - sqlalchemy.engine.Engine - INFO - [generated in 0.00274s] {'user_id': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'company_id': 7, 'file_type': 'input_recommendation', 'file_format': 'json', 'filename': 'Australia_for_UNHCR_input_recommendation_20251007_143557.json', 'file_path': 'user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_input_recommendation_20251007_143557.json', 'file_size': 26783, 'sha256': '50606c90ba76867a6a0074ce5cd0f234256b5df799a605220e7e5fb7b4e4d9fc', 'timestamp': '20251007_143557'}
+2025-10-07 14:35:57,416 - sqlalchemy.engine.Engine - INFO - INSERT INTO analysis_runs (user_id, company_id, kind, status, model_used, started_at, completed_at, meta_json, source_file_id, output_file_id) VALUES (%(user_id)s, %(company_id)s, %(kind)s, %(status)s, %(model_used)s, now(), %(completed_at)s, %(meta_json)s, %(source_file_id)s, %(output_file_id)s) RETURNING analysis_runs.id, analysis_runs.started_at
+2025-10-07 14:35:57,416 - sqlalchemy.engine.Engine - INFO - [generated in 0.00102s] {'user_id': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'company_id': 7, 'kind': 'input_reco', 'status': 'completed', 'model_used': None, 'completed_at': None, 'meta_json': 'null', 'source_file_id': None, 'output_file_id': 46}
+2025-10-07 14:35:57,439 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-10-07 14:35:57,456 - app.services.ats_recommendation_service - INFO - Successfully created AI recommendation prompt: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_prompt_recommendation.py
+2025-10-07 14:35:57,457 - app.services.ats_recommendation_service - INFO - 🤖 [TRIGGER] Starting AI recommendation generation for Australia_for_UNHCR
+2025-10-07 14:35:57,457 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:57,458 - app.services.ats_recommendation_service - INFO - 📋 [TRIGGER] AI generation scheduled as background task for Australia_for_UNHCR
+2025-10-07 14:35:57,458 - app.services.ats.component_assembler - INFO - [ASSEMBLER] Recommendation file created for Australia_for_UNHCR
+2025-10-07 14:35:57,458 - app.services.ats.component_assembler - INFO - ===== [ASSEMBLER] Completed assembly. Scores: skills=85.0 exp=85.0 industry=55.0 seniority=20.0 tech=90.0 =====
+2025-10-07 14:35:57,459 - app.services.ats.modular_ats_orchestrator - INFO - ===== [MODULAR ATS] Component analysis completed for: Australia_for_UNHCR =====
+2025-10-07 14:35:57,459 - app.routes.skills_analysis - INFO - ✅ [PIPELINE] Component analysis completed for Australia_for_UNHCR
+2025-10-07 14:35:57,459 - app.routes.skills_analysis - INFO - 📊 [PIPELINE] Component scores extracted: 23 scores
+2025-10-07 14:35:57,459 - app.routes.skills_analysis - INFO - 📊 [PIPELINE] skills_relevance: 85.0
+2025-10-07 14:35:57,459 - app.routes.skills_analysis - INFO - 📊 [PIPELINE] experience_alignment: 85.0
+2025-10-07 14:35:57,460 - app.routes.skills_analysis - INFO - 📊 [PIPELINE] industry_fit: 55.0
+2025-10-07 14:35:57,460 - app.routes.skills_analysis - INFO - 📊 [PIPELINE] role_seniority: 20.0
+2025-10-07 14:35:57,460 - app.routes.skills_analysis - INFO - 📊 [PIPELINE] technical_depth: 90.0
+2025-10-07 14:35:57,460 - app.routes.skills_analysis - INFO - 🎯 [PIPELINE] ATS Score calculated: 42.875
+2025-10-07 14:35:57,461 - app.routes.skills_analysis - INFO - 📋 [PIPELINE] Creating input recommendation file for Australia_for_UNHCR
+2025-10-07 14:35:57,461 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:57,463 - app.services.ats_recommendation_service - INFO - Final ATS Score: 42.875
+2025-10-07 14:35:57,464 - app.services.ats_recommendation_service - INFO - Category Status: ❌ Poor fit
+2025-10-07 14:35:57,464 - app.services.ats_recommendation_service - INFO - Successfully extracted comprehensive recommendation data for Australia_for_UNHCR
+2025-10-07 14:35:57,468 - app.services.ats_recommendation_service - INFO - Successfully created recommendation file: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_input_recommendation_20251007_143557.json
+2025-10-07 14:35:57,487 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:35:57,488 - sqlalchemy.engine.Engine - INFO - SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.full_name AS users_full_name, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at, users.last_login AS users_last_login 
+FROM users 
+WHERE users.email = %(email_1)s
+2025-10-07 14:35:57,489 - sqlalchemy.engine.Engine - INFO - [cached since 0.1876s ago] {'email_1': 'shankar@gmail.com'}
+2025-10-07 14:35:57,528 - sqlalchemy.engine.Engine - INFO - SELECT companies.id AS companies_id, companies.user_id AS companies_user_id, companies.name AS companies_name, companies.display_name AS companies_display_name, companies.jd_url AS companies_jd_url, companies.created_at AS companies_created_at, companies.updated_at AS companies_updated_at 
+FROM companies 
+WHERE companies.user_id = %(user_id_1)s AND companies.name = %(name_1)s
+2025-10-07 14:35:57,529 - sqlalchemy.engine.Engine - INFO - [cached since 0.1764s ago] {'user_id_1': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'name_1': 'Australia_for_UNHCR'}
+2025-10-07 14:35:57,551 - sqlalchemy.engine.Engine - INFO - INSERT INTO company_files (user_id, company_id, file_type, file_format, filename, file_path, file_size, sha256, timestamp, created_at) VALUES (%(user_id)s, %(company_id)s, %(file_type)s, %(file_format)s, %(filename)s, %(file_path)s, %(file_size)s, %(sha256)s, %(timestamp)s, now()) RETURNING company_files.id, company_files.created_at
+2025-10-07 14:35:57,553 - sqlalchemy.engine.Engine - INFO - [cached since 0.1644s ago] {'user_id': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'company_id': 7, 'file_type': 'input_recommendation', 'file_format': 'json', 'filename': 'Australia_for_UNHCR_input_recommendation_20251007_143557.json', 'file_path': 'user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_input_recommendation_20251007_143557.json', 'file_size': 26783, 'sha256': '50606c90ba76867a6a0074ce5cd0f234256b5df799a605220e7e5fb7b4e4d9fc', 'timestamp': '20251007_143557'}
+2025-10-07 14:35:57,578 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-10-07 14:35:57,597 - app.services.ats_recommendation_service - WARNING - ⚠️ [DB] Failed to register input recommendation: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "uq_company_files_dedupe"
+DETAIL:  Key (user_id, company_id, file_type, sha256)=(0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed, 7, input_recommendation, 50606c90ba76867a6a0074ce5cd0f234256b5df799a605220e7e5fb7b4e4d9fc) already exists.
+
+[SQL: INSERT INTO company_files (user_id, company_id, file_type, file_format, filename, file_path, file_size, sha256, timestamp, created_at) VALUES (%(user_id)s, %(company_id)s, %(file_type)s, %(file_format)s, %(filename)s, %(file_path)s, %(file_size)s, %(sha256)s, %(timestamp)s, now()) RETURNING company_files.id, company_files.created_at]
+[parameters: {'user_id': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'company_id': 7, 'file_type': 'input_recommendation', 'file_format': 'json', 'filename': 'Australia_for_UNHCR_input_recommendation_20251007_143557.json', 'file_path': 'user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_input_recommendation_20251007_143557.json', 'file_size': 26783, 'sha256': '50606c90ba76867a6a0074ce5cd0f234256b5df799a605220e7e5fb7b4e4d9fc', 'timestamp': '20251007_143557'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-10-07 14:35:57,600 - app.services.ats_recommendation_service - INFO - Successfully created AI recommendation prompt: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_prompt_recommendation.py
+2025-10-07 14:35:57,602 - app.services.ats_recommendation_service - INFO - 🤖 [TRIGGER] Starting AI recommendation generation for Australia_for_UNHCR
+2025-10-07 14:35:57,606 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:57,608 - app.services.ats_recommendation_service - INFO - 📋 [TRIGGER] AI generation scheduled as background task for Australia_for_UNHCR
+2025-10-07 14:35:57,608 - app.routes.skills_analysis - INFO - ✅ [PIPELINE] Input recommendation file created for Australia_for_UNHCR
+2025-10-07 14:35:57,609 - app.routes.skills_analysis - INFO - 🤖 [PIPELINE] Starting AI recommendation generation for Australia_for_UNHCR
+2025-10-07 14:35:57,609 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:57,610 - app.services.ai_recommendation_generator - INFO - 🤖 [AI GENERATOR] Starting AI recommendation generation for: Australia_for_UNHCR
+2025-10-07 14:35:57,631 - app.services.ai_recommendation_generator - INFO - 🟡 [AI GENERATOR] Input recommendation is newer (ai_mtime=0, input_mtime=1759808157.4685347); regenerating AI recommendation
+2025-10-07 14:35:57,632 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:57,633 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:35:57,636 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:35:57,641 - app.services.ai_recommendation_generator - INFO - ✅ [AI GENERATOR] CV is fresh - no updates since input recommendation
+2025-10-07 14:35:57,644 - app.services.ai_recommendation_generator - INFO - 📋 [AI GENERATOR] Generated AI prompt for Australia_for_UNHCR using centralized template (12988 characters)
+2025-10-07 14:35:57,645 - app.services.ai_recommendation_generator - INFO - 🧠 [AI GENERATOR] Executing AI prompt for Australia_for_UNHCR
+2025-10-07 14:35:57,645 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
+2025-10-07 14:36:02,366 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 14:36:02,370 - app.services.ai_recommendation_generator - INFO - 🧠 [AI GENERATOR] AI response generated - Provider: openai, Model: gpt-3.5-turbo
+2025-10-07 14:36:02,370 - app.services.ai_recommendation_generator - INFO - 💰 [AI GENERATOR] Cost: $0.0047, Tokens: 3624
+2025-10-07 14:36:02,371 - app.services.ai_recommendation_generator - INFO - 💾 [AI GENERATOR] Saved AI recommendation: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_ai_recommendation_20251007_143602.json (3.4KB)
+2025-10-07 14:36:02,389 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-10-07 14:36:02,390 - sqlalchemy.engine.Engine - INFO - SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.full_name AS users_full_name, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at, users.last_login AS users_last_login 
+FROM users 
+WHERE users.email = %(email_1)s
+2025-10-07 14:36:02,391 - sqlalchemy.engine.Engine - INFO - [cached since 5.09s ago] {'email_1': 'shankar@gmail.com'}
+2025-10-07 14:36:02,427 - sqlalchemy.engine.Engine - INFO - SELECT companies.id AS companies_id, companies.user_id AS companies_user_id, companies.name AS companies_name, companies.display_name AS companies_display_name, companies.jd_url AS companies_jd_url, companies.created_at AS companies_created_at, companies.updated_at AS companies_updated_at 
+FROM companies 
+WHERE companies.user_id = %(user_id_1)s AND companies.name = %(name_1)s
+2025-10-07 14:36:02,427 - sqlalchemy.engine.Engine - INFO - [cached since 5.075s ago] {'user_id_1': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'name_1': 'Australia_for_UNHCR'}
+2025-10-07 14:36:02,448 - sqlalchemy.engine.Engine - INFO - INSERT INTO company_files (user_id, company_id, file_type, file_format, filename, file_path, file_size, sha256, timestamp, created_at) VALUES (%(user_id)s, %(company_id)s, %(file_type)s, %(file_format)s, %(filename)s, %(file_path)s, %(file_size)s, %(sha256)s, %(timestamp)s, now()) RETURNING company_files.id, company_files.created_at
+2025-10-07 14:36:02,449 - sqlalchemy.engine.Engine - INFO - [cached since 5.062s ago] {'user_id': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'company_id': 7, 'file_type': 'ai_recommendation', 'file_format': 'json', 'filename': 'Australia_for_UNHCR_ai_recommendation_20251007_143602.json', 'file_path': 'user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_ai_recommendation_20251007_143602.json', 'file_size': 3486, 'sha256': '5849d81818c300567b545ec9c2c0ea3bfa9caee29e80cb8535c9a9bf141edf3a', 'timestamp': '20251007_143602'}
+2025-10-07 14:36:02,474 - sqlalchemy.engine.Engine - INFO - INSERT INTO analysis_runs (user_id, company_id, kind, status, model_used, started_at, completed_at, meta_json, source_file_id, output_file_id) VALUES (%(user_id)s, %(company_id)s, %(kind)s, %(status)s, %(model_used)s, now(), %(completed_at)s, %(meta_json)s, %(source_file_id)s, %(output_file_id)s) RETURNING analysis_runs.id, analysis_runs.started_at
+2025-10-07 14:36:02,475 - sqlalchemy.engine.Engine - INFO - [cached since 5.06s ago] {'user_id': '0f468f2b-1d7d-45cf-aea2-e9e5fffa65ed', 'company_id': 7, 'kind': 'ai_reco', 'status': 'completed', 'model_used': None, 'completed_at': None, 'meta_json': 'null', 'source_file_id': None, 'output_file_id': 48}
+2025-10-07 14:36:02,494 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-10-07 14:36:02,515 - app.services.ai_recommendation_generator - INFO - ✅ [AI GENERATOR] AI recommendation generated and saved for Australia_for_UNHCR
+2025-10-07 14:36:02,517 - app.services.ai_recommendation_generator - INFO - 📄 File: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR/Australia_for_UNHCR_ai_recommendation.json
+2025-10-07 14:36:02,517 - app.services.ai_recommendation_generator - INFO - 💰 Cost: $0.0047
+2025-10-07 14:36:02,518 - app.services.ai_recommendation_generator - INFO - 🔤 Tokens: 3624
+2025-10-07 14:36:02,518 - app.services.ai_recommendation_generator - INFO - 🚀 [AI GENERATOR] Starting automatic CV tailoring for Australia_for_UNHCR
+2025-10-07 14:36:02,519 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:36:02,531 - app.tailored_cv.services.cv_tailoring_service - INFO - ✅ Loaded CV optimization framework from /Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/app/tailored_cv/prompts/framework.md
+2025-10-07 14:36:02,535 - app.tailored_cv.services.cv_tailoring_service - INFO - Loading real data for Australia_for_UNHCR
+2025-10-07 14:36:02,537 - app.tailored_cv.services.cv_tailoring_service - INFO - Company folder: user/shankar@gmail.com/cv-analysis/applied_companies/Australia_for_UNHCR
+2025-10-07 14:36:02,547 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:36:02,561 - app.utils.user_path_utils - INFO - ✅ User base path (preferred): user/shankar@gmail.com/cv-analysis for shankar@gmail.com
+2025-10-07 14:36:02,565 - app.utils.user_path_utils - INFO - ✅ Ensured user directories exist: user/shankar@gmail.com/cv-analysis
+2025-10-07 14:36:02,568 - app.tailored_cv.services.cv_tailoring_service - INFO - 📄 [TAILORING] Using latest CV via unified selector → type=original, ts=None, path=user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:36:02,569 - app.tailored_cv.services.cv_tailoring_service - INFO - 🔍 [DEBUG] Loading CV from user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:36:02,570 - app.tailored_cv.services.cv_tailoring_service - INFO - - First 200 chars: {   "personal_information": {     "name": "Maheshwor Tiwari",     "phone": "0414 032 507",     "email": "maheshtwari99@gmail.com",     "location": "Hurstville, NSW, 2220",     "linkedin": "LinkedIn", 
+2025-10-07 14:36:02,571 - app.tailored_cv.services.recommendation_parser - INFO - 📂 Loading CV from: user/shankar@gmail.com/cv-analysis/cvs/original/original_cv.json
+2025-10-07 14:36:02,572 - app.tailored_cv.services.recommendation_parser - INFO - 📋 CV format check:
+2025-10-07 14:36:02,574 - app.tailored_cv.services.recommendation_parser - INFO -   - Top-level keys: ['personal_information', 'career_profile', 'skills', 'education', 'experience', 'projects', 'certifications', 'languages', 'awards', 'publications', 'volunteer_work', 'professional_memberships', 'unknown_sections', 'original_sections', 'saved_at', 'metadata']
+2025-10-07 14:36:02,575 - app.tailored_cv.services.recommendation_parser - INFO -   - Has metadata: True
+2025-10-07 14:36:02,576 - app.tailored_cv.services.recommendation_parser - INFO -   - Source file: maheshwor_tiwari.pdf
+2025-10-07 14:36:02,576 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing version: 2.0
+2025-10-07 14:36:02,576 - app.tailored_cv.services.recommendation_parser - INFO - ✅ Detected structured CV format
+2025-10-07 14:36:02,577 - app.tailored_cv.services.recommendation_parser - INFO - 📊 Structure overview:
+2025-10-07 14:36:02,577 - app.tailored_cv.services.recommendation_parser - INFO -   - Skills sections: ['technical_skills', 'key_skills', 'soft_skills', 'domain_expertise']
+2025-10-07 14:36:02,577 - app.tailored_cv.services.recommendation_parser - INFO -   - Experience entries: 6
+2025-10-07 14:36:02,578 - app.tailored_cv.services.recommendation_parser - INFO -   - Education entries: 3
+2025-10-07 14:36:02,578 - app.tailored_cv.services.recommendation_parser - INFO -   - Projects: 0
+2025-10-07 14:36:02,578 - app.tailored_cv.services.recommendation_parser - INFO - 🔄 Starting structured CV conversion
+2025-10-07 14:36:02,579 - app.tailored_cv.services.recommendation_parser - INFO - 📊 Input data validation:
+2025-10-07 14:36:02,579 - app.tailored_cv.services.recommendation_parser - INFO - 👤 Converting contact information
+2025-10-07 14:36:02,579 - app.tailored_cv.services.recommendation_parser - INFO -   - Source fields: ['name', 'phone', 'email', 'location', 'linkedin', 'github', 'portfolio_links', 'residency_status', 'open_to']
+2025-10-07 14:36:02,580 - app.tailored_cv.services.recommendation_parser - INFO -   - Mapped fields: ['name', 'email', 'phone', 'location', 'linkedin', 'website']
+2025-10-07 14:36:02,580 - app.tailored_cv.services.recommendation_parser - INFO -   - Contact completeness: 100.0%
+2025-10-07 14:36:02,580 - app.tailored_cv.services.recommendation_parser - INFO -   - LinkedIn: LinkedIn
+2025-10-07 14:36:02,581 - app.tailored_cv.services.recommendation_parser - INFO -   - Website: GitHub
+2025-10-07 14:36:02,581 - app.tailored_cv.services.recommendation_parser - INFO - 💼 Converting experience entries
+2025-10-07 14:36:02,581 - app.tailored_cv.services.recommendation_parser - INFO -   - Found 6 experience entries
+2025-10-07 14:36:02,581 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing experience 1/6
+2025-10-07 14:36:02,582 - app.tailored_cv.services.recommendation_parser - INFO -     • Company: The Bitrates
+2025-10-07 14:36:02,582 - app.tailored_cv.services.recommendation_parser - INFO -     • Title: Data Analyst
+2025-10-07 14:36:02,582 - app.tailored_cv.services.recommendation_parser - INFO -     • Duration: Jul 2024 to Present
+2025-10-07 14:36:02,583 - app.tailored_cv.services.recommendation_parser - INFO -     • Bullets: 5
+2025-10-07 14:36:02,583 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing experience 2/6
+2025-10-07 14:36:02,583 - app.tailored_cv.services.recommendation_parser - INFO -     • Company: iBuild Building Solutions
+2025-10-07 14:36:02,583 - app.tailored_cv.services.recommendation_parser - INFO -     • Title: Data Analyst
+2025-10-07 14:36:02,584 - app.tailored_cv.services.recommendation_parser - INFO -     • Duration: Mar 2024 to Jun 2024
+2025-10-07 14:36:02,584 - app.tailored_cv.services.recommendation_parser - INFO -     • Bullets: 4
+2025-10-07 14:36:02,584 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing experience 3/6
+2025-10-07 14:36:02,584 - app.tailored_cv.services.recommendation_parser - INFO -     • Company: Property Console
+2025-10-07 14:36:02,584 - app.tailored_cv.services.recommendation_parser - INFO -     • Title: Software engineer and Analyst
+2025-10-07 14:36:02,585 - app.tailored_cv.services.recommendation_parser - INFO -     • Duration: Jun 2023 to Nov 2023
+2025-10-07 14:36:02,585 - app.tailored_cv.services.recommendation_parser - INFO -     • Bullets: 4
+2025-10-07 14:36:02,585 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing experience 4/6
+2025-10-07 14:36:02,585 - app.tailored_cv.services.recommendation_parser - INFO -     • Company: CY Cergy Paris University
+2025-10-07 14:36:02,586 - app.tailored_cv.services.recommendation_parser - INFO -     • Title: Research Assistant
+2025-10-07 14:36:02,586 - app.tailored_cv.services.recommendation_parser - INFO -     • Duration: Oct 2018 to Sep 2022
+2025-10-07 14:36:02,586 - app.tailored_cv.services.recommendation_parser - INFO -     • Bullets: 3
+2025-10-07 14:36:02,586 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing experience 5/6
+2025-10-07 14:36:02,587 - app.tailored_cv.services.recommendation_parser - INFO -     • Company: CY Cergy Paris University
+2025-10-07 14:36:02,587 - app.tailored_cv.services.recommendation_parser - INFO -     • Title: Lecturer and Course Facilitator
+2025-10-07 14:36:02,587 - app.tailored_cv.services.recommendation_parser - INFO -     • Duration: Sep 2019 to Jun 2022
+2025-10-07 14:36:02,587 - app.tailored_cv.services.recommendation_parser - INFO -     • Bullets: 3
+2025-10-07 14:36:02,588 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing experience 6/6
+2025-10-07 14:36:02,588 - app.tailored_cv.services.recommendation_parser - INFO -     • Company: CY Cergy Paris University
+2025-10-07 14:36:02,588 - app.tailored_cv.services.recommendation_parser - INFO -     • Title: Research Intern
+2025-10-07 14:36:02,588 - app.tailored_cv.services.recommendation_parser - INFO -     • Duration: Feb 2018 to Jun 2018
+2025-10-07 14:36:02,588 - app.tailored_cv.services.recommendation_parser - INFO -     • Bullets: 3
+2025-10-07 14:36:02,589 - app.tailored_cv.services.recommendation_parser - INFO - Converted 6 experience entries
+2025-10-07 14:36:02,589 - app.tailored_cv.services.recommendation_parser - INFO - 🔧 Converting skills section
+2025-10-07 14:36:02,589 - app.tailored_cv.services.recommendation_parser - INFO -   - Source skill categories: ['technical_skills', 'key_skills', 'soft_skills', 'domain_expertise']
+2025-10-07 14:36:02,589 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing technical skills:
+2025-10-07 14:36:02,590 - app.tailored_cv.services.recommendation_parser - INFO -     • Extracted 5 unique technical skills
+2025-10-07 14:36:02,590 - app.tailored_cv.services.recommendation_parser - INFO -     • Skills: SQL, Python, Excel, Power BI, Data Analysis
+2025-10-07 14:36:02,590 - app.tailored_cv.services.recommendation_parser - INFO - Converted 1 skill categories
+2025-10-07 14:36:02,590 - app.tailored_cv.services.recommendation_parser - INFO - ✅ Conversion complete - Validating output
+2025-10-07 14:36:02,590 - app.tailored_cv.services.recommendation_parser - INFO - ✓ Experience: 6 entries
+2025-10-07 14:36:02,591 - app.tailored_cv.services.recommendation_parser - INFO - ✓ Skills: 1 categories
+2025-10-07 14:36:02,591 - app.tailored_cv.services.recommendation_parser - INFO -   • Technical Skills: 5 skills
+2025-10-07 14:36:02,591 - app.tailored_cv.services.recommendation_parser - INFO - ✨ Validation passed - All required sections present
+2025-10-07 14:36:02,592 - app.tailored_cv.services.recommendation_parser - INFO - 🎓 Converting education entries
+2025-10-07 14:36:02,592 - app.tailored_cv.services.recommendation_parser - INFO -   - Found 3 education entries
+2025-10-07 14:36:02,592 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing education 1/3
+2025-10-07 14:36:02,592 - app.tailored_cv.services.recommendation_parser - INFO -     • Institution: Charles Darwin University, Sydney, Australia
+2025-10-07 14:36:02,592 - app.tailored_cv.services.recommendation_parser - INFO -     • Degree: Master of Data Science
+2025-10-07 14:36:02,593 - app.tailored_cv.services.recommendation_parser - INFO -     • Graduation date: Mar 2023 - Nov 2024
+2025-10-07 14:36:02,593 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing education 2/3
+2025-10-07 14:36:02,593 - app.tailored_cv.services.recommendation_parser - INFO -     • Institution: CY Cergy Paris University, Cergy, France
+2025-10-07 14:36:02,594 - app.tailored_cv.services.recommendation_parser - INFO -     • Degree: PhD in Physics
+2025-10-07 14:36:02,594 - app.tailored_cv.services.recommendation_parser - INFO -     • Graduation date: Oct 2018 - Sep 2022
+2025-10-07 14:36:02,594 - app.tailored_cv.services.recommendation_parser - INFO -   - Processing education 3/3
+2025-10-07 14:36:02,595 - app.tailored_cv.services.recommendation_parser - INFO -     • Institution: CY Cergy Paris University, Cergy, France
+2025-10-07 14:36:02,595 - app.tailored_cv.services.recommendation_parser - INFO -     • Degree: Master of Theoretical Physics
+2025-10-07 14:36:02,595 - app.tailored_cv.services.recommendation_parser - INFO -     • Graduation date: Sep 2016 - Jun 2018
+2025-10-07 14:36:02,596 - app.tailored_cv.services.recommendation_parser - INFO - Converted 3 education entries
+2025-10-07 14:36:02,596 - app.tailored_cv.services.recommendation_parser - INFO - 📤 Returning converted CV data:
+2025-10-07 14:36:02,596 - app.tailored_cv.services.recommendation_parser - INFO -   - Contact fields: ['name', 'email', 'phone', 'location', 'linkedin', 'website']
+2025-10-07 14:36:02,597 - app.tailored_cv.services.recommendation_parser - INFO -   - Experience entries: 6
+2025-10-07 14:36:02,597 - app.tailored_cv.services.recommendation_parser - INFO -   - Skill categories: 1
+2025-10-07 14:36:02,598 - app.tailored_cv.services.recommendation_parser - INFO -   - Education entries: 3
+2025-10-07 14:36:02,598 - app.tailored_cv.services.cv_tailoring_service - INFO - - Parsed CV data keys: ['contact', 'experience', 'skills', 'education']
+2025-10-07 14:36:02,599 - app.tailored_cv.services.cv_tailoring_service - INFO - ✅ Skills already in SkillCategory format
+2025-10-07 14:36:02,600 - app.tailored_cv.services.cv_tailoring_service - INFO - - Final CV object attributes: ['__abstractmethods__', '__annotations__', '__class__', '__class_getitem__', '__class_vars__', '__copy__', '__deepcopy__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__fields__', '__fields_set__', '__format__', '__ge__', '__get_pydantic_core_schema__', '__get_pydantic_json_schema__', '__getattr__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__pretty__', '__private_attributes__', '__pydantic_complete__', '__pydantic_core_schema__', '__pydantic_custom_init__', '__pydantic_decorators__', '__pydantic_extra__', '__pydantic_fields_set__', '__pydantic_generic_metadata__', '__pydantic_init_subclass__', '__pydantic_parent_namespace__', '__pydantic_post_init__', '__pydantic_private__', '__pydantic_root_model__', '__pydantic_serializer__', '__pydantic_validator__', '__reduce__', '__reduce_ex__', '__repr__', '__repr_args__', '__repr_name__', '__repr_str__', '__rich_repr__', '__setattr__', '__setstate__', '__signature__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '__weakref__', '_abc_impl', '_calculate_keys', '_check_frozen', '_copy_and_set_values', '_get_value', '_iter', 'construct', 'contact', 'copy', 'created_at', 'dict', 'education', 'experience', 'experience_level', 'from_orm', 'json', 'model_computed_fields', 'model_config', 'model_construct', 'model_copy', 'model_dump', 'model_dump_json', 'model_extra', 'model_fields', 'model_fields_set', 'model_json_schema', 'model_parametrized_name', 'model_post_init', 'model_rebuild', 'model_validate', 'model_validate_json', 'model_validate_strings', 'parse_file', 'parse_obj', 'parse_raw', 'projects', 'schema', 'schema_json', 'skills', 'total_years_experience', 'update_forward_refs', 'updated_at', 'validate']
+2025-10-07 14:36:02,612 - app.tailored_cv.services.recommendation_parser - INFO - ✅ Parsed recommendation for Australia_for_UNHCR
+2025-10-07 14:36:02,613 - app.tailored_cv.services.cv_tailoring_service - INFO - ✅ Loaded real CV and recommendation for Australia_for_UNHCR
+2025-10-07 14:36:02,614 - app.tailored_cv.services.cv_tailoring_service - INFO - 🎯 Starting CV tailoring for Australia_for_UNHCR - Senior Data Analyst
+2025-10-07 14:36:02,614 - app.tailored_cv.services.cv_tailoring_service - INFO - 🔍 [DEBUG] Validating CV structure:
+2025-10-07 14:36:02,614 - app.tailored_cv.services.cv_tailoring_service - INFO - - CV object type: <class 'app.tailored_cv.models.cv_models.OriginalCV'>
+2025-10-07 14:36:02,615 - app.tailored_cv.services.cv_tailoring_service - INFO - - CV attributes: ['__abstractmethods__', '__annotations__', '__class__', '__class_getitem__', '__class_vars__', '__copy__', '__deepcopy__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__fields__', '__fields_set__', '__format__', '__ge__', '__get_pydantic_core_schema__', '__get_pydantic_json_schema__', '__getattr__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__pretty__', '__private_attributes__', '__pydantic_complete__', '__pydantic_core_schema__', '__pydantic_custom_init__', '__pydantic_decorators__', '__pydantic_extra__', '__pydantic_fields_set__', '__pydantic_generic_metadata__', '__pydantic_init_subclass__', '__pydantic_parent_namespace__', '__pydantic_post_init__', '__pydantic_private__', '__pydantic_root_model__', '__pydantic_serializer__', '__pydantic_validator__', '__reduce__', '__reduce_ex__', '__repr__', '__repr_args__', '__repr_name__', '__repr_str__', '__rich_repr__', '__setattr__', '__setstate__', '__signature__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '__weakref__', '_abc_impl', '_calculate_keys', '_check_frozen', '_copy_and_set_values', '_get_value', '_iter', 'construct', 'contact', 'copy', 'created_at', 'dict', 'education', 'experience', 'experience_level', 'from_orm', 'json', 'model_computed_fields', 'model_config', 'model_construct', 'model_copy', 'model_dump', 'model_dump_json', 'model_extra', 'model_fields', 'model_fields_set', 'model_json_schema', 'model_parametrized_name', 'model_post_init', 'model_rebuild', 'model_validate', 'model_validate_json', 'model_validate_strings', 'parse_file', 'parse_obj', 'parse_raw', 'projects', 'schema', 'schema_json', 'skills', 'total_years_experience', 'update_forward_refs', 'updated_at', 'validate']
+2025-10-07 14:36:02,616 - app.tailored_cv.services.cv_tailoring_service - INFO - - CV data: {
+  "contact": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "linkedin": "LinkedIn",
+    "location": "Hurstville, NSW, 2220",
+    "website": "GitHub"
+  },
+  "education": [
+    {
+      "institution": "Charles Darwin University, Sydney, Australia",
+      "degree": "Master of Data Science",
+      "location": "Sydney, Australia",
+      "graduation_date": "Mar 2023 - Nov 2024",
+      "gpa": "GPA",
+      "relevant_coursework": [],
+      "honors": []
+    },
+    {
+      "institution": "CY Cergy Paris University, Cergy, France",
+      "degree": "PhD in Physics",
+      "location": "Cergy, France",
+      "graduation_date": "Oct 2018 - Sep 2022",
+      "gpa": "",
+      "relevant_coursework": [],
+      "honors": []
+    },
+    {
+      "institution": "CY Cergy Paris University, Cergy, France",
+      "degree": "Master of Theoretical Physics",
+      "location": "Cergy, France",
+      "graduation_date": "Sep 2016 - Jun 2018",
+      "gpa": "",
+      "relevant_coursework": [],
+      "honors": []
+    }
+  ],
+  "experience": [
+    {
+      "company": "The Bitrates",
+      "title": "Data Analyst",
+      "location": "Sydney, New South Wales, Australia",
+      "start_date": "Jul 2024",
+      "end_date": "Present",
+      "duration": null,
+      "bullets": [
+        "\u2022 Designed and implemented Python scripts for data cleaning, preprocessing, and analysis, improving data pipeline efficiency by 30%.",
+        "\u2022 Developed machine learning models in Python for predictive analytics, enabling data-driven business decisions.",
+        "\u2022 Leveraged AI techniques to automate repetitive tasks, reducing manual effort and improving productivity.",
+        "\u2022 Built dynamic dashboards and visualizations using Python libraries like Matplotlib and Seaborn to communicate insights effectively.",
+        "\u2022 Integrated Google Analytics data with Python for advanced analysis, enhancing customer behavior insights."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "iBuild Building Solutions",
+      "title": "Data Analyst",
+      "location": "Victoria, Australia",
+      "start_date": "Mar 2024",
+      "end_date": "Jun 2024",
+      "duration": null,
+      "bullets": [
+        "\u2022 Automated data extraction and structuring of population datasets using Python, improving data accuracy and team collaboration.",
+        "\u2022 Analyzed customer support data with Python to optimize response times and enhance operational efficiency.",
+        "\u2022 Developed Python-based solutions to generate actionable insights, meeting strict deadlines for strategic decision-making.",
+        "\u2022 Designed Python scripts to create dynamic reports and dashboards, significantly improving customer satisfaction and decision-making processes."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "Property Console",
+      "title": "Software engineer and Analyst",
+      "location": "Sydney, Australia",
+      "start_date": "Jun 2023",
+      "end_date": "Nov 2023",
+      "duration": null,
+      "bullets": [
+        "\u2022 Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity and operational efficiency.",
+        "\u2022 Collaborated with the development team to enhance analytics capabilities, using Python to improve data processing speed by 25%.",
+        "\u2022 Leveraged Python for data preprocessing and analysis, producing Tableau dashboards that improved decision-making.",
+        "\u2022 Supported cross-functional teams with Python-driven insights, enabling customer-focused initiatives."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Research Assistant",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Oct 2018",
+      "end_date": "Sep 2022",
+      "duration": null,
+      "bullets": [
+        "\u2022 Utilized advanced Python programming for computational modeling and solving complex research problems.",
+        "\u2022 Developed Python-based workflows to manage and analyze large datasets across multiple research projects.",
+        "\u2022 Presented Python-enabled research findings at international conferences, demonstrating technical expertise and communication skills."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Lecturer and Course Facilitator",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Sep 2019",
+      "end_date": "Jun 2022",
+      "duration": null,
+      "bullets": [
+        "\u2022 Led engaging physics tutorials for master\u2019s students, enhancing understanding and promoting teamwork.",
+        "\u2022 Designed course materials, assignments, and exams, strengthening the learning experience.",
+        "\u2022 Mentored students on projects, collaborated with faculty, and fostered student engagement."
+      ],
+      "skills_used": null
+    },
+    {
+      "company": "CY Cergy Paris University",
+      "title": "Research Intern",
+      "location": "Cergy-Pontoise, France",
+      "start_date": "Feb 2018",
+      "end_date": "Jun 2018",
+      "duration": null,
+      "bullets": [
+        "\u2022 Developed proficiency in Python programming by researching the effect of magnetic fields on 2D materials.",
+        "\u2022 Managed and analysed complex data sets, improving their accuracy and reliability.",
+        "\u2022 Used dashboard using Power BI to present research findings and participated in weekly reviews, improving collaboration and research skills."
+      ],
+      "skills_used": null
+    }
+  ],
+  "projects": null,
+  "skills": [
+    {
+      "category": "Technical Skills",
+      "skills": [
+        "SQL",
+        "Python",
+        "Excel",
+        "Power BI",
+        "Data Analysis"
+      ]
+    }
+  ],
+  "experience_level": null,
+  "total_years_experience": null,
+  "created_at": null,
+  "updated_at": null
+}
+2025-10-07 14:36:02,622 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] 🎯 Starting CV tailoring for Australia_for_UNHCR with strategy: education_last
+2025-10-07 14:36:02,623 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] Initial stats:
+2025-10-07 14:36:02,623 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] - Experience entries: 6
+2025-10-07 14:36:02,624 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] - Total bullets: 22
+2025-10-07 14:36:02,624 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] - Skills categories: 1
+2025-10-07 14:36:02,625 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] - Total skills: 5
+2025-10-07 14:36:02,626 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] Critical gaps to address: Business Intelligence
+2025-10-07 14:36:02,626 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] Technical enhancements needed: 
+2025-10-07 14:36:02,627 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] 🤖 Generating tailored CV using AI service...
+2025-10-07 14:36:02,628 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] Attempt 1/5 with temp=0.0
+2025-10-07 14:36:02,628 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] - System prompt length: 10574
+2025-10-07 14:36:02,628 - app.tailored_cv.services.cv_tailoring_service - INFO - [7161e767] - User prompt length: 12394
+2025-10-07 14:36:02,629 - app.ai.ai_service - INFO - Generating response with provider: openai, model: gpt-3.5-turbo
