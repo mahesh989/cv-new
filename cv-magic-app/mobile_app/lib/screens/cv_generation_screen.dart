@@ -4,14 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:async';
 import '../core/theme/app_theme.dart';
-import '../services/skills_analysis_handler.dart';
+import '../services/results_clearing_service.dart';
 
 class CVGenerationScreen extends StatefulWidget {
   final VoidCallback? onNavigateToCVMagic;
+  final VoidCallback? onNavigateToCVMagicWithoutClearing;
 
   const CVGenerationScreen({
     super.key,
     this.onNavigateToCVMagic,
+    this.onNavigateToCVMagicWithoutClearing,
   });
 
   @override
@@ -739,33 +741,32 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
   }
 
   void _runATSAgain() async {
-    debugPrint('🗑 [CV_GENERATION] Run ATS Again clicked - clearing results');
+    debugPrint(
+        '🗑 [CV_GENERATION] Run ATS Again clicked - clearing analysis results only (preserving JD inputs)');
 
     try {
-      // Clear all results first
-      await SkillsAnalysisHandler.clearResults();
-      debugPrint('✅ [CV_GENERATION] Results cleared successfully');
+      // Clear only analysis results while preserving JD URL and JD text
+      await ResultsClearingService.clearAnalysisResultsOnly();
+      debugPrint(
+          '✅ [CV_GENERATION] Analysis results cleared successfully (JD inputs preserved)');
 
-      // Navigate to CV Magic tab
-      _navigateToCVMagicTab();
-    } catch (e) {
-      debugPrint('⚠️ [CV_GENERATION] Error clearing results: $e');
-      // Still try to navigate even if clearing fails
-      _navigateToCVMagicTab();
-    }
-    // Navigate back to CV Magic tab and clear results
-    if (mounted) {
       // Show notification
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              '🔄 Navigating to CV Magic tab. Previous results cleared for fresh analysis with tailored CV.'),
-          backgroundColor: Colors.blue,
-          duration: Duration(seconds: 4),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                '🔄 Analysis results cleared, JD URL and JD text preserved. Navigating to CV Magic tab for fresh analysis with tailored CV.'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
 
-      // Navigate to CV Magic tab (index 1) and clear results
+      // Navigate to CV Magic tab (without triggering the clear flag)
+      _navigateToCVMagicTabWithoutClearing();
+    } catch (e) {
+      debugPrint('⚠️ [CV_GENERATION] Error clearing analysis results: $e');
+      // Still try to navigate even if clearing fails
       _navigateToCVMagicTab();
     }
   }
@@ -777,6 +778,19 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
       widget.onNavigateToCVMagic!();
       debugPrint(
           '✅ Navigated to CV Magic tab - clearing should happen in CV Magic tab');
+    } else {
+      debugPrint('❌ No navigation callback provided');
+    }
+  }
+
+  void _navigateToCVMagicTabWithoutClearing() {
+    debugPrint(
+        '🔀 [CV_GENERATION] Navigating to CV Magic tab without clearing');
+    // Use the callback to navigate to CV Magic tab without clearing
+    if (widget.onNavigateToCVMagicWithoutClearing != null) {
+      widget.onNavigateToCVMagicWithoutClearing!();
+      debugPrint(
+          '✅ Navigated to CV Magic tab without clearing - JD inputs preserved');
     } else {
       debugPrint('❌ No navigation callback provided');
     }

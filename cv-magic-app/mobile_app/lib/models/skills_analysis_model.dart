@@ -56,6 +56,9 @@ class SkillsAnalysisResult {
   final ATSResult? atsResult;
   // New: AI recommendation content
   final AIRecommendationResult? aiRecommendation;
+  // New: warnings and suggestions from backend (e.g., cv_minimal)
+  final List<dynamic>? warnings;
+  final Map<String, dynamic>? suggestions;
 
   SkillsAnalysisResult({
     required this.cvSkills,
@@ -73,6 +76,8 @@ class SkillsAnalysisResult {
     this.componentAnalysis,
     this.atsResult,
     this.aiRecommendation,
+    this.warnings,
+    this.suggestions,
   });
 
   factory SkillsAnalysisResult.fromJson(Map<String, dynamic> json) {
@@ -80,13 +85,17 @@ class SkillsAnalysisResult {
     debugPrint('🔍 [MODEL_DEBUG] Parsing SkillsAnalysisResult from JSON');
     debugPrint('   Keys in JSON: ${json.keys.toList()}');
     debugPrint(
-        '   cv_comprehensive_analysis present: ${json.containsKey("cv_comprehensive_analysis")}');
+      '   cv_comprehensive_analysis present: ${json.containsKey("cv_comprehensive_analysis")}',
+    );
     debugPrint(
-        '   jd_comprehensive_analysis present: ${json.containsKey("jd_comprehensive_analysis")}');
+      '   jd_comprehensive_analysis present: ${json.containsKey("jd_comprehensive_analysis")}',
+    );
     debugPrint(
-        '   expandable_analysis present: ${json.containsKey("expandable_analysis")}');
+      '   expandable_analysis present: ${json.containsKey("expandable_analysis")}',
+    );
     debugPrint(
-        '   analyze_match present: ${json.containsKey("analyze_match")}');
+      '   analyze_match present: ${json.containsKey("analyze_match")}',
+    );
 
     // Handle expandable_analysis structure
     final expandableAnalysis =
@@ -100,9 +109,11 @@ class SkillsAnalysisResult {
 
     // Debug the lengths
     debugPrint(
-        '   cv_comprehensive_analysis length: ${cvComprehensiveAnalysis?.length ?? 0}');
+      '   cv_comprehensive_analysis length: ${cvComprehensiveAnalysis?.length ?? 0}',
+    );
     debugPrint(
-        '   jd_comprehensive_analysis length: ${jdComprehensiveAnalysis?.length ?? 0}');
+      '   jd_comprehensive_analysis length: ${jdComprehensiveAnalysis?.length ?? 0}',
+    );
 
     // If comprehensive analysis is empty, try to get from expandable_analysis
     if ((cvComprehensiveAnalysis == null ||
@@ -129,7 +140,8 @@ class SkillsAnalysisResult {
     AnalyzeMatchResult? analyzeMatch;
     if (json['analyze_match'] != null) {
       analyzeMatch = AnalyzeMatchResult.fromJson(
-          json['analyze_match'] as Map<String, dynamic>);
+        json['analyze_match'] as Map<String, dynamic>,
+      );
     }
 
     // Parse pre-extracted comparison
@@ -140,14 +152,17 @@ class SkillsAnalysisResult {
       preextractedRaw = m['raw_output'] as String?;
       preextractedCompany = m['company_name'] as String?;
       debugPrint(
-          '   preextracted_skills_comparison raw length: ${preextractedRaw?.length ?? 0}');
+        '   preextracted_skills_comparison raw length: ${preextractedRaw?.length ?? 0}',
+      );
     }
 
     // Debug final values
     debugPrint(
-        '   FINAL cvComprehensiveAnalysis length: ${cvComprehensiveAnalysis?.length ?? 0}');
+      '   FINAL cvComprehensiveAnalysis length: ${cvComprehensiveAnalysis?.length ?? 0}',
+    );
     debugPrint(
-        '   FINAL jdComprehensiveAnalysis length: ${jdComprehensiveAnalysis?.length ?? 0}');
+      '   FINAL jdComprehensiveAnalysis length: ${jdComprehensiveAnalysis?.length ?? 0}',
+    );
     debugPrint('   FINAL analyzeMatch present: ${analyzeMatch != null}');
 
     // Parse component analysis and ATS results (from polling response)
@@ -156,7 +171,8 @@ class SkillsAnalysisResult {
 
     if (json['component_analysis'] != null) {
       componentAnalysis = ComponentAnalysisResult.fromJson(
-          json['component_analysis'] as Map<String, dynamic>);
+        json['component_analysis'] as Map<String, dynamic>,
+      );
       debugPrint('   component_analysis parsed successfully');
     }
 
@@ -169,9 +185,14 @@ class SkillsAnalysisResult {
     AIRecommendationResult? aiRecommendation;
     if (json['ai_recommendation'] != null) {
       aiRecommendation = AIRecommendationResult.fromJson(
-          json['ai_recommendation'] as Map<String, dynamic>);
+        json['ai_recommendation'] as Map<String, dynamic>,
+      );
       debugPrint('   ai_recommendation parsed successfully');
     }
+
+    // Parse warnings and suggestions (optional)
+    final warnings = json['warnings'] as List<dynamic>?;
+    final suggestions = json['suggestions'] as Map<String, dynamic>?;
 
     // Parse CV skills with fallback extraction
     SkillsData cvSkills = SkillsData.fromJson(json['cv_skills'] ?? {});
@@ -181,11 +202,14 @@ class SkillsAnalysisResult {
         cvComprehensiveAnalysis != null &&
         cvComprehensiveAnalysis.trim().isNotEmpty) {
       debugPrint(
-          '🔧 [MODEL_DEBUG] cv_skills is empty, attempting fallback extraction from comprehensive analysis');
+        '🔧 [MODEL_DEBUG] cv_skills is empty, attempting fallback extraction from comprehensive analysis',
+      );
       cvSkills = SkillsExtractor.extractFromComprehensiveAnalysis(
-          cvComprehensiveAnalysis);
+        cvComprehensiveAnalysis,
+      );
       debugPrint(
-          '   Fallback extracted CV skills: ${cvSkills.totalSkillsCount}');
+        '   Fallback extracted CV skills: ${cvSkills.totalSkillsCount}',
+      );
     }
 
     // Parse JD skills (normally these are fine, but add same fallback just in case)
@@ -195,11 +219,14 @@ class SkillsAnalysisResult {
         jdComprehensiveAnalysis != null &&
         jdComprehensiveAnalysis.trim().isNotEmpty) {
       debugPrint(
-          '🔧 [MODEL_DEBUG] jd_skills is empty, attempting fallback extraction from comprehensive analysis');
+        '🔧 [MODEL_DEBUG] jd_skills is empty, attempting fallback extraction from comprehensive analysis',
+      );
       jdSkills = SkillsExtractor.extractFromComprehensiveAnalysis(
-          jdComprehensiveAnalysis);
+        jdComprehensiveAnalysis,
+      );
       debugPrint(
-          '   Fallback extracted JD skills: ${jdSkills.totalSkillsCount}');
+        '   Fallback extracted JD skills: ${jdSkills.totalSkillsCount}',
+      );
     }
 
     return SkillsAnalysisResult(
@@ -218,6 +245,8 @@ class SkillsAnalysisResult {
       componentAnalysis: componentAnalysis,
       atsResult: atsResult,
       aiRecommendation: aiRecommendation,
+      warnings: warnings,
+      suggestions: suggestions,
     );
   }
 
@@ -263,6 +292,8 @@ class SkillsAnalysisResult {
       'component_analysis': componentAnalysis?.toJson(),
       'ats_score': atsResult?.toJson(),
       'ai_recommendation': aiRecommendation?.toJson(),
+      'warnings': warnings,
+      'suggestions': suggestions,
     };
   }
 
@@ -285,6 +316,8 @@ class SkillsAnalysisResult {
     ComponentAnalysisResult? componentAnalysis,
     ATSResult? atsResult,
     AIRecommendationResult? aiRecommendation,
+    List<dynamic>? warnings,
+    Map<String, dynamic>? suggestions,
   }) {
     return SkillsAnalysisResult(
       cvSkills: cvSkills ?? this.cvSkills,
@@ -306,6 +339,8 @@ class SkillsAnalysisResult {
       componentAnalysis: componentAnalysis ?? this.componentAnalysis,
       atsResult: atsResult ?? this.atsResult,
       aiRecommendation: aiRecommendation ?? this.aiRecommendation,
+      warnings: warnings ?? this.warnings,
+      suggestions: suggestions ?? this.suggestions,
     );
   }
 
@@ -331,7 +366,8 @@ class AnalyzeMatchResult {
     debugPrint('🔍 [MODEL_DEBUG] Parsing AnalyzeMatchResult from JSON');
     debugPrint('   Keys in JSON: ${json.keys.toList()}');
     debugPrint(
-        '   raw_analysis length: ${(json['raw_analysis'] as String?)?.length ?? 0}');
+      '   raw_analysis length: ${(json['raw_analysis'] as String?)?.length ?? 0}',
+    );
 
     return AnalyzeMatchResult(
       rawAnalysis: json['raw_analysis'] as String? ?? '',
@@ -342,10 +378,7 @@ class AnalyzeMatchResult {
   }
 
   factory AnalyzeMatchResult.error(String errorMessage) {
-    return AnalyzeMatchResult(
-      rawAnalysis: '',
-      error: errorMessage,
-    );
+    return AnalyzeMatchResult(rawAnalysis: '', error: errorMessage);
   }
 
   Map<String, dynamic> toJson() {
@@ -384,7 +417,8 @@ class ATSResult {
       categoryStatus: json['category_status'] as String? ?? '',
       recommendation: json['recommendation'] as String? ?? '',
       breakdown: ATSBreakdown.fromJson(
-          json['breakdown'] as Map<String, dynamic>? ?? {}),
+        json['breakdown'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
@@ -416,9 +450,11 @@ class ATSBreakdown {
   factory ATSBreakdown.fromJson(Map<String, dynamic> json) {
     return ATSBreakdown(
       category1: ATSCategory1.fromJson(
-          json['category1'] as Map<String, dynamic>? ?? {}),
+        json['category1'] as Map<String, dynamic>? ?? {},
+      ),
       category2: ATSCategory2.fromJson(
-          json['category2'] as Map<String, dynamic>? ?? {}),
+        json['category2'] as Map<String, dynamic>? ?? {},
+      ),
       ats1Score: (json['ats1_score'] as num?)?.toDouble() ?? 0.0,
       bonusPoints: (json['bonus_points'] as num?)?.toDouble() ?? 0.0,
     );

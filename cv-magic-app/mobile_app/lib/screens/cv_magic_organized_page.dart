@@ -670,4 +670,47 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
       ),
     );
   }
+
+  /// Clear only analysis results while preserving CV, JD URL, and JD text
+  /// This is used by "Run ATS Again" button to preserve user inputs
+  void clearAnalysisResultsOnly() {
+    debugPrint(
+        '🧹 [CV_MAGIC] Clearing analysis results only (preserving JD inputs)');
+    debugPrint('🧹 [CV_MAGIC] Preserving selected CV: $selectedCVFilename');
+    debugPrint('🧹 [CV_MAGIC] Preserving JD URL: ${jdUrlController.text}');
+    debugPrint(
+        '🧹 [CV_MAGIC] Preserving JD text length: ${jdController.text.length}');
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller has results before clear: ${_skillsController.hasResults}');
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller state before clear: ${_skillsController.state}');
+
+    // Clear only the skills analysis results
+    _skillsController.clearResults();
+
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller has results after clear: ${_skillsController.hasResults}');
+    debugPrint(
+        '🧹 [CV_MAGIC] Controller state after clear: ${_skillsController.state}');
+    debugPrint('🧹 [CV_MAGIC] Selected CV preserved: $selectedCVFilename');
+    debugPrint('🧹 [CV_MAGIC] JD URL preserved: ${jdUrlController.text}');
+    debugPrint(
+        '🧹 [CV_MAGIC] JD text preserved: ${jdController.text.length} characters');
+
+    // Clear any other state if needed
+    setState(() {
+      // Reset any local state variables if needed
+      debugPrint('🧹 [CV_MAGIC] setState called to refresh UI');
+    });
+
+    // Show confirmation message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+            '🔄 Analysis results cleared. CV, JD URL, and JD text preserved for fresh analysis.'),
+        backgroundColor: Colors.blue,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
 }

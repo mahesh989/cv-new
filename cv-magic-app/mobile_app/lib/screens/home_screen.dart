@@ -92,10 +92,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onResultsCleared: () => _shouldClearCVMagicResults = false,
     );
 
-    // Initialize CV Generation screen with navigation callback and key
+    // Initialize CV Generation screen with navigation callbacks and key
     _cvGenerationScreen = CVGenerationScreen(
       key: _cvGenerationKey,
       onNavigateToCVMagic: _navigateToCVMagicTab,
+      onNavigateToCVMagicWithoutClearing: _navigateToCVMagicTabWithoutClearing,
     );
 
     // Initialize Job Tracking screen with key for external refresh control
@@ -227,6 +228,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         '🔄 HomeScreen: Navigating to CV Magic tab (index 2) and clearing results');
     _shouldClearCVMagicResults = true; // Set flag to clear results
     debugPrint('🔄 HomeScreen: Flag set, now switching to tab index 2');
+    _onTabTapped(2); // Switch to CV Magic tab (index 2)
+  }
+
+  void _navigateToCVMagicTabWithoutClearing() {
+    debugPrint(
+        '🔄 HomeScreen: Navigating to CV Magic tab (index 2) without clearing results');
+    // Don't set the clear flag - just navigate
     _onTabTapped(2); // Switch to CV Magic tab (index 2)
   }
 

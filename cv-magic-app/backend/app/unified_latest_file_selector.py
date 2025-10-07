@@ -191,6 +191,21 @@ class UnifiedLatestFileSelector:
         if not candidates:
             raise FileNotFoundError(f"No CV found in tailored or original folders for company: {company}")
 
+        # Log discovered candidates with timestamps and mtimes for debugging
+        try:
+            debug_rows: List[str] = []
+            for json_path, _txt_path, ts, ftype in candidates:
+                try:
+                    mtime = json_path.stat().st_mtime if json_path and json_path.exists() else 0
+                except Exception:
+                    mtime = 0
+                debug_rows.append(f"type={ftype}, ts={ts}, mtime={mtime}, json={json_path}")
+            if debug_rows:
+                print("🧭 [UNIFIED] CV candidates before sort:\n  - " + "\n  - ".join(debug_rows))
+        except Exception as _e:
+            # best-effort logging only
+            pass
+
         # Sort by (timestamp desc, mtime desc) to always pick the freshest file
         def _candidate_key(c):
             json_path, _txt_path, ts, _ftype = c

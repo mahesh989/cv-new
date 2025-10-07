@@ -38,7 +38,8 @@ class SkillsDisplayWidget extends StatelessWidget {
           return _buildErrorState();
         } else if (!controller.hasResults && !controller.isLoading) {
           debugPrint(
-              '🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)');
+            '🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)',
+          );
           return const SizedBox.shrink(); // Remove placeholder - show nothing
         } else {
           debugPrint('🔍 [SKILLS_DISPLAY] Building results content');
@@ -61,11 +62,7 @@ class SkillsDisplayWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red.shade600,
-            size: 48,
-          ),
+          Icon(Icons.error_outline, color: Colors.red.shade600, size: 48),
           const SizedBox(height: 12),
           Text(
             'Analysis Failed',
@@ -79,10 +76,7 @@ class SkillsDisplayWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             controller.errorMessage ?? 'Unknown error occurred',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.red.shade600,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.red.shade600),
             textAlign: TextAlign.center,
           ),
         ],
@@ -98,9 +92,11 @@ class SkillsDisplayWidget extends StatelessWidget {
     debugPrint('   controller.result: ${controller.result != null}');
     if (controller.result != null) {
       debugPrint(
-          '   CV comprehensive analysis length: ${controller.cvComprehensiveAnalysis?.length ?? 0}');
+        '   CV comprehensive analysis length: ${controller.cvComprehensiveAnalysis?.length ?? 0}',
+      );
       debugPrint(
-          '   JD comprehensive analysis length: ${controller.jdComprehensiveAnalysis?.length ?? 0}');
+        '   JD comprehensive analysis length: ${controller.jdComprehensiveAnalysis?.length ?? 0}',
+      );
       debugPrint('   CV total skills: ${controller.cvTotalSkills}');
       debugPrint('   JD total skills: ${controller.jdTotalSkills}');
     }
@@ -119,6 +115,17 @@ class SkillsDisplayWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Inline minimal CV warning with actionable suggestions
+          if (controller.result?.warnings != null &&
+              (controller.result!.warnings!.any(
+                (w) =>
+                    (w is Map && (w['type'] == 'cv_minimal')) ||
+                    (w is String && w.contains('cv_minimal')),
+              )))
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: _buildCvMinimalSuggestions(),
+            ),
           // Header with execution info - show as soon as any results are available
           if (controller.result != null &&
               (controller.cvTotalSkills > 0 ||
@@ -146,7 +153,8 @@ class SkillsDisplayWidget extends StatelessWidget {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.orange.shade600),
+                          Colors.orange.shade600,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -171,7 +179,8 @@ class SkillsDisplayWidget extends StatelessWidget {
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering side-by-side comparison');
+                  '🔍 [SKILLS_DISPLAY] Rendering side-by-side comparison',
+                );
                 debugPrint('   CV Skills: ${controller.cvTotalSkills}');
                 debugPrint('   JD Skills: ${controller.jdTotalSkills}');
                 return Padding(
@@ -216,13 +225,16 @@ class SkillsDisplayWidget extends StatelessWidget {
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget (progressive)');
+                  '🔍 [SKILLS_DISPLAY] Rendering AnalyzeMatchWidget (progressive)',
+                );
                 debugPrint(
-                    '   showAnalyzeMatch: ${controller.showAnalyzeMatch}');
+                  '   showAnalyzeMatch: ${controller.showAnalyzeMatch}',
+                );
                 debugPrint('   hasAnalyzeMatch: ${controller.hasAnalyzeMatch}');
                 debugPrint('   isLoading: ${controller.isLoading}');
                 debugPrint(
-                    '   analyzeMatch: ${controller.analyzeMatch != null}');
+                  '   analyzeMatch: ${controller.analyzeMatch != null}',
+                );
 
                 // Show loading state if analyze match should show but isn't available yet
                 // This happens when showAnalyzeMatch is true but the actual data isn't loaded yet
@@ -243,13 +255,17 @@ class SkillsDisplayWidget extends StatelessWidget {
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering AIPoweredSkillsAnalysis');
+                  '🔍 [SKILLS_DISPLAY] Rendering AIPoweredSkillsAnalysis',
+                );
                 debugPrint(
-                    '   showPreextractedComparison: ${controller.showPreextractedComparison}');
+                  '   showPreextractedComparison: ${controller.showPreextractedComparison}',
+                );
                 debugPrint(
-                    '   hasPreextractedComparison: ${controller.result?.hasPreextractedComparison}');
+                  '   hasPreextractedComparison: ${controller.result?.hasPreextractedComparison}',
+                );
                 debugPrint(
-                    '   preextractedRawOutput length: ${controller.result?.preextractedRawOutput?.length ?? 0}');
+                  '   preextractedRawOutput length: ${controller.result?.preextractedRawOutput?.length ?? 0}',
+                );
 
                 // Show loading state if comparison should show but isn't available yet
                 if (controller.showPreextractedComparison &&
@@ -272,7 +288,8 @@ class SkillsDisplayWidget extends StatelessWidget {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.orange.shade600),
+                                Colors.orange.shade600,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -348,7 +365,8 @@ class SkillsDisplayWidget extends StatelessWidget {
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering ATS section (progressive)');
+                  '🔍 [SKILLS_DISPLAY] Rendering ATS section (progressive)',
+                );
                 debugPrint('   showATSLoading: ${controller.showATSLoading}');
                 debugPrint('   showATSResults: ${controller.showATSResults}');
                 debugPrint('   hasATSResult: ${controller.hasATSResult}');
@@ -373,7 +391,8 @@ class SkillsDisplayWidget extends StatelessWidget {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.orange.shade600),
+                                Colors.orange.shade600,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -393,9 +412,7 @@ class SkillsDisplayWidget extends StatelessWidget {
 
                 // Show actual ATS results when available
                 if (controller.showATSResults && controller.hasATSResult) {
-                  return ATSScoreWidgetWithProgressBars(
-                    controller: controller,
-                  );
+                  return ATSScoreWidgetWithProgressBars(controller: controller);
                 }
 
                 return const SizedBox.shrink();
@@ -409,13 +426,17 @@ class SkillsDisplayWidget extends StatelessWidget {
             Builder(
               builder: (context) {
                 debugPrint(
-                    '🔍 [SKILLS_DISPLAY] Rendering AI Recommendations section (progressive)');
+                  '🔍 [SKILLS_DISPLAY] Rendering AI Recommendations section (progressive)',
+                );
                 debugPrint(
-                    '   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
+                  '   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}',
+                );
                 debugPrint(
-                    '   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
+                  '   showAIRecommendationResults: ${controller.showAIRecommendationResults}',
+                );
                 debugPrint(
-                    '   hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
+                  '   hasAIRecommendation: ${controller.result?.aiRecommendation != null}',
+                );
 
                 // Show loading state if AI recommendations should show but results aren't available yet
                 if (controller.showAIRecommendationLoading &&
@@ -438,7 +459,8 @@ class SkillsDisplayWidget extends StatelessWidget {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.orange.shade600),
+                                Colors.orange.shade600,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -475,6 +497,81 @@ class SkillsDisplayWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildCvMinimalSuggestions() {
+    try {
+      final suggestions =
+          controller.result?.suggestions?['cv_enrichment']
+              as Map<String, dynamic>? ??
+          {};
+      final addTech = List<String>.from(suggestions['add_technical'] ?? []);
+      final addEvidence = List<String>.from(suggestions['add_evidence'] ?? []);
+      final addDomain = List<String>.from(suggestions['add_domain'] ?? []);
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF8E1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFFFECB3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: const [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: Color(0xFFFFA000),
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Your CV looks minimal — suggestions to enrich it',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            if (addTech.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Add technical focus:',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: addTech.map((s) => Chip(label: Text(s))).toList(),
+              ),
+            ],
+            if (addEvidence.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Strengthen evidence:',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              ...addEvidence.map((e) => Text('• $e')).toList(),
+            ],
+            if (addDomain.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Add domain terms:',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: addDomain.map((s) => Chip(label: Text(s))).toList(),
+              ),
+            ],
+          ],
+        ),
+      );
+    } catch (_) {
+      return const SizedBox.shrink();
+    }
+  }
+
   Widget _buildResultsHeader() {
     return Container(
       width: double.infinity,
@@ -488,11 +585,7 @@ class SkillsDisplayWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.analytics,
-            color: Colors.blue.shade700,
-            size: 20,
-          ),
+          Icon(Icons.analytics, color: Colors.blue.shade700, size: 20),
           const SizedBox(width: 8),
           Text(
             'Skills Analysis Results',
@@ -569,11 +662,7 @@ class SkillsDisplayWidget extends StatelessWidget {
 
         // Soft Skills
         if (softSkills.isNotEmpty) ...[
-          _buildSkillSection(
-            '🤝 Soft Skills',
-            softSkills,
-            baseColor.shade200,
-          ),
+          _buildSkillSection('🤝 Soft Skills', softSkills, baseColor.shade200),
           const SizedBox(height: 12),
         ],
 
@@ -624,10 +713,7 @@ class SkillsDisplayWidget extends StatelessWidget {
             children: sortedSkills
                 .map(
                   (skill) => Chip(
-                    label: Text(
-                      skill,
-                      style: const TextStyle(fontSize: 12),
-                    ),
+                    label: Text(skill, style: const TextStyle(fontSize: 12)),
                     backgroundColor: Colors.white,
                     side: BorderSide(color: Colors.grey.shade400),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

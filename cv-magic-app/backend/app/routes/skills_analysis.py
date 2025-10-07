@@ -914,6 +914,24 @@ async def preliminary_analysis(
         try:
             # Create user-specific selector
             user_selector = get_selector_for_user(user_email)
+            # Log JD URL if available via latest job_info for this company (once per analysis)
+            try:
+                from app.utils.user_path_utils import get_user_base_path
+                from pathlib import Path as _Path
+                base_dir = get_user_base_path(user_email)
+                company_dir = base_dir / "applied_companies" / company_name
+                job_info_files = list(company_dir.glob("job_info_*.json"))
+                if job_info_files:
+                    latest_job_info = max(job_info_files, key=lambda f: f.stat().st_mtime)
+                    import json as _json
+                    with open(latest_job_info, 'r', encoding='utf-8') as _jf:
+                        _job = _json.load(_jf)
+                    _jd_url_logged = _job.get("job_url") or _job.get("url")
+                    if _jd_url_logged:
+                        logger.info(f"🔗 [PRELIM_ANALYSIS] JD URL (latest job_info): {_jd_url_logged}")
+            except Exception as _e:
+                logger.debug(f"(debug) JD URL logging skipped: {_e}")
+
             cv_ctx = user_selector.get_latest_cv_across_all(company_name)
             logger.info(
                 "📄 [PRELIM_ANALYSIS] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
@@ -2274,6 +2292,12 @@ async def perform_preliminary_skills_analysis(
             logger.info(f"🔍 [SKILLS_ANALYSIS] CV content length: {len(cv_content)} chars")
             logger.info(f"🔍 [SKILLS_ANALYSIS] JD content length: {len(jd_text)} chars")
             logger.info(f"🔍 [SKILLS_ANALYSIS] Using config: {config_name or 'default'}")
+            # Lightweight CV content preview to aid debugging
+            try:
+                _cv_preview = (cv_content or "")[:180].replace('\n', ' ')
+                logger.info(f"🧪 [SKILLS_ANALYSIS] CV preview: '{_cv_preview}'")
+            except Exception:
+                pass
         
         # Get AI service instance
         from app.ai.ai_service import ai_service
@@ -2307,9 +2331,17 @@ async def perform_preliminary_skills_analysis(
         cv_soft_skills = cv_parsed.get('soft_skills', [])
         cv_domain_keywords = cv_parsed.get('domain_keywords', [])
 
-        # Enforce stop: if no CV skills extracted, abort early for frontend handling
-        if not cv_technical_skills and not cv_soft_skills and not cv_domain_keywords:
-            raise CVSkillsEmptyError("CV skills extraction returned zero items across all categories")
+        # Do NOT fallback or abort on minimal CVs; proceed and surface warnings + suggestions
+        cv_minimal = False
+        try:
+            total_cv_items = len(cv_technical_skills) + len(cv_soft_skills) + len(cv_domain_keywords)
+            # Consider minimal if no items or very few technical skills (< 5)
+            if total_cv_items == 0 or len(cv_technical_skills) < 5:
+                cv_minimal = True
+                logger.warning("⚠️ [SKILLS_ANALYSIS] CV content appears minimal (tech=%d, soft=%d, domain=%d) — continuing without fallback",
+                               len(cv_technical_skills), len(cv_soft_skills), len(cv_domain_keywords))
+        except Exception:
+            pass
         
         # Extract JD skills using enhanced structured prompt
         if logging_params["enable_detailed_logging"]:
@@ -2400,6 +2432,28 @@ async def perform_preliminary_skills_analysis(
             "analysis_timestamp": datetime.now().isoformat(),
             "config_used": config_name or "default"
         }
+
+        # Attach a minimal-CV warning and suggestions without aborting
+        if cv_minimal:
+            try:
+                result.setdefault("warnings", [])
+                result["warnings"].append({
+                    "type": "cv_minimal",
+                    "message": "Your CV appears minimal. We continued the analysis without fallback. Consider enriching the tailored CV with more role-relevant content.",
+                })
+                # Provide quick actionable suggestions for tailored CV
+                improvement_suggestions = {
+                    "add_technical": ["SQL", "Power BI", "Python", "Excel", "Data Analysis", "Business Intelligence"],
+                    "add_evidence": [
+                        "Quantify outcomes for dashboards and analytics (e.g., +30% efficiency)",
+                        "Mention data sizes, model counts, and automations",
+                        "Reference BI/reporting artifacts delivered"
+                    ],
+                    "add_domain": ["Fundraising", "Humanitarian Aid", "Donor-Centricity"],
+                }
+                result.setdefault("suggestions", {})["cv_enrichment"] = improvement_suggestions
+            except Exception:
+                pass
         
         if logging_params["enable_detailed_logging"]:
             logger.info(f"✅ [SKILLS_ANALYSIS] Analysis completed successfully")

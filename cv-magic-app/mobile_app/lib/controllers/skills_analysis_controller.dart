@@ -291,6 +291,30 @@ class SkillsAnalysisController extends ChangeNotifier {
         _setState(SkillsAnalysisState.completed);
         _showNotification('Context-aware analysis completed successfully!');
 
+        // Surface backend warnings (e.g., cv_minimal) as snackbars
+        try {
+          final warnings = _result!.warnings ?? [];
+          if (warnings.isNotEmpty) {
+            // If cv_minimal present, show a focused message
+            final hasCvMinimal = warnings.any(
+              (w) =>
+                  (w is Map && (w['type'] == 'cv_minimal')) ||
+                  (w is String && w.contains('cv_minimal')),
+            );
+            if (hasCvMinimal) {
+              _showNotification(
+                'Your CV appears minimal. We continued the analysis and generated enrichment suggestions.',
+                isError: false,
+              );
+            } else {
+              _showNotification(
+                'Analysis completed with warnings.',
+                isError: false,
+              );
+            }
+          }
+        } catch (_) {}
+
         // Save job details if analysis was successful
         await SkillsAnalysisHandler.handleAnalysisResult(
           jdText: jdUrl,
