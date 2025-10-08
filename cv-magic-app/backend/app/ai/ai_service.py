@@ -11,6 +11,7 @@ from app.ai.base_provider import BaseAIProvider, AIResponse
 from app.ai.providers import OpenAIProvider, AnthropicProvider, DeepSeekProvider
 import logging
 from app.core.model_dependency import get_request_model
+from app.models.auth import UserData
 
 logger = logging.getLogger(__name__)
 
@@ -204,6 +205,7 @@ class AIServiceManager:
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
         provider_name: Optional[str] = None,
+        user: Optional[UserData] = None,
         **kwargs
     ) -> AIResponse:
         """
@@ -236,26 +238,34 @@ class AIServiceManager:
                     provider.model_name = request_model_id
                     logger.debug(f"Updated provider model to match request: {request_model_id}")
         
-        # Determine which provider to use
-        if provider_name:
-            provider = self.get_provider(provider_name)
-            if not provider:
-                available_providers = self.get_available_providers()
-                logger.error(f"❌ Provider '{provider_name}' not available. Available providers: {available_providers}")
-                raise Exception(f"Provider '{provider_name}' not available. Available providers: {available_providers}")
-        else:
-            provider = self.get_current_provider()
-            if not provider:
-                current_provider_name = self.config.get_current_provider()
-                raise Exception(
-                    f"No AI model selected or provider unavailable. Current: '{current_provider_name}'. Set via /ai/set-current-model."
-                )
-        
+        # Determine provider name and model
+        resolved_provider_name = provider_name or self.config.get_current_provider()
+        if not resolved_provider_name:
+            raise Exception("No AI provider selected. Set via /ai/set-current-model.")
+
+        # Fetch API key for this specific user (no sharing between users)
+        api_key_for_request = self.config.get_api_key(resolved_provider_name, user)
+        if not api_key_for_request:
+            raise Exception(f"No API key configured for provider '{resolved_provider_name}' for this user.")
+
+        # Resolve model to use
+        available_models = self.config.get_available_models(resolved_provider_name)
+        if not available_models:
+            raise Exception(f"No models available for provider '{resolved_provider_name}'")
+        model_to_use = self.config.get_current_model_name() or available_models[0]
+
+        # Construct a fresh provider instance per request using the user's API key
+        provider_class: Type[BaseAIProvider] = self._provider_classes.get(resolved_provider_name)  # type: ignore
+        if not provider_class:
+            raise Exception(f"Unknown provider '{resolved_provider_name}'")
+
+        provider_instance = provider_class(api_key_for_request, model_to_use)
+
         # Log the actual model being used
-        logger.info(f"Generating response with provider: {provider.provider_name}, model: {provider.model_name}")
-        
+        logger.info(f"Generating response with provider: {resolved_provider_name}, model: {provider_instance.model_name}")
+
         # Generate response
-        return await provider.generate_response(
+        return await provider_instance.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=temperature,
@@ -324,7 +334,7 @@ class AIServiceManager:
         """Property to get the current model name for backward compatibility"""
         return self.get_current_model_name()
     
-    async def analyze_cv_content(self, cv_text: str) -> AIResponse:
+    async def analyze_cv_content(self, cv_text: str, user: Optional[UserData] = None) -> AIResponse:
         """
         Analyze CV content to extract skills and information
         
@@ -359,10 +369,11 @@ Provide your response in JSON format with the following structure:
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=0.0,  # Zero temperature for maximum consistency
-            max_tokens=2000
+            max_tokens=2000,
+            user=user
         )
     
-    async def compare_cv_with_job(self, cv_text: str, job_description: str) -> AIResponse:
+    async def compare_cv_with_job(self, cv_text: str, job_description: str, user: Optional[UserData] = None) -> AIResponse:
         """
         Compare CV with job description to find matches and gaps
         
@@ -404,10 +415,11 @@ Job Description:
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=0.0,
-            max_tokens=3000
+            max_tokens=3000,
+            user=user
         )
     
-    async def analyze_job_description(self, job_description: str) -> AIResponse:
+    async def analyze_job_description(self, job_description: str, user: Optional[UserData] = None) -> AIResponse:
         """
         Analyze job description to extract required and preferred keywords
         
@@ -469,14 +481,16 @@ Remember to classify keywords based on the language context they appear in. Focu
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=0.0,
-            max_tokens=2000
+            max_tokens=2000,
+            user=user
         )
     
     async def match_cv_against_jd_keywords(
         self, 
         cv_content: str, 
         required_keywords: List[str], 
-        preferred_keywords: List[str]
+        preferred_keywords: List[str],
+        user: Optional[UserData] = None
     ) -> AIResponse:
         """
         Match CV content against job description keywords using AI-powered smart matching
@@ -557,7 +571,8 @@ Remember to use intelligent matching - look for semantic meaning, synonyms, vari
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=0.0,
-            max_tokens=3000
+            max_tokens=3000,
+            user=user
         )
 
 

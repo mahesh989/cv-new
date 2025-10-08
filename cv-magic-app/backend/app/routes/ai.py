@@ -263,7 +263,8 @@ async def chat_completion(
             system_prompt=request.system_prompt,
             temperature=request.temperature,
             max_tokens=request.max_tokens,
-            provider_name=request.provider
+            provider_name=request.provider,
+            user=current_user
         )
         
         return ChatCompletionResponse(
@@ -296,7 +297,7 @@ async def analyze_cv(
     """
     try:
         logger.info(f"🟢 [AI_ANALYZE_CV] user={current_user.email} provider={ai_service.config.get_current_provider()} model={ai_service.get_current_model_name()}")
-        response = await ai_service.analyze_cv_content(request.cv_text)
+        response = await ai_service.analyze_cv_content(request.cv_text, user=current_user)
         
         return {
             "analysis": response.content,
@@ -328,7 +329,8 @@ async def compare_cv_with_job(
         logger.info(f"🟢 [AI_COMPARE_CV_JOB] user={current_user.email} provider={ai_service.config.get_current_provider()} model={ai_service.get_current_model_name()}")
         response = await ai_service.compare_cv_with_job(
             request.cv_text, 
-            request.job_description
+            request.job_description,
+            user=current_user
         )
         
         return {
