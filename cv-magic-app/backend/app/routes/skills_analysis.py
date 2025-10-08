@@ -17,6 +17,9 @@ from app.core.auth import verify_token
 from app.core.dependencies import get_current_user
 from app.models.auth import UserData
 from app.core.model_dependency import get_current_model
+from app.services.user_api_key_manager import user_api_key_manager
+from app.ai.ai_service import ai_service
+from fastapi import HTTPException, status
 from app.services.skill_extraction import skill_extraction_service
 from app.services.cv_content_service import CVContentService
 from app.services.skills_analysis_config import skills_analysis_config_service
@@ -591,6 +594,16 @@ async def _run_pipeline(cname: str, token_data=None):
 async def analyze_skills(request: Request, current_user: UserData = Depends(get_current_user)):
     """Extract skills from CV and JD using AI with caching"""
     try:
+        # Guard: ensure this user has an API key for the active provider
+        try:
+            current_provider = ai_service.config.get_current_provider()
+        except Exception:
+            current_provider = None
+        if not current_provider or not user_api_key_manager.has_api_key(current_user, current_provider):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"No API key configured for provider '{current_provider or 'unknown'}' for this user. Please add your key via /api/api-keys/set."
+            )
         # Ensure required directories exist before processing
         from ..utils.directory_utils import ensure_cv_analysis_directories
         ensure_cv_analysis_directories()
@@ -870,6 +883,18 @@ async def preliminary_analysis(
                 content={"detail": "Invalid token"}
             )
         
+        # Guard: ensure this user has an API key for the active provider
+        try:
+            current_provider = ai_service.config.get_current_provider()
+        except Exception:
+            current_provider = None
+        user_email_guard = getattr(token_data, 'email', None)
+        if not current_provider or not user_email_guard or not user_api_key_manager.has_api_key(UserData(id=getattr(token_data, 'user_id', None), email=user_email_guard), current_provider):
+            return JSONResponse(
+                status_code=400,
+                content={"error": f"No API key configured for provider '{current_provider or 'unknown'}' for this user. Please add your key via /api/api-keys/set."}
+            )
+
         data = await request.json()
         
         # Extract parameters
