@@ -208,6 +208,14 @@ class SkillsAnalysisController extends ChangeNotifier {
         debugPrint('   JD Skills: ${result.jdSkills.totalSkillsCount}');
         debugPrint('   Duration: ${result.executionDuration.inSeconds}s');
 
+        // 🔧 Also fetch AI recommendations for standard analysis when company is available
+        try {
+          final company = result.preextractedCompanyName;
+          if (company != null && company.trim().isNotEmpty) {
+            unawaited(_tryShowLatestAIRecommendation(company));
+          }
+        } catch (_) {}
+
         // Store full result and start progressive display
         _fullResult = result;
         _startProgressiveDisplay();
@@ -322,6 +330,10 @@ class SkillsAnalysisController extends ChangeNotifier {
         );
 
         _startProgressiveDisplay();
+
+        // Always display latest AI recommendation for this company (no fallback logic)
+        // Fetch immediately and surface if available, independent of other steps
+        unawaited(_tryShowLatestAIRecommendation(company));
       } else {
         _setError(_result!.errorMessage ?? 'Context-aware analysis failed');
         _showNotification(
@@ -333,6 +345,98 @@ class SkillsAnalysisController extends ChangeNotifier {
       _setError('Context-aware analysis failed: $e');
       _showNotification('Context-aware analysis failed: $e', isError: true);
       debugPrint('❌ [SKILLS_ANALYSIS_CONTROLLER] Error: $e');
+    }
+  }
+
+  // Always fetch and display the latest AI recommendation for the company
+  // This is invoked right after a successful context-aware analysis
+  Future<void> _tryShowLatestAIRecommendation(String company) async {
+    print(
+        '🔍 [AI_REC] Fetching for company: $company, loading: $_showAIRecommendationLoading, results: $_showAIRecommendationResults');
+    // Avoid regressing UI if we already have results
+    if (_showAIRecommendationResults && _result?.aiRecommendation != null) {
+      print('ℹ️ [AI_REC] Recommendations already present; skipping fetch');
+      return;
+    }
+    // Strict behavior: set loading, then require file to exist; otherwise surface error
+    _showAIRecommendationLoading = true;
+    _showAIRecommendationResults = false;
+    notifyListeners();
+
+    try {
+      // Try aggregate endpoint first
+      final data =
+          await SkillsAnalysisService.getCompleteAnalysisResults(company);
+      if (data != null && data['ai_recommendation'] != null) {
+        final aiRecommendation = AIRecommendationResult.fromJson(
+          data['ai_recommendation'] as Map<String, dynamic>,
+        );
+        if (aiRecommendation.isEmpty) {
+          throw Exception('AI recommendation exists but content is empty');
+        }
+        _showAIRecommendationLoading = false;
+        _showAIRecommendationResults = true;
+        if (_result != null) {
+          _result = _result!.copyWith(aiRecommendation: aiRecommendation);
+        }
+        if (_fullResult != null) {
+          _fullResult =
+              _fullResult!.copyWith(aiRecommendation: aiRecommendation);
+        }
+        notifyListeners();
+        _showNotification('🤖 Latest AI recommendations are ready!');
+        print(
+            '✅ [AI_REC] Found recommendation, content length: ${aiRecommendation.content.length}');
+        return;
+      }
+
+      // Strict endpoint: must exist
+      final latest =
+          await SkillsAnalysisService.fetchLatestAIRecommendation(company);
+      if (latest == null || !latest.hasContent) {
+        // One short retry for race conditions
+        await Future.delayed(const Duration(seconds: 3));
+        final retry =
+            await SkillsAnalysisService.fetchLatestAIRecommendation(company);
+        if (retry == null || !retry.hasContent) {
+          throw Exception(
+              'AI recommendation file not found for company: $company');
+        }
+
+        _showAIRecommendationLoading = false;
+        _showAIRecommendationResults = true;
+        if (_result != null) {
+          _result = _result!.copyWith(aiRecommendation: retry);
+        }
+        if (_fullResult != null) {
+          _fullResult = _fullResult!.copyWith(aiRecommendation: retry);
+        }
+        notifyListeners();
+        _showNotification('🤖 Latest AI recommendations are ready!');
+        print(
+            '✅ [AI_REC] Found recommendation after retry, content length: ${retry.content.length}');
+        return;
+      }
+
+      _showAIRecommendationLoading = false;
+      _showAIRecommendationResults = true;
+      if (_result != null) {
+        _result = _result!.copyWith(aiRecommendation: latest);
+      }
+      if (_fullResult != null) {
+        _fullResult = _fullResult!.copyWith(aiRecommendation: latest);
+      }
+      notifyListeners();
+      _showNotification('🤖 Latest AI recommendations are ready!');
+      print(
+          '✅ [AI_REC] Found recommendation, content length: ${latest.content.length}');
+    } catch (e) {
+      _showAIRecommendationLoading = false;
+      _showAIRecommendationResults = false;
+      notifyListeners();
+      final errorMsg = 'Failed to load AI recommendations: ${e.toString()}';
+      debugPrint('❌ [AI_REC] $errorMsg');
+      _showNotification('❌ $errorMsg', isError: true);
     }
   }
 
@@ -352,6 +456,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     _showPreextractedComparison = false;
     _showATSLoading = false;
     _showATSResults = false;
+    _showAIRecommendationLoading = false;
+    _showAIRecommendationResults = false;
     _result = null;
     // Keep _currentCvFilename and _currentJdText for re-runs - they're just internal tracking
     // The UI controllers are managed separately in the CV Magic page
@@ -404,6 +510,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     // Reset progressive state (but keep ATS states as they're managed by polling)
     _showAnalyzeMatch = false;
     _showPreextractedComparison = false;
+    _showAIRecommendationLoading = false;
+    _showAIRecommendationResults = false;
     // Don't reset ATS loading states here - they're managed by the polling process
 
     // Step 1: Show skills immediately (side-by-side display)
@@ -484,8 +592,12 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   /// Start polling for component analysis and ATS calculation results
   void _startPollingForCompleteResults() async {
-    final company = _fullResult?.preextractedCompanyName;
+    String? company = _fullResult?.preextractedCompanyName;
+    // Robust fallback: use company provided by backend in preliminary-analysis model
     if (company == null || company.isEmpty) {
+      company = _fullResult?.preextractedCompanyName;
+    }
+    if (company == null || company.trim().isEmpty) {
       print('❌ [POLLING] No company name found for polling');
       _finishAnalysis();
       return;
@@ -540,23 +652,24 @@ class SkillsAnalysisController extends ChangeNotifier {
         );
 
         // Check if AI recommendation is now available and trigger display
-        // Show AI recommendations immediately when available (no need to wait for ATS)
+        // CRITICAL FIX: Show AI recommendations immediately when available (no delay)
         if (aiRecommendation != null && !_showAIRecommendationResults) {
-          // Show AI recommendations with brief loading for UI smoothness
           print(
-            '🔍 [CONTROLLER] Setting AI recommendation loading state to true',
-          );
-          _showAIRecommendationLoading = true;
+              '✅ [POLLING] Setting AI recommendations immediately (no delay)');
+          _showAIRecommendationLoading = false;
+          _showAIRecommendationResults = true;
+          _result = _result!.copyWith(aiRecommendation: aiRecommendation);
+          // Defensive: if copy failed or _result became null, take from _fullResult
+          if (_result == null || _result!.aiRecommendation == null) {
+            if (_fullResult?.aiRecommendation != null) {
+              _result = (_result ?? _fullResult)!.copyWith(
+                aiRecommendation: _fullResult!.aiRecommendation,
+              );
+            }
+          }
           notifyListeners();
-          _showNotification('🤖 AI recommendations found!');
-
-          Timer(Duration(seconds: 2), () {
-            // Show AI recommendations after brief delay for UI smoothness
-            _showAIRecommendationResults = true;
-            _result = _result!.copyWith(aiRecommendation: aiRecommendation);
-            notifyListeners();
-            _showNotification('🎯 AI recommendations ready!');
-          });
+          _showNotification('🤖 AI recommendations are ready!');
+          print('🎯 [POLLING] AI recommendations set successfully');
         }
 
         // Update result with component analysis first (component analysis can show immediately)
@@ -648,6 +761,20 @@ class SkillsAnalysisController extends ChangeNotifier {
     _executionDuration = _fullResult?.executionDuration ?? Duration.zero;
     notifyListeners();
     debugPrint('🏁 [CONTROLLER] Analysis fully completed');
+
+    // File check for latest AI recommendation existence
+    (() async {
+      try {
+        final company =
+            _fullResult?.preextractedCompanyName ?? _currentCvFilename ?? '';
+        if (company.isNotEmpty) {
+          final aiFile =
+              await SkillsAnalysisService.fetchLatestAIRecommendation(company);
+          print(
+              '📁 [FILE_CHECK] AI file exists and has content: ${aiFile?.hasContent}');
+        }
+      } catch (_) {}
+    })();
   }
 
   void _triggerClearResults() {

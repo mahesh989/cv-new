@@ -6,6 +6,7 @@ Extracted from main.py to provide better organization and maintainability
 import logging
 from datetime import datetime
 from fastapi.responses import JSONResponse
+from app.utils.path_debug import path_debug
 from typing import Optional, List
 
 from fastapi import APIRouter, Request, Depends, HTTPException
@@ -959,6 +960,12 @@ async def preliminary_analysis(
             user_id=user_id,
             user_email=user_email
         )
+        # Attach resolved company to result so frontend can poll consistently (no extra calls)
+        try:
+            if company_name:
+                result["company"] = company_name
+        except Exception:
+            pass
         # Attach CV selection info for frontend display (under expandable_analysis)
         try:
             if cv_selection_info:
@@ -2029,6 +2036,13 @@ async def get_analysis_results(company: str, request: Request = None):
         
         base_dir = get_user_base_path(user_email)
         company_dir = base_dir / "applied_companies" / company
+        # Debug: which directories/files are used
+        try:
+            path_debug.start_operation("get_analysis_results")
+            path_debug.log_path(base_dir, "User base dir")
+            path_debug.log_path(company_dir, "Company dir")
+        except Exception:
+            pass
         
         # Use timestamped analysis file with fallback
         from app.utils.timestamp_utils import TimestampUtils
@@ -2037,14 +2051,28 @@ async def get_analysis_results(company: str, request: Request = None):
             analysis_file = company_dir / f"{company}_skills_analysis.json"
         
         if not analysis_file.exists():
+            try:
+                path_debug._log(f"❌ Analysis file not found in {company_dir}")
+                path_debug.end_operation()
+            except Exception:
+                pass
             return JSONResponse(
                 status_code=404,
                 content={"error": f"No analysis found for company: {company}"}
             )
         
         # Read analysis data
+        try:
+            path_debug.log_path(analysis_file, "Using analysis file")
+        except Exception:
+            pass
         with open(analysis_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
+        try:
+            path_debug._log(f"✅ Loaded analysis file, size: {analysis_file.stat().st_size} bytes")
+            path_debug.end_operation()
+        except Exception:
+            pass
         
         # Extract latest entries from each analysis type
         def _sorted(lst: list[str]) -> list[str]:

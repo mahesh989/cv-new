@@ -420,57 +420,37 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // AI Recommendations - Show with progressive loading
+          // AI Recommendations - Strict rendering (no fallback)
           if (controller.showAIRecommendationLoading ||
               controller.showAIRecommendationResults) ...[
             Builder(
               builder: (context) {
                 debugPrint(
-                  '🔍 [SKILLS_DISPLAY] Rendering AI Recommendations section (progressive)',
-                );
+                    '🔍 [SKILLS_DISPLAY] ===== AI RECOMMENDATIONS SECTION =====');
                 debugPrint(
-                  '   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}',
-                );
+                    '   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
                 debugPrint(
-                  '   showAIRecommendationResults: ${controller.showAIRecommendationResults}',
-                );
+                    '   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
                 debugPrint(
-                  '   hasAIRecommendation: ${controller.result?.aiRecommendation != null}',
-                );
+                    '   hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
+                debugPrint(
+                    '   AI Recommendation content length: ${controller.result?.aiRecommendation?.content.length ?? 0}');
+                debugPrint(
+                    '   AI Recommendation isEmpty: ${controller.result?.aiRecommendation?.isEmpty ?? true}');
 
-                // Show loading state if AI recommendations should show but results aren't available yet
-                if (controller.showAIRecommendationLoading &&
-                    !controller.showAIRecommendationResults) {
+                if (controller.showAIRecommendationLoading) {
+                  debugPrint('🎯 [SKILLS_DISPLAY] Showing AI loading state');
                   return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange.shade200),
-                      ),
-                      child: Row(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Column(
                         children: [
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.orange.shade600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 8),
                           Text(
-                            'Generating AI recommendations...',
+                            'Loading AI recommendations...',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
+                                color: Colors.grey[600], fontSize: 14),
                           ),
                         ],
                       ),
@@ -478,16 +458,52 @@ class SkillsDisplayWidget extends StatelessWidget {
                   );
                 }
 
-                // Show actual AI recommendations when available
-                if (controller.showAIRecommendationResults &&
-                    controller.result?.aiRecommendation != null) {
+                if (controller.showAIRecommendationResults) {
+                  final ai = controller.result?.aiRecommendation;
+                  if (ai == null) {
+                    debugPrint(
+                        '❌ [SKILLS_DISPLAY] AI recommendation is null but results flag is true');
+                    // Error state when controller says results should show but model missing
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline,
+                                color: Colors.red.shade700),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'AI recommendation file not found. Please run analysis again.',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  // ignore: avoid_print
+                  print(
+                      '🎨 [AI_WIDGET] Building with isLoading: false, hasRecommendation: true, isEmpty: ${ai.isEmpty}');
+                  debugPrint(
+                      '✅ [SKILLS_DISPLAY] Building AIRecommendationsWidget with content length: ${ai.content.length}');
                   return AIRecommendationsWidget(
-                    aiRecommendation: controller.result!.aiRecommendation,
+                    aiRecommendation: ai,
                     isLoading: false,
                     onGenerateCV: onNavigateToCVGeneration,
                   );
                 }
 
+                debugPrint(
+                    '❌ [SKILLS_DISPLAY] No AI state matched - returning empty');
                 return const SizedBox.shrink();
               },
             ),
@@ -499,8 +515,7 @@ class SkillsDisplayWidget extends StatelessWidget {
 
   Widget _buildCvMinimalSuggestions() {
     try {
-      final suggestions =
-          controller.result?.suggestions?['cv_enrichment']
+      final suggestions = controller.result?.suggestions?['cv_enrichment']
               as Map<String, dynamic>? ??
           {};
       final addTech = List<String>.from(suggestions['add_technical'] ?? []);

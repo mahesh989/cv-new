@@ -16,6 +16,8 @@ from fastapi.responses import JSONResponse
 from app.services.ai_recommendation_generator import AIRecommendationGenerator
 from app.core.dependencies import get_current_user
 from app.models.auth import UserData
+from app.utils.user_path_utils import get_user_base_path
+from app.utils.timestamp_utils import TimestampUtils
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +33,6 @@ async def get_latest_ai_recommendations(current_user: UserData = Depends(get_cur
         JSON response with recommendation content
     """
     try:
-        from app.utils.user_path_utils import get_user_base_path
         ai_recommendations_dir = get_user_base_path(current_user.email) / "cv-analysis"
         
         if not ai_recommendations_dir.exists():
@@ -86,88 +87,110 @@ async def get_latest_ai_recommendations(current_user: UserData = Depends(get_cur
 async def get_company_ai_recommendations(company: str, current_user: UserData = Depends(get_current_user)):
     """
     Get AI recommendations for a specific company
-    
-    Args:
-        company: Company name
-        
-    Returns:
-        JSON response with recommendation content
     """
     try:
-        from app.utils.timestamp_utils import TimestampUtils
-        # Try multiple naming patterns for AI recommendations
+        logger.info(f"🔍 [AI_RECOMMENDATIONS] Fetching for company: {company}, user: {current_user.email}")
+
+        # Resolve user base path and company directory
+        base_path = get_user_base_path(current_user.email)
+        company_dir = base_path / "applied_companies" / company
+
+        logger.info(f"🔍 [AI_RECOMMENDATIONS] Searching in: {company_dir}")
+
+        if not company_dir.exists():
+            logger.warning(f"⚠️ [AI_RECOMMENDATIONS] Company directory not found: {company_dir}")
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"No company directory found for: {company}"}
+            )
+
+        # Try timestamped AI recommendation file
         ai_file_path = TimestampUtils.find_latest_timestamped_file(
-            get_user_base_path(current_user.email) / "cv-analysis/applied_companies" / company,
+            company_dir,
             f"{company}_ai_recommendation",
             "json",
         )
+
+        # Fallback to timestamped input_recommendation
         if not ai_file_path:
-            # Try input_recommendation pattern
             ai_file_path = TimestampUtils.find_latest_timestamped_file(
-                get_user_base_path(current_user.email) / "cv-analysis/applied_companies" / company,
+                company_dir,
                 f"{company}_input_recommendation",
                 "json",
             )
+
+        # Fallback to non-timestamped names
         if not ai_file_path:
-            # Try non-timestamped files
-            ai_file_path = get_user_base_path(current_user.email) / "cv-analysis/applied_companies" / company / f"{company}_ai_recommendation.json"
-        if not ai_file_path.exists():
-            ai_file_path = Path(f"cv-analysis/applied_companies/{company}/{company}_input_recommendation.json")
-        
-        if not ai_file_path.exists():
+            fallback_ai = company_dir / f"{company}_ai_recommendation.json"
+            fallback_input = company_dir / f"{company}_input_recommendation.json"
+            if fallback_ai.exists():
+                ai_file_path = fallback_ai
+            elif fallback_input.exists():
+                ai_file_path = fallback_input
+
+        if not ai_file_path or not ai_file_path.exists():
+            logger.warning(f"⚠️ [AI_RECOMMENDATIONS] No AI recommendation file found in: {company_dir}")
+            try:
+                logger.warning(f"⚠️ [AI_RECOMMENDATIONS] Directory contents: {list(company_dir.glob('*.json'))}")
+            except Exception:
+                pass
             return JSONResponse(
                 status_code=404,
                 content={"error": f"No AI recommendations found for company: {company}"}
             )
-        
+
+        logger.info(f"✅ [AI_RECOMMENDATIONS] Found file: {ai_file_path}")
+
         # Read the AI recommendation file
         with open(ai_file_path, 'r', encoding='utf-8') as f:
             ai_data = json.load(f)
-        
-        # Handle different file formats
+
+        # Standard format
         if "recommendation_content" in ai_data:
-            # Standard AI recommendation format
             content = {
                 "success": True,
-                "company": ai_data.get("company"),
+                "company": ai_data.get("company", company),
                 "generated_at": ai_data.get("generated_at"),
                 "recommendation_content": ai_data.get("recommendation_content"),
                 "ai_model_info": ai_data.get("ai_model_info"),
                 "file_path": str(ai_file_path)
             }
         else:
-            # Input recommendation format - extract recommendations from analyze_match_entries
+            # Extract from input_recommendation-style files
             recommendations = []
-            
-            # Extract from analyze_match_entries if available
-            if "analyze_match_entries" in ai_data and ai_data["analyze_match_entries"]:
+
+            if ai_data.get("analyze_match_entries"):
                 for entry in ai_data["analyze_match_entries"]:
-                    if "content" in entry:
+                    if isinstance(entry, dict) and entry.get("content"):
                         recommendations.append(entry["content"])
-            
-            # Extract component analysis strategic priorities
-            if "component_analysis_entries" in ai_data and ai_data["component_analysis_entries"]:
+
+            if ai_data.get("component_analysis_entries"):
                 for entry in ai_data["component_analysis_entries"]:
-                    if "component_analyses" in entry and "skills" in entry["component_analyses"]:
-                        skills_data = entry["component_analyses"]["skills"]
-                        if "skills_analysis" in skills_data:
-                            for skill in skills_data["skills_analysis"]:
-                                if "jd_application" in skill:
-                                    recommendations.append(f"💡 {skill['skill']}: {skill['jd_application']}")
-            
+                    try:
+                        skills_data = entry.get("component_analyses", {}).get("skills", {})
+                        for skill in skills_data.get("skills_analysis", []):
+                            if skill.get("jd_application"):
+                                recommendations.append(f"💡 {skill['skill']}: {skill['jd_application']}")
+                    except Exception:
+                        continue
+
             content = {
                 "success": True,
-                "company": ai_data.get("company", "Australia_for_UNHCR"),
-                "generated_at": ai_data.get("timestamp") or (ai_data.get("analyze_match_entries", [{}])[0].get("timestamp") if ai_data.get("analyze_match_entries") else None),
+                "company": ai_data.get("company", company),
+                "generated_at": ai_data.get("timestamp") or (
+                    (ai_data.get("analyze_match_entries", [{}])[0] or {}).get("timestamp")
+                    if ai_data.get("analyze_match_entries") else None
+                ),
                 "recommendation_content": "\n\n".join(recommendations) if recommendations else "Comprehensive analysis available",
                 "ai_model_info": {"model": "comprehensive_analysis", "source": "input_recommendation"},
                 "file_path": str(ai_file_path)
             }
-        
+
+        logger.info(f"✅ [AI_RECOMMENDATIONS] Successfully loaded recommendation, content length: {len(content.get('recommendation_content', ''))}")
         return JSONResponse(content=content)
-        
+
     except Exception as e:
-        logger.error(f"❌ [AI_RECOMMENDATIONS] Error fetching recommendations for {company}: {str(e)}")
+        logger.error(f"❌ [AI_RECOMMENDATIONS] Error fetching recommendations for {company}: {str(e)}", exc_info=True)
         return JSONResponse(
             status_code=500,
             content={"error": f"Failed to fetch AI recommendations for {company}: {str(e)}"}
@@ -183,7 +206,6 @@ async def list_available_ai_recommendations(current_user: UserData = Depends(get
         JSON response with list of companies and their recommendation info
     """
     try:
-        from app.utils.user_path_utils import get_user_base_path
         ai_recommendations_dir = get_user_base_path(current_user.email) / "cv-analysis"
         
         if not ai_recommendations_dir.exists():
