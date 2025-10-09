@@ -102,17 +102,33 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
                 logger.info(f"Processing {filename} for structured CV format (background)...")
                 from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
                 user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
-                processing_result = await user_enhanced_cv_upload_service.process_existing_cv(
-                    filename=filename
+                
+                # Process the content directly instead of looking for the file in upload folder
+                cv_content = cv_content_result['content']
+                structured_cv = await user_enhanced_cv_upload_service._parse_to_structured_format(
+                    text_content=cv_content,
+                    filename=filename,
+                    user=current_user
                 )
                 
-                if processing_result.get('success', False):
-                    logger.info(f"✅ Background: CV saved as structured JSON: {processing_result.get('structured_cv_path')}")
+                # Check if parsing was successful (no parsing_error field means success)
+                if not structured_cv.get('parsing_error'):
+                    # Save the structured CV to the original folder
+                    json_filepath = original_folder / "original_cv.json"
+                    import json
+                    with open(json_filepath, 'w', encoding='utf-8') as f:
+                        json.dump(structured_cv, f, indent=2, ensure_ascii=False)
+                    
+                    logger.info(f"✅ Background: CV saved as structured JSON: {json_filepath}")
                 else:
-                    logger.warning(f"⚠️ Background: Failed to save structured CV: {processing_result.get('error', 'Unknown error')}")
+                    error_msg = structured_cv.get('parsing_error', 'Unknown error')
+                    logger.warning(f"⚠️ Background: Failed to save structured CV: {error_msg}")
+                    logger.warning(f"⚠️ Background: Structured CV data: {structured_cv}")
                     
             except Exception as e:
-                logger.error(f"Background: Error saving structured CV: {str(e)}")
+                logger.error(f"❌ Background: Error saving structured CV: {str(e)}")
+                import traceback
+                logger.error(f"❌ Background: Traceback: {traceback.format_exc()}")
         
         # Start background task (fire and forget)
         asyncio.create_task(background_structured_processing())
@@ -121,10 +137,10 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
             "message": "CV saved for analysis successfully",
             "filename": filename,
             "txt_path": str(txt_filepath),
-            "structured_path": str(structured_path),
-            "structured_success": structured_success,
+            "structured_path": str(original_folder / "original_cv.json"),
+            "structured_success": "processing_in_background",
             "content_length": len(cv_content_result['content']),
-            "note": "Both original_cv.txt and original_cv.json have been saved for analysis and CV tailoring"
+            "note": "original_cv.txt saved immediately, original_cv.json being processed in background"
         })
         
     except Exception as e:
