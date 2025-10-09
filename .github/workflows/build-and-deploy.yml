@@ -39,6 +39,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/next-level' }}
     steps:
+      - name: Checkout (for web assets)
+        uses: actions/checkout@v4
+
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -49,7 +52,19 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Upload Flutter Web assets (if present)
+        env:
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          if [ -d "cv-magic-app/mobile_app/build/flutter_assets" ]; then
+            rsync -az --delete cv-magic-app/mobile_app/build/flutter_assets/ $VPS_USER@$VPS_HOST:/opt/cv-app/web/
+          else
+            echo "Flutter web assets not found; skipping upload";
+          fi
+
       - name: Deploy on VPS via SSH
+        shell: bash
         env:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -58,13 +73,12 @@ jobs:
           GHCR_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          ssh $VPS_USER@$VPS_HOST '
-            set -e
-            APP_DIR=/opt/cv-app
-            sudo mkdir -p $APP_DIR/{deploy,env,data}
-            sudo chown -R $USER:$USER $APP_DIR
-            if [ ! -f "$APP_DIR/deploy/docker-compose.yml" ]; then
-              cat > $APP_DIR/deploy/docker-compose.yml <<YAML
+          ssh "$VPS_USER@$VPS_HOST" 'set -e
+          APP_DIR=/opt/cv-app
+          sudo mkdir -p $APP_DIR/{deploy,env,data,web}
+          sudo chown -R $USER:$USER $APP_DIR
+
+          cat > $APP_DIR/deploy/docker-compose.yml <<'COMPOSE'
 version: "3.9"
 services:
   proxy:
@@ -72,7 +86,15 @@ services:
     ports: ["80:80","443:443"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    depends_on: [ backend ]
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [ web, backend ]
+    restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    volumes:
+      - ../web:/usr/share/nginx/html:ro
     restart: unless-stopped
 
   backend:
@@ -83,18 +105,29 @@ services:
     volumes:
       - ../data:/app/backend/user
     restart: unless-stopped
-YAML
-            fi
-            if [ ! -f "$APP_DIR/deploy/Caddyfile" ]; then
-              cat > $APP_DIR/deploy/Caddyfile <<EOF
-${DOMAIN:-cvagent.duckdns.org} {
+
+volumes:
+  caddy_data:
+  caddy_config:
+COMPOSE
+
+          cat > $APP_DIR/deploy/Caddyfile <<'CADDY'
+'${DOMAIN:-cvagent.duckdns.org}' {
     encode gzip
-    reverse_proxy backend:8000
+    handle_path /api/* {
+        reverse_proxy backend:8000
+    }
+    handle {
+        root * /usr/share/nginx/html
+        file_server
+        try_files {path} /index.html
+        reverse_proxy web:80
+    }
 }
-EOF
-            fi
-            cd $APP_DIR/deploy
-            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-            docker compose pull
-            docker compose up -d --remove-orphans
+CADDY
+
+          cd $APP_DIR/deploy
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+          docker compose pull
+          docker compose up -d --remove-orphans
           '
