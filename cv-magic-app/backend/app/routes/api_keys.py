@@ -103,7 +103,7 @@ async def _set_user_api_key_internal(request: APIKeyRequest, current_user: UserD
         # Refresh AI providers to pick up the new API key
         try:
             from app.ai.ai_service import ai_service
-            ai_service.refresh_providers()
+            ai_service.refresh_providers(current_user)
             logger.info(f"🔄 Refreshed AI providers after setting {request.provider} API key for user {current_user.email}")
         except Exception as e:
             logger.warning(f"⚠️ Failed to refresh AI providers: {e}")

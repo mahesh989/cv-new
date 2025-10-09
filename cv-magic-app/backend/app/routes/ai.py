@@ -52,6 +52,7 @@ class ProviderSwitchRequest(BaseModel):
 class ModelSwitchRequest(BaseModel):
     """Request model for switching models"""
     model: str
+    provider: Optional[str] = None
 
 
 class CVAnalysisRequest(BaseModel):

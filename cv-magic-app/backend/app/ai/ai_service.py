@@ -34,11 +34,14 @@ class AIServiceManager:
         # Initialize available providers
         self._initialize_providers()
     
-    def refresh_providers(self):
+    def refresh_providers(self, user: Optional[Any] = None):
         """Refresh all providers after API keys have been updated"""
         logger.info("🔄 Refreshing AI providers after API key changes")
         self._providers.clear()
-        self._initialize_providers()
+        if user:
+            self._initialize_providers_for_user(user)
+        else:
+            self._initialize_providers()
     
     def _initialize_providers(self):
         """Initialize all available providers based on API keys"""
@@ -58,6 +61,26 @@ class AIServiceManager:
                             logger.warning(f"⚠️ {provider_name} provider initialized but not available")
                 except Exception as e:
                     logger.error(f"❌ Failed to initialize {provider_name} provider: {e}")
+    
+    def _initialize_providers_for_user(self, user: Any):
+        """Initialize providers for a specific user based on their API keys"""
+        for provider_name, provider_class in self._provider_classes.items():
+            api_key = self.config.get_api_key(provider_name, user)
+            if api_key:
+                try:
+                    # Get default model for this provider
+                    available_models = self.config.get_available_models(provider_name)
+                    if available_models:
+                        default_model = available_models[0]
+                        provider_instance = provider_class(api_key, default_model)
+                        # Always add the provider instance, even if validation fails
+                        # The validation will happen during actual usage
+                        self._providers[provider_name] = provider_instance
+                        logger.info(f"✅ Initialized {provider_name} provider for user with model {default_model}")
+                    else:
+                        logger.warning(f"⚠️ No available models for {provider_name} provider")
+                except Exception as e:
+                    logger.error(f"❌ Failed to initialize {provider_name} provider for user: {e}")
     
     def get_current_provider(self) -> Optional[BaseAIProvider]:
         """Get the current active provider"""
