@@ -127,7 +127,14 @@ class JDUsageTracker:
             job_title: Job title
         """
         try:
+            logger.info(f"🔍 [JD_TRACKER] Recording JD usage:")
+            logger.info(f"- jd_url: {jd_url}")
+            logger.info(f"- jd_text length: {len(jd_text) if jd_text else 0}")
+            logger.info(f"- company: {company}")
+            logger.info(f"- job_title: {job_title}")
+            
             jd_hash = self._generate_jd_hash(jd_url, jd_text)
+            logger.info(f"- Generated JD hash: {jd_hash}")
             current_time = datetime.now().isoformat()
             
             if jd_hash not in self.usage_data["jd_usage"]:

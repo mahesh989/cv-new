@@ -168,12 +168,15 @@ async def get_cv_content(
         if auto_structure:
             try:
                 logger.info(f"Auto-processing {filename} into structured format...")
-                processing_result = await enhanced_cv_upload_service.process_existing_cv(
+                # Create user-specific enhanced CV upload service
+                from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
+                user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
+                processing_result = await user_enhanced_cv_upload_service.process_existing_cv(
                     filename=filename
                 )
                 
                 if processing_result['success']:
-                    structured_cv = enhanced_cv_upload_service.load_structured_cv()
+                    structured_cv = user_enhanced_cv_upload_service.load_structured_cv()
                     
                     response_content["processing_info"] = {
                         "structured_processing": True,

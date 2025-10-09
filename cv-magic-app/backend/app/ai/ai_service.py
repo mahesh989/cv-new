@@ -30,6 +30,9 @@ class AIServiceManager:
             "deepseek": DeepSeekProvider
         }
         
+        # Cache for validated providers per user to avoid re-validation
+        self._validated_providers: Dict[str, Dict[str, BaseAIProvider]] = {}
+        
         # Providers will be initialized when user context is available
         # No global initialization to prevent fallback behavior
     
@@ -37,15 +40,51 @@ class AIServiceManager:
         """Initialize providers for a specific user"""
         if not user:
             raise Exception("User is required for AI provider initialization")
-        logger.info(f"🔄 Initializing AI providers for user {user.email}")
-        self._providers.clear()
-        self._initialize_providers(user)
+        
+        user_email = user.email
+        logger.info(f"🔄 Initializing AI providers for user {user_email}")
+        logger.info(f"🔍 [AI_SERVICE] Before initialization:")
+        logger.info(f"- Current providers: {list(self._providers.keys())}")
+        logger.info(f"- Current provider name: {self.config.get_current_provider()}")
+        logger.info(f"- Cached providers for user: {list(self._validated_providers.get(user_email, {}).keys())}")
+        
+        # Check if we already have validated providers for this user
+        if user_email in self._validated_providers and self._validated_providers[user_email]:
+            logger.info(f"✅ [AI_SERVICE] Using cached providers for user {user_email}")
+            self._providers = self._validated_providers[user_email].copy()
+        else:
+            logger.info(f"🔄 [AI_SERVICE] Initializing new providers for user {user_email}")
+            self._providers.clear()
+            self._initialize_providers(user)
+            
+            # Cache the validated providers for this user
+            if self._providers:
+                self._validated_providers[user_email] = self._providers.copy()
+                logger.info(f"💾 [AI_SERVICE] Cached {len(self._providers)} providers for user {user_email}")
+        
+        logger.info(f"🔍 [AI_SERVICE] After initialization:")
+        logger.info(f"- Current providers: {list(self._providers.keys())}")
+        logger.info(f"- Current provider name: {self.config.get_current_provider()}")
     
     def refresh_providers(self, user: Optional[Any] = None):
         """Refresh all providers after API keys have been updated"""
         logger.info("🔄 Refreshing AI providers after API key changes")
+        
+        # Clear cache for the specific user if provided, or all users
+        if user and user.email:
+            logger.info(f"🗑️ [AI_SERVICE] Clearing cached providers for user {user.email}")
+            if user.email in self._validated_providers:
+                del self._validated_providers[user.email]
+        else:
+            logger.info("🗑️ [AI_SERVICE] Clearing all cached providers")
+            self._validated_providers.clear()
+        
         self._providers.clear()
-        self._initialize_providers(user)
+        if user:
+            self._initialize_providers(user)
+            # Re-cache the providers
+            if self._providers:
+                self._validated_providers[user.email] = self._providers.copy()
     
     def _initialize_providers(self, user: Optional[Any] = None):
         """Initialize all available providers based on user-specific API keys"""
@@ -75,6 +114,12 @@ class AIServiceManager:
     def get_current_provider(self) -> Optional[BaseAIProvider]:
         """Get the current active provider"""
         current_provider_name = self.config.get_current_provider()
+        
+        logger.info(f"🔍 [AI_SERVICE] Getting current provider:")
+        logger.info(f"- Current provider name: {current_provider_name}")
+        logger.info(f"- Available providers: {list(self._providers.keys())}")
+        logger.info(f"- Provider status: {self.get_provider_status()}")
+        
         provider = self._providers.get(current_provider_name)
         
         # Debug logging to help diagnose issues
@@ -83,6 +128,16 @@ class AIServiceManager:
             logger.error(f"❌ [AI_SERVICE] Available providers: {list(self._providers.keys())}")
             logger.error(f"❌ [AI_SERVICE] Current provider name: {current_provider_name}")
             logger.error(f"❌ [AI_SERVICE] Provider status: {self.get_provider_status()}")
+            
+            # Try to auto-initialize if we have providers but no current provider
+            if self._providers and not current_provider_name:
+                logger.warning("⚠️ [AI_SERVICE] Attempting to auto-select first available provider")
+                first_provider = list(self._providers.keys())[0]
+                if self.switch_provider(first_provider):
+                    logger.info(f"✅ [AI_SERVICE] Auto-selected provider: {first_provider}")
+                    provider = self._providers.get(first_provider)
+        else:
+            logger.info(f"✅ [AI_SERVICE] Current provider found: {current_provider_name}")
         
         return provider
     
@@ -118,6 +173,14 @@ class AIServiceManager:
         
         logger.info(f"✅ Switched to {provider_name} provider" + (f" with model {model_name}" if model_name else ""))
         return True
+    
+    def clear_user_cache(self, user_email: str):
+        """Clear cached providers for a specific user"""
+        if user_email in self._validated_providers:
+            logger.info(f"🗑️ [AI_SERVICE] Clearing cached providers for user {user_email}")
+            del self._validated_providers[user_email]
+        else:
+            logger.info(f"ℹ️ [AI_SERVICE] No cached providers found for user {user_email}")
     
     def _resolve_model_name(self, model_name: str, provider_name: str) -> Optional[str]:
         """
@@ -243,6 +306,14 @@ class AIServiceManager:
         if not user:
             from app.exceptions.cv_exceptions import APIKeyError
             raise APIKeyError("User context is required for AI operations. Please ensure you are authenticated.")
+        
+        logger.info(f"🔍 [AI_SERVICE] Generating response:")
+        logger.info(f"- User: {user.email if hasattr(user, 'email') else 'Unknown'}")
+        logger.info(f"- Prompt length: {len(prompt)}")
+        logger.info(f"- System prompt length: {len(system_prompt) if system_prompt else 0}")
+        logger.info(f"- Temperature: {temperature}")
+        logger.info(f"- Max tokens: {max_tokens}")
+        logger.info(f"- Provider override: {provider_name}")
         
         # Check if there's a request-specific model set
         request_model_id = get_request_model()

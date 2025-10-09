@@ -66,6 +66,13 @@ class UnifiedLatestFileSelector:
             True if this is first-time usage, False if JD has been used before
         """
         try:
+            import logging
+            logger = logging.getLogger(__name__)
+            
+            logger.info(f"🔍 [UNIFIED_SELECTOR] Checking JD first-time usage:")
+            logger.info(f"- jd_url: {jd_url}")
+            logger.info(f"- jd_text length: {len(jd_text) if jd_text else 0}")
+            
             from app.services.jd_usage_tracker import JDUsageTracker
             
             # Create JD usage tracker for this user
@@ -75,14 +82,19 @@ class UnifiedLatestFileSelector:
             effective_jd_url = jd_url if jd_url and jd_url.strip() else ""
             effective_jd_text = jd_text if jd_text and jd_text.strip() else "default_jd_text"
             
+            logger.info(f"- effective_jd_url: {effective_jd_url}")
+            logger.info(f"- effective_jd_text: {effective_jd_text}")
+            
             # Check if this is first-time usage
             is_first_time = tracker.is_jd_first_time_usage(effective_jd_url, effective_jd_text)
             
-            print(f"🔍 [UNIFIED_SELECTOR] JD usage check: first_time={is_first_time}")
+            logger.info(f"🔍 [UNIFIED_SELECTOR] JD usage check: first_time={is_first_time}")
             return is_first_time
             
         except Exception as e:
-            print(f"⚠️ [UNIFIED_SELECTOR] Error checking JD usage, defaulting to first-time: {e}")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"⚠️ [UNIFIED_SELECTOR] Error checking JD usage, defaulting to first-time: {e}")
             # Default to first-time usage on error to be safe
             return True
 

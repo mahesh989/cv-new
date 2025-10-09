@@ -158,7 +158,48 @@ class EnhancedCVUploadService:
                 raise HTTPException(status_code=500, detail=f"Text extraction failed: {extraction_result['error']}")
             
             # Parse into structured format
-            structured_cv = await self._parse_to_structured_format(extraction_result["text"], filename, user=user)
+            # Create a UserData object for the AI service
+            from app.models.auth import UserData
+            from datetime import datetime
+            from app.database import SessionLocal
+            from app.models.user import User
+            
+            # Get the real user ID from database
+            db = SessionLocal()
+            try:
+                user = db.query(User).filter(User.email == self.user_email).first()
+                if user:
+                    user_id = str(user.id)
+                    user_name = user.full_name or ""
+                else:
+                    user_id = "temp"
+                    user_name = ""
+            finally:
+                db.close()
+            
+            user_data = UserData(
+                id=user_id, 
+                email=self.user_email, 
+                name=user_name, 
+                created_at=datetime.now(), 
+                updated_at=datetime.now()
+            )
+            
+            # Initialize AI service for this user
+            from app.ai.ai_service import ai_service
+            ai_service.initialize_for_user(user_data)
+            logger.info(f"🔄 [CV_UPLOAD] Initialized AI service for user {self.user_email}")
+            
+            # Auto-select the first available provider if none is set
+            if ai_service._providers and not ai_service.config.get_current_provider():
+                first_provider = list(ai_service._providers.keys())[0]
+                success = ai_service.switch_provider(first_provider, "gpt-3.5-turbo")
+                if success:
+                    logger.info(f"✅ [CV_UPLOAD] Auto-selected provider: {first_provider}")
+                else:
+                    logger.warning(f"⚠️ [CV_UPLOAD] Failed to auto-select provider: {first_provider}")
+            
+            structured_cv = await self._parse_to_structured_format(extraction_result["text"], filename, user=user_data)
             
             # Validate structured CV
             validation_report = self.structured_parser.validate_cv_structure(structured_cv)
@@ -297,7 +338,27 @@ class EnhancedCVUploadService:
         user: Any = None
     ) -> Dict[str, Any]:
         """Parse text content into structured CV format"""
+        print(f"🔍 [DEBUG] _parse_to_structured_format called with user: {user is not None}")
         try:
+            # Initialize AI service for this user if not already done
+            logger.info(f"🔍 [CV_UPLOAD] Checking user parameter: {user is not None}")
+            if user:
+                logger.info(f"🔍 [CV_UPLOAD] User email: {user.email}")
+                from app.ai.ai_service import ai_service
+                logger.info(f"🔍 [CV_UPLOAD] About to initialize AI service...")
+                ai_service.initialize_for_user(user)
+                logger.info(f"🔄 [CV_UPLOAD] Initialized AI service for user {user.email}")
+                
+                # Auto-select the first available provider if none is set
+                if ai_service._providers and not ai_service.config.get_current_provider():
+                    first_provider = list(ai_service._providers.keys())[0]
+                    success = ai_service.switch_provider(first_provider, "gpt-3.5-turbo")
+                    if success:
+                        logger.info(f"✅ [CV_UPLOAD] Auto-selected provider: {first_provider}")
+                    else:
+                        logger.warning(f"⚠️ [CV_UPLOAD] Failed to auto-select provider: {first_provider}")
+            else:
+                logger.warning(f"⚠️ [CV_UPLOAD] No user provided for AI service initialization")
             # Check if text content is already structured JSON
             try:
                 existing_data = json.loads(text_content)

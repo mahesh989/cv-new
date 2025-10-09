@@ -97,6 +97,14 @@ async def _set_user_api_key_internal(request: APIKeyRequest, current_user: UserD
                 detail=message
             )
         
+        # Clear AI service cache for this user since API key changed
+        try:
+            from app.ai.ai_service import ai_service
+            ai_service.clear_user_cache(current_user.email)
+            logger.info(f"🗑️ [API_KEYS] Cleared AI service cache for user {current_user.email}")
+        except Exception as e:
+            logger.warning(f"⚠️ [API_KEYS] Failed to clear AI service cache: {e}")
+        
         # Validate the key
         is_valid, validation_message = user_api_key_manager.validate_api_key(
             current_user, request.provider, request.api_key
@@ -107,6 +115,34 @@ async def _set_user_api_key_internal(request: APIKeyRequest, current_user: UserD
             from app.ai.ai_service import ai_service
             ai_service.refresh_providers(current_user)
             logger.info(f"🔄 Refreshed AI providers after setting {request.provider} API key for user {current_user.email}")
+            
+            # Auto-set default model preference if user doesn't have one
+            try:
+                from app.database import SessionLocal
+                from app.services.user_model_service import user_model_service
+                
+                db = SessionLocal()
+                try:
+                    existing_pref = user_model_service.get_user_model(db, str(current_user.id))
+                    if not existing_pref:
+                        # User doesn't have a model preference, set default for this provider
+                        default_models = {
+                            "openai": "gpt-3.5-turbo",
+                            "anthropic": "claude-3-haiku-20240307", 
+                            "deepseek": "deepseek-chat"
+                        }
+                        default_model = default_models.get(request.provider, "gpt-3.5-turbo")
+                        
+                        # Set the default model preference
+                        user_model_service.set_user_model(db, str(current_user.id), request.provider, default_model)
+                        logger.info(f"🎯 [API_KEYS] Auto-set default model preference: {request.provider}/{default_model} for user {current_user.email}")
+                    else:
+                        logger.info(f"ℹ️ [API_KEYS] User {current_user.email} already has model preference: {existing_pref[0]}/{existing_pref[1]}")
+                finally:
+                    db.close()
+            except Exception as e:
+                logger.warning(f"⚠️ [API_KEYS] Failed to set default model preference: {e}")
+                
         except Exception as e:
             logger.warning(f"⚠️ Failed to refresh AI providers: {e}")
         

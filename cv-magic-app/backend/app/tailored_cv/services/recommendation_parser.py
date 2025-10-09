@@ -373,6 +373,35 @@ class RecommendationParser:
                 logger.info(f"  - Source file: {data['metadata'].get('source_filename')}")
                 logger.info(f"  - Processing version: {data['metadata'].get('processing_version')}")
             
+            # Enhanced debugging for CV data structure
+            logger.info(f"🔍 [CV_PARSER] Detailed CV structure analysis:")
+            logger.info(f"  - Has contact: {'contact' in data}")
+            if 'contact' in data:
+                contact_data = data['contact']
+                logger.info(f"  - Contact keys: {list(contact_data.keys()) if isinstance(contact_data, dict) else 'Not a dict'}")
+                logger.info(f"  - Contact name: {contact_data.get('name', 'MISSING') if isinstance(contact_data, dict) else 'Not accessible'}")
+                logger.info(f"  - Contact email: {contact_data.get('email', 'MISSING') if isinstance(contact_data, dict) else 'Not accessible'}")
+            
+            logger.info(f"  - Has experience: {'experience' in data}")
+            if 'experience' in data:
+                exp_data = data['experience']
+                logger.info(f"  - Experience type: {type(exp_data)}")
+                logger.info(f"  - Experience count: {len(exp_data) if isinstance(exp_data, list) else 'Not a list'}")
+                if isinstance(exp_data, list) and exp_data:
+                    logger.info(f"  - First experience keys: {list(exp_data[0].keys()) if isinstance(exp_data[0], dict) else 'Not a dict'}")
+            
+            logger.info(f"  - Has skills: {'skills' in data}")
+            if 'skills' in data:
+                skills_data = data['skills']
+                logger.info(f"  - Skills type: {type(skills_data)}")
+                logger.info(f"  - Skills count: {len(skills_data) if isinstance(skills_data, list) else 'Not a list'}")
+                if isinstance(skills_data, list) and skills_data:
+                    logger.info(f"  - First skill type: {type(skills_data[0])}")
+                    if isinstance(skills_data[0], dict):
+                        logger.info(f"  - First skill keys: {list(skills_data[0].keys())}")
+                    elif isinstance(skills_data[0], str):
+                        logger.info(f"  - First skill (string): {skills_data[0]}")
+            
             # Check if this is already structured CV data or raw text
             if 'personal_information' in data:
                 # Already structured format

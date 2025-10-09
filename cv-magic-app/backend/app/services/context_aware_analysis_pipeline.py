@@ -163,6 +163,12 @@ class ContextAwareAnalysisPipeline:
             from app.services.jd_usage_tracker import jd_usage_tracker
             # Provide fallback text if no URL is available
             jd_text_fallback = f"JD for {company}" if not jd_url else ""
+            
+            logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Recording JD usage:")
+            logger.info(f"- jd_url: {jd_url}")
+            logger.info(f"- jd_text_fallback: {jd_text_fallback}")
+            logger.info(f"- company: {company}")
+            
             jd_usage_tracker.record_jd_usage(jd_url, jd_text_fallback, company, "")
             
             if not cv_context.exists:

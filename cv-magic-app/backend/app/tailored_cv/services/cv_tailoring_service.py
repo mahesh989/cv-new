@@ -140,22 +140,57 @@ class CVTailoringService:
             cv_data = cv.model_dump()
             logger.info(f"- CV data: {json.dumps(cv_data, indent=2)}")
         
+        # Enhanced debugging for CV validation
+        logger.info(f"🔍 [CV_VALIDATION] Starting detailed validation:")
+        logger.info(f"- Has contact: {hasattr(cv, 'contact')}")
+        if hasattr(cv, 'contact'):
+            logger.info(f"- Contact name: {getattr(cv.contact, 'name', 'MISSING')}")
+            logger.info(f"- Contact email: {getattr(cv.contact, 'email', 'MISSING')}")
+        
+        logger.info(f"- Has experience: {hasattr(cv, 'experience')}")
+        if hasattr(cv, 'experience'):
+            logger.info(f"- Experience count: {len(cv.experience) if cv.experience else 0}")
+            if cv.experience:
+                for i, exp in enumerate(cv.experience):
+                    logger.info(f"- Experience {i+1}: company={getattr(exp, 'company', 'MISSING')}, bullets={len(getattr(exp, 'bullets', []))}")
+        
+        logger.info(f"- Has skills: {hasattr(cv, 'skills')}")
+        if hasattr(cv, 'skills'):
+            logger.info(f"- Skills count: {len(cv.skills) if cv.skills else 0}")
+            if cv.skills:
+                for i, skill_cat in enumerate(cv.skills):
+                    logger.info(f"- Skill category {i+1}: {getattr(skill_cat, 'category', 'MISSING')}, skills={len(getattr(skill_cat, 'skills', []))}")
+        
         errors = []
         warnings = []
         suggestions = []
         
-        # Required fields validation
+        # Required fields validation with detailed debugging
+        logger.info(f"🔍 [CV_VALIDATION] Checking required fields:")
+        
         if not cv.contact.name:
+            logger.error(f"❌ [CV_VALIDATION] Missing contact name")
             errors.append(CVValidationError(field="contact.name", message="Name is required", severity="error"))
+        else:
+            logger.info(f"✅ [CV_VALIDATION] Contact name present: {cv.contact.name}")
         
         if not cv.contact.email:
+            logger.error(f"❌ [CV_VALIDATION] Missing contact email")
             errors.append(CVValidationError(field="contact.email", message="Email is required", severity="error"))
+        else:
+            logger.info(f"✅ [CV_VALIDATION] Contact email present: {cv.contact.email}")
         
         if not cv.experience:
+            logger.error(f"❌ [CV_VALIDATION] Missing experience entries")
             errors.append(CVValidationError(field="experience", message="At least one experience entry is required", severity="error"))
+        else:
+            logger.info(f"✅ [CV_VALIDATION] Experience entries present: {len(cv.experience)}")
         
         if not cv.skills:
+            logger.error(f"❌ [CV_VALIDATION] Missing skills section")
             errors.append(CVValidationError(field="skills", message="Skills section is required", severity="error"))
+        else:
+            logger.info(f"✅ [CV_VALIDATION] Skills section present: {len(cv.skills)} categories")
         
         # Content quality warnings
         for i, exp in enumerate(cv.experience):

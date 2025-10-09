@@ -427,3 +427,33 @@ async def ai_health_check():
             "status": "unhealthy",
             "error": str(e)
         }
+
+
+@router.get("/user-model-preference")
+async def get_user_model_preference(
+    current_user: UserData = Depends(get_current_user),
+    db: Session = Depends(get_database)
+):
+    """Get the user's saved model preference"""
+    try:
+        from app.services.user_model_service import user_model_service
+        
+        pref = user_model_service.get_user_model(db, str(current_user.id))
+        if pref:
+            provider, model = pref
+            return {
+                "has_preference": True,
+                "provider": provider,
+                "model": model,
+                "message": f"User preference: {provider}/{model}"
+            }
+        else:
+            return {
+                "has_preference": False,
+                "provider": None,
+                "model": None,
+                "message": "No saved model preference found"
+            }
+    except Exception as e:
+        logger.error(f"Failed to get user model preference: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

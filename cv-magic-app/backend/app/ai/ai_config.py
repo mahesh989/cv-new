@@ -215,6 +215,7 @@ class AIConfig:
     def get_current_provider(self) -> str:
         """Get current provider name"""
         # No auto-selection - provider must be explicitly set
+        logger.info(f"🔍 [AI_CONFIG] Getting current provider: {self._current_provider}")
         return self._current_provider
     
     def get_current_model_name(self) -> str:

@@ -35,6 +35,10 @@ async def get_current_model(
         logger.debug(f"📌 Using existing request model: {existing_model}")
         return existing_model
     
+    logger.info(f"🔍 [MODEL_DEPENDENCY] Initializing model for user: {current_user.email}")
+    logger.info(f"- Header model: {x_current_model}")
+    logger.info(f"- User ID: {current_user.id}")
+    
     model_to_use = None
     
     if x_current_model:
@@ -60,8 +64,9 @@ async def get_current_model(
             from app.services.user_model_service import user_model_service
             from app.ai.ai_service import ai_service
             
-            # Initialize AI providers for this user
+            # Initialize AI providers for this user (will use cache if available)
             ai_service.initialize_for_user(current_user)
+            logger.info(f"✅ [MODEL_DEPENDENCY] AI providers initialized for user {current_user.email}")
             
             db = SessionLocal()
             try:
@@ -70,10 +75,19 @@ async def get_current_model(
                 db.close()
             if pref:
                 provider, model = pref
-                # Validate by switching in-memory so providers are aligned
-                ok = ai_service.switch_provider(provider, model)
-                if ok:
-                    model_to_use = model
+                logger.info(f"🔍 [MODEL_DEPENDENCY] Found saved preference: {provider}/{model}")
+                
+                # Check if provider is available
+                if provider in ai_service._providers:
+                    # Validate by switching in-memory so providers are aligned
+                    ok = ai_service.switch_provider(provider, model)
+                    if ok:
+                        model_to_use = model
+                        logger.info(f"✅ [MODEL_DEPENDENCY] Successfully restored user preference: {provider}/{model}")
+                    else:
+                        logger.warning(f"⚠️ [MODEL_DEPENDENCY] Failed to switch to saved preference: {provider}/{model}")
+                else:
+                    logger.warning(f"⚠️ [MODEL_DEPENDENCY] Saved provider {provider} not available, available providers: {list(ai_service._providers.keys())}")
             if not model_to_use:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
