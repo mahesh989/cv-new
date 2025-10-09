@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+.env*
+.git
+.gitignore
+.vscode
+.idea
+**/user/**
+**/backend/log*.txt
+**/mobile_app/build/
+**/node_modules/
+**/.DS_Store

@@ -1,5 +1,20 @@
 {
-  "jobs": [],
-  "last_updated": "2025-10-09T06:01:35.030075",
-  "total_jobs": 0
+  "jobs": [
+    {
+      "company_name": "The Glen Centre",
+      "job_title": "Data Analyst",
+      "location": "Unknown",
+      "experience_required": "Unknown",
+      "seniority_level": "Unknown",
+      "industry": "Unknown",
+      "phone_number": null,
+      "email": null,
+      "website": null,
+      "work_type": null,
+      "extracted_at": "2025-10-09T17:04:43.755258",
+      "job_url": "https://www.ethicaljobs.com.au/members/glencentre/data-analyst"
+    }
+  ],
+  "last_updated": "2025-10-09T17:04:43.757881",
+  "total_jobs": 1
 }
