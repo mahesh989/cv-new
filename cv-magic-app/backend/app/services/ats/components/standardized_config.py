@@ -7,7 +7,7 @@ Ensures consistent AI parameters, prompt structure, and validation across all an
 # Standardized AI Parameters
 STANDARD_AI_PARAMS = {
     "temperature": 0.0,  # Zero temperature for maximum consistency
-    "max_tokens": 1500,  # Increased for comprehensive analysis
+    "max_tokens": 3000,  # Increased for comprehensive analysis (was 1500, too low for skills analysis)
     "system_prompt": "You are an expert ATS analyst with 15+ years of experience. Analyze the provided CV and JD content with precision and consistency. Always return valid JSON format."
 }
 

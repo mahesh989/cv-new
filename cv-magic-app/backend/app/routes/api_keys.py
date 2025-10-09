@@ -46,6 +46,7 @@ class AllProvidersStatusResponse(BaseModel):
     """Response model for all providers status"""
     providers: Dict[str, ProviderStatusResponse]
     session_id: str
+    has_api_keys: bool
 
 
 @router.post("/set", response_model=APIKeyResponse)
@@ -245,9 +246,13 @@ async def get_providers_status(
                 created_at=data['created_at']
             )
         
+        # Check if user has any API keys configured
+        has_api_keys = any(data['has_api_key'] for data in status_data.values())
+        
         return AllProvidersStatusResponse(
             providers=providers,
-            session_id=f"user_{current_user.id}"
+            session_id=f"user_{current_user.id}",
+            has_api_keys=has_api_keys
         )
         
     except Exception as e:

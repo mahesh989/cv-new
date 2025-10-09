@@ -366,6 +366,52 @@ class ComponentAssembler:
         
         logger.info("[ASSEMBLER] Results saved to: %s", file_path)
 
+    def _save_minimal_cv_results(self, company: str, minimal_results: Dict[str, Any]) -> None:
+        """Save minimal CV results to the company's skills analysis file."""
+        # Use timestamped analysis file with fallback
+        from app.utils.timestamp_utils import TimestampUtils
+        company_dir = self.base_dir / "applied_companies" / company
+        file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+        if not file_path:
+            file_path = company_dir / f"{company}_skills_analysis.json"
+        
+        # Create the assembled entry for minimal CV
+        assembled_entry = {
+            "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+            "component_analyses": minimal_results.get("ats_breakdown", {}),
+            "extracted_scores": {
+                "skills_relevance": minimal_results.get("ats_breakdown", {}).get("category1_skills_relevance", {}).get("total", 0),
+                "experience_alignment": minimal_results.get("ats_breakdown", {}).get("category2_component_analysis", {}).get("experience_seniority", {}).get("total", 0),
+                "industry_fit": minimal_results.get("ats_breakdown", {}).get("category2_component_analysis", {}).get("potential_ability", {}).get("total", 0),
+                "role_seniority": minimal_results.get("ats_breakdown", {}).get("category2_component_analysis", {}).get("experience_seniority", {}).get("total", 0),
+                "technical_depth": minimal_results.get("ats_breakdown", {}).get("category2_component_analysis", {}).get("core_competency", {}).get("total", 0),
+            },
+            "analysis_type": "minimal_cv_realistic"
+        }
+        
+        # Read existing file or create new structure
+        if file_path.exists():
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    existing_data = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                existing_data = {}
+        else:
+            existing_data = {}
+        
+        # Ensure we have the right structure
+        if "component_analysis_entries" not in existing_data:
+            existing_data["component_analysis_entries"] = []
+        
+        # Append new entry
+        existing_data["component_analysis_entries"].append(assembled_entry)
+        
+        # Save back to file
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(existing_data, f, indent=2, ensure_ascii=False)
+        
+        logger.info("[ASSEMBLER] Minimal CV results saved to: %s", file_path)
+
     async def _run_ats_calculation(self, company: str, extracted_scores: Dict[str, float]) -> Dict[str, Any]:
         """Run ATS score calculation and save results."""
         try:
@@ -616,7 +662,20 @@ class ComponentAssembler:
             
             if minimal_analysis['is_minimal_cv']:
                 logger.info("📄 [ASSEMBLER] CV is minimal - using realistic analysis with constraints")
-                return self._generate_minimal_cv_results(minimal_analysis, company)
+                minimal_results = self._generate_minimal_cv_results(minimal_analysis, company)
+                
+                # Save minimal CV results to analysis file
+                self._save_minimal_cv_results(company, minimal_results)
+                
+                # Run ATS calculation for minimal CV as well
+                logger.info("[ASSEMBLER] Starting ATS score calculation for minimal CV...")
+                extracted_scores = minimal_results.get("extracted_scores", {})
+                ats_result = await self._run_ats_calculation(company, extracted_scores)
+                
+                # Add ATS results to minimal results
+                minimal_results["ats_results"] = ats_result
+                
+                return minimal_results
             
             matched_skills = self._read_matched_skills(company)
             

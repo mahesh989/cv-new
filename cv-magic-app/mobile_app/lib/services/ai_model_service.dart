@@ -33,20 +33,48 @@ class AIModelService extends ChangeNotifier {
       if (savedModelId != null) {
         final savedModel = AIModelsConfig.getModel(savedModelId);
         if (savedModel != null) {
-          _currentModel = savedModel;
-          debugPrint('🤖 Loaded saved AI model: ${_currentModel!.name}');
+          // Check if user has API keys configured before setting model
+          final hasApiKeys = await _checkApiKeyAvailability();
+          if (hasApiKeys) {
+            _currentModel = savedModel;
+            debugPrint('🤖 Loaded saved AI model: ${_currentModel!.name}');
+          } else {
+            debugPrint(
+                '⚠️ Saved model found but no API keys configured, clearing model selection');
+            _currentModel = null;
+            // Clear the saved model since no API keys are available
+            await prefs.remove(_selectedModelKey);
+          }
         } else {
           debugPrint('⚠️ Saved model not found, no default model available');
+          _currentModel = null;
         }
       } else {
         debugPrint('🤖 No saved model found, no default model available');
+        _currentModel = null;
       }
     } catch (e) {
       debugPrint('❌ Error initializing AI model service: $e');
+      _currentModel = null;
     }
 
     _isInitialized = true;
     notifyListeners();
+  }
+
+  // Check if user has any API keys configured
+  Future<bool> _checkApiKeyAvailability() async {
+    try {
+      // Try to get backend status to check if any API keys are configured
+      final status = await getBackendStatus();
+      if (status != null && status['has_api_keys'] == true) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('⚠️ Could not check API key availability: $e');
+      return false;
+    }
   }
 
   // Change the current model
@@ -241,8 +269,9 @@ class AIModelService extends ChangeNotifier {
         headers['Authorization'] = 'Bearer $token';
       }
 
+      // Get API key status to check if user has configured any API keys
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/ai/status'),
+        Uri.parse('http://localhost:8000/api/api-keys/status'),
         headers: headers,
       );
 
@@ -250,14 +279,14 @@ class AIModelService extends ChangeNotifier {
         return jsonDecode(response.body);
       } else if (response.statusCode == 403) {
         debugPrint(
-            '🔐 AI status requires authentication (403) - this is normal when not logged in');
+            '🔐 API key status requires authentication (403) - this is normal when not logged in');
         return null;
       } else {
-        debugPrint('⚠️ Failed to get backend status: ${response.statusCode}');
+        debugPrint('⚠️ Failed to get API key status: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      debugPrint('❌ Error getting backend status: $e');
+      debugPrint('❌ Error getting API key status: $e');
       return null;
     }
   }

@@ -374,19 +374,29 @@ class SkillsAnalysisController extends ChangeNotifier {
         if (aiRecommendation.isEmpty) {
           throw Exception('AI recommendation exists but content is empty');
         }
-        _showAIRecommendationLoading = false;
-        _showAIRecommendationResults = true;
-        if (_result != null) {
-          _result = _result!.copyWith(aiRecommendation: aiRecommendation);
-        }
+        // Store AI recommendation but don't show it yet - wait for ATS score to be displayed first
         if (_fullResult != null) {
           _fullResult =
               _fullResult!.copyWith(aiRecommendation: aiRecommendation);
         }
-        notifyListeners();
-        _showNotification('🤖 Latest AI recommendations are ready!');
         print(
-            '✅ [AI_REC] Found recommendation, content length: ${aiRecommendation.content.length}');
+            '✅ [AI_REC] Found recommendation, storing for later display (content length: ${aiRecommendation.content.length})');
+
+        // Only show AI recommendations if ATS score has already been displayed
+        if (_showATSResults) {
+          _showAIRecommendationLoading = false;
+          _showAIRecommendationResults = true;
+          if (_result != null) {
+            _result = _result!.copyWith(aiRecommendation: aiRecommendation);
+          }
+          notifyListeners();
+          _showNotification('🤖 Latest AI recommendations are ready!');
+          print(
+              '✅ [AI_REC] Showing AI recommendations (ATS score already displayed)');
+        } else {
+          print(
+              '⏳ [AI_REC] AI recommendations ready but waiting for ATS score to be displayed first');
+        }
         return;
       }
 
@@ -403,33 +413,53 @@ class SkillsAnalysisController extends ChangeNotifier {
               'AI recommendation file not found for company: $company');
         }
 
+        // Store AI recommendation but don't show it yet - wait for ATS score to be displayed first
+        if (_fullResult != null) {
+          _fullResult = _fullResult!.copyWith(aiRecommendation: retry);
+        }
+        print(
+            '✅ [AI_REC] Found recommendation after retry, storing for later display (content length: ${retry.content.length})');
+
+        // Only show AI recommendations if ATS score has already been displayed
+        if (_showATSResults) {
+          _showAIRecommendationLoading = false;
+          _showAIRecommendationResults = true;
+          if (_result != null) {
+            _result = _result!.copyWith(aiRecommendation: retry);
+          }
+          notifyListeners();
+          _showNotification('🤖 Latest AI recommendations are ready!');
+          print(
+              '✅ [AI_REC] Showing AI recommendations after retry (ATS score already displayed)');
+        } else {
+          print(
+              '⏳ [AI_REC] AI recommendations ready after retry but waiting for ATS score to be displayed first');
+        }
+        return;
+      }
+
+      // Store AI recommendation but don't show it yet - wait for ATS score to be displayed first
+      if (_fullResult != null) {
+        _fullResult = _fullResult!.copyWith(aiRecommendation: latest);
+      }
+      print(
+          '✅ [AI_REC] Found recommendation, storing for later display (content length: ${latest.content.length})');
+
+      // Only show AI recommendations if ATS score has already been displayed
+      if (_showATSResults) {
         _showAIRecommendationLoading = false;
         _showAIRecommendationResults = true;
         if (_result != null) {
-          _result = _result!.copyWith(aiRecommendation: retry);
-        }
-        if (_fullResult != null) {
-          _fullResult = _fullResult!.copyWith(aiRecommendation: retry);
+          _result = _result!.copyWith(aiRecommendation: latest);
         }
         notifyListeners();
         _showNotification('🤖 Latest AI recommendations are ready!');
         print(
-            '✅ [AI_REC] Found recommendation after retry, content length: ${retry.content.length}');
-        return;
+            '✅ [AI_REC] Showing AI recommendations (ATS score already displayed)');
+      } else {
+        print(
+            '⏳ [AI_REC] AI recommendations ready but waiting for ATS score to be displayed first');
       }
-
-      _showAIRecommendationLoading = false;
-      _showAIRecommendationResults = true;
-      if (_result != null) {
-        _result = _result!.copyWith(aiRecommendation: latest);
-      }
-      if (_fullResult != null) {
-        _fullResult = _fullResult!.copyWith(aiRecommendation: latest);
-      }
-      notifyListeners();
-      _showNotification('🤖 Latest AI recommendations are ready!');
-      print(
-          '✅ [AI_REC] Found recommendation, content length: ${latest.content.length}');
     } catch (e) {
       _showAIRecommendationLoading = false;
       _showAIRecommendationResults = false;
@@ -651,25 +681,12 @@ class SkillsAnalysisController extends ChangeNotifier {
           aiRecommendation: aiRecommendation,
         );
 
-        // Check if AI recommendation is now available and trigger display
-        // CRITICAL FIX: Show AI recommendations immediately when available (no delay)
+        // Store AI recommendation but don't show it yet - wait for ATS score to be displayed first
         if (aiRecommendation != null && !_showAIRecommendationResults) {
           print(
-              '✅ [POLLING] Setting AI recommendations immediately (no delay)');
-          _showAIRecommendationLoading = false;
-          _showAIRecommendationResults = true;
-          _result = _result!.copyWith(aiRecommendation: aiRecommendation);
-          // Defensive: if copy failed or _result became null, take from _fullResult
-          if (_result == null || _result!.aiRecommendation == null) {
-            if (_fullResult?.aiRecommendation != null) {
-              _result = (_result ?? _fullResult)!.copyWith(
-                aiRecommendation: _fullResult!.aiRecommendation,
-              );
-            }
-          }
-          notifyListeners();
-          _showNotification('🤖 AI recommendations are ready!');
-          print('🎯 [POLLING] AI recommendations set successfully');
+              '✅ [POLLING] AI recommendation available, storing for later display');
+          // Don't show AI recommendations yet - they will be shown after ATS score
+          // Just store the data for when it's time to display
         }
 
         // Update result with component analysis first (component analysis can show immediately)
@@ -710,9 +727,21 @@ class SkillsAnalysisController extends ChangeNotifier {
                 _showNotification('✅ ATS Analysis completed!');
               }
 
-              // Step 6: AI recommendations are now handled in the polling process
-              // when they become available, so we can finish analysis here
-              _finishAnalysis();
+              // Step 6: Now show AI recommendations AFTER ATS score is displayed
+              Timer(Duration(seconds: 2), () {
+                if (_fullResult?.aiRecommendation != null &&
+                    !_showAIRecommendationResults) {
+                  print(
+                      '✅ [ATS_COMPLETE] Now showing AI recommendations after ATS score');
+                  _showAIRecommendationLoading = false;
+                  _showAIRecommendationResults = true;
+                  _result = _result!.copyWith(
+                      aiRecommendation: _fullResult!.aiRecommendation);
+                  notifyListeners();
+                  _showNotification('🤖 AI recommendations are ready!');
+                }
+                _finishAnalysis();
+              });
             });
           });
         } else {

@@ -137,7 +137,8 @@ class SkillExtractionParser:
     def _extract_markdown_list(text: str, section_name: str, document_type: str) -> List[str]:
         """
         Extract skills from markdown format like:
-        **SOFT SKILLS:**
+        ## SOFT SKILLS:
+        **EXPLICIT (directly stated):**
         - Communication
         - Leadership
         
@@ -150,8 +151,9 @@ class SkillExtractionParser:
             List of extracted skills
         """
         try:
-            # Look for markdown sections with bullet points
-            pattern = rf'\*\*{re.escape(section_name)}:\*\*\s*\n((?:- .+\n?)+)'
+            # Look for markdown sections with hash headers and bullet points
+            # Pattern matches: ## SECTION_NAME: followed by optional **EXPLICIT** and bullet points
+            pattern = rf'## {re.escape(section_name)}:\s*\n(?:\*\*[^*]+\*\*\s*\n)?((?:- .+\n?)+)'
             match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
             
             if match:
@@ -162,8 +164,19 @@ class SkillExtractionParser:
                 logger.debug(f"🔍 [{document_type.upper()}] Extracted {section_name} (markdown): {len(skills)} items")
                 return skills
             else:
-                logger.debug(f"🔍 [{document_type.upper()}] No {section_name} markdown section found")
-                return []
+                # Fallback: try the old format with double asterisks
+                pattern_old = rf'\*\*{re.escape(section_name)}:\*\*\s*\n((?:- .+\n?)+)'
+                match_old = re.search(pattern_old, text, re.IGNORECASE | re.MULTILINE)
+                
+                if match_old:
+                    skills_text = match_old.group(1)
+                    skill_lines = re.findall(r'- (.+)', skills_text)
+                    skills = [skill.strip() for skill in skill_lines if skill.strip()]
+                    logger.debug(f"🔍 [{document_type.upper()}] Extracted {section_name} (old markdown): {len(skills)} items")
+                    return skills
+                else:
+                    logger.debug(f"🔍 [{document_type.upper()}] No {section_name} markdown section found")
+                    return []
                 
         except Exception as e:
             logger.error(f"❌ [{document_type.upper()}] Failed to extract {section_name} (markdown): {e}")
@@ -186,6 +199,8 @@ class SkillExtractionParser:
             for section_name in section_names:
                 # Try multiple patterns for section headers
                 patterns = [
+                    rf'## {re.escape(section_name)}:\s*\n(?:\*\*[^*]+\*\*\s*\n)?((?:- .+\n?)+)',  # Hash header with optional **EXPLICIT** and bullets
+                    rf'## {re.escape(section_name)}:\s*\n((?:- .+\n?)+)',  # Hash header with bullets
                     rf'{re.escape(section_name)}:\s*\n((?:- .+\n?)+)',  # Header with bullets
                     rf'{re.escape(section_name)}\s*\n((?:- .+\n?)+)',   # Header without colon
                     rf'{re.escape(section_name)}:\s*\n((?:\* .+\n?)+)', # Header with asterisks

@@ -1,0 +1,45 @@
+{
+  "company_name": "The_Glen_Centre",
+  "cv_analysis_timestamp": "2025-10-09T16:55:02.257544",
+  "matched_required_keywords": [
+    "Power BI",
+    "MS Excel",
+    "communication",
+    "problem solving",
+    "planning",
+    "time management",
+    "attention to detail"
+  ],
+  "matched_preferred_keywords": [
+    "SQL"
+  ],
+  "missed_required_keywords": [
+    "MS Forms",
+    "MS Teams",
+    "independence"
+  ],
+  "missed_preferred_keywords": [
+    "project management",
+    "innovation"
+  ],
+  "match_counts": {
+    "total_required_keywords": 10,
+    "total_preferred_keywords": 3,
+    "matched_required_count": 7,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "Power BI": "Found in technical skills section",
+    "MS Excel": "Found in technical skills section",
+    "SQL": "Found in technical skills section",
+    "communication": "Found in experience section",
+    "problem solving": "Found in experience section",
+    "planning": "Found in experience section",
+    "time management": "Found in experience section",
+    "attention to detail": "Found in experience section"
+  },
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "cv_file_path": "user/keosha@gmail.com/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}

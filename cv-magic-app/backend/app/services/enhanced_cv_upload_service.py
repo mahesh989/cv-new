@@ -47,6 +47,52 @@ class EnhancedCVUploadService:
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         self.cv_analysis_dir.mkdir(parents=True, exist_ok=True)
 
+    async def upload_cv_only(
+        self, 
+        cv_file: UploadFile
+    ) -> Dict[str, Any]:
+        """
+        Upload CV file only (no structured processing)
+        
+        Args:
+            cv_file: The uploaded CV file
+            
+        Returns:
+            Dict containing upload results only
+        """
+        
+        # Validate file
+        validation_result = await self._validate_cv_file(cv_file)
+        if not validation_result["valid"]:
+            raise HTTPException(status_code=400, detail=validation_result["error"])
+        
+        try:
+            # Read file content
+            file_content = await cv_file.read()
+            file_path = self.upload_dir / cv_file.filename
+            
+            # Save original file
+            with open(file_path, "wb") as buffer:
+                buffer.write(file_content)
+            
+            logger.info(f"CV file uploaded: {cv_file.filename} ({len(file_content)} bytes)")
+            
+            return {
+                "success": True,
+                "filename": cv_file.filename,
+                "file_size": len(file_content),
+                "file_type": file_path.suffix[1:].upper(),
+                "upload_path": str(file_path),
+                "message": "CV uploaded successfully. Select from list to process into structured format."
+            }
+            
+        except Exception as e:
+            logger.error(f"Error uploading CV: {str(e)}")
+            # Clean up uploaded file if upload failed
+            if 'file_path' in locals() and file_path.exists():
+                file_path.unlink()
+            raise HTTPException(status_code=500, detail=f"CV upload failed: {str(e)}")
+
     async def upload_and_process_cv(
         self, 
         cv_file: UploadFile, 

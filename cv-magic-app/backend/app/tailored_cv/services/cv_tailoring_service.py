@@ -96,7 +96,34 @@ class CVTailoringService:
             )
             
             # Step 5: Estimate ATS score improvement
-            estimated_score = await self._estimate_ats_score(tailored_cv, request.recommendations)
+            # Create user data for AI service
+            from app.models.auth import UserData
+            from datetime import datetime
+            from app.database import SessionLocal
+            from app.models.user import User
+            
+            # Get the real user ID from database
+            db = SessionLocal()
+            try:
+                user = db.query(User).filter(User.email == self.user_email).first()
+                if user:
+                    user_id = str(user.id)
+                    user_name = user.full_name or ""
+                else:
+                    user_id = "temp"
+                    user_name = ""
+            finally:
+                db.close()
+            
+            user_data = UserData(
+                id=user_id, 
+                email=self.user_email, 
+                name=user_name, 
+                created_at=datetime.now(), 
+                updated_at=datetime.now()
+            )
+            
+            estimated_score = await self._estimate_ats_score(tailored_cv, request.recommendations, user_data)
             tailored_cv.estimated_ats_score = estimated_score
             
             # Add quality warnings to processing summary if any
@@ -375,11 +402,52 @@ class CVTailoringService:
             logger.info(f"[{request_id}] - System prompt length: {len(system_prompt)}")
             logger.info(f"[{request_id}] - User prompt length: {len(user_prompt)}")
             
+            # Create user data for AI service with real user ID
+            from app.models.auth import UserData
+            from datetime import datetime
+            from app.database import SessionLocal
+            from app.models.user import User
+            
+            # Get the real user ID from database
+            db = SessionLocal()
+            try:
+                user = db.query(User).filter(User.email == self.user_email).first()
+                if user:
+                    user_id = str(user.id)
+                    user_name = user.full_name or ""
+                else:
+                    user_id = "temp"
+                    user_name = ""
+            finally:
+                db.close()
+            
+            user_data = UserData(
+                id=user_id, 
+                email=self.user_email, 
+                name=user_name, 
+                created_at=datetime.now(), 
+                updated_at=datetime.now()
+            )
+            
+            # Initialize AI service for this user
+            ai_service.initialize_for_user(user_data)
+            logger.info(f"[{request_id}] 🔄 Initialized AI service for user {self.user_email}")
+            
+            # Auto-select the first available provider if none is set
+            if ai_service._providers and not ai_service.config.get_current_provider():
+                first_provider = list(ai_service._providers.keys())[0]
+                success = ai_service.switch_provider(first_provider, "gpt-3.5-turbo")
+                if success:
+                    logger.info(f"[{request_id}] ✅ Auto-selected provider: {first_provider}")
+                else:
+                    logger.warning(f"[{request_id}] ⚠️ Failed to auto-select provider: {first_provider}")
+            
             ai_response = await ai_service.generate_response(
                 prompt=user_prompt,
                 system_prompt=system_prompt,
                 temperature=temperature,
-                max_tokens=4000
+                max_tokens=4000,
+                user=user_data
             )
             
             # Log AI response stats
@@ -437,7 +505,8 @@ class CVTailoringService:
                 prompt=user_prompt,
                 system_prompt=system_prompt,
                 temperature=0.0,
-                max_tokens=4000
+                max_tokens=4000,
+                user=user_data
             )
             try:
                 tailored_data = self._extract_and_parse_json(ai_response.content)
@@ -1275,7 +1344,8 @@ FIX: Output ONLY valid JSON!
     async def _estimate_ats_score(
         self,
         tailored_cv: TailoredCV,
-        recommendations: RecommendationAnalysis
+        recommendations: RecommendationAnalysis,
+        user_data: Any
     ) -> int:
         """
         Estimate ATS score for the tailored CV
@@ -1306,7 +1376,8 @@ FIX: Output ONLY valid JSON!
                 prompt=prompt,
                 system_prompt=system_prompt,
                 temperature=0.0,
-                max_tokens=10
+                max_tokens=10,
+                user=user_data
             )
             
             # Extract score from response
@@ -1809,11 +1880,14 @@ FIX: Output ONLY valid JSON!
             companies = []
             
             if self.cv_analysis_path.exists():
-                for company_dir in self.cv_analysis_path.iterdir():
-                    if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                        ai_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
-                        if ai_file.exists():
-                            companies.append(company_dir.name)
+                applied_companies_dir = self.cv_analysis_path / "applied_companies"
+                if applied_companies_dir.exists():
+                    for company_dir in applied_companies_dir.iterdir():
+                        if company_dir.is_dir() and company_dir.name != "Unknown_Company":
+                            # Look for any AI recommendation file (with timestamp)
+                            ai_files = list(company_dir.glob(f"{company_dir.name}_ai_recommendation_*.json"))
+                            if ai_files:
+                                companies.append(company_dir.name)
             
             return companies
             

@@ -187,6 +187,9 @@ async def tailor_cv_with_real_data(
     try:
         logger.info(f"🎯 CV tailoring with real data for user {current_user.id} - {company}")
         
+        # Create user-specific service instance
+        cv_tailoring_service = CVTailoringService(user_email=current_user.email)
+        
         # First, check what companies are available
         available_companies = cv_tailoring_service.list_available_companies()
         logger.info(f"Available companies: {available_companies}")

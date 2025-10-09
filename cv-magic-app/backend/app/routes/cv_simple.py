@@ -38,35 +38,27 @@ async def upload_cv(
     cv: UploadFile = File(...), 
     current_user: UserData = Depends(get_current_user)
 ):
-    """Upload a CV file with automatic structured processing - user-specific path isolated"""
+    """Upload a CV file only (no structured processing) - user-specific path isolated"""
     
     if not cv.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     
     try:
-        logger.info(f"Uploading {cv.filename} with structured processing for user: {current_user.email}")
+        logger.info(f"Uploading {cv.filename} for user: {current_user.email}")
         
         # Create service instance with current user's email - user-specific path isolated
         upload_service = EnhancedCVUploadService(user_email=current_user.email)
-        result = await upload_service.upload_and_process_cv(
-            cv_file=cv,
-            user=current_user
-            # Always saves as original_cv.json (replaces existing)
-        )
+        result = await upload_service.upload_cv_only(cv_file=cv)
         
-        logger.info(f"✅ {cv.filename} uploaded and processed into structured format for user: {current_user.email}")
+        logger.info(f"✅ {cv.filename} uploaded successfully for user: {current_user.email}")
         
         return JSONResponse(content={
-            "message": "CV uploaded and processed successfully",
+            "message": "CV uploaded successfully. Select from list to process into structured format.",
             "filename": result['filename'],
             "size": result['file_size'],
             "type": result['file_type'],
-            "structured_processing": True,
-            "structured_cv_path": result['structured_cv_path'],
-            "sections_found": result['sections_found'],
-            "unknown_sections": result['unknown_sections'],
-            "validation_report": result['validation_report'],
-            "processing_timestamp": result['processing_timestamp'],
+            "upload_path": result['upload_path'],
+            "structured_processing": False,
             "user_email": current_user.email
         })
         
