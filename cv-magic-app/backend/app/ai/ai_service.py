@@ -263,6 +263,18 @@ class AIServiceManager:
         
         # Determine provider name and model
         resolved_provider_name = provider_name or self.config.get_current_provider()
+        
+        # If no provider is set globally, try to find one the user has an API key for
+        if not resolved_provider_name and user:
+            for provider_name_candidate in ["openai", "anthropic", "deepseek"]:
+                try:
+                    if self.config.get_api_key(provider_name_candidate, user):
+                        resolved_provider_name = provider_name_candidate
+                        logger.info(f"Auto-selected provider {provider_name_candidate} based on user's API key")
+                        break
+                except Exception:
+                    continue
+        
         if not resolved_provider_name:
             raise Exception("No AI provider selected. Set via /ai/set-current-model.")
 
