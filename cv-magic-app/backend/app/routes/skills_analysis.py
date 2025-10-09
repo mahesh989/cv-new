@@ -599,10 +599,19 @@ async def analyze_skills(request: Request, current_user: UserData = Depends(get_
             current_provider = ai_service.config.get_current_provider()
         except Exception:
             current_provider = None
+        # Fallback: choose any provider the user has a key for (openai→anthropic→deepseek)
+        if not current_provider:
+            for prov in ["openai", "anthropic", "deepseek"]:
+                try:
+                    if user_api_key_manager.has_api_key(current_user, prov):
+                        current_provider = prov
+                        break
+                except Exception:
+                    continue
         if not current_provider or not user_api_key_manager.has_api_key(current_user, current_provider):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"No API key configured for provider '{current_provider or 'unknown'}' for this user. Please add your key via /api/api-keys/set."
+                detail=f"No API key configured for this user. Please add your key via /api/api-keys/set."
             )
         # Ensure required directories exist before processing
         from ..utils.directory_utils import ensure_cv_analysis_directories
@@ -863,7 +872,8 @@ async def context_aware_analysis(
 @router.post("/preliminary-analysis")
 async def preliminary_analysis(
     request: Request,
-    current_model: str = Depends(get_current_model)
+    current_model: str = Depends(get_current_model),
+    current_user: UserData = Depends(get_current_user)
 ):
     """Preliminary skills analysis from CV filename and JD text"""
     try:
@@ -888,11 +898,30 @@ async def preliminary_analysis(
             current_provider = ai_service.config.get_current_provider()
         except Exception:
             current_provider = None
+        from datetime import datetime, timezone
         user_email_guard = getattr(token_data, 'email', None)
-        if not current_provider or not user_email_guard or not user_api_key_manager.has_api_key(UserData(id=getattr(token_data, 'user_id', None), email=user_email_guard), current_provider):
+        user_obj = (
+            UserData(
+                id=str(getattr(token_data, 'user_id', None)),
+                email=user_email_guard,
+                name=(user_email_guard.split("@")[0] if user_email_guard else "user"),
+                created_at=datetime.now(timezone.utc),
+                is_active=True,
+            ) if user_email_guard else None
+        )
+        # Fallback: choose any provider the user has a key for
+        if user_obj and not current_provider:
+            for prov in ["openai", "anthropic", "deepseek"]:
+                try:
+                    if user_api_key_manager.has_api_key(user_obj, prov):
+                        current_provider = prov
+                        break
+                except Exception:
+                    continue
+        if not user_obj or not current_provider or not user_api_key_manager.has_api_key(user_obj, current_provider):
             return JSONResponse(
                 status_code=400,
-                content={"error": f"No API key configured for provider '{current_provider or 'unknown'}' for this user. Please add your key via /api/api-keys/set."}
+                content={"error": "No API key configured for this user. Please add your key via /api/api-keys/set."}
             )
 
         data = await request.json()
@@ -983,7 +1012,8 @@ async def preliminary_analysis(
             current_model=current_model,
             config_name=config_name,
             user_id=user_id,
-            user_email=user_email
+            user_email=user_email,
+            current_user=current_user
         )
         # Attach resolved company to result so frontend can poll consistently (no extra calls)
         try:
@@ -2331,10 +2361,22 @@ async def perform_preliminary_skills_analysis(
     current_model: str,
     config_name: Optional[str] = None,
     user_id: int = 1,
-    user_email: str = None
+    user_email: str = None,
+    current_user: Optional[UserData] = None
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
+        # Create UserData object if not provided
+        if not current_user and user_email:
+            from datetime import timezone
+            current_user = UserData(
+                id=str(user_id),
+                email=user_email,
+                name=user_email.split("@")[0] if user_email else "user",
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
+        
         # Get configuration
         config = skills_analysis_config_service.get_config(config_name)
         ai_params = skills_analysis_config_service.get_ai_parameters(config_name)
@@ -2373,7 +2415,8 @@ async def perform_preliminary_skills_analysis(
         cv_structured_response = await ai_service.generate_response(
             prompt=cv_structured_prompt,
             temperature=ai_params["temperature"],
-            max_tokens=ai_params["max_tokens"]
+            max_tokens=ai_params["max_tokens"],
+            user=current_user
         )
         cv_raw_response = cv_structured_response.content
         
@@ -2406,7 +2449,8 @@ async def perform_preliminary_skills_analysis(
         jd_structured_response = await ai_service.generate_response(
             prompt=jd_structured_prompt,
             temperature=ai_params["temperature"],
-            max_tokens=ai_params["max_tokens"]
+            max_tokens=ai_params["max_tokens"],
+            user=current_user
         )
         jd_raw_response = jd_structured_response.content
         
@@ -2630,7 +2674,8 @@ async def perform_preliminary_skills_analysis(
             analyze_match_response = await ai_service.generate_response(
                 prompt=analyze_match_prompt,
                 temperature=0.0,
-                max_tokens=4000
+                max_tokens=4000,
+                user=current_user
             )
             analyze_match_content = analyze_match_response.content
             
