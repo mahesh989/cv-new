@@ -1,0 +1,18 @@
+Maheshwor Tiwari
+maheshwor.tiwari@example.com|+61-123-456-789|Sydney, NSW, Australia
+linkedin.com/in/maheshwor-tiwari|github.com/maheshwor-tiwari
+Professional Summary
+Experienced Data Analyst with expertise in Python and SQL
+Education
+•Master of Data Science - Charles Darwin University
+•Bachelor of Computer Science
+Experience
+•Data Analyst at iBuild Building Solutions
+•Data Insight Analyst at Property Console
+Skills
+•Python
+•SQL
+•Power BI
+•Data Analysis
+•Machine Learning
+1

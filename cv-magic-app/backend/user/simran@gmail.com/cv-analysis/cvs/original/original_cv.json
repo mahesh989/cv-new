@@ -1,0 +1,87 @@
+{
+  "personal_information": {
+    "name": "Maheshwor Tiwari",
+    "phone": "+61-123-456-789",
+    "email": "maheshwor.tiwari@example.com",
+    "location": "Sydney, NSW, Australia",
+    "linkedin": "linkedin.com/in/maheshwor-tiwari",
+    "github": "github.com/maheshwor-tiwari",
+    "portfolio_links": {
+      "blogs": "",
+      "dashboard_portfolio": "",
+      "website": ""
+    },
+    "residency_status": "",
+    "open_to": ""
+  },
+  "career_profile": {
+    "summary": "Experienced Data Analyst with expertise in Python and SQL"
+  },
+  "skills": {
+    "technical_skills": [
+      "Python",
+      "SQL",
+      "Power BI",
+      "Data Analysis",
+      "Machine Learning"
+    ],
+    "key_skills": [],
+    "soft_skills": [],
+    "domain_expertise": []
+  },
+  "education": [
+    {
+      "degree": "Master of Data Science",
+      "institution": "Charles Darwin University",
+      "year": "",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Sydney, Australia"
+    },
+    {
+      "degree": "Bachelor of Computer Science",
+      "institution": "",
+      "year": "",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": ""
+    }
+  ],
+  "experience": [
+    {
+      "title": "Data Analyst",
+      "company": "iBuild Building Solutions",
+      "duration": "",
+      "location": "",
+      "responsibilities": []
+    },
+    {
+      "title": "Data Insight Analyst",
+      "company": "Property Console",
+      "duration": "",
+      "location": "",
+      "responsibilities": []
+    }
+  ],
+  "projects": [],
+  "certifications": [],
+  "languages": [],
+  "awards": [],
+  "publications": [],
+  "volunteer_work": [],
+  "professional_memberships": [],
+  "unknown_sections": {},
+  "original_sections": {
+    "section_headers_found": [],
+    "parsing_approach": "content_preserving"
+  },
+  "saved_at": "2025-10-09T14:01:57.824964",
+  "metadata": {
+    "source_filename": "test_cv.pdf",
+    "processed_at": "2025-10-09T14:01:57.825248",
+    "processing_version": "2.0",
+    "content_type": "structured_cv"
+  }
+}

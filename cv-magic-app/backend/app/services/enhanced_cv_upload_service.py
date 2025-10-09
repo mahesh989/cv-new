@@ -52,7 +52,8 @@ class EnhancedCVUploadService:
         cv_file: UploadFile, 
         user_id: Optional[str] = None,
         title: Optional[str] = None,
-        description: Optional[str] = None
+        description: Optional[str] = None,
+        user: Any = None
     ) -> Dict[str, Any]:
         """
         Upload and process CV with structured parsing
@@ -97,7 +98,8 @@ class EnhancedCVUploadService:
                 cv_file.filename,
                 title,
                 description,
-                user_id
+                user_id,
+                user
             )
             
             # Validate structured CV
@@ -156,7 +158,7 @@ class EnhancedCVUploadService:
                 raise HTTPException(status_code=500, detail=f"Text extraction failed: {extraction_result['error']}")
             
             # Parse into structured format
-            structured_cv = await self._parse_to_structured_format(extraction_result["text"], filename)
+            structured_cv = await self._parse_to_structured_format(extraction_result["text"], filename, user=user)
             
             # Validate structured CV
             validation_report = self.structured_parser.validate_cv_structure(structured_cv)
@@ -291,7 +293,8 @@ class EnhancedCVUploadService:
         filename: str,
         title: Optional[str] = None,
         description: Optional[str] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        user: Any = None
     ) -> Dict[str, Any]:
         """Parse text content into structured CV format"""
         try:
@@ -300,15 +303,15 @@ class EnhancedCVUploadService:
                 existing_data = json.loads(text_content)
                 if isinstance(existing_data, dict) and "personal_information" in existing_data:
                     # Already structured, just validate and clean
-                    structured_cv = await self.structured_parser.parse_cv_content(existing_data)
+                    structured_cv = await self.structured_parser.parse_cv_content(existing_data, user)
                     logger.info("CV was already in structured format")
                 else:
                     # JSON but not our structure, parse as text
-                    structured_cv = await self.structured_parser.parse_cv_content(text_content)
+                    structured_cv = await self.structured_parser.parse_cv_content(text_content, user)
                     logger.info("CV parsed from JSON content")
             except json.JSONDecodeError:
                 # Regular text content, parse it
-                structured_cv = await self.structured_parser.parse_cv_content(text_content)
+                structured_cv = await self.structured_parser.parse_cv_content(text_content, user)
                 logger.info("CV parsed from raw text content")
             
             # Add metadata

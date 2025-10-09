@@ -76,7 +76,7 @@ TEXT TO ANALYZE:
         
         return company_slug
     
-    async def extract_job_information(self, job_description: str, auth_token: Optional[str] = None) -> Dict[str, Any]:
+    async def extract_job_information(self, job_description: str, auth_token: Optional[str] = None, user: Any = None) -> Dict[str, Any]:
         """
         Extract job information using the selected AI model with comprehensive error handling
         
@@ -94,7 +94,7 @@ TEXT TO ANALYZE:
         if auth_token:
             print(f"🔍 Starting AI extraction with token: {auth_token[:20]}...")
             try:
-                ai_result = await self._try_ai_extraction(job_description, auth_token)
+                ai_result = await self._try_ai_extraction(job_description, auth_token, user)
                 print(f"🔍 AI extraction result: {ai_result}")
                 if ai_result and "error" not in ai_result:
                     print(f"✅ AI extraction successful: {ai_result.get('company_name', 'Unknown')}")
@@ -116,7 +116,7 @@ TEXT TO ANALYZE:
             # Step 3: Return minimal default if everything fails
             return self._get_default_job_info()
     
-    async def _try_ai_extraction(self, job_description: str, auth_token: str) -> Dict[str, Any]:
+    async def _try_ai_extraction(self, job_description: str, auth_token: str, user: Any = None) -> Dict[str, Any]:
         """Attempt AI extraction using centralized AI service"""
         try:
             # Load prompt template
@@ -130,6 +130,7 @@ TEXT TO ANALYZE:
             try:
                 ai_response = await enhanced_ai_service.generate_response_with_validation(
                     prompt=prompt,
+                    user=user,
                     system_prompt="You are a precise job information extractor. CRITICAL: Return ONLY a valid JSON object that starts with { and ends with }. Do NOT wrap in code blocks. Do NOT add any text before or after the JSON. Use double quotes for all keys. If information is not available, use null. Your response must be parsable by json.loads() without modification.",
                     temperature=0.0,
                     max_tokens=1000
@@ -511,7 +512,7 @@ TEXT TO ANALYZE:
         
         return job_info
     
-    async def save_job_analysis(self, job_description: str, job_url: Optional[str] = None, auth_token: Optional[str] = None) -> Dict[str, Any]:
+    async def save_job_analysis(self, job_description: str, job_url: Optional[str] = None, auth_token: Optional[str] = None, user: Any = None) -> Dict[str, Any]:
         """
         Extract job information and save to organized folder structure
         
@@ -524,7 +525,7 @@ TEXT TO ANALYZE:
         """
         try:
             # Extract job information using AI
-            job_info = await self.extract_job_information(job_description, auth_token)
+            job_info = await self.extract_job_information(job_description, auth_token, user)
             
             if "error" in job_info:
                 return job_info

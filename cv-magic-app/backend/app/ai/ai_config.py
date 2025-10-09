@@ -183,38 +183,30 @@ class AIConfig:
         self._current_model = None
     
     def _auto_select_provider(self):
-        """Auto-select a provider if none is currently set"""
-        # Check for available API keys and select the first available provider
-        for provider in self._model_configs.keys():
-            api_key = self.get_api_key(provider)
-            if api_key:
-                # Get the first available model for this provider
-                available_models = self.get_available_models(provider)
-                if available_models:
-                    self._current_provider = provider
-                    self._current_model = available_models[0]
-                    logger.info(f"Auto-selected provider: {provider} with model: {self._current_model}")
-                    return
-        
-        # If no provider with API key is found, log warning
-        logger.warning("No AI providers available - please configure API keys")
+        """Auto-select provider - requires user context, so this is disabled"""
+        # Auto-selection is disabled since we require user-specific API keys
+        logger.warning("Auto-selection disabled - user-specific API keys required")
         self._current_provider = None
         self._current_model = None
     
     def get_api_key(self, provider: str, user: Optional[Any] = None) -> Optional[str]:
-        """Get API key for a specific provider and user (no global fallback)."""
-        # Only return the logged-in user's stored key
-        if user:
-            try:
-                from app.services.user_api_key_manager import user_api_key_manager
-                user_key = user_api_key_manager.get_api_key(user, provider)
-                if user_key:
-                    return user_key
-            except Exception as e:
-                logger.warning(f"Failed to get user-specific API key for {provider}: {e}")
-        
-        # No global/dynamic fallback; require per-user configuration
-        return None
+        """Get API key for a specific provider and user - REQUIRES user-specific key"""
+        if not user:
+            logger.error(f"❌ [AI_CONFIG] No user provided for API key request for {provider}")
+            return None
+            
+        try:
+            from app.services.user_api_key_manager import user_api_key_manager
+            user_key = user_api_key_manager.get_api_key(user, provider)
+            if user_key:
+                logger.debug(f"✅ [AI_CONFIG] Retrieved user-specific API key for {provider}")
+                return user_key
+            else:
+                logger.error(f"❌ [AI_CONFIG] No API key found for user {user.email} and provider {provider}")
+                return None
+        except Exception as e:
+            logger.error(f"❌ [AI_CONFIG] Failed to get user-specific API key for {provider}: {e}")
+            return None
     
     def get_current_model(self) -> Tuple[str, str]:
         """Get current provider and model"""
@@ -222,9 +214,7 @@ class AIConfig:
     
     def get_current_provider(self) -> str:
         """Get current provider name"""
-        if self._current_provider is None:
-            # Try to auto-select a provider if none is set
-            self._auto_select_provider()
+        # No auto-selection - provider must be explicitly set
         return self._current_provider
     
     def get_current_model_name(self) -> str:
@@ -263,11 +253,11 @@ class AIConfig:
             for provider, models in self._model_configs.items()
         }
     
-    def get_provider_status(self) -> Dict[str, Any]:
-        """Get status of all providers"""
+    def get_provider_status(self, user: Optional[Any] = None) -> Dict[str, Any]:
+        """Get status of all providers for a specific user"""
         status = {}
         for provider in self._model_configs.keys():
-            api_key = self.get_api_key(provider)
+            api_key = self.get_api_key(provider, user) if user else None
             status[provider] = {
                 "available": bool(api_key),
                 "api_key_configured": bool(api_key),

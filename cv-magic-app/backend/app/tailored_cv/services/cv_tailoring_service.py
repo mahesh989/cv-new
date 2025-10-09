@@ -1477,10 +1477,15 @@ FIX: Output ONLY valid JSON!
                     
                     lines.append("")
                     
-                    # Bullets
+                    # Bullets (sanitize to avoid double bullet prefixes)
                     if exp.bullets:
+                        import re as _re
                         for bullet in exp.bullets:
-                            lines.append(f"• {bullet}")
+                            try:
+                                clean_bullet = _re.sub(r'^\s*[•*\-–—]+\s*', '', str(bullet))
+                            except Exception:
+                                clean_bullet = str(bullet)
+                            lines.append(f"• {clean_bullet}")
                         lines.append("")
             
             # Education - Format like original CV with all data
@@ -1524,8 +1529,13 @@ FIX: Output ONLY valid JSON!
                     if project.technologies:
                         lines.append(f"Technologies: {', '.join(project.technologies)}")
                     if project.bullets:
+                        import re as _re
                         for bullet in project.bullets:
-                            lines.append(f"• {bullet}")
+                            try:
+                                clean_bullet = _re.sub(r'^\s*[•*\-–—]+\s*', '', str(bullet))
+                            except Exception:
+                                clean_bullet = str(bullet)
+                            lines.append(f"• {clean_bullet}")
                     lines.append("")
             
             # Note: Certifications and Languages are not part of the current TailoredCV model

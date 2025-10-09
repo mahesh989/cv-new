@@ -434,8 +434,20 @@ class JDAnalyzer:
         try:
             system_prompt, user_prompt = get_jd_analysis_prompts(jd_text)
             
+            # Create user object from stored user_email
+            from app.models.auth import UserData
+            from datetime import datetime, timezone
+            current_user = UserData(
+                id="pipeline_user",  # Use a placeholder ID for pipeline operations
+                email=self.user_email,
+                name=self.user_email.split("@")[0] if self.user_email else "user",
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
+            
             response = await self.ai_service.generate_response(
                 prompt=user_prompt,
+                user=current_user,
                 system_prompt=system_prompt,
                 temperature=temperature,
                 max_tokens=2000

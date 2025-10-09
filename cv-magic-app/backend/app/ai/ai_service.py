@@ -11,7 +11,6 @@ from app.ai.base_provider import BaseAIProvider, AIResponse
 from app.ai.providers import OpenAIProvider, AnthropicProvider, DeepSeekProvider
 import logging
 from app.core.model_dependency import get_request_model
-from app.models.auth import UserData
 
 logger = logging.getLogger(__name__)
 
@@ -31,39 +30,29 @@ class AIServiceManager:
             "deepseek": DeepSeekProvider
         }
         
-        # Initialize available providers
-        self._initialize_providers()
+        # Providers will be initialized when user context is available
+        # No global initialization to prevent fallback behavior
+    
+    def initialize_for_user(self, user: Any):
+        """Initialize providers for a specific user"""
+        if not user:
+            raise Exception("User is required for AI provider initialization")
+        logger.info(f"🔄 Initializing AI providers for user {user.email}")
+        self._providers.clear()
+        self._initialize_providers(user)
     
     def refresh_providers(self, user: Optional[Any] = None):
         """Refresh all providers after API keys have been updated"""
         logger.info("🔄 Refreshing AI providers after API key changes")
         self._providers.clear()
-        if user:
-            self._initialize_providers_for_user(user)
-        else:
-            self._initialize_providers()
+        self._initialize_providers(user)
     
-    def _initialize_providers(self):
-        """Initialize all available providers based on API keys"""
-        for provider_name, provider_class in self._provider_classes.items():
-            api_key = self.config.get_api_key(provider_name)
-            if api_key:
-                try:
-                    # Get default model for this provider
-                    available_models = self.config.get_available_models(provider_name)
-                    if available_models:
-                        default_model = available_models[0]
-                        provider_instance = provider_class(api_key, default_model)
-                        if provider_instance.is_available():
-                            self._providers[provider_name] = provider_instance
-                            logger.info(f"✅ Initialized {provider_name} provider with model {default_model}")
-                        else:
-                            logger.warning(f"⚠️ {provider_name} provider initialized but not available")
-                except Exception as e:
-                    logger.error(f"❌ Failed to initialize {provider_name} provider: {e}")
-    
-    def _initialize_providers_for_user(self, user: Any):
-        """Initialize providers for a specific user based on their API keys"""
+    def _initialize_providers(self, user: Optional[Any] = None):
+        """Initialize all available providers based on user-specific API keys"""
+        if not user:
+            logger.warning("⚠️ No user provided for provider initialization - providers will not be initialized")
+            return
+            
         for provider_name, provider_class in self._provider_classes.items():
             api_key = self.config.get_api_key(provider_name, user)
             if api_key:
@@ -73,14 +62,15 @@ class AIServiceManager:
                     if available_models:
                         default_model = available_models[0]
                         provider_instance = provider_class(api_key, default_model)
-                        # Always add the provider instance, even if validation fails
-                        # The validation will happen during actual usage
-                        self._providers[provider_name] = provider_instance
-                        logger.info(f"✅ Initialized {provider_name} provider for user with model {default_model}")
-                    else:
-                        logger.warning(f"⚠️ No available models for {provider_name} provider")
+                        if provider_instance.is_available():
+                            self._providers[provider_name] = provider_instance
+                            logger.info(f"✅ Initialized {provider_name} provider with model {default_model} for user {user.email}")
+                        else:
+                            logger.warning(f"⚠️ {provider_name} provider initialized but not available for user {user.email}")
                 except Exception as e:
-                    logger.error(f"❌ Failed to initialize {provider_name} provider for user: {e}")
+                    logger.error(f"❌ Failed to initialize {provider_name} provider for user {user.email}: {e}")
+            else:
+                logger.debug(f"🔍 No API key found for {provider_name} for user {user.email}")
     
     def get_current_provider(self) -> Optional[BaseAIProvider]:
         """Get the current active provider"""
@@ -224,11 +214,11 @@ class AIServiceManager:
     async def generate_response(
         self, 
         prompt: str, 
+        user: Any,
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
         provider_name: Optional[str] = None,
-        user: Optional[UserData] = None,
         **kwargs
     ) -> AIResponse:
         """
@@ -236,6 +226,7 @@ class AIServiceManager:
         
         Args:
             prompt: User prompt
+            user: User object (required for API key access)
             system_prompt: Optional system prompt
             temperature: Response randomness (0.0 to 1.0)
             max_tokens: Maximum tokens in response
@@ -244,7 +235,15 @@ class AIServiceManager:
             
         Returns:
             AIResponse object
+            
+        Raises:
+            Exception: If no user provided or no valid API key found
         """
+        # Validate user is provided
+        if not user:
+            from app.exceptions.cv_exceptions import APIKeyError
+            raise APIKeyError("User context is required for AI operations. Please ensure you are authenticated.")
+        
         # Check if there's a request-specific model set
         request_model_id = get_request_model()
         if request_model_id:
@@ -261,46 +260,32 @@ class AIServiceManager:
                     provider.model_name = request_model_id
                     logger.debug(f"Updated provider model to match request: {request_model_id}")
         
-        # Determine provider name and model
-        resolved_provider_name = provider_name or self.config.get_current_provider()
+        # Determine which provider to use
+        if provider_name:
+            provider = self.get_provider(provider_name)
+            if not provider:
+                available_providers = self.get_available_providers()
+                logger.error(f"❌ Provider '{provider_name}' not available. Available providers: {available_providers}")
+                raise Exception(f"Provider '{provider_name}' not available. Available providers: {available_providers}")
+        else:
+            provider = self.get_current_provider()
+            if not provider:
+                current_provider_name = self.config.get_current_provider()
+                from app.exceptions.cv_exceptions import APIKeyNotFoundError, AIProviderUnavailableError
+                
+                # Check if it's an API key issue or provider availability issue
+                if current_provider_name:
+                    # Provider is configured but not available - likely API key issue
+                    raise APIKeyNotFoundError(current_provider_name, user.email)
+                else:
+                    # No provider configured at all
+                    raise APIKeyNotFoundError("any", user.email)
         
-        # If no provider is set globally, try to find one the user has an API key for
-        if not resolved_provider_name and user:
-            for provider_name_candidate in ["openai", "anthropic", "deepseek"]:
-                try:
-                    if self.config.get_api_key(provider_name_candidate, user):
-                        resolved_provider_name = provider_name_candidate
-                        logger.info(f"Auto-selected provider {provider_name_candidate} based on user's API key")
-                        break
-                except Exception:
-                    continue
-        
-        if not resolved_provider_name:
-            raise Exception("No AI provider selected. Set via /ai/set-current-model.")
-
-        # Fetch API key for this specific user (no sharing between users)
-        api_key_for_request = self.config.get_api_key(resolved_provider_name, user)
-        if not api_key_for_request:
-            raise Exception(f"No API key configured for provider '{resolved_provider_name}' for this user.")
-
-        # Resolve model to use
-        available_models = self.config.get_available_models(resolved_provider_name)
-        if not available_models:
-            raise Exception(f"No models available for provider '{resolved_provider_name}'")
-        model_to_use = self.config.get_current_model_name() or available_models[0]
-
-        # Construct a fresh provider instance per request using the user's API key
-        provider_class: Type[BaseAIProvider] = self._provider_classes.get(resolved_provider_name)  # type: ignore
-        if not provider_class:
-            raise Exception(f"Unknown provider '{resolved_provider_name}'")
-
-        provider_instance = provider_class(api_key_for_request, model_to_use)
-
         # Log the actual model being used
-        logger.info(f"Generating response with provider: {resolved_provider_name}, model: {provider_instance.model_name}")
-
+        logger.info(f"Generating response with provider: {provider.provider_name}, model: {provider.model_name}")
+        
         # Generate response
-        return await provider_instance.generate_response(
+        return await provider.generate_response(
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=temperature,
@@ -329,17 +314,8 @@ class AIServiceManager:
                 "is_current": provider_name == self.config.get_current_provider()
             }
         
-        # Add providers that have API keys but aren't initialized
-        config_status = self.config.get_provider_status()
-        for provider_name, config_info in config_status.items():
-            if provider_name not in status and config_info["api_key_configured"]:
-                status[provider_name] = {
-                    "provider": provider_name,
-                    "available": False,
-                    "api_key_configured": True,
-                    "error": "Failed to initialize",
-                    "is_current": False
-                }
+        # Note: Provider status now requires user context, so we can't check uninitialized providers
+        # without user information
         
         return status
     
@@ -369,12 +345,13 @@ class AIServiceManager:
         """Property to get the current model name for backward compatibility"""
         return self.get_current_model_name()
     
-    async def analyze_cv_content(self, cv_text: str, user: Optional[UserData] = None) -> AIResponse:
+    async def analyze_cv_content(self, cv_text: str, user: Any) -> AIResponse:
         """
         Analyze CV content to extract skills and information
         
         Args:
             cv_text: The CV content as text
+            user: User object (required for API key access)
             
         Returns:
             AIResponse with analysis
@@ -402,19 +379,20 @@ Provide your response in JSON format with the following structure:
         
         return await self.generate_response(
             prompt=prompt,
+            user=user,
             system_prompt=system_prompt,
             temperature=0.0,  # Zero temperature for maximum consistency
-            max_tokens=2000,
-            user=user
+            max_tokens=2000
         )
     
-    async def compare_cv_with_job(self, cv_text: str, job_description: str, user: Optional[UserData] = None) -> AIResponse:
+    async def compare_cv_with_job(self, cv_text: str, job_description: str, user: Any) -> AIResponse:
         """
         Compare CV with job description to find matches and gaps
         
         Args:
             cv_text: The CV content as text
             job_description: Job description text
+            user: User object (required for API key access)
             
         Returns:
             AIResponse with comparison analysis
@@ -448,18 +426,19 @@ Job Description:
         
         return await self.generate_response(
             prompt=prompt,
+            user=user,
             system_prompt=system_prompt,
             temperature=0.0,
-            max_tokens=3000,
-            user=user
+            max_tokens=3000
         )
     
-    async def analyze_job_description(self, job_description: str, user: Optional[UserData] = None) -> AIResponse:
+    async def analyze_job_description(self, job_description: str, user: Any) -> AIResponse:
         """
         Analyze job description to extract required and preferred keywords
         
         Args:
             job_description: Job description text to analyze
+            user: User object (required for API key access)
             
         Returns:
             AIResponse with keyword analysis
@@ -514,10 +493,10 @@ Remember to classify keywords based on the language context they appear in. Focu
         
         return await self.generate_response(
             prompt=prompt,
+            user=user,
             system_prompt=system_prompt,
             temperature=0.0,
-            max_tokens=2000,
-            user=user
+            max_tokens=2000
         )
     
     async def match_cv_against_jd_keywords(
@@ -525,7 +504,7 @@ Remember to classify keywords based on the language context they appear in. Focu
         cv_content: str, 
         required_keywords: List[str], 
         preferred_keywords: List[str],
-        user: Optional[UserData] = None
+        user: Any
     ) -> AIResponse:
         """
         Match CV content against job description keywords using AI-powered smart matching
@@ -534,6 +513,7 @@ Remember to classify keywords based on the language context they appear in. Focu
             cv_content: CV text content to analyze
             required_keywords: List of required keywords from JD analysis
             preferred_keywords: List of preferred keywords from JD analysis
+            user: User object (required for API key access)
             
         Returns:
             AIResponse with matching results
@@ -604,10 +584,10 @@ Remember to use intelligent matching - look for semantic meaning, synonyms, vari
         
         return await self.generate_response(
             prompt=prompt,
+            user=user,
             system_prompt=system_prompt,
             temperature=0.0,
-            max_tokens=3000,
-            user=user
+            max_tokens=3000
         )
 
 

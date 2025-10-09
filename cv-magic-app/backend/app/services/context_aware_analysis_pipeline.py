@@ -161,7 +161,9 @@ class ContextAwareAnalysisPipeline:
             
             # Record JD usage for tracking
             from app.services.jd_usage_tracker import jd_usage_tracker
-            jd_usage_tracker.record_jd_usage(jd_url, "", company, "")
+            # Provide fallback text if no URL is available
+            jd_text_fallback = f"JD for {company}" if not jd_url else ""
+            jd_usage_tracker.record_jd_usage(jd_url, jd_text_fallback, company, "")
             
             if not cv_context.exists:
                 results.errors.append(f"No CV found for company: {company}")

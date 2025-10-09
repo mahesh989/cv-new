@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 import logging
 
-from app.services.api_key_manager import api_key_manager
 from app.services.user_api_key_manager import user_api_key_manager
 from app.core.dependencies import get_current_user
 from app.models.auth import UserData
@@ -59,9 +58,12 @@ async def set_api_key(
 
 
 @router.post("/set-initial", response_model=APIKeyResponse)
-async def set_initial_api_key(request: APIKeyRequest):
-    """Set API key for initial setup (no auth required)"""
-    return await _set_api_key_internal(request)
+async def set_initial_api_key(
+    request: APIKeyRequest,
+    current_user: UserData = Depends(get_current_user)
+):
+    """Set initial API key for a user - requires authentication"""
+    return await _set_user_api_key_internal(request, current_user)
 
 
 async def _set_user_api_key_internal(request: APIKeyRequest, current_user: UserData):
@@ -125,63 +127,7 @@ async def _set_user_api_key_internal(request: APIKeyRequest, current_user: UserD
         )
 
 
-async def _set_api_key_internal(request: APIKeyRequest):
-    """
-    Set API key for a specific provider
-    
-    Args:
-        request: API key request data
-        current_user: Current authenticated user
-        
-    Returns:
-        APIKeyResponse: Result of the operation
-    """
-    try:
-        # Validate provider
-        valid_providers = ['openai', 'anthropic', 'deepseek']
-        if request.provider not in valid_providers:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid provider. Must be one of: {', '.join(valid_providers)}"
-            )
-        
-        # Set the API key
-        success = api_key_manager.set_api_key(request.provider, request.api_key)
-        
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to set API key for {request.provider}"
-            )
-        
-        # Validate the key
-        is_valid, validation_message = api_key_manager.validate_api_key(
-            request.provider, request.api_key
-        )
-        
-        # Refresh AI providers to pick up the new API key
-        try:
-            from app.ai.ai_service import ai_service
-            ai_service.refresh_providers()
-            logger.info(f"🔄 Refreshed AI providers after setting {request.provider} API key")
-        except Exception as e:
-            logger.warning(f"⚠️ Failed to refresh AI providers: {e}")
-        
-        return APIKeyResponse(
-            success=True,
-            message=f"API key set for {request.provider}. {validation_message}",
-            provider=request.provider,
-            is_valid=is_valid
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error setting API key for {request.provider}: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal server error: {str(e)}"
-        )
+# Removed global API key management - only user-specific keys are supported
 
 
 @router.post("/validate/{provider}", response_model=APIKeyResponse)
@@ -276,38 +222,7 @@ async def get_providers_status(
         )
 
 
-@router.get("/status-initial", response_model=AllProvidersStatusResponse)
-async def get_providers_status_initial():
-    """
-    Get status of all AI providers for initial setup (no auth required)
-    
-    Returns:
-        AllProvidersStatusResponse: Status of all providers
-    """
-    try:
-        status_data = api_key_manager.get_provider_status()
-        
-        providers = {}
-        for provider, data in status_data.items():
-            providers[provider] = ProviderStatusResponse(
-                provider=provider,
-                has_api_key=data['has_api_key'],
-                is_valid=data['is_valid'],
-                last_validated=data['last_validated'],
-                created_at=data['created_at']
-            )
-        
-        return AllProvidersStatusResponse(
-            providers=providers,
-            session_id=api_key_manager._session_id
-        )
-        
-    except Exception as e:
-        logger.error(f"Error getting providers status: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal server error: {str(e)}"
-        )
+# Removed status-initial route - global API key management no longer supported
 
 
 @router.delete("/{provider}", response_model=APIKeyResponse)

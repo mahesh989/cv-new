@@ -135,7 +135,7 @@ class SkillsAnalyzer:
         logger.warning("[SKILLS] Using fallback response due to parsing failure")
         return fallback_response
 
-    async def analyze(self, cv_text: str, jd_text: str, matched_skills: str) -> Dict[str, Any]:
+    async def analyze(self, cv_text: str, jd_text: str, matched_skills: str, user_email: str = None) -> Dict[str, Any]:
         """
         Analyze skills relevance using LLM.
         
@@ -143,6 +143,7 @@ class SkillsAnalyzer:
             cv_text: CV content
             jd_text: Job description content
             matched_skills: JSON string of matched skills
+            user_email: User email for API key context
             
         Returns:
             Dict containing skills analysis results
@@ -155,8 +156,20 @@ class SkillsAnalyzer:
 
         logger.info("[SKILLS] Requesting skills relevance analysis...")
         try:
+            # Create user object from user_email
+            from app.models.auth import UserData
+            from datetime import datetime, timezone
+            current_user = UserData(
+                id="pipeline_user",  # Use a placeholder ID for pipeline operations
+                email=user_email or "pipeline@system.com",
+                name=(user_email or "pipeline").split("@")[0],
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
+            
             response = await ai_service.generate_response(
                 prompt=prompt, 
+                user=current_user,
                 temperature=STANDARD_AI_PARAMS["temperature"], 
                 max_tokens=STANDARD_AI_PARAMS["max_tokens"],
                 system_prompt=STANDARD_AI_PARAMS["system_prompt"]

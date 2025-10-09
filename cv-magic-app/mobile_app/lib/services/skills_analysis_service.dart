@@ -456,4 +456,32 @@ class SkillsAnalysisService {
     print('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
     return null;
   }
+
+  /// Fetch the latest AI recommendation for a company directly
+  /// Uses the backend endpoint that finds the latest timestamped file per user/company
+  static Future<AIRecommendationResult?> fetchLatestAIRecommendation(
+      String company) async {
+    try {
+      final result = await APIService.makeAuthenticatedCall(
+        endpoint: '/ai-recommendations/company/$company',
+        method: 'GET',
+      );
+
+      if (result is Map<String, dynamic> && result['success'] == true) {
+        final content = result['recommendation_content'] as String? ?? '';
+        final generatedAt = result['generated_at'] as String?;
+        final modelInfo = result['ai_model_info'] as Map<String, dynamic>?;
+
+        return AIRecommendationResult(
+          content: content,
+          generatedAt: generatedAt,
+          modelInfo: modelInfo,
+        );
+      }
+    } catch (e) {
+      // Silent failure to avoid disrupting UI
+      // debugPrint('⚠️ Failed to fetch latest AI recommendation: $e');
+    }
+    return null;
+  }
 }

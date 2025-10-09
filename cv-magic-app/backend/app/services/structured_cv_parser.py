@@ -78,7 +78,7 @@ class LLMStructuredCVParser:
             }
         }
 
-    async def parse_cv_content(self, cv_data: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
+    async def parse_cv_content(self, cv_data: Union[str, Dict[str, Any]], user: Any = None) -> Dict[str, Any]:
         """
         Parse CV content using LLM into structured format
         
@@ -98,7 +98,7 @@ class LLMStructuredCVParser:
             cv_text = str(cv_data)
             
             # Use LLM to parse the CV content
-            structured_cv = await self._parse_with_llm(cv_text)
+            structured_cv = await self._parse_with_llm(cv_text, user)
             
             # Add original content preservation (without raw text)
             structured_cv["original_sections"]["section_headers_found"] = self._extract_section_headers(cv_text)
@@ -121,15 +121,20 @@ class LLMStructuredCVParser:
             empty_structure["original_text"] = cv_text[:1000] + "..." if len(cv_text) > 1000 else cv_text
             return empty_structure
 
-    async def _parse_with_llm(self, cv_text: str) -> Dict[str, Any]:
+    async def _parse_with_llm(self, cv_text: str, user: Any = None) -> Dict[str, Any]:
         """Use LLM to parse CV text into structured format"""
         try:
             # Create the parsing prompt
             parsing_prompt = self._create_parsing_prompt(cv_text)
             
             # Get response from AI service
+            if not user:
+                logger.error("❌ [STRUCTURED_CV_PARSER] No user provided for AI service call")
+                raise ValueError("User context is required for AI operations")
+                
             ai_response = await ai_service.generate_response(
                 prompt=parsing_prompt,
+                user=user,
                 system_prompt="You are an expert CV parser that preserves original content structure. Your primary goal is to maintain the exact formatting, bullet points, and descriptions as they appear in the original CV while organizing them into the specified JSON structure. Do NOT break down, summarize, or restructure the original content - preserve it exactly as written.",
                 max_tokens=4000,
                 temperature=0.0

@@ -568,11 +568,11 @@ Return only this formatted analysis.
 """
 
 
-async def execute_skills_semantic_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.0, max_tokens: int = 3000) -> str:
+async def execute_skills_semantic_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], user: Any, temperature: float = 0.0, max_tokens: int = 3000) -> str:
     """Execute the comparison prompt using the centralized AI service and return formatted text."""
     try:
         # Use JSON mode for consistent structured output
-        json_result = await execute_skills_comparison_with_json_output(ai_service, cv_skills, jd_skills, temperature, max_tokens)
+        json_result = await execute_skills_comparison_with_json_output(ai_service, cv_skills, jd_skills, user, temperature, max_tokens)
         
         # Validate the results are mathematically correct
         if not _validate_comparison_results(json_result, cv_skills, jd_skills):
@@ -591,6 +591,7 @@ async def execute_skills_semantic_comparison(ai_service, cv_skills: Dict[str, li
                 prompt = build_prompt(cv_skills, jd_skills)
                 response = await ai_service.generate_response(
                     prompt=prompt,
+                    user=user,
                     temperature=temperature,
                     max_tokens=max_tokens
                 )
@@ -956,6 +957,7 @@ async def execute_skills_comparison_with_json_output(
     ai_service,
     cv_skills: Dict[str, list],
     jd_skills: Dict[str, list],
+    user: Any,
     temperature: float = 0.0,
     max_tokens: int = 2500,
 ) -> Dict[str, Any]:
@@ -970,6 +972,7 @@ async def execute_skills_comparison_with_json_output(
     prompt = build_json_prompt(cv_skills, jd_skills)
     response = await ai_service.generate_response(
         prompt=prompt,
+        user=user,
         temperature=temperature,
         max_tokens=max_tokens,
     )
@@ -1160,13 +1163,13 @@ Domain Keywords             {cv_raw_counts['domain_keywords']:2d}         {jd_ra
 # BACKWARD COMPATIBILITY WRAPPERS
 # ====================================
 
-async def run_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.0, max_tokens: int = 3000) -> str:
+async def run_comparison(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], user: Any, temperature: float = 0.0, max_tokens: int = 3000) -> str:
     """Legacy wrapper for execute_skills_semantic_comparison - DEPRECATED"""
     logger.warning("⚠️ [DEPRECATED] run_comparison is deprecated, use execute_skills_semantic_comparison instead")
-    return await execute_skills_semantic_comparison(ai_service, cv_skills, jd_skills, temperature, max_tokens)
+    return await execute_skills_semantic_comparison(ai_service, cv_skills, jd_skills, user, temperature, max_tokens)
 
-async def run_comparison_json(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], temperature: float = 0.0, max_tokens: int = 2500) -> Dict[str, Any]:
+async def run_comparison_json(ai_service, cv_skills: Dict[str, list], jd_skills: Dict[str, list], user: Any, temperature: float = 0.0, max_tokens: int = 2500) -> Dict[str, Any]:
     """Legacy wrapper for execute_skills_comparison_with_json_output - DEPRECATED"""
     logger.warning("⚠️ [DEPRECATED] run_comparison_json is deprecated, use execute_skills_comparison_with_json_output instead")
-    return await execute_skills_comparison_with_json_output(ai_service, cv_skills, jd_skills, temperature, max_tokens)
+    return await execute_skills_comparison_with_json_output(ai_service, cv_skills, jd_skills, user, temperature, max_tokens)
 

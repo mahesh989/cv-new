@@ -49,7 +49,8 @@ async def upload_cv(
         # Create service instance with current user's email - user-specific path isolated
         upload_service = EnhancedCVUploadService(user_email=current_user.email)
         result = await upload_service.upload_and_process_cv(
-            cv_file=cv
+            cv_file=cv,
+            user=current_user
             # Always saves as original_cv.json (replaces existing)
         )
         

@@ -6,6 +6,8 @@ from fastapi import Header, HTTPException, status, Request, Depends
 from typing import Optional
 import logging
 from contextvars import ContextVar
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +17,7 @@ request_model: ContextVar[Optional[str]] = ContextVar('request_model', default=N
 
 async def get_current_model(
     request: Request,
+    current_user: UserData = Depends(get_current_user),
     x_current_model: Optional[str] = Header(None, alias="X-Current-Model")
 ) -> str:
     """
@@ -49,33 +52,32 @@ async def get_current_model(
     
     # If still not set, resolve from persisted user preference
     if not model_to_use:
-        try:
-            user = request.state.user if hasattr(request.state, "user") else None
-        except Exception:
-            user = None
-
-        if not user or not getattr(user, "id", None):
+        if not current_user or not getattr(current_user, "id", None):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authenticated")
 
         try:
             from app.database import SessionLocal
             from app.services.user_model_service import user_model_service
+            from app.ai.ai_service import ai_service
+            
+            # Initialize AI providers for this user
+            ai_service.initialize_for_user(current_user)
+            
             db = SessionLocal()
             try:
-                pref = user_model_service.get_user_model(db, str(user.id))
+                pref = user_model_service.get_user_model(db, str(current_user.id))
             finally:
                 db.close()
             if pref:
                 provider, model = pref
                 # Validate by switching in-memory so providers are aligned
-                from app.ai.ai_service import ai_service
                 ok = ai_service.switch_provider(provider, model)
                 if ok:
                     model_to_use = model
             if not model_to_use:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="No AI model selected. Please set provider and model via /ai/set-current-model."
+                    detail="No AI model selected or no valid API key configured. Please set provider and model via /ai/set-current-model and configure your API keys."
                 )
         except HTTPException:
             raise

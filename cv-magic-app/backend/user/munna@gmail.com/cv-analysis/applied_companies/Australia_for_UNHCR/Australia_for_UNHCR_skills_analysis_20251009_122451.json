@@ -1,0 +1,102 @@
+{
+  "generated": "2025-10-09T12:24:51.673",
+  "cv_filename": "maheshwor_tiwari.pdf",
+  "jd_url": "preliminary_analysis",
+  "user_id": "4df52e53-b78f-45e9-8946-3b6c00618693",
+  "company": "Australia_for_UNHCR",
+  "model_used": "gpt-3.5-turbo",
+  "cv_skills": {
+    "technical_skills": [
+      "Business Intelligence",
+      "Data Analysis",
+      "Data Extraction",
+      "Data Warehouse",
+      "Excel",
+      "Power BI",
+      "Python",
+      "SQL",
+      "VBA"
+    ],
+    "soft_skills": [
+      "Analytical",
+      "Results-Driven",
+      "Stakeholder Management"
+    ],
+    "domain_keywords": [
+      "N/A"
+    ],
+    "comprehensive_analysis": "\n**SOFT SKILLS:**\n- Analytical\n- Stakeholder Management\n- Results-Driven\n\n**TECHNICAL SKILLS:**\n- SQL\n- Python\n- Excel\n- Power BI\n- VBA\n- Data Warehouse\n- Data Extraction\n- Data Analysis\n- Business Intelligence\n\n**DOMAIN KEYWORDS:**\n- N/A"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Business Intelligence",
+      "Data Analysis",
+      "Data Extraction",
+      "Data Mining",
+      "Data Modeling",
+      "Data Segmentation",
+      "Data Warehousing",
+      "Database Management",
+      "Excel",
+      "Power BI",
+      "Project Management",
+      "Report Generation",
+      "Spreadsheets",
+      "SQL",
+      "VBA"
+    ],
+    "soft_skills": [
+      "Adaptability",
+      "Analytical Thinking",
+      "Collaboration",
+      "Communication",
+      "Creativity",
+      "Critical Thinking",
+      "Detail-oriented",
+      "Innovation",
+      "Leadership",
+      "Negotiation",
+      "Organization",
+      "Proactive",
+      "Problem-solving",
+      "Results-driven",
+      "Self-motivated",
+      "Teamwork",
+      "Time Management"
+    ],
+    "domain_keywords": [
+      "Business Decision-making",
+      "Business Intelligence Reporting",
+      "Campaign Analysis",
+      "Clean Data Maintenance",
+      "Communication Strategies",
+      "Data Governance",
+      "Data Utilization",
+      "Data Warehouse Administration",
+      "Data-driven Strategies",
+      "Direct Marketing",
+      "Donor Management",
+      "Fundraising",
+      "Humanitarian Aid",
+      "Refugee Support",
+      "Stakeholder Management"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Negotiation\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n- Data Analysis\n- Data Mining\n- Business Intelligence\n- Power BI\n- SQL\n- Excel\n- Data Modeling\n- Database Management\n- Spreadsheets\n- VBA\n- Data Warehousing\n- Data Extraction\n- Data Segmentation\n- Report Generation\n- Project Management\n\n## DOMAIN KEYWORDS:\n- Fundraising\n- Humanitarian Aid\n- Refugee Support\n- Donor Management\n- Direct Marketing\n- Stakeholder Management\n- Business Decision-making\n- Data-driven Strategies\n- Data Warehouse Administration\n- Business Intelligence Reporting\n- Campaign Analysis\n- Data Utilization\n- Clean Data Maintenance\n- Communication Strategies\n- Data Governance\n\n**DETAILED EXTRACTION EXAMPLE:**\n\nSOFT_SKILLS = [\"Communication\", \"Leadership\", \"Teamwork\", \"Collaboration\", \"Negotiation\", \"Time Management\", \"Organization\", \"Adaptability\", \"Problem-solving\", \"Analytical Thinking\", \"Critical Thinking\", \"Creativity\", \"Innovation\", \"Detail-oriented\", \"Self-motivated\", \"Proactive\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Data Analysis\", \"Data Mining\", \"Business Intelligence\", \"Power BI\", \"SQL\", \"Excel\", \"Data Modeling\", \"Database Management\", \"Spreadsheets\", \"VBA\", \"Data Warehousing\", \"Data Extraction\", \"Data Segmentation\", \"Report Generation\", \"Project Management\"]\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Humanitarian Aid\", \"Refugee Support\", \"Donor Management\", \"Direct Marketing\", \"Stakeholder Management\", \"Business Decision-making\", \"Data-driven Strategies\", \"Data Warehouse Administration\", \"Business Intelligence Reporting\", \"Campaign Analysis\", \"Data Utilization\", \"Clean Data Maintenance\", \"Communication Strategies\", \"Data Governance\"]"
+  },
+  "cv_comprehensive_analysis": "\n**SOFT SKILLS:**\n- Analytical\n- Stakeholder Management\n- Results-Driven\n\n**TECHNICAL SKILLS:**\n- SQL\n- Python\n- Excel\n- Power BI\n- VBA\n- Data Warehouse\n- Data Extraction\n- Data Analysis\n- Business Intelligence\n\n**DOMAIN KEYWORDS:**\n- N/A",
+  "jd_comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Negotiation\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n- Data Analysis\n- Data Mining\n- Business Intelligence\n- Power BI\n- SQL\n- Excel\n- Data Modeling\n- Database Management\n- Spreadsheets\n- VBA\n- Data Warehousing\n- Data Extraction\n- Data Segmentation\n- Report Generation\n- Project Management\n\n## DOMAIN KEYWORDS:\n- Fundraising\n- Humanitarian Aid\n- Refugee Support\n- Donor Management\n- Direct Marketing\n- Stakeholder Management\n- Business Decision-making\n- Data-driven Strategies\n- Data Warehouse Administration\n- Business Intelligence Reporting\n- Campaign Analysis\n- Data Utilization\n- Clean Data Maintenance\n- Communication Strategies\n- Data Governance\n\n**DETAILED EXTRACTION EXAMPLE:**\n\nSOFT_SKILLS = [\"Communication\", \"Leadership\", \"Teamwork\", \"Collaboration\", \"Negotiation\", \"Time Management\", \"Organization\", \"Adaptability\", \"Problem-solving\", \"Analytical Thinking\", \"Critical Thinking\", \"Creativity\", \"Innovation\", \"Detail-oriented\", \"Self-motivated\", \"Proactive\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Data Analysis\", \"Data Mining\", \"Business Intelligence\", \"Power BI\", \"SQL\", \"Excel\", \"Data Modeling\", \"Database Management\", \"Spreadsheets\", \"VBA\", \"Data Warehousing\", \"Data Extraction\", \"Data Segmentation\", \"Report Generation\", \"Project Management\"]\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Humanitarian Aid\", \"Refugee Support\", \"Donor Management\", \"Direct Marketing\", \"Stakeholder Management\", \"Business Decision-making\", \"Data-driven Strategies\", \"Data Warehouse Administration\", \"Business Intelligence Reporting\", \"Campaign Analysis\", \"Data Utilization\", \"Clean Data Maintenance\", \"Communication Strategies\", \"Data Governance\"]",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-10-09T12:24:55.310",
+      "model_used": "gpt-3.5-turbo",
+      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** Strong analytical and problem-solving skills, experience with SQL, Excel, VBA, and Power BI\n- **Flexibility indicators:** Willing to consider candidates with 2 years of experience in a similar role\n- **Hard blockers identified:** None present\n- **Hiring urgency signals:** 15-month contract position suggests some urgency\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** Experience with Python for data cleaning and preprocessing, machine learning models for predictive analytics\n- **Smart connections:** Strong analytical skills demonstrated through Python scripting and machine learning model development\n- **Growth potential:** Opportunity to learn Power BI and enhance SQL skills\n- **Positioning opportunities:** Highlight experience in data cleaning, preprocessing, and predictive analytics\n\n**REALISTIC ODDS:** 60% chance of getting an interview if CV tailored well\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Highlight experience with Python scripting for data cleaning and preprocessing\n2. **Priority 2:** Emphasize machine learning model development for predictive analytics\n3. **Priority 3:** Showcase analytical and problem-solving skills in data analysis\n\n**HONEST BOTTOM LINE:** Worth pursuing with tailored emphasis on relevant experience and potential for growth in Power BI and SQL."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-10-09T12:25:04.773",
+      "model_used": "gpt-3.5-turbo",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 47\nMatched: 12\nMissing: 36\nMatch Rate: 26%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills             9         15          9          6           60\nSoft Skills                   3         17          3         14           18\nDomain Keywords              1         15          0         16            0\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (9 items):\n    1. JD Required: 'Business Intelligence'\n       → Found in CV: 'Business Intelligence'\n       💡 Exact match\n    2. JD Required: 'Data Analysis'\n       → Found in CV: 'Data Analysis'\n       💡 Exact match\n    3. JD Required: 'Data Extraction'\n       → Found in CV: 'Data Extraction'\n       💡 Exact match\n    4. JD Required: 'Data Mining'\n       → Found in CV: 'Machine Learning'\n       💡 Hierarchical - ML includes data mining\n    5. JD Required: 'Data Modeling'\n       → Found in CV: 'Data Analysis'\n       💡 Synonym - Data Analysis includes Data Modeling\n    6. JD Required: 'Data Segmentation'\n       → Found in CV: 'N/A'\n       💡 No equivalent found in CV skills\n    7. JD Required: 'Data Warehousing'\n       → Found in CV: 'Data Warehouse'\n       💡 Exact match\n    8. JD Required: 'Database Management'\n       → Found in CV: 'SQL'\n       💡 Hierarchical - SQL demonstrates DB management\n    9. JD Required: 'Excel'\n       → Found in CV: 'Excel'\n       💡 Exact match\n  ❌ MISSING FROM CV (6 items):\n    1. JD Requires: 'Data Utilization'\n       💡 No equivalent found in CV skills\n    2. JD Requires: 'Data-Driven Strategies'\n       💡 No equivalent found in CV skills\n    3. JD Requires: 'Direct Marketing'\n       💡 No equivalent found in CV skills\n    4. JD Requires: 'Fundraising'\n       💡 No equivalent found in CV skills\n    5. JD Requires: 'Humanitarian Aid'\n       💡 No equivalent found in CV skills\n    6. JD Requires: 'Power BI'\n       💡 Moved from matched due to CV skills limit\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Analytical Thinking'\n       → Found in CV: 'Data Analysis'\n       💡 Synonym - Analytical Thinking involves Data Analysis\n    2. JD Required: 'Collaboration'\n       → Found in CV: 'Collaboration'\n       💡 Exact match\n    3. JD Required: 'Communication'\n       → Found in CV: 'N/A'\n       💡 No equivalent found in CV skills\n  ❌ MISSING FROM CV (14 items):\n    1. JD Requires: 'Adaptability'\n       💡 No equivalent found in CV skills\n    2. JD Requires: 'Creativity'\n       💡 No equivalent found in CV skills\n    3. JD Requires: 'Critical Thinking'\n       💡 No equivalent found in CV skills\n    4. JD Requires: 'Innovation'\n       💡 No equivalent found in CV skills\n    5. JD Requires: 'Team Leadership'\n       💡 No equivalent found in CV skills\n    6. JD Requires: 'Leadership'\n       💡 Moved from matched due to CV skills limit\n    7. JD Requires: 'Negotiation'\n       💡 Moved from matched due to CV skills limit\n    8. JD Requires: 'Organization'\n       💡 Moved from matched due to CV skills limit\n    9. JD Requires: 'Proactive'\n       💡 Moved from matched due to CV skills limit\n    10. JD Requires: 'Problem-Solving'\n       💡 Moved from matched due to CV skills limit\n    11. JD Requires: 'Results-Driven'\n       💡 Moved from matched due to CV skills limit\n    12. JD Requires: 'Self-Motivated'\n       💡 Moved from matched due to CV skills limit\n    13. JD Requires: 'Teamwork'\n       💡 Moved from matched due to CV skills limit\n    14. JD Requires: 'Time Management'\n       💡 Moved from matched due to CV skills limit\n\n🔹 DOMAIN KEYWORDS\n  ❌ MISSING FROM CV (16 items):\n    1. JD Requires: 'Business Decision-Making'\n       💡 No equivalent found in CV skills\n    2. JD Requires: 'Business Intelligence Reporting'\n       💡 No equivalent found in CV skills\n    3. JD Requires: 'Campaign Analysis'\n       💡 No equivalent found in CV skills\n    4. JD Requires: 'Clean Data Maintenance'\n       💡 No equivalent found in CV skills\n    5. JD Requires: 'Communication Strategies'\n       💡 No equivalent found in CV skills\n    6. JD Requires: 'Business Decision-making'\n       💡 Not accounted for in AI response\n    7. JD Requires: 'Data Governance'\n       💡 Not accounted for in AI response\n    8. JD Requires: 'Data Utilization'\n       💡 Not accounted for in AI response\n    9. JD Requires: 'Data Warehouse Administration'\n       💡 Not accounted for in AI response\n    10. JD Requires: 'Data-driven Strategies'\n       💡 Not accounted for in AI response\n    11. JD Requires: 'Direct Marketing'\n       💡 Not accounted for in AI response\n    12. JD Requires: 'Donor Management'\n       💡 Not accounted for in AI response\n    13. JD Requires: 'Fundraising'\n       💡 Not accounted for in AI response\n    14. JD Requires: 'Humanitarian Aid'\n       💡 Not accounted for in AI response\n    15. JD Requires: 'Refugee Support'\n       💡 Not accounted for in AI response\n    16. JD Requires: 'Stakeholder Management'\n       💡 Not accounted for in AI response\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Business Intelligence, Data Analysis, Data Extraction, Data Warehouse, Excel, Power BI, Python, SQL, VBA\n- Soft: Analytical, Results-Driven, Stakeholder Management\n- Domain: N/A\n\nJD\n- Technical: Business Intelligence, Data Analysis, Data Extraction, Data Mining, Data Modeling, Data Segmentation, Data Warehousing, Database Management, Excel, Power BI...\n- Soft: Adaptability, Analytical Thinking, Collaboration, Communication, Creativity, Critical Thinking, Detail-oriented, Innovation, Leadership, Negotiation...\n- Domain: Business Decision-making, Business Intelligence Reporting, Campaign Analysis, Clean Data Maintenance, Communication Strategies, Data Governance, Data Utilization, Data Warehouse Administration, Data-driven Strategies, Direct Marketing...\n"
+    }
+  ]
+}

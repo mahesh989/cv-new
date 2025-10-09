@@ -52,7 +52,6 @@ class ProviderSwitchRequest(BaseModel):
 class ModelSwitchRequest(BaseModel):
     """Request model for switching models"""
     model: str
-    provider: Optional[str] = None
 
 
 class CVAnalysisRequest(BaseModel):
@@ -261,11 +260,11 @@ async def chat_completion(
         logger.info(f"🟢 [AI_CHAT] user={current_user.email} provider={ai_service.config.get_current_provider()} model={ai_service.get_current_model_name()}")
         response = await ai_service.generate_response(
             prompt=request.prompt,
+            user=current_user,
             system_prompt=request.system_prompt,
             temperature=request.temperature,
             max_tokens=request.max_tokens,
-            provider_name=request.provider,
-            user=current_user
+            provider_name=request.provider
         )
         
         return ChatCompletionResponse(
@@ -279,10 +278,28 @@ async def chat_completion(
         
     except Exception as e:
         logger.error(f"Chat completion failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI generation failed: {str(e)}"
-        )
+        from app.exceptions.cv_exceptions import APIKeyError, APIKeyNotFoundError, APIKeyInvalidError, AIProviderUnavailableError
+        
+        if isinstance(e, APIKeyNotFoundError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        elif isinstance(e, (APIKeyInvalidError, AIProviderUnavailableError)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        elif isinstance(e, APIKeyError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"AI generation failed: {str(e)}"
+            )
 
 
 # CV Analysis Endpoints
@@ -298,7 +315,7 @@ async def analyze_cv(
     """
     try:
         logger.info(f"🟢 [AI_ANALYZE_CV] user={current_user.email} provider={ai_service.config.get_current_provider()} model={ai_service.get_current_model_name()}")
-        response = await ai_service.analyze_cv_content(request.cv_text, user=current_user)
+        response = await ai_service.analyze_cv_content(request.cv_text, current_user)
         
         return {
             "analysis": response.content,
@@ -311,10 +328,28 @@ async def analyze_cv(
         
     except Exception as e:
         logger.error(f"CV analysis failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"CV analysis failed: {str(e)}"
-        )
+        from app.exceptions.cv_exceptions import APIKeyError, APIKeyNotFoundError, APIKeyInvalidError, AIProviderUnavailableError
+        
+        if isinstance(e, APIKeyNotFoundError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        elif isinstance(e, (APIKeyInvalidError, AIProviderUnavailableError)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        elif isinstance(e, APIKeyError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"CV analysis failed: {str(e)}"
+            )
 
 
 @router.post("/compare-cv-job")
@@ -331,7 +366,7 @@ async def compare_cv_with_job(
         response = await ai_service.compare_cv_with_job(
             request.cv_text, 
             request.job_description,
-            user=current_user
+            current_user
         )
         
         return {
@@ -345,10 +380,28 @@ async def compare_cv_with_job(
         
     except Exception as e:
         logger.error(f"CV comparison failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"CV comparison failed: {str(e)}"
-        )
+        from app.exceptions.cv_exceptions import APIKeyError, APIKeyNotFoundError, APIKeyInvalidError, AIProviderUnavailableError
+        
+        if isinstance(e, APIKeyNotFoundError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        elif isinstance(e, (APIKeyInvalidError, AIProviderUnavailableError)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        elif isinstance(e, APIKeyError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"CV comparison failed: {str(e)}"
+            )
 
 
 # Health Check Endpoint

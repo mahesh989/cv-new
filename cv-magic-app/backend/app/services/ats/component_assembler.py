@@ -176,7 +176,7 @@ class ComponentAssembler:
         
         try:
             # Run batched analysis (2 LLM calls instead of 5)
-            batched_result = await self.batched_analyzer.analyze_all_batched(cv_text, jd_text, matched_skills)
+            batched_result = await self.batched_analyzer.analyze_all_batched(cv_text, jd_text, matched_skills, self.user_email)
             
             # Run bonus calculation in parallel
             bonus_task = asyncio.get_event_loop().run_in_executor(
@@ -210,11 +210,11 @@ class ComponentAssembler:
         logger.info("[ASSEMBLER] Starting parallel component analyses...")
         
         # Run all analyses in parallel
-        skills_task = self.skills_analyzer.analyze(cv_text, jd_text, matched_skills)
-        experience_task = self.experience_analyzer.analyze(cv_text, jd_text)
-        industry_task = self.industry_analyzer.analyze(cv_text, jd_text)
-        seniority_task = self.seniority_analyzer.analyze(cv_text, jd_text)
-        technical_task = self.technical_analyzer.analyze(cv_text, jd_text)
+        skills_task = self.skills_analyzer.analyze(cv_text, jd_text, matched_skills, self.user_email)
+        experience_task = self.experience_analyzer.analyze(cv_text, jd_text, self.user_email)
+        industry_task = self.industry_analyzer.analyze(cv_text, jd_text, self.user_email)
+        seniority_task = self.seniority_analyzer.analyze(cv_text, jd_text, self.user_email)
+        technical_task = self.technical_analyzer.analyze(cv_text, jd_text, self.user_email)
         
         # Run bonus calculation in parallel (synchronous but wrapped in asyncio)
         bonus_task = asyncio.get_event_loop().run_in_executor(

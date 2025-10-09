@@ -134,7 +134,7 @@ Guidelines:
             logger.error(f"[BATCHED] Content: {content[:500]}...")
             raise ValueError(f"Failed to parse LLM response: {str(e)}")
 
-    async def analyze_batch_1(self, cv_text: str, jd_text: str, matched_skills: str) -> Dict[str, Any]:
+    async def analyze_batch_1(self, cv_text: str, jd_text: str, matched_skills: str, user_email: str = None) -> Dict[str, Any]:
         """Analyze Skills Relevance and Experience Alignment in a single call."""
         logger.info("[BATCHED] Requesting batch 1 analysis (Skills + Experience)...")
         
@@ -145,8 +145,20 @@ Guidelines:
                 matched_skills=matched_skills
             )
             
+            # Create user object from user_email
+            from app.models.auth import UserData
+            from datetime import datetime, timezone
+            current_user = UserData(
+                id="pipeline_user",  # Use a placeholder ID for pipeline operations
+                email=user_email or "pipeline@system.com",
+                name=(user_email or "pipeline").split("@")[0],
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
+            
             response = await ai_service.generate_response(
                 prompt=prompt,
+                user=current_user,
                 system_prompt=STANDARD_AI_PARAMS["system_prompt"],
                 temperature=STANDARD_AI_PARAMS["temperature"],
                 max_tokens=STANDARD_AI_PARAMS["max_tokens"]
@@ -165,7 +177,7 @@ Guidelines:
             logger.error(f"[BATCHED] Batch 1 analysis failed: {e}")
             raise ValueError(f"Batch 1 analysis failed: {str(e)}")
 
-    async def analyze_batch_2(self, cv_text: str, jd_text: str) -> Dict[str, Any]:
+    async def analyze_batch_2(self, cv_text: str, jd_text: str, user_email: str = None) -> Dict[str, Any]:
         """Analyze Industry Fit, Role Seniority, and Technical Depth in a single call."""
         logger.info("[BATCHED] Requesting batch 2 analysis (Industry + Seniority + Technical)...")
         
@@ -175,8 +187,20 @@ Guidelines:
                 jd_text=jd_text
             )
             
+            # Create user object from user_email
+            from app.models.auth import UserData
+            from datetime import datetime, timezone
+            current_user = UserData(
+                id="pipeline_user",  # Use a placeholder ID for pipeline operations
+                email=user_email or "pipeline@system.com",
+                name=(user_email or "pipeline").split("@")[0],
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
+            
             response = await ai_service.generate_response(
                 prompt=prompt,
+                user=current_user,
                 system_prompt=STANDARD_AI_PARAMS["system_prompt"],
                 temperature=STANDARD_AI_PARAMS["temperature"],
                 max_tokens=STANDARD_AI_PARAMS["max_tokens"]
@@ -196,14 +220,14 @@ Guidelines:
             logger.error(f"[BATCHED] Batch 2 analysis failed: {e}")
             raise ValueError(f"Batch 2 analysis failed: {str(e)}")
 
-    async def analyze_all_batched(self, cv_text: str, jd_text: str, matched_skills: str) -> Dict[str, Any]:
+    async def analyze_all_batched(self, cv_text: str, jd_text: str, matched_skills: str, user_email: str = None) -> Dict[str, Any]:
         """Analyze all components using batched approach (2 LLM calls instead of 5)."""
         logger.info("[BATCHED] Starting batched analysis (2 calls instead of 5)...")
         
         try:
             # Run both batches in parallel
-            batch_1_task = self.analyze_batch_1(cv_text, jd_text, matched_skills)
-            batch_2_task = self.analyze_batch_2(cv_text, jd_text)
+            batch_1_task = self.analyze_batch_1(cv_text, jd_text, matched_skills, user_email)
+            batch_2_task = self.analyze_batch_2(cv_text, jd_text, user_email)
             
             batch_1_result, batch_2_result = await asyncio.gather(
                 batch_1_task, batch_2_task, return_exceptions=True

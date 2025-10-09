@@ -1,0 +1,1700 @@
+Launching lib/main.dart on Chrome in debug mode...
+Waiting for connection from debug service on Chrome...             32.6s
+This app is linked to the debug service: ws://127.0.0.1:51414/iH9TsEgyWbQ=/ws
+Debug service listening on ws://127.0.0.1:51414/iH9TsEgyWbQ=/ws
+
+Flutter run key commands.
+r Hot reload. 🔥🔥🔥
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on Chrome is available at: http://127.0.0.1:51414/iH9TsEgyWbQ=
+Starting application from main method in: org-dartlang-app:/web_entrypoint.dart.
+Found an existing <meta name="viewport"> tag. Flutter Web uses its own viewport configuration for better compatibility with Flutter. This tag will be replaced.
+🤖 No saved model found, no default model available
+⚠️ No AI model selected, skipping backend sync
+🔐 AI status requires authentication (403) - this is normal when not logged in
+🔐 Backend status unavailable (authentication required)
+🚀 CV Agent Mobile App initialized
+🔐 Auth status checked: Logged out
+The Flutter DevTools debugger and profiler on Chrome is available at: http://127.0.0.1:9102?uri=http://127.0.0.1:51414/iH9TsEgyWbQ=
+🔵 [FRONTEND] Starting authentication process
+🔵 [FRONTEND] Tab index: 0, isLogin: true, endpoint: /api/auth/login
+🔵 [FRONTEND] Raw form values:
+  - Email: "munna@gmail.com" -> trimmed: "munna@gmail.com"
+  - Password: "munnaa" -> trimmed: "munnaa" (length: 6)
+  - Name: "" -> trimmed: ""
+✅ [FRONTEND] All validations passed
+🔵 [FRONTEND] Login request body: {email: munna@gmail.com, password: munnaa}
+🔵 [FRONTEND] Making HTTP request to: http://localhost:8000/api/auth/login
+🔵 [FRONTEND] Request headers: {'Content-Type': 'application/json'}
+🔵 [FRONTEND] Request body: {"email":"munna@gmail.com","password":"munnaa"}
+🔵 [FRONTEND] HTTP response received:
+  - Status code: 200
+  - Response body: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZW1haWwiOiJtdW5uYUBnbWFpbC5jb20iLCJleHAiOjE3NTk4NTgyMTMsImlhdCI6MTc1OTgyOTQxMywidHlwZSI6ImFjY2VzcyJ9.zb1mZd11mYp3qkq1XaKzpnz7mE0tk2BfkHoLNDuwhNQ","refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZXhwIjoxNzYwNDM0MjEzLCJpYXQiOjE3NTk4Mjk0MTMsInR5cGUiOiJyZWZyZXNoIn0.DaALlHZN4_CFpCJXTFAQizQgm8lYUBXjQrKZ_s_d4yY","token_type":"bearer","expires_in":28800,"user":{"id":"4df52e53-b78f-45e9-8946-3b6c00618693","email":"munna@gmail.com","name":"munna","created_at":"2025-10-07T06:58:55.008073Z","is_active":true}}
+✅ [FRONTEND] HTTP 200 - Success response
+🔵 [FRONTEND] Parsed response data: {access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZW1haWwiOiJtdW5uYUBnbWFpbC5jb20iLCJleHAiOjE3NTk4NTgyMTMsImlhdCI6MTc1OTgyOTQxMywidHlwZSI6ImFjY2VzcyJ9.zb1mZd11mYp3qkq1XaKzpnz7mE0tk2BfkHoLNDuwhNQ, refresh_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZXhwIjoxNzYwNDM0MjEzLCJpYXQiOjE3NTk4Mjk0MTMsInR5cGUiOiJyZWZyZXNoIn0.DaALlHZN4_CFpCJXTFAQizQgm8lYUBXjQrKZ_s_d4yY, token_type: bearer, expires_in: 28800, user: {id: 4df52e53-b78f-45e9-8946-3b6c00618693, email: munna@gmail.com, name: munna, created_at: 2025-10-07T06:58:55.008073Z, is_active: true}}
+🔵 [FRONTEND] Processing login response
+🔵 [FRONTEND] Access token received: eyJhbGciOiJIUzI1NiIs...
+🔵 [FRONTEND] Saving authentication data to SharedPreferences
+✅ [FRONTEND] Authentication data saved successfully
+🔵 [FRONTEND] Showing success message and calling onLogin
+✅ User logged in successfully
+⚠️ No AI model selected, skipping post-auth sync
+🔵 [FRONTEND] Authentication process completed, setting loading to false
+🎯 Using YouTube Video ID: a9IUom_eUGI
+🎯 Expected URL: https://www.youtube.com/embed/a9IUom_eUGI
+📝 [RESULTS_CLEARING] Registered skills controller
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [JOB_TRACKING] Verifying assets...
+🚀 [JOB_TRACKING] Preloading applied status on app start...
+🔄 [JOB_TRACKING] Loading saved jobs...
+🌐 [SAVED_JOBS] Loading from API...
+Height of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `height: 100%`.
+Set `style.height` to any appropriate value to stop this message.
+Width of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `width: 100%`.
+Set `style.width` to any appropriate value to stop this message.
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+❌ [JOB_TRACKING] Error loading from backup file: MissingPluginException(No implementation found for method getApplicationDocumentsDirectory on channel plugins.flutter.io/path_provider)
+🔍 [JOB_TRACKING] All SharedPreferences keys: [is_logged_in, auth_token, user_email, user_name]
+📚 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+⚠️ [JOB_TRACKING] No applied statuses found in SharedPreferences or backup file
+❌ [JOB_TRACKING] saved_jobs.json not found in asset manifest!
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":["maheshwor_tiwari.pdf"],"cv_details":[{"filename":"maheshwor_tiwari.pdf","size":130169,"type":"PDF","uploaded_date":1759820364.491259}],"total_count":1}...
+📡 [SAVED_JOBS] API Response status: 200
+✅ [SAVED_JOBS] Loaded 1 jobs from API
+✅ [JOB_TRACKING] Successfully loaded 1 jobs
+🔄 [JOB_TRACKING] Loading applied status from SharedPreferences...
+📊 [JOB_TRACKING] Total jobs to load status for: 1
+🔍 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+🔑 [JOB_TRACKING] Generated key for Australia for UNHCR: australia for unhcr_data analyst_175825903
+📋 [JOB_TRACKING] Job Australia for UNHCR: applied = false (key: applied_australia for unhcr_data analyst_175825903)
+✅ [JOB_TRACKING] Loaded applied status for 1 jobs (0 applied)
+🔄 [HOME_SCREEN] Tab tapped: 1
+🔄 [PROVIDER] Changing to provider: openai
+🔑 [PROVIDER] Showing API key dialog for openai
+🚀 [DIALOG] _showAPIKeyDialog called for provider: openai
+🚀 [DIALOG] Context available: true
+🚀 [DIALOG] Builder called, creating APIKeyInputDialog
+🎯 [DIALOG] Switching to first model: gpt-4o
+✅ Changed AI model to: GPT-4o
+🔄 Syncing model: gpt-4o -> openai/gpt-4o
+⚠️ Failed to sync model with backend: 404
+✅ Changed AI model to: Claude 3.5 Sonnet
+🔄 Syncing model: claude-3.5-sonnet -> anthropic/claude-3-5-sonnet-20241022
+⚠️ Failed to sync model with backend: 404
+🔄 [HOME_SCREEN] Tab tapped: 2
+🔍 [API_SERVICE] Making authenticated call to: /cv/save-for-analysis/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [CV_PREVIEW] Loading CV content for: maheshwor_tiwari.pdf
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /cv/content/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Making authenticated call to: /job/scrape
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"message":"CV saved for analysis successfully","filename":"maheshwor_tiwari.pdf","txt_path":"user/munna@gmail.com/cv-analysis/cvs/original/original_cv.txt","structured_path":"user/munna@gmail.com/cv-...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"filename":"maheshwor_tiwari.pdf","content":"Maheshwor Tiwari  \n0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220  \nBlogs on Medium  | GitHub  | Dashboard  Portfolio  \nCAR...
+🔍 [CV_PREVIEW] API response received: (filename, content, metadata, file_info, extraction_info)
+🔍 [CV_PREVIEW] Content length: 4864
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"job_description":"Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fu...
+🔍 [DEBUG] JobInput: Setting jdController.text with 6014 characters
+🔍 [DEBUG] CV Magic: jdController changed - length: 6014
+🔍 [DEBUG] JobInput: jdController.text.length after setting: 6014
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /job-analysis/extract-and-save
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"success":true,"company_slug":"Australia_for_UNHCR","company_name":"Australia for UNHCR","job_title":"Data Analyst","job_info_file":"user/munna@gmail.com/cv-analysis/applied_companies/Australia_for_U...
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.idle -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔄 [HOME_SCREEN] Tab tapped: 1
+🔄 [HOME_SCREEN] Tab tapped: 0
+👋 User logged out
+🗑 [RESULTS_CLEARING] Unregistered skills controller
+🔵 [FRONTEND] Starting authentication process
+🔵 [FRONTEND] Tab index: 0, isLogin: true, endpoint: /api/auth/login
+🔵 [FRONTEND] Raw form values:
+  - Email: "munna@gmail.com" -> trimmed: "munna@gmail.com"
+  - Password: "munnaa" -> trimmed: "munnaa" (length: 6)
+  - Name: "" -> trimmed: ""
+✅ [FRONTEND] All validations passed
+🔵 [FRONTEND] Login request body: {email: munna@gmail.com, password: munnaa}
+🔵 [FRONTEND] Making HTTP request to: http://localhost:8000/api/auth/login
+🔵 [FRONTEND] Request headers: {'Content-Type': 'application/json'}
+🔵 [FRONTEND] Request body: {"email":"munna@gmail.com","password":"munnaa"}
+🔵 [FRONTEND] HTTP response received:
+  - Status code: 200
+  - Response body: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZW1haWwiOiJtdW5uYUBnbWFpbC5jb20iLCJleHAiOjE3NTk4NTg0MjksImlhdCI6MTc1OTgyOTYyOSwidHlwZSI6ImFjY2VzcyJ9.nxVvcxixtPu6Y9-3hZTimqAY7qHGnmaBt6bOSykCfwM","refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZXhwIjoxNzYwNDM0NDI5LCJpYXQiOjE3NTk4Mjk2MjksInR5cGUiOiJyZWZyZXNoIn0.zxUYm65MYOlEwc8IfrcUoyPHtFP7ajh7rVQ-7HY8nGM","token_type":"bearer","expires_in":28800,"user":{"id":"4df52e53-b78f-45e9-8946-3b6c00618693","email":"munna@gmail.com","name":"munna","created_at":"2025-10-07T06:58:55.008073Z","is_active":true}}
+✅ [FRONTEND] HTTP 200 - Success response
+🔵 [FRONTEND] Parsed response data: {access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZW1haWwiOiJtdW5uYUBnbWFpbC5jb20iLCJleHAiOjE3NTk4NTg0MjksImlhdCI6MTc1OTgyOTYyOSwidHlwZSI6ImFjY2VzcyJ9.nxVvcxixtPu6Y9-3hZTimqAY7qHGnmaBt6bOSykCfwM, refresh_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZXhwIjoxNzYwNDM0NDI5LCJpYXQiOjE3NTk4Mjk2MjksInR5cGUiOiJyZWZyZXNoIn0.zxUYm65MYOlEwc8IfrcUoyPHtFP7ajh7rVQ-7HY8nGM, token_type: bearer, expires_in: 28800, user: {id: 4df52e53-b78f-45e9-8946-3b6c00618693, email: munna@gmail.com, name: munna, created_at: 2025-10-07T06:58:55.008073Z, is_active: true}}
+🔵 [FRONTEND] Processing login response
+🔵 [FRONTEND] Access token received: eyJhbGciOiJIUzI1NiIs...
+🔵 [FRONTEND] Saving authentication data to SharedPreferences
+✅ [FRONTEND] Authentication data saved successfully
+🔵 [FRONTEND] Showing success message and calling onLogin
+✅ User logged in successfully
+🔵 [FRONTEND] Authentication process completed, setting loading to false
+🔄 Syncing model: claude-3.5-sonnet -> anthropic/claude-3-5-sonnet-20241022
+🎯 Using YouTube Video ID: a9IUom_eUGI
+🎯 Expected URL: https://www.youtube.com/embed/a9IUom_eUGI
+📝 [RESULTS_CLEARING] Registered skills controller
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [JOB_TRACKING] Verifying assets...
+🚀 [JOB_TRACKING] Preloading applied status on app start...
+🔄 [JOB_TRACKING] Loading saved jobs...
+🌐 [SAVED_JOBS] Loading from API...
+Height of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `height: 100%`.
+Set `style.height` to any appropriate value to stop this message.
+Width of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `width: 100%`.
+Set `style.width` to any appropriate value to stop this message.
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+❌ [JOB_TRACKING] saved_jobs.json not found in asset manifest!
+❌ [JOB_TRACKING] Error loading from backup file: MissingPluginException(No implementation found for method getApplicationDocumentsDirectory on channel plugins.flutter.io/path_provider)
+🔍 [JOB_TRACKING] All SharedPreferences keys: [selected_ai_model, is_logged_in, auth_token, user_email, user_name]
+📚 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+⚠️ [JOB_TRACKING] No applied statuses found in SharedPreferences or backup file
+⚠️ Failed to sync model with backend: 404
+✅ AI model synced with backend after authentication
+📡 [SAVED_JOBS] API Response status: 200
+✅ [SAVED_JOBS] Loaded 1 jobs from API
+✅ [JOB_TRACKING] Successfully loaded 1 jobs
+🔄 [JOB_TRACKING] Loading applied status from SharedPreferences...
+📊 [JOB_TRACKING] Total jobs to load status for: 1
+🔍 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+🔑 [JOB_TRACKING] Generated key for Australia for UNHCR: australia for unhcr_data analyst_175825903
+📋 [JOB_TRACKING] Job Australia for UNHCR: applied = false (key: applied_australia for unhcr_data analyst_175825903)
+✅ [JOB_TRACKING] Loaded applied status for 1 jobs (0 applied)
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":["maheshwor_tiwari.pdf"],"cv_details":[{"filename":"maheshwor_tiwari.pdf","size":130169,"type":"PDF","uploaded_date":1759820364.491259}],"total_count":1}...
+🔄 [HOME_SCREEN] Tab tapped: 1
+🔄 [HOME_SCREEN] Tab tapped: 2
+🔍 [API_SERVICE] Making authenticated call to: /cv/save-for-analysis/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [CV_PREVIEW] Loading CV content for: maheshwor_tiwari.pdf
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /cv/content/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Making authenticated call to: /job/scrape
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"message":"CV saved for analysis successfully","filename":"maheshwor_tiwari.pdf","txt_path":"user/munna@gmail.com/cv-analysis/cvs/original/original_cv.txt","structured_path":"user/munna@gmail.com/cv-...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"filename":"maheshwor_tiwari.pdf","content":"Maheshwor Tiwari  \n0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220  \nBlogs on Medium  | GitHub  | Dashboard  Portfolio  \nCAR...
+🔍 [CV_PREVIEW] API response received: (filename, content, metadata, file_info, extraction_info)
+🔍 [CV_PREVIEW] Content length: 4864
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"job_description":"Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fu...
+🔍 [DEBUG] JobInput: Setting jdController.text with 6014 characters
+🔍 [DEBUG] CV Magic: jdController changed - length: 6014
+🔍 [DEBUG] JobInput: jdController.text.length after setting: 6014
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /job-analysis/extract-and-save
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"success":true,"company_slug":"Australia_for_UNHCR","company_name":"Australia for UNHCR","job_title":"Data Analyst","job_info_file":"user/munna@gmail.com/cv-analysis/applied_companies/Australia_for_U...
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.idle -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.error -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🧹 [SKILLS_HANDLER] Clearing analysis results
+✅ [SKILLS_HANDLER] Results cleared successfully
+🔍 [DEBUG] CV Magic: jdController changed - length: 0
+🏁 [CONTROLLER] Analysis fully completed
+🧹 [CONTROLLER] clearResults() called
+🧹 [CONTROLLER] Current state before clear: SkillsAnalysisState.error
+🧹 [CONTROLLER] Has results before clear: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.error -> SkillsAnalysisState.idle
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🧹 [CONTROLLER] State after clear: SkillsAnalysisState.idle
+🧹 [CONTROLLER] Has results after clear: false
+🧹 [CONTROLLER] clearResults() completed
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+👋 User logged out
+🗑 [RESULTS_CLEARING] Unregistered skills controller
+🔵 [FRONTEND] Starting authentication process
+🔵 [FRONTEND] Tab index: 0, isLogin: true, endpoint: /api/auth/login
+🔵 [FRONTEND] Raw form values:
+  - Email: "munna@gmail.com" -> trimmed: "munna@gmail.com"
+  - Password: "munnaa" -> trimmed: "munnaa" (length: 6)
+  - Name: "" -> trimmed: ""
+✅ [FRONTEND] All validations passed
+🔵 [FRONTEND] Login request body: {email: munna@gmail.com, password: munnaa}
+🔵 [FRONTEND] Making HTTP request to: http://localhost:8000/api/auth/login
+🔵 [FRONTEND] Request headers: {'Content-Type': 'application/json'}
+🔵 [FRONTEND] Request body: {"email":"munna@gmail.com","password":"munnaa"}
+🔵 [FRONTEND] HTTP response received:
+  - Status code: 200
+  - Response body: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZW1haWwiOiJtdW5uYUBnbWFpbC5jb20iLCJleHAiOjE3NTk4NTg5MjgsImlhdCI6MTc1OTgzMDEyOCwidHlwZSI6ImFjY2VzcyJ9.kmv13lwPCr7p1jyagIj9sQKtgdt5F89KBGIBMCIGb60","refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZXhwIjoxNzYwNDM0OTI4LCJpYXQiOjE3NTk4MzAxMjgsInR5cGUiOiJyZWZyZXNoIn0.gWyVRK7MGBi848HYKtDX1niZLlsFo2fHdDNl2YzYKwQ","token_type":"bearer","expires_in":28800,"user":{"id":"4df52e53-b78f-45e9-8946-3b6c00618693","email":"munna@gmail.com","name":"munna","created_at":"2025-10-07T06:58:55.008073Z","is_active":true}}
+✅ [FRONTEND] HTTP 200 - Success response
+🔵 [FRONTEND] Parsed response data: {access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZW1haWwiOiJtdW5uYUBnbWFpbC5jb20iLCJleHAiOjE3NTk4NTg5MjgsImlhdCI6MTc1OTgzMDEyOCwidHlwZSI6ImFjY2VzcyJ9.kmv13lwPCr7p1jyagIj9sQKtgdt5F89KBGIBMCIGb60, refresh_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGRmNTJlNTMtYjc4Zi00NWU5LTg5NDYtM2I2YzAwNjE4NjkzIiwiZXhwIjoxNzYwNDM0OTI4LCJpYXQiOjE3NTk4MzAxMjgsInR5cGUiOiJyZWZyZXNoIn0.gWyVRK7MGBi848HYKtDX1niZLlsFo2fHdDNl2YzYKwQ, token_type: bearer, expires_in: 28800, user: {id: 4df52e53-b78f-45e9-8946-3b6c00618693, email: munna@gmail.com, name: munna, created_at: 2025-10-07T06:58:55.008073Z, is_active: true}}
+🔵 [FRONTEND] Processing login response
+🔵 [FRONTEND] Access token received: eyJhbGciOiJIUzI1NiIs...
+🔵 [FRONTEND] Saving authentication data to SharedPreferences
+✅ [FRONTEND] Authentication data saved successfully
+🔵 [FRONTEND] Showing success message and calling onLogin
+✅ User logged in successfully
+🔵 [FRONTEND] Authentication process completed, setting loading to false
+🔄 Syncing model: claude-3.5-sonnet -> anthropic/claude-3-5-sonnet-20241022
+🎯 Using YouTube Video ID: a9IUom_eUGI
+🎯 Expected URL: https://www.youtube.com/embed/a9IUom_eUGI
+📝 [RESULTS_CLEARING] Registered skills controller
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [JOB_TRACKING] Verifying assets...
+🚀 [JOB_TRACKING] Preloading applied status on app start...
+🔄 [JOB_TRACKING] Loading saved jobs...
+🌐 [SAVED_JOBS] Loading from API...
+Height of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `height: 100%`.
+Set `style.height` to any appropriate value to stop this message.
+Width of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `width: 100%`.
+Set `style.width` to any appropriate value to stop this message.
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+❌ [JOB_TRACKING] saved_jobs.json not found in asset manifest!
+❌ [JOB_TRACKING] Error loading from backup file: MissingPluginException(No implementation found for method getApplicationDocumentsDirectory on channel plugins.flutter.io/path_provider)
+🔍 [JOB_TRACKING] All SharedPreferences keys: [selected_ai_model, is_logged_in, auth_token, user_email, user_name]
+📚 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+⚠️ [JOB_TRACKING] No applied statuses found in SharedPreferences or backup file
+⚠️ Failed to sync model with backend: 404
+✅ AI model synced with backend after authentication
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":["maheshwor_tiwari.pdf"],"cv_details":[{"filename":"maheshwor_tiwari.pdf","size":130169,"type":"PDF","uploaded_date":1759820364.491259}],"total_count":1}...
+📡 [SAVED_JOBS] API Response status: 200
+✅ [SAVED_JOBS] Loaded 1 jobs from API
+✅ [JOB_TRACKING] Successfully loaded 1 jobs
+🔄 [JOB_TRACKING] Loading applied status from SharedPreferences...
+📊 [JOB_TRACKING] Total jobs to load status for: 1
+🔍 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+🔑 [JOB_TRACKING] Generated key for Australia for UNHCR: australia for unhcr_data analyst_175825903
+📋 [JOB_TRACKING] Job Australia for UNHCR: applied = false (key: applied_australia for unhcr_data analyst_175825903)
+✅ [JOB_TRACKING] Loaded applied status for 1 jobs (0 applied)
+🔄 [HOME_SCREEN] Tab tapped: 1
+🔄 [HOME_SCREEN] Tab tapped: 2
+🔍 [API_SERVICE] Making authenticated call to: /cv/save-for-analysis/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [CV_PREVIEW] Loading CV content for: maheshwor_tiwari.pdf
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /cv/content/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Making authenticated call to: /job/scrape
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"message":"CV saved for analysis successfully","filename":"maheshwor_tiwari.pdf","txt_path":"user/munna@gmail.com/cv-analysis/cvs/original/original_cv.txt","structured_path":"user/munna@gmail.com/cv-...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"filename":"maheshwor_tiwari.pdf","content":"Maheshwor Tiwari  \n0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220  \nBlogs on Medium  | GitHub  | Dashboard  Portfolio  \nCAR...
+🔍 [CV_PREVIEW] API response received: (filename, content, metadata, file_info, extraction_info)
+🔍 [CV_PREVIEW] Content length: 4864
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"job_description":"Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fu...
+🔍 [DEBUG] JobInput: Setting jdController.text with 6014 characters
+🔍 [DEBUG] CV Magic: jdController changed - length: 6014
+🔍 [DEBUG] JobInput: jdController.text.length after setting: 6014
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /job-analysis/extract-and-save
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"success":true,"company_slug":"Australia_for_UNHCR","company_name":"Australia for UNHCR","job_title":"Data Analyst","job_info_file":"user/munna@gmail.com/cv-analysis/applied_companies/Australia_for_U...
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.idle -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+👋 User logged out
+🗑 [RESULTS_CLEARING] Unregistered skills controller
+🔵 [FRONTEND] Starting authentication process
+🔵 [FRONTEND] Tab index: 0, isLogin: true, endpoint: /api/auth/login
+🔵 [FRONTEND] Raw form values:
+  - Email: "mahesh@gmail.com " -> trimmed: "mahesh@gmail.com"
+  - Password: "mahesh" -> trimmed: "mahesh" (length: 6)
+  - Name: "" -> trimmed: ""
+✅ [FRONTEND] All validations passed
+🔵 [FRONTEND] Login request body: {email: mahesh@gmail.com, password: mahesh}
+🔵 [FRONTEND] Making HTTP request to: http://localhost:8000/api/auth/login
+🔵 [FRONTEND] Request headers: {'Content-Type': 'application/json'}
+🔵 [FRONTEND] Request body: {"email":"mahesh@gmail.com","password":"mahesh"}
+🔵 [FRONTEND] HTTP response received:
+  - Status code: 401
+  - Response body: {"detail":"Invalid credentials"}
+🔴 [FRONTEND] HTTP Error - Status code: 401
+🔵 [FRONTEND] Error response data: {detail: Invalid credentials}
+🔵 [FRONTEND] Extracted error message: Invalid credentials
+🔴 [FRONTEND] Throwing exception with message: Invalid credentials
+🔴 [FRONTEND] Exception caught: Exception: Invalid credentials
+🔵 [FRONTEND] Showing error message to user
+🔵 [FRONTEND] Authentication process completed, setting loading to false
+🔵 [FRONTEND] Starting authentication process
+🔵 [FRONTEND] Tab index: 0, isLogin: true, endpoint: /api/auth/login
+🔵 [FRONTEND] Raw form values:
+  - Email: "maheshwor@gmail.com " -> trimmed: "maheshwor@gmail.com"
+  - Password: "maheshwor" -> trimmed: "maheshwor" (length: 9)
+  - Name: "" -> trimmed: ""
+✅ [FRONTEND] All validations passed
+🔵 [FRONTEND] Login request body: {email: maheshwor@gmail.com, password: maheshwor}
+🔵 [FRONTEND] Making HTTP request to: http://localhost:8000/api/auth/login
+🔵 [FRONTEND] Request headers: {'Content-Type': 'application/json'}
+🔵 [FRONTEND] Request body: {"email":"maheshwor@gmail.com","password":"maheshwor"}
+🔵 [FRONTEND] HTTP response received:
+  - Status code: 401
+  - Response body: {"detail":"Invalid credentials"}
+🔴 [FRONTEND] HTTP Error - Status code: 401
+🔵 [FRONTEND] Error response data: {detail: Invalid credentials}
+🔵 [FRONTEND] Extracted error message: Invalid credentials
+🔴 [FRONTEND] Throwing exception with message: Invalid credentials
+🔴 [FRONTEND] Exception caught: Exception: Invalid credentials
+🔵 [FRONTEND] Showing error message to user
+🔵 [FRONTEND] Authentication process completed, setting loading to false
+🔵 [FRONTEND] Starting authentication process
+🔵 [FRONTEND] Tab index: 0, isLogin: true, endpoint: /api/auth/login
+🔵 [FRONTEND] Raw form values:
+  - Email: "kritika@gmail.com" -> trimmed: "kritika@gmail.com"
+  - Password: "kritika" -> trimmed: "kritika" (length: 7)
+  - Name: "" -> trimmed: ""
+✅ [FRONTEND] All validations passed
+🔵 [FRONTEND] Login request body: {email: kritika@gmail.com, password: kritika}
+🔵 [FRONTEND] Making HTTP request to: http://localhost:8000/api/auth/login
+🔵 [FRONTEND] Request headers: {'Content-Type': 'application/json'}
+🔵 [FRONTEND] Request body: {"email":"kritika@gmail.com","password":"kritika"}
+🔵 [FRONTEND] HTTP response received:
+  - Status code: 200
+  - Response body: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMWUyODg5YWItZWE1NC00M2JkLTk1ZTUtMGVlNDQzZmM4Mzg3IiwiZW1haWwiOiJrcml0aWthQGdtYWlsLmNvbSIsImV4cCI6MTc1OTg1OTQ5NiwiaWF0IjoxNzU5ODMwNjk2LCJ0eXBlIjoiYWNjZXNzIn0.yQnOXd1-ZF4rg2accilSjKfrxu68t770_KNgSq3eTz8","refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMWUyODg5YWItZWE1NC00M2JkLTk1ZTUtMGVlNDQzZmM4Mzg3IiwiZXhwIjoxNzYwNDM1NDk2LCJpYXQiOjE3NTk4MzA2OTYsInR5cGUiOiJyZWZyZXNoIn0.kqAKC0cNgBO25bWvVtJ2D4NmoPXsh3EUobKRKqz6GbY","token_type":"bearer","expires_in":28800,"user":{"id":"1e2889ab-ea54-43bd-95e5-0ee443fc8387","email":"kritika@gmail.com","name":"Kritika Poudel","created_at":"2025-10-06T05:56:12.438031Z","is_active":true}}
+✅ [FRONTEND] HTTP 200 - Success response
+🔵 [FRONTEND] Parsed response data: {access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMWUyODg5YWItZWE1NC00M2JkLTk1ZTUtMGVlNDQzZmM4Mzg3IiwiZW1haWwiOiJrcml0aWthQGdtYWlsLmNvbSIsImV4cCI6MTc1OTg1OTQ5NiwiaWF0IjoxNzU5ODMwNjk2LCJ0eXBlIjoiYWNjZXNzIn0.yQnOXd1-ZF4rg2accilSjKfrxu68t770_KNgSq3eTz8, refresh_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMWUyODg5YWItZWE1NC00M2JkLTk1ZTUtMGVlNDQzZmM4Mzg3IiwiZXhwIjoxNzYwNDM1NDk2LCJpYXQiOjE3NTk4MzA2OTYsInR5cGUiOiJyZWZyZXNoIn0.kqAKC0cNgBO25bWvVtJ2D4NmoPXsh3EUobKRKqz6GbY, token_type: bearer, expires_in: 28800, user: {id: 1e2889ab-ea54-43bd-95e5-0ee443fc8387, email: kritika@gmail.com, name: Kritika Poudel, created_at: 2025-10-06T05:56:12.438031Z, is_active: true}}
+🔵 [FRONTEND] Processing login response
+🔵 [FRONTEND] Access token received: eyJhbGciOiJIUzI1NiIs...
+🔵 [FRONTEND] Saving authentication data to SharedPreferences
+✅ [FRONTEND] Authentication data saved successfully
+🔵 [FRONTEND] Showing success message and calling onLogin
+✅ User logged in successfully
+🔵 [FRONTEND] Authentication process completed, setting loading to false
+🔄 Syncing model: claude-3.5-sonnet -> anthropic/claude-3-5-sonnet-20241022
+🎯 Using YouTube Video ID: a9IUom_eUGI
+🎯 Expected URL: https://www.youtube.com/embed/a9IUom_eUGI
+📝 [RESULTS_CLEARING] Registered skills controller
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [JOB_TRACKING] Verifying assets...
+🚀 [JOB_TRACKING] Preloading applied status on app start...
+🔄 [JOB_TRACKING] Loading saved jobs...
+🌐 [SAVED_JOBS] Loading from API...
+Height of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `height: 100%`.
+Set `style.height` to any appropriate value to stop this message.
+Width of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `width: 100%`.
+Set `style.width` to any appropriate value to stop this message.
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+❌ [JOB_TRACKING] saved_jobs.json not found in asset manifest!
+❌ [JOB_TRACKING] Error loading from backup file: MissingPluginException(No implementation found for method getApplicationDocumentsDirectory on channel plugins.flutter.io/path_provider)
+🔍 [JOB_TRACKING] All SharedPreferences keys: [selected_ai_model, is_logged_in, auth_token, user_email, user_name]
+📚 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+⚠️ [JOB_TRACKING] No applied statuses found in SharedPreferences or backup file
+⚠️ Failed to sync model with backend: 404
+✅ AI model synced with backend after authentication
+📡 [SAVED_JOBS] API Response status: 200
+✅ [SAVED_JOBS] Loaded 0 jobs from API
+✅ [JOB_TRACKING] Successfully loaded 0 jobs
+🔄 [JOB_TRACKING] Loading applied status from SharedPreferences...
+📊 [JOB_TRACKING] Total jobs to load status for: 0
+🔍 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+✅ [JOB_TRACKING] Loaded applied status for 0 jobs (0 applied)
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":[],"cv_details":[],"total_count":0}...
+🔄 [HOME_SCREEN] Tab tapped: 1
+🔄 [HOME_SCREEN] Tab tapped: 2
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":[],"cv_details":[],"total_count":0}...
+🔍 [API_SERVICE] Making authenticated call to: /job/scrape
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":["maheshwor_tiwari.pdf"],"cv_details":[{"filename":"maheshwor_tiwari.pdf","size":130169,"type":"PDF","uploaded_date":1759830728.4285433}],"total_count":1}...
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":["maheshwor_tiwari.pdf"],"cv_details":[{"filename":"maheshwor_tiwari.pdf","size":130169,"type":"PDF","uploaded_date":1759830728.4285433}],"total_count":1}...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"job_description":"Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fu...
+🔍 [DEBUG] JobInput: Setting jdController.text with 6014 characters
+🔍 [DEBUG] CV Magic: jdController changed - length: 6014
+🔍 [DEBUG] JobInput: jdController.text.length after setting: 6014
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /job-analysis/extract-and-save
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Making authenticated call to: /cv/save-for-analysis/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [CV_PREVIEW] Loading CV content for: maheshwor_tiwari.pdf
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /cv/content/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"success":true,"company_slug":"Australia_for_UNHCR","company_name":"Australia for UNHCR","job_title":"Data Analyst","job_info_file":"user/kritika@gmail.com/cv-analysis/applied_companies/Australia_for...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"message":"CV saved for analysis successfully","filename":"maheshwor_tiwari.pdf","txt_path":"user/kritika@gmail.com/cv-analysis/cvs/original/original_cv.txt","structured_path":"user/kritika@gmail.com...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"filename":"maheshwor_tiwari.pdf","content":"Maheshwor Tiwari  \n0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220  \nBlogs on Medium  | GitHub  | Dashboard  Portfolio  \nCAR...
+🔍 [CV_PREVIEW] API response received: (filename, content, metadata, file_info, extraction_info)
+🔍 [CV_PREVIEW] Content length: 4864
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.idle -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.error -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.error -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+Starting application from main method in: org-dartlang-app:/web_entrypoint.dart.
+Found an existing <meta name="viewport"> tag. Flutter Web uses its own viewport configuration for better compatibility with Flutter. This tag will be replaced.
+🤖 Loaded saved AI model: Claude 3.5 Sonnet
+🔄 Syncing model: claude-3.5-sonnet -> anthropic/claude-3-5-sonnet-20241022
+⚠️ Failed to sync model with backend: 404
+✅ AI model synced with backend
+🔄 Backend status: {current_status: {current_provider: openai, current_model: gpt-4o, provider_available: true, total_providers: 1, available_providers: [openai]}, providers: {openai: {provider: openai, model: gpt-4o, available: true, api_key_configured: true, current_model: gpt-4o, is_current: true}}, available_models: {openai: [gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo, gpt-5-nano]}}
+🚀 CV Agent Mobile App initialized
+🔐 Auth status checked: Logged in
+🎯 Using YouTube Video ID: a9IUom_eUGI
+🎯 Expected URL: https://www.youtube.com/embed/a9IUom_eUGI
+📝 [RESULTS_CLEARING] Registered skills controller
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: null
+🔍 [DEBUG] selectedCVFilename != null: false
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [JOB_TRACKING] Verifying assets...
+🚀 [JOB_TRACKING] Preloading applied status on app start...
+🔄 [JOB_TRACKING] Loading saved jobs...
+🌐 [SAVED_JOBS] Loading from API...
+Height of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `height: 100%`.
+Set `style.height` to any appropriate value to stop this message.
+Width of Platform View type: [youtube_player_iframe] may not be set. Defaulting to `width: 100%`.
+Set `style.width` to any appropriate value to stop this message.
+🔍 [API_SERVICE] Making authenticated call to: /cv/list
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+❌ [JOB_TRACKING] Error loading from backup file: MissingPluginException(No implementation found for method getApplicationDocumentsDirectory on channel plugins.flutter.io/path_provider)
+🔍 [JOB_TRACKING] All SharedPreferences keys: [auth_token, user_name, selected_ai_model, is_logged_in, user_email]
+📚 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+⚠️ [JOB_TRACKING] No applied statuses found in SharedPreferences or backup file
+🔄 [HOME_SCREEN] Tab tapped: 1
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"uploaded_cvs":["maheshwor_tiwari.pdf"],"cv_details":[{"filename":"maheshwor_tiwari.pdf","size":130169,"type":"PDF","uploaded_date":1759830728.4285433}],"total_count":1}...
+📡 [SAVED_JOBS] API Response status: 200
+✅ [SAVED_JOBS] Loaded 1 jobs from API
+✅ [JOB_TRACKING] Successfully loaded 1 jobs
+🔄 [JOB_TRACKING] Loading applied status from SharedPreferences...
+📊 [JOB_TRACKING] Total jobs to load status for: 1
+🔍 [JOB_TRACKING] Found 0 saved applied statuses in SharedPreferences
+🔑 [JOB_TRACKING] Generated key for Australia for UNHCR: australia for unhcr_data analyst_175825903
+📋 [JOB_TRACKING] Job Australia for UNHCR: applied = false (key: applied_australia for unhcr_data analyst_175825903)
+✅ [JOB_TRACKING] Loaded applied status for 1 jobs (0 applied)
+❌ [JOB_TRACKING] saved_jobs.json not found in asset manifest!
+🔄 [HOME_SCREEN] Tab tapped: 2
+🔍 [API_SERVICE] Making authenticated call to: /cv/save-for-analysis/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [CV_PREVIEW] Loading CV content for: maheshwor_tiwari.pdf
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: false, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 0
+🔍 [DEBUG] jdController.text.trim().length: 0
+🔍 [DEBUG] jdController.text.trim().isEmpty: true
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [API_SERVICE] Making authenticated call to: /cv/content/maheshwor_tiwari.pdf
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Making authenticated call to: /job/scrape
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"message":"CV saved for analysis successfully","filename":"maheshwor_tiwari.pdf","txt_path":"user/kritika@gmail.com/cv-analysis/cvs/original/original_cv.txt","structured_path":"user/kritika@gmail.com...
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"filename":"maheshwor_tiwari.pdf","content":"Maheshwor Tiwari  \n0414 032 507 | maheshtwari99@gmail.com | LinkedIn  | Hurstville, NSW, 2220  \nBlogs on Medium  | GitHub  | Dashboard  Portfolio  \nCAR...
+🔍 [CV_PREVIEW] API response received: (filename, content, metadata, file_info, extraction_info)
+🔍 [CV_PREVIEW] Content length: 4864
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"job_description":"Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fu...
+🔍 [DEBUG] JobInput: Setting jdController.text with 6014 characters
+🔍 [DEBUG] CV Magic: jdController changed - length: 6014
+🔍 [DEBUG] JobInput: jdController.text.length after setting: 6014
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.idle
+🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)
+🔍 [DEBUG] _analyzeSkills called
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] jdController.text: "Data Analyst Australia for UNHCR Job Summary Australia for UNHCR Applications close: Job posted on: 14th Mar 2025 Sydney Contract , Full Time International Aid and Development , Fundraising Not For Profit (NFP) Job description Work in a high performing, values-driven organisation Competitive salary with salary packaging benefits Hybrid work arrangement with office located in Sydney CBD Full-time 15-month contract position ABOUT US Our passionate team empowers refugees to find safety and protection when they need it most. Australia for UNHCR is the UN Refugee Agency’s partner in Australia, raising funds and awareness to assist people forced to flee conflict, disaster or persecution. With more than 120 million people now forcibly displaced worldwide, this work has never been more vital. At Australia for UNHCR, we harness the generosity of Australians to help UNHCR deliver life-saving aid during humanitarian emergencies. This aid includes shelter, clean water, medicine, emergency cash assistance and counselling. We also support long-term education, healthcare and employment programs to help refugees rebuild their lives and create more secure futures. As part of the UN network, we make a difference for millions of people every year. WHO WE ARE LOOKING FOR Our people are collaborative and inclusive team players, committed to finding new ways to increase support for refugees. A highly motivated, organised and detail-oriented Data Analyst to join our high performing Business Intelligence Unit, who work closely with our business stakeholders, providing data to support data-driven business decision-making across Australia for UNHCR and New Zealand for UNHCR. A data-passionate individual with strong analytical and problem-solving skills, to play a vital part in contributing to the evolving data requirements of the organisation by providing segmented data selections, data mining, analysis, and developing and maintaining reports. YOU’LL MAKE AN IMPACT BY Delivering analytics on the business-critical objective of understanding how to maximise the value from our donors, in the form of data-mining, profile analysis, building analytical models and BI report authoring in Power BI or a similar reporting suite. Addressing data extract requirements for direct marketing campaigns with a high degree of service; manipulating data in preparation for bulk communications, updating records with contact history, and working with Fundraising stakeholders to advise on segmentation strategies considering a multi-channel communication and donor-centricity approach. Producing reports and analysis for reviewing results post campaign. Building projection and segmentation models to answer key business questions. Assisting the BI Analyst and BI Manager to administer and develop A4U’s data warehouse (DWH) considering current and future business requirements to strategise and implement enhancements to the platform through research, analysis, consultation and evaluation of program needs. Working with a range of internal and external stakeholders to satisfy their business intelligence requirements for analysis, report creation, data selections, and data mining within a strong project management framework, driving evidence-based decision making throughout the organisation. WE WOULD LIKE YOU TO HAVE Minimum 2 years’ experience in a similar role Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel. Experience in the development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment. Strong SQL coding skills and database knowledge Experience using business intelligence tools such as Power BI, Tableau, etc. Hands on experience in querying and extracting data across multiple, disparate and complex relational databases or a data warehouse Strong project management skills to deliver multiple projects and work autonomously to meet deadlines Strong stakeholder management skills. Excellent communication and customer service skills Experience extracting data for marketing campaigns with knowledge of how to best utilise data to optimise campaign outcomes An advanced understanding of how data is used for communication purposes, the process and the governing regulations / best practice guidelines. An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data. WHAT YOU’LL GET IN RETURN Working at Australia for UNHCR means that you get to make a difference for refugees every day. Our people give their best, work with compassion, and feel valued and supported. We have an inclusive and supportive culture built on a shared purpose. How do we know this? Our employees tell us! Our 2024 employee engagement survey revealed that: 100% of employees are proud to work at Australia for UNHCR 100% of employees feel trusted and valued by their Manager 89% can be successful as their authentic selves We also offer: A competitive salary commensurate with the NFP sector Access to $15,900 salary packaging Additional leave entitlements with five weeks of annual leave A flexible and hybrid work environment A focus on wellbeing, including weekly fruit box, access to a holistic Employee Assistance Program with offerings on mental health, nutrition, parenting, financial support and much more A focus on learning and development at individual, team and organisational levels We are a workplace that embraces diversity, inclusion and equal opportunity. We recognise the value of a diverse workforce and the creation of inclusive workforce cultures. We welcome applications from people with diverse experiences and cultural backgrounds, including migrants and former refugees. For further information on this position, or to discuss any requirements that will ensure you can fully participate in our recruitment process, please reach out to our HR team: [email protected] , using the subject line: Data Analyst enquiry via EthicalJobs. Please click"
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] _skillsController.isLoading: false
+✅ [DEBUG] Starting skills analysis...
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.idle -> SkillsAnalysisState.loading
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [CONTROLLER_DEBUG] Checking for cached results...
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis/cache
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: false
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.state: SkillsAnalysisState.loading
+🔍 [SKILLS_DISPLAY] Building results content
+🔍 [SKILLS_DISPLAY] _buildResultsContent called
+   controller.hasResults: false
+   controller.isLoading: true
+   controller.result: false
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: true
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: true
+=== END BUTTON CHECK ===
+🔍 [API_SERVICE] Response status: 200
+🔍 [API_SERVICE] Response body preview: {"cached":false}...
+🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis
+=== CONTROLLER CALLING SERVICE ===
+[SKILLS_ANALYSIS] Starting fresh analysis...
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014 chars
+=== FRONTEND SERVICE CALLED ===
+CV: maheshwor_tiwari.pdf
+JD length: 6014
+🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis
+   CV: maheshwor_tiwari.pdf
+   JD text length: 6014
+🔍 [API_SERVICE] Making authenticated call to: /preliminary-analysis
+🔍 [API_SERVICE] Token available: true
+🔍 [API_SERVICE] Token preview: eyJhbGciOiJIUzI1NiIs...
+🔍 [API_SERVICE] Response status: 401
+🔍 [API_SERVICE] Response body preview: {"detail":"User not authenticated"}...
+❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: Exception: API call failed: 401 - {"detail":"User not authenticated"}
+❌ [SERVICE_ERROR] Stack trace: dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3       throw_
+package:cv_agent_mobile/services/api_service.dart 96:7                            <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/http.dart 172:1                                                      <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 504:7                complete
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 571:12               _asyncReturn
+package:http/src/response.dart 66:3                                               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 623:19               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 648:23               <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 594:19               <fn>
+dart-sdk/lib/async/zone.dart 1849:54                                              runUnary
+dart-sdk/lib/async/future_impl.dart 222:18                                        handleValue
+dart-sdk/lib/async/future_impl.dart 948:44                                        handleValueCallback
+dart-sdk/lib/async/future_impl.dart 977:13                                        _propagateToListeners
+dart-sdk/lib/async/future_impl.dart 720:5                                         [_completeWithValue]
+dart-sdk/lib/async/future_impl.dart 804:7                                         <fn>
+dart-sdk/lib/async/schedule_microtask.dart 40:34                                  _microtaskLoop
+dart-sdk/lib/async/schedule_microtask.dart 49:5                                   _startMicrotaskLoop
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77  tear
+dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 188:69               <fn>
+
+=== CONTROLLER RECEIVED RESULT ===
+Result success: false
+🧹 [CONTROLLER] _setState: SkillsAnalysisState.loading -> SkillsAnalysisState.error
+🧹 [CONTROLLER] Calling notifyListeners()
+🧹 [CONTROLLER] notifyListeners() completed
+🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered
+   controller.hasError: true
+   controller.hasResults: false
+   controller.isLoading: false
+   controller.state: SkillsAnalysisState.error
+🔍 [SKILLS_DISPLAY] Building error state
+=== BUTTON STATE CHECK ===
+🔍 [DEBUG] Button state - canAnalyze: true, isAnalyzing: false
+🔍 [DEBUG] selectedCVFilename: maheshwor_tiwari.pdf
+🔍 [DEBUG] selectedCVFilename != null: true
+🔍 [DEBUG] jdController.text.length: 6014
+🔍 [DEBUG] jdController.text.trim().length: 6014
+🔍 [DEBUG] jdController.text.trim().isEmpty: false
+🔍 [DEBUG] jdController.text.trim().isNotEmpty: true
+🔍 [DEBUG] _skillsController.isLoading: false
+=== END BUTTON CHECK ===
+Application finished.

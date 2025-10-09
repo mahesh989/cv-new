@@ -1,0 +1,50 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-10-09T11:53:34.048903",
+  "matched_required_keywords": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "analytical skills",
+    "communication",
+    "data warehouse"
+  ],
+  "matched_preferred_keywords": [
+    "Tableau"
+  ],
+  "missed_required_keywords": [
+    "VBA",
+    "problem-solving",
+    "project management",
+    "stakeholder management",
+    "customer service",
+    "marketing campaigns",
+    "data models",
+    "data mining",
+    "segmentation strategies"
+  ],
+  "missed_preferred_keywords": [
+    "data issues",
+    "de-duplication",
+    "clean data"
+  ],
+  "match_counts": {
+    "total_required_keywords": 15,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 6,
+    "matched_preferred_count": 1
+  },
+  "matching_notes": {
+    "SQL": "Mentioned in technical skills and experience sections",
+    "Power BI": "Used for creating dashboards and presenting research findings",
+    "Excel": "Found in technical skills section",
+    "analytical skills": "Implied through data analysis and Python scripting",
+    "communication": "Demonstrated through presenting research findings and mentoring",
+    "data warehouse": "Mentioned in context of Snowflake",
+    "Tableau": "Used for creating dashboards in experience section"
+  },
+  "ai_model_used": "openai/gpt-4o",
+  "processing_status": "completed",
+  "cv_file_path": "user/munna@gmail.com/cv-analysis/cvs/original/original_cv.txt",
+  "metadata": {}
+}

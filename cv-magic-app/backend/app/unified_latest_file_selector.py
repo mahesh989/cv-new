@@ -71,8 +71,12 @@ class UnifiedLatestFileSelector:
             # Create JD usage tracker for this user
             tracker = JDUsageTracker(self.user_email)
             
+            # Provide fallback values if both jd_url and jd_text are empty
+            effective_jd_url = jd_url if jd_url and jd_url.strip() else ""
+            effective_jd_text = jd_text if jd_text and jd_text.strip() else "default_jd_text"
+            
             # Check if this is first-time usage
-            is_first_time = tracker.is_jd_first_time_usage(jd_url, jd_text)
+            is_first_time = tracker.is_jd_first_time_usage(effective_jd_url, effective_jd_text)
             
             print(f"🔍 [UNIFIED_SELECTOR] JD usage check: first_time={is_first_time}")
             return is_first_time

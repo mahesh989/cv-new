@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any, Tuple
 from fastapi import HTTPException, status
 
 from app.ai.ai_service import AIServiceManager
-from app.services.api_key_manager import api_key_manager
+# Removed global API key manager - using user-specific keys only
 from app.ai.base_provider import AIResponse
 
 logger = logging.getLogger(__name__)
@@ -28,25 +28,29 @@ class EnhancedAIService:
     
     def __init__(self):
         self.ai_service = AIServiceManager()
-        self.api_key_manager = api_key_manager
+        # Removed global API key manager - using user-specific keys only
     
-    def _validate_provider_api_key(self, provider: str) -> Tuple[bool, str]:
+    def _validate_provider_api_key(self, provider: str, user: Any) -> Tuple[bool, str]:
         """
-        Validate API key for a specific provider
+        Validate API key for a specific provider and user
         
         Args:
             provider: AI provider name
+            user: User object for API key validation
             
         Returns:
             Tuple[bool, str]: (is_valid, message)
         """
         try:
-            # Check if API key exists
-            if not self.api_key_manager.has_api_key(provider):
+            from app.services.user_api_key_manager import user_api_key_manager
+            
+            # Check if API key exists for this user
+            user_key = user_api_key_manager.get_api_key(user, provider)
+            if not user_key:
                 return False, f"No API key configured for {provider}. Please add your API key to use this provider."
             
             # Validate the API key
-            is_valid, message = self.api_key_manager.validate_api_key(provider)
+            is_valid, message = user_api_key_manager.validate_api_key(user, provider, user_key)
             return is_valid, message
             
         except Exception as e:
@@ -100,6 +104,7 @@ class EnhancedAIService:
     async def generate_response_with_validation(
         self,
         prompt: str,
+        user: Any,
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
@@ -141,7 +146,7 @@ class EnhancedAIService:
                 target_provider = self.ai_service.config.get_current_provider()
             
             # Validate API key for the provider
-            is_valid, message = self._validate_provider_api_key(target_provider)
+            is_valid, message = self._validate_provider_api_key(target_provider, user)
             
             if not is_valid:
                 provider_display = self._get_provider_display_name(target_provider)
@@ -160,6 +165,7 @@ class EnhancedAIService:
             # Proceed with AI call
             response = await self.ai_service.generate_response(
                 prompt=prompt,
+                user=user,
                 system_prompt=system_prompt,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -181,6 +187,7 @@ class EnhancedAIService:
     async def analyze_cv_content_with_validation(
         self,
         cv_text: str,
+        user: Any,
         provider_name: Optional[str] = None
     ) -> Dict[str, Any]:
         """
@@ -200,6 +207,7 @@ class EnhancedAIService:
             # Use the enhanced generate_response method
             response = await self.generate_response_with_validation(
                 prompt=cv_text,
+                user=user,
                 system_prompt="You are an expert CV analyst. Analyze the CV content and provide insights.",
                 provider_name=provider_name
             )
@@ -225,6 +233,7 @@ class EnhancedAIService:
         self,
         cv_text: str,
         job_description: str,
+        user: Any,
         provider_name: Optional[str] = None
     ) -> Dict[str, Any]:
         """
@@ -257,6 +266,7 @@ class EnhancedAIService:
             # Use the enhanced generate_response method
             response = await self.generate_response_with_validation(
                 prompt=comparison_prompt,
+                user=user,
                 system_prompt="You are an expert job matching analyst. Compare the CV with the job description and provide detailed insights.",
                 provider_name=provider_name
             )
@@ -278,24 +288,22 @@ class EnhancedAIService:
                 detail=f"CV-Job comparison error: {str(e)}"
             )
     
-    def get_provider_status(self) -> Dict[str, Any]:
-        """Get status of all providers with API key information"""
+    def get_provider_status(self, user: Any = None) -> Dict[str, Any]:
+        """Get status of all providers with API key information for a specific user"""
         try:
             # Get AI service provider status
             ai_status = self.ai_service.get_provider_status()
             
-            # Get API key manager status
-            api_key_status = self.api_key_manager.get_provider_status()
-            
-            # Combine the information
+            # Note: API key status now requires user context
+            # Return basic provider information without API key details
             combined_status = {}
             for provider in ['openai', 'anthropic', 'deepseek']:
                 combined_status[provider] = {
                     "ai_service_available": ai_status.get(provider, {}).get("available", False),
-                    "api_key_configured": api_key_status.get(provider, {}).get("has_api_key", False),
-                    "api_key_valid": api_key_status.get(provider, {}).get("is_valid", False),
-                    "last_validated": api_key_status.get(provider, {}).get("last_validated"),
-                    "created_at": api_key_status.get(provider, {}).get("created_at"),
+                    "api_key_configured": False,  # Requires user context to determine
+                    "api_key_valid": False,       # Requires user context to determine
+                    "last_validated": None,       # Requires user context to determine
+                    "created_at": None,           # Requires user context to determine
                     "models": ai_status.get(provider, {}).get("models", [])
                 }
             

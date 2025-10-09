@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from fastapi.responses import JSONResponse
 from app.utils.path_debug import path_debug
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from fastapi import APIRouter, Request, Depends, HTTPException
 from app.exceptions import TailoredCVNotFoundError
@@ -17,9 +17,6 @@ from app.core.auth import verify_token
 from app.core.dependencies import get_current_user
 from app.models.auth import UserData
 from app.core.model_dependency import get_current_model
-from app.services.user_api_key_manager import user_api_key_manager
-from app.ai.ai_service import ai_service
-from fastapi import HTTPException, status
 from app.services.skill_extraction import skill_extraction_service
 from app.services.cv_content_service import CVContentService
 from app.services.skills_analysis_config import skills_analysis_config_service
@@ -382,9 +379,11 @@ async def _run_pipeline(cname: str, token_data=None):
                     preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
             cv_txt_path_for_match = str(preferred_txt) if preferred_txt else None
             if not cv_txt_path_for_match:
-                from app.services.dynamic_cv_selector import dynamic_cv_selector as _dyn
-                latest_cv_paths_for_match = _dyn.get_latest_cv_paths_for_services()
-                cv_txt_path_for_match = latest_cv_paths_for_match.get('txt_path')
+                # Use unified selector instead of missing dynamic_cv_selector
+                from app.unified_latest_file_selector import get_selector_for_user
+                user_selector = get_selector_for_user(user_email)
+                cv_context = user_selector.get_latest_cv_across_all(cname)
+                cv_txt_path_for_match = str(cv_context.txt_path) if cv_context and cv_context.txt_path else None
             if cv_txt_path_for_match:
                 logger.info(f"📄 [PIPELINE] CV–JD matching will use CV TXT: {cv_txt_path_for_match}")
         except Exception as _sel_err:
@@ -594,25 +593,6 @@ async def _run_pipeline(cname: str, token_data=None):
 async def analyze_skills(request: Request, current_user: UserData = Depends(get_current_user)):
     """Extract skills from CV and JD using AI with caching"""
     try:
-        # Guard: ensure this user has an API key for the active provider
-        try:
-            current_provider = ai_service.config.get_current_provider()
-        except Exception:
-            current_provider = None
-        # Fallback: choose any provider the user has a key for (openai→anthropic→deepseek)
-        if not current_provider:
-            for prov in ["openai", "anthropic", "deepseek"]:
-                try:
-                    if user_api_key_manager.has_api_key(current_user, prov):
-                        current_provider = prov
-                        break
-                except Exception:
-                    continue
-        if not current_provider or not user_api_key_manager.has_api_key(current_user, current_provider):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"No API key configured for this user. Please add your key via /api/api-keys/set."
-            )
         # Ensure required directories exist before processing
         from ..utils.directory_utils import ensure_cv_analysis_directories
         ensure_cv_analysis_directories()
@@ -872,8 +852,7 @@ async def context_aware_analysis(
 @router.post("/preliminary-analysis")
 async def preliminary_analysis(
     request: Request,
-    current_model: str = Depends(get_current_model),
-    current_user: UserData = Depends(get_current_user)
+    current_model: str = Depends(get_current_model)
 ):
     """Preliminary skills analysis from CV filename and JD text"""
     try:
@@ -893,37 +872,17 @@ async def preliminary_analysis(
                 content={"detail": "Invalid token"}
             )
         
-        # Guard: ensure this user has an API key for the active provider
-        try:
-            current_provider = ai_service.config.get_current_provider()
-        except Exception:
-            current_provider = None
+        # Create user object from token data
+        from app.models.auth import UserData
         from datetime import datetime, timezone
-        user_email_guard = getattr(token_data, 'email', None)
-        user_obj = (
-            UserData(
-                id=str(getattr(token_data, 'user_id', None)),
-                email=user_email_guard,
-                name=(user_email_guard.split("@")[0] if user_email_guard else "user"),
-                created_at=datetime.now(timezone.utc),
-                is_active=True,
-            ) if user_email_guard else None
+        current_user = UserData(
+            id=token_data.user_id,
+            email=token_data.email,
+            name=token_data.email.split("@")[0] if token_data.email else "user",
+            created_at=datetime.now(timezone.utc),
+            is_active=True
         )
-        # Fallback: choose any provider the user has a key for
-        if user_obj and not current_provider:
-            for prov in ["openai", "anthropic", "deepseek"]:
-                try:
-                    if user_api_key_manager.has_api_key(user_obj, prov):
-                        current_provider = prov
-                        break
-                except Exception:
-                    continue
-        if not user_obj or not current_provider or not user_api_key_manager.has_api_key(user_obj, current_provider):
-            return JSONResponse(
-                status_code=400,
-                content={"error": "No API key configured for this user. Please add your key via /api/api-keys/set."}
-            )
-
+        
         data = await request.json()
         
         # Extract parameters
@@ -1133,17 +1092,16 @@ async def preliminary_analysis(
             except Exception as e:
                 logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to save JD and job info: {e}")
 
-                # Ensure CV file exists for the matcher - use dynamic CV selection
+                # Ensure CV file exists for the matcher - use unified CV selection
                 try:
                     import json
-                    # Avoid shadowing the module-level import used earlier
-                    from app.services.dynamic_cv_selector import dynamic_cv_selector as _dynamic_cv_selector
+                    # Use unified selector instead of missing dynamic_cv_selector
+                    from app.unified_latest_file_selector import get_selector_for_user
+                    user_selector = get_selector_for_user(user_email)
+                    cv_context = user_selector.get_latest_cv_across_all(company_name)
+                    cv_file = Path(cv_context.json_path) if cv_context and cv_context.json_path else None
                     
-                    # Get the latest CV file dynamically
-                    latest_cv_paths = _dynamic_cv_selector.get_latest_cv_paths_for_services()
-                    cv_file = Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None
-                    
-                    logger.info(f"📄 [PIPELINE] Using dynamic CV: {cv_file} from {latest_cv_paths['json_source']} folder")
+                    logger.info(f"📄 [PIPELINE] Using unified CV: {cv_file} from {cv_context.file_type if cv_context else 'unknown'} folder")
                     
                     # Check if file exists and has structured data
                     should_save = True
@@ -2362,21 +2320,10 @@ async def perform_preliminary_skills_analysis(
     config_name: Optional[str] = None,
     user_id: int = 1,
     user_email: str = None,
-    current_user: Optional[UserData] = None
+    current_user: Any = None
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
-        # Create UserData object if not provided
-        if not current_user and user_email:
-            from datetime import timezone
-            current_user = UserData(
-                id=str(user_id),
-                email=user_email,
-                name=user_email.split("@")[0] if user_email else "user",
-                created_at=datetime.now(timezone.utc),
-                is_active=True
-            )
-        
         # Get configuration
         config = skills_analysis_config_service.get_config(config_name)
         ai_params = skills_analysis_config_service.get_ai_parameters(config_name)
@@ -2414,9 +2361,9 @@ async def perform_preliminary_skills_analysis(
         # Use configuration parameters
         cv_structured_response = await ai_service.generate_response(
             prompt=cv_structured_prompt,
+            user=current_user,
             temperature=ai_params["temperature"],
-            max_tokens=ai_params["max_tokens"],
-            user=current_user
+            max_tokens=ai_params["max_tokens"]
         )
         cv_raw_response = cv_structured_response.content
         
@@ -2448,9 +2395,9 @@ async def perform_preliminary_skills_analysis(
         # Use configuration parameters
         jd_structured_response = await ai_service.generate_response(
             prompt=jd_structured_prompt,
+            user=current_user,
             temperature=ai_params["temperature"],
-            max_tokens=ai_params["max_tokens"],
-            user=current_user
+            max_tokens=ai_params["max_tokens"]
         )
         jd_raw_response = jd_structured_response.content
         
@@ -2673,9 +2620,9 @@ async def perform_preliminary_skills_analysis(
             # Generate AI response for analyze match
             analyze_match_response = await ai_service.generate_response(
                 prompt=analyze_match_prompt,
+                user=current_user,
                 temperature=0.0,
-                max_tokens=4000,
-                user=current_user
+                max_tokens=4000
             )
             analyze_match_content = analyze_match_response.content
             
@@ -2756,6 +2703,7 @@ async def perform_preliminary_skills_analysis(
                 ai_service,
                 cv_skills=pre_cv_skills,
                 jd_skills=pre_jd_skills,
+                user=current_user,
                 temperature=ai_params["temperature"],
                 max_tokens=min(ai_params["max_tokens"], 3000)
             )

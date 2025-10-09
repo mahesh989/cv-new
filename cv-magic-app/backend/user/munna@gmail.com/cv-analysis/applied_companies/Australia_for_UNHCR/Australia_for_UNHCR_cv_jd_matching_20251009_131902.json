@@ -1,0 +1,45 @@
+{
+  "company_name": "Australia_for_UNHCR",
+  "cv_analysis_timestamp": "2025-10-09T13:19:02.552262",
+  "matched_required_keywords": [
+    "SQL",
+    "VBA",
+    "Power BI",
+    "communication",
+    "project management",
+    "Data Warehouse"
+  ],
+  "matched_preferred_keywords": [],
+  "missed_required_keywords": [
+    "SQL data warehouse"
+  ],
+  "missed_preferred_keywords": [
+    "Tableau",
+    "stakeholder management",
+    "marketing campaigns",
+    "communication purposes"
+  ],
+  "match_counts": {
+    "total_required_keywords": 7,
+    "total_preferred_keywords": 4,
+    "matched_required_count": 6,
+    "matched_preferred_count": 0
+  },
+  "matching_notes": {
+    "SQL": "Listed in technical skills section and used in experience",
+    "VBA": "Listed in technical skills section",
+    "Power BI": "Listed in technical skills section",
+    "communication": "Listed in technical skills section",
+    "project management": "Listed in technical skills section",
+    "Data Warehouse": "Listed in technical skills section",
+    "SQL data warehouse": "Not explicitly mentioned",
+    "Tableau": "Not found in the CV",
+    "stakeholder management": "Not found in the CV",
+    "marketing campaigns": "Not found in the CV",
+    "communication purposes": "Not found in the CV"
+  },
+  "ai_model_used": "openai/gpt-3.5-turbo",
+  "processing_status": "completed",
+  "cv_file_path": "user/munna@gmail.com/cv-analysis/cvs/tailored/Australia_for_UNHCR_tailored_cv_20251009_115547.txt",
+  "metadata": {}
+}

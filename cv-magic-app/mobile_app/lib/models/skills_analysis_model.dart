@@ -155,6 +155,13 @@ class SkillsAnalysisResult {
         '   preextracted_skills_comparison raw length: ${preextractedRaw?.length ?? 0}',
       );
     }
+    // If backend attached company at top-level, use it as canonical company for polling
+    final topLevelCompany = json['company'] as String?;
+    if ((preextractedCompany == null || preextractedCompany.isEmpty) &&
+        topLevelCompany != null &&
+        topLevelCompany.isNotEmpty) {
+      preextractedCompany = topLevelCompany;
+    }
 
     // Debug final values
     debugPrint(

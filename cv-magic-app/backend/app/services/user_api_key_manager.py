@@ -142,12 +142,34 @@ class UserAPIKeyManager:
                 if not api_key:
                     return False, f"No API key found for {provider}"
             
-            # Import validation logic from the original API key manager
-            from app.services.api_key_manager import APIKeyManager
-            temp_manager = APIKeyManager()
+            # Direct provider validation without global API key manager
+            from app.ai.providers import OpenAIProvider, AnthropicProvider, DeepSeekProvider
+            from app.ai.ai_config import ai_config
             
-            # Use the original validation logic
-            is_valid, message = temp_manager.validate_api_key(provider, api_key)
+            # Create provider instance for validation
+            provider_classes = {
+                'openai': OpenAIProvider,
+                'anthropic': AnthropicProvider,
+                'deepseek': DeepSeekProvider
+            }
+            
+            if provider not in provider_classes:
+                return False, f"Unknown provider: {provider}"
+            
+            # Get default model for validation
+            available_models = ai_config.get_available_models(provider)
+            if not available_models:
+                return False, f"No models available for {provider}"
+            
+            default_model = available_models[0]
+            
+            # Create provider instance and test
+            provider_class = provider_classes[provider]
+            provider_instance = provider_class(api_key, default_model)
+            
+            # Test the connection
+            is_valid = provider_instance.is_available()
+            message = f"API key for {provider} is {'valid' if is_valid else 'invalid or service unavailable'}"
             
             # Update validation status in database
             if is_valid:

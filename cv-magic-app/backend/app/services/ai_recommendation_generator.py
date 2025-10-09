@@ -253,9 +253,21 @@ class AIRecommendationGenerator:
             AIResponse object or None if failed
         """
         try:
+            # Create user object from stored user_email
+            from app.models.auth import UserData
+            from datetime import datetime, timezone
+            current_user = UserData(
+                id="pipeline_user",  # Use a placeholder ID for pipeline operations
+                email=self.user_email,
+                name=self.user_email.split("@")[0] if self.user_email else "user",
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
+            
             # Use the centralized AI service
             response = await ai_service.generate_response(
                 prompt=prompt_content,
+                user=current_user,
                 system_prompt="You are an expert CV strategist and career consultant. Provide detailed, actionable recommendations in the exact format requested.",
                 temperature=0.0,  # Zero temperature for maximum consistency
                 max_tokens=4000   # Allow for detailed responses

@@ -48,7 +48,8 @@ async def extract_and_save_job(request: Request, current_user: UserData = Depend
             result = await user_job_extraction_service.save_job_analysis(
                 job_description=job_description,
                 job_url=job_url if job_url else None,
-                auth_token=auth_token if auth_token else None
+                auth_token=auth_token if auth_token else None,
+                user=current_user
             )
             
             if "error" in result:
