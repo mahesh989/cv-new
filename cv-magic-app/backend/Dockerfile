@@ -21,6 +21,7 @@ RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 # Copy app
 COPY app /app/app
 COPY migrations /app/migrations
+COPY prompt /app/prompt
 
 # Defaults for Uvicorn
 EXPOSE 8000
