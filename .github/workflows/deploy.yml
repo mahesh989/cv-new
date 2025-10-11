@@ -20,8 +20,13 @@ jobs:
       - run: flutter build web --release --base-href="/cv-new/"
         working-directory: ./cv-magic-app/mobile_app
         
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Create deployment directory
+        run: |
+          # Create a temporary deployment directory
+          mkdir -p deployment
+          cp -r cv-magic-app/mobile_app/build/web/* deployment/
+          
+      - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./cv-magic-app/mobile_app/build/web
+          publish_dir: ./deployment
