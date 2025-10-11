@@ -14,12 +14,23 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.1'
+          channel: 'stable'
           
-      - run: flutter pub get
+      - name: Install dependencies
+        run: flutter pub get
         working-directory: ./cv-magic-app/mobile_app
         
-      - run: flutter build web --release --base-href="/cv-new/"
+      - name: Debug Flutter environment
+        run: |
+          flutter --version
+          flutter doctor
         working-directory: ./cv-magic-app/mobile_app
+        
+      - name: Build Flutter web app
+        run: flutter build web --release --base-href="/cv-new/" --web-renderer html
+        working-directory: ./cv-magic-app/mobile_app
+        env:
+          FLUTTER_WEB_USE_SKIA: false
         
       - name: Create deployment directory
         run: |
