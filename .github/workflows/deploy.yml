@@ -1,29 +1,29 @@
-name: Deploy to GitHub Pages
+name: Deploy Flutter Web to GitHub Pages
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: ./cv-magic-app/mobile_app
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.27.1'
-        channel: 'stable'
-    
+
     - name: Install dependencies
       run: flutter pub get
-      working-directory: ./cv-magic-app/mobile_app
-    
+
     - name: Build web
       run: flutter build web --release --base-href="/cv-new/"
-      working-directory: ./cv-magic-app/mobile_app
-    
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
