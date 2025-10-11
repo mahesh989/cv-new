@@ -20,7 +20,7 @@ jobs:
       working-directory: ./cv-magic-app/mobile_app
 
     - name: Build web
-      run: flutter build web --release --base-href="/cv-new/" --no-wasm-dry-run
+      run: flutter build web --release --base-href="/cv-new/" --web-renderer html
       working-directory: ./cv-magic-app/mobile_app
 
     - name: Deploy to GitHub Pages
