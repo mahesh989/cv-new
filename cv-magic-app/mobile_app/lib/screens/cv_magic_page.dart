@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import '../widgets/cv_uploader.dart';
 import '../services/api_service.dart';
+import '../config/config.dart';
 
 class CVMagicPage extends StatefulWidget {
   const CVMagicPage({super.key});
@@ -32,7 +33,7 @@ class _CVMagicPageState extends State<CVMagicPage> {
   Future<void> _loadAvailableCVs() async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:8000/api/cv/list'));
+          await http.get(Uri.parse('${AppConfig.baseUrl}/api/cv/list'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> cvList = data['uploaded_cvs'] ?? [];

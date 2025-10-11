@@ -1,6 +1,6 @@
 class AppConfig {
-  // Base URL for API and static assets
-  static const String baseUrl = 'http://localhost:8000';
+  // Base URL for API and static assets - UPDATED FOR PRODUCTION
+  static const String baseUrl = 'http://cvagent.duckdns.org';
 
   // API endpoints
   static const String apiBaseUrl = '$baseUrl/api';

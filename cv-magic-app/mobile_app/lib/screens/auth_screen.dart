@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme/app_theme.dart';
+import '../config/config.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -213,7 +214,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       }
 
       // Call backend endpoint
-      final url = 'http://localhost:8000$endpoint';
+      final url = '${AppConfig.baseUrl}$endpoint';
       print('🔵 [FRONTEND] Making HTTP request to: $url');
       print(
           '🔵 [FRONTEND] Request headers: {\'Content-Type\': \'application/json\'}');
@@ -354,7 +355,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       // Call backend login endpoint with Google user credentials
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
+        Uri.parse('${AppConfig.baseUrl}/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': 'demo@gmail.com',
