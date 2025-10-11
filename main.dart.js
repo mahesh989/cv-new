@@ -9574,7 +9574,7 @@ s=7
 return A.p(A.e2(),$async$Su)
 case 7:n=b
 m=A.bn(J.T(n.a,"auth_token"))
-h=A.dF("http://cvagent.duckdns.org/api/jobs/saved",0,null)
+h=A.dF("https://cvagent.duckdns.org/api/jobs/saved",0,null)
 g=t.N
 l=A.x(g,g)
 J.dX(l,"Content-Type","application/json")
@@ -31441,7 +31441,7 @@ var $async$fw=A.q(function(d,e){if(d===1)return A.r(e,r)
 while(true)switch(s){case 0:s=3
 return A.p(A.Ma(),$async$fw)
 case 3:j=e
-i=A.dF("http://cvagent.duckdns.org/api"+b,0,null)
+i=A.dF("https://cvagent.duckdns.org/api"+b,0,null)
 A.S("\ud83d\udd0d [API_SERVICE] Making authenticated call to: "+b)
 n=j==null
 m=!n
@@ -31517,7 +31517,7 @@ var $async$zT=A.q(function(b,c){if(b===1)return A.r(c,r)
 while(true)switch(s){case 0:s=3
 return A.p(A.Ma(),$async$zT)
 case 3:l=c
-k=A.b0y("POST",A.dF("http://cvagent.duckdns.org/api/cv/upload",0,null))
+k=A.b0y("POST",A.dF("https://cvagent.duckdns.org/api/cv/upload",0,null))
 if(l!=null)k.r.n(0,"Authorization","Bearer "+l)
 p=$.uJ().a
 o=p==null
@@ -51019,7 +51019,7 @@ a3=t.N
 a4=t.z
 if(l){g=A.a2(["email",j,"password",i],a3,a4)
 A.S("\ud83d\udd35 [FRONTEND] Login request body: "+A.c(g))}else{g=A.a2(["email",j,"password",i,"name",h],a3,a4)
-A.S("\ud83d\udd35 [FRONTEND] Registration request body: "+A.c(g))}f="http://cvagent.duckdns.org"+A.c(k)
+A.S("\ud83d\udd35 [FRONTEND] Registration request body: "+A.c(g))}f="https://cvagent.duckdns.org"+A.c(k)
 A.S("\ud83d\udd35 [FRONTEND] Making HTTP request to: "+A.c(f))
 A.S("\ud83d\udd35 [FRONTEND] Request headers: {'Content-Type': 'application/json'}")
 A.S("\ud83d\udd35 [FRONTEND] Request body: "+B.ag.mp(g,null))
@@ -51104,7 +51104,7 @@ m0(){var s=0,r=A.v(t.H),q=1,p,o=[],n=this,m,l,k,j,i,h,g,f,e,d
 var $async$m0=A.q(function(a,b){if(a===1){p=b
 s=q}while(true)switch(s){case 0:n.L(new A.atD(n))
 q=3
-h=A.dF("http://cvagent.duckdns.org/api/auth/login",0,null)
+h=A.dF("https://cvagent.duckdns.org/api/auth/login",0,null)
 g=t.N
 f=A.a2(["Content-Type","application/json"],g,g)
 s=6
@@ -51274,7 +51274,7 @@ s=5
 break}a=t.N
 j=A.a2(["Authorization","Bearer "+A.c(k),"Content-Type","application/json"],a,a)
 s=8
-return A.p(A.a4l(A.dF("http://cvagent.duckdns.org/api/tailored-cv/available-companies-real",0,null),j),$async$p0)
+return A.p(A.a4l(A.dF("https://cvagent.duckdns.org/api/tailored-cv/available-companies-real",0,null),j),$async$p0)
 case 8:i=a3
 s=i.b===200?9:11
 break
@@ -51290,7 +51290,7 @@ break}J.M6(g,new A.auJ())
 f=J.iY(g)
 e=J.T(f,"company")
 s=12
-return A.p(A.a4l(A.dF("http://cvagent.duckdns.org/api/tailored-cv/content/"+A.c(e),0,null),j),$async$p0)
+return A.p(A.a4l(A.dF("https://cvagent.duckdns.org/api/tailored-cv/content/"+A.c(e),0,null),j),$async$p0)
 case 12:d=a3
 if(d.b===200){a=d
 c=B.ag.cK(0,A.hE(A.hC(a.e)).cK(0,a.w))
@@ -51390,7 +51390,7 @@ s=7
 return A.p(A.e2(),$async$rt)
 case 7:m=b
 l=A.bn(J.T(m.a,"auth_token"))
-h=A.dF("http://cvagent.duckdns.org/api/tailored-cv/save-edited",0,null)
+h=A.dF("https://cvagent.duckdns.org/api/tailored-cv/save-edited",0,null)
 g=t.N
 k=A.x(g,g)
 J.dX(k,"Content-Type","application/json")
@@ -51424,7 +51424,7 @@ var $async$B_=A.q(function(b,c){if(b===1){o=c
 s=p}while(true)switch(s){case 0:g=B.c.au(a)
 if(g.length===0||n.f==null){s=1
 break}p=4
-k=A.dF("http://cvagent.duckdns.org/api/tailored-cv/save-additional-prompt",0,null)
+k=A.dF("https://cvagent.duckdns.org/api/tailored-cv/save-additional-prompt",0,null)
 j=t.N
 i=A.a2(["Content-Type","application/json"],j,j)
 s=7
@@ -52648,7 +52648,7 @@ break}i=j.c.toLowerCase()
 h=n.aff(a)
 A.B().$1("\ud83d\udd04 Syncing model: "+a+" -> "+A.c(i)+"/"+A.c(h))
 s=8
-return A.p(A.zC(A.dF("http://cvagent.duckdns.org/api/ai/switch-model",0,null),B.ag.mp(A.a2(["model",h],d,d),null),k),$async$ph)
+return A.p(A.zC(A.dF("https://cvagent.duckdns.org/api/ai/switch-model",0,null),B.ag.mp(A.a2(["model",h],d,d),null),k),$async$ph)
 case 8:g=a1
 if(g.b===200){d=g
 f=B.ag.kp(0,A.hE(A.hC(d.e)).cK(0,d.w),null)
@@ -52678,7 +52678,7 @@ i=t.N
 l=A.a2(["Content-Type","application/json"],i,i)
 if(m!=null)J.dX(l,"Authorization","Bearer "+A.c(m))
 s=8
-return A.p(A.a4l(A.dF("http://cvagent.duckdns.org/api/api-keys/status",0,null),l),$async$qq)
+return A.p(A.a4l(A.dF("https://cvagent.duckdns.org/api/api-keys/status",0,null),l),$async$qq)
 case 8:k=b
 if(k.b===200){i=k
 i=B.ag.kp(0,A.hE(A.hC(i.e)).cK(0,i.w),null)
@@ -52815,9 +52815,9 @@ return A.p(n.A5(),$async$uC)
 case 7:m=d
 g=t.N
 l=A.a2(["Content-Type","application/json"],g,g)
-k="http://cvagent.duckdns.org/api/api-keys/set-initial"
+k="https://cvagent.duckdns.org/api/api-keys/set-initial"
 if(m!=null&&J.aQ(m)!==0){J.dX(l,"Authorization","Bearer "+A.c(m))
-k="http://cvagent.duckdns.org/api/api-keys/set"}s=8
+k="https://cvagent.duckdns.org/api/api-keys/set"}s=8
 return A.p(A.zC(A.dF(k,0,null),B.ag.mp(A.a2(["provider",a,"api_key",b],g,g),null),l),$async$uC)
 case 8:j=d
 if(j.b===200){g=j
