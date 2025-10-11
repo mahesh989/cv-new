@@ -37,8 +37,8 @@ jobs:
           # Create a temporary deployment directory
           mkdir -p deployment
           cp -r cv-magic-app/mobile_app/build/web/* deployment/
-          # Create CNAME file for GitHub Pages
-          echo "mahesh989.github.io" > deployment/CNAME
+          # Create CNAME file for GitHub Pages (empty for project pages)
+          echo "" > deployment/CNAME
           
       - uses: peaceiris/actions-gh-pages@v3
         with:
