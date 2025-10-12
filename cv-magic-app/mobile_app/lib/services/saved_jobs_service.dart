@@ -65,7 +65,7 @@ class SavedJobsService {
       debugPrint('🌐 [SAVED_JOBS] Loading from API...');
 
       // Use localhost for development
-      const baseUrl = 'http://localhost:8000';
+      const baseUrl = 'https://cvagent.duckdns.org';
 
       // Add timeout to prevent hanging during analysis
       final prefs = await SharedPreferences.getInstance();

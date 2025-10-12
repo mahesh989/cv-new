@@ -234,7 +234,7 @@ class AIModelService extends ChangeNotifier {
       debugPrint('🔄 Syncing model: $modelId -> $provider/$apiModelName');
 
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/ai/switch-model'),
+        Uri.parse('https://cvagent.duckdns.org/api/ai/switch-model'),
         headers: headers,
         body: jsonEncode({
           'model': apiModelName,
@@ -271,7 +271,7 @@ class AIModelService extends ChangeNotifier {
 
       // Get API key status to check if user has configured any API keys
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/api-keys/status'),
+        Uri.parse('https://cvagent.duckdns.org/api/api-keys/status'),
         headers: headers,
       );
 

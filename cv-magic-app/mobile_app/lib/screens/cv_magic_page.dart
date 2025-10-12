@@ -32,7 +32,7 @@ class _CVMagicPageState extends State<CVMagicPage> {
   Future<void> _loadAvailableCVs() async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:8000/api/cv/list'));
+          await http.get(Uri.parse('https://cvagent.duckdns.org/api/cv/list'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> cvList = data['uploaded_cvs'] ?? [];

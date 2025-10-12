@@ -213,7 +213,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       }
 
       // Call backend endpoint
-      final url = 'http://localhost:8000$endpoint';
+      final url = 'https://cvagent.duckdns.org$endpoint';
       print('🔵 [FRONTEND] Making HTTP request to: $url');
       print(
           '🔵 [FRONTEND] Request headers: {\'Content-Type\': \'application/json\'}');
@@ -354,7 +354,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       // Call backend login endpoint with Google user credentials
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
+        Uri.parse('https://cvagent.duckdns.org/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': 'demo@gmail.com',
