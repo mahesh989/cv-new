@@ -3,7 +3,7 @@ class AppConfig {
   static const String baseUrl = 'https://cvagent.duckdns.org';
 
   // API endpoints
-  static const String apiBaseUrl = '$baseUrl/api';
+  static const String apiBaseUrl = '$baseUrl';
 
   // Video and media paths (now using YouTube embed)
   static const String youtubeVideoId = 'a9IUom_eUGI';
