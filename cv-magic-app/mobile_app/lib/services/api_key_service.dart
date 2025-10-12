@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class APIKeyService {
   static const String _baseUrl = AppConfig.baseUrl;

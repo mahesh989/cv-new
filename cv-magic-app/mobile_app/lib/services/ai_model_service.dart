@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/ai_model.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class AIModelService extends ChangeNotifier {
   static final AIModelService _instance = AIModelService._internal();

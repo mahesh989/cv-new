@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class APIService {
   static const String baseUrl = AppConfig.baseUrl;

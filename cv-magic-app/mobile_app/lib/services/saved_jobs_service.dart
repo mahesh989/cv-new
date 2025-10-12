@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class SavedJobsService {
   static String get _savedJobsPath {

@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:async';
 import '../core/theme/app_theme.dart';
 import '../services/results_clearing_service.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class CVGenerationScreen extends StatefulWidget {
   final VoidCallback? onNavigateToCVMagic;

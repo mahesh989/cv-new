@@ -732,7 +732,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           Icon(
             Icons.info_outline_rounded,
             color: AppTheme.primaryTeal,
-            asize: isSmallScreen ? 18 : 20,
+            size: isSmallScreen ? 18 : 20,
           ),
           const SizedBox(width: 12),
           Expanded(

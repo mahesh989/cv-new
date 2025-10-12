@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import '../widgets/cv_uploader.dart';
 import '../services/api_service.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class CVMagicPage extends StatefulWidget {
   const CVMagicPage({super.key});
