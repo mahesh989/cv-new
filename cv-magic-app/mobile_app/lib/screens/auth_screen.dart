@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme/app_theme.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -77,7 +77,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
     // Determine if this is login or registration based on tab index
     final isLogin = _tabController.index == 0;
-    final endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    final endpoint = isLogin ? '/auth/login' : '/auth/register';
     print(
         '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
 
@@ -214,7 +214,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       }
 
       // Call backend endpoint
-      final url = '${AppConfig.baseUrl}$endpoint';
+      final url = '${AppConfig.baseUrl}/api$endpoint';
       print('🔵 [FRONTEND] Making HTTP request to: $url');
       print(
           '🔵 [FRONTEND] Request headers: {\'Content-Type\': \'application/json\'}');
@@ -732,7 +732,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           Icon(
             Icons.info_outline_rounded,
             color: AppTheme.primaryTeal,
-            size: isSmallScreen ? 18 : 20,
+            asize: isSmallScreen ? 18 : 20,
           ),
           const SizedBox(width: 12),
           Expanded(
