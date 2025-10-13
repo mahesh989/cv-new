@@ -28,6 +28,14 @@ async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
         4. If you cannot find either piece of information, return null for that field
         5. Be precise and extract only the actual job title and company name, not additional descriptive text
         
+        JOB TITLE EXTRACTION PRIORITY:
+        - Look for the MAIN job title in the header/title section (usually at the top)
+        - Common patterns: "Data Analytics Officer", "Business Analyst", "Software Engineer", "Marketing Manager"
+        - Look for titles with specific roles like "Officer", "Analyst", "Manager", "Engineer", "Specialist", "Coordinator"
+        - Avoid generic terms like "Manager" if a more specific title exists (e.g., "Data Analytics Officer" not just "Manager")
+        - If multiple titles appear, choose the most specific and relevant one
+        - Examples: "Data Analytics Officer - Foodbank" → extract "Data Analytics Officer"
+        
         COMPANY NAME EXTRACTION PRIORITY:
         - If this is a recruitment agency posting (look for "Reference Number:", "Robert Half", "Hays", "Randstad", "Adecco", "Manpower", "Michael Page", "Hudson", "Chandler Macleod", "SEEK", privacy notices, "express consent"), extract the RECRUITMENT AGENCY NAME
         - If it's a direct company posting, extract the hiring company name
@@ -41,9 +49,21 @@ async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
         {{"job_title": "actual job title or null", "company": "actual company name or null"}}
         """
         
+        # Create a mock user for AI extraction (since we don't have user context in this function)
+        from app.models.auth import UserData
+        from datetime import datetime, timezone
+        mock_user = UserData(
+            id="extraction_user",
+            email="extraction@system.local",
+            name="System",
+            created_at=datetime.now(timezone.utc),
+            is_active=True
+        )
+        
         # Use the AI service to extract information
         result_text = await ai_service.generate_response(
             prompt=prompt,
+            user=mock_user,
             temperature=0.0,
             max_tokens=200
         )
@@ -98,12 +118,23 @@ def extract_job_info_fallback(job_description: str) -> Dict[str, Any]:
     company = None
     
     try:
-        # Common patterns for job titles
+        # Common patterns for job titles (prioritize specific titles over generic ones)
         title_patterns = [
+            # Specific job title patterns (highest priority) - look for titles at the beginning of lines
+            r'^([A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff))\s*[-–]',
+            r'^([A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff))\s*$',
+            
+            # Look for job titles in the first few lines
+            r'([A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff))\s*[-–]',
+            
+            # Standard patterns
             r'(?:Job\s+Title|Position|Role):\s*([^\n\r]+)',
             r'(?:We\s+are\s+looking\s+for\s+a\s+)([^\n\r]+)',
             r'(?:Seeking\s+a\s+)([^\n\r]+)',
             r'(?:Hiring\s+for\s+)([^\n\r]+)',
+            
+            # Generic fallback patterns (lowest priority)
+            r'([A-Z][a-zA-Z\s]+(?:Manager|Analyst|Engineer|Developer|Designer|Consultant|Specialist|Coordinator|Officer|Director|Lead|Senior|Junior|Principal|Staff))',
         ]
         
         for pattern in title_patterns:
@@ -117,7 +148,10 @@ def extract_job_info_fallback(job_description: str) -> Dict[str, Any]:
             # Recruitment agency patterns (highest priority)
             r'(?:Reference Number:.*?)([A-Z][a-zA-Z\s&.-]+?)(?:\s+privacy|\s+recruitment|$)',
             r'(?:By clicking \'apply\', you give your express consent that )([A-Z][a-zA-Z\s&.-]+?)(?:\s+may use)',
-            r'(?:Robert Half|Hays|Randstad|Adecco|Manpower|Michael Page|Hudson|Chandler Macleod|SEEK)',
+            r'(?:Robert Half|Hays|Randstad|Adecco|Manpower|Michael Page|Hudson|Chandler Macleod|SEEK|Cause Recruitment)',
+            
+            # Look for company names after job title (common pattern)
+            r'[A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff)\s*[-–]\s*([A-Z][a-zA-Z\s&.-]+?)\s*[-–]',
             
             # Standard company patterns
             r'(?:Company|Organization|Employer):\s*([^\n\r]+)',
@@ -128,7 +162,11 @@ def extract_job_info_fallback(job_description: str) -> Dict[str, Any]:
         for pattern in company_patterns:
             match = re.search(pattern, job_description, re.IGNORECASE)
             if match:
-                company = match.group(1).strip()
+                # Handle patterns with and without capture groups
+                if match.groups():
+                    company = match.group(1).strip()
+                else:
+                    company = match.group(0).strip()
                 break
         
         return {

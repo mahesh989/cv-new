@@ -404,7 +404,17 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     }
 
     try {
-      final company = _extractCompanyFromJD()!;
+      // Use the company name from the backend's preliminary analysis result if available
+      String company;
+      if (_controller.result?.preextractedCompanyName != null &&
+          _controller.result!.preextractedCompanyName!.isNotEmpty) {
+        company = _controller.result!.preextractedCompanyName!;
+        print('🔄 [RERUN] Using backend-extracted company name: $company');
+      } else {
+        // Fallback to frontend extraction if backend company name is not available
+        company = _extractCompanyFromJD()!;
+        print('🔄 [RERUN] Using frontend-extracted company name: $company');
+      }
 
       // Perform context-aware rerun analysis
       await _controller.performContextAwareAnalysis(
