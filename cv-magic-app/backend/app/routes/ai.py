@@ -199,6 +199,18 @@ async def switch_provider(
         )
 
 
+@router.post("/switch-model")
+async def switch_model(
+    request: ModelSwitchRequest,
+    current_user: UserData = Depends(get_current_user),
+    db: Session = Depends(get_database)
+):
+    """
+    Switch the current AI model (alias for set-current-model for Flutter compatibility)
+    """
+    return await set_current_model(request, current_user, db)
+
+
 @router.post("/set-current-model")
 async def set_current_model(
     request: ModelSwitchRequest,
@@ -210,31 +222,62 @@ async def set_current_model(
     """
     try:
         from app.services.user_model_service import user_model_service
+        
+        # Initialize AI service for this user
+        ai_service.initialize_for_user(current_user)
+        logger.info(f"✅ [AI_SWITCH] AI providers initialized for user {current_user.email}")
+        
         if not hasattr(request, "model") or not request.model:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Model is required")
-        if not hasattr(request, "provider"):
-            # Try using current provider if not supplied
-            current_provider = ai_service.config.get_current_provider()
-            if not current_provider:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Provider is required")
-            provider = current_provider
+        
+        # Parse provider from model name if not provided
+        model_name = request.model
+        provider = None
+        
+        if hasattr(request, "provider") and request.provider:
+            provider = request.provider
         else:
-            provider = getattr(request, "provider") or ai_service.config.get_current_provider()
+            # Auto-detect provider from model name
+            if model_name.startswith("gpt-") or model_name.startswith("o1-"):
+                provider = "openai"
+            elif model_name.startswith("claude-"):
+                provider = "anthropic"
+            elif model_name.startswith("deepseek-"):
+                provider = "deepseek"
+            else:
+                # Try using current provider if we can't detect
+                current_provider = ai_service.config.get_current_provider()
+                if current_provider:
+                    provider = current_provider
+                else:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not determine provider for model: {model_name}")
+        
         if not provider:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Provider is required")
 
+        logger.info(f"🔄 [AI_SWITCH] Attempting to switch to provider: {provider}, model: {model_name}")
+        
         # Validate by switching in-memory
-        ok = ai_service.switch_provider(provider, request.model)
+        ok = ai_service.switch_provider(provider, model_name)
         if not ok:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid provider/model: {provider}/{request.model}")
+            available_providers = list(ai_service._providers.keys())
+            available_models = ai_service.get_all_available_models()
+            logger.error(f"❌ [AI_SWITCH] Failed to switch to {provider}/{model_name}")
+            logger.error(f"❌ [AI_SWITCH] Available providers: {available_providers}")
+            logger.error(f"❌ [AI_SWITCH] Available models: {available_models}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail=f"Invalid provider/model: {provider}/{model_name}. Available providers: {available_providers}"
+            )
 
         # Persist for the user
-        user_model_service.set_user_model(db, str(current_user.id), provider, request.model)
+        user_model_service.set_user_model(db, str(current_user.id), provider, model_name)
+        logger.info(f"✅ [AI_SWITCH] Successfully switched to {provider}/{model_name} for user {current_user.email}")
 
         return {
             "message": "Current model set",
             "provider": provider,
-            "model": request.model,
+            "model": model_name,
             "current_status": ai_service.get_current_status()
         }
     except HTTPException:
