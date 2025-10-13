@@ -512,7 +512,7 @@ TEXT TO ANALYZE:
         
         return job_info
     
-    async def save_job_analysis(self, job_description: str, job_url: Optional[str] = None, auth_token: Optional[str] = None, user: Any = None) -> Dict[str, Any]:
+    async def save_job_analysis(self, job_description: str, job_url: Optional[str] = None, auth_token: Optional[str] = None, user: Any = None, company_override: Optional[str] = None) -> Dict[str, Any]:
         """
         Extract job information and save to organized folder structure
         
@@ -532,14 +532,16 @@ TEXT TO ANALYZE:
             
             # Create company slug for folder name
             company_slug = self._create_company_slug(job_info["company_name"])
+            # If an override is provided (e.g., pipeline-detected company folder), honor it to avoid detaching data
+            target_folder = company_override or company_slug
             
             # Create company-specific directory under applied_companies subfolder
-            company_dir = self.cv_analysis_dir / "applied_companies" / company_slug
+            company_dir = self.cv_analysis_dir / "applied_companies" / target_folder
             company_dir.mkdir(parents=True, exist_ok=True)
             
             # Save job_info JSON file with timestamp
             timestamp = TimestampUtils.get_timestamp()
-            job_info_file = company_dir / f"job_info_{company_slug}_{timestamp}.json"
+            job_info_file = company_dir / f"job_info_{target_folder}_{timestamp}.json"
             job_info_data = job_info.copy()
             job_info_data["extracted_at"] = datetime.now().isoformat()
             if job_url:

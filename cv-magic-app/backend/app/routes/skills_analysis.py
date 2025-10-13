@@ -1037,19 +1037,41 @@ async def preliminary_analysis(
                     # Only save if no JD file exists
                     timestamp = TimestampUtils.get_timestamp()
                     jd_file = company_dir / f"jd_original_{timestamp}.json"
-                    # Save JD file
+                    # Extract minimal job metadata for schema population
+                    job_metadata = await extract_job_metadata(jd_text)
+                    extracted_company = (job_metadata or {}).get("company") if job_metadata else None
+                    extracted_title = (job_metadata or {}).get("job_title") if job_metadata else None
+                    # Save JD file in full expected schema
                     with open(jd_file, 'w', encoding='utf-8') as f:
-                        json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+                        json.dump({
+                            "company": extracted_company,
+                            "job_title": extracted_title,
+                            "extracted_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                            "length_chars": len(jd_text or ""),
+                            "job_url": None,
+                            "text": jd_text or ""
+                        }, f, ensure_ascii=False, indent=2)
                     logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
                     
-                    # Extract and save job metadata
-                    job_metadata = await extract_job_metadata(jd_text)
-                    if job_metadata:
-                        # Save with timestamped, company-specific filename
-                        job_info_file = company_dir / f"job_info_{company_name}_{timestamp}.json"
-                        with open(job_info_file, 'w', encoding='utf-8') as f:
-                            json.dump(job_metadata, f, indent=2, ensure_ascii=False)
-                        logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
+                    # Save job info in the full expected schema (fill unknowns with null)
+                    job_info_file = company_dir / f"job_info_{company_name}_{timestamp}.json"
+                    job_info_full = {
+                        "company_name": extracted_company,
+                        "job_title": extracted_title,
+                        "location": None,
+                        "experience_required": None,
+                        "seniority_level": None,
+                        "industry": None,
+                        "phone_number": None,
+                        "email": None,
+                        "website": None,
+                        "work_type": None,
+                        "extracted_at": datetime.now().isoformat(),
+                        "job_url": None
+                    }
+                    with open(job_info_file, 'w', encoding='utf-8') as f:
+                        json.dump(job_info_full, f, indent=2, ensure_ascii=False)
+                    logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
                 else:
                     logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
                 

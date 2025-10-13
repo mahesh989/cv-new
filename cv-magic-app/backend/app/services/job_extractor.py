@@ -27,29 +27,58 @@ async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
         3. Return result in JSON format with exactly these keys: "job_title" and "company"
         4. If you cannot find either piece of information, return null for that field
         5. Be precise and extract only the actual job title and company name, not additional descriptive text
+        6. RETURN ONLY THE JSON OBJECT - NO markdown, NO explanations, NO code blocks
         
-        JOB TITLE EXTRACTION PRIORITY:
-        - Look for the MAIN job title in the header/title section (usually at the top)
-        - Common patterns: "Data Analytics Officer", "Business Analyst", "Software Engineer", "Marketing Manager"
-        - Look for titles with specific roles like "Officer", "Analyst", "Manager", "Engineer", "Specialist", "Coordinator"
-        - Avoid generic terms like "Manager" if a more specific title exists (e.g., "Data Analytics Officer" not just "Manager")
-        - If multiple titles appear, choose the most specific and relevant one
-        - Examples: "Data Analytics Officer - Foodbank" → extract "Data Analytics Officer"
+        JOB TITLE EXTRACTION:
+        - Look for the MAIN job title throughout the ENTIRE text
+        - Job titles can appear anywhere: at the top, in headers, after "Position:", "Role:", "Job Title:", or in the body
+        - Common patterns: "Data Entry Officer", "Business Analyst", "Software Engineer", "Marketing Manager"
+        - Look for titles with specific roles like "Officer", "Analyst", "Manager", "Engineer", "Specialist", "Coordinator", "Clerk", "Administrator", "Developer", "Designer"
+        - Avoid generic terms like "Manager" alone if a more specific title exists (e.g., "Data Analytics Officer" not just "Manager")
+        - If multiple titles appear, choose the most specific and prominent one
+        - Examples: 
+          * "Data Entry Officer" from "Data Entry Officer\nFull-time\nHOBAN Recruitment"
+          * "Senior Software Engineer" from "Position: Senior Software Engineer"
+          * "Marketing Coordinator" from "We are hiring a Marketing Coordinator to join our team"
         
-        COMPANY NAME EXTRACTION PRIORITY:
-        - If this is a recruitment agency posting (look for "Reference Number:", "Robert Half", "Hays", "Randstad", "Adecco", "Manpower", "Michael Page", "Hudson", "Chandler Macleod", "SEEK", privacy notices, "express consent"), extract the RECRUITMENT AGENCY NAME
-        - If it's a direct company posting, extract the hiring company name
-        - Look for company names in headers, contact info, email domains, or website URLs
-        - Avoid generic terms like "Company", "Organization", "Client"
+        COMPANY NAME EXTRACTION:
+        - **RECRUITMENT AGENCY DETECTION**:
+          * If this is a recruitment agency posting, extract the RECRUITMENT AGENCY NAME, NOT the client company
+          * Recruitment agencies often have these characteristics:
+            - Company name contains words like "Recruitment", "Recruiter", "Staffing", "Personnel", "Consulting", "Solutions", "Group", "Resources"
+            - Mentions "Reference Number:", "Job Reference:", "Job ID:"
+            - Has privacy notices, terms about "express consent", data handling
+            - Generic language like "our client", "a leading company", "well-known organization"
+            - Professional recruiter tone with structured application processes
+          * Look for the agency name anywhere in the text: header, footer, contact section, "About us", email signatures
+          * Examples: 
+            - "HOBAN Recruitment" from anywhere in the text
+            - "Robert Half" from "Apply through Robert Half"
+            - "Hays" from "Contact: jobs@hays.com.au"
+        
+        - **DIRECT COMPANY POSTING**:
+          * If NOT a recruitment agency, extract the actual hiring company name
+          * Look throughout the entire text: headers, "About [Company]", "Join [Company]", contact info, email domains, website URLs
+          * Company names are often in:
+            - "About us" or "About the company" sections
+            - Email domains (e.g., jobs@company.com → "Company")
+            - Website URLs (e.g., www.company.com → "Company")
+            - "Join our team at [Company]"
+            - After the job title (e.g., "Engineer - TechCorp")
+          * Avoid generic terms like "Company", "Organization", "Client", "Employer", "warehouse", "sales", "team"
+        
+        - **IMPORTANT**: Scan the ENTIRE text, not just the beginning. Company names can appear anywhere.
         
         Job Description:
+        ```
         {job_description}
+        ```
         
-        Return ONLY a JSON object in this exact format:
+        Return ONLY this JSON object with NO additional text:
         {{"job_title": "actual job title or null", "company": "actual company name or null"}}
         """
         
-        # Create a mock user for AI extraction (since we don't have user context in this function)
+        # Create a mock user for AI extraction
         from app.models.auth import UserData
         from datetime import datetime, timezone
         mock_user = UserData(
@@ -65,117 +94,68 @@ async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
             prompt=prompt,
             user=mock_user,
             temperature=0.0,
-            max_tokens=200
+            max_tokens=300
         )
         
-        # Try to parse the JSON response
-        try:
-            # Clean the response text
+        # Clean and parse the AI response
+        result_text = result_text.strip()
+        
+        # Remove markdown code blocks if present
+        if result_text.startswith('```'):
+            # Remove opening code block
+            result_text = re.sub(r'^```(?:json)?\s*\n?', '', result_text)
+            # Remove closing code block
+            result_text = re.sub(r'\n?```\s*$', '', result_text)
             result_text = result_text.strip()
-            
-            # Remove any markdown formatting if present
-            if result_text.startswith('```json'):
-                result_text = result_text[7:]
-            if result_text.endswith('```'):
-                result_text = result_text[:-3]
-            
-            result_text = result_text.strip()
-            
-            # Parse JSON
-            result = json.loads(result_text)
-            
-            # Validate the result structure
-            if not isinstance(result, dict):
-                raise ValueError("Response is not a dictionary")
-            
-            # Ensure required keys exist
-            if "job_title" not in result:
-                result["job_title"] = None
-            if "company" not in result:
-                result["company"] = None
-                
-            return result
-            
-        except (json.JSONDecodeError, ValueError) as parse_error:
-            # Fallback: try to extract using regex patterns
-            return extract_job_info_fallback(job_description)
-            
-    except Exception as e:
-        return {"error": f"Failed to extract job metadata: {str(e)}"}
-
-
-def extract_job_info_fallback(job_description: str) -> Dict[str, Any]:
-    """
-    Fallback method to extract job information using regex patterns.
-    
-    Args:
-        job_description: The job description text
         
-    Returns:
-        Dictionary containing extracted metadata
-    """
-    job_title = None
-    company = None
-    
-    try:
-        # Common patterns for job titles (prioritize specific titles over generic ones)
-        title_patterns = [
-            # Specific job title patterns (highest priority) - look for titles at the beginning of lines
-            r'^([A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff))\s*[-–]',
-            r'^([A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff))\s*$',
-            
-            # Look for job titles in the first few lines
-            r'([A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff))\s*[-–]',
-            
-            # Standard patterns
-            r'(?:Job\s+Title|Position|Role):\s*([^\n\r]+)',
-            r'(?:We\s+are\s+looking\s+for\s+a\s+)([^\n\r]+)',
-            r'(?:Seeking\s+a\s+)([^\n\r]+)',
-            r'(?:Hiring\s+for\s+)([^\n\r]+)',
-            
-            # Generic fallback patterns (lowest priority)
-            r'([A-Z][a-zA-Z\s]+(?:Manager|Analyst|Engineer|Developer|Designer|Consultant|Specialist|Coordinator|Officer|Director|Lead|Senior|Junior|Principal|Staff))',
-        ]
+        # Try to find JSON object in the response
+        json_match = re.search(r'\{[^{}]*\}', result_text)
+        if json_match:
+            result_text = json_match.group(0)
         
-        for pattern in title_patterns:
-            match = re.search(pattern, job_description, re.IGNORECASE)
-            if match:
-                job_title = match.group(1).strip()
-                break
+        # Parse JSON
+        result = json.loads(result_text)
         
-        # Common patterns for company names (prioritize recruitment agencies)
-        company_patterns = [
-            # Recruitment agency patterns (highest priority)
-            r'(?:Reference Number:.*?)([A-Z][a-zA-Z\s&.-]+?)(?:\s+privacy|\s+recruitment|$)',
-            r'(?:By clicking \'apply\', you give your express consent that )([A-Z][a-zA-Z\s&.-]+?)(?:\s+may use)',
-            r'(?:Robert Half|Hays|Randstad|Adecco|Manpower|Michael Page|Hudson|Chandler Macleod|SEEK|Cause Recruitment)',
-            
-            # Look for company names after job title (common pattern)
-            r'[A-Z][a-zA-Z\s]+(?:Officer|Analyst|Engineer|Manager|Specialist|Coordinator|Consultant|Developer|Designer|Architect|Director|Lead|Senior|Junior|Principal|Staff)\s*[-–]\s*([A-Z][a-zA-Z\s&.-]+?)\s*[-–]',
-            
-            # Standard company patterns
-            r'(?:Company|Organization|Employer):\s*([^\n\r]+)',
-            r'(?:About\s+)([^\n\r]+?)(?:\s+is\s+looking|\s+seeks|\s+hires)',
-            r'(?:at\s+)([^\n\r]+?)(?:\s+we\s+are|\s+is\s+seeking)',
-        ]
+        # Validate the result structure
+        if not isinstance(result, dict):
+            return {
+                "error": "AI returned invalid format",
+                "job_title": None,
+                "company": None
+            }
         
-        for pattern in company_patterns:
-            match = re.search(pattern, job_description, re.IGNORECASE)
-            if match:
-                # Handle patterns with and without capture groups
-                if match.groups():
-                    company = match.group(1).strip()
-                else:
-                    company = match.group(0).strip()
-                break
+        # Ensure required keys exist
+        job_title = result.get("job_title")
+        company = result.get("company")
+        
+        # Additional validation: reject obviously wrong extractions
+        if company and company.lower() in ['company', 'organization', 'client', 'employer', 'warehouse', 'sales', 'marketing', 'unknown']:
+            company = None
+        
+        if job_title and job_title.lower() in ['position', 'role', 'opportunity', 'job', 'unknown']:
+            job_title = None
         
         return {
             "job_title": job_title,
             "company": company
         }
-        
+            
+    except json.JSONDecodeError as e:
+        return {
+            "error": f"AI returned invalid JSON: {str(e)}",
+            "raw_response": result_text[:500] if 'result_text' in locals() else "N/A",
+            "job_title": None,
+            "company": None
+        }
     except Exception as e:
-        return {"error": f"Fallback extraction failed: {str(e)}"}
+        return {
+            "error": f"Failed to extract job metadata: {str(e)}",
+            "job_title": None,
+            "company": None
+        }
+
+
+# (Removed) extract_job_info_fallback: no longer used; AI-only extraction is enforced.
 
 
 
