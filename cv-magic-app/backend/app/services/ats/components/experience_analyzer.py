@@ -10,7 +10,7 @@ import re
 from typing import Dict, Any
 
 from app.ai.ai_service import ai_service
-from prompt.ats_experience_prompt import EXPERIENCE_ALIGNMENT_PROMPT
+from app.prompt.ats_experience_prompt import EXPERIENCE_ALIGNMENT_PROMPT
 from .standardized_config import STANDARD_AI_PARAMS, validate_analysis_result
 
 logger = logging.getLogger(__name__)

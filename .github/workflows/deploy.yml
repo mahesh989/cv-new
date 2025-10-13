@@ -1,0 +1,46 @@
+name: Deploy to GitHub Pages
+# Try-2: Updated deployment workflow
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.1'
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ./cv-magic-app/mobile_app
+        
+      - name: Debug Flutter environment
+        run: |
+          flutter --version
+          flutter doctor
+        working-directory: ./cv-magic-app/mobile_app
+        
+      - name: Build Flutter web app
+        run: flutter build web --release --base-href="/cv-new/" --web-renderer html
+        working-directory: ./cv-magic-app/mobile_app
+        env:
+          FLUTTER_WEB_USE_SKIA: false
+        
+      - name: Create deployment directory
+        run: |
+          # Create a temporary deployment directory
+          mkdir -p deployment
+          cp -r cv-magic-app/mobile_app/build/web/* deployment/
+          # Create CNAME file for GitHub Pages (empty for project pages)
+          echo "" > deployment/CNAME
+          
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deployment
