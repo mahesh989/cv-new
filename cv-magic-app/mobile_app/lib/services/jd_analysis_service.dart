@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import '../core/config/app_config.dart';
 
 class JDAnalysisService {
-  static const String baseUrl = AppConfig.baseUrl; // Configured backend URL
+  static const String baseUrl =
+      'https://cvagent.duckdns.org'; // Update with your backend URL
 
   // Authentication token - you'll need to implement proper auth
   String? _authToken;

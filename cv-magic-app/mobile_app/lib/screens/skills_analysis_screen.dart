@@ -406,7 +406,7 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
     try {
       // Use the company name from the backend's preliminary analysis result if available
       String company;
-      if (_controller.result?.preextractedCompanyName != null &&
+      if (_controller.result?.preextractedCompanyName != null && 
           _controller.result!.preextractedCompanyName!.isNotEmpty) {
         company = _controller.result!.preextractedCompanyName!;
         print('🔄 [RERUN] Using backend-extracted company name: $company');

@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/ai_model.dart';
-import '../core/config/app_config.dart';
 
 class AIModelService extends ChangeNotifier {
   static final AIModelService _instance = AIModelService._internal();
@@ -235,7 +234,7 @@ class AIModelService extends ChangeNotifier {
       debugPrint('🔄 Syncing model: $modelId -> $provider/$apiModelName');
 
       final response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/api/ai/switch-model'),
+        Uri.parse('https://cvagent.duckdns.org/api/ai/switch-model'),
         headers: headers,
         body: jsonEncode({
           'model': apiModelName,
@@ -272,7 +271,7 @@ class AIModelService extends ChangeNotifier {
 
       // Get API key status to check if user has configured any API keys
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl}/api/api-keys/status'),
+        Uri.parse('https://cvagent.duckdns.org/api/api-keys/status'),
         headers: headers,
       );
 

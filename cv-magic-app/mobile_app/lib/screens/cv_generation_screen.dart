@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'dart:async';
 import '../core/theme/app_theme.dart';
 import '../services/results_clearing_service.dart';
-import '../core/config/app_config.dart';
 
 class CVGenerationScreen extends StatefulWidget {
   final VoidCallback? onNavigateToCVMagic;
@@ -130,7 +129,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
       // First, get the list of available companies to find the latest CV
       final companiesResponse = await http.get(
         Uri.parse(
-            '${AppConfig.baseUrl}/api/tailored-cv/available-companies-real'),
+            'https://cvagent.duckdns.org/api/tailored-cv/available-companies-real'),
         headers: headers,
       );
 
@@ -157,7 +156,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         // Now get the content for this company
         final response = await http.get(
           Uri.parse(
-              '${AppConfig.baseUrl}/api/tailored-cv/content/$companyName'),
+              'https://cvagent.duckdns.org/api/tailored-cv/content/$companyName'),
           headers: headers,
         );
 
@@ -618,7 +617,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
       final token = prefs.getString('auth_token');
 
       final response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/api/tailored-cv/save-edited'),
+        Uri.parse('https://cvagent.duckdns.org/api/tailored-cv/save-edited'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
@@ -708,7 +707,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     try {
       final response = await http.post(
         Uri.parse(
-            '${AppConfig.baseUrl}/api/tailored-cv/save-additional-prompt'),
+            'https://cvagent.duckdns.org/api/tailored-cv/save-additional-prompt'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'company': _currentCompany,

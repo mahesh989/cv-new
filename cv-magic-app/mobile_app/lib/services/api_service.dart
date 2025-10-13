@@ -3,10 +3,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
-import '../core/config/app_config.dart';
 
 class APIService {
-  static const String baseUrl = AppConfig.baseUrl;
+  static const String baseUrl = 'https://cvagent.duckdns.org';
   static const String apiPrefix = '/api';
 
   // Get the current selected model from AI service

@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/config/app_config.dart';
 
 class SavedJobsService {
   static String get _savedJobsPath {
@@ -65,8 +64,8 @@ class SavedJobsService {
     try {
       debugPrint('🌐 [SAVED_JOBS] Loading from API...');
 
-      // Use configured base URL
-      const baseUrl = AppConfig.baseUrl;
+      // Use localhost for development
+      const baseUrl = 'https://cvagent.duckdns.org';
 
       // Add timeout to prevent hanging during analysis
       final prefs = await SharedPreferences.getInstance();
