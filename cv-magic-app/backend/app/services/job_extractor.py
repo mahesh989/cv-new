@@ -28,6 +28,12 @@ async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
         4. If you cannot find either piece of information, return null for that field
         5. Be precise and extract only the actual job title and company name, not additional descriptive text
         
+        COMPANY NAME EXTRACTION PRIORITY:
+        - If this is a recruitment agency posting (look for "Reference Number:", "Robert Half", "Hays", "Randstad", "Adecco", "Manpower", "Michael Page", "Hudson", "Chandler Macleod", "SEEK", privacy notices, "express consent"), extract the RECRUITMENT AGENCY NAME
+        - If it's a direct company posting, extract the hiring company name
+        - Look for company names in headers, contact info, email domains, or website URLs
+        - Avoid generic terms like "Company", "Organization", "Client"
+        
         Job Description:
         {job_description}
         
@@ -106,8 +112,14 @@ def extract_job_info_fallback(job_description: str) -> Dict[str, Any]:
                 job_title = match.group(1).strip()
                 break
         
-        # Common patterns for company names
+        # Common patterns for company names (prioritize recruitment agencies)
         company_patterns = [
+            # Recruitment agency patterns (highest priority)
+            r'(?:Reference Number:.*?)([A-Z][a-zA-Z\s&.-]+?)(?:\s+privacy|\s+recruitment|$)',
+            r'(?:By clicking \'apply\', you give your express consent that )([A-Z][a-zA-Z\s&.-]+?)(?:\s+may use)',
+            r'(?:Robert Half|Hays|Randstad|Adecco|Manpower|Michael Page|Hudson|Chandler Macleod|SEEK)',
+            
+            # Standard company patterns
             r'(?:Company|Organization|Employer):\s*([^\n\r]+)',
             r'(?:About\s+)([^\n\r]+?)(?:\s+is\s+looking|\s+seeks|\s+hires)',
             r'(?:at\s+)([^\n\r]+?)(?:\s+we\s+are|\s+is\s+seeking)',

@@ -28,11 +28,25 @@ class OpenAIProvider(BaseAIProvider):
     def _validate_api_key(self) -> bool:
         """Validate if the API key is working"""
         try:
-            # Try to list models as a test
-            self.client.models.list()
+            # Check if API key format is correct
+            if not self.api_key or not self.api_key.startswith('sk-'):
+                logger.error("OpenAI API key format is invalid")
+                return False
+            
+            # Try a simple API call to validate the key
+            # Use a lightweight endpoint instead of models.list()
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "test"}],
+                max_tokens=1
+            )
             return True
         except Exception as e:
             logger.error(f"OpenAI API key validation failed: {e}")
+            # Log more specific error information
+            if hasattr(e, 'response') and e.response:
+                logger.error(f"HTTP Status: {e.response.status_code}")
+                logger.error(f"Response: {e.response.text}")
             return False
     
     async def generate_response(
