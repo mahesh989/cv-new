@@ -8949,7 +8949,7 @@ r=q.h(a,"soft_skills")
 r=A.cW(r==null?[]:r,!0,s)
 q=q.h(a,"domain_keywords")
 return new A.tF(p,r,A.cW(q==null?[]:q,!0,s))},
-Tf(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q){return new A.Fd(f,m,e,l,i,j,b,h,k,g,o,n,d,c,a,q,p)},
+Tf(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r){return new A.Fd(g,n,f,m,j,k,b,i,l,h,p,o,d,e,c,a,r,q)},
 aP5(b6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3="   Keys in JSON: ",a4="cv_comprehensive_analysis",a5="jd_comprehensive_analysis",a6="expandable_analysis",a7="analyze_match",a8=null,a9="raw_analysis",b0="company_name",b1="preextracted_skills_comparison",b2="component_analysis",b3="ats_score",b4="ai_recommendation",b5="extracted_keywords"
 A.B().$1("\ud83d\udd0d [MODEL_DEBUG] Parsing SkillsAnalysisResult from JSON")
 s=J.dz(b6)
@@ -9011,9 +9011,9 @@ A.B().$1("   Fallback extracted CV skills: "+a1.got())}r=s.h(b6,"jd_skills")
 a2=A.aP6(r==null?A.x(t.N,t.z):r)
 if(a2.gac(0)&&!m&&B.c.au(o).length!==0){A.B().$1("\ud83d\udd27 [MODEL_DEBUG] jd_skills is empty, attempting fallback extraction from comprehensive analysis")
 a2=A.aP7(o)
-A.B().$1("   Fallback extracted JD skills: "+a2.got())}return A.Tf(b,i,c,d,p,a1,a8,B.B,q,s.h(b6,b5)!=null?A.cW(s.h(b6,b5),!0,t.N):a8,!0,o,a2,f,g,a0,a)},
+A.B().$1("   Fallback extracted JD skills: "+a2.got())}return A.Tf(b,i,c,e,d,p,a1,a8,B.B,q,s.h(b6,b5)!=null?A.cW(s.h(b6,b5),!0,t.N):a8,!0,o,a2,f,g,a0,a)},
 Fe(a){var s=null,r=t.s
-return A.Tf(s,s,s,s,s,new A.tF(A.a([],r),A.a([],r),A.a([],r)),a,B.B,s,s,!1,s,new A.tF(A.a([],r),A.a([],r),A.a([],r)),s,s,s,s)},
+return A.Tf(s,s,s,s,s,s,new A.tF(A.a([],r),A.a([],r),A.a([],r)),a,B.B,s,s,!1,s,new A.tF(A.a([],r),A.a([],r),A.a([],r)),s,s,s,s)},
 aLb(a0){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c=null,b=J.a6(a0),a=A.bn(b.h(a0,"timestamp"))
 if(a==null)a=""
 s=A.iV(b.h(a0,"final_ats_score"))
@@ -9093,7 +9093,7 @@ return new A.zQ(r,A.bn(s.h(a,"generated_at")),t.nA.a(s.h(a,"model_info")))},
 tF:function tF(a,b,c){this.a=a
 this.b=b
 this.c=c},
-Fd:function Fd(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q){var _=this
+Fd:function Fd(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r){var _=this
 _.a=a
 _.b=b
 _.c=c
@@ -9110,7 +9110,8 @@ _.as=m
 _.at=n
 _.ax=o
 _.ay=p
-_.ch=q},
+_.ch=q
+_.CW=r},
 a5g:function a5g(a,b,c,d){var _=this
 _.a=a
 _.b=b
@@ -31740,7 +31741,7 @@ a4=i.f
 a5=i.r
 a6=A.dm(n.gM_(),0,0)
 a7=i.z
-h=A.Tf(null,a5,null,null,a1,b,null,a6,a3,a4,!0,a2,a0,i.Q,a7,null,null)
+h=A.Tf(null,a5,null,null,null,a1,b,null,a6,a3,a4,!0,a2,a0,i.Q,a7,null,null)
 A.S("\ud83d\udd0d [SERVICE_DEBUG] Final result analyzeMatch: "+(h.r!=null))
 if(h.r!=null)A.S("\ud83d\udd0d [SERVICE_DEBUG] Final result analyzeMatch raw analysis length: "+h.r.a.length)
 q=h
@@ -50262,7 +50263,7 @@ s=s==null?null:s.b
 s=s==null?null:s.got()
 return s==null?0:s},
 gML(){var s=this.a
-return(s==null?null:s.at)!=null},
+return(s==null?null:s.ax)!=null},
 X5(a,b){var s=this.ax
 if(s!=null)s.$2$isError(a,b)},
 fj(a){return this.X5(a,!1)},
@@ -50336,7 +50337,7 @@ aq8(a){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e
 var $async$pi=A.q(function(b,c){if(b===1){o=c
 s=p}while(true)switch(s){case 0:A.S("\ud83d\udd0d [AI_REC] Fetching for company: "+a+", loading: "+n.Q+", results: "+n.as)
 if(n.as){g=n.a
-g=(g==null?null:g.ax)!=null}else g=!1
+g=(g==null?null:g.ay)!=null}else g=!1
 if(g){A.S("\u2139\ufe0f [AI_REC] Recommendations already present; skipping fetch")
 s=1
 break}n.Q=!0
@@ -50448,7 +50449,7 @@ q=k.c
 p=k.d
 o=k.e
 n=k.f
-m.a=A.Tf(l,l,l,l,q,s,l,k.w,o,n,!0,p,r,l,l,l,l)
+m.a=A.Tf(l,l,l,l,l,q,s,l,k.w,o,n,!0,p,r,l,l,l,l)
 m.pd(B.bY)
 m.fj("\u2705 Skills extracted! Found "+m.r.a.got()+" CV skills and "+m.r.b.got()+" JD skills.")
 k=m.r
@@ -50460,20 +50461,22 @@ A.ch(A.dm(0,0,10),new A.aoR(m))}else if((s?l:k.z)!=null){m.x=!0
 m.a3()
 m.fj(u.P)
 A.ch(A.dm(0,0,10),new A.aoS(m))}},
-vX(){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e,d,c
-var $async$vX=A.q(function(a,b){if(a===1){o=b
-s=p}while(true)switch(s){case 0:e=n.r
-d=e==null?null:e.Q
-if(d==null||J.aQ(d)===0){e=n.r
-d=e==null?null:e.Q}if(d==null||J.zO(d).length===0){A.S("\u274c [POLLING] No company name found for polling")
+vX(){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e,d,c,b
+var $async$vX=A.q(function(a,a0){if(a===1){o=a0
+s=p}while(true)switch(s){case 0:d=n.r
+c=d==null?null:d.Q
+if((c==null||J.aQ(c)===0)&&n.r!=null){h=n.r.as
+if(h!=null&&h.length!==0){c=h
+A.S("\ud83d\udd04 [POLLING] Using top-level company name from backend: "+A.c(c))}}if(c==null||J.zO(c).length===0){A.S("\u274c [POLLING] No company name found for polling")
 n.vg()
 s=1
-break}A.S(u.W)
+break}A.S("\ud83d\udd04 [POLLING] Using company name for polling: "+A.c(c))
+A.S(u.W)
 n.fj("\ud83d\udd27 Running advanced analysis (component analysis & ATS calculation)...")
 p=4
 s=7
-return A.p(A.Th(d),$async$vX)
-case 7:m=b
+return A.p(A.Th(c),$async$vX)
+case 7:m=a0
 if(m!=null){A.S("\u2705 [POLLING] Complete results obtained!")
 l=null
 if(J.T(m,"component_analysis")!=null){l=A.aLI(J.T(m,"component_analysis"))
@@ -50481,10 +50484,10 @@ A.S("\ud83d\udcca [POLLING] Component analysis parsed: "+l.b.a+" scores")}k=null
 if(J.T(m,"ats_score")!=null){k=A.aLb(J.T(m,"ats_score"))
 A.S("\ud83c\udfaf [POLLING] ATS result parsed: "+A.c(k.b))}j=null
 if(J.T(m,"ai_recommendation")!=null){j=A.aGZ(J.T(m,"ai_recommendation"))
-A.S("\ud83e\udd16 [POLLING] AI recommendation parsed: "+j.a.length+" chars")}e=n.r
-h=l
-g=k
-n.r=e.atH(j,g,h)
+A.S("\ud83e\udd16 [POLLING] AI recommendation parsed: "+j.a.length+" chars")}d=n.r
+g=l
+f=k
+n.r=d.atH(j,f,g)
 if(j!=null&&!n.as)A.S("\u2705 [POLLING] AI recommendation available, storing for later display")
 n.a=n.a.atf(l)
 n.a3()
@@ -50496,8 +50499,8 @@ n.vg()}p=2
 s=6
 break
 case 4:p=3
-c=o
-i=A.Y(c)
+b=o
+i=A.Y(b)
 A.S("\u274c [POLLING] Error during polling: "+A.c(i))
 n.fj("\u26a0\ufe0f Advanced analysis failed - basic analysis complete")
 n.vg()
@@ -50559,21 +50562,21 @@ $0(){var s,r,q=this.a
 q.z=!0
 r=q.a
 r.toString
-q.a=r.ate(q.r.at)
+q.a=r.ate(q.r.ax)
 q.a3()
-s=q.r.at
+s=q.r.ax
 if(s!=null)q.fj("\ud83c\udfaf ATS Score: "+B.d.ab(s.b,1)+"/100 ("+s.c+")")
 else q.fj("\u2705 ATS Analysis completed!")
 A.ch(A.dm(0,0,2),new A.aoN(q))},
 $S:0}
 A.aoN.prototype={
 $0(){var s=this.a,r=s.r
-if((r==null?null:r.ax)!=null&&!s.as){A.S("\u2705 [ATS_COMPLETE] Now showing AI recommendations after ATS score")
+if((r==null?null:r.ay)!=null&&!s.as){A.S("\u2705 [ATS_COMPLETE] Now showing AI recommendations after ATS score")
 s.Q=!1
 s.as=!0
 r=s.a
 r.toString
-s.a=r.px(s.r.ax)
+s.a=r.px(s.r.ay)
 s.a3()
 s.fj("\ud83e\udd16 AI recommendations are ready!")}s.vg()},
 $S:0}
@@ -50723,15 +50726,15 @@ dq(){var s,r,q,p,o=this,n=null,m=o.a.dq(),l=o.b.dq(),k=o.r
 k=k==null?n:k.dq()
 s=o.z
 s=s==null?n:A.a2(["raw_output",s,"company_name",o.Q],t.N,t.T)
-r=o.as
+r=o.at
 r=r==null?n:r.dq()
-q=o.at
+q=o.ax
 q=q==null?n:q.dq()
-p=o.ax
+p=o.ay
 p=p==null?n:p.dq()
-return A.a2(["cv_skills",m,"jd_skills",l,"cv_comprehensive_analysis",o.c,"jd_comprehensive_analysis",o.d,"expandable_analysis",o.e,"extracted_keywords",o.f,"analyze_match",k,"is_success",o.x,"error_message",o.y,"preextracted_skills_comparison",s,"component_analysis",r,"ats_score",q,"ai_recommendation",p,"warnings",o.ay,"suggestions",o.ch],t.N,t.z)},
-t2(a,b,c,d,e,f){var s=this,r=b==null?s.r:b,q=f==null?s.z:f,p=e==null?s.Q:e,o=d==null?s.as:d,n=c==null?s.at:c,m=a==null?s.ax:a
-return A.Tf(m,r,n,o,s.c,s.a,s.y,s.w,s.e,s.f,s.x,s.d,s.b,p,q,s.ch,s.ay)},
+return A.a2(["cv_skills",m,"jd_skills",l,"cv_comprehensive_analysis",o.c,"jd_comprehensive_analysis",o.d,"expandable_analysis",o.e,"extracted_keywords",o.f,"analyze_match",k,"is_success",o.x,"error_message",o.y,"preextracted_skills_comparison",s,"component_analysis",r,"ats_score",q,"ai_recommendation",p,"warnings",o.ch,"suggestions",o.CW],t.N,t.z)},
+t2(a,b,c,d,e,f){var s=this,r=b==null?s.r:b,q=f==null?s.z:f,p=e==null?s.Q:e,o=d==null?s.at:d,n=c==null?s.ax:c,m=a==null?s.ay:a
+return A.Tf(m,r,n,s.as,o,s.c,s.a,s.y,s.w,s.e,s.f,s.x,s.d,s.b,p,q,s.CW,s.ch)},
 a_a(a,b){var s=null
 return this.t2(s,s,s,s,a,b)},
 atH(a,b,c){return this.t2(a,null,b,c,null,null)},
@@ -53446,7 +53449,7 @@ A.Mb.prototype={
 G(a4){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1=this,a2=null,a3=a1.c
 if(!a3.gML())return B.ai
 a3=a3.a
-a3=a3==null?a2:a3.at
+a3=a3==null?a2:a3.ax
 a3.toString
 s=A.M(a4).p2.f
 r=t.p
@@ -54208,7 +54211,7 @@ q=A.bU(B.i8,1)
 p=t.p
 o=A.a([],p)
 n=s.a
-if((n==null?j:n.ay)!=null){n=n.ay
+if((n==null?j:n.ch)!=null){n=n.ch
 n.toString
 n=J.aL3(n,new A.ap_())}else n=!1
 if(n)o.push(new A.aG(B.Q,k.aby(),j))
@@ -54237,7 +54240,7 @@ return A.aw(j,A.aL(o,B.w,B.j,B.k),B.m,j,j,new A.am(B.dR,j,q,r,j,j,B.q),j,j,j,j,j
 aby(){var s,r,q,p,o,n,m,l,k,j,i,h,g=null
 try{m=this.c.a
 if(m==null)m=g
-else{m=m.ch
+else{m=m.CW
 m=m==null?g:J.T(m,"cv_enrichment")}t.nA.a(m)
 s=m==null?A.x(t.N,t.z):m
 m=J.T(s,"add_technical")
@@ -54412,18 +54415,18 @@ r=s.c
 A.B().$1("   showAIRecommendationLoading: "+r.Q)
 A.B().$1("   showAIRecommendationResults: "+r.as)
 q=r.a
-A.B().$1("   hasAIRecommendation: "+((q==null?o:q.ax)!=null))
+A.B().$1("   hasAIRecommendation: "+((q==null?o:q.ay)!=null))
 q=r.a
 if(q==null)q=o
-else{q=q.ax
+else{q=q.ay
 q=q==null?o:q.a.length}A.B().$1("   AI Recommendation content length: "+(q==null?0:q))
 q=r.a
 if(q==null)q=o
-else{q=q.ax
+else{q=q.ay
 q=q==null?o:B.c.au(q.a).length===0}A.B().$1("   AI Recommendation isEmpty: "+(q!==!1))
 if(r.Q){A.B().$1("\ud83c\udfaf [SKILLS_DISPLAY] Showing AI loading state")
 return new A.aG(B.fR,A.eD(A.aL(A.a([B.kS,B.aD,A.R("Loading AI recommendations...",o,o,o,o,A.bg(o,o,B.aQ,o,o,o,o,o,o,o,o,14,o,o,o,o,o,!0,o,o,o,o,o,o,o,o),o,o)],t.p),B.o,B.j,B.k),o,o),o)}if(r.as){r=r.a
-p=r==null?o:r.ax
+p=r==null?o:r.ay
 if(p==null){A.B().$1("\u274c [SKILLS_DISPLAY] AI recommendation is null but results flag is true")
 s=A.av(12)
 r=A.bU(B.lf,1)
