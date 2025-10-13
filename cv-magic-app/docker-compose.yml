@@ -8,6 +8,7 @@ services:
       - ./backend/.env
     environment:
       # Safe defaults if .env is missing; override in ./backend/.env
+      - PYTHONPATH=/app
       - HOST=0.0.0.0
       - PORT=8000
       - DEBUG=false
@@ -29,7 +30,6 @@ services:
       redis:
         condition: service_started
     volumes:
-      - backend_logs:/app
       - user_data:/app/user
     expose:
       - "8000"
@@ -70,4 +70,3 @@ volumes:
   pg_data:
   redis_data:
   user_data:
-  backend_logs:

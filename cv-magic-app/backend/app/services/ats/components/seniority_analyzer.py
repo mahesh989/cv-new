@@ -10,7 +10,7 @@ import re
 from typing import Dict, Any
 
 from app.ai.ai_service import ai_service
-from app.prompt.ats_seniority_prompt import ROLE_SENIORITY_PROMPT
+from prompt.ats_seniority_prompt import ROLE_SENIORITY_PROMPT
 from .standardized_config import STANDARD_AI_PARAMS, validate_analysis_result
 
 logger = logging.getLogger(__name__)

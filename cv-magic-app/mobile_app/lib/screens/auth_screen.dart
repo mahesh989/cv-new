@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme/app_theme.dart';
+import '../core/config/app_config.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -76,7 +77,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
     // Determine if this is login or registration based on tab index
     final isLogin = _tabController.index == 0;
-    final endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    final endpoint = isLogin ? '/auth/login' : '/auth/register';
     print(
         '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
 
@@ -213,7 +214,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       }
 
       // Call backend endpoint
-      final url = 'https://cvagent.duckdns.org$endpoint';
+      final url = '${AppConfig.baseUrl}/api$endpoint';
       print('🔵 [FRONTEND] Making HTTP request to: $url');
       print(
           '🔵 [FRONTEND] Request headers: {\'Content-Type\': \'application/json\'}');
@@ -354,7 +355,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       // Call backend login endpoint with Google user credentials
       final response = await http.post(
-        Uri.parse('https://cvagent.duckdns.org/api/auth/login'),
+        Uri.parse('${AppConfig.baseUrl}/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': 'demo@gmail.com',
