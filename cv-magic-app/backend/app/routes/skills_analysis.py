@@ -909,9 +909,9 @@ async def preliminary_analysis(
         # Get user email first for company name extraction
         user_email = getattr(token_data, 'email', None)
         
-        # Extract company name from JD text ONCE and use consistently throughout pipeline
+        # Extract company name from JD text to validate required files
         company_name = await _extract_company_name_from_jd(jd_text, user_email)
-        logger.info(f"🏢 [PIPELINE] Extracted company name ONCE: {company_name}")
+        logger.info(f"🏢 Extracted company name: {company_name}")
         
         # Validate required files exist before proceeding (non-blocking for preliminary flow)
         # In preliminary analysis, we can proceed even if JD hasn't been analyzed yet;
@@ -972,8 +972,7 @@ async def preliminary_analysis(
             config_name=config_name,
             user_id=user_id,
             user_email=user_email,
-            current_user=current_user,
-            company_name=company_name  # Pass the extracted company name
+            current_user=current_user
         )
         # Attach resolved company to result so frontend can poll consistently (no extra calls)
         try:
@@ -1037,41 +1036,19 @@ async def preliminary_analysis(
                     # Only save if no JD file exists
                     timestamp = TimestampUtils.get_timestamp()
                     jd_file = company_dir / f"jd_original_{timestamp}.json"
-                    # Extract minimal job metadata for schema population
-                    job_metadata = await extract_job_metadata(jd_text)
-                    extracted_company = (job_metadata or {}).get("company") if job_metadata else None
-                    extracted_title = (job_metadata or {}).get("job_title") if job_metadata else None
-                    # Save JD file in full expected schema
+                    # Save JD file
                     with open(jd_file, 'w', encoding='utf-8') as f:
-                        json.dump({
-                            "company": extracted_company,
-                            "job_title": extracted_title,
-                            "extracted_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                            "length_chars": len(jd_text or ""),
-                            "job_url": None,
-                            "text": jd_text or ""
-                        }, f, ensure_ascii=False, indent=2)
+                        json.dump({"text": jd_text or "", "saved_at": datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
                     logger.info(f"💾 [PIPELINE] (preliminary-analysis) JD JSON saved to: {jd_file}")
                     
-                    # Save job info in the full expected schema (fill unknowns with null)
-                    job_info_file = company_dir / f"job_info_{company_name}_{timestamp}.json"
-                    job_info_full = {
-                        "company_name": extracted_company,
-                        "job_title": extracted_title,
-                        "location": None,
-                        "experience_required": None,
-                        "seniority_level": None,
-                        "industry": None,
-                        "phone_number": None,
-                        "email": None,
-                        "website": None,
-                        "work_type": None,
-                        "extracted_at": datetime.now().isoformat(),
-                        "job_url": None
-                    }
-                    with open(job_info_file, 'w', encoding='utf-8') as f:
-                        json.dump(job_info_full, f, indent=2, ensure_ascii=False)
-                    logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
+                    # Extract and save job metadata
+                    job_metadata = await extract_job_metadata(jd_text)
+                    if job_metadata:
+                        # Save with timestamped, company-specific filename
+                        job_info_file = company_dir / f"job_info_{company_name}_{timestamp}.json"
+                        with open(job_info_file, 'w', encoding='utf-8') as f:
+                            json.dump(job_metadata, f, indent=2, ensure_ascii=False)
+                        logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
                 else:
                     logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
                 
@@ -2343,8 +2320,7 @@ async def perform_preliminary_skills_analysis(
     config_name: Optional[str] = None,
     user_id: int = 1,
     user_email: str = None,
-    current_user: Any = None,
-    company_name: str = None  # Add company_name parameter
+    current_user: Any = None
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
@@ -2532,17 +2508,9 @@ async def perform_preliminary_skills_analysis(
             try:
                 result_saver = SkillExtractionResultSaver(user_email=user_email)
                 
-                # Use the company name passed from the calling function (extracted once)
-                if not company_name or company_name == "Unknown_Company":
-                    # Only fallback if no company name was passed
-                    if logging_params["enable_detailed_logging"]:
-                        logger.warning(f"⚠️ [COMPANY_DETECTION] No valid company name provided, using fallback detection")
-                    company_name = None
-                else:
-                    if logging_params["enable_detailed_logging"]:
-                        logger.info(f"🏢 [COMPANY_DETECTION] Using provided company name: {company_name}")
-                
-                if file_params["auto_detect_company"] and not company_name:
+                # Get the company name from existing job info files (reuse already extracted company name)
+                company_name = None
+                if file_params["auto_detect_company"]:
                     try:
                         from pathlib import Path
                         from app.utils.user_path_utils import get_user_base_path
@@ -2663,17 +2631,12 @@ async def perform_preliminary_skills_analysis(
             
             # Save analyze match to the same file
             try:
-                # Use the company name passed from the calling function (extracted once)
+                # Ensure we have a valid company name before saving
                 if not company_name or company_name == "Unknown_Company":
-                    # Only fallback if no company name was passed
-                    if logging_params["enable_detailed_logging"]:
-                        logger.warning(f"⚠️ [ANALYZE_MATCH] No valid company name provided, using fallback")
-                    company_name = await _extract_company_name_from_jd(jd_text, user_email)
+                    # Fallback: try to extract company name from JD text if not found
+                    company_name = await _extract_company_name_from_jd(jd_text)
                     if logging_params["enable_detailed_logging"]:
                         logger.info(f"🏢 [ANALYZE_MATCH] Using fallback company name: {company_name}")
-                else:
-                    if logging_params["enable_detailed_logging"]:
-                        logger.info(f"🏢 [ANALYZE_MATCH] Using provided company name: {company_name}")
                 
                 # Final validation - ensure we have a valid company name
                 if company_name and company_name != "Unknown_Company" and not company_name.startswith("Unknown_Company_"):
