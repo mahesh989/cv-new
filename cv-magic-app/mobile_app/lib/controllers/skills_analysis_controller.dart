@@ -623,15 +623,24 @@ class SkillsAnalysisController extends ChangeNotifier {
   /// Start polling for component analysis and ATS calculation results
   void _startPollingForCompleteResults() async {
     String? company = _fullResult?.preextractedCompanyName;
-    // Robust fallback: use company provided by backend in preliminary-analysis model
-    if (company == null || company.isEmpty) {
-      company = _fullResult?.preextractedCompanyName;
+    
+    // Use the top-level company name from backend response if available
+    if ((company == null || company.isEmpty) && _fullResult != null) {
+      // Check if there's a top-level company name in the response
+      final topLevelCompany = _fullResult!.company;
+      if (topLevelCompany != null && topLevelCompany.isNotEmpty) {
+        company = topLevelCompany;
+        print('🔄 [POLLING] Using top-level company name from backend: $company');
+      }
     }
+    
     if (company == null || company.trim().isEmpty) {
       print('❌ [POLLING] No company name found for polling');
       _finishAnalysis();
       return;
     }
+    
+    print('🔄 [POLLING] Using company name for polling: $company');
 
     print('🔄 [POLLING] Starting polling for complete results...');
     _showNotification(

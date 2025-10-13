@@ -36,7 +36,7 @@ class AIRecommendationGenerator:
         # get_user_base_path already returns the per-user cv-analysis directory
         # Avoid duplicating "cv-analysis" in the path
         self.base_dir = get_user_base_path(user_email)
-        self.prompt_dir = Path("/Users/mahesh/Documents/Github/cv-new/cv-magic-app/backend/prompt")
+        self.prompt_dir = Path("/app/prompt")
     
     async def generate_ai_recommendation(self, company: str, force_regenerate: bool = False) -> bool:
         """

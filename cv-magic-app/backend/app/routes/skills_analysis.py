@@ -909,9 +909,9 @@ async def preliminary_analysis(
         # Get user email first for company name extraction
         user_email = getattr(token_data, 'email', None)
         
-        # Extract company name from JD text to validate required files
+        # Extract company name from JD text ONCE and use consistently throughout pipeline
         company_name = await _extract_company_name_from_jd(jd_text, user_email)
-        logger.info(f"🏢 Extracted company name: {company_name}")
+        logger.info(f"🏢 [PIPELINE] Extracted company name ONCE: {company_name}")
         
         # Validate required files exist before proceeding (non-blocking for preliminary flow)
         # In preliminary analysis, we can proceed even if JD hasn't been analyzed yet;
@@ -972,7 +972,8 @@ async def preliminary_analysis(
             config_name=config_name,
             user_id=user_id,
             user_email=user_email,
-            current_user=current_user
+            current_user=current_user,
+            company_name=company_name  # Pass the extracted company name
         )
         # Attach resolved company to result so frontend can poll consistently (no extra calls)
         try:
@@ -2320,7 +2321,8 @@ async def perform_preliminary_skills_analysis(
     config_name: Optional[str] = None,
     user_id: int = 1,
     user_email: str = None,
-    current_user: Any = None
+    current_user: Any = None,
+    company_name: str = None  # Add company_name parameter
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
@@ -2508,9 +2510,17 @@ async def perform_preliminary_skills_analysis(
             try:
                 result_saver = SkillExtractionResultSaver(user_email=user_email)
                 
-                # Get the company name from existing job info files (reuse already extracted company name)
-                company_name = None
-                if file_params["auto_detect_company"]:
+                # Use the company name passed from the calling function (extracted once)
+                if not company_name or company_name == "Unknown_Company":
+                    # Only fallback if no company name was passed
+                    if logging_params["enable_detailed_logging"]:
+                        logger.warning(f"⚠️ [COMPANY_DETECTION] No valid company name provided, using fallback detection")
+                    company_name = None
+                else:
+                    if logging_params["enable_detailed_logging"]:
+                        logger.info(f"🏢 [COMPANY_DETECTION] Using provided company name: {company_name}")
+                
+                if file_params["auto_detect_company"] and not company_name:
                     try:
                         from pathlib import Path
                         from app.utils.user_path_utils import get_user_base_path
@@ -2631,12 +2641,17 @@ async def perform_preliminary_skills_analysis(
             
             # Save analyze match to the same file
             try:
-                # Ensure we have a valid company name before saving
+                # Use the company name passed from the calling function (extracted once)
                 if not company_name or company_name == "Unknown_Company":
-                    # Fallback: try to extract company name from JD text if not found
-                    company_name = await _extract_company_name_from_jd(jd_text)
+                    # Only fallback if no company name was passed
+                    if logging_params["enable_detailed_logging"]:
+                        logger.warning(f"⚠️ [ANALYZE_MATCH] No valid company name provided, using fallback")
+                    company_name = await _extract_company_name_from_jd(jd_text, user_email)
                     if logging_params["enable_detailed_logging"]:
                         logger.info(f"🏢 [ANALYZE_MATCH] Using fallback company name: {company_name}")
+                else:
+                    if logging_params["enable_detailed_logging"]:
+                        logger.info(f"🏢 [ANALYZE_MATCH] Using provided company name: {company_name}")
                 
                 # Final validation - ensure we have a valid company name
                 if company_name and company_name != "Unknown_Company" and not company_name.startswith("Unknown_Company_"):

@@ -34,6 +34,15 @@ EXTRACTION GUIDELINES:
    - Examples: "Drive is Nine's brand" → extract "Nine Entertainment", not "Drive"
    - Examples: "Microsoft Azure team" → extract "Microsoft", not "Azure"
    - Examples: "Google Cloud division" → extract "Google", not "Google Cloud"
+   
+   **RECRUITMENT AGENCY DETECTION**:
+   - If job posting is from a recruitment agency, extract the AGENCY NAME, not the client company
+   - Look for indicators: "Reference Number:", "By clicking 'apply'", "Robert Half", "Hays", "Randstad", "Adecco", "Manpower", "Michael Page", "Hudson", "Chandler Macleod", "SEEK"
+   - Look for privacy notices, recruitment agency disclaimers, or "express consent" language
+   - If recruitment agency is detected, use the agency name as the company
+   - Examples: "Reference Number: 06800-0013310513" + "Robert Half privacy notice" → extract "Robert Half"
+   - Examples: "Hays Recruitment" mentioned → extract "Hays"
+   - Examples: "Randstad" in contact info → extract "Randstad"
 
 2. **Job Title**: Extract the actual job title/role
    - Look for patterns like "Senior Data Analyst", "Software Engineer", "Marketing Manager"
