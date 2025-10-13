@@ -50973,7 +50973,7 @@ a3=m.d
 a3===$&&A.b()
 a3=a3.d
 l=a3===0
-k=l?"/api/auth/login":"/api/auth/register"
+k=l?"/auth/login":"/auth/register"
 A.S("\ud83d\udd35 [FRONTEND] Tab index: "+a3+", isLogin: "+A.c(l)+", endpoint: "+A.c(k))
 p=4
 a3=m.f
@@ -51022,7 +51022,7 @@ a3=t.N
 a4=t.z
 if(l){g=A.a2(["email",j,"password",i],a3,a4)
 A.S("\ud83d\udd35 [FRONTEND] Login request body: "+A.c(g))}else{g=A.a2(["email",j,"password",i,"name",h],a3,a4)
-A.S("\ud83d\udd35 [FRONTEND] Registration request body: "+A.c(g))}f="https://cvagent.duckdns.org"+A.c(k)
+A.S("\ud83d\udd35 [FRONTEND] Registration request body: "+A.c(g))}f="https://cvagent.duckdns.org/api"+A.c(k)
 A.S("\ud83d\udd35 [FRONTEND] Making HTTP request to: "+A.c(f))
 A.S("\ud83d\udd35 [FRONTEND] Request headers: {'Content-Type': 'application/json'}")
 A.S("\ud83d\udd35 [FRONTEND] Request body: "+B.ag.mp(g,null))
