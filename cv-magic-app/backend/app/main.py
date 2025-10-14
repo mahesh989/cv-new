@@ -117,7 +117,7 @@ app.add_middleware(
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Current-Model"],
     expose_headers=["*"],  # Expose all headers
 )
 
@@ -130,7 +130,7 @@ async def auth_debug_middleware(request: Request, call_next):
         response = Response()
         response.headers["Access-Control-Allow-Origin"] = "https://mahesh989.github.io"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-        response.headers["Access-Control-Allow-Headers"] = "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, X-Requested-With"
+        response.headers["Access-Control-Allow-Headers"] = "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, X-Requested-With, X-Current-Model"
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Max-Age"] = "600"
         return response
