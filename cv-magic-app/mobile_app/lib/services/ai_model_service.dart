@@ -28,30 +28,40 @@ class AIModelService extends ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final savedModelId = prefs.getString(_selectedModelKey);
+      final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
 
-      if (savedModelId != null) {
-        final savedModel = AIModelsConfig.getModel(savedModelId);
-        if (savedModel != null) {
-          // Check if user has API keys configured before setting model
-          final hasApiKeys = await _checkApiKeyAvailability();
-          if (hasApiKeys) {
-            _currentModel = savedModel;
-            debugPrint('🤖 Loaded saved AI model: ${_currentModel!.name}');
+      if (isLoggedIn) {
+        // User is logged in, fetch configuration from backend
+        debugPrint(
+            '🔐 User is logged in, fetching AI configuration from backend');
+        await _fetchUserConfigurationFromBackend();
+      } else {
+        // User is not logged in, load from local storage (for offline mode)
+        final savedModelId = prefs.getString(_selectedModelKey);
+
+        if (savedModelId != null) {
+          final savedModel = AIModelsConfig.getModel(savedModelId);
+          if (savedModel != null) {
+            // Check if user has API keys configured before setting model
+            final hasApiKeys = await _checkApiKeyAvailability();
+            if (hasApiKeys) {
+              _currentModel = savedModel;
+              debugPrint('🤖 Loaded saved AI model: ${_currentModel!.name}');
+            } else {
+              debugPrint(
+                  '⚠️ Saved model found but no API keys configured, clearing model selection');
+              _currentModel = null;
+              // Clear the saved model since no API keys are available
+              await prefs.remove(_selectedModelKey);
+            }
           } else {
-            debugPrint(
-                '⚠️ Saved model found but no API keys configured, clearing model selection');
+            debugPrint('⚠️ Saved model not found, no default model available');
             _currentModel = null;
-            // Clear the saved model since no API keys are available
-            await prefs.remove(_selectedModelKey);
           }
         } else {
-          debugPrint('⚠️ Saved model not found, no default model available');
+          debugPrint('🤖 No saved model found, no default model available');
           _currentModel = null;
         }
-      } else {
-        debugPrint('🤖 No saved model found, no default model available');
-        _currentModel = null;
       }
     } catch (e) {
       debugPrint('❌ Error initializing AI model service: $e');
@@ -343,6 +353,9 @@ class AIModelService extends ChangeNotifier {
 
   // Sync with backend after authentication
   Future<void> syncAfterAuth() async {
+    // First, try to fetch user's saved configuration from backend
+    await _fetchUserConfigurationFromBackend();
+
     if (_currentModel == null) {
       debugPrint('⚠️ No AI model selected, skipping post-auth sync');
       return;
@@ -355,6 +368,100 @@ class AIModelService extends ChangeNotifier {
       debugPrint(
           '❌ Failed to sync AI model with backend after authentication: $e');
     }
+  }
+
+  // Fetch user's AI configuration from backend
+  Future<void> _fetchUserConfigurationFromBackend() async {
+    try {
+      // Get authentication token
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      if (token == null) {
+        debugPrint(
+            '🔐 No auth token available for fetching user configuration');
+        return;
+      }
+
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      // Get user's current model preference from backend
+      final response = await http.get(
+        Uri.parse('https://cvagent.duckdns.org/api/ai/current-model'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final currentModel = data['current_model'];
+        final provider = data['current_provider'];
+
+        if (currentModel && provider) {
+          // Map backend model name to frontend model ID
+          final frontendModelId = _getFrontendModelId(provider, currentModel);
+          if (frontendModelId != null) {
+            final model = AIModelsConfig.getModel(frontendModelId);
+            if (model != null) {
+              _currentModel = model;
+              // Save to local preferences
+              await prefs.setString(_selectedModelKey, frontendModelId);
+              debugPrint(
+                  '✅ Restored user AI configuration from backend: $provider/$currentModel');
+              notifyListeners();
+            }
+          }
+        } else {
+          debugPrint('🔍 No AI configuration found for user in backend');
+        }
+      } else if (response.statusCode == 404) {
+        debugPrint('🔍 No AI model configured for user in backend');
+      } else {
+        debugPrint(
+            '⚠️ Failed to fetch user AI configuration: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('❌ Error fetching user AI configuration from backend: $e');
+    }
+  }
+
+  // Map backend model name to frontend model ID
+  String? _getFrontendModelId(String provider, String backendModel) {
+    switch (provider.toLowerCase()) {
+      case 'openai':
+        switch (backendModel) {
+          case 'gpt-4o':
+            return 'gpt-4o';
+          case 'gpt-4o-mini':
+            return 'gpt-4o-mini';
+          case 'gpt-3.5-turbo':
+            return 'gpt-3.5-turbo';
+          case 'gpt-5-nano':
+            return 'gpt-5-nano';
+        }
+        break;
+      case 'anthropic':
+        switch (backendModel) {
+          case 'claude-3-5-sonnet-20241022':
+            return 'claude-3.5-sonnet';
+          case 'claude-3-5-haiku-20241022':
+            return 'claude-3-haiku';
+        }
+        break;
+      case 'deepseek':
+        switch (backendModel) {
+          case 'deepseek-chat':
+            return 'deepseek-chat';
+          case 'deepseek-coder':
+            return 'deepseek-coder';
+          case 'deepseek-reasoner':
+            return 'deepseek-reasoner';
+        }
+        break;
+    }
+    return null;
   }
 }
 

@@ -199,6 +199,45 @@ async def switch_provider(
         )
 
 
+@router.get("/current-model")
+async def get_current_model_config(
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Get the current AI model configuration for the authenticated user
+    """
+    try:
+        from app.services.user_model_service import user_model_service
+        from app.database import SessionLocal
+        
+        db = SessionLocal()
+        try:
+            # Get user's saved model preference
+            model_pref = user_model_service.get_user_model(db, str(current_user.id))
+            
+            if model_pref:
+                provider, model = model_pref
+                return {
+                    "current_provider": provider,
+                    "current_model": model,
+                    "has_configuration": True
+                }
+            else:
+                return {
+                    "current_provider": None,
+                    "current_model": None,
+                    "has_configuration": False
+                }
+        finally:
+            db.close()
+            
+    except Exception as e:
+        logger.error(f"Failed to get current model configuration for user {current_user.email}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve current model configuration"
+        )
+
 @router.post("/switch-model")
 async def switch_model(
     request: ModelSwitchRequest,

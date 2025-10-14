@@ -80,6 +80,30 @@ class _AIModelSelectorState extends State<AIModelSelector>
     }
   }
 
+  // Get the currently configured provider from the current model
+  String? _getCurrentConfiguredProvider() {
+    final aiModelService = Provider.of<AIModelService>(context, listen: false);
+    final currentModel = aiModelService.currentModel;
+    if (currentModel != null) {
+      return _getProviderFromModel(currentModel.id);
+    }
+    return null;
+  }
+
+  // Filter models to show only those from the configured provider
+  List<AIModel> _getFilteredModels(List<AIModel> allModels) {
+    final configuredProvider = _getCurrentConfiguredProvider();
+    if (configuredProvider == null) {
+      // No provider configured yet, return empty list
+      return [];
+    }
+
+    // Filter models to show only those from the configured provider
+    return allModels
+        .where((model) => _getProviderFromModel(model.id) == configuredProvider)
+        .toList();
+  }
+
   Future<void> _changeModel(String modelId) async {
     // No API key validation needed here - handled at provider level
     final aiModelService = Provider.of<AIModelService>(context, listen: false);
@@ -126,7 +150,10 @@ class _AIModelSelectorState extends State<AIModelSelector>
 
         final currentModel = aiModelService.currentModel;
         final allModels = aiModelService.getAllModels();
-        final recommendedModels = aiModelService.getRecommendedModels();
+        final filteredModels = _getFilteredModels(allModels);
+        final allRecommendedModels = aiModelService.getRecommendedModels();
+        final filteredRecommendedModels =
+            _getFilteredModels(allRecommendedModels);
 
         // If no model is selected, show selection prompt
         if (currentModel == null) {
@@ -184,10 +211,11 @@ class _AIModelSelectorState extends State<AIModelSelector>
                             const SizedBox(height: 16),
                             _buildProviderDropdown(),
                             const SizedBox(height: 16),
-                            _buildModelDropdown(allModels, currentModel.id),
+                            _buildModelDropdown(
+                                filteredModels, currentModel.id),
                             const SizedBox(height: 16),
                             _buildRecommendedModels(
-                                recommendedModels, currentModel.id),
+                                filteredRecommendedModels, currentModel.id),
                             const SizedBox(height: 16),
                             _buildModelInfo(),
                             const SizedBox(height: 16),
@@ -426,7 +454,8 @@ class _AIModelSelectorState extends State<AIModelSelector>
     ];
 
     return DropdownButtonFormField<String>(
-      value: _selectedProvider, // Use tracked provider
+      value: _getCurrentConfiguredProvider() ??
+          _selectedProvider, // Show configured provider or selected provider
       isExpanded: true,
       menuMaxHeight: 200,
       decoration: InputDecoration(
@@ -763,6 +792,18 @@ class _AIModelSelectorState extends State<AIModelSelector>
     if (provider == 'select') {
       print('🔍 [PROVIDER] Select option chosen, no action needed');
       return;
+    }
+
+    // Check if this is a different provider than currently configured
+    final currentConfiguredProvider = _getCurrentConfiguredProvider();
+    if (currentConfiguredProvider != null &&
+        currentConfiguredProvider != provider) {
+      // User is switching to a different provider, clear current model
+      print(
+          '🔄 [PROVIDER] Switching from $currentConfiguredProvider to $provider, clearing current model');
+      final aiModelService =
+          Provider.of<AIModelService>(context, listen: false);
+      await aiModelService.clearSelection();
     }
 
     // Always show API key dialog for any provider selection - same logic for all providers

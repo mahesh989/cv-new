@@ -123,6 +123,32 @@ class UserAPIKeyManager:
         """Check if API key exists for a user and provider"""
         return self.get_api_key(user, provider) is not None
     
+    def get_api_key_info(self, user: UserData, provider: str) -> Optional[UserAPIKey]:
+        """
+        Get API key info (including validation status) for a specific user and provider
+        
+        Args:
+            user: User data
+            provider: The AI provider
+            
+        Returns:
+            UserAPIKey object if found, None otherwise
+        """
+        try:
+            user_id = str(user.id)
+            
+            for db in get_database():
+                user_key = db.query(UserAPIKey).filter(
+                    UserAPIKey.user_id == user_id,
+                    UserAPIKey.provider == provider
+                ).first()
+                
+                return user_key
+                
+        except Exception as e:
+            logger.error(f"Failed to get API key info for user {user.email} and provider {provider}: {e}")
+            return None
+    
     def validate_api_key(self, user: UserData, provider: str, api_key: Optional[str] = None) -> Tuple[bool, str]:
         """
         Validate API key for a specific user and provider

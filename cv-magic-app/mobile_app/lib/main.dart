@@ -152,6 +152,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     await prefs.remove('user_email');
     await prefs.remove('user_name');
 
+    // Clear AI configuration state to prevent confusion when another user logs in
+    await aiModelService.clearSelection();
+    debugPrint('🧹 Cleared AI configuration state on logout');
+
     setState(() {
       _isLoggedIn = false;
     });

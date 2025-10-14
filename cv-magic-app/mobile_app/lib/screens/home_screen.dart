@@ -4,6 +4,7 @@ import 'dart:async';
 import '../core/theme/app_theme.dart';
 import '../utils/responsive_utils.dart';
 import '../widgets/mobile_bottom_nav.dart';
+import '../services/ai_model_service.dart';
 import 'intro_screen.dart';
 import 'welcome_home_page.dart';
 import 'cv_magic_organized_page.dart';
@@ -188,6 +189,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (confirmed == true) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_logged_in', false);
+
+      // Clear AI configuration state to prevent confusion when another user logs in
+      final aiModelService = AIModelService();
+      await aiModelService.clearSelection();
+      debugPrint('🧹 Cleared AI configuration state on logout');
 
       if (widget.onLogout != null) {
         widget.onLogout!();

@@ -101,11 +101,31 @@ class AIServiceManager:
                     if available_models:
                         default_model = available_models[0]
                         provider_instance = provider_class(api_key, default_model)
-                        if provider_instance.is_available():
+                        
+                        # Trust the database validation status instead of re-validating every time
+                        # Only validate if the key was never validated or marked as invalid
+                        from app.services.user_api_key_manager import user_api_key_manager
+                        key_info = user_api_key_manager.get_api_key_info(user, provider_name)
+                        
+                        if key_info and key_info.is_valid:
+                            # Trust the database - key is valid, initialize provider
                             self._providers[provider_name] = provider_instance
-                            logger.info(f"✅ Initialized {provider_name} provider with model {default_model} for user {user.email}")
+                            logger.info(f"✅ Initialized {provider_name} provider with model {default_model} for user {user.email} (trusting database validation)")
+                        elif key_info and not key_info.is_valid:
+                            # Key was previously validated and marked invalid, skip
+                            logger.warning(f"⚠️ {provider_name} provider skipped for user {user.email} - API key marked as invalid in database")
                         else:
-                            logger.warning(f"⚠️ {provider_name} provider initialized but not available for user {user.email}")
+                            # No validation record, do a one-time validation
+                            logger.info(f"🔍 No validation record for {provider_name}, performing one-time validation for user {user.email}")
+                            if provider_instance.is_available():
+                                self._providers[provider_name] = provider_instance
+                                # Mark as valid in database
+                                user_api_key_manager._mark_key_as_valid(user, provider_name)
+                                logger.info(f"✅ Initialized {provider_name} provider with model {default_model} for user {user.email} (validated and cached)")
+                            else:
+                                # Mark as invalid in database
+                                user_api_key_manager._mark_key_as_invalid(user, provider_name)
+                                logger.warning(f"⚠️ {provider_name} provider failed validation for user {user.email}")
                 except Exception as e:
                     logger.error(f"❌ Failed to initialize {provider_name} provider for user {user.email}: {e}")
             else:
