@@ -603,6 +603,7 @@ async def execute_skills_semantic_comparison(ai_service, cv_skills: Dict[str, li
         prompt = build_prompt(cv_skills, jd_skills)
         response = await ai_service.generate_response(
             prompt=prompt,
+            user=user,
             temperature=temperature,
             max_tokens=max_tokens
         )
