@@ -162,9 +162,8 @@ SEMANTIC_SKILL_MAPPING = {
     ],
     "data mining": [
         "data mining",
-        "machine learning",
-        "predictive analytics",
-        "data science"
+        "pattern recognition",
+        "knowledge discovery"
     ],
     "data modeling": [
         "data modeling",
@@ -174,16 +173,14 @@ SEMANTIC_SKILL_MAPPING = {
     ],
     "data segmentation": [
         "data segmentation",
-        "statistical analysis",
-        "data analysis",
-        "customer segmentation"
+        "customer segmentation",
+        "segmentation strategies"
     ],
     "data warehousing": [
         "data warehousing",
         "data warehouse",
-        "sql",
-        "database management",
-        "relational databases"
+        "etl",
+        "data storage"
     ],
     "database management": [
         "database management",
@@ -721,12 +718,13 @@ def build_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) ->
         "   • 'Tableau' = 'Data Visualization' = 'Dashboard Creation' = 'Business Intelligence'\n"
         "   • 'Excel' = 'Spreadsheets' = 'Microsoft Excel'\n"
         "   • 'VBA' = 'Visual Basic for Applications' = 'Excel VBA' = 'Macro Programming'\n"
-        "3. HIERARCHICAL MATCH: Specific skills demonstrate broader capabilities:\n"
-        "   • 'Machine Learning' demonstrates 'Data Mining', 'Data Analysis', and 'Statistical Analysis'\n"
+        "3. HIERARCHICAL MATCH: Specific skills demonstrate broader capabilities (use sparingly):\n"
         "   • 'SQL' demonstrates 'Database Management', 'Data Extraction', 'Querying', and 'Relational Databases'\n"
         "   • 'Data Science' demonstrates 'Data Analysis', 'Statistical Analysis', and 'Machine Learning'\n"
-        "   • 'Python' demonstrates 'Programming', 'Scripting', and 'Data Analysis' skills\n"
         "   • 'Tableau/Power BI' demonstrates 'Data Visualization', 'Business Intelligence', and 'Reporting'\n"
+        "   ⚠️ CRITICAL: Do NOT match 'Machine Learning' with 'Data Mining' (different skills)\n"
+        "   ⚠️ CRITICAL: Do NOT match 'Python' with 'VBA' (different programming languages)\n"
+        "   ⚠️ CRITICAL: Do NOT match 'Data Analysis' with 'Data Mining' (different skills)\n"
         "4. DOMAIN CONTEXT: Skills in same professional domain:\n"
         "   • Data Science: SQL, Python, Tableau, Power BI, Statistical Analysis, Machine Learning\n"
         "   • Business Intelligence: Data Science, Analytics, Data Visualization, Dashboard creation, Reporting\n"
@@ -753,9 +751,9 @@ def build_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) ->
         "✅ JD: 'Power BI' → CV: 'Power BI' (exact match)\n"
         "✅ JD: 'Excel' → CV: 'Excel' (exact match)\n"
         "✅ JD: 'Data Analysis' → CV: 'Data Analytics' (synonym)\n"
-        "✅ JD: 'Data Mining' → CV: 'Machine Learning' (hierarchical - ML includes data mining)\n"
+        "❌ JD: 'Data Mining' → CV: 'Machine Learning' (different skills - don't match)\n"
         "✅ JD: 'Database Management' → CV: 'SQL' (hierarchical - SQL demonstrates DB management)\n"
-        "✅ JD: 'Report Creation' → CV: 'Data Visualization' (synonym - both involve creating reports)\n"
+        "❌ JD: 'Report Creation' → CV: 'Data Visualization' (different skills - don't match)\n"
         "✅ JD: 'Tableau' → CV: 'Power BI' (domain context - both are BI tools)\n"
         "✅ JD: 'Relational Databases' → CV: 'SQL' (hierarchical - SQL works with relational databases)\n"
         "✅ JD: 'Extracting Data' → CV: 'SQL' (hierarchical - SQL enables data extraction)\n"
