@@ -173,6 +173,7 @@ CRITICAL RULES:
                 # Generate response with low temperature for consistency
                 ai_response = await ai_service.generate_response(
                     prompt=prompt,
+                    user=user,
                     temperature=self.temperature,
                     max_tokens=2000  # Reduced token limit for focused response
                 )

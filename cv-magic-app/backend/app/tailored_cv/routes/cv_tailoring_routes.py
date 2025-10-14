@@ -763,6 +763,7 @@ Updated JSON:"""
         # 1) Generate response using AI to fully map free text back to structure
         response = await ai_service.generate_response(
             prompt=parsing_prompt,
+            user=current_user,
             temperature=0.0,  # Zero temperature for maximum consistency
             max_tokens=4000
         )

@@ -1375,9 +1375,9 @@ FIX: Output ONLY valid JSON!
             response = await ai_service.generate_response(
                 prompt=prompt,
                 system_prompt=system_prompt,
+                user=user_data,
                 temperature=0.0,
-                max_tokens=10,
-                user=user_data
+                max_tokens=10
             )
             
             # Extract score from response

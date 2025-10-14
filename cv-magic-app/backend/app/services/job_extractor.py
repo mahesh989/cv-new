@@ -44,6 +44,7 @@ async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
         # Use the AI service to extract information
         result_text = await ai_service.generate_response(
             prompt=prompt,
+            user=user,
             temperature=0.0,
             max_tokens=200
         )

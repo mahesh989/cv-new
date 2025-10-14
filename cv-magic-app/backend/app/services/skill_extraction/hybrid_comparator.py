@@ -124,6 +124,7 @@ class HybridSkillComparator:
         try:
             response = await ai_service.generate_response(
                 prompt=focused_prompt,
+                user=user,
                 temperature=temperature,
                 max_tokens=max_tokens
             )
