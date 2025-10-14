@@ -127,7 +127,18 @@
     window.flutterWebPlugins = window.flutterWebPlugins || {};
     window.flutterWebPlugins.path_provider = {
       getApplicationDocumentsDirectory: function() {
-        return window.localStorage;
+        return Promise.resolve({
+          path: '/tmp',
+          create: function() { return Promise.resolve(); },
+          exists: function() { return Promise.resolve(true); }
+        });
+      },
+      getTemporaryDirectory: function() {
+        return Promise.resolve({
+          path: '/tmp',
+          create: function() { return Promise.resolve(); },
+          exists: function() { return Promise.resolve(true); }
+        });
       }
     };
   </script>
