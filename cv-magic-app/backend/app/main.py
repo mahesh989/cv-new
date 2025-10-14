@@ -108,6 +108,7 @@ app.add_middleware(
         "https://vercel-deploy-2fuzu768c-maheshwor-tiwaris-projects.vercel.app",
         "https://vercel-deploy.vercel.app",
         "https://*-maheshwor-tiwaris-projects.vercel.app",  # Allow all Vercel preview deployments
+        "https://mahesh989.github.io",  # GitHub Pages frontend
         "http://localhost:8000",
         "http://localhost:3000",
         "http://localhost:8080",
