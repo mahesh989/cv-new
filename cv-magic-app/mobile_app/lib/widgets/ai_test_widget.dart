@@ -29,13 +29,14 @@ class _AITestWidgetState extends State<AITestWidget> {
     // Check if user is authenticated
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
-    
+
     if (!isLoggedIn) {
       setState(() {
-        _response = 'Error: Authentication required. Please log in to use AI features.';
+        _response =
+            'Error: Authentication required. Please log in to use AI features.';
         _isLoading = false;
       });
-      
+
       // Show a helpful snackbar
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
