@@ -328,6 +328,23 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                                   ),
                                 ),
                               ],
+                              if (isCancelled) ...[
+                                const SizedBox(width: 12),
+                                ElevatedButton.icon(
+                                  onPressed: _resetEverything,
+                                  icon: const Icon(Icons.clear_all, size: 18),
+                                  label: const Text('Reset'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.grey.shade600,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12, horizontal: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           );
                         },
@@ -505,6 +522,26 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     print('🛑 [DEBUG] _cancelAnalysis called');
     _skillsController.cancelAnalysis();
     _showSnackBar('🛑 Analysis cancelled');
+  }
+
+  /// Reset everything - CV, JD, and all analysis results
+  void _resetEverything() {
+    print('🗑️ [DEBUG] _resetEverything called');
+    
+    // Clear all state
+    setState(() {
+      selectedCVFilename = null;
+      jdController.clear();
+      jdUrlController.clear();
+    });
+    
+    // Clear analysis results
+    _skillsController.clearResults();
+    
+    // Show confirmation message
+    _showSnackBar('🗑️ Everything has been reset. Ready for a fresh start!');
+    
+    print('🗑️ [DEBUG] Everything reset successfully');
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
