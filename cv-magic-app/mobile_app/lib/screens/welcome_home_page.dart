@@ -5,7 +5,7 @@ import '../widgets/ai_test_widget.dart';
 
 class WelcomeHomePage extends StatelessWidget {
   final VoidCallback? onNavigateToCVMagic;
-  
+
   const WelcomeHomePage({super.key, this.onNavigateToCVMagic});
 
   @override
@@ -21,6 +21,8 @@ class WelcomeHomePage extends StatelessWidget {
           const SizedBox(height: 20),
           const AITestWidget(),
           const SizedBox(height: 20),
+          // Proceed to create tailored CV button - moved to end of home tab
+          _buildProceedButton(),
         ],
       ),
     );
@@ -70,15 +72,14 @@ class WelcomeHomePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          // Proceed to create tailored CV button
-          _buildProceedButton(),
         ],
       ),
     );
   }
 
   Widget _buildProceedButton() {
-    print('🔍 [WELCOME_HOME] Building proceed button, callback: ${onNavigateToCVMagic != null ? "provided" : "null"}');
+    print(
+        '🔍 [WELCOME_HOME] Building proceed button, callback: ${onNavigateToCVMagic != null ? "provided" : "null"}');
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
