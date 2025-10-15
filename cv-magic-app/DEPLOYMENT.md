@@ -15,16 +15,35 @@ Both backend and frontend deploy from the **`enhanced-vps-ghs`** branch:
 - **Backend**: VPS pulls from `enhanced-vps-ghs` branch
 - **Frontend**: GitHub Actions deploys from `enhanced-vps-ghs` branch
 
-## 🛠️ Available Deployment Scripts
+## 🛠️ Unified Deployment Script
 
-### 1. Full Deployment (`deploy-vps.sh`)
-Complete deployment with cleanup and health checks:
+### Single Script with Multiple Options (`deploy.sh`)
 
+**Full Deployment (default):**
 ```bash
-./cv-magic-app/deploy-vps.sh
+./cv-magic-app/deploy.sh
+# or
+./cv-magic-app/deploy.sh --full
 ```
 
-**What it does:**
+**Quick Deployment:**
+```bash
+./cv-magic-app/deploy.sh --quick
+```
+
+**Check Status Only:**
+```bash
+./cv-magic-app/deploy.sh --check
+```
+
+**Show Help:**
+```bash
+./cv-magic-app/deploy.sh --help
+```
+
+### What Each Mode Does:
+
+**Full Mode (`--full`):**
 - Pulls latest changes from `enhanced-vps-ghs` branch
 - Stops existing containers
 - Cleans up Docker resources
@@ -33,26 +52,12 @@ Complete deployment with cleanup and health checks:
 - Runs health checks
 - Shows deployment status
 
-### 2. Quick Deployment (`quick-deploy.sh`)
-Fast deployment for minor changes:
-
-```bash
-./cv-magic-app/quick-deploy.sh
-```
-
-**What it does:**
+**Quick Mode (`--quick`):**
 - Pulls latest changes
 - Restarts containers with build
 - Minimal output for speed
 
-### 3. Status Check (`check-deployment.sh`)
-Check deployment status and health:
-
-```bash
-./cv-magic-app/check-deployment.sh
-```
-
-**What it shows:**
+**Check Mode (`--check`):**
 - Git status and recent commits
 - Docker container status
 - Health check results
@@ -154,14 +159,17 @@ ssh ubuntu@13.210.217.204 'cd ~/cv-new/cv-magic-app && docker compose restart'
 ## 📝 Quick Commands Reference
 
 ```bash
-# Full deployment
-./cv-magic-app/deploy-vps.sh
+# Full deployment (default)
+./cv-magic-app/deploy.sh
 
 # Quick deployment
-./cv-magic-app/quick-deploy.sh
+./cv-magic-app/deploy.sh --quick
 
 # Check status
-./cv-magic-app/check-deployment.sh
+./cv-magic-app/deploy.sh --check
+
+# Show help
+./cv-magic-app/deploy.sh --help
 
 # Manual SSH
 ssh ubuntu@13.210.217.204
