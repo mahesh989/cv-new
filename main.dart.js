@@ -53062,23 +53062,25 @@ break
 case 1:return A.t(q,r)}})
 return A.u($async$A9,r)},
 uC(a,b){return this.a4P(a,b)},
-a4P(a,b){var s=0,r=A.v(t.y),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e
-var $async$uC=A.q(function(c,d){if(c===1){o=d
+a4P(a,b){var s=0,r=A.v(t.y),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e,d
+var $async$uC=A.q(function(c,a0){if(c===1){o=a0
 s=p}while(true)switch(s){case 0:p=4
 s=7
 return A.m(n.A9(),$async$uC)
-case 7:m=d
-g=t.N
-l=A.a1(["Content-Type","application/json"],g,g)
+case 7:m=a0
+f=t.N
+l=A.a1(["Content-Type","application/json"],f,f)
 k="https://cvagent.duckdns.org/api/api-keys/set-initial"
 if(m!=null&&J.aQ(m)!==0){J.eo(l,"Authorization","Bearer "+A.c(m))
 k="https://cvagent.duckdns.org/api/api-keys/set"}s=8
-return A.m(A.uL(A.du(k,0,null),B.a7.lc(A.a1(["provider",a,"api_key",b],g,g),null),l),$async$uC)
-case 8:j=d
-if(j.b===200){g=j
-i=B.a7.j4(0,A.fc(A.fb(g.e)).cD(0,g.w),null)
-g=J.d(J.T(i,"success"),!0)&&J.d(J.T(i,"is_valid"),!0)
-q=g
+return A.m(A.uL(A.du(k,0,null),B.a7.lc(A.a1(["provider",a,"api_key",b],f,f),null),l),$async$uC)
+case 8:j=a0
+if(j.b===200){f=j
+i=B.a7.j4(0,A.fc(A.fb(f.e)).cD(0,f.w),null)
+A.P("\ud83d\udd0d [API_KEY_SERVICE] Response: "+A.c(i))
+h=J.d(J.T(i,"success"),!0)
+A.P("\ud83d\udd0d [API_KEY_SERVICE] Success: "+A.c(h))
+q=h
 s=1
 break}q=!1
 s=1
@@ -53087,9 +53089,9 @@ p=2
 s=6
 break
 case 4:p=3
-e=o
-h=A.W(e)
-A.P("Error setting API key: "+A.c(h))
+d=o
+g=A.W(d)
+A.P("Error setting API key: "+A.c(g))
 q=!1
 s=1
 break
