@@ -2,7 +2,7 @@
 Authentication routes
 """
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime
 from app.models.auth import LoginRequest, TokenResponse, UserData, RegisterRequest, RegisterResponse
