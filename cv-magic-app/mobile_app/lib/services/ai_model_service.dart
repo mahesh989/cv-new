@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/ai_model.dart';
+import 'auth_service.dart';
 
 class AIModelService extends ChangeNotifier {
   static final AIModelService _instance = AIModelService._internal();
@@ -217,9 +218,8 @@ class AIModelService extends ChangeNotifier {
   // Sync model selection with backend
   Future<void> _syncModelWithBackend(String modelId) async {
     try {
-      // Get authentication token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      // Get authentication token using AuthService
+      final token = await AuthService.getValidAuthToken();
 
       final headers = {
         'Content-Type': 'application/json',
@@ -266,9 +266,8 @@ class AIModelService extends ChangeNotifier {
   // Get current model status from backend
   Future<Map<String, dynamic>?> getBackendStatus() async {
     try {
-      // Get authentication token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      // Get authentication token using AuthService
+      final token = await AuthService.getValidAuthToken();
 
       final headers = {
         'Content-Type': 'application/json',
@@ -373,9 +372,8 @@ class AIModelService extends ChangeNotifier {
   // Fetch user's AI configuration from backend
   Future<void> _fetchUserConfigurationFromBackend() async {
     try {
-      // Get authentication token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      // Get authentication token using AuthService
+      final token = await AuthService.getValidAuthToken();
 
       if (token == null) {
         debugPrint(
@@ -383,6 +381,7 @@ class AIModelService extends ChangeNotifier {
         return;
       }
 
+      final prefs = await SharedPreferences.getInstance();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
