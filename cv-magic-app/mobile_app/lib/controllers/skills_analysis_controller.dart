@@ -496,7 +496,11 @@ class SkillsAnalysisController extends ChangeNotifier {
     _currentJdText = null;
     _executionDuration = Duration.zero;
     _clearError();
-    _setState(SkillsAnalysisState.idle);
+    
+    // Only reset to idle if not in cancelled state (preserve cancelled state for UI)
+    if (_state != SkillsAnalysisState.cancelled) {
+      _setState(SkillsAnalysisState.idle);
+    }
 
     debugPrint('🧹 [CONTROLLER] State after clear: $_state');
     debugPrint('🧹 [CONTROLLER] Has results after clear: $hasResults');
