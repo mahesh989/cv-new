@@ -1,20 +1,14 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../core/config/app_config.dart';
+import 'auth_service.dart';
 
 class APIKeyService {
   static const String _baseUrl = AppConfig.baseUrl;
 
-  /// Get authentication token from SharedPreferences
+  /// Get authentication token using AuthService
   Future<String?> _getAuthToken() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('auth_token');
-    } catch (e) {
-      print('Error getting auth token: $e');
-      return null;
-    }
+    return await AuthService.getValidAuthToken();
   }
 
   /// Set API key for a specific provider
