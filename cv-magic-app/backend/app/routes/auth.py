@@ -264,3 +264,64 @@ async def refresh_session():
         expires_in=settings.JWT_EXPIRATION_MINUTES * 60,
         user=user
     )
+
+
+@router.post("/refresh-token")
+async def refresh_token(request: Request, db: Session = Depends(get_database)):
+    """Refresh access token using refresh token"""
+    from app.core.auth import verify_token, create_access_token, create_refresh_token
+    from app.models.auth import TokenResponse
+    from app.core.dependencies import get_user_by_id
+    
+    try:
+        # Get refresh token from request body or Authorization header
+        body = await request.json()
+        refresh_token = body.get("refresh_token")
+        
+        if not refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Refresh token is required"
+            )
+        
+        # Verify refresh token
+        token_data = verify_token(refresh_token)
+        
+        # Check if it's actually a refresh token
+        import jwt
+        payload = jwt.decode(refresh_token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token type"
+            )
+        
+        # Get user from database
+        user = get_user_by_id(db, token_data.user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found"
+            )
+        
+        # Create new tokens
+        user_dict = {"id": str(user.id), "email": user.email}
+        new_access_token = create_access_token(user_dict)
+        new_refresh_token = create_refresh_token(str(user.id))
+        
+        return TokenResponse(
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+            token_type="bearer",
+            expires_in=settings.JWT_EXPIRATION_MINUTES * 60,
+            user=UserData(id=str(user.id), email=user.email, username=user.username)
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Token refresh failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token refresh failed"
+        )

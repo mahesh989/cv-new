@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme/app_theme.dart';
 import '../core/config/app_config.dart';
+import '../services/auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -239,17 +240,24 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           print('🔵 [FRONTEND] Processing login response');
           // Login response includes tokens
           final accessToken = data['access_token'];
+          final refreshToken = data['refresh_token'];
+          final expiresIn = data['expires_in'];
+          final userData = data['user'];
+          
           print(
               '🔵 [FRONTEND] Access token received: ${accessToken.substring(0, 20)}...');
+          print('🔵 [FRONTEND] Refresh token received: ${refreshToken.substring(0, 20)}...');
+          print('🔵 [FRONTEND] Token expires in: $expiresIn seconds');
 
-          // Save authentication data
-          print(
-              '🔵 [FRONTEND] Saving authentication data to SharedPreferences');
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('is_logged_in', true);
-          await prefs.setString('auth_token', accessToken);
-          await prefs.setString('user_email', email);
-          await prefs.setString('user_name', name);
+          // Save authentication data using AuthService
+          print('🔵 [FRONTEND] Saving authentication data using AuthService');
+          await AuthService.saveUserData(
+            email: userData['email'] ?? email,
+            name: userData['username'] ?? name,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expiresIn: expiresIn,
+          );
           print('✅ [FRONTEND] Authentication data saved successfully');
 
           if (mounted) {
@@ -366,13 +374,18 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final accessToken = data['access_token'];
+        final refreshToken = data['refresh_token'];
+        final expiresIn = data['expires_in'];
+        final userData = data['user'];
 
-        // Save authentication data
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_logged_in', true);
-        await prefs.setString('auth_token', accessToken);
-        await prefs.setString('user_email', 'demo@gmail.com');
-        await prefs.setString('user_name', 'Demo User');
+        // Save authentication data using AuthService
+        await AuthService.saveUserData(
+          email: userData['email'] ?? 'demo@gmail.com',
+          name: userData['username'] ?? 'Demo User',
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          expiresIn: expiresIn,
+        );
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

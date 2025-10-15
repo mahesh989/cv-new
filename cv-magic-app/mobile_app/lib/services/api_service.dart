@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
+import 'auth_service.dart';
 
 class APIService {
   static const String baseUrl = 'https://cvagent.duckdns.org';
@@ -11,14 +12,9 @@ class APIService {
   // Get the current selected model from AI service
   static String? get currentModelId => aiModelService.currentModelId;
 
-  // Get auth token from shared preferences
+  // Get auth token from shared preferences (deprecated - use AuthService)
   static Future<String?> _getAuthToken() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('auth_token');
-    } catch (e) {
-      return null;
-    }
+    return await AuthService.getValidAuthToken();
   }
 
   // Make authenticated API call with current model

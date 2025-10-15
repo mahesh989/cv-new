@@ -40,8 +40,8 @@ class Settings(BaseSettings):
     # JWT Authentication
     JWT_SECRET_KEY: str = "your-super-secret-jwt-key-change-this-in-production"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRATION_MINUTES: int = 480  # 8 hours for development
-    JWT_REFRESH_EXPIRATION_DAYS: int = 7
+    JWT_EXPIRATION_MINUTES: int = 1440  # 24 hours for better user experience
+    JWT_REFRESH_EXPIRATION_DAYS: int = 30  # 30 days for refresh tokens
     
     # Development Settings
     DEVELOPMENT_MODE: bool = True  # Enable development features
@@ -139,5 +139,5 @@ settings = Settings()
 
 # Override for development
 if settings.DEVELOPMENT_MODE:
-    settings.JWT_EXPIRATION_MINUTES = 480  # 8 hours for development
-    print(f"🔧 Development mode: JWT expiration set to {settings.JWT_EXPIRATION_MINUTES} minutes")
+    settings.JWT_EXPIRATION_MINUTES = 1440  # 24 hours for development
+    print(f"🔧 Development mode: JWT expiration set to {settings.JWT_EXPIRATION_MINUTES} minutes (24 hours)")
