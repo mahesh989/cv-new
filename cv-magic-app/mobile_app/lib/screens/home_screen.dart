@@ -87,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
 
     // Initialize welcome home page with navigation callback
+    print('🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: ${_navigateToCVMagicTab != null ? "provided" : "null"}');
     _welcomeHomePage = WelcomeHomePage(
       onNavigateToCVMagic: _navigateToCVMagicTab,
     );
@@ -209,7 +210,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _onTabTapped(int index) {
     print('🔄 [HOME_SCREEN] Tab tapped: $index');
     if (index == 4) {
-      print('📊 [HOME_SCREEN] Job Tracking tab selected - displaying saved results');
+      print(
+          '📊 [HOME_SCREEN] Job Tracking tab selected - displaying saved results');
       // Job tracking tab only displays saved results, no automatic refresh needed
     }
     setState(() {

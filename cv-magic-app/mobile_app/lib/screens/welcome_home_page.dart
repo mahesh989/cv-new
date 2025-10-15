@@ -78,6 +78,7 @@ class WelcomeHomePage extends StatelessWidget {
   }
 
   Widget _buildProceedButton() {
+    print('🔍 [WELCOME_HOME] Building proceed button, callback: ${onNavigateToCVMagic != null ? "provided" : "null"}');
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
