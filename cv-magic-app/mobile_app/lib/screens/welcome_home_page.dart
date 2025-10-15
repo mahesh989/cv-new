@@ -4,7 +4,9 @@ import '../widgets/ai_model_selector.dart';
 import '../widgets/ai_test_widget.dart';
 
 class WelcomeHomePage extends StatelessWidget {
-  const WelcomeHomePage({super.key});
+  final VoidCallback? onNavigateToCVMagic;
+  
+  const WelcomeHomePage({super.key, this.onNavigateToCVMagic});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +69,49 @@ class WelcomeHomePage extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          // Proceed to create tailored CV button
+          _buildProceedButton(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProceedButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onNavigateToCVMagic,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.blue.shade600,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.blue.shade200, width: 1),
+          ),
+          elevation: 2,
+          shadowColor: Colors.blue.withOpacity(0.2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Proceed to create tailored CV',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.blue.shade600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.arrow_forward,
+              color: Colors.blue.shade600,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

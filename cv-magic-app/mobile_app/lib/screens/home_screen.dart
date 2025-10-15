@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _shouldClearCVMagicResults = false;
 
   late final IntroScreen _introScreen;
-  final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
+  late final WelcomeHomePage _welcomeHomePage;
   late final CVMagicOrganizedPage _cvMagicPage;
   final GlobalKey<State<CVGenerationScreen>> _cvGenerationKey =
       GlobalKey<State<CVGenerationScreen>>();
@@ -84,6 +84,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Initialize intro screen with navigation callback
     _introScreen = IntroScreen(
       onNavigateToTab: _onTabTapped,
+    );
+
+    // Initialize welcome home page with navigation callback
+    _welcomeHomePage = WelcomeHomePage(
+      onNavigateToCVMagic: _navigateToCVMagicTab,
     );
 
     // Initialize CV Magic page with navigation callback
