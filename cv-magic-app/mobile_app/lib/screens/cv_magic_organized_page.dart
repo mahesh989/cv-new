@@ -528,6 +528,12 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   void _resetEverything() {
     print('🗑️ [DEBUG] _resetEverything called');
     
+    // First, cancel any ongoing analysis to stop backend processing
+    if (_skillsController.isLoading) {
+      print('🛑 [DEBUG] Stopping ongoing analysis before reset');
+      _skillsController.cancelAnalysis();
+    }
+    
     // Clear all state
     setState(() {
       selectedCVFilename = null;
