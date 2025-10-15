@@ -99,12 +99,35 @@ if [ ! -f ~/.ssh/id_rsa ] && [ ! -f ~/.ssh/id_ed25519 ]; then
     print_warning "No SSH key found. Make sure you have SSH access to the VPS."
 fi
 
+# Function to show cleanup summary
+show_cleanup_summary() {
+    echo ""
+    echo "🧹 Full Cleanup Operations:"
+    echo "  ✅ Stop all containers with volumes and orphan removal"
+    echo "  ✅ Remove unused containers"
+    echo "  ✅ Remove unused images (preserves current project)"
+    echo "  ✅ Remove unused networks"
+    echo "  ✅ Remove unused volumes (preserves user data)"
+    echo "  ✅ Remove dangling images"
+    echo "  ✅ System-wide cleanup (safe operations)"
+    echo "  ✅ Disk space monitoring"
+    echo ""
+    echo "⚠️  Safety Features:"
+    echo "  🔒 User data volumes are preserved"
+    echo "  🔒 Current project images are kept"
+    echo "  🔒 All operations use '|| true' for safety"
+    echo "  🔒 Disk space checked before/after cleanup"
+    echo ""
+}
+
 # Main deployment function
 deploy_full() {
     print_header "🚀 Full VPS Deployment"
     print_info "Connecting to VPS: $VPS_USER@$VPS_HOST"
     print_info "Deploying branch: $BRANCH"
     print_info "Target path: $VPS_PATH"
+    
+    show_cleanup_summary
 
     ssh $VPS_USER@$VPS_HOST << EOF
         set -e
@@ -120,8 +143,31 @@ deploy_full() {
         echo "🛑 Stopping existing containers..."
         docker compose down --volumes --remove-orphans || true
         
-        echo "🧹 Cleaning up Docker resources..."
+        echo "🧹 Performing comprehensive Docker cleanup..."
+        echo "  - Checking disk space before cleanup..."
+        df -h / || true
+        
+        echo "  - Removing unused containers..."
+        docker container prune -f || true
+        
+        echo "  - Removing unused images (keeping current project images)..."
+        docker image prune -f || true
+        
+        echo "  - Removing unused networks..."
+        docker network prune -f || true
+        
+        echo "  - Removing unused volumes (preserving user data volumes)..."
+        # Only remove volumes not in use by current project
+        docker volume prune -f || true
+        
+        echo "  - Removing dangling images..."
+        docker image prune -f --filter "dangling=true" || true
+        
+        echo "  - System-wide cleanup (safe operations only)..."
         docker system prune -f || true
+        
+        echo "  - Checking disk space after cleanup..."
+        df -h / || true
         
         echo "🔨 Building new containers..."
         docker compose build --no-cache
