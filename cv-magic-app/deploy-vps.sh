@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-VPS_HOST="cvagent.duckdns.org"
+VPS_HOST="13.210.217.204"
 VPS_USER="ubuntu"
 VPS_PATH="~/cv-new/cv-magic-app"
 BRANCH="enhanced-vps-ghs"

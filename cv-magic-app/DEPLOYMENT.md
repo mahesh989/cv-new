@@ -65,7 +65,7 @@ If you prefer to deploy manually:
 
 ```bash
 # SSH into VPS
-ssh ubuntu@cvagent.duckdns.org
+ssh ubuntu@13.210.217.204
 
 # Navigate to project directory
 cd ~/cv-new/cv-magic-app
@@ -112,12 +112,12 @@ curl https://cvagent.duckdns.org/health
 
 ### View Backend Logs
 ```bash
-ssh ubuntu@cvagent.duckdns.org 'cd ~/cv-new/cv-magic-app && docker compose logs -f'
+ssh ubuntu@13.210.217.204 'cd ~/cv-new/cv-magic-app && docker compose logs -f'
 ```
 
 ### Restart Backend
 ```bash
-ssh ubuntu@cvagent.duckdns.org 'cd ~/cv-new/cv-magic-app && docker compose restart'
+ssh ubuntu@13.210.217.204 'cd ~/cv-new/cv-magic-app && docker compose restart'
 ```
 
 ### Check Frontend Deployment
@@ -164,13 +164,13 @@ ssh ubuntu@cvagent.duckdns.org 'cd ~/cv-new/cv-magic-app && docker compose resta
 ./cv-magic-app/check-deployment.sh
 
 # Manual SSH
-ssh ubuntu@cvagent.duckdns.org
+ssh ubuntu@13.210.217.204
 
 # View logs
-ssh ubuntu@cvagent.duckdns.org 'cd ~/cv-new/cv-magic-app && docker compose logs -f'
+ssh ubuntu@13.210.217.204 'cd ~/cv-new/cv-magic-app && docker compose logs -f'
 
 # Restart services
-ssh ubuntu@cvagent.duckdns.org 'cd ~/cv-new/cv-magic-app && docker compose restart'
+ssh ubuntu@13.210.217.204 'cd ~/cv-new/cv-magic-app && docker compose restart'
 ```
 
 ## 🎉 Success Indicators

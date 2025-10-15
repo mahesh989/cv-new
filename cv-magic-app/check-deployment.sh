@@ -3,7 +3,7 @@
 # VPS Deployment Status Checker
 # Check the status of your VPS deployment
 
-VPS_HOST="cvagent.duckdns.org"
+VPS_HOST="13.210.217.204"
 VPS_USER="ubuntu"
 VPS_PATH="~/cv-new/cv-magic-app"
 
@@ -34,7 +34,7 @@ ssh $VPS_USER@$VPS_HOST << EOF
     
     echo ""
     echo "🌐 External connectivity test:"
-    curl -f https://$VPS_HOST/health 2>/dev/null && echo "✅ External access working" || echo "❌ External access failed"
+    curl -f https://cvagent.duckdns.org/health 2>/dev/null && echo "✅ External access working" || echo "❌ External access failed"
 EOF
 
 echo ""
