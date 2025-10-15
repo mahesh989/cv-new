@@ -37,7 +37,11 @@ class APIKeyService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['success'] == true && data['is_valid'] == true;
+        print('🔍 [API_KEY_SERVICE] Response: $data');
+        // API key was successfully saved, regardless of validation result
+        final success = data['success'] == true;
+        print('🔍 [API_KEY_SERVICE] Success: $success');
+        return success;
       }
 
       return false;
