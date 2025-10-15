@@ -52086,6 +52086,7 @@ q.AB()
 q.Jq()
 q.y!==$&&A.bY()
 q.y=new A.Co(q.gVs(),p)
+A.O("\ud83d\udd0d [HOME_SCREEN] Initializing WelcomeHomePage with callback: provided")
 s=q.gakN()
 q.z!==$&&A.bY()
 q.z=new A.UV(s,p)
@@ -52721,9 +52722,11 @@ if(s!=null){s.a2()
 s.dr()
 this.eW$=null}this.kQ()}}
 A.UV.prototype={
-G(a){var s=null,r=t.p,q=A.aN(A.a([A.av(s,B.M_,B.m,s,s,new A.al(s,s,s,s,s,B.mb,B.cp),s,s,s,B.b0,s,s,s),B.df,A.bn(A.aM(A.a([A.S("Ready to optimize your CV?",s,s,s,s,A.bC().$5$color$fontSize$fontWeight$height$letterSpacing(B.cK,18,B.Z,1.4,-0.1).ce(B.aZ,B.v),s,s),B.c_,A.S("Select your AI model below and start creating amazing resumes!",s,s,s,s,A.bC().$5$color$fontSize$fontWeight$height$letterSpacing(B.an,14,B.p,1.5,0).b7(B.U),s,s)],r),B.w,B.i,B.k),1)],r),B.n,B.i,B.k,s),p=A.ar(12)
-p=A.fd(s,s,B.h,s,s,s,2,s,s,B.bG,s,s,B.K2,A.a8(51,B.aj.gl(0)>>>16&255,B.aj.gl(0)>>>8&255,B.aj.gl(0)&255),new A.cg(p,new A.bb(B.fC,1,B.E,-1)),s,s,s,s)
-return A.iK(A.aM(A.a([A.lW(A.aM(A.a([q,B.bZ,A.ch(A.vE(!1,A.aN(A.a([A.S("Proceed to create tailored CV",s,s,s,s,A.b8(s,s,B.bG,s,s,s,s,s,s,s,s,16,s,s,B.Z,s,s,!0,s,s,s,s,s,s,s,s),s,s),B.ae,A.bw(B.KW,B.bG,s,20)],r),B.n,B.cc,B.k,s),s,s,B.c7,s,s,s,s,this.c,s,p),s,1/0)],r),B.w,B.i,B.k)),B.bZ,B.DJ,B.bZ,B.DT,B.bZ],r),B.w,B.i,B.k),s,B.M,B.bA,s,B.aq)}}
+G(a){var s,r=null,q=t.p,p=A.aN(A.a([A.av(r,B.M_,B.m,r,r,new A.al(r,r,r,r,r,B.mb,B.cp),r,r,r,B.b0,r,r,r),B.df,A.bn(A.aM(A.a([A.S("Ready to optimize your CV?",r,r,r,r,A.bC().$5$color$fontSize$fontWeight$height$letterSpacing(B.cK,18,B.Z,1.4,-0.1).ce(B.aZ,B.v),r,r),B.c_,A.S("Select your AI model below and start creating amazing resumes!",r,r,r,r,A.bC().$5$color$fontSize$fontWeight$height$letterSpacing(B.an,14,B.p,1.5,0).b7(B.U),r,r)],q),B.w,B.i,B.k),1)],q),B.n,B.i,B.k,r)
+A.O("\ud83d\udd0d [WELCOME_HOME] Building proceed button, callback: provided")
+s=A.ar(12)
+s=A.fd(r,r,B.h,r,r,r,2,r,r,B.bG,r,r,B.K2,A.a8(51,B.aj.gl(0)>>>16&255,B.aj.gl(0)>>>8&255,B.aj.gl(0)&255),new A.cg(s,new A.bb(B.fC,1,B.E,-1)),r,r,r,r)
+return A.iK(A.aM(A.a([A.lW(A.aM(A.a([p,B.bZ,A.ch(A.vE(!1,A.aN(A.a([A.S("Proceed to create tailored CV",r,r,r,r,A.b8(r,r,B.bG,r,r,r,r,r,r,r,r,16,r,r,B.Z,r,r,!0,r,r,r,r,r,r,r,r),r,r),B.ae,A.bw(B.KW,B.bG,r,20)],q),B.n,B.cc,B.k,r),r,r,B.c7,r,r,r,r,this.c,r,s),r,1/0)],q),B.w,B.i,B.k)),B.bZ,B.DJ,B.bZ,B.DT,B.bZ],q),B.w,B.i,B.k),r,B.M,B.bA,r,B.aq)}}
 A.lS.prototype={
 ll(a){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e
 var $async$ll=A.q(function(b,c){if(b===1){o=c
