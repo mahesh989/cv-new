@@ -353,6 +353,12 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
           const SizedBox(height: 16),
           // Action buttons
           _buildActionButtons(),
+
+          // Analyze Another Job Button - shown when CV preview is displayed
+          if (tailoredCVContent != null) ...[
+            const SizedBox(height: 16),
+            _buildAnalyzeAnotherJobButton(),
+          ],
         ],
       ),
     );
@@ -499,6 +505,10 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
             ],
           ),
           const SizedBox(height: 20),
+
+          // Analyze Another Job Button - positioned based on CV preview state
+          if (tailoredCVContent == null) _buildAnalyzeAnotherJobButton(),
+
           if (tailoredCVContent != null) _buildCVPreview(),
         ],
       ),
@@ -552,6 +562,31 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildAnalyzeAnotherJobButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: _navigateToCVMagicAndClear,
+        icon: const Icon(Icons.work_outline, color: Colors.white),
+        label: const Text(
+          'Analyze Another Job',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue.shade600,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
     );
   }
 
@@ -791,6 +826,29 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
       widget.onNavigateToCVMagicWithoutClearing!();
       debugPrint(
           '✅ Navigated to CV Magic tab without clearing - JD inputs preserved');
+    } else {
+      debugPrint('❌ No navigation callback provided');
+    }
+  }
+
+  void _navigateToCVMagicAndClear() {
+    debugPrint(
+        '🔀 [CV_GENERATION] Navigating to CV Magic tab and clearing everything');
+
+    // Clear all current state
+    setState(() {
+      tailoredCVContent = null;
+      _currentCompany = null;
+      _isGenerating = false;
+      _isEditMode = false;
+      _editController.clear();
+    });
+
+    // Use the callback to navigate to CV Magic tab with clearing
+    if (widget.onNavigateToCVMagic != null) {
+      widget.onNavigateToCVMagic!();
+      debugPrint(
+          '✅ Navigated to CV Magic tab - everything cleared for fresh start');
     } else {
       debugPrint('❌ No navigation callback provided');
     }

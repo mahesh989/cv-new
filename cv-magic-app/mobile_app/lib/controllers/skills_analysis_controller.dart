@@ -7,7 +7,7 @@ import '../services/job_parser.dart';
 import '../services/jobs_state_manager.dart';
 
 /// States for skills analysis
-enum SkillsAnalysisState { idle, loading, completed, error }
+enum SkillsAnalysisState { idle, loading, completed, error, cancelled }
 
 /// Controller for managing skills analysis operations and state
 class SkillsAnalysisController extends ChangeNotifier {
@@ -44,6 +44,7 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool get hasResults =>
       _state == SkillsAnalysisState.completed && _result != null;
   bool get hasError => _state == SkillsAnalysisState.error;
+  bool get isCancelled => _state == SkillsAnalysisState.cancelled;
   bool get isEmpty => _result?.isEmpty ?? true;
 
   // Progressive display getters
@@ -502,6 +503,36 @@ class SkillsAnalysisController extends ChangeNotifier {
     debugPrint('🧹 [CONTROLLER] clearResults() completed');
   }
 
+  /// Cancel the current analysis and reset to idle state
+  void cancelAnalysis() {
+    if (_state == SkillsAnalysisState.loading) {
+      debugPrint('🛑 [CONTROLLER] Cancelling analysis...');
+
+      // Cancel any ongoing timers
+      _progressiveTimer?.cancel();
+      _progressiveTimer = null;
+
+      // Clear any partial results
+      _result = null;
+      _fullResult = null;
+      _showAnalyzeMatch = false;
+      _showPreextractedComparison = false;
+      _showATSLoading = false;
+      _showATSResults = false;
+      _showAIRecommendationLoading = false;
+      _showAIRecommendationResults = false;
+
+      // Set cancelled state
+      _setState(SkillsAnalysisState.cancelled);
+      _clearError();
+
+      // Show notification
+      _showNotification('🛑 Analysis cancelled by user');
+
+      debugPrint('🛑 [CONTROLLER] Analysis cancelled successfully');
+    }
+  }
+
   /// Check if we can perform analysis with current inputs
   bool canPerformAnalysis(String? cvFilename, String? jdText) {
     return SkillsAnalysisService.validateAnalysisInputs(
@@ -623,23 +654,24 @@ class SkillsAnalysisController extends ChangeNotifier {
   /// Start polling for component analysis and ATS calculation results
   void _startPollingForCompleteResults() async {
     String? company = _fullResult?.preextractedCompanyName;
-    
+
     // Use the top-level company name from backend response if available
     if ((company == null || company.isEmpty) && _fullResult != null) {
       // Check if there's a top-level company name in the response
       final topLevelCompany = _fullResult!.company;
       if (topLevelCompany != null && topLevelCompany.isNotEmpty) {
         company = topLevelCompany;
-        print('🔄 [POLLING] Using top-level company name from backend: $company');
+        print(
+            '🔄 [POLLING] Using top-level company name from backend: $company');
       }
     }
-    
+
     if (company == null || company.trim().isEmpty) {
       print('❌ [POLLING] No company name found for polling');
       _finishAnalysis();
       return;
     }
-    
+
     print('🔄 [POLLING] Using company name for polling: $company');
 
     print('🔄 [POLLING] Starting polling for complete results...');

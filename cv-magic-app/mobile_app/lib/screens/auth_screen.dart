@@ -243,10 +243,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           final refreshToken = data['refresh_token'];
           final expiresIn = data['expires_in'];
           final userData = data['user'];
-          
+
           print(
               '🔵 [FRONTEND] Access token received: ${accessToken.substring(0, 20)}...');
-          print('🔵 [FRONTEND] Refresh token received: ${refreshToken.substring(0, 20)}...');
+          print(
+              '🔵 [FRONTEND] Refresh token received: ${refreshToken.substring(0, 20)}...');
           print('🔵 [FRONTEND] Token expires in: $expiresIn seconds');
 
           // Save authentication data using AuthService

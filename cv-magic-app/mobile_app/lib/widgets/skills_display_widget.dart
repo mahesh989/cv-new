@@ -36,6 +36,9 @@ class SkillsDisplayWidget extends StatelessWidget {
         if (controller.hasError) {
           debugPrint('🔍 [SKILLS_DISPLAY] Building error state');
           return _buildErrorState();
+        } else if (controller.isCancelled) {
+          debugPrint('🔍 [SKILLS_DISPLAY] Building cancelled state');
+          return _buildCancelledState();
         } else if (!controller.hasResults && !controller.isLoading) {
           debugPrint(
             '🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)',
@@ -77,6 +80,42 @@ class SkillsDisplayWidget extends StatelessWidget {
           Text(
             controller.errorMessage ?? 'Unknown error occurred',
             style: TextStyle(fontSize: 14, color: Colors.red.shade600),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCancelledState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange.shade200),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.stop_circle_outlined,
+              color: Colors.orange.shade600, size: 48),
+          const SizedBox(height: 12),
+          Text(
+            'Analysis Cancelled',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange.shade700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'The analysis was stopped by the user. Click "Restart Analysis" to begin again.',
+            style: TextStyle(fontSize: 14, color: Colors.orange.shade600),
             textAlign: TextAlign.center,
           ),
         ],

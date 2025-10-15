@@ -39,12 +39,12 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final expiryString = prefs.getString(_tokenExpiryKey);
-      
+
       if (expiryString == null) return true;
-      
+
       final expiry = DateTime.parse(expiryString);
       final now = DateTime.now();
-      
+
       // Consider token expired if it expires within the next 5 minutes
       return now.isAfter(expiry.subtract(const Duration(minutes: 5)));
     } catch (e) {
@@ -107,7 +107,7 @@ class AuthService {
       }
 
       print('🔄 Token expired, attempting to refresh...');
-      
+
       // Try to refresh the token
       final newToken = await refreshAccessToken();
       if (newToken != null) {
@@ -132,15 +132,15 @@ class AuthService {
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Calculate expiry time
       final expiry = DateTime.now().add(Duration(seconds: expiresIn));
-      
+
       await prefs.setString(_authTokenKey, accessToken);
       await prefs.setString(_refreshTokenKey, refreshToken);
       await prefs.setString(_tokenExpiryKey, expiry.toIso8601String());
       await prefs.setBool(_isLoggedInKey, true);
-      
+
       print('✅ Tokens saved successfully');
     } catch (e) {
       print('❌ Error saving tokens: $e');
@@ -157,17 +157,17 @@ class AuthService {
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Calculate expiry time
       final expiry = DateTime.now().add(Duration(seconds: expiresIn));
-      
+
       await prefs.setString(_userEmailKey, email);
       await prefs.setString(_userNameKey, name);
       await prefs.setString(_authTokenKey, accessToken);
       await prefs.setString(_refreshTokenKey, refreshToken);
       await prefs.setString(_tokenExpiryKey, expiry.toIso8601String());
       await prefs.setBool(_isLoggedInKey, true);
-      
+
       print('✅ User data saved successfully');
     } catch (e) {
       print('❌ Error saving user data: $e');
@@ -178,14 +178,14 @@ class AuthService {
   static Future<void> clearAuthData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       await prefs.remove(_authTokenKey);
       await prefs.remove(_refreshTokenKey);
       await prefs.remove(_tokenExpiryKey);
       await prefs.remove(_userEmailKey);
       await prefs.remove(_userNameKey);
       await prefs.setBool(_isLoggedInKey, false);
-      
+
       print('✅ Auth data cleared successfully');
     } catch (e) {
       print('❌ Error clearing auth data: $e');
@@ -197,9 +197,9 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final isLoggedIn = prefs.getBool(_isLoggedInKey) ?? false;
-      
+
       if (!isLoggedIn) return false;
-      
+
       // Check if token is still valid
       return !await isTokenExpired();
     } catch (e) {
@@ -283,16 +283,15 @@ class AuthService {
       // If token expired during request, try to refresh and retry once
       if (response.statusCode == 401) {
         final responseBody = response.body;
-        if (responseBody.contains('Token has expired') || 
+        if (responseBody.contains('Token has expired') ||
             responseBody.contains('expired')) {
-          
           print('🔄 Token expired during request, refreshing...');
           final newToken = await refreshAccessToken();
-          
+
           if (newToken != null) {
             // Retry request with new token
             requestHeaders['Authorization'] = 'Bearer $newToken';
-            
+
             switch (method.toUpperCase()) {
               case 'GET':
                 response = await http.get(url, headers: requestHeaders);

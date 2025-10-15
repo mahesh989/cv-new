@@ -250,6 +250,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                           final canAnalyze = selectedCVFilename != null &&
                               jdController.text.trim().isNotEmpty;
                           final isAnalyzing = _skillsController.isLoading;
+                          final isCancelled = _skillsController.isCancelled;
 
                           // Comprehensive debug logging
                           print('=== BUTTON STATE CHECK ===');
@@ -271,32 +272,63 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                               '🔍 [DEBUG] _skillsController.isLoading: ${_skillsController.isLoading}');
                           print('=== END BUTTON CHECK ===');
 
-                          return ElevatedButton.icon(
-                            onPressed: (canAnalyze && !isAnalyzing)
-                                ? _analyzeSkills
-                                : null,
-                            icon: isAnalyzing
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: (canAnalyze && !isAnalyzing)
+                                      ? _analyzeSkills
+                                      : null,
+                                  icon: isAnalyzing
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : isCancelled
+                                          ? const Icon(Icons.refresh)
+                                          : const Icon(Icons.psychology),
+                                  label: Text(isAnalyzing
+                                      ? 'Analyzing Skills...'
+                                      : isCancelled
+                                          ? 'Restart Analysis'
+                                          : 'Analyze Skills'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isCancelled
+                                        ? Colors.orange
+                                        : canAnalyze
+                                            ? Colors.purple
+                                            : Colors.grey,
+                                    foregroundColor:
+                                        canAnalyze ? Colors.white : Colors.grey,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                  )
-                                : const Icon(Icons.psychology),
-                            label: Text(isAnalyzing
-                                ? 'Analyzing Skills...'
-                                : 'Analyze Skills'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  canAnalyze ? Colors.purple : Colors.grey,
-                              foregroundColor:
-                                  canAnalyze ? Colors.white : Colors.grey,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (isAnalyzing) ...[
+                                const SizedBox(width: 12),
+                                ElevatedButton.icon(
+                                  onPressed: _cancelAnalysis,
+                                  icon: const Icon(Icons.stop, size: 18),
+                                  label: const Text('Cancel'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12, horizontal: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           );
                         },
                       ),
@@ -459,11 +491,20 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
         _showSnackBar(
             'Skills analysis failed: ${_skillsController.errorMessage}',
             isError: true);
+      } else if (_skillsController.isCancelled) {
+        _showSnackBar('Analysis was cancelled');
       }
     } catch (e) {
       print('❌ [DEBUG] Error in _analyzeSkills: $e');
       _showSnackBar('Error performing skills analysis: $e', isError: true);
     }
+  }
+
+  /// Cancel the current analysis
+  void _cancelAnalysis() {
+    print('🛑 [DEBUG] _cancelAnalysis called');
+    _skillsController.cancelAnalysis();
+    _showSnackBar('🛑 Analysis cancelled');
   }
 
   void _showSnackBar(String message, {bool isError = false}) {

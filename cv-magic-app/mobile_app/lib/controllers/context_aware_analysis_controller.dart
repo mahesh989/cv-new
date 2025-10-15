@@ -10,6 +10,7 @@ enum ContextAwareAnalysisState {
   loading,
   completed,
   error,
+  cancelled,
 }
 
 /// Controller for managing context-aware analysis operations and state
@@ -47,6 +48,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   bool get hasResults =>
       _state == ContextAwareAnalysisState.completed && _result != null;
   bool get hasError => _state == ContextAwareAnalysisState.error;
+  bool get isCancelled => _state == ContextAwareAnalysisState.cancelled;
   bool get hasCVContext => _cvContext != null;
 
   // Progressive display getters
@@ -204,7 +206,8 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       }
     } catch (e) {
       if (e is TailoredCVNotFoundException) {
-        String errorMessage = 'No tailored CV is available. Please create a tailored CV first.';
+        String errorMessage =
+            'No tailored CV is available. Please create a tailored CV first.';
         _setError(errorMessage);
         _showNotification(errorMessage, isError: true);
       } else {
@@ -246,6 +249,35 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     _showTailoredCV = false;
 
     notifyListeners();
+  }
+
+  /// Cancel the current analysis and reset to idle state
+  void cancelAnalysis() {
+    if (_state == ContextAwareAnalysisState.loading) {
+      debugPrint('🛑 [CONTEXT_AWARE_CONTROLLER] Cancelling analysis...');
+
+      // Cancel any ongoing timers
+      _progressiveTimer?.cancel();
+      _progressiveTimer = null;
+
+      // Clear any partial results
+      _result = null;
+      _cvContext = null;
+      _showCVContext = false;
+      _showAnalysisResults = false;
+      _showTailoredCV = false;
+
+      // Set cancelled state
+      _state = ContextAwareAnalysisState.cancelled;
+      _errorMessage = null;
+
+      // Show notification
+      _showNotification('🛑 Analysis cancelled by user');
+
+      notifyListeners();
+      debugPrint(
+          '🛑 [CONTEXT_AWARE_CONTROLLER] Analysis cancelled successfully');
+    }
   }
 
   /// Set loading state
