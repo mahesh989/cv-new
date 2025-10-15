@@ -36,6 +36,20 @@ class AIModelService extends ChangeNotifier {
         debugPrint(
             '🔐 User is logged in, fetching AI configuration from backend');
         await _fetchUserConfigurationFromBackend();
+        
+        // If no model was found in backend, check local storage and sync it
+        if (_currentModel == null) {
+          final savedModelId = prefs.getString(_selectedModelKey);
+          if (savedModelId != null) {
+            final savedModel = AIModelsConfig.getModel(savedModelId);
+            if (savedModel != null) {
+              debugPrint('🔄 No backend model found, syncing local model: ${savedModel.name}');
+              _currentModel = savedModel;
+              // Sync this model to the backend
+              await _syncModelWithBackend(savedModelId);
+            }
+          }
+        }
       } else {
         // User is not logged in, load from local storage (for offline mode)
         final savedModelId = prefs.getString(_selectedModelKey);
@@ -397,10 +411,13 @@ class AIModelService extends ChangeNotifier {
         final data = jsonDecode(response.body);
         final currentModel = data['current_model'];
         final provider = data['current_provider'];
+        
+        debugPrint('🔍 Backend response: $data');
 
         if (currentModel && provider) {
           // Map backend model name to frontend model ID
           final frontendModelId = _getFrontendModelId(provider, currentModel);
+          debugPrint('🔍 Mapped backend model to frontend ID: $frontendModelId');
           if (frontendModelId != null) {
             final model = AIModelsConfig.getModel(frontendModelId);
             if (model != null) {
@@ -410,16 +427,20 @@ class AIModelService extends ChangeNotifier {
               debugPrint(
                   '✅ Restored user AI configuration from backend: $provider/$currentModel');
               notifyListeners();
+            } else {
+              debugPrint('❌ Frontend model not found for ID: $frontendModelId');
             }
+          } else {
+            debugPrint('❌ Could not map backend model to frontend ID');
           }
         } else {
-          debugPrint('🔍 No AI configuration found for user in backend');
+          debugPrint('🔍 No AI configuration found for user in backend (currentModel: $currentModel, provider: $provider)');
         }
       } else if (response.statusCode == 404) {
-        debugPrint('🔍 No AI model configured for user in backend');
+        debugPrint('🔍 No AI model configured for user in backend (404)');
       } else {
         debugPrint(
-            '⚠️ Failed to fetch user AI configuration: ${response.statusCode}');
+            '⚠️ Failed to fetch user AI configuration: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       debugPrint('❌ Error fetching user AI configuration from backend: $e');
