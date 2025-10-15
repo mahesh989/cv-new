@@ -107,13 +107,13 @@ class AIServiceManager:
                         from app.services.user_api_key_manager import user_api_key_manager
                         key_info = user_api_key_manager.get_api_key_info(user, provider_name)
                         
-                        if key_info and key_info.is_valid:
-                            # Trust the database - key is valid, initialize provider
+                        if key_info:
+                            # API key exists (valid or invalid), initialize provider
                             self._providers[provider_name] = provider_instance
-                            logger.info(f"✅ Initialized {provider_name} provider with model {default_model} for user {user.email} (trusting database validation)")
-                        elif key_info and not key_info.is_valid:
-                            # Key was previously validated and marked invalid, skip
-                            logger.warning(f"⚠️ {provider_name} provider skipped for user {user.email} - API key marked as invalid in database")
+                            if key_info.is_valid:
+                                logger.info(f"✅ Initialized {provider_name} provider with model {default_model} for user {user.email} (valid API key)")
+                            else:
+                                logger.warning(f"⚠️ Initialized {provider_name} provider with model {default_model} for user {user.email} (invalid API key - will fail on API calls)")
                         else:
                             # No validation record, do a one-time validation
                             logger.info(f"🔍 No validation record for {provider_name}, performing one-time validation for user {user.email}")
