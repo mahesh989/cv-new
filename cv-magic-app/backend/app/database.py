@@ -48,7 +48,7 @@ def create_tables():
     """Create database tables"""
     try:
         # Import all models here to ensure they are registered
-        from app.models import user, cv, base
+        from app.models import user, cv, base, user_preferences, user_api_keys
         
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
