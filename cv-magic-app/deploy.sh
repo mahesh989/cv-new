@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# CV Magic App - Unified Deployment Script
-# Usage: ./deploy.sh [--quick|--full|--check|--help]
+# CV Magic App - Interactive Deployment Script
+# Usage: ./deploy.sh
 
 set -e  # Exit on any error
 
@@ -10,6 +10,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
@@ -18,48 +19,58 @@ VPS_USER="ubuntu"
 VPS_PATH="~/cv-new/cv-magic-app"
 BRANCH="enhanced-vps-ghs"
 
-# Default mode
-MODE="full"
+# Function to show interactive menu
+show_menu() {
+    clear
+    echo -e "${BLUE}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║                    CV Magic App Deployment                   ║${NC}"
+    echo -e "${BLUE}║                                                              ║${NC}"
+    echo -e "${BLUE}║  🚀 Choose your deployment option:                          ║${NC}"
+    echo -e "${BLUE}║                                                              ║${NC}"
+    echo -e "${BLUE}║  ${GREEN}1)${NC} Full Deployment (thorough, with cleanup)              ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${YELLOW}2)${NC} Quick Deployment (fast, minimal cleanup)             ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${CYAN}3)${NC} Check Status Only (monitoring)                        ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${RED}4)${NC} Exit                                                   ${BLUE}║${NC}"
+    echo -e "${BLUE}║                                                              ║${NC}"
+    echo -e "${BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${CYAN}Target: ${VPS_USER}@${VPS_HOST}${NC}"
+    echo -e "${CYAN}Branch: ${BRANCH}${NC}"
+    echo ""
+    echo -n "Enter your choice [1-4]: "
+}
 
-# Parse command line arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --quick)
-            MODE="quick"
-            shift
-            ;;
-        --full)
-            MODE="full"
-            shift
-            ;;
-        --check)
-            MODE="check"
-            shift
-            ;;
-        --help|-h)
-            echo "CV Magic App - Unified Deployment Script"
-            echo ""
-            echo "Usage: ./deploy.sh [OPTION]"
-            echo ""
-            echo "Options:"
-            echo "  --quick    Quick deployment (fast, minimal cleanup)"
-            echo "  --full     Full deployment (thorough, with cleanup) [default]"
-            echo "  --check    Check deployment status only"
-            echo "  --help     Show this help message"
-            echo ""
-            echo "Examples:"
-            echo "  ./deploy.sh           # Full deployment"
-            echo "  ./deploy.sh --quick   # Quick deployment"
-            echo "  ./deploy.sh --check   # Check status"
-            exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            echo "Use --help for usage information"
-            exit 1
-            ;;
-    esac
-done
+# Function to get user choice
+get_user_choice() {
+    while true; do
+        show_menu
+        read -r choice
+        case $choice in
+            1)
+                MODE="full"
+                break
+                ;;
+            2)
+                MODE="quick"
+                break
+                ;;
+            3)
+                MODE="check"
+                break
+                ;;
+            4)
+                echo -e "${YELLOW}👋 Goodbye!${NC}"
+                exit 0
+                ;;
+            *)
+                echo -e "${RED}❌ Invalid option. Please enter 1, 2, 3, or 4.${NC}"
+                echo ""
+                echo -n "Press Enter to continue..."
+                read -r
+                ;;
+        esac
+    done
+}
 
 # Function to print colored output
 print_status() {
@@ -203,6 +214,29 @@ EOF
     echo "  Restart:   ssh $VPS_USER@$VPS_HOST 'cd $VPS_PATH && docker compose restart'"
     echo "  Full logs: ssh $VPS_USER@$VPS_HOST 'cd $VPS_PATH && docker compose logs --tail=100'"
 }
+
+# Main execution
+echo -e "${BLUE}🚀 CV Magic App - Interactive Deployment Script${NC}"
+echo ""
+
+# Get user choice
+get_user_choice
+
+# Show selected option
+case $MODE in
+    "full")
+        echo -e "${GREEN}✅ Selected: Full Deployment${NC}"
+        echo ""
+        ;;
+    "quick")
+        echo -e "${YELLOW}⚡ Selected: Quick Deployment${NC}"
+        echo ""
+        ;;
+    "check")
+        echo -e "${CYAN}🔍 Selected: Status Check${NC}"
+        echo ""
+        ;;
+esac
 
 # Execute based on mode
 case $MODE in
