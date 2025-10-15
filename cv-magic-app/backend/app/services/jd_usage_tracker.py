@@ -106,7 +106,8 @@ class JDUsageTracker:
                 usage_info = self.usage_data["jd_usage"][jd_hash]
                 usage_count = usage_info.get("usage_count", 0)
                 logger.info(f"🔍 [JD_TRACKER] JD hash {jd_hash[:8]}... found with {usage_count} previous uses")
-                return usage_count == 0
+                # If JD hash exists in usage data, it has been used before (not first time)
+                return False
             else:
                 logger.info(f"🆕 [JD_TRACKER] JD hash {jd_hash[:8]}... not found - first time usage")
                 return True
