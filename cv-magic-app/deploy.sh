@@ -27,9 +27,10 @@ show_menu() {
     echo -e "${BLUE}║                                                              ║${NC}"
     echo -e "${BLUE}║  🚀 Choose your deployment option:                          ║${NC}"
     echo -e "${BLUE}║                                                              ║${NC}"
-    echo -e "${BLUE}║  ${GREEN}1)${NC} Full Deployment (thorough, with cleanup)              ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${GREEN}1)${NC} Full Deployment (thorough, preserves data)           ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${YELLOW}2)${NC} Quick Deployment (fast, minimal cleanup)             ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${CYAN}3)${NC} Check Status Only (monitoring)                        ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${RED}5)${NC} Reset Database (⚠️  DESTROYS ALL DATA)                 ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${RED}4)${NC} Exit                                                   ${BLUE}║${NC}"
     echo -e "${BLUE}║                                                              ║${NC}"
     echo -e "${BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
@@ -37,7 +38,7 @@ show_menu() {
     echo -e "${CYAN}Target: ${VPS_USER}@${VPS_HOST}${NC}"
     echo -e "${CYAN}Branch: ${BRANCH}${NC}"
     echo ""
-    echo -n "Enter your choice [1-4]: "
+    echo -n "Enter your choice [1-5]: "
 }
 
 # Function to get user choice
@@ -62,8 +63,12 @@ get_user_choice() {
                 echo -e "${YELLOW}👋 Goodbye!${NC}"
                 exit 0
                 ;;
+            5)
+                MODE="reset"
+                break
+                ;;
             *)
-                echo -e "${RED}❌ Invalid option. Please enter 1, 2, 3, or 4.${NC}"
+                echo -e "${RED}❌ Invalid option. Please enter 1, 2, 3, 4, or 5.${NC}"
                 echo ""
                 echo -n "Press Enter to continue..."
                 read -r
@@ -103,7 +108,7 @@ fi
 show_cleanup_summary() {
     echo ""
     echo "🧹 Full Cleanup Operations:"
-    echo "  ✅ Stop all containers with volumes and orphan removal"
+    echo "  ✅ Stop all containers (preserves database and user data)"
     echo "  ✅ Remove unused containers"
     echo "  ✅ Remove unused images (preserves current project)"
     echo "  ✅ Remove unused networks"
@@ -113,6 +118,7 @@ show_cleanup_summary() {
     echo "  ✅ Disk space monitoring"
     echo ""
     echo "⚠️  Safety Features:"
+    echo "  🔒 Database volumes are preserved (no data loss)"
     echo "  🔒 User data volumes are preserved"
     echo "  🔒 Current project images are kept"
     echo "  🔒 All operations use '|| true' for safety"
@@ -141,7 +147,8 @@ deploy_full() {
         git pull origin $BRANCH
         
         echo "🛑 Stopping existing containers..."
-        docker compose down --volumes --remove-orphans || true
+        echo "  - Preserving database and user data volumes..."
+        docker compose down --remove-orphans || true
         
         echo "🧹 Performing comprehensive Docker cleanup..."
         echo "  - Checking disk space before cleanup..."
@@ -195,6 +202,64 @@ EOF
         print_info "Backend should be available at: https://cvagent.duckdns.org"
     else
         print_error "Full VPS deployment failed!"
+        exit 1
+    fi
+}
+
+# Reset database function (DANGEROUS - destroys all data)
+deploy_reset() {
+    print_header "⚠️  RESET DATABASE - DESTROYS ALL DATA"
+    print_warning "This will permanently delete all user data, analysis files, and database records!"
+    print_warning "This action cannot be undone!"
+    echo ""
+    echo -n "Are you absolutely sure? Type 'RESET' to confirm: "
+    read -r confirmation
+    
+    if [ "$confirmation" != "RESET" ]; then
+        print_info "Reset cancelled. No data was lost."
+        exit 0
+    fi
+    
+    print_info "Connecting to VPS: $VPS_USER@$VPS_HOST"
+    print_info "Target path: $VPS_PATH"
+    
+    ssh $VPS_USER@$VPS_HOST << EOF
+        set -e
+        
+        echo "🔍 Checking current directory..."
+        cd $VPS_PATH
+        
+        echo "🛑 Stopping all containers..."
+        docker compose down --volumes --remove-orphans || true
+        
+        echo "🗑️  Removing all volumes (database, user data, etc.)..."
+        docker volume prune -f || true
+        
+        echo "🧹 Cleaning up Docker resources..."
+        docker system prune -f || true
+        
+        echo "🔨 Building new containers..."
+        docker compose build --no-cache
+        
+        echo "🚀 Starting containers with fresh database..."
+        docker compose up -d
+        
+        echo "⏳ Waiting for services to start..."
+        sleep 10
+        
+        echo "🔍 Checking container status..."
+        docker compose ps
+        
+        echo "✅ Database reset completed!"
+        echo "⚠️  All user data has been permanently deleted!"
+EOF
+
+    if [ $? -eq 0 ]; then
+        print_warning "Database reset completed successfully!"
+        print_warning "All user data has been permanently deleted!"
+        print_info "Users will need to register again."
+    else
+        print_error "Database reset failed!"
         exit 1
     fi
 }
@@ -282,6 +347,10 @@ case $MODE in
         echo -e "${CYAN}🔍 Selected: Status Check${NC}"
         echo ""
         ;;
+    "reset")
+        echo -e "${RED}⚠️  Selected: Reset Database${NC}"
+        echo ""
+        ;;
 esac
 
 # Execute based on mode
@@ -294,6 +363,9 @@ case $MODE in
         ;;
     "check")
         check_deployment
+        ;;
+    "reset")
+        deploy_reset
         ;;
     *)
         print_error "Unknown mode: $MODE"
