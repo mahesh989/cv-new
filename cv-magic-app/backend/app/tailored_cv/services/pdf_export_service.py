@@ -574,14 +574,30 @@ from datetime import datetime
 
     selector = get_selector_for_user(user_email)
     cv_context = selector.get_latest_tailored_cv_only(company)
+    logger.info(
+        "[PDF_EXPORT] user=%s company=%s json_path=%s txt_path=%s exists=%s",
+        user_email,
+        company,
+        str(cv_context.json_path) if cv_context.json_path else None,
+        str(cv_context.txt_path) if cv_context.txt_path else None,
+        cv_context.exists,
+    )
 
     # Convert tailored JSON → generator schema using the adapter
+    if not cv_context.json_path or not cv_context.json_path.exists():
+        raise FileNotFoundError(f"Tailored JSON not found for company '{company}'")
     pdf_data = load_tailored_cv_and_convert(str(cv_context.json_path))
 
     export_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    out_path = export_dir / f"{company}_tailored_resume_{ts}.pdf"
+    safe_company = company.replace(" ", "_")
+    out_path = export_dir / f"{safe_company}_tailored_resume_{ts}.pdf"
+    logger.info("[PDF_EXPORT] writing to %s", out_path)
 
-    ResumePDFGenerator(pdf_data).generate(str(out_path))
+    try:
+        ResumePDFGenerator(pdf_data).generate(str(out_path))
+    except Exception as e:
+        logger.error("[PDF_EXPORT] generation failed: %s", e)
+        raise
 
     return out_path
