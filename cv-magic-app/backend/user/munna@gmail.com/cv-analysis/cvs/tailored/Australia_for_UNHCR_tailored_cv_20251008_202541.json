@@ -1,0 +1,43 @@
+{
+  "contact": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "linkedin": "",
+    "location": "Hurstville, NSW, 2220",
+    "website": ""
+  },
+  "education": [],
+  "experience": [
+    {
+      "company": "The Bitrates",
+      "title": "Data Analyst",
+      "location": "The Bitrates, Sydney, New South Wales, Australia",
+      "start_date": "Jul 2024",
+      "end_date": "Present",
+      "duration": null,
+      "bullets": [
+        "Designed and implemented 5 Python scripts for data cleaning and preprocessing, improving data pipeline efficiency by 30% and processing 100K records weekly.",
+        "Developed 5 machine learning models in Python for predictive analytics, enabling datadriven business decisions and increasing accuracy by 20%."
+      ]
+    }
+  ],
+  "projects": [],
+  "skills": [
+    "SQL",
+    "Python",
+    "Excel",
+    "Power BI",
+    "VBA",
+    "Analytical",
+    "Stakeholder Management",
+    "Data Warehouse",
+    "Data Extraction",
+    "Data Analysis",
+    "Business Intelligence",
+    "ResultsDriven"
+  ],
+  "created_at": "2025-10-08 09:25:40.881457",
+  "last_edited": "2025-10-09T12:21:58.325190",
+  "manually_edited": true
+}

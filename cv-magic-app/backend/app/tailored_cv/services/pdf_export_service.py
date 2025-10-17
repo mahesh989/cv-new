@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class ResumePDFGenerator:
-    """Generate a PDF resume from structured or lightly-structured data."""
+    """Generate a PDF resume from structured data with perfect alignment."""
 
     def __init__(self, data: Dict[str, Any], page_margins: Optional[Dict[str, float]] = None) -> None:
         self.data = data
@@ -39,6 +39,16 @@ class ResumePDFGenerator:
         # Alignment constants
         self.content_left_margin = 0.15 * inch
         self.bullet_indent = 18
+
+        # Uniform spacing settings (in points)
+        self.spacing = {
+            'section_above': 16,
+            'section_below': 4,
+            'subsection_gap': 12,
+            'bullet_gap': 3,
+            'after_bullets': 8,
+            'line_after_section': 6,
+        }
 
         self._calculate_dimensions()
         self._setup_custom_styles()
@@ -58,98 +68,175 @@ class ResumePDFGenerator:
     def _setup_custom_styles(self) -> None:
         style_names = [s.name for s in self.styles.byName.values()]
 
+        # Name style
         if 'Name' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='Name', parent=self.styles['Heading1'], fontSize=24,
-                textColor=colors.HexColor('#1a1a1a'), spaceAfter=6, spaceBefore=0,
-                alignment=TA_CENTER, fontName='Helvetica-Bold', leading=24
+                name='Name',
+                parent=self.styles['Heading1'],
+                fontSize=24,
+                textColor=colors.HexColor('#1a1a1a'),
+                spaceAfter=6,
+                spaceBefore=0,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold',
+                leading=24
             ))
 
+        # Contact info style
         if 'Contact' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='Contact', parent=self.styles['Normal'], fontSize=10,
-                textColor=colors.HexColor('#444444'), alignment=TA_CENTER,
-                spaceAfter=4, leading=10
+                name='Contact',
+                parent=self.styles['Normal'],
+                fontSize=10,
+                textColor=colors.HexColor('#444444'),
+                alignment=TA_CENTER,
+                spaceAfter=4,
+                leading=10
             ))
 
+        # Section header
         if 'SectionHeader' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='SectionHeader', parent=self.styles['Heading2'], fontSize=14,
-                textColor=colors.HexColor('#1a1a1a'), spaceAfter=6, spaceBefore=0,
-                fontName='Helvetica-Bold', alignment=TA_LEFT, leftIndent=self.content_left_margin,
-                rightIndent=0, leading=14
+                name='SectionHeader',
+                parent=self.styles['Heading2'],
+                fontSize=14,
+                textColor=colors.HexColor('#1a1a1a'),
+                spaceAfter=self.spacing['section_below'],
+                spaceBefore=0,
+                fontName='Helvetica-Bold',
+                alignment=TA_LEFT,
+                leftIndent=self.content_left_margin,
+                rightIndent=0,
+                leading=14
             ))
 
+        # Body text style
         if 'BodyText' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='BodyText', parent=self.styles['Normal'], fontSize=11,
-                textColor=colors.HexColor('#333333'), spaceAfter=6, alignment=TA_JUSTIFY,
-                leftIndent=0, rightIndent=0, leading=12
+                name='BodyText',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#333333'),
+                spaceAfter=6,
+                alignment=TA_JUSTIFY,
+                leftIndent=self.content_left_margin,
+                rightIndent=0,
+                leading=12
             ))
 
+        # Bullet character style
         if 'BulletChar' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='BulletChar', parent=self.styles['Normal'], fontSize=11,
-                textColor=colors.HexColor('#333333'), alignment=TA_LEFT,
-                leftIndent=0, rightIndent=0, leading=12
+                name='BulletChar',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#333333'),
+                alignment=TA_LEFT,
+                leftIndent=0,
+                rightIndent=0,
+                leading=12
             ))
 
+        # Job Title style
         if 'JobTitle' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='JobTitle', parent=self.styles['Normal'], fontSize=11,
-                textColor=colors.HexColor('#1a1a1a'), fontName='Helvetica-Bold',
-                spaceAfter=0, alignment=TA_LEFT, leftIndent=0, rightIndent=0, leading=12
+                name='JobTitle',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#1a1a1a'),
+                fontName='Helvetica-Bold',
+                spaceAfter=0,
+                alignment=TA_LEFT,
+                leftIndent=0,
+                rightIndent=0,
+                leading=12
             ))
 
+        # Date style - right aligned
         if 'DateRight' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='DateRight', parent=self.styles['Normal'], fontSize=11,
-                textColor=colors.HexColor('#555555'), fontName='Helvetica',
-                alignment=TA_RIGHT, spaceAfter=0, leftIndent=0, rightIndent=0, leading=12
+                name='DateRight',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#555555'),
+                fontName='Helvetica',
+                alignment=TA_RIGHT,
+                spaceAfter=0,
+                leftIndent=0,
+                rightIndent=0,
+                leading=12
             ))
 
+        # Company style
         if 'Company' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='Company', parent=self.styles['Normal'], fontSize=11,
-                textColor=colors.HexColor('#555555'), fontName='Helvetica-Oblique',
-                spaceAfter=8, alignment=TA_LEFT, leftIndent=self.content_left_margin,
-                rightIndent=0, leading=12
+                name='Company',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#555555'),
+                fontName='Helvetica-Oblique',
+                spaceAfter=8,
+                alignment=TA_LEFT,
+                leftIndent=self.content_left_margin,
+                rightIndent=0,
+                leading=12
             ))
 
+        # Degree style
         if 'Degree' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='Degree', parent=self.styles['Normal'], fontSize=11,
-                textColor=colors.HexColor('#1a1a1a'), fontName='Helvetica-Bold',
-                spaceAfter=0, alignment=TA_LEFT, leftIndent=0, rightIndent=0, leading=12
+                name='Degree',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#1a1a1a'),
+                fontName='Helvetica-Bold',
+                spaceAfter=0,
+                alignment=TA_LEFT,
+                leftIndent=0,
+                rightIndent=0,
+                leading=12
             ))
 
+        # Institution style
         if 'Institution' not in style_names:
             self.styles.add(ParagraphStyle(
-                name='Institution', parent=self.styles['Normal'], fontSize=11,
-                textColor=colors.HexColor('#555555'), spaceAfter=12, alignment=TA_LEFT,
-                leftIndent=self.content_left_margin, rightIndent=0, leading=12
+                name='Institution',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#555555'),
+                spaceAfter=12,
+                alignment=TA_LEFT,
+                leftIndent=self.content_left_margin,
+                rightIndent=0,
+                leading=12
             ))
 
     def _create_section_with_line(self, title: str):
-        elements = [Spacer(1, 16), Paragraph(title, self.styles['SectionHeader'])]
+        elements = []
+        elements.append(Spacer(1, self.spacing['section_above']))
+        elements.append(Paragraph(title, self.styles['SectionHeader']))
+        
         line = HRFlowable(
             width=self._usable_width() - self.content_left_margin,
             thickness=0.5,
             color=colors.HexColor('#666666'),
             spaceBefore=2,
-            spaceAfter=6,
-            hAlign='LEFT',
+            spaceAfter=self.spacing['line_after_section'],
+            hAlign='LEFT'
         )
         line._xoffset = self.content_left_margin
         elements.append(line)
+        
         return elements
 
     def _make_bullet_row(self, text: str) -> Table:
         bullet_col = self.bullet_indent
         usable = self._usable_width() - self.content_left_margin
         text_col = usable - bullet_col
+        
         bullet_par = Paragraph("•", self.styles['BulletChar'])
         text_par = Paragraph(text, self.styles['BodyText'])
+        
         tbl = Table([[bullet_par, text_par]], colWidths=[bullet_col, text_col])
         tbl.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
@@ -161,49 +248,74 @@ class ResumePDFGenerator:
         return tbl
 
     def _make_bullet_rows(self, texts: List[str]):
-        out: List[Any] = []
+        out = []
         for i, text in enumerate(texts):
             out.append(self._make_bullet_row(text))
             if i < len(texts) - 1:
-                out.append(Spacer(1, 3))
+                out.append(Spacer(1, self.spacing['bullet_gap']))
         return out
 
-    def _contact_elements(self) -> List[Any]:
-        personal = self.data.get('personal_information', {})
-        if not isinstance(personal, dict):
-            return []
-        out: List[Any] = [Spacer(1, 0.05 * inch)]
-        name = personal.get('name') or personal.get('full_name')
-        if name:
-            out.append(Paragraph(str(name), self.styles['Name']))
-        line1 = []
-        for key in ['location', 'phone', 'email']:
-            val = personal.get(key)
-            if val:
-                line1.append(str(val))
-        if line1:
-            out.append(Paragraph(" | ".join(line1), self.styles['Contact']))
-        line2 = []
-        for key in ['linkedin', 'github', 'portfolio']:
-            val = personal.get(key)
-            if val:
-                line2.append(str(val))
-        if line2:
-            out.append(Paragraph(" | ".join(line2), self.styles['Contact']))
-        return out
-
-    def _paragraph_block(self, text: str):
+    def _create_aligned_two_column(self, left_content: str, right_content: str, 
+                                   left_style: str = 'JobTitle', right_style: str = 'DateRight'):
+        left_para = Paragraph(left_content, self.styles[left_style])
+        right_para = Paragraph(right_content, self.styles[right_style])
+        
         table = Table(
-            [[Paragraph(text, self.styles['BodyText'])]],
-            colWidths=[self._usable_width() - self.content_left_margin],
+            [[left_para, right_para]], 
+            colWidths=self.two_column_widths,
             style=[
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ('LEFTPADDING', (0, 0), (-1, -1), self.content_left_margin),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 0),
                 ('TOPPADDING', (0, 0), (-1, -1), 0),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-            ],
+            ]
         )
+        
         return table
+
+    def _contact_elements(self):
+        elements = []
+        personal_info = self.data.get('personal_information', {})
+
+        elements.append(Spacer(1, 0.05 * inch))
+
+        # Name
+        name = personal_info.get('name', 'N/A')
+        elements.append(Paragraph(name, self.styles['Name']))
+
+        # Contact Line 1
+        contact_line1 = []
+        if personal_info.get('location'):
+            contact_line1.append(personal_info['location'])
+        if personal_info.get('phone'):
+            contact_line1.append(personal_info['phone'])
+        if personal_info.get('email'):
+            contact_line1.append(personal_info['email'])
+
+        if contact_line1:
+            elements.append(Paragraph(" | ".join(contact_line1), self.styles['Contact']))
+
+        # Contact Line 2
+        contact_line2 = []
+        if personal_info.get('linkedin'):
+            contact_line2.append(personal_info['linkedin'])
+        if personal_info.get('github'):
+            contact_line2.append(personal_info['github'])
+
+        portfolio = personal_info.get('portfolio_links', {})
+        if portfolio and portfolio.get('blogs'):
+            contact_line2.append(portfolio['blogs'])
+        if portfolio and portfolio.get('dashboard_portfolio'):
+            contact_line2.append(portfolio['dashboard_portfolio'])
+
+        if contact_line2:
+            elements.append(Paragraph(" | ".join(contact_line2), self.styles['Contact']))
+
+        return elements
+
+    def _paragraph_block(self, text: str):
+        return Paragraph(text, self.styles['BodyText'])
 
     def generate(self, filename: str) -> str:
         doc = SimpleDocTemplate(
@@ -217,6 +329,7 @@ class ResumePDFGenerator:
 
         elements: List[Any] = []
 
+        # Contact section
         elements.extend(self._contact_elements())
 
         # Career profile
@@ -225,241 +338,248 @@ class ResumePDFGenerator:
             elements.extend(self._create_section_with_line('CAREER PROFILE'))
             elements.append(self._paragraph_block(profile['summary']))
 
-        # Experience (structured)
+        # Experience
         experience = self.data.get('experience', [])
         if isinstance(experience, list) and experience:
             elements.extend(self._create_section_with_line('PROFESSIONAL EXPERIENCE'))
-            for exp in experience:
+            for i, exp in enumerate(experience):
                 if not isinstance(exp, dict):
                     continue
+                
                 title = exp.get('title', 'N/A')
                 duration = exp.get('duration', '')
                 company = exp.get('company', '')
                 location = exp.get('location', '')
-                hdr = Paragraph(f"<b>{title}</b>", self.styles['JobTitle'])
-                date = Paragraph(duration or '', self.styles['DateRight'])
-                tbl = Table([[hdr, date]], colWidths=self.two_column_widths, style=[
-                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                    ('LEFTPADDING', (0, 0), (-1, -1), self.content_left_margin),
-                    ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-                    ('TOPPADDING', (0, 0), (-1, -1), 0),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-                ])
-                elements.append(tbl)
-                comps = [c for c in [company, location] if c]
-                if comps:
-                    elements.append(Paragraph(" | ".join(comps), self.styles['Company']))
-                if isinstance(exp.get('responsibilities'), list):
+                
+                # Title and date
+                if duration:
+                    table = self._create_aligned_two_column(f"<b>{title}</b>", duration, 'JobTitle', 'DateRight')
+                    elements.append(table)
+                else:
+                    elements.append(Paragraph(f"<b>{title}</b>", self.styles['BodyText']))
+                
+                # Company and location
+                company_parts = []
+                if company:
+                    company_parts.append(company)
+                if location:
+                    company_parts.append(location)
+                
+                if company_parts:
+                    elements.append(Paragraph(" | ".join(company_parts), self.styles['Company']))
+                
+                # Responsibilities
+                if exp.get('responsibilities') and isinstance(exp['responsibilities'], list):
                     elements.extend(self._make_bullet_rows([str(x) for x in exp['responsibilities']]))
+                    
+                    if i < len(experience) - 1:
+                        elements.append(Spacer(1, self.spacing['after_bullets']))
+                elif i < len(experience) - 1:
+                    elements.append(Spacer(1, self.spacing['subsection_gap']))
 
-        # Education (structured)
+        # Education
         education = self.data.get('education', [])
         if isinstance(education, list) and education:
             elements.extend(self._create_section_with_line('EDUCATION'))
-            for edu in education:
+            for i, edu in enumerate(education):
                 if not isinstance(edu, dict):
                     continue
-                degree = Paragraph(f"<b>{edu.get('degree','')}</b>", self.styles['Degree'])
-                year = Paragraph(edu.get('year',''), self.styles['DateRight'])
-                tbl = Table([[degree, year]], colWidths=self.two_column_widths, style=[
-                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                    ('LEFTPADDING', (0, 0), (-1, -1), self.content_left_margin),
-                    ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-                    ('TOPPADDING', (0, 0), (-1, -1), 0),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-                ])
-                elements.append(tbl)
-                inst_parts = [p for p in [edu.get('institution'), edu.get('location')] if p]
+                
+                degree = edu.get('degree', 'N/A')
+                institution = edu.get('institution', '')
+                year = edu.get('year', '')
+                location = edu.get('location', '')
+                
+                # Degree and year
+                if year:
+                    table = self._create_aligned_two_column(f"<b>{degree}</b>", year, 'Degree', 'DateRight')
+                    elements.append(table)
+                else:
+                    elements.append(Paragraph(f"<b>{degree}</b>", self.styles['BodyText']))
+                
+                # Institution and location
+                inst_parts = []
+                if institution:
+                    inst_parts.append(institution)
+                if location and location not in institution:
+                    inst_parts.append(location)
+                
                 if inst_parts:
                     elements.append(Paragraph(", ".join(inst_parts), self.styles['Institution']))
+                
+                if i < len(education) - 1:
+                    elements.append(Spacer(1, 6))
 
-        # Skills (structured)
+        # Skills
         skills = self.data.get('skills', {})
-        tech_skills = None
-        if isinstance(skills, dict):
-            tech_skills = skills.get('technical_skills')
-        if isinstance(tech_skills, list) and tech_skills:
+        if skills and skills.get('technical_skills'):
             elements.extend(self._create_section_with_line('TECHNICAL SKILLS'))
-            for s in tech_skills:
-                elements.extend(self._make_bullet_rows([str(s)]))
+            for skill in skills['technical_skills']:
+                elements.extend(self._make_bullet_rows([skill]))
+
+        # Projects
+        projects = self.data.get('projects', [])
+        if isinstance(projects, list) and projects:
+            elements.extend(self._create_section_with_line('PROJECTS'))
+            for i, proj in enumerate(projects):
+                if not isinstance(proj, dict):
+                    continue
+                
+                name = proj.get('name', 'N/A')
+                date = proj.get('date', '')
+                
+                if date:
+                    table = self._create_aligned_two_column(f"<b>{name}</b>", date, 'JobTitle', 'DateRight')
+                    elements.append(table)
+                else:
+                    elements.append(Paragraph(f"<b>{name}</b>", self.styles['BodyText']))
+                
+                if proj.get('description'):
+                    elements.append(Paragraph(proj['description'], self.styles['BodyText']))
+                
+                if proj.get('technologies'):
+                    tech_text = f"Technologies: {', '.join(proj['technologies'])}"
+                    elements.append(Paragraph(tech_text, self.styles['Company']))
+                
+                if i < len(projects) - 1:
+                    elements.append(Spacer(1, self.spacing['subsection_gap']))
+
+        # Certifications
+        certifications = self.data.get('certifications', [])
+        if isinstance(certifications, list) and certifications:
+            elements.extend(self._create_section_with_line('CERTIFICATIONS'))
+            for cert in certifications:
+                if isinstance(cert, dict):
+                    cert_name = cert.get('name', 'N/A')
+                    issuer = cert.get('issuer', '')
+                    date = cert.get('date', '')
+                    
+                    cert_text = f"{cert_name}"
+                    if issuer:
+                        cert_text += f" - {issuer}"
+                    if date:
+                        cert_text += f" ({date})"
+                    
+                    elements.extend(self._make_bullet_rows([cert_text]))
+                else:
+                    elements.extend(self._make_bullet_rows([str(cert)]))
 
         doc.build(elements)
+        logger.info(f"✓ PDF generated with perfect alignment: {filename}")
         return filename
 
 
-def _parse_text_cv_to_minimal_structure(text: str) -> Dict[str, Any]:
-    """Parse the saved plain text tailored CV into a minimal structure usable by the generator.
-    This is intentionally simple and robust.
-    """
-    lines = [ln.strip() for ln in text.splitlines()]
-    lines = [ln for ln in lines if ln]
-
-    # Heuristic: first non-empty line as name if it looks like a name
-    name = lines[0] if lines else 'Candidate'
-
-    bullets: List[str] = []
-    for ln in lines:
-        if ln.startswith('•'):
-            bullets.append(ln[1:].strip())
-
-    return {
-        'personal_information': {
-            'name': name,
-        },
-        'career_profile': {
-            'summary': 'Tailored resume generated from latest CV content.'
-        },
-        'skills': {'technical_skills': bullets[:10]}  # best-effort
-    }
-
-
 def _map_tailored_json_to_generator_schema(data: Dict[str, Any]) -> Dict[str, Any]:
-    """Map TailoredCV JSON (contact/education/experience/skills) to the generator schema
-    used by ResumePDFGenerator (personal_information, experience[responsibilities], etc.).
-    """
-    mapped: Dict[str, Any] = {
-        'personal_information': {
-            'name': None,
-            'phone': None,
-            'email': None,
-            'linkedin': None,
-            'location': None,
-            'github': None,
-        },
-        'career_profile': {},
-        'education': [],
-        'experience': [],
-        'skills': {'technical_skills': []},
-        'projects': [],
-        'certifications': [],
-    }
-
-    contact = data.get('contact') or {}
-    if isinstance(contact, dict):
-        mapped['personal_information'].update({
-            'name': contact.get('name') or 'Candidate',
-            'phone': contact.get('phone'),
-            'email': contact.get('email'),
-            'linkedin': contact.get('linkedin'),
-            'location': contact.get('location'),
-            'github': contact.get('website'),
-        })
-
-    # Optional summary if present
-    summary = data.get('summary') or data.get('profile') or None
-    if isinstance(summary, str) and summary.strip():
-        mapped['career_profile'] = {'summary': summary.strip()}
-
+    """Map tailored CV JSON to the generator schema."""
+    mapped = {}
+    
+    # Personal information
+    if 'personal_information' in data:
+        mapped['personal_information'] = data['personal_information']
+    
+    # Career profile
+    if 'career_profile' in data:
+        mapped['career_profile'] = data['career_profile']
+    
     # Education
-    for edu in data.get('education') or []:
-        if not isinstance(edu, dict):
-            continue
-        degree = edu.get('degree') or ''
-        institution = edu.get('institution') or ''
-        year = edu.get('graduation_date') or edu.get('year') or ''
-        location = edu.get('location') or ''
-        mapped['education'].append({
-            'degree': degree,
-            'institution': institution,
-            'year': year,
-            'location': location,
-        })
-
-    # Experience
-    for exp in data.get('experience') or []:
-        if not isinstance(exp, dict):
-            continue
-        start = (exp.get('start_date') or '').strip()
-        end = (exp.get('end_date') or '').strip()
-        duration = (exp.get('duration') or '').strip()
-        if not duration and start:
-            duration = f"{start} – {end or 'Present'}"
-
-        # Clean company/location to avoid duplicates like "Company | Company, City"
-        company_val = (exp.get('company') or '').strip()
-        location_val = (exp.get('location') or '').strip()
-        if company_val and location_val:
-            # Drop company name from location if embedded
-            lowered_company = company_val.lower()
-            cleaned_loc = ", ".join([
-                part.strip() for part in location_val.split(',')
-                if part.strip() and part.strip().lower() != lowered_company
-            ])
-            location_val = cleaned_loc
-        # Final de-duplication: if location equals company, clear location
-        if location_val and company_val and location_val.lower() == company_val.lower():
-            location_val = ''
-        mapped['experience'].append({
-            'title': exp.get('title') or '',
-            'company': company_val,
-            'location': location_val,
-            'duration': duration,
-            'responsibilities': [str(b) for b in (exp.get('bullets') or [])],
-        })
-
-    # Skills (flatten categories). Prefer categories with names into labeled lines.
-    skills = data.get('skills') or []
-    flat: List[str] = []
-    if isinstance(skills, list):
-        for cat in skills:
-            if isinstance(cat, dict):
-                category_name = cat.get('category') or ''
-                items = [str(s) for s in (cat.get('skills') or [])]
-                if category_name and items:
-                    flat.append(f"{category_name}: {', '.join(items)}")
+    if 'education' in data:
+        mapped['education'] = data['education']
+    
+    # Experience - clean up duplicates in company/location
+    if 'experience' in data:
+        experiences = []
+        for exp in data['experience']:
+            if not isinstance(exp, dict):
+                continue
+            
+            cleaned_exp = exp.copy()
+            
+            # Clean company/location duplication
+            company = exp.get('company', '')
+            location = exp.get('location', '')
+            if company and location and location in company:
+                cleaned_exp['location'] = ''
+            
+            # Build duration if missing
+            if not cleaned_exp.get('duration'):
+                start = exp.get('start_date', '')
+                end = exp.get('end_date', 'Present')
+                if start:
+                    cleaned_exp['duration'] = f"{start} - {end}"
+            
+            experiences.append(cleaned_exp)
+        mapped['experience'] = experiences
+    
+    # Skills - flatten categories
+    if 'skills' in data:
+        skills_data = data['skills']
+        if isinstance(skills_data, dict):
+            technical = []
+            for category, items in skills_data.items():
+                if isinstance(items, list) and items:
+                    technical.append(f"{category}: {', '.join(map(str, items))}")
+            mapped['skills'] = {'technical_skills': technical}
+        elif isinstance(skills_data, list):
+            # Convert dict entries into labeled strings if needed
+            technical = []
+            for item in skills_data:
+                if isinstance(item, dict):
+                    cat = item.get('category')
+                    items = item.get('skills')
+                    if cat and isinstance(items, list):
+                        technical.append(f"{cat}: {', '.join(map(str, items))}")
+                    else:
+                        technical.append(str(item))
                 else:
-                    flat.extend(items)
-            elif isinstance(cat, str):
-                flat.append(cat)
-    elif isinstance(skills, dict) and 'technical_skills' in skills:
-        flat.extend([str(x) for x in skills.get('technical_skills') or []])
-    mapped['skills']['technical_skills'] = flat
-
-    # Projects (optional)
-    for proj in data.get('projects') or []:
-        if not isinstance(proj, dict):
-            continue
-        mapped['projects'].append({
-            'name': proj.get('name') or '',
-            'date': proj.get('duration') or proj.get('date') or '',
-            'description': proj.get('context') or '',
-            'technologies': proj.get('technologies') or [],
-        })
-
+                    technical.append(str(item))
+            mapped['skills'] = {'technical_skills': technical}
+    
+    # Ensure personal_information exists even if missing in source
+    if 'personal_information' not in mapped:
+        mapped['personal_information'] = {
+            'name': (data.get('contact') or {}).get('name', 'Candidate'),
+            'phone': (data.get('contact') or {}).get('phone'),
+            'email': (data.get('contact') or {}).get('email'),
+            'linkedin': (data.get('contact') or {}).get('linkedin'),
+            'location': (data.get('contact') or {}).get('location'),
+        }
+    
+    # Projects
+    if 'projects' in data:
+        mapped['projects'] = data['projects']
+    
+    # Certifications
+    if 'certifications' in data:
+        mapped['certifications'] = data['certifications']
+    
     return mapped
 
 
 def build_resume_data_from_files(json_path: Optional[Path], _txt_path: Optional[Path]) -> Dict[str, Any]:
-    """Load structured tailored JSON and map it to the generator schema. Do not use TXT."""
+    """Load tailored JSON and map to generator schema."""
     if not json_path or not json_path.exists() or json_path.stat().st_size == 0:
         raise FileNotFoundError("Tailored JSON CV not found or empty. Export requires JSON.")
-    try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            raw = json.load(f)
-        if not isinstance(raw, dict):
-            raise ValueError("Tailored CV JSON must be an object")
-        return _map_tailored_json_to_generator_schema(raw)
-    except Exception as e:
-        logger.error(f"Failed to read or map tailored JSON at {json_path}: {e}")
-        raise
+    
+    with open(json_path, 'r', encoding='utf-8') as f:
+        raw = json.load(f)
+    
+    return _map_tailored_json_to_generator_schema(raw)
 
 
 def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> Path:
-    """Generate a PDF of the latest tailored CV for a company and return the file path."""
+    """Export the latest tailored CV as PDF (using the adapter that preserves JSON)."""
     from app.unified_latest_file_selector import get_selector_for_user
+    from app.tailored_cv.services.tailored_cv_adapter import load_tailored_cv_and_convert
 
     selector = get_selector_for_user(user_email)
     cv_context = selector.get_latest_tailored_cv_only(company)
-    if not cv_context.exists:
-        raise FileNotFoundError(f"No tailored CV found for company: {company}")
 
-    data = build_resume_data_from_files(cv_context.json_path, cv_context.txt_path)
+    # Convert tailored JSON → generator schema using the adapter
+    pdf_data = load_tailored_cv_and_convert(str(cv_context.json_path))
 
     export_dir.mkdir(parents=True, exist_ok=True)
     out_path = export_dir / f"{company}_tailored_resume.pdf"
 
-    generator = ResumePDFGenerator(data)
-    generator.generate(str(out_path))
+    ResumePDFGenerator(pdf_data).generate(str(out_path))
+
     return out_path
-
-

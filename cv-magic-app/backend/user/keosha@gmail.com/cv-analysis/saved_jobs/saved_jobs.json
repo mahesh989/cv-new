@@ -1,0 +1,34 @@
+{
+  "jobs": [
+    {
+      "company_name": "Australia for UNHCR",
+      "job_title": "Data Analyst",
+      "location": "Unknown",
+      "experience_required": "Minimum 2 years",
+      "seniority_level": "Unknown",
+      "industry": "Unknown",
+      "phone_number": null,
+      "email": null,
+      "website": null,
+      "work_type": null,
+      "extracted_at": "2025-10-09T16:07:00.814758",
+      "job_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst"
+    },
+    {
+      "company_name": "The Glen Centre",
+      "job_title": "Data Analyst",
+      "location": "Unknown",
+      "experience_required": "Unknown",
+      "seniority_level": "Unknown",
+      "industry": "Unknown",
+      "phone_number": null,
+      "email": null,
+      "website": null,
+      "work_type": null,
+      "extracted_at": "2025-10-09T16:54:13.966646",
+      "job_url": "https://www.ethicaljobs.com.au/members/glencentre/data-analyst"
+    }
+  ],
+  "last_updated": "2025-10-09T16:54:13.969760",
+  "total_jobs": 2
+}

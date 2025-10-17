@@ -1,0 +1,27 @@
+{
+  "contact": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "linkedin": "",
+    "location": "Hurstville, NSW, 2220",
+    "website": null
+  },
+  "education": [],
+  "experience": [],
+  "projects": [],
+  "skills": [
+    "SQL",
+    "Python",
+    "Power BI",
+    "Excel",
+    "VBA",
+    "Analytical",
+    "Data Analysis",
+    "Business Intelligence",
+    "Querying"
+  ],
+  "created_at": "2025-10-09 05:33:16.347921",
+  "last_edited": "2025-10-09T16:45:58.706373",
+  "manually_edited": true
+}

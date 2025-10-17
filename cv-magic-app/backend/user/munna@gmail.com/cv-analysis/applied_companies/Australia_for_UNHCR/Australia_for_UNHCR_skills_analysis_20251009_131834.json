@@ -1,0 +1,447 @@
+{
+  "generated": "2025-10-09T13:18:34.433",
+  "cv_filename": "maheshwor_tiwari.pdf",
+  "jd_url": "preliminary_analysis",
+  "user_id": "4df52e53-b78f-45e9-8946-3b6c00618693",
+  "company": "Australia_for_UNHCR",
+  "model_used": "gpt-3.5-turbo",
+  "cv_skills": {
+    "technical_skills": [
+      "Business Intelligence",
+      "Data Analysis",
+      "Data Extraction",
+      "Data Warehouse",
+      "Excel",
+      "Power BI",
+      "Python",
+      "SQL",
+      "VBA"
+    ],
+    "soft_skills": [
+      "Analytical",
+      "Results-Driven",
+      "Stakeholder Management"
+    ],
+    "domain_keywords": [
+      "N/A"
+    ],
+    "comprehensive_analysis": "\n**SOFT SKILLS:**\n- Analytical\n- Stakeholder Management\n- Results-Driven\n\n**TECHNICAL SKILLS:**\n- SQL\n- Python\n- Excel\n- Power BI\n- VBA\n- Data Warehouse\n- Data Extraction\n- Data Analysis\n- Business Intelligence\n\n**DOMAIN KEYWORDS:**\n- N/A"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Business Intelligence",
+      "Clean Data",
+      "Data Analysis",
+      "Data Extraction",
+      "Data Mining",
+      "Data Models",
+      "Data Segmentation",
+      "Data Selections",
+      "Data Warehousing",
+      "Database Knowledge",
+      "Excel",
+      "Marketing Campaigns",
+      "Power BI",
+      "Project Management",
+      "Spreadsheets",
+      "SQL",
+      "SQL Data Warehouse",
+      "Stakeholder Management",
+      "Tableau",
+      "VBA"
+    ],
+    "soft_skills": [
+      "Adaptability",
+      "Analytical Thinking",
+      "Collaboration",
+      "Communication",
+      "Creativity",
+      "Critical Thinking",
+      "Detail-oriented",
+      "Innovation",
+      "Leadership",
+      "Negotiation",
+      "Organization",
+      "Proactive",
+      "Problem-solving",
+      "Results-driven",
+      "Self-motivated",
+      "Teamwork",
+      "Time Management"
+    ],
+    "domain_keywords": [
+      "Best Practice Guidelines",
+      "Business Decision-making",
+      "Business Requirements",
+      "Campaign Optimization",
+      "Communication Purposes",
+      "Data Governance",
+      "Data Utilization",
+      "Data Warehouse Administration",
+      "Direct Marketing Campaigns",
+      "Donor-centricity",
+      "Evidence-based Decision Making",
+      "Fundraising",
+      "Humanitarian Emergencies",
+      "Multi-channel Communication",
+      "Project Management Framework",
+      "Refugee Support"
+    ],
+    "comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Negotiation\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n- Data Analysis\n- Data Mining\n- Business Intelligence\n- Power BI\n- SQL\n- Excel\n- Spreadsheets\n- VBA\n- Data Models\n- SQL Data Warehouse\n- Database Knowledge\n- Tableau\n- Project Management\n- Stakeholder Management\n- Data Extraction\n- Marketing Campaigns\n- Clean Data\n- Data Segmentation\n- Data Selections\n- Data Warehousing\n\n## DOMAIN KEYWORDS:\n- Fundraising\n- Humanitarian Emergencies\n- Business Decision-making\n- Direct Marketing Campaigns\n- Multi-channel Communication\n- Donor-centricity\n- Data Warehouse Administration\n- Business Requirements\n- Project Management Framework\n- Evidence-based Decision Making\n- Refugee Support\n- Data Utilization\n- Campaign Optimization\n- Communication Purposes\n- Data Governance\n- Best Practice Guidelines\n\n**CRITICAL OUTPUT REQUIREMENT:**\nSOFT_SKILLS = [\"Communication\", \"Leadership\", \"Teamwork\", \"Collaboration\", \"Negotiation\", \"Time Management\", \"Organization\", \"Adaptability\", \"Problem-solving\", \"Analytical Thinking\", \"Critical Thinking\", \"Creativity\", \"Innovation\", \"Detail-oriented\", \"Self-motivated\", \"Proactive\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Data Analysis\", \"Data Mining\", \"Business Intelligence\", \"Power BI\", \"SQL\", \"Excel\", \"Spreadsheets\", \"VBA\", \"Data Models\", \"SQL Data Warehouse\", \"Database Knowledge\", \"Tableau\", \"Project Management\", \"Stakeholder Management\", \"Data Extraction\", \"Marketing Campaigns\", \"Clean Data\", \"Data Segmentation\", \"Data Selections\", \"Data Warehousing\"]\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Humanitarian Emergencies\", \"Business Decision-making\", \"Direct Marketing Campaigns\", \"Multi-channel Communication\", \"Donor-centricity\", \"Data Warehouse Administration\", \"Business Requirements\", \"Project Management Framework\", \"Evidence-based Decision Making\", \"Refugee Support\", \"Data Utilization\", \"Campaign Optimization\", \"Communication Purposes\", \"Data Governance\", \"Best Practice Guidelines\"]"
+  },
+  "cv_comprehensive_analysis": "\n**SOFT SKILLS:**\n- Analytical\n- Stakeholder Management\n- Results-Driven\n\n**TECHNICAL SKILLS:**\n- SQL\n- Python\n- Excel\n- Power BI\n- VBA\n- Data Warehouse\n- Data Extraction\n- Data Analysis\n- Business Intelligence\n\n**DOMAIN KEYWORDS:**\n- N/A",
+  "jd_comprehensive_analysis": "## SOFT SKILLS:\n- Communication\n- Leadership\n- Teamwork\n- Collaboration\n- Negotiation\n- Time Management\n- Organization\n- Adaptability\n- Problem-solving\n- Analytical Thinking\n- Critical Thinking\n- Creativity\n- Innovation\n- Detail-oriented\n- Self-motivated\n- Proactive\n- Results-driven\n\n## TECHNICAL SKILLS:\n- Data Analysis\n- Data Mining\n- Business Intelligence\n- Power BI\n- SQL\n- Excel\n- Spreadsheets\n- VBA\n- Data Models\n- SQL Data Warehouse\n- Database Knowledge\n- Tableau\n- Project Management\n- Stakeholder Management\n- Data Extraction\n- Marketing Campaigns\n- Clean Data\n- Data Segmentation\n- Data Selections\n- Data Warehousing\n\n## DOMAIN KEYWORDS:\n- Fundraising\n- Humanitarian Emergencies\n- Business Decision-making\n- Direct Marketing Campaigns\n- Multi-channel Communication\n- Donor-centricity\n- Data Warehouse Administration\n- Business Requirements\n- Project Management Framework\n- Evidence-based Decision Making\n- Refugee Support\n- Data Utilization\n- Campaign Optimization\n- Communication Purposes\n- Data Governance\n- Best Practice Guidelines\n\n**CRITICAL OUTPUT REQUIREMENT:**\nSOFT_SKILLS = [\"Communication\", \"Leadership\", \"Teamwork\", \"Collaboration\", \"Negotiation\", \"Time Management\", \"Organization\", \"Adaptability\", \"Problem-solving\", \"Analytical Thinking\", \"Critical Thinking\", \"Creativity\", \"Innovation\", \"Detail-oriented\", \"Self-motivated\", \"Proactive\", \"Results-driven\"]\nTECHNICAL_SKILLS = [\"Data Analysis\", \"Data Mining\", \"Business Intelligence\", \"Power BI\", \"SQL\", \"Excel\", \"Spreadsheets\", \"VBA\", \"Data Models\", \"SQL Data Warehouse\", \"Database Knowledge\", \"Tableau\", \"Project Management\", \"Stakeholder Management\", \"Data Extraction\", \"Marketing Campaigns\", \"Clean Data\", \"Data Segmentation\", \"Data Selections\", \"Data Warehousing\"]\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Humanitarian Emergencies\", \"Business Decision-making\", \"Direct Marketing Campaigns\", \"Multi-channel Communication\", \"Donor-centricity\", \"Data Warehouse Administration\", \"Business Requirements\", \"Project Management Framework\", \"Evidence-based Decision Making\", \"Refugee Support\", \"Data Utilization\", \"Campaign Optimization\", \"Communication Purposes\", \"Data Governance\", \"Best Practice Guidelines\"]",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-10-09T13:18:37.468",
+      "model_used": "gpt-3.5-turbo",
+      "content": "**DECISION:** 🟡 STRATEGIC PURSUE\n\n**MARKET REALITY CHECK:**\n- **What they actually need:** Strong analytical skills, SQL, Excel/VBA, Power BI, data extraction\n- **Flexibility indicators:** Willing to consider candidates with 2 years' experience, open to diverse backgrounds\n- **Hard blockers identified:** None explicitly mentioned\n- **Hiring urgency signals:** 15-month contract position suggests some urgency\n\n**INTELLIGENT OBSERVATIONS:**\n- **Hidden strengths:** Strong Python skills not explicitly required but valuable for data analysis\n- **Smart connections:** Python scripting experience aligns with data cleaning and preprocessing needs\n- **Growth potential:** Demonstrated ability to develop machine learning models shows potential for growth in analytics\n- **Positioning opportunities:** Highlight Python scripting and machine learning experience as added value\n\n**REALISTIC ODDS:** 60% chance of getting an interview if CV tailored well\n\n**IF PURSUING - STRATEGIC PRIORITIES:**\n1. **Priority 1:** Emphasize Python scripting and machine learning model development\n2. **Priority 2:** Showcase SQL and Excel/VBA proficiency\n3. **Priority 3:** Highlight experience in data extraction and analysis\n\n**HONEST BOTTOM LINE:** Worth pursuing with tailored application to emphasize relevant skills and experience. Good potential for a strong fit with the role."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-10-09T13:18:58.576",
+      "model_used": "gpt-3.5-turbo",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 53\nMatched: 10\nMissing: 50\nMatch Rate: 19%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills             9         20          9         11           45\nSoft Skills                   3         17          1         19            5\nDomain Keywords              1         16          0         20            0\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (9 items):\n    1. JD Required: 'Business Intelligence'\n       → Found in CV: 'Business Intelligence'\n       💡 exact match\n    2. JD Required: 'Clean Data'\n       → Found in CV: 'Data Analysis'\n       💡 synonym - Data Analysis involves cleaning data\n    3. JD Required: 'Data Analysis'\n       → Found in CV: 'Data Analysis'\n       💡 exact match\n    4. JD Required: 'Data Extraction'\n       → Found in CV: 'Data Extraction'\n       💡 exact match\n    5. JD Required: 'Data Mining'\n       → Found in CV: 'Python'\n       💡 hierarchical - Python includes data mining\n    6. JD Required: 'Data Models'\n       → Found in CV: 'Data Analysis'\n       💡 synonym - Data Analysis involves creating data models\n    7. JD Required: 'Data Segmentation'\n       → Found in CV: 'Data Analysis'\n       💡 synonym - Data Analysis involves segmenting data\n    8. JD Required: 'Data Selections'\n       → Found in CV: 'Data Analysis'\n       💡 synonym - Data Analysis involves selecting data\n    9. JD Required: 'Data Warehousing'\n       → Found in CV: 'Data Warehouse'\n       💡 exact match\n  ❌ MISSING FROM CV (11 items):\n    1. JD Requires: 'Data Science'\n       💡 no CV equivalent found\n    2. JD Requires: 'Data Utilization'\n       💡 no CV equivalent found\n    3. JD Requires: 'Direct Marketing Campaigns'\n       💡 no CV equivalent found\n    4. JD Requires: 'Donor-Centricity'\n       💡 no CV equivalent found\n    5. JD Requires: 'Evidence-Based Decision Making'\n       💡 no CV equivalent found\n    6. JD Requires: 'Fundraising'\n       💡 no CV equivalent found\n    7. JD Requires: 'Humanitarian Emergencies'\n       💡 no CV equivalent found\n    8. JD Requires: 'Multi-Channel Communication'\n       💡 no CV equivalent found\n    9. JD Requires: 'Project Management Framework'\n       💡 no CV equivalent found\n    10. JD Requires: 'Refugee Support'\n       💡 no CV equivalent found\n    11. JD Requires: 'Database Knowledge'\n       💡 Moved from matched due to CV skills limit\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (1 items):\n    1. JD Required: 'Results-driven'\n       → Found in CV: ''\n       💡 Exact match - identical skills\n  ❌ MISSING FROM CV (19 items):\n    1. JD Requires: 'Adaptability'\n       💡 no CV equivalent found\n    2. JD Requires: 'Collaboration'\n       💡 no CV equivalent found\n    3. JD Requires: 'Communication'\n       💡 no CV equivalent found\n    4. JD Requires: 'Creativity'\n       💡 no CV equivalent found\n    5. JD Requires: 'Critical Thinking'\n       💡 no CV equivalent found\n    6. JD Requires: 'Detail-Oriented'\n       💡 no CV equivalent found\n    7. JD Requires: 'Innovation'\n       💡 no CV equivalent found\n    8. JD Requires: 'Leadership'\n       💡 no CV equivalent found\n    9. JD Requires: 'Negotiation'\n       💡 no CV equivalent found\n    10. JD Requires: 'Organization'\n       💡 no CV equivalent found\n    11. JD Requires: 'Proactive'\n       💡 no CV equivalent found\n    12. JD Requires: 'Problem-Solving'\n       💡 no CV equivalent found\n    13. JD Requires: 'Self-Motivated'\n       💡 no CV equivalent found\n    14. JD Requires: 'Teamwork'\n       💡 no CV equivalent found\n    15. JD Requires: 'Time Management'\n       💡 no CV equivalent found\n    16. JD Requires: 'Analytical Thinking'\n       💡 Not accounted for in AI response\n    17. JD Requires: 'Detail-oriented'\n       💡 Not accounted for in AI response\n    18. JD Requires: 'Problem-solving'\n       💡 Not accounted for in AI response\n    19. JD Requires: 'Self-motivated'\n       💡 Not accounted for in AI response\n\n🔹 DOMAIN KEYWORDS\n  ❌ MISSING FROM CV (20 items):\n    1. JD Requires: 'Best Practice Guidelines'\n       💡 no CV equivalent found\n    2. JD Requires: 'Business Decision-Making'\n       💡 no CV equivalent found\n    3. JD Requires: 'Business Requirements'\n       💡 no CV equivalent found\n    4. JD Requires: 'Campaign Optimization'\n       💡 no CV equivalent found\n    5. JD Requires: 'Communication Purposes'\n       💡 no CV equivalent found\n    6. JD Requires: 'Data Governance'\n       💡 no CV equivalent found\n    7. JD Requires: 'Data Warehouse Administration'\n       💡 no CV equivalent found\n    8. JD Requires: 'Direct Marketing Campaigns'\n       💡 no CV equivalent found\n    9. JD Requires: 'Donor-Centricity'\n       💡 no CV equivalent found\n    10. JD Requires: 'Evidence-Based Decision Making'\n       💡 no CV equivalent found\n    11. JD Requires: 'Fundraising'\n       💡 no CV equivalent found\n    12. JD Requires: 'Humanitarian Emergencies'\n       💡 no CV equivalent found\n    13. JD Requires: 'Multi-Channel Communication'\n       💡 no CV equivalent found\n    14. JD Requires: 'Project Management Framework'\n       💡 no CV equivalent found\n    15. JD Requires: 'Refugee Support'\n       💡 no CV equivalent found\n    16. JD Requires: 'Business Decision-making'\n       💡 Not accounted for in AI response\n    17. JD Requires: 'Data Utilization'\n       💡 Not accounted for in AI response\n    18. JD Requires: 'Donor-centricity'\n       💡 Not accounted for in AI response\n    19. JD Requires: 'Evidence-based Decision Making'\n       💡 Not accounted for in AI response\n    20. JD Requires: 'Multi-channel Communication'\n       💡 Not accounted for in AI response\n\n📚 INPUT SUMMARY (as extracted, showing first 10 if many)\nCV\n- Technical: Business Intelligence, Data Analysis, Data Extraction, Data Warehouse, Excel, Power BI, Python, SQL, VBA\n- Soft: Analytical, Results-Driven, Stakeholder Management\n- Domain: N/A\n\nJD\n- Technical: Business Intelligence, Clean Data, Data Analysis, Data Extraction, Data Mining, Data Models, Data Segmentation, Data Selections, Data Warehousing, Database Knowledge...\n- Soft: Adaptability, Analytical Thinking, Collaboration, Communication, Creativity, Critical Thinking, Detail-oriented, Innovation, Leadership, Negotiation...\n- Domain: Best Practice Guidelines, Business Decision-making, Business Requirements, Campaign Optimization, Communication Purposes, Data Governance, Data Utilization, Data Warehouse Administration, Direct Marketing Campaigns, Donor-centricity...\n"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-10-09T13:19:22.829",
+      "component_analyses": {
+        "skills": {
+          "skills_analysis": [
+            {
+              "skill": "SQL",
+              "cv_evidence": "Proficient in SQL",
+              "jd_application": "Addressing data extract requirements for direct marketing campaigns, manipulating data for bulk communications, updating records, advising on segmentation strategies, producing reports and analysis",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "3",
+              "academic_experience_years": "1",
+              "business_impact_evidence": "Improved data pipeline efficiency by 30%",
+              "relevance_score": "85",
+              "skill_level_corporate": "Advanced",
+              "skill_level_academic": "Intermediate",
+              "depth_indicators": [
+                "Used for data extraction, manipulation, and analysis in a business setting"
+              ],
+              "business_application_bonus": "10",
+              "academic_penalty": "5",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Python",
+              "cv_evidence": "Developed Python scripts for data cleaning and preprocessing, built machine learning models for predictive analytics",
+              "jd_application": "Building analytical models, data mining, developing reports, assisting in data warehouse enhancements",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "3",
+              "academic_experience_years": "2",
+              "business_impact_evidence": "Enabled data-driven business decisions, increased accuracy by 20%",
+              "relevance_score": "80",
+              "skill_level_corporate": "Advanced",
+              "skill_level_academic": "Intermediate",
+              "depth_indicators": [
+                "Used for data cleaning, preprocessing, and predictive analytics in a business context"
+              ],
+              "business_application_bonus": "10",
+              "academic_penalty": "5",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Excel",
+              "cv_evidence": "Proficient in Excel",
+              "jd_application": "Producing reports, analysis, building projection and segmentation models",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "4",
+              "academic_experience_years": "1",
+              "business_impact_evidence": "Utilized for reporting and analysis purposes",
+              "relevance_score": "75",
+              "skill_level_corporate": "Advanced",
+              "skill_level_academic": "Intermediate",
+              "depth_indicators": [
+                "Used for data analysis, reporting, and modeling in a business environment"
+              ],
+              "business_application_bonus": "10",
+              "academic_penalty": "5",
+              "synergy_score": "Medium",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "Power BI",
+              "cv_evidence": "Experience in Power BI",
+              "jd_application": "BI report authoring, administering and developing data warehouse, strategizing enhancements",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "2",
+              "academic_experience_years": "0",
+              "business_impact_evidence": "Utilized for BI reporting and data warehouse management",
+              "relevance_score": "90",
+              "skill_level_corporate": "Expert",
+              "skill_level_academic": "Beginner",
+              "depth_indicators": [
+                "Extensive experience in BI reporting and data warehouse management"
+              ],
+              "business_application_bonus": "20",
+              "academic_penalty": "0",
+              "synergy_score": "High",
+              "transferability_risk": "LOW"
+            },
+            {
+              "skill": "VBA",
+              "cv_evidence": "Proficient in VBA",
+              "jd_application": "Not explicitly mentioned in JD",
+              "context_type": "CORPORATE",
+              "corporate_experience_years": "2",
+              "academic_experience_years": "1",
+              "business_impact_evidence": "No specific business impact evidence provided",
+              "relevance_score": "60",
+              "skill_level_corporate": "Intermediate",
+              "skill_level_academic": "Intermediate",
+              "depth_indicators": [
+                "Utilized VBA for automation and process improvement"
+              ],
+              "business_application_bonus": "10",
+              "academic_penalty": "5",
+              "synergy_score": "Medium",
+              "transferability_risk": "MEDIUM"
+            }
+          ],
+          "overall_skills_score": "78",
+          "corporate_skills_strength": "Strong",
+          "academic_skills_discount": "5",
+          "business_readiness_score": "73",
+          "skill_development_timeline": "0-6 months",
+          "strength_areas": [
+            "SQL",
+            "Python",
+            "Excel",
+            "Power BI"
+          ],
+          "critical_gaps": [
+            "VBA"
+          ],
+          "training_investment_needed": [
+            "VBA"
+          ],
+          "immediate_value_skills": [
+            "SQL",
+            "Python",
+            "Excel",
+            "Power BI"
+          ],
+          "risky_transition_skills": [
+            "VBA"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "3.5 years",
+            "cv_corporate_years": "3 years",
+            "cv_academic_years": "0.5 years",
+            "cv_role_level": "Mid-level",
+            "cv_progression": [
+              "Data Analyst at The Bitrates, Sydney, Australia (3 years)",
+              "Academic background (0.5 years)"
+            ],
+            "jd_required_years": "Not specified in JD",
+            "jd_role_level": "Not specified in JD",
+            "alignment_score": "75",
+            "experience_gaps": [],
+            "experience_strengths": [
+              "Strong corporate experience in data analysis",
+              "Experience in Python scripting and machine learning models"
+            ],
+            "quantified_achievements": [
+              "Improved data pipeline efficiency by 30%",
+              "Increased accuracy of predictive analytics by 20%"
+            ],
+            "overqualification_risk": "LOW"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Data Analysis",
+            "cv_secondary_industries": [],
+            "cv_academic_background": "",
+            "cv_corporate_exposure": "1 year",
+            "jd_target_industry": "International Aid and Development, Fundraising, Not For Profit (NFP)",
+            "jd_industry_specificity": "Highly industry-specific",
+            "direct_industry_match": "NO",
+            "industry_alignment_score": "60",
+            "corporate_background_bonus": "0",
+            "industry_penalty_factors": [
+              "No regulatory experience"
+            ],
+            "transferable_skills_score": "75",
+            "cultural_adaptation_difficulty": "MODERATE",
+            "regulatory_knowledge_gap": "High",
+            "client_stakeholder_fit": "Moderate",
+            "business_cycle_understanding": "Limited",
+            "success_probability": "MEDIUM",
+            "adaptation_timeline": "6-12 months",
+            "investment_level_required": "HIGH",
+            "industry_strengths": [
+              "Strong analytical and problem-solving skills",
+              "Experience in data analysis and business intelligence"
+            ],
+            "critical_industry_gaps": [
+              "Lack of experience in International Aid and Development sector",
+              "Limited exposure to fundraising and NFP organizations"
+            ],
+            "hiring_risk_assessment": "MEDIUM RISK"
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "1",
+            "cv_academic_years": "MISSING",
+            "cv_total_weighted_years": "0.8",
+            "cv_responsibility_scope": "Entry Level",
+            "cv_leadership_indicators": "2",
+            "cv_decision_authority": "MISSING",
+            "cv_stakeholder_level": "MISSING",
+            "cv_management_experience": "MISSING",
+            "jd_required_seniority": "Senior Level",
+            "jd_leadership_requirements": "Strong corporate background, minor leadership gaps",
+            "jd_decision_authority_needed": "Senior Level",
+            "jd_stakeholder_level": "Senior Level",
+            "seniority_score": "20",
+            "corporate_seniority_match": "25",
+            "leadership_readiness_score": "10",
+            "decision_authority_match": "0",
+            "stakeholder_management_fit": "0",
+            "overqualification_risk": "HIGH",
+            "seniority_strengths": [
+              "Entry-level corporate experience"
+            ],
+            "seniority_gaps": [
+              "Limited corporate leadership experience"
+            ],
+            "leadership_transition_risk": "HIGH",
+            "readiness_assessment": "Limited corporate seniority, significant development needed"
+          }
+        },
+        "technical": {
+          "technical_analysis": {
+            "cv_sophistication_level": "Advanced",
+            "cv_primary_domain": "Machine Learning & Data Science",
+            "cv_core_competencies": [
+              "Python",
+              "SQL",
+              "Data Cleaning",
+              "Data Preprocessing",
+              "Machine Learning"
+            ],
+            "cv_problem_complexity": 8,
+            "cv_innovation_indicators": [
+              "Script Development for Efficiency Improvement",
+              "Machine Learning Model Development"
+            ],
+            "jd_required_sophistication": "Intermediate",
+            "jd_core_tech_stack": [
+              "Python",
+              "SQL",
+              "Power BI",
+              "Excel"
+            ],
+            "jd_problem_complexity": 6,
+            "jd_innovation_requirements": false,
+            "technical_depth_score": 90,
+            "core_skills_match_percentage": 85,
+            "technical_stack_fit_percentage": 80,
+            "complexity_readiness_score": 95,
+            "learning_agility_score": 85,
+            "technical_strengths": [
+              "Advanced Analytics",
+              "Machine Learning Implementation",
+              "Data Architecture"
+            ],
+            "technical_gaps": [
+              "Power BI Proficiency",
+              "Tableau Experience"
+            ],
+            "overqualification_risk": "Moderate"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 7,
+            "total_preferred_keywords": 4,
+            "matched_required_count": 6,
+            "matched_preferred_count": 0,
+            "missing_required": 1,
+            "missing_preferred": 4
+          },
+          "bonus_breakdown": {
+            "required_bonus": 3.0,
+            "required_penalty": 0.0,
+            "preferred_bonus": 0.0,
+            "preferred_penalty": -0.6,
+            "total_bonus": 2.4
+          },
+          "coverage_metrics": {
+            "required_coverage": 85.71,
+            "preferred_coverage": 0.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 78.0,
+        "experience_alignment": 75.0,
+        "industry_fit": 60.0,
+        "domain_overlap_percentage": 0.0,
+        "data_familiarity_score": 0.0,
+        "stakeholder_fit_score": 0.0,
+        "business_cycle_alignment": 0.0,
+        "role_seniority": 20.0,
+        "leadership_readiness_score": 10.0,
+        "technical_depth": 90.0,
+        "core_skills_match_percentage": 85.0,
+        "technical_stack_fit_percentage": 80.0,
+        "complexity_readiness_score": 95.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 6.0,
+        "requirement_bonus": 2.4,
+        "total_bonus": 2.4,
+        "required_bonus": 3.0,
+        "required_penalty": 0.0,
+        "preferred_bonus": 0.0,
+        "preferred_penalty": -0.6,
+        "required_coverage": 85.71,
+        "preferred_coverage": 0.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-10-09T13:19:22.836",
+      "final_ats_score": 39.0375,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally rejected",
+      "breakdown": {
+        "category1": {
+          "score": 9.75,
+          "technical_skills_match_rate": 45.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 5.0,
+          "missing_counts": {
+            "technical": 11,
+            "domain": 20,
+            "soft": 19
+          }
+        },
+        "category2": {
+          "score": 26.8875,
+          "core_competency_avg": 63.75,
+          "experience_seniority_avg": 21.0,
+          "potential_ability_avg": 60.0,
+          "company_fit_avg": 15.0
+        },
+        "ats1_score": 36.6375,
+        "bonus_points": 2.4
+      }
+    }
+  ]
+}

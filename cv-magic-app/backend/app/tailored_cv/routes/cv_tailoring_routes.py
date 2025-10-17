@@ -1004,7 +1004,7 @@ async def export_pdf(
         from app.utils.user_path_utils import get_user_base_path
 
         user_base = get_user_base_path(current_user.email)
-        export_dir = user_base / "exports"
+        export_dir = user_base / "cvs" / "pdf_cvs"
 
         pdf_path = export_tailored_cv_pdf(current_user.email, company, export_dir)
 
