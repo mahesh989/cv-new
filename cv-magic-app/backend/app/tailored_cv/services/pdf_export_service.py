@@ -313,23 +313,113 @@ def _parse_text_cv_to_minimal_structure(text: str) -> Dict[str, Any]:
     }
 
 
-def build_resume_data_from_files(json_path: Optional[Path], txt_path: Optional[Path]) -> Dict[str, Any]:
-    """Load structured JSON if available; otherwise parse text."""
-    if json_path and json_path.exists() and json_path.stat().st_size > 0:
-        try:
-            with open(json_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            if isinstance(data, dict):
-                return data
-        except Exception as e:
-            logger.warning(f"Failed to read JSON CV at {json_path}: {e}")
-    if txt_path and txt_path.exists():
-        try:
-            text = txt_path.read_text(encoding='utf-8')
-            return _parse_text_cv_to_minimal_structure(text)
-        except Exception as e:
-            logger.warning(f"Failed to read TXT CV at {txt_path}: {e}")
-    return {'personal_information': {'name': 'Candidate'}}
+def _map_tailored_json_to_generator_schema(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Map TailoredCV JSON (contact/education/experience/skills) to the generator schema
+    used by ResumePDFGenerator (personal_information, experience[responsibilities], etc.).
+    """
+    mapped: Dict[str, Any] = {
+        'personal_information': {
+            'name': None,
+            'phone': None,
+            'email': None,
+            'linkedin': None,
+            'location': None,
+            'github': None,
+        },
+        'career_profile': {},
+        'education': [],
+        'experience': [],
+        'skills': {'technical_skills': []},
+        'projects': [],
+        'certifications': [],
+    }
+
+    contact = data.get('contact') or {}
+    if isinstance(contact, dict):
+        mapped['personal_information'].update({
+            'name': contact.get('name') or 'Candidate',
+            'phone': contact.get('phone'),
+            'email': contact.get('email'),
+            'linkedin': contact.get('linkedin'),
+            'location': contact.get('location'),
+            'github': contact.get('website'),
+        })
+
+    # Optional summary if present
+    summary = data.get('summary') or data.get('profile') or None
+    if isinstance(summary, str) and summary.strip():
+        mapped['career_profile'] = {'summary': summary.strip()}
+
+    # Education
+    for edu in data.get('education') or []:
+        if not isinstance(edu, dict):
+            continue
+        degree = edu.get('degree') or ''
+        institution = edu.get('institution') or ''
+        year = edu.get('graduation_date') or edu.get('year') or ''
+        location = edu.get('location') or ''
+        mapped['education'].append({
+            'degree': degree,
+            'institution': institution,
+            'year': year,
+            'location': location,
+        })
+
+    # Experience
+    for exp in data.get('experience') or []:
+        if not isinstance(exp, dict):
+            continue
+        start = exp.get('start_date') or ''
+        end = exp.get('end_date') or ''
+        duration = exp.get('duration') or f"{start} – {end or 'Present'}" if start else ''
+        mapped['experience'].append({
+            'title': exp.get('title') or '',
+            'company': exp.get('company') or '',
+            'location': exp.get('location') or '',
+            'duration': duration,
+            'responsibilities': [str(b) for b in (exp.get('bullets') or [])],
+        })
+
+    # Skills (flatten categories)
+    skills = data.get('skills') or []
+    flat: List[str] = []
+    if isinstance(skills, list):
+        for cat in skills:
+            if isinstance(cat, dict):
+                flat.extend([str(s) for s in (cat.get('skills') or [])])
+            elif isinstance(cat, str):
+                flat.append(cat)
+    elif isinstance(skills, dict) and 'technical_skills' in skills:
+        flat.extend([str(x) for x in skills.get('technical_skills') or []])
+    mapped['skills']['technical_skills'] = flat
+
+    # Projects (optional)
+    for proj in data.get('projects') or []:
+        if not isinstance(proj, dict):
+            continue
+        mapped['projects'].append({
+            'name': proj.get('name') or '',
+            'date': proj.get('duration') or '',
+            'description': proj.get('context') or '',
+            'technologies': proj.get('technologies') or [],
+        })
+
+    return mapped
+
+
+def build_resume_data_from_files(json_path: Optional[Path], _txt_path: Optional[Path]) -> Dict[str, Any]:
+    """Load structured tailored JSON and map it to the generator schema. Do not use TXT."""
+    if not json_path or not json_path.exists() or json_path.stat().st_size == 0:
+        raise FileNotFoundError("Tailored JSON CV not found or empty. Export requires JSON.")
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            raw = json.load(f)
+        if not isinstance(raw, dict):
+            raise ValueError("Tailored CV JSON must be an object")
+        return _map_tailored_json_to_generator_schema(raw)
+    except Exception as e:
+        logger.error(f"Failed to read or map tailored JSON at {json_path}: {e}")
+        raise
 
 
 def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> Path:
