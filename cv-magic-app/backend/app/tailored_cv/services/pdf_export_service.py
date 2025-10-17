@@ -603,6 +603,11 @@ def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> P
             logger.error("[PDF_EXPORT] tailored JSON loaded as string and failed to parse")
             raise TypeError("Tailored CV data must be a JSON object, not a string")
 
+    # Ensure pdf_data is a dictionary before proceeding
+    if not isinstance(pdf_data, dict):
+        logger.error("[PDF_EXPORT] pdf_data is not a dictionary after processing: %s", type(pdf_data))
+        raise TypeError(f"Expected dictionary, got {type(pdf_data)}")
+
     # Normalize known sections that might be stringified unexpectedly
     try:
         if isinstance(pdf_data.get('experience'), str):
