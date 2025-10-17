@@ -87,7 +87,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
 
     // Initialize welcome home page with navigation callback
-    print('🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: ${_navigateToCVMagicTab != null ? "provided" : "null"}');
+    print(
+        '🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: ${_navigateToCVMagicTab != null ? "provided" : "null"}');
     _welcomeHomePage = WelcomeHomePage(
       onNavigateToCVMagic: _navigateToCVMagicTab,
     );

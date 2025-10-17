@@ -496,7 +496,7 @@ class SkillsAnalysisController extends ChangeNotifier {
     _currentJdText = null;
     _executionDuration = Duration.zero;
     _clearError();
-    
+
     // Only reset to idle if not in cancelled state (preserve cancelled state for UI)
     if (_state != SkillsAnalysisState.cancelled) {
       _setState(SkillsAnalysisState.idle);

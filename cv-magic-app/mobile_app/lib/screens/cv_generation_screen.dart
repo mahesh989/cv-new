@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:html' as html
+    show AnchorElement, document, Blob, Url; // Only used on web
 import '../core/theme/app_theme.dart';
 import '../services/results_clearing_service.dart';
 
@@ -561,6 +563,24 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
             ),
           ),
         ),
+
+        const SizedBox(width: 12),
+
+        // Save PDF Button
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: (_currentCompany != null && tailoredCVContent != null)
+                ? _savePdf
+                : null,
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Save PDF'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -680,6 +700,55 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Error saving CV: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _savePdf() async {
+    if (_currentCompany == null) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final url = Uri.parse(
+          'https://cvagent.duckdns.org/api/tailored-cv/export-pdf/${_currentCompany!}');
+
+      final response = await http.get(url, headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final blob = html.Blob([bytes], 'application/pdf');
+        final urlObject = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: urlObject)
+          ..download = '${_currentCompany}_tailored_resume.pdf'
+          ..style.display = 'none';
+        html.document.body!.append(anchor);
+        anchor.click();
+        anchor.remove();
+        html.Url.revokeObjectUrl(urlObject);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Failed to export PDF (${response.statusCode})'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error exporting PDF: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),

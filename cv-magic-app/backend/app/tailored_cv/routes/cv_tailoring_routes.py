@@ -993,6 +993,33 @@ async def get_tailored_cv_content(
         )
 
 
+@router.get("/export-pdf/{company}")
+async def export_pdf(
+    company: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Generate and return a PDF for the latest tailored CV for the given company."""
+    try:
+        from app.tailored_cv.services.pdf_export_service import export_tailored_cv_pdf
+        from app.utils.user_path_utils import get_user_base_path
+
+        user_base = get_user_base_path(current_user.email)
+        export_dir = user_base / "exports"
+
+        pdf_path = export_tailored_cv_pdf(current_user.email, company, export_dir)
+
+        return FileResponse(
+            path=str(pdf_path),
+            media_type="application/pdf",
+            filename=pdf_path.name,
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"❌ PDF export failed for {company}: {e}")
+        raise HTTPException(status_code=500, detail=f"PDF export failed: {str(e)}")
+
+
 # Background task function
 async def _process_batch_tailoring(
     task_id: str,
