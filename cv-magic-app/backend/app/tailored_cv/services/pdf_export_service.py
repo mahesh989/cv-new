@@ -603,6 +603,30 @@ def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> P
             logger.error("[PDF_EXPORT] tailored JSON loaded as string and failed to parse")
             raise TypeError("Tailored CV data must be a JSON object, not a string")
 
+    # Normalize known sections that might be stringified unexpectedly
+    try:
+        if isinstance(pdf_data.get('experience'), str):
+            pdf_data['experience'] = json.loads(pdf_data['experience'])
+            logger.info("[PDF_EXPORT] normalized experience from string")
+        if isinstance(pdf_data.get('education'), str):
+            pdf_data['education'] = json.loads(pdf_data['education'])
+            logger.info("[PDF_EXPORT] normalized education from string")
+        skills = pdf_data.get('skills')
+        if isinstance(skills, str):
+            pdf_data['skills'] = json.loads(skills)
+            logger.info("[PDF_EXPORT] normalized skills from string")
+        projects = pdf_data.get('projects')
+        if isinstance(projects, str):
+            pdf_data['projects'] = json.loads(projects)
+            logger.info("[PDF_EXPORT] normalized projects from string")
+        certifications = pdf_data.get('certifications')
+        if isinstance(certifications, str):
+            pdf_data['certifications'] = json.loads(certifications)
+            logger.info("[PDF_EXPORT] normalized certifications from string")
+    except Exception as e:
+        logger.error("[PDF_EXPORT] normalization failed: %s", e)
+        raise
+
     export_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     safe_company = company.replace(" ", "_")
