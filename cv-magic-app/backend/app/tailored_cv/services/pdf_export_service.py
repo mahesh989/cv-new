@@ -369,24 +369,46 @@ def _map_tailored_json_to_generator_schema(data: Dict[str, Any]) -> Dict[str, An
     for exp in data.get('experience') or []:
         if not isinstance(exp, dict):
             continue
-        start = exp.get('start_date') or ''
-        end = exp.get('end_date') or ''
-        duration = exp.get('duration') or f"{start} – {end or 'Present'}" if start else ''
+        start = (exp.get('start_date') or '').strip()
+        end = (exp.get('end_date') or '').strip()
+        duration = (exp.get('duration') or '').strip()
+        if not duration and start:
+            duration = f"{start} – {end or 'Present'}"
+
+        # Clean company/location to avoid duplicates like "Company | Company, City"
+        company_val = (exp.get('company') or '').strip()
+        location_val = (exp.get('location') or '').strip()
+        if company_val and location_val:
+            # Drop company name from location if embedded
+            lowered_company = company_val.lower()
+            cleaned_loc = ", ".join([
+                part.strip() for part in location_val.split(',')
+                if part.strip() and part.strip().lower() != lowered_company
+            ])
+            location_val = cleaned_loc
+        # Final de-duplication: if location equals company, clear location
+        if location_val and company_val and location_val.lower() == company_val.lower():
+            location_val = ''
         mapped['experience'].append({
             'title': exp.get('title') or '',
-            'company': exp.get('company') or '',
-            'location': exp.get('location') or '',
+            'company': company_val,
+            'location': location_val,
             'duration': duration,
             'responsibilities': [str(b) for b in (exp.get('bullets') or [])],
         })
 
-    # Skills (flatten categories)
+    # Skills (flatten categories). Prefer categories with names into labeled lines.
     skills = data.get('skills') or []
     flat: List[str] = []
     if isinstance(skills, list):
         for cat in skills:
             if isinstance(cat, dict):
-                flat.extend([str(s) for s in (cat.get('skills') or [])])
+                category_name = cat.get('category') or ''
+                items = [str(s) for s in (cat.get('skills') or [])]
+                if category_name and items:
+                    flat.append(f"{category_name}: {', '.join(items)}")
+                else:
+                    flat.extend(items)
             elif isinstance(cat, str):
                 flat.append(cat)
     elif isinstance(skills, dict) and 'technical_skills' in skills:
@@ -399,7 +421,7 @@ def _map_tailored_json_to_generator_schema(data: Dict[str, Any]) -> Dict[str, An
             continue
         mapped['projects'].append({
             'name': proj.get('name') or '',
-            'date': proj.get('duration') or '',
+            'date': proj.get('duration') or proj.get('date') or '',
             'description': proj.get('context') or '',
             'technologies': proj.get('technologies') or [],
         })
