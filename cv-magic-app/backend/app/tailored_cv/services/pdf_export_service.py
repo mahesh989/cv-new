@@ -419,10 +419,28 @@ class ResumePDFGenerator:
 
         # Skills
         skills = self.data.get('skills', {})
-        if skills and skills.get('technical_skills'):
-            elements.extend(self._create_section_with_line('TECHNICAL SKILLS'))
-            for skill in skills['technical_skills']:
-                elements.extend(self._make_bullet_rows([skill]))
+        if skills:
+            elements.extend(self._create_section_with_line('SKILLS'))
+            
+            # Check if skills are categorized
+            is_categorized = skills.get('is_categorized', False)
+            
+            if is_categorized:
+                # Categorized format: Display as bullets with category headers
+                for category_name, skills_list in skills.items():
+                    if category_name != 'is_categorized' and isinstance(skills_list, list) and skills_list:
+                        # Category header
+                        elements.append(Paragraph(f"<b>{category_name.replace('_', ' ').title()}:</b>", self.styles['SkillCategory']))
+                        # Skills as bullets
+                        for skill in skills_list:
+                            elements.extend(self._make_bullet_rows([skill]))
+                        elements.append(Spacer(1, self.spacing['bullet_gap']))
+            else:
+                # Simple format: Display as single line with comma separation
+                technical_skills = skills.get('technical_skills', [])
+                if technical_skills:
+                    skills_text = ", ".join(technical_skills)
+                    elements.append(Paragraph(skills_text, self.styles['SkillItem']))
 
         # Projects
         projects = self.data.get('projects', [])

@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:html' as html;
 import '../../core/theme/app_theme.dart';
 
 class SavedJobsTable extends StatefulWidget {
@@ -61,10 +64,6 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
     }
   }
 
-  Future<void> _saveRemark(String key, String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('remarks_$key', value);
-  }
 
   String _getJobKey(Map<String, dynamic> job) {
     // Create a more robust key using multiple fields and normalize them
@@ -306,48 +305,62 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
                 activeColor: Colors.green,
               ),
             ),
-            // Remarks
+            // Actions (Preview & Download)
             Expanded(
               flex: 2,
-              child: GestureDetector(
-                onTap: () => _showRemarksDialog(job),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.neutralGray50,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: AppTheme.neutralGray200,
-                    ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.neutralGray50,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: AppTheme.neutralGray200,
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _remarks[key]?.isEmpty ?? true
-                              ? 'Add note...'
-                              : _remarks[key]!,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: _remarks[key]?.isEmpty ?? true
-                                        ? AppTheme.neutralGray400
-                                        : AppTheme.neutralGray700,
-                                    fontStyle: _remarks[key]?.isEmpty ?? true
-                                        ? FontStyle.italic
-                                        : FontStyle.normal,
-                                  ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Preview Icon
+                    GestureDetector(
+                      onTap: () => _showCVPreview(job),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: Colors.blue.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.visibility,
+                          size: 16,
+                          color: Colors.blue.shade600,
                         ),
                       ),
-                      Icon(
-                        Icons.edit,
-                        size: 14,
-                        color: AppTheme.neutralGray400,
+                    ),
+                    // Download Icon
+                    GestureDetector(
+                      onTap: () => _downloadCV(job),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: Colors.green.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.download,
+                          size: 16,
+                          color: Colors.green.shade600,
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -412,69 +425,136 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
     }
   }
 
-  void _showRemarksDialog(Map<String, dynamic> job) {
-    final key = _getJobKey(job);
-    final controller = TextEditingController(text: _remarks[key] ?? '');
+  void _showCVPreview(Map<String, dynamic> job) async {
+    final companyName = job['company_name'] ?? 'Unknown Company';
+    
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text('Loading CV preview...'),
+            ],
+          ),
+        ),
+      );
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Add Remarks',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.neutralGray800,
-              ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Add notes for ${job['company_name']} - ${job['job_title']}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.neutralGray600,
+      // Get tailored CV content
+      final cvContent = await _getTailoredCVContent(companyName);
+      
+      // Close loading dialog
+      Navigator.of(context).pop();
+      
+      if (cvContent != null) {
+        // Show CV preview dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.visibility, color: Colors.blue.shade600),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'CV Preview - $companyName',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.neutralGray800,
+                        ),
                   ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'Enter your notes here...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppTheme.primaryTeal),
+              ],
+            ),
+            content: Container(
+              width: double.maxFinite,
+              height: 400,
+              child: SingleChildScrollView(
+                child: Text(
+                  cvContent,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.neutralGray700,
+                        height: 1.5,
+                      ),
                 ),
               ),
             ),
-          ],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Close',
+                  style: TextStyle(color: AppTheme.neutralGray600),
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No tailored CV found for $companyName'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      Navigator.of(context).pop();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading CV preview: $e'),
+          backgroundColor: Colors.red,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.neutralGray600),
-            ),
+      );
+    }
+  }
+
+  void _downloadCV(Map<String, dynamic> job) async {
+    final companyName = job['company_name'] ?? 'Unknown Company';
+    
+    try {
+      // Show loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 12),
+              Text('Preparing download...'),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              setState(() => _remarks[key] = controller.text);
-              await _saveRemark(key, controller.text);
-              Navigator.of(context).pop();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryTeal,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Download the PDF
+      await _downloadTailoredCVPDF(companyName);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('CV downloaded successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Download failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildEmptyState() {
@@ -512,4 +592,75 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
       ),
     );
   }
+
+  // Helper function to get tailored CV content
+  Future<String?> _getTailoredCVContent(String companyName) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final url = Uri.parse(
+          'https://cvagent.duckdns.org/api/tailored-cv/content/$companyName');
+
+      final response = await http.get(url, headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['content'] as String?;
+      } else {
+        print('Failed to get CV content: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error getting CV content: $e');
+      return null;
+    }
+  }
+
+  // Helper function to download tailored CV PDF
+  Future<void> _downloadTailoredCVPDF(String companyName) async {
+    try {
+      // Use the existing PDF download logic from CV generation screen
+      await _downloadPDFDirectly(companyName);
+    } catch (e) {
+      print('Error downloading CV PDF: $e');
+      rethrow;
+    }
+  }
+
+  // Direct PDF download using the same logic as CV generation screen
+  Future<void> _downloadPDFDirectly(String companyName) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final url = Uri.parse(
+          'https://cvagent.duckdns.org/api/tailored-cv/export-pdf/$companyName');
+
+      final response = await http.get(url, headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final blob = html.Blob([bytes], 'application/pdf');
+        final urlObject = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: urlObject)
+          ..download = '${companyName}_tailored_resume.pdf'
+          ..style.display = 'none';
+        html.document.body!.append(anchor);
+        anchor.click();
+        anchor.remove();
+        html.Url.revokeObjectUrl(urlObject);
+      } else {
+        throw Exception('Failed to download PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error in direct PDF download: $e');
+      rethrow;
+    }
+  }
+
 }

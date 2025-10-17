@@ -61,17 +61,21 @@ def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[st
     if skills_data:
         # Check if skills is a list of strings (simple format)
         if isinstance(skills_data[0], str):
-            # Simple list format - add all skills as technical skills
+            # Simple list format - add all skills as technical skills (single line)
             pdf_data["skills"]["technical_skills"] = skills_data
+            pdf_data["skills"]["is_categorized"] = False
         else:
-            # Grouped format - preserve category structure
+            # Grouped format - preserve category structure (bullets)
+            pdf_data["skills"]["is_categorized"] = True
             for skill_category in skills_data:
                 if isinstance(skill_category, dict):
                     category_name = skill_category.get('category', '')
                     skills_list = skill_category.get('skills', [])
                     if category_name and skills_list:
-                        skills_text = f"{category_name}: {', '.join(skills_list)}"
-                        pdf_data["skills"]["technical_skills"].append(skills_text)
+                        # Store category and skills separately for proper PDF rendering
+                        if category_name not in pdf_data["skills"]:
+                            pdf_data["skills"][category_name] = []
+                        pdf_data["skills"][category_name] = skills_list
 
     # Projects
     for project in tailored_cv_data.get('projects', []) or []:
