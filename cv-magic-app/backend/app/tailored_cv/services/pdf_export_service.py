@@ -587,6 +587,14 @@ def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> P
     if not cv_context.json_path or not cv_context.json_path.exists():
         raise FileNotFoundError(f"Tailored JSON not found for company '{company}'")
     pdf_data = load_tailored_cv_and_convert(str(cv_context.json_path))
+    # Some historical files may contain a JSON string instead of an object
+    if isinstance(pdf_data, str):
+        try:
+            pdf_data = json.loads(pdf_data)
+            logger.info("[PDF_EXPORT] parsed stringified JSON into dict")
+        except Exception:
+            logger.error("[PDF_EXPORT] tailored JSON loaded as string and failed to parse")
+            raise TypeError("Tailored CV data must be a JSON object, not a string")
 
     export_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
