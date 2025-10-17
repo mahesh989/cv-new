@@ -23,8 +23,15 @@ logger = logging.getLogger(__name__)
 class ResumePDFGenerator:
     """Generate a PDF resume from structured data with perfect alignment."""
 
-    def __init__(self, data: Dict[str, Any], page_margins: Optional[Dict[str, float]] = None) -> None:
-        self.data = data
+    def __init__(self, data: Dict[str, Any] | str, page_margins: Optional[Dict[str, float]] = None) -> None:
+        # Accept dict or JSON string; normalize to dict to avoid 'str'.get errors
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+                logger.info("[PDF_EXPORT] generator received string; parsed into dict")
+            except Exception:
+                raise TypeError("ResumePDFGenerator expects a dict or JSON string that parses to a dict")
+        self.data = data  # type: ignore[assignment]
         self.styles = getSampleStyleSheet()
 
         # Page configuration
