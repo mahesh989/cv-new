@@ -623,6 +623,14 @@ def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> P
         if isinstance(certifications, str):
             pdf_data['certifications'] = json.loads(certifications)
             logger.info("[PDF_EXPORT] normalized certifications from string")
+        personal = pdf_data.get('personal_information')
+        if isinstance(personal, str):
+            pdf_data['personal_information'] = json.loads(personal)
+            logger.info("[PDF_EXPORT] normalized personal_information from string")
+        cprof = pdf_data.get('career_profile')
+        if isinstance(cprof, str):
+            pdf_data['career_profile'] = json.loads(cprof)
+            logger.info("[PDF_EXPORT] normalized career_profile from string")
     except Exception as e:
         logger.error("[PDF_EXPORT] normalization failed: %s", e)
         raise
