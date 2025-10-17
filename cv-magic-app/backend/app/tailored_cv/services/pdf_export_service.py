@@ -568,9 +568,9 @@ def build_resume_data_from_files(json_path: Optional[Path], _txt_path: Optional[
 
 def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> Path:
     """Export the latest tailored CV as PDF (using the adapter that preserves JSON)."""
-from app.unified_latest_file_selector import get_selector_for_user
-from app.tailored_cv.services.tailored_cv_adapter import load_tailored_cv_and_convert
-from datetime import datetime
+    from app.unified_latest_file_selector import get_selector_for_user
+    from app.tailored_cv.services.tailored_cv_adapter import load_tailored_cv_and_convert
+    from datetime import datetime
 
     selector = get_selector_for_user(user_email)
     cv_context = selector.get_latest_tailored_cv_only(company)
