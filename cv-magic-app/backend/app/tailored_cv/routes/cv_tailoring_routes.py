@@ -1052,20 +1052,29 @@ async def export_pdf(
     company: str,
     current_user: User = Depends(get_current_user)
 ):
-    """Return the pre-generated PDF for the latest tailored CV for the given company."""
+    """Return the PDF for the latest tailored CV for the given company. Generates PDF if not found."""
     try:
         from app.tailored_cv.services.pdf_file_selector import get_latest_company_pdf
+        from app.tailored_cv.services.pdf_export_service import export_tailored_cv_pdf
+        from app.utils.user_path_utils import get_user_base_path
 
         # Get the latest pre-generated PDF for this company
         pdf_path = get_latest_company_pdf(current_user.email, company)
         
         if not pdf_path or not pdf_path.exists():
-            raise HTTPException(
-                status_code=404, 
-                detail=f"No tailored CV PDF found for company: {company}. Please generate a tailored CV first."
-            )
+            # PDF doesn't exist, generate a new one
+            logger.info(f"🔄 No PDF found for {company}, generating new PDF...")
+            
+            # Get user's PDF export directory
+            user_base = get_user_base_path(current_user.email)
+            pdf_export_dir = user_base / "cvs" / "pdf_cvs"
+            pdf_export_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate new PDF
+            pdf_path = export_tailored_cv_pdf(current_user.email, company, pdf_export_dir)
+            logger.info(f"✅ Generated new PDF for {company}: {pdf_path.name}")
 
-        logger.info(f"✅ Serving pre-generated PDF for {company}: {pdf_path.name}")
+        logger.info(f"✅ Serving PDF for {company}: {pdf_path.name}")
 
         return FileResponse(
             path=str(pdf_path),
