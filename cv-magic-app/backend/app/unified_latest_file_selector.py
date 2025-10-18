@@ -232,6 +232,32 @@ class UnifiedLatestFileSelector:
             return (ts, mtime)
         candidates.sort(key=_candidate_key, reverse=True)
         json_path, txt_path, ts, ftype = candidates[0]
+        
+        # 🔍 ENHANCED DEBUG: Log detailed selection information
+        print(f"🔍 [UNIFIED_DEBUG] CV Selection Details for {company}:")
+        print(f"  📊 Total candidates found: {len(candidates)}")
+        print(f"  🏆 Selected candidate: type={ftype}, ts={ts}")
+        print(f"  📁 JSON path: {json_path}")
+        print(f"  📄 TXT path: {txt_path}")
+        if json_path and json_path.exists():
+            print(f"  📏 JSON file size: {json_path.stat().st_size} bytes")
+            print(f"  🕒 JSON modified: {json_path.stat().st_mtime}")
+        if txt_path and txt_path.exists():
+            print(f"  📏 TXT file size: {txt_path.stat().st_size} bytes")
+            print(f"  🕒 TXT modified: {txt_path.stat().st_mtime}")
+        
+        # 🔍 ENHANCED DEBUG: Log all candidates for comparison
+        print(f"  📋 All candidates (sorted by priority):")
+        for i, (j_path, t_path, timestamp, file_type) in enumerate(candidates[:5]):  # Show top 5
+            try:
+                j_mtime = j_path.stat().st_mtime if j_path and j_path.exists() else 0
+                t_mtime = t_path.stat().st_mtime if t_path and t_path.exists() else 0
+                print(f"    {i+1}. {file_type} | ts={timestamp} | json_mtime={j_mtime} | txt_mtime={t_mtime}")
+                print(f"       JSON: {j_path}")
+                print(f"       TXT:  {t_path}")
+            except Exception as e:
+                print(f"    {i+1}. {file_type} | ts={timestamp} | ERROR: {e}")
+        
         print(f"📄 [UNIFIED] Latest CV resolved → type={ftype}, ts={ts}, json={json_path}, txt={txt_path}")
         return FileContext(
             json_path=json_path,

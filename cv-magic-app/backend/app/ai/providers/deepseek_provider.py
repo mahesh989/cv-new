@@ -46,7 +46,7 @@ class DeepSeekProvider(BaseAIProvider):
         self, 
         prompt: str, 
         system_prompt: Optional[str] = None,
-        temperature: float = 0.7,
+        temperature: float = 0.0,
         max_tokens: Optional[int] = None,
         **kwargs
     ) -> AIResponse:
