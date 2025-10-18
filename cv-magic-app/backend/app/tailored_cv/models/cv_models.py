@@ -35,6 +35,24 @@ class Education(BaseModel):
     relevant_coursework: Optional[List[str]] = Field(None, description="Relevant courses")
     honors: Optional[List[str]] = Field(None, description="Academic honors/achievements")
 
+    @validator('relevant_coursework', pre=True)
+    def validate_relevant_coursework(cls, v):
+        """Convert empty string to None for relevant_coursework"""
+        if v == "" or v is None:
+            return None
+        if isinstance(v, str):
+            return [v]  # Convert single string to list
+        return v
+
+    @validator('honors', pre=True)
+    def validate_honors(cls, v):
+        """Convert empty string to None for honors"""
+        if v == "" or v is None:
+            return None
+        if isinstance(v, str):
+            return [v]  # Convert single string to list
+        return v
+
 
 class ExperienceEntry(BaseModel):
     """Work experience entry structure"""
