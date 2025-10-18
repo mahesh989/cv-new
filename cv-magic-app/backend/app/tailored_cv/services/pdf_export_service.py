@@ -456,14 +456,12 @@ class ResumePDFGenerator:
             is_categorized = skills.get('is_categorized', False)
             
             if is_categorized:
-                # Categorized format: Display as bullets with category headers
+                # Categorized format: Display as single lines with category headers
                 for category_name, skills_list in skills.items():
                     if category_name != 'is_categorized' and isinstance(skills_list, list) and skills_list:
-                        # Category header
-                        elements.append(Paragraph(f"<b>{category_name.replace('_', ' ').title()}:</b>", self.styles['SkillCategory']))
-                        # Skills as bullets
-                        for skill in skills_list:
-                            elements.extend(self._make_bullet_rows([skill]))
+                        # Category header with skills on same line
+                        skills_text = ", ".join(skills_list)
+                        elements.append(Paragraph(f"• <b>{category_name.replace('_', ' ').title()}:</b> {skills_text}", self.styles['SkillItem']))
                         elements.append(Spacer(1, self.spacing['bullet_gap']))
             else:
                 # Simple format: Display as single line with comma separation
@@ -489,7 +487,13 @@ class ResumePDFGenerator:
                 else:
                     elements.append(Paragraph(f"<b>{name}</b>", self.styles['BodyText']))
                 
-                if proj.get('description'):
+                # Handle bullets/descriptions
+                bullets = proj.get('bullets', [])
+                if bullets:
+                    for bullet in bullets:
+                        if bullet.strip():
+                            elements.extend(self._make_bullet_rows([bullet]))
+                elif proj.get('description'):
                     elements.append(Paragraph(proj['description'], self.styles['BodyText']))
                 
                 if proj.get('technologies'):
@@ -575,19 +579,25 @@ def _map_tailored_json_to_generator_schema(data: Dict[str, Any]) -> Dict[str, An
                     technical.append(f"{category}: {', '.join(map(str, items))}")
             mapped['skills'] = {'technical_skills': technical}
         elif isinstance(skills_data, list):
-            # Convert dict entries into labeled strings if needed
-            technical = []
+            # Handle categorized skills format properly
+            mapped['skills'] = {'is_categorized': True}
             for item in skills_data:
                 if isinstance(item, dict):
                     cat = item.get('category')
                     items = item.get('skills')
                     if cat and isinstance(items, list):
-                        technical.append(f"{cat}: {', '.join(map(str, items))}")
+                        # Store each category separately for proper PDF rendering
+                        mapped['skills'][cat] = items
                     else:
-                        technical.append(str(item))
+                        # Fallback for non-categorized items
+                        if 'technical_skills' not in mapped['skills']:
+                            mapped['skills']['technical_skills'] = []
+                        mapped['skills']['technical_skills'].append(str(item))
                 else:
-                    technical.append(str(item))
-            mapped['skills'] = {'technical_skills': technical}
+                    # Fallback for non-dict items
+                    if 'technical_skills' not in mapped['skills']:
+                        mapped['skills']['technical_skills'] = []
+                    mapped['skills']['technical_skills'].append(str(item))
     
     # Ensure personal_information exists even if missing in source
     if 'personal_information' not in mapped:
