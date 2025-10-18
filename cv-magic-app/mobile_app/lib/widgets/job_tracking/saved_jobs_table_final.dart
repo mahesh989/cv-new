@@ -425,7 +425,8 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   }
 
   void _showCVPreview(Map<String, dynamic> job) async {
-    final companyName = _normalizeCompanyName(job['company_name'] ?? 'Unknown Company');
+    final companyName =
+        _normalizeCompanyName(job['company_name'] ?? 'Unknown Company');
 
     try {
       // Show loading dialog
@@ -516,7 +517,8 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   }
 
   void _downloadCV(Map<String, dynamic> job) async {
-    final companyName = _normalizeCompanyName(job['company_name'] ?? 'Unknown Company');
+    final companyName =
+        _normalizeCompanyName(job['company_name'] ?? 'Unknown Company');
 
     try {
       // Show loading indicator
@@ -604,22 +606,25 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
 
+      // Use the new PDF preview endpoint
       final url = Uri.parse(
-          'https://cvagent.duckdns.org/api/tailored-cv/content/$companyName');
+          '${AppConfig.apiBaseUrl}/tailored-cv/preview-pdf/$companyName');
 
       final response = await http.get(url, headers: {
         if (token != null) 'Authorization': 'Bearer $token',
+        'Content-Type': 'application/pdf',
       });
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['content'] as String?;
+        // For PDF preview, we'll show a message that PDF is available
+        // The actual PDF content will be handled by the browser/PDF viewer
+        return 'PDF Preview Available - Click to view the tailored CV PDF';
       } else {
-        print('Failed to get CV content: ${response.statusCode}');
+        print('Failed to get CV PDF: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error getting CV content: $e');
+      print('Error getting CV PDF: $e');
       return null;
     }
   }
@@ -642,7 +647,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
       final token = prefs.getString('auth_token');
 
       final url = Uri.parse(
-          'https://cvagent.duckdns.org/api/tailored-cv/export-pdf/$companyName');
+          '${AppConfig.apiBaseUrl}/tailored-cv/export-pdf/$companyName');
 
       final response = await http.get(url, headers: {
         if (token != null) 'Authorization': 'Bearer $token',

@@ -305,7 +305,7 @@ check_deployment() {
         echo ""
         echo "🐳 Docker containers:"
         docker compose ps
-        
+    
         echo ""
         echo "📊 Container health:"
         docker compose exec backend curl -f http://localhost:8000/health 2>/dev/null && echo "✅ Backend is healthy" || echo "❌ Backend health check failed"

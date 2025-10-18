@@ -1025,31 +1025,68 @@ async def get_tailored_cv_content(
         )
 
 
-@router.get("/export-pdf/{company}")
-async def export_pdf(
+@router.get("/preview-pdf/{company}")
+async def preview_pdf(
     company: str,
     current_user: User = Depends(get_current_user)
 ):
-    """Generate and return a PDF for the latest tailored CV for the given company."""
+    """Return the pre-generated PDF content for preview in Job Tracking."""
     try:
-        from app.tailored_cv.services.pdf_export_service import export_tailored_cv_pdf
-        from app.utils.user_path_utils import get_user_base_path
+        from app.tailored_cv.services.pdf_file_selector import get_latest_company_pdf
 
-        user_base = get_user_base_path(current_user.email)
-        export_dir = user_base / "cvs" / "pdf_cvs"
+        # Get the latest pre-generated PDF for this company
+        pdf_path = get_latest_company_pdf(current_user.email, company)
+        
+        if not pdf_path or not pdf_path.exists():
+            raise HTTPException(
+                status_code=404, 
+                detail=f"No tailored CV PDF found for company: {company}. Please generate a tailored CV first."
+            )
 
-        pdf_path = export_tailored_cv_pdf(current_user.email, company, export_dir)
+        logger.info(f"✅ Serving pre-generated PDF for preview {company}: {pdf_path.name}")
 
         return FileResponse(
             path=str(pdf_path),
             media_type="application/pdf",
             filename=pdf_path.name,
         )
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"❌ PDF export failed for {company}: {e}")
-        raise HTTPException(status_code=500, detail=f"PDF export failed: {str(e)}")
+        logger.error(f"❌ PDF preview failed for {company}: {e}")
+        raise HTTPException(status_code=500, detail=f"PDF preview failed: {str(e)}")
+
+
+@router.get("/export-pdf/{company}")
+async def export_pdf(
+    company: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Return the pre-generated PDF for the latest tailored CV for the given company."""
+    try:
+        from app.tailored_cv.services.pdf_file_selector import get_latest_company_pdf
+
+        # Get the latest pre-generated PDF for this company
+        pdf_path = get_latest_company_pdf(current_user.email, company)
+        
+        if not pdf_path or not pdf_path.exists():
+            raise HTTPException(
+                status_code=404, 
+                detail=f"No tailored CV PDF found for company: {company}. Please generate a tailored CV first."
+            )
+
+        logger.info(f"✅ Serving pre-generated PDF for {company}: {pdf_path.name}")
+
+        return FileResponse(
+            path=str(pdf_path),
+            media_type="application/pdf",
+            filename=pdf_path.name,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ PDF download failed for {company}: {e}")
+        raise HTTPException(status_code=500, detail=f"PDF download failed: {str(e)}")
 
 
 # Background task function

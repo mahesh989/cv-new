@@ -1724,6 +1724,24 @@ FIX: Output ONLY valid JSON!
             with open(txt_file_path, 'w', encoding='utf-8') as f:
                 f.write(text_content)
             
+            # Generate PDF immediately after JSON/TXT creation
+            try:
+                from app.tailored_cv.services.pdf_export_service import export_tailored_cv_pdf
+                from pathlib import Path
+                
+                # Create PDF export directory (company-specific)
+                pdf_export_dir = self.cv_analysis_path / "cvs" / "pdf_cvs"
+                pdf_export_dir.mkdir(parents=True, exist_ok=True)
+                
+                # Generate PDF using the same JSON file
+                pdf_path = export_tailored_cv_pdf(self.user_email, company, pdf_export_dir)
+                
+                logger.info(f"✅ Generated tailored CV PDF: {pdf_path}")
+                
+            except Exception as pdf_error:
+                logger.warning(f"⚠️ Failed to generate PDF during CV save: {pdf_error}")
+                # Don't fail the entire process if PDF generation fails
+            
             logger.info(f"✅ Saved tailored CV to {json_file_path}")
             logger.info(f"✅ Saved tailored CV text to {txt_file_path}")
             return str(json_file_path)
