@@ -977,11 +977,10 @@ async def get_tailored_cv_content(
         
         # Create minimal required fields
         optimization_strategy = OptimizationStrategy(
-            section_order={},
-            education_strategy={},
+            section_order=[],
+            education_strategy="",
             keyword_placement={},
-            quantification_targets={},
-            enhancements={},
+            quantification_targets=[],
             impact_enhancements={}
         )
         
