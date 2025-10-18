@@ -654,13 +654,21 @@ ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
    - Companies: Use EXACT company names
    - Dates: Use EXACT dates
 
-4. JSON OUTPUT RULES:
+5. SKILLS FORMATTING RULES:
+   - Convert skills to categorized format with proper category names
+   - Use standard category names: "Programming Languages", "Data Analysis Tools", "Software & Platforms", "Soft Skills", "Domain Expertise"
+   - DO NOT use generic names like "Technical Skills" or "Other Skills"
+   - Extract individual skills from original CV's skill descriptions
+   - Group related skills under appropriate categories
+   - Example: "Proficient in Microsoft Word, Excel, PowerPoint" → ["Microsoft Word", "Excel", "PowerPoint"] under "Software & Platforms"
+
+6. JSON OUTPUT RULES:
    - Output ONLY valid JSON
    - NO markdown, NO explanations, NO comments
    - Start with { and end with }
    - Use proper JSON structure
 
-5. SECTION PRESERVATION RULES:
+7. SECTION PRESERVATION RULES:
    - DO NOT create new top-level sections that do not exist in the provided CV
    - Only tailor and enhance the sections that are present in the provided CV
    - If a section is missing in the provided CV (e.g., Projects), DO NOT add it
@@ -704,8 +712,16 @@ The exact JSON structure must be:
   ],
   "skills": [
     {
-      "category": "enhanced category name",
-      "skills": ["skills from original CV plus recommended additions", ...]
+      "category": "Software & Platforms",
+      "skills": ["Microsoft Word", "Excel", "PowerPoint", "Power BI"]
+    },
+    {
+      "category": "Data Management", 
+      "skills": ["Data Entry", "Report Generation", "Dashboard Creation"]
+    },
+    {
+      "category": "Soft Skills",
+      "skills": ["Communication", "Problem Solving", "Teamwork", "Time Management"]
     }
   ],
   "projects": [  // OPTIONAL - include only if original CV has projects
