@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:html' as html
     show AnchorElement, document, Blob, Url; // Only used on web
 import '../core/theme/app_theme.dart';
 import '../services/results_clearing_service.dart';
+import '../services/auth_service.dart';
 
 class CVGenerationScreen extends StatefulWidget {
   final VoidCallback? onNavigateToCVMagic;
@@ -110,8 +110,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
     try {
       // Get auth token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthService.getValidAuthToken();
 
       if (token == null) {
         setState(() {
@@ -667,9 +666,8 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     if (_currentCompany == null || tailoredCVContent == null) return;
 
     try {
-      // Include auth token like in load calls
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      // Get valid auth token (with auto-refresh)
+      final token = await AuthService.getValidAuthToken();
 
       final response = await http.post(
         Uri.parse('https://cvagent.duckdns.org/api/tailored-cv/save-edited'),
@@ -712,8 +710,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     if (_currentCompany == null) return;
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthService.getValidAuthToken();
 
       final url = Uri.parse(
           'https://cvagent.duckdns.org/api/tailored-cv/export-pdf/${_currentCompany!}');

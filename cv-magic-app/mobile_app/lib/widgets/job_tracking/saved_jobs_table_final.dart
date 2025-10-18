@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 import '../../core/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
+import '../../services/auth_service.dart';
 
 class SavedJobsTable extends StatefulWidget {
   final List<Map<String, dynamic>> jobs;
@@ -603,8 +604,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   // Helper function to get tailored CV content
   Future<String?> _getTailoredCVContent(String companyName) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthService.getValidAuthToken();
 
       // Use the new PDF preview endpoint
       final url = Uri.parse(
@@ -643,8 +643,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   // Direct PDF download using the same logic as CV generation screen
   Future<void> _downloadPDFDirectly(String companyName) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthService.getValidAuthToken();
 
       final url = Uri.parse(
           '${AppConfig.apiBaseUrl}/tailored-cv/export-pdf/$companyName');

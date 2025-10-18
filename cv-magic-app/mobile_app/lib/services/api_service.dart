@@ -1,6 +1,5 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
 import 'auth_service.dart';
@@ -75,6 +74,59 @@ class APIService {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401) {
+      // Handle 401 Unauthorized - try to refresh token
+      print('🔄 [API_SERVICE] Received 401, attempting token refresh...');
+      
+      final newToken = await AuthService.refreshAccessToken();
+      if (newToken != null) {
+        print('✅ [API_SERVICE] Token refreshed, retrying request...');
+        // Retry the request with new token
+        final retryHeaders = {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $newToken',
+          if (currentModelId != null) 'X-Current-Model': currentModelId!,
+          ...?headers,
+        };
+        
+        // Retry the request
+        http.Response retryResponse;
+        switch (method.toUpperCase()) {
+          case 'GET':
+            retryResponse = await http.get(url, headers: retryHeaders);
+            break;
+          case 'POST':
+            retryResponse = await http.post(
+              url,
+              headers: retryHeaders,
+              body: body != null ? jsonEncode(body) : null,
+            );
+            break;
+          case 'PUT':
+            retryResponse = await http.put(
+              url,
+              headers: retryHeaders,
+              body: body != null ? jsonEncode(body) : null,
+            );
+            break;
+          case 'DELETE':
+            retryResponse = await http.delete(url, headers: retryHeaders);
+            break;
+          default:
+            throw Exception('Unsupported HTTP method: $method');
+        }
+        
+        if (retryResponse.statusCode >= 200 && retryResponse.statusCode < 300) {
+          print('✅ [API_SERVICE] Retry successful after token refresh');
+          return jsonDecode(retryResponse.body);
+        } else {
+          print('❌ [API_SERVICE] Retry failed even after token refresh: ${retryResponse.statusCode}');
+          throw Exception('Request failed after token refresh: ${retryResponse.statusCode}');
+        }
+      } else {
+        print('❌ [API_SERVICE] Token refresh failed, user needs to login');
+        throw Exception('Authentication failed - please login again');
+      }
     } else {
       // Try to parse error response for better error handling
       try {
