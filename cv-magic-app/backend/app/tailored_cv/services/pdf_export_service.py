@@ -218,6 +218,36 @@ class ResumePDFGenerator:
                 leading=12
             ))
 
+        # Skill Category style
+        if 'SkillCategory' not in style_names:
+            self.styles.add(ParagraphStyle(
+                name='SkillCategory',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#1a1a1a'),
+                fontName='Helvetica-Bold',
+                spaceAfter=4,
+                alignment=TA_LEFT,
+                leftIndent=0,
+                rightIndent=0,
+                leading=12
+            ))
+
+        # Skill Item style
+        if 'SkillItem' not in style_names:
+            self.styles.add(ParagraphStyle(
+                name='SkillItem',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#333333'),
+                fontName='Helvetica',
+                spaceAfter=0,
+                alignment=TA_LEFT,
+                leftIndent=0,
+                rightIndent=0,
+                leading=12
+            ))
+
     def _create_section_with_line(self, title: str):
         elements = []
         elements.append(Spacer(1, self.spacing['section_above']))
