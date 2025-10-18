@@ -64,7 +64,6 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
     }
   }
 
-
   String _getJobKey(Map<String, dynamic> job) {
     // Create a more robust key using multiple fields and normalize them
     // This MUST match the key generation in JobTrackingScreen
@@ -426,8 +425,8 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   }
 
   void _showCVPreview(Map<String, dynamic> job) async {
-    final companyName = job['company_name'] ?? 'Unknown Company';
-    
+    final companyName = _normalizeCompanyName(job['company_name'] ?? 'Unknown Company');
+
     try {
       // Show loading dialog
       showDialog(
@@ -446,10 +445,10 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
 
       // Get tailored CV content
       final cvContent = await _getTailoredCVContent(companyName);
-      
+
       // Close loading dialog
       Navigator.of(context).pop();
-      
+
       if (cvContent != null) {
         // Show CV preview dialog
         showDialog(
@@ -506,7 +505,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
     } catch (e) {
       // Close loading dialog if still open
       Navigator.of(context).pop();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error loading CV preview: $e'),
@@ -517,8 +516,8 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
   }
 
   void _downloadCV(Map<String, dynamic> job) async {
-    final companyName = job['company_name'] ?? 'Unknown Company';
-    
+    final companyName = _normalizeCompanyName(job['company_name'] ?? 'Unknown Company');
+
     try {
       // Show loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
@@ -540,7 +539,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
 
       // Download the PDF
       await _downloadTailoredCVPDF(companyName);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('CV downloaded successfully!'),
@@ -591,6 +590,12 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
         ],
       ),
     );
+  }
+
+  // Helper function to normalize company name for backend API
+  String _normalizeCompanyName(String companyName) {
+    // Replace spaces with underscores to match backend expectations
+    return companyName.replaceAll(' ', '_');
   }
 
   // Helper function to get tailored CV content
@@ -662,5 +667,4 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
       rethrow;
     }
   }
-
 }
