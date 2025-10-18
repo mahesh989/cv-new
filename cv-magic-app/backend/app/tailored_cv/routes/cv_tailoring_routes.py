@@ -955,30 +955,63 @@ async def get_tailored_cv_content(
                 detail=f"No tailored CV found for company: {company_name}. Please generate a tailored CV first."
             )
         
-        latest_txt_file = cv_context.txt_path
+        latest_json_file = cv_context.json_path
         
-        # Check if it exists
-        if not latest_txt_file.exists():
+        # Check if JSON file exists
+        if not latest_json_file or not latest_json_file.exists():
             raise HTTPException(
                 status_code=404,
-                detail=f"Tailored CV text file not found: {latest_txt_file}"
+                detail=f"Tailored CV JSON file not found: {latest_json_file}"
             )
         
-        # Read the text content
-        with open(latest_txt_file, 'r', encoding='utf-8') as f:
-            content = f.read()
+        # Read the JSON content and convert to text format
+        with open(latest_json_file, 'r', encoding='utf-8') as f:
+            json_data = json.load(f)
         
-        logger.info(f"✅ Served TAILORED CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
+        # Convert JSON to text format using the service
+        from app.tailored_cv.services.cv_tailoring_service import CVTailoringService
+        service = CVTailoringService(user_email=current_user.email)
+        
+        # Create a minimal TailoredCV object for text conversion
+        from app.tailored_cv.models.cv_models import TailoredCV, ContactInfo, ExperienceEntry, SkillCategory, OptimizationStrategy
+        
+        # Create minimal required fields
+        optimization_strategy = OptimizationStrategy(
+            section_order={},
+            education_strategy={},
+            keyword_placement={},
+            quantification_targets={},
+            enhancements={},
+            impact_enhancements={}
+        )
+        
+        tailored_cv = TailoredCV(
+            contact=ContactInfo(**json_data['contact']),
+            education=json_data.get('education', []),
+            experience=[ExperienceEntry(**exp) for exp in json_data.get('experience', [])],
+            skills=[SkillCategory(**skill) for skill in json_data.get('skills', [])],
+            target_company=company_name,
+            target_role='Data Analyst',
+            optimization_strategy=optimization_strategy,
+            enhancements_applied={},
+            keywords_integrated=[],
+            quantifications_added=[]
+        )
+        
+        # Convert to text with current format
+        content = service._convert_tailored_cv_to_text(tailored_cv)
+        
+        logger.info(f"✅ Served TAILORED CV content: {latest_json_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
         
         return JSONResponse(content={
             "success": True,
             "content": content,
-            "filename": latest_txt_file.name,
+            "filename": latest_json_file.name,
             "company": company_name,
             "source_folder": cv_context.file_type,
             "metadata": {
                 "file_size": len(content),
-                "last_modified": latest_txt_file.stat().st_mtime,
+                "last_modified": latest_json_file.stat().st_mtime,
                 "dynamic_selection": True
             }
         })
