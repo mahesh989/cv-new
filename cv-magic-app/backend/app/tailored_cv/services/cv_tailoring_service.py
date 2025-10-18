@@ -1561,10 +1561,13 @@ FIX: Output ONLY valid JSON!
             #     lines.append(tailored_cv.professional_summary)
             #     lines.append("")
             
-            # Skills - Format like original CV
+            # Skills - Format with categories to match JSON structure
             if tailored_cv.skills:
                 lines.append("TECHNICAL SKILLS")
-                lines.append("• " + ", ".join([skill for skill_category in tailored_cv.skills for skill in skill_category.skills]))
+                for skill_category in tailored_cv.skills:
+                    if skill_category.category and skill_category.skills:
+                        lines.append(f"  {skill_category.category}:")
+                        lines.append("  • " + ", ".join(skill_category.skills))
                 lines.append("")
             
             # Experience - Format like original CV
