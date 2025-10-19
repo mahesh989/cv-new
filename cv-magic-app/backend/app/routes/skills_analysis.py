@@ -57,7 +57,8 @@ from app.ai.ai_service import AIServiceManager
 async def _extract_company_name_from_jd_v2(
     jd_text: str, 
     jd_url: str, 
-    user_email: str
+    user_email: str,
+    user: Any = None
 ) -> tuple[str, CompanyResult]:
     """
     New version using single AI company extractor
@@ -67,6 +68,7 @@ async def _extract_company_name_from_jd_v2(
         jd_text: Job description text
         jd_url: Job description URL
         user_email: User's email for folder lookup
+        user: User context for AI service initialization
         
     Returns:
         Tuple of (company_folder_name, CompanyResult)
@@ -77,7 +79,7 @@ async def _extract_company_name_from_jd_v2(
         extractor = CompanyExtractor(ai_service)
         
         # Extract company name
-        result = await extractor.extract(jd_url, jd_text)
+        result = await extractor.extract(jd_url, jd_text, user)
         
         # Check for existing company folders
         from app.utils.user_path_utils import get_user_base_path
@@ -111,7 +113,7 @@ async def _extract_company_name_from_jd_v2(
 
 
 # Wrapper to maintain old signature
-async def _extract_company_name_from_jd(jd_text: str, user_email: str) -> str:
+async def _extract_company_name_from_jd(jd_text: str, user_email: str, user: Any = None) -> str:
     """
     DEPRECATED: Use _extract_company_name_from_jd_v2 instead
     Maintained for backward compatibility
@@ -119,7 +121,7 @@ async def _extract_company_name_from_jd(jd_text: str, user_email: str) -> str:
     This wrapper calls the new single AI method with empty URL
     Returns only the company folder name (old behavior)
     """
-    company_name, _ = await _extract_company_name_from_jd_v2(jd_text, "", user_email)
+    company_name, _ = await _extract_company_name_from_jd_v2(jd_text, "", user_email, user)
     return company_name
 
 
@@ -994,7 +996,8 @@ async def preliminary_analysis(
         company_name, company_result = await _extract_company_name_from_jd_v2(
             jd_text, 
             jd_url=jd_url or "",  # Use provided URL or empty string
-            user_email=user_email
+            user_email=user_email,
+            user=current_user
         )
 
         # Log extraction details for monitoring
@@ -2726,7 +2729,8 @@ async def perform_preliminary_skills_analysis(
                     company_name, company_result = await _extract_company_name_from_jd_v2(
                         jd_text, 
                         jd_url=jd_url or "",  # Use provided URL or empty string
-                        user_email=user_email
+                        user_email=user_email,
+                        user=current_user
                     )
 
                     # Log extraction details for monitoring

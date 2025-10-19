@@ -3,12 +3,13 @@ import re
 from typing import Dict, Any, Optional
 from ..ai.ai_service import ai_service
 
-async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
+async def extract_job_metadata(job_description: str, user: Any = None) -> Dict[str, Any]:
     """
     Extract metadata from job description using AI.
     
     Args:
         job_description: The job description text
+        user: User context for AI service initialization
         
     Returns:
         Dictionary containing extracted metadata
@@ -16,73 +17,8 @@ async def extract_job_metadata(job_description: str) -> Dict[str, Any]:
     if not job_description or len(job_description.strip()) < 10:
         return {"error": "Job description too short or empty"}
     
-    try:
-        # Create a prompt for extracting job information
-        prompt = f"""
-        Analyze the following job description and extract the job title and company name.
-        
-        CRITICAL RULES:
-        1. Extract ONLY information that ACTUALLY APPEARS in the text
-        2. Do NOT infer or assume information not explicitly stated
-        3. Return result in JSON format with exactly these keys: "job_title" and "company"
-        4. If you cannot find either piece of information, return null for that field
-        5. Be precise and extract only the actual job title and company name, not additional descriptive text
-        
-        COMPANY NAME EXTRACTION PRIORITY:
-        - If this is a recruitment agency posting (look for "Reference Number:", "Robert Half", "Hays", "Randstad", "Adecco", "Manpower", "Michael Page", "Hudson", "Chandler Macleod", "SEEK", privacy notices, "express consent"), extract the RECRUITMENT AGENCY NAME
-        - If it's a direct company posting, extract the hiring company name
-        - Look for company names in headers, contact info, email domains, or website URLs
-        - Avoid generic terms like "Company", "Organization", "Client"
-        
-        Job Description:
-        {job_description}
-        
-        Return ONLY a JSON object in this exact format:
-        {{"job_title": "actual job title or null", "company": "actual company name or null"}}
-        """
-        
-        # Use the AI service to extract information
-        result_text = await ai_service.generate_response(
-            prompt=prompt,
-            user=user,
-            temperature=0.0,
-            max_tokens=200
-        )
-        
-        # Try to parse the JSON response
-        try:
-            # Clean the response text
-            result_text = result_text.strip()
-            
-            # Remove any markdown formatting if present
-            if result_text.startswith('```json'):
-                result_text = result_text[7:]
-            if result_text.endswith('```'):
-                result_text = result_text[:-3]
-            
-            result_text = result_text.strip()
-            
-            # Parse JSON
-            result = json.loads(result_text)
-            
-            # Validate the result structure
-            if not isinstance(result, dict):
-                raise ValueError("Response is not a dictionary")
-            
-            # Ensure required keys exist
-            if "job_title" not in result:
-                result["job_title"] = None
-            if "company" not in result:
-                result["company"] = None
-                
-            return result
-            
-        except (json.JSONDecodeError, ValueError) as parse_error:
-            # Fallback: try to extract using regex patterns
-            return extract_job_info_fallback(job_description)
-            
-    except Exception as e:
-        return {"error": f"Failed to extract job metadata: {str(e)}"}
+    # Use the new v2 function for better company extraction
+    return await extract_job_metadata_v2("", job_description, user)
 
 
 def extract_job_info_fallback(job_description: str) -> Dict[str, Any]:
@@ -201,13 +137,14 @@ def validate_job_description(job_description: str) -> Dict[str, Any]:
 
 from app.services.company_extractor import CompanyExtractor
 
-async def extract_job_metadata_v2(jd_url: str, jd_text: str) -> Dict[str, Any]:
+async def extract_job_metadata_v2(jd_url: str, jd_text: str, user: Any = None) -> Dict[str, Any]:
     """
     New version using single AI company extractor
     
     Args:
         jd_url: Job description URL
         jd_text: Job description text
+        user: User context for AI service initialization
         
     Returns:
         Dictionary with job metadata including company name
@@ -217,7 +154,7 @@ async def extract_job_metadata_v2(jd_url: str, jd_text: str) -> Dict[str, Any]:
     ai_service = AIServiceManager()
     extractor = CompanyExtractor(ai_service)
     
-    result = await extractor.extract(jd_url, jd_text)
+    result = await extractor.extract(jd_url, jd_text, user)
     
     return {
         "job_title": "",  # TODO: Extract job title separately if needed

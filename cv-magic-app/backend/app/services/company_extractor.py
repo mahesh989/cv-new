@@ -33,7 +33,11 @@ class CompanyExtractor:
     
     PROMPT = """Extract the company name from this job posting and return JSON.
 
-EXAMPLE:
+CRITICAL: Return ONLY a valid JSON object. Do NOT include any other text.
+
+EXAMPLES:
+
+Example 1 - Recruitment Agency:
 URL: https://www.seek.com.au/job/78901234
 Text: "Senior Data Analyst - Ref: DA2024-456
 Robert Half Technology is seeking a Senior Data Analyst for our client, a leading ASX-listed financial services company in Melbourne CBD. 
@@ -47,27 +51,35 @@ By clicking 'apply', you give your express consent that Robert Half may use your
 Contact: applications@roberthalf.com.au
 Robert Half International Inc. Privacy Policy applies."
 
-ANALYSIS:
-- URL shows: seek.com.au (job board, not employer)
-- "Robert Half Technology" mentioned as recruiter
-- "Ref: DA2024-456" → recruitment reference number
-- "our client" → agency placing for someone else
-- Privacy consent for "Robert Half" → confirms agency
-- Real employer kept confidential ("leading ASX-listed financial services company")
+JSON:
+{{"company": "Robert Half", "confidence": "high", "is_agency": true}}
+
+Example 2 - Direct Company:
+URL: https://www.microsoft.com/careers/azure-engineer
+Text: "About Microsoft Azure
+Join the Azure Cloud Platform team at Microsoft Corporation. We are looking for a Senior Software Engineer to help build the next generation of cloud infrastructure.
+
+About Microsoft:
+Microsoft Corporation is a leading technology company..."
 
 JSON:
-{
-  "company": "Robert Half",
-  "confidence": "high",
-  "is_agency": true
-}
+{{"company": "Microsoft", "confidence": "high", "is_agency": false}}
 
-RULES:
+Example 3 - Benefits/Compensation (NOT a company):
+URL: 
+Text: "This role offers a competitive salary plus superannuation and leave loading. The package includes health insurance and flexible working arrangements."
+
+JSON:
+{{"company": null, "confidence": "low", "is_agency": false}}
+
+EXTRACTION RULES:
 1. Recruitment agency posting → return AGENCY name (look for: reference numbers, "our client", "on behalf of", privacy consents, known agencies like Robert Half, Hays, Randstad, Seek Talent, Hudson, Michael Page)
 2. Direct employer posting → return COMPANY name (look for: "About [Company]", company websites, direct contact emails, no reference numbers)
 3. Parent company over divisions (Microsoft not Azure, Nine Entertainment not Drive, Google not Google Cloud)
 4. Check: headers, "About" sections, email domains (@company.com), website URLs (www.company.com)
 5. Avoid generic terms: "Company", "Client", "Organization", "Employer"
+6. NEVER extract benefits/compensation phrases like "superannuation", "leave loading", "salary package", "benefits"
+7. If no clear company found, return null for company
 
 Now extract from:
 URL: {url}
@@ -79,24 +91,30 @@ JSON:"""
         """Initialize with AI service dependency"""
         self.ai_service = ai_service
     
-    async def extract(self, jd_url: str, jd_text: str) -> CompanyResult:
+    async def extract(self, jd_url: str, jd_text: str, user: Any = None) -> CompanyResult:
         """
         Extract company name from job description
         
         Args:
             jd_url: Job description URL (can be empty string)
             jd_text: Job description text content
+            user: User context for AI service initialization
             
         Returns:
             CompanyResult with extraction details
         """
         try:
+            # Initialize AI service for user if needed
+            if hasattr(self.ai_service, 'initialize_for_user') and user:
+                self.ai_service.initialize_for_user(user)
+            
             # Call AI service
             response = await self.ai_service.generate_response(
                 prompt=self.PROMPT.format(
                     url=jd_url[:500] if jd_url else "No URL provided",
                     text=jd_text[:4000]
                 ),
+                user=user,
                 temperature=0.0,
                 max_tokens=256
             )
