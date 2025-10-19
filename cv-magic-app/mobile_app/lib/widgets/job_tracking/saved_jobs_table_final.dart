@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
+import 'dart:convert';
 import '../../core/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
 import '../../services/auth_service.dart';
@@ -606,25 +607,24 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
     try {
       final token = await AuthService.getValidAuthToken();
 
-      // Use the new PDF preview endpoint
+      // Use the content endpoint to get text content for preview
       final url = Uri.parse(
-          '${AppConfig.apiBaseUrl}/tailored-cv/preview-pdf/$companyName');
+          '${AppConfig.apiBaseUrl}/api/tailored-cv/content/$companyName');
 
       final response = await http.get(url, headers: {
         if (token != null) 'Authorization': 'Bearer $token',
-        'Content-Type': 'application/pdf',
+        'Content-Type': 'application/json',
       });
 
       if (response.statusCode == 200) {
-        // For PDF preview, we'll show a message that PDF is available
-        // The actual PDF content will be handled by the browser/PDF viewer
-        return 'PDF Preview Available - Click to view the tailored CV PDF';
+        final data = json.decode(response.body);
+        return data['content'] ?? 'No content available';
       } else {
-        print('Failed to get CV PDF: ${response.statusCode}');
+        print('Failed to get CV content: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error getting CV PDF: $e');
+      print('Error getting CV content: $e');
       return null;
     }
   }
@@ -646,7 +646,7 @@ class _SavedJobsTableState extends State<SavedJobsTable> {
       final token = await AuthService.getValidAuthToken();
 
       final url = Uri.parse(
-          '${AppConfig.apiBaseUrl}/tailored-cv/export-pdf/$companyName');
+          '${AppConfig.apiBaseUrl}/api/tailored-cv/export-pdf/$companyName');
 
       final response = await http.get(url, headers: {
         if (token != null) 'Authorization': 'Bearer $token',
