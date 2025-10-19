@@ -31928,24 +31928,27 @@ while(true)switch(s){case 0:A.y().$1("\ud83e\uddf9 [SKILLS_HANDLER] Clearing ana
 try{A.y().$1("\u2705 [SKILLS_HANDLER] Results cleared successfully")}catch(o){q=A.U(o)
 A.y().$1("\u274c [SKILLS_HANDLER] Error clearing results: "+A.c(q))}return A.t(null,r)}})
 return A.u($async$aIY,r)},
-ap0(a,b){return A.b2K(a,b)},
-b2K(b0,b1){var s=0,r=A.v(t.PC),q,p=2,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9
-var $async$ap0=A.q(function(b2,b3){if(b2===1){o=b3
-s=p}while(true)switch(s){case 0:A.M("=== FRONTEND SERVICE CALLED ===")
-A.M("CV: "+b0)
-b=""+b1.length
+ap0(a,b){var s=null
+return A.b2K(a,b)},
+b2K(b1,b2){var s=0,r=A.v(t.PC),q,p=2,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0
+var $async$ap0=A.q(function(b3,b4){if(b3===1){o=b4
+s=p}while(true)switch(s){case 0:a9=null
+A.M("=== FRONTEND SERVICE CALLED ===")
+A.M("CV: "+b1)
+b=""+b2.length
 A.M("JD length: "+b)
 p=4
 A.M("\ud83d\ude80 [SERVICE_DEBUG] Starting performPreliminaryAnalysis")
-A.M("   CV: "+b0)
+A.M("   CV: "+b1)
 A.M("   JD text length: "+b)
 a=new A.xx()
 $.zN()
 a.n1(0)
 n=a
+b=a9
 s=7
-return A.m(A.ee(A.a1(["cv_filename",b0,"jd_text",b1],t.N,t.z),"/preliminary-analysis","POST"),$async$ap0)
-case 7:m=b3
+return A.m(A.ee(A.a1(["cv_filename",b1,"jd_text",b2,"jd_url",b==null?"":b],t.N,t.z),"/preliminary-analysis","POST"),$async$ap0)
+case 7:m=b4
 A.M("\ud83d\udce1 [SERVICE_DEBUG] Received response from API")
 A.M("\ud83d\udce1 [SERVICE_DEBUG] Raw result type: "+J.Z(m).j(0))
 A.M("\ud83d\udce1 [SERVICE_DEBUG] Raw result: "+A.c(m))
@@ -31997,9 +32000,9 @@ p=2
 s=6
 break
 case 4:p=3
-a9=o
-g=A.U(a9)
-f=A.aT(a9)
+b0=o
+g=A.U(b0)
+f=A.aT(b0)
 A.M("\u274c [SERVICE_ERROR] Exception in performPreliminaryAnalysis: "+A.c(g))
 A.M("\u274c [SERVICE_ERROR] Stack trace: "+A.c(f))
 if(B.c.p(J.cp(g),"404")||B.c.p(J.cp(g),"not found")){q=A.Fk("CV file not found. Please upload a CV file first.")
