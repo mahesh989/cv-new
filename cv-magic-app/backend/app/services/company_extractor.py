@@ -253,6 +253,7 @@ JSON:"""
             
             if any(board in domain for board in job_boards):
                 # For job boards, try to extract from text
+                print(f"🔍 Detected job board: {domain}, extracting from text...")
                 return self._extract_from_text_fallback(jd_text)
             
             # Extract company from domain
@@ -302,11 +303,21 @@ JSON:"""
             
             # Look for common patterns in text
             patterns = [
-                r'About\s+([A-Z][a-zA-Z\s&.-]{2,30}?)\s+is',
-                r'([A-Z][a-zA-Z\s&.-]{2,30}?)\s+is\s+(?:looking|seeking|hiring)',
+                # Job title followed by company name
+                r'^([A-Z][a-zA-Z\s&.-]{5,50}?)\s*$',
+                # Company name in job summary
+                r'Job Summary\s*\n\s*([A-Z][a-zA-Z\s&.-]{5,50}?)\s*\n',
+                # About company patterns
+                r'About\s+([A-Z][a-zA-Z\s&.-]{5,50}?)\s+is',
+                r'([A-Z][a-zA-Z\s&.-]{5,50}?)\s+is\s+(?:looking|seeking|hiring)',
+                # Direct company labels
                 r'Company:\s*([^\n\r]+)',
                 r'Employer:\s*([^\n\r]+)',
+                # Email domains
                 r'@([a-zA-Z0-9.-]+)\.(?:com|org|au|net)',
+                # Organization patterns
+                r'([A-Z][a-zA-Z\s&.-]{5,50}?)\s+works\s+in\s+partnership',
+                r'([A-Z][a-zA-Z\s&.-]{5,50}?)\s+plays\s+a\s+critical\s+role',
             ]
             
             for pattern in patterns:
@@ -339,7 +350,10 @@ JSON:"""
         invalid_terms = [
             "superannuation", "leave", "loading", "benefits", "salary", "package",
             "compensation", "remuneration", "bonus", "incentive", "allowance",
-            "work", "job", "position", "role", "applications", "close", "posted"
+            "work", "job", "position", "role", "applications", "close", "posted",
+            "opportunity", "home", "remote", "flexible", "arrangements", "culture",
+            "environment", "supportive", "friendly", "progression", "development",
+            "learning", "discounts", "insurance", "career", "attractive", "base"
         ]
         
         if any(term in name_lower for term in invalid_terms):
