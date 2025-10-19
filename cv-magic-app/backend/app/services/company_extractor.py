@@ -31,57 +31,30 @@ class CompanyResult:
 class CompanyExtractor:
     """Single source of truth for company name extraction"""
     
-    PROMPT = """Extract the company name from this job posting and return JSON.
+    PROMPT = """Extract the company name from this job posting. Return ONLY a JSON object.
 
-CRITICAL: Return ONLY a valid JSON object. Do NOT include any other text.
+SIMPLE RULES:
+1. Look for the ACTUAL company name (not job boards like Seek, Indeed)
+2. If it's a recruitment agency posting → return the AGENCY name
+3. If it's a direct company posting → return the COMPANY name
+4. NEVER extract benefits like "superannuation", "leave loading", "salary package"
+5. If no company found → return null
 
 EXAMPLES:
 
-Example 1 - Recruitment Agency:
-URL: https://www.seek.com.au/job/78901234
-Text: "Senior Data Analyst - Ref: DA2024-456
-Robert Half Technology is seeking a Senior Data Analyst for our client, a leading ASX-listed financial services company in Melbourne CBD. 
+Recruitment Agency:
+Text: "Robert Half is seeking a Data Analyst for our client..."
+JSON: {{"company": "Robert Half", "confidence": "high", "is_agency": true}}
 
-About the Role:
-Our client, a major Australian bank, is looking for...
+Direct Company:
+Text: "Microsoft is looking for a Software Engineer..."
+JSON: {{"company": "Microsoft", "confidence": "high", "is_agency": false}}
 
-How to Apply:
-By clicking 'apply', you give your express consent that Robert Half may use your personal information to process your job application...
+Benefits Text (NOT a company):
+Text: "Salary plus superannuation and leave loading..."
+JSON: {{"company": null, "confidence": "low", "is_agency": false}}
 
-Contact: applications@roberthalf.com.au
-Robert Half International Inc. Privacy Policy applies."
-
-JSON:
-{{"company": "Robert Half", "confidence": "high", "is_agency": true}}
-
-Example 2 - Direct Company:
-URL: https://www.microsoft.com/careers/azure-engineer
-Text: "About Microsoft Azure
-Join the Azure Cloud Platform team at Microsoft Corporation. We are looking for a Senior Software Engineer to help build the next generation of cloud infrastructure.
-
-About Microsoft:
-Microsoft Corporation is a leading technology company..."
-
-JSON:
-{{"company": "Microsoft", "confidence": "high", "is_agency": false}}
-
-Example 3 - Benefits/Compensation (NOT a company):
-URL: 
-Text: "This role offers a competitive salary plus superannuation and leave loading. The package includes health insurance and flexible working arrangements."
-
-JSON:
-{{"company": null, "confidence": "low", "is_agency": false}}
-
-EXTRACTION RULES:
-1. Recruitment agency posting → return AGENCY name (look for: reference numbers, "our client", "on behalf of", privacy consents, known agencies like Robert Half, Hays, Randstad, Seek Talent, Hudson, Michael Page)
-2. Direct employer posting → return COMPANY name (look for: "About [Company]", company websites, direct contact emails, no reference numbers)
-3. Parent company over divisions (Microsoft not Azure, Nine Entertainment not Drive, Google not Google Cloud)
-4. Check: headers, "About" sections, email domains (@company.com), website URLs (www.company.com)
-5. Avoid generic terms: "Company", "Client", "Organization", "Employer"
-6. NEVER extract benefits/compensation phrases like "superannuation", "leave loading", "salary package", "benefits"
-7. If no clear company found, return null for company
-
-Now extract from:
+EXTRACT FROM:
 URL: {url}
 Text: {text}
 
@@ -128,9 +101,13 @@ JSON:"""
         except Exception as e:
             # Log error and use fallback
             print(f"AI extraction failed: {str(e)}")
-            company = "Unknown"
-            conf = "low"
-            is_agency = False
+            print("🔄 Falling back to URL-based extraction...")
+            
+            # Use URL-based fallback
+            fallback_result = self._url_based_fallback(jd_url, jd_text)
+            company = fallback_result.get("company", "Unknown")
+            conf = fallback_result.get("confidence", "low")
+            is_agency = fallback_result.get("is_agency", False)
         
         # Validate and clean
         company = self._validate_company_name(company)
@@ -249,3 +226,127 @@ JSON:"""
                     return folder
         
         return None
+    
+    def _url_based_fallback(self, jd_url: str, jd_text: str) -> dict:
+        """
+        URL-based fallback when AI extraction fails
+        Extract company name from URL patterns
+        """
+        try:
+            if not jd_url or not jd_url.startswith("http"):
+                return {"company": "Unknown", "confidence": "low", "is_agency": False}
+            
+            from urllib.parse import urlparse
+            parsed_url = urlparse(jd_url)
+            domain = parsed_url.netloc.lower()
+            
+            # Remove www. prefix
+            if domain.startswith("www."):
+                domain = domain[4:]
+            
+            # Known job boards (extract from text instead)
+            job_boards = [
+                "seek.com.au", "indeed.com", "linkedin.com", "glassdoor.com",
+                "ziprecruiter.com", "monster.com", "careerbuilder.com",
+                "ethicaljobs.com.au", "jora.com.au", "adzuna.com.au"
+            ]
+            
+            if any(board in domain for board in job_boards):
+                # For job boards, try to extract from text
+                return self._extract_from_text_fallback(jd_text)
+            
+            # Extract company from domain
+            # careers.company.com → company
+            # company.com/careers → company
+            # jobs.company.com → company
+            
+            # Remove common subdomains
+            subdomains_to_remove = ["careers", "jobs", "work", "employment", "hr", "talent"]
+            domain_parts = domain.split(".")
+            
+            if len(domain_parts) >= 2:
+                # Check if first part is a subdomain to remove
+                if domain_parts[0] in subdomains_to_remove:
+                    company_domain = ".".join(domain_parts[1:])
+                else:
+                    company_domain = domain
+                
+                # Extract company name from domain
+                company_name = company_domain.split(".")[0]
+                
+                # Clean up the name
+                company_name = company_name.replace("-", " ").replace("_", " ")
+                company_name = " ".join(word.capitalize() for word in company_name.split())
+                
+                # Check if it's a valid company name
+                if len(company_name) >= 2 and len(company_name) < 50:
+                    return {
+                        "company": company_name,
+                        "confidence": "medium",
+                        "is_agency": False
+                    }
+            
+            # If URL extraction fails, try text extraction
+            return self._extract_from_text_fallback(jd_text)
+            
+        except Exception as e:
+            print(f"URL-based fallback failed: {str(e)}")
+            return {"company": "Unknown", "confidence": "low", "is_agency": False}
+    
+    def _extract_from_text_fallback(self, jd_text: str) -> dict:
+        """
+        Simple text-based fallback extraction
+        """
+        try:
+            import re
+            
+            # Look for common patterns in text
+            patterns = [
+                r'About\s+([A-Z][a-zA-Z\s&.-]{2,30}?)\s+is',
+                r'([A-Z][a-zA-Z\s&.-]{2,30}?)\s+is\s+(?:looking|seeking|hiring)',
+                r'Company:\s*([^\n\r]+)',
+                r'Employer:\s*([^\n\r]+)',
+                r'@([a-zA-Z0-9.-]+)\.(?:com|org|au|net)',
+            ]
+            
+            for pattern in patterns:
+                match = re.search(pattern, jd_text, re.IGNORECASE)
+                if match:
+                    company_name = match.group(1).strip()
+                    
+                    # Validate the extracted name
+                    if self._is_valid_company_name(company_name):
+                        return {
+                            "company": company_name,
+                            "confidence": "low",
+                            "is_agency": False
+                        }
+            
+            return {"company": "Unknown", "confidence": "low", "is_agency": False}
+            
+        except Exception as e:
+            print(f"Text-based fallback failed: {str(e)}")
+            return {"company": "Unknown", "confidence": "low", "is_agency": False}
+    
+    def _is_valid_company_name(self, name: str) -> bool:
+        """Check if extracted name is a valid company name"""
+        if not name or len(name.strip()) < 2:
+            return False
+        
+        name_lower = name.lower().strip()
+        
+        # Check for invalid terms
+        invalid_terms = [
+            "superannuation", "leave", "loading", "benefits", "salary", "package",
+            "compensation", "remuneration", "bonus", "incentive", "allowance",
+            "work", "job", "position", "role", "applications", "close", "posted"
+        ]
+        
+        if any(term in name_lower for term in invalid_terms):
+            return False
+        
+        # Check for too many words
+        if len(name.split()) > 8:
+            return False
+        
+        return True
