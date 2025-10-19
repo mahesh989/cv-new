@@ -146,9 +146,34 @@ JSON:"""
     def _validate_company_name(self, name: str) -> str:
         """Validate and clean company name"""
         # Check for invalid names
-        invalid_names = ["unknown", "company", "organization", "client", "employer", "", "n/a"]
+        invalid_names = [
+            "unknown", "company", "organization", "client", "employer", "", "n/a",
+            "superannuation", "leave", "loading", "benefits", "salary", "wage", 
+            "compensation", "package", "remuneration", "bonus", "incentive", 
+            "allowance", "entitlement", "plus", "including", "with", "and", "or"
+        ]
         
-        if name.lower() in invalid_names:
+        name_lower = name.lower().strip()
+        
+        # Check for invalid names
+        if name_lower in invalid_names:
+            return "Unknown"
+        
+        # Check for benefits/compensation phrases
+        benefits_terms = ['superannuation', 'leave', 'loading', 'benefits', 'salary', 'package', 'compensation']
+        if any(term in name_lower for term in benefits_terms):
+            return "Unknown"
+        
+        # Check for too many words (likely not a company name)
+        if len(name.split()) > 8:
+            return "Unknown"
+        
+        # Check for too many spaces
+        if name.count(' ') > 6:
+            return "Unknown"
+        
+        # Check for no letters
+        if not any(c.isalpha() for c in name):
             return "Unknown"
         
         # Minimum length check

@@ -458,8 +458,28 @@ TEXT TO ANALYZE:
             if match:
                 company_name = match.group(1).strip()
                 # Filter out invalid company names (allow short names like GfK, NIQ)
-                if (len(company_name) >= 2 and len(company_name) < 50 and 
-                    not company_name.lower() in ['work', 'job', 'position', 'role', 'applications', 'close', 'posted', 'summary']):
+                invalid_terms = [
+                    'work', 'job', 'position', 'role', 'applications', 'close', 'posted', 'summary',
+                    'superannuation', 'leave', 'loading', 'benefits', 'salary', 'wage', 'compensation',
+                    'package', 'remuneration', 'bonus', 'incentive', 'allowance', 'entitlement',
+                    'plus', 'including', 'with', 'and', 'or', 'the', 'a', 'an', 'in', 'on', 'at',
+                    'for', 'to', 'of', 'by', 'from', 'up', 'down', 'out', 'off', 'over', 'under',
+                    'about', 'above', 'below', 'between', 'among', 'through', 'during', 'before',
+                    'after', 'since', 'until', 'while', 'because', 'although', 'unless', 'if',
+                    'when', 'where', 'why', 'how', 'what', 'which', 'who', 'whom', 'whose'
+                ]
+                
+                # Check if company name contains invalid terms or is too generic
+                company_lower = company_name.lower()
+                is_invalid = (
+                    company_lower in invalid_terms or
+                    any(term in company_lower for term in ['superannuation', 'leave', 'loading', 'benefits', 'salary', 'package']) or
+                    len(company_name.split()) > 8 or  # Too many words (likely not a company name)
+                    company_name.count(' ') > 6 or   # Too many spaces
+                    not any(c.isalpha() for c in company_name)  # No letters
+                )
+                
+                if (len(company_name) >= 2 and len(company_name) < 50 and not is_invalid):
                     job_info["company_name"] = company_name
                     break
         
