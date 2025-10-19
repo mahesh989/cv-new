@@ -45,7 +45,86 @@ class CVSkillsEmptyError(Exception):
     pass
 
 # Helper functions for file validation
+
+# ============================================================================
+# NEW: Single AI Method Integration
+# Added: [DATE]
+# ============================================================================
+
+from app.services.company_extractor import CompanyExtractor, CompanyResult, Confidence
+from app.ai.ai_service import AIServiceManager
+
+async def _extract_company_name_from_jd_v2(
+    jd_text: str, 
+    jd_url: str, 
+    user_email: str
+) -> tuple[str, CompanyResult]:
+    """
+    New version using single AI company extractor
+    Returns both the folder name and full result object
+    
+    Args:
+        jd_text: Job description text
+        jd_url: Job description URL
+        user_email: User's email for folder lookup
+        
+    Returns:
+        Tuple of (company_folder_name, CompanyResult)
+    """
+    try:
+        # Initialize extractor
+        ai_service = AIServiceManager()
+        extractor = CompanyExtractor(ai_service)
+        
+        # Extract company name
+        result = await extractor.extract(jd_url, jd_text)
+        
+        # Check for existing company folders
+        from app.utils.user_path_utils import get_user_base_path
+        applied_companies_path = get_user_base_path(user_email)
+        existing_folders = []
+        
+        if applied_companies_path.exists():
+            existing_folders = [
+                d.name for d in applied_companies_path.iterdir() 
+                if d.is_dir() and d.name != "cvs"
+            ]
+        
+        # Match against existing folders
+        matched = extractor.match_existing(result, existing_folders)
+        
+        company_name = matched if matched else result.normalized
+        
+        print(f"Company extraction: '{result.name}' → folder: '{company_name}' (confidence: {result.confidence.value})")
+        
+        return company_name, result
+        
+    except Exception as e:
+        print(f"Error in company extraction: {str(e)}")
+        return "Unknown_Company", CompanyResult(
+            name="Unknown",
+            confidence=Confidence.LOW,
+            is_agency=False,
+            normalized="Unknown_Company",
+            display_name="Unknown"
+        )
+
+
+# Wrapper to maintain old signature
 async def _extract_company_name_from_jd(jd_text: str, user_email: str) -> str:
+    """
+    DEPRECATED: Use _extract_company_name_from_jd_v2 instead
+    Maintained for backward compatibility
+    
+    This wrapper calls the new single AI method with empty URL
+    Returns only the company folder name (old behavior)
+    """
+    company_name, _ = await _extract_company_name_from_jd_v2(jd_text, "", user_email)
+    return company_name
+
+
+# Original function preserved below for reference (now deprecated)
+async def _extract_company_name_from_jd_original(jd_text: str, user_email: str) -> str:
     """Extract company name from job description text using AI with fallback to existing folders"""
     try:
         from app.services.job_extractor import extract_job_metadata
@@ -888,6 +967,7 @@ async def preliminary_analysis(
         # Extract parameters
         cv_filename = data.get("cv_filename")
         jd_text = data.get("jd_text")
+        jd_url = data.get("jd_url", "")  # NEW: Add URL parameter (optional)
         config_name = data.get("config_name")  # Optional custom config
         user_id = getattr(token_data, 'user_id', 1)
         
@@ -910,7 +990,15 @@ async def preliminary_analysis(
         user_email = getattr(token_data, 'email', None)
         
         # Extract company name from JD text to validate required files
-        company_name = await _extract_company_name_from_jd(jd_text, user_email)
+        # Use new version with URL support
+        company_name, company_result = await _extract_company_name_from_jd_v2(
+            jd_text, 
+            jd_url=jd_url or "",  # Use provided URL or empty string
+            user_email=user_email
+        )
+
+        # Log extraction details for monitoring
+        print(f"Extracted company: {company_result.name} (confidence: {company_result.confidence.value})")
         logger.info(f"🏢 Extracted company name: {company_name}")
         
         # Validate required files exist before proceeding (non-blocking for preliminary flow)
@@ -2634,7 +2722,15 @@ async def perform_preliminary_skills_analysis(
                 # Ensure we have a valid company name before saving
                 if not company_name or company_name == "Unknown_Company":
                     # Fallback: try to extract company name from JD text if not found
-                    company_name = await _extract_company_name_from_jd(jd_text)
+                    # Use new version with URL support
+                    company_name, company_result = await _extract_company_name_from_jd_v2(
+                        jd_text, 
+                        jd_url=jd_url or "",  # Use provided URL or empty string
+                        user_email=user_email
+                    )
+
+                    # Log extraction details for monitoring
+                    print(f"Extracted company: {company_result.name} (confidence: {company_result.confidence.value})")
                     if logging_params["enable_detailed_logging"]:
                         logger.info(f"🏢 [ANALYZE_MATCH] Using fallback company name: {company_name}")
                 

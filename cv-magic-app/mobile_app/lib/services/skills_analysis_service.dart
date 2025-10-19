@@ -98,6 +98,7 @@ class SkillsAnalysisService {
   static Future<SkillsAnalysisResult> performPreliminaryAnalysis({
     required String cvFilename,
     required String jdText,
+    String? jdUrl, // NEW: Add URL parameter (optional)
   }) async {
     print('=== FRONTEND SERVICE CALLED ===');
     print('CV: $cvFilename');
@@ -115,6 +116,7 @@ class SkillsAnalysisService {
         body: {
           'cv_filename': cvFilename,
           'jd_text': jdText,
+          'jd_url': jdUrl ?? '', // NEW: Add URL if available
         },
       );
 

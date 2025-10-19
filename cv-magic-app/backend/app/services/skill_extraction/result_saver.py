@@ -7,6 +7,7 @@ Handles saving skill extraction results to organized file structure
 import os
 import re
 import logging
+import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
@@ -77,7 +78,7 @@ class SkillExtractionResultSaver:
                     company_slug = self._create_company_slug(jd_data['company_name'])
                     logger.info(f"🏢 Using company name from JD data: {jd_data['company_name']} -> {company_slug}")
                 else:
-                    company_slug = self._extract_company_name(jd_skills, jd_url, jd_data)
+                    company_slug = asyncio.run(self._extract_company_name_v2(jd_skills, jd_url, jd_data))
             
             # Create company folder under applied_companies subfolder
             company_folder = self.base_dir / "applied_companies" / company_slug
@@ -229,6 +230,71 @@ class SkillExtractionResultSaver:
             
         except Exception as e:
             logger.warning(f"⚠️ Failed to extract company name: {e}, using 'Unknown_Company'")
+            return "Unknown_Company"
+
+    # ============================================================================
+    # NEW: Single AI Method Integration
+    # Added: [DATE]
+    # ============================================================================
+
+    async def _extract_company_name_v2(
+        self, 
+        jd_skills: Dict, 
+        jd_url: str, 
+        jd_data: Optional[Dict] = None
+    ) -> str:
+        """
+        New version using single AI company extractor
+        
+        Args:
+            jd_skills: Skills data from job description
+            jd_url: Job description URL
+            jd_data: Optional job data dictionary
+            
+        Returns:
+            Company folder name (normalized)
+        """
+        try:
+            # Get JD text from skills data
+            jd_text = jd_skills.get('jd_text', '')
+            
+            if not jd_text and jd_data:
+                jd_text = jd_data.get('jd_text', '')
+            
+            # Initialize extractor
+            from app.ai.ai_service import AIServiceManager
+            from app.services.company_extractor import CompanyExtractor
+            
+            ai_service = AIServiceManager()
+            extractor = CompanyExtractor(ai_service)
+            
+            # Extract company name
+            result = await extractor.extract(jd_url, jd_text)
+            
+            # Check for existing folders
+            from app.utils.user_path_utils import get_user_base_path
+            
+            user_email = jd_skills.get('user_email', '')
+            applied_companies_path = get_user_base_path(user_email)
+            
+            existing_folders = []
+            if applied_companies_path.exists():
+                existing_folders = [
+                    d.name for d in applied_companies_path.iterdir() 
+                    if d.is_dir()
+                ]
+            
+            # Match against existing folders
+            matched = extractor.match_existing(result, existing_folders)
+            
+            company_name = matched if matched else result.normalized
+            
+            print(f"[ResultSaver] Company: '{result.name}' → folder: '{company_name}'")
+            
+            return company_name
+            
+        except Exception as e:
+            print(f"[ResultSaver] Error extracting company: {str(e)}")
             return "Unknown_Company"
     
     def _extract_company_from_url(self, jd_url: str) -> str:

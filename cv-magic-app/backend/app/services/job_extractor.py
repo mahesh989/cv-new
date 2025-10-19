@@ -191,3 +191,42 @@ def validate_job_description(job_description: str) -> Dict[str, Any]:
         "length": len(job_description),
         "found_indicators": found_indicators
     }
+
+
+# ============================================================================
+# NEW: Single AI Method Integration
+# Added: [DATE]
+# Maintains backward compatibility while using new CompanyExtractor
+# ============================================================================
+
+from app.services.company_extractor import CompanyExtractor
+
+async def extract_job_metadata_v2(jd_url: str, jd_text: str) -> Dict[str, Any]:
+    """
+    New version using single AI company extractor
+    
+    Args:
+        jd_url: Job description URL
+        jd_text: Job description text
+        
+    Returns:
+        Dictionary with job metadata including company name
+    """
+    from app.ai.ai_service import AIServiceManager
+    
+    ai_service = AIServiceManager()
+    extractor = CompanyExtractor(ai_service)
+    
+    result = await extractor.extract(jd_url, jd_text)
+    
+    return {
+        "job_title": "",  # TODO: Extract job title separately if needed
+        "company": result.name,
+        "company_normalized": result.normalized,
+        "confidence": result.confidence.value,
+        "is_agency": result.is_agency
+    }
+
+
+# Note: The original extract_job_metadata function is preserved above
+# New code should use extract_job_metadata_v2 for better company extraction

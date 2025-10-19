@@ -111,7 +111,13 @@ async def extract_job_info(request: Request):
             raise HTTPException(status_code=400, detail=validation.get("error", "Invalid job description"))
         
         # Extract metadata using AI
-        result = await extract_job_metadata(job_description)
+        # Use new version with URL support
+        from app.services.job_extractor import extract_job_metadata_v2
+
+        result = await extract_job_metadata_v2(
+            jd_url="",  # No URL available in this endpoint
+            jd_text=job_description
+        )
         
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])

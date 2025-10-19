@@ -40,11 +40,14 @@ class JobParser {
   }
 
   static String? _extractCompanyName(String text) {
+    // NOTE: This is a simple fallback for offline parsing
+    // Server-side uses advanced AI extraction (CompanyExtractor)
+    // Keep this for: offline mode, quick preview, fallback
     try {
       // Company name is usually at the start after the job title
       final lines = text.split('\n');
       for (final line in lines.take(5)) {
-        if (line.trim().isNotEmpty && 
+        if (line.trim().isNotEmpty &&
             !line.toLowerCase().contains('job title') &&
             !_isCommonJobTitle(line)) {
           return line.trim();
@@ -90,9 +93,9 @@ class JobParser {
     try {
       // Look for location information
       final locationIndicators = [
-        'location:', 
-        'location :', 
-        'based in', 
+        'location:',
+        'location :',
+        'based in',
         'work location',
         '(hybrid)',
         '(remote)',
@@ -128,7 +131,8 @@ class JobParser {
       String? phone;
 
       // Extract email using regex
-      final emailRegex = RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b');
+      final emailRegex =
+          RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b');
       final emailMatch = emailRegex.firstMatch(text);
       if (emailMatch != null) {
         email = emailMatch.group(0);
