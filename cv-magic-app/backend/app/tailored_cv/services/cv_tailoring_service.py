@@ -702,9 +702,9 @@ The exact JSON structure must be:
   ],
   "experience": [
     {
-      "company": "EXACT company from provided CV",
+      "company": "EXACT company name from provided CV (extract only company name, not location)",
       "title": "EXACT or enhanced title from provided CV",
-      "location": "EXACT location from provided CV",
+      "location": "EXACT location from provided CV (if location field is empty, extract location from company field)",
       "start_date": "EXACT date from provided CV",
       "end_date": "EXACT date from provided CV",
       "bullets": ["enhanced bullet with quantified impact based on original", ...]
@@ -737,7 +737,13 @@ The exact JSON structure must be:
   }
 }
 
-CRITICAL: Use the REAL CV data provided. Do NOT generate fake examples. Respond with ONLY the JSON object."""
+CRITICAL: Use the REAL CV data provided. Do NOT generate fake examples. Respond with ONLY the JSON object.
+
+LOCATION EXTRACTION RULES:
+- If the original CV has location information in the company field (e.g., "Company Name, City, State"), extract the location part
+- If the location field is empty but company contains location info, extract it to the location field
+- Example: "The Bitrates, Sydney, New South Wales, Australia" → company: "The Bitrates", location: "Sydney, New South Wales, Australia"
+- Always ensure location information is properly separated from company name"""
     
     def _build_user_prompt(
         self,
