@@ -2706,7 +2706,6 @@ async def perform_preliminary_skills_analysis(
                 logger.info("🔍 [ANALYZE_MATCH] Starting analyze match assessment...")
             
             # Get analyze match prompt
-            from datetime import datetime
             current_date = datetime.now().strftime('%Y-%m-%d')
             analyze_match_prompt = get_skill_prompt('analyze_match', cv_text=cv_content, job_text=jd_text, current_date=current_date)
             
