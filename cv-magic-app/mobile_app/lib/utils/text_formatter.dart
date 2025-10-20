@@ -50,6 +50,19 @@ class TextFormatter {
         }
         spans.add(TextSpan(children: coloredSpans));
       }
+      // Handle new LITMUS_TEST_PROMPT format fields
+      else if (isAnalyzeMatch && _isLitmusField(line)) {
+        debugPrint('🔍 [TEXT_FORMATTER] Detected LITMUS field');
+        spans.add(TextSpan(
+          text: '$line\n',
+          style: TextStyle(
+            fontSize: baseFontSize,
+            fontWeight: FontWeight.w600,
+            color: _getLitmusFieldColor(line),
+            height: 1.4,
+          ),
+        ));
+      }
       // Handle main headers (##) - including those with bold text
       else if (line.startsWith('## ')) {
         debugPrint('🔍 [TEXT_FORMATTER] Detected main header');
@@ -217,6 +230,14 @@ class TextFormatter {
 
   /// Checks if a line contains decision indicators
   static bool _isDecisionIndicator(String line) {
+    // New LITMUS_TEST_PROMPT format
+    if (line.contains('DECISION: PROCEED') ||
+        line.contains('DECISION: MAYBE') ||
+        line.contains('DECISION: DONT_PROCEED')) {
+      return true;
+    }
+    
+    // Legacy format
     return line.contains('🟢 STRONG PURSUE') ||
         line.contains('🟡 STRATEGIC PURSUE') ||
         line.contains('🟠 CALCULATED RISK') ||
@@ -225,11 +246,49 @@ class TextFormatter {
 
   /// Gets color for decision indicators
   static Color _getDecisionColor(String line) {
-    if (line.contains('🟢')) return Colors.green.shade600;
-    if (line.contains('🟡')) return Colors.orange.shade600;
-    if (line.contains('🟠')) return Colors.deepOrange.shade600;
-    if (line.contains('🔴')) return Colors.red.shade600;
-    return Colors.blue.shade600;
+    // New LITMUS_TEST_PROMPT format with beautiful colors
+    if (line.contains('DECISION: PROCEED')) {
+      return const Color(0xFF10B981); // Emerald green
+    } else if (line.contains('DECISION: MAYBE')) {
+      return const Color(0xFFF59E0B); // Amber
+    } else if (line.contains('DECISION: DONT_PROCEED')) {
+      return const Color(0xFFEF4444); // Red
+    }
+    
+    // Legacy format support
+    if (line.contains('🟢')) return const Color(0xFF10B981); // Emerald green
+    if (line.contains('🟡')) return const Color(0xFFF59E0B); // Amber
+    if (line.contains('🟠')) return const Color(0xFFEA580C); // Orange
+    if (line.contains('🔴')) return const Color(0xFFEF4444); // Red
+    return const Color(0xFF3B82F6); // Blue
+  }
+
+  /// Checks if a line contains LITMUS_TEST_PROMPT fields
+  static bool _isLitmusField(String line) {
+    return line.contains('CONFIDENCE:') ||
+        line.contains('MATCH_SCORE:') ||
+        line.contains('PRIMARY_REASON:') ||
+        line.contains('CRITICAL_MISSING:') ||
+        line.contains('IMPLICIT_LIKELY:') ||
+        line.contains('LEARNABLE_GAPS:') ||
+        line.contains('STRENGTHS:') ||
+        line.contains('BLOCKER_FOUND:');
+  }
+
+  /// Gets color for LITMUS_TEST_PROMPT fields
+  static Color _getLitmusFieldColor(String line) {
+    if (line.contains('CONFIDENCE:') || line.contains('MATCH_SCORE:')) {
+      return const Color(0xFF8B5CF6); // Purple for scores
+    } else if (line.contains('PRIMARY_REASON:')) {
+      return const Color(0xFF1F2937); // Dark gray for main reason
+    } else if (line.contains('CRITICAL_MISSING:') || line.contains('BLOCKER_FOUND:')) {
+      return const Color(0xFFEF4444); // Red for blockers
+    } else if (line.contains('IMPLICIT_LIKELY:') || line.contains('LEARNABLE_GAPS:')) {
+      return const Color(0xFF10B981); // Green for opportunities
+    } else if (line.contains('STRENGTHS:')) {
+      return const Color(0xFF059669); // Darker green for strengths
+    }
+    return const Color(0xFF6B7280); // Default gray
   }
 
   /// Parses bold text within a line - completely rewritten approach

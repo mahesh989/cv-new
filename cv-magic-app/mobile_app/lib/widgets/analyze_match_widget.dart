@@ -225,75 +225,137 @@ class _AnalyzeMatchWidgetState extends State<AnalyzeMatchWidget> {
 
   Widget _buildAnalyzeMatchContent() {
     final analyzeMatch = widget.analyzeMatch!;
+    final decisionColor = _getDecisionColor(analyzeMatch.rawAnalysis);
 
     return Card(
       margin: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Header (non-expandable)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.analytics,
-                  color: _getDecisionColor(analyzeMatch.rawAnalysis),
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              decisionColor.withOpacity(0.1),
+              decisionColor.withOpacity(0.05),
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            // Header with beautiful gradient background
+            Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Analyze Match',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  _getDecisionColor(analyzeMatch.rawAnalysis),
-                            ),
-                      ),
-                      Text(
-                        _getDecisionSummary(analyzeMatch.rawAnalysis),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
-                      ),
-                    ],
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    decisionColor.withOpacity(0.15),
+                    decisionColor.withOpacity(0.08),
+                  ],
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: decisionColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      _getDecisionIcon(analyzeMatch.rawAnalysis),
+                      color: decisionColor,
+                      size: 32,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Analyze Match',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: decisionColor,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _getDecisionSummary(analyzeMatch.rawAnalysis),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: decisionColor.withOpacity(0.8),
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // Content (always visible)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
-            child: AnalyzeMatchFormattedText(
-              text: analyzeMatch.rawAnalysis,
+            // Content (always visible)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 20.0),
+              child: AnalyzeMatchFormattedText(
+                text: analyzeMatch.rawAnalysis,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Color _getDecisionColor(String analysis) {
-    if (analysis.contains('🟢 STRONG PURSUE')) {
-      return Colors.green.shade600;
-    } else if (analysis.contains('🟡 STRATEGIC PURSUE')) {
-      return Colors.orange.shade600;
-    } else if (analysis.contains('🟠 CALCULATED RISK')) {
-      return Colors.deepOrange.shade600;
-    } else if (analysis.contains('🔴 REALISTIC REJECT')) {
-      return Colors.red.shade600;
+    // New LITMUS_TEST_PROMPT format
+    if (analysis.contains('DECISION: PROCEED')) {
+      return const Color(0xFF10B981); // Emerald green
+    } else if (analysis.contains('DECISION: MAYBE')) {
+      return const Color(0xFFF59E0B); // Amber
+    } else if (analysis.contains('DECISION: DONT_PROCEED')) {
+      return const Color(0xFFEF4444); // Red
     }
-    return Colors.blue.shade600;
+    
+    // Legacy format support
+    if (analysis.contains('🟢 STRONG PURSUE')) {
+      return const Color(0xFF10B981); // Emerald green
+    } else if (analysis.contains('🟡 STRATEGIC PURSUE')) {
+      return const Color(0xFFF59E0B); // Amber
+    } else if (analysis.contains('🟠 CALCULATED RISK')) {
+      return const Color(0xFFEA580C); // Orange
+    } else if (analysis.contains('🔴 REALISTIC REJECT')) {
+      return const Color(0xFFEF4444); // Red
+    }
+    
+    return const Color(0xFF3B82F6); // Blue
   }
 
   String _getDecisionSummary(String analysis) {
+    // New LITMUS_TEST_PROMPT format
+    if (analysis.contains('DECISION: PROCEED')) {
+      return '✅ Strong Match - Proceed with confidence!';
+    } else if (analysis.contains('DECISION: MAYBE')) {
+      return '⚠️ Conditional Match - Worth considering';
+    } else if (analysis.contains('DECISION: DONT_PROCEED')) {
+      return '❌ Not Recommended - Skip this opportunity';
+    }
+    
+    // Legacy format support
     if (analysis.contains('🟢 STRONG PURSUE')) {
       return 'Strong candidate match (80%+ probability)';
     } else if (analysis.contains('🟡 STRATEGIC PURSUE')) {
@@ -304,5 +366,29 @@ class _AnalyzeMatchWidgetState extends State<AnalyzeMatchWidget> {
       return 'Low match probability (<15%)';
     }
     return 'Recruiter assessment available';
+  }
+
+  IconData _getDecisionIcon(String analysis) {
+    // New LITMUS_TEST_PROMPT format
+    if (analysis.contains('DECISION: PROCEED')) {
+      return Icons.check_circle_rounded; // Green checkmark
+    } else if (analysis.contains('DECISION: MAYBE')) {
+      return Icons.help_center_rounded; // Question mark in circle
+    } else if (analysis.contains('DECISION: DONT_PROCEED')) {
+      return Icons.cancel_rounded; // Red X
+    }
+    
+    // Legacy format support
+    if (analysis.contains('🟢 STRONG PURSUE')) {
+      return Icons.check_circle_rounded;
+    } else if (analysis.contains('🟡 STRATEGIC PURSUE')) {
+      return Icons.help_center_rounded;
+    } else if (analysis.contains('🟠 CALCULATED RISK')) {
+      return Icons.warning_rounded;
+    } else if (analysis.contains('🔴 REALISTIC REJECT')) {
+      return Icons.cancel_rounded;
+    }
+    
+    return Icons.analytics_rounded; // Default analytics icon
   }
 }
