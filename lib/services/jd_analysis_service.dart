@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 class JDAnalysisService {
   static const String baseUrl =
-      'http://localhost:8000'; // Update with your backend URL
+      'https://cvagent.duckdns.org'; // Update with your backend URL
 
   // Authentication token - you'll need to implement proper auth
   String? _authToken;

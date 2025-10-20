@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ enhanced-vps-ghs ]
 
 jobs:
   build-and-deploy:

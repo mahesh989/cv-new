@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/ai_model.dart';
+import 'auth_service.dart';
 
 class AIModelService extends ChangeNotifier {
   static final AIModelService _instance = AIModelService._internal();
@@ -28,30 +29,47 @@ class AIModelService extends ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final savedModelId = prefs.getString(_selectedModelKey);
+      final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
 
-      if (savedModelId != null) {
-        final savedModel = AIModelsConfig.getModel(savedModelId);
-        if (savedModel != null) {
-          // Check if user has API keys configured before setting model
-          final hasApiKeys = await _checkApiKeyAvailability();
-          if (hasApiKeys) {
-            _currentModel = savedModel;
-            debugPrint('🤖 Loaded saved AI model: ${_currentModel!.name}');
-          } else {
-            debugPrint(
-                '⚠️ Saved model found but no API keys configured, clearing model selection');
-            _currentModel = null;
-            // Clear the saved model since no API keys are available
-            await prefs.remove(_selectedModelKey);
-          }
-        } else {
-          debugPrint('⚠️ Saved model not found, no default model available');
-          _currentModel = null;
+      if (isLoggedIn) {
+        // User is logged in, fetch configuration from backend
+        debugPrint(
+            '🔐 User is logged in, fetching AI configuration from backend');
+        await _fetchUserConfigurationFromBackend();
+
+        // If no model was found in backend, clear local model and show error
+        if (_currentModel == null) {
+          debugPrint('❌ No AI model configured in backend for logged-in user');
+          // Clear any local model selection since backend doesn't have one
+          await prefs.remove(_selectedModelKey);
         }
       } else {
-        debugPrint('🤖 No saved model found, no default model available');
-        _currentModel = null;
+        // User is not logged in, load from local storage (for offline mode)
+        final savedModelId = prefs.getString(_selectedModelKey);
+
+        if (savedModelId != null) {
+          final savedModel = AIModelsConfig.getModel(savedModelId);
+          if (savedModel != null) {
+            // Check if user has API keys configured before setting model
+            final hasApiKeys = await _checkApiKeyAvailability();
+            if (hasApiKeys) {
+              _currentModel = savedModel;
+              debugPrint('🤖 Loaded saved AI model: ${_currentModel!.name}');
+            } else {
+              debugPrint(
+                  '⚠️ Saved model found but no API keys configured, clearing model selection');
+              _currentModel = null;
+              // Clear the saved model since no API keys are available
+              await prefs.remove(_selectedModelKey);
+            }
+          } else {
+            debugPrint('⚠️ Saved model not found, no default model available');
+            _currentModel = null;
+          }
+        } else {
+          debugPrint('🤖 No saved model found, no default model available');
+          _currentModel = null;
+        }
       }
     } catch (e) {
       debugPrint('❌ Error initializing AI model service: $e');
@@ -207,9 +225,8 @@ class AIModelService extends ChangeNotifier {
   // Sync model selection with backend
   Future<void> _syncModelWithBackend(String modelId) async {
     try {
-      // Get authentication token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      // Get authentication token using AuthService
+      final token = await AuthService.getValidAuthToken();
 
       final headers = {
         'Content-Type': 'application/json',
@@ -234,7 +251,7 @@ class AIModelService extends ChangeNotifier {
       debugPrint('🔄 Syncing model: $modelId -> $provider/$apiModelName');
 
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/ai/switch-model'),
+        Uri.parse('https://cvagent.duckdns.org/api/ai/switch-model'),
         headers: headers,
         body: jsonEncode({
           'model': apiModelName,
@@ -256,9 +273,8 @@ class AIModelService extends ChangeNotifier {
   // Get current model status from backend
   Future<Map<String, dynamic>?> getBackendStatus() async {
     try {
-      // Get authentication token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      // Get authentication token using AuthService
+      final token = await AuthService.getValidAuthToken();
 
       final headers = {
         'Content-Type': 'application/json',
@@ -271,7 +287,7 @@ class AIModelService extends ChangeNotifier {
 
       // Get API key status to check if user has configured any API keys
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/api-keys/status'),
+        Uri.parse('https://cvagent.duckdns.org/api/api-keys/status'),
         headers: headers,
       );
 
@@ -343,6 +359,9 @@ class AIModelService extends ChangeNotifier {
 
   // Sync with backend after authentication
   Future<void> syncAfterAuth() async {
+    // First, try to fetch user's saved configuration from backend
+    await _fetchUserConfigurationFromBackend();
+
     if (_currentModel == null) {
       debugPrint('⚠️ No AI model selected, skipping post-auth sync');
       return;
@@ -355,6 +374,109 @@ class AIModelService extends ChangeNotifier {
       debugPrint(
           '❌ Failed to sync AI model with backend after authentication: $e');
     }
+  }
+
+  // Fetch user's AI configuration from backend
+  Future<void> _fetchUserConfigurationFromBackend() async {
+    try {
+      // Get authentication token using AuthService
+      final token = await AuthService.getValidAuthToken();
+
+      if (token == null) {
+        debugPrint(
+            '🔐 No auth token available for fetching user configuration');
+        return;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      // Get user's current model preference from backend
+      final response = await http.get(
+        Uri.parse('https://cvagent.duckdns.org/api/ai/current-model'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final currentModel = data['current_model'];
+        final provider = data['current_provider'];
+
+        debugPrint('🔍 Backend response: $data');
+
+        if (currentModel && provider) {
+          // Map backend model name to frontend model ID
+          final frontendModelId = _getFrontendModelId(provider, currentModel);
+          debugPrint(
+              '🔍 Mapped backend model to frontend ID: $frontendModelId');
+          if (frontendModelId != null) {
+            final model = AIModelsConfig.getModel(frontendModelId);
+            if (model != null) {
+              _currentModel = model;
+              // Save to local preferences
+              await prefs.setString(_selectedModelKey, frontendModelId);
+              debugPrint(
+                  '✅ Restored user AI configuration from backend: $provider/$currentModel');
+              notifyListeners();
+            } else {
+              debugPrint('❌ Frontend model not found for ID: $frontendModelId');
+            }
+          } else {
+            debugPrint('❌ Could not map backend model to frontend ID');
+          }
+        } else {
+          debugPrint(
+              '❌ No AI configuration found for user in backend (currentModel: $currentModel, provider: $provider)');
+        }
+      } else if (response.statusCode == 404) {
+        debugPrint('❌ No AI model configured for user in backend (404)');
+      } else {
+        debugPrint(
+            '❌ Failed to fetch user AI configuration: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('❌ Error fetching user AI configuration from backend: $e');
+    }
+  }
+
+  // Map backend model name to frontend model ID
+  String? _getFrontendModelId(String provider, String backendModel) {
+    switch (provider.toLowerCase()) {
+      case 'openai':
+        switch (backendModel) {
+          case 'gpt-4o':
+            return 'gpt-4o';
+          case 'gpt-4o-mini':
+            return 'gpt-4o-mini';
+          case 'gpt-3.5-turbo':
+            return 'gpt-3.5-turbo';
+          case 'gpt-5-nano':
+            return 'gpt-5-nano';
+        }
+        break;
+      case 'anthropic':
+        switch (backendModel) {
+          case 'claude-3-5-sonnet-20241022':
+            return 'claude-3.5-sonnet';
+          case 'claude-3-5-haiku-20241022':
+            return 'claude-3-haiku';
+        }
+        break;
+      case 'deepseek':
+        switch (backendModel) {
+          case 'deepseek-chat':
+            return 'deepseek-chat';
+          case 'deepseek-coder':
+            return 'deepseek-coder';
+          case 'deepseek-reasoner':
+            return 'deepseek-reasoner';
+        }
+        break;
+    }
+    return null;
   }
 }
 

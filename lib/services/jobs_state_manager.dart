@@ -20,6 +20,12 @@ class JobsStateManager {
     try {
       debugPrint('🔄 [JOBS_STATE] Saving new job: $companyName - $jobTitle');
 
+      // Skip file operations on web platform
+      if (kIsWeb) {
+        debugPrint('🌐 [JOBS_STATE] Running on web, skipping file operations');
+        return;
+      }
+
       // Get current working directory
       final currentDir = Directory.current.path;
       debugPrint('📂 [JOBS_STATE] Working directory: $currentDir');
@@ -80,12 +86,25 @@ class JobsStateManager {
     } catch (e, stackTrace) {
       debugPrint('❌ [JOBS_STATE] Error saving job: $e');
       debugPrint('📋 [JOBS_STATE] Stack trace: $stackTrace');
-      rethrow;
+      // Don't rethrow on web to prevent crashes
+      if (!kIsWeb) {
+        rethrow;
+      }
     }
   }
 
   static Future<Map<String, dynamic>> _loadExistingJobs(String filePath) async {
     try {
+      // Skip file operations on web platform
+      if (kIsWeb) {
+        debugPrint('🌐 [JOBS_STATE] Running on web, returning empty jobs data');
+        return {
+          'jobs': [],
+          'total_jobs': 0,
+          'last_updated': DateTime.now().toIso8601String()
+        };
+      }
+
       final file = File(filePath);
       if (!await file.exists()) {
         debugPrint('⚠️ [JOBS_STATE] Jobs file not found, creating new one');
@@ -102,19 +121,35 @@ class JobsStateManager {
       return data;
     } catch (e) {
       debugPrint('❌ [JOBS_STATE] Error loading existing jobs: $e');
-      rethrow;
+      if (!kIsWeb) {
+        rethrow;
+      }
+      // Return empty data on web to prevent crashes
+      return {
+        'jobs': [],
+        'total_jobs': 0,
+        'last_updated': DateTime.now().toIso8601String()
+      };
     }
   }
 
   static Future<void> _writeJsonToFile(
       String filePath, String jsonString) async {
     try {
+      // Skip file operations on web platform
+      if (kIsWeb) {
+        debugPrint('🌐 [JOBS_STATE] Running on web, skipping file write');
+        return;
+      }
+
       final file = File(filePath);
       await file.writeAsString('$jsonString\n');
       debugPrint('✅ [JOBS_STATE] Successfully wrote to $filePath');
     } catch (e) {
       debugPrint('❌ [JOBS_STATE] Error writing to $filePath: $e');
-      rethrow;
+      if (!kIsWeb) {
+        rethrow;
+      }
     }
   }
 }

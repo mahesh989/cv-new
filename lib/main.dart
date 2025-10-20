@@ -6,6 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 // Core imports
 import 'core/theme/app_theme.dart';
 import 'services/ai_model_service.dart';
+import 'services/notification_service.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
 
@@ -34,6 +35,7 @@ class CVAgentApp extends StatelessWidget {
       child: MaterialApp(
         title: 'CV Agent',
         theme: AppTheme.lightTheme,
+        navigatorKey: NotificationService.navigatorKey,
         home: const AuthWrapper(),
         debugShowCheckedModeBanner: false,
       ),
@@ -151,6 +153,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     await prefs.remove('auth_token');
     await prefs.remove('user_email');
     await prefs.remove('user_name');
+
+    // Clear AI configuration state to prevent confusion when another user logs in
+    await aiModelService.clearSelection();
+    debugPrint('🧹 Cleared AI configuration state on logout');
 
     setState(() {
       _isLoggedIn = false;

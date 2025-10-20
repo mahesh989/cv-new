@@ -51,6 +51,8 @@ class SkillsAnalysisResult {
   // New: Pre-extracted comparison raw output (formatted text) and company name
   final String? preextractedRawOutput;
   final String? preextractedCompanyName;
+  // New: Top-level company name from backend response
+  final String? company;
   // New: Component analysis and ATS calculation results
   final ComponentAnalysisResult? componentAnalysis;
   final ATSResult? atsResult;
@@ -73,6 +75,7 @@ class SkillsAnalysisResult {
     this.errorMessage,
     this.preextractedRawOutput,
     this.preextractedCompanyName,
+    this.company,
     this.componentAnalysis,
     this.atsResult,
     this.aiRecommendation,
@@ -249,6 +252,7 @@ class SkillsAnalysisResult {
       isSuccess: true,
       preextractedRawOutput: preextractedRaw,
       preextractedCompanyName: preextractedCompany,
+      company: topLevelCompany,
       componentAnalysis: componentAnalysis,
       atsResult: atsResult,
       aiRecommendation: aiRecommendation,
@@ -320,6 +324,7 @@ class SkillsAnalysisResult {
     String? errorMessage,
     String? preextractedRawOutput,
     String? preextractedCompanyName,
+    String? company,
     ComponentAnalysisResult? componentAnalysis,
     ATSResult? atsResult,
     AIRecommendationResult? aiRecommendation,
@@ -343,6 +348,7 @@ class SkillsAnalysisResult {
           preextractedRawOutput ?? this.preextractedRawOutput,
       preextractedCompanyName:
           preextractedCompanyName ?? this.preextractedCompanyName,
+      company: company ?? this.company,
       componentAnalysis: componentAnalysis ?? this.componentAnalysis,
       atsResult: atsResult ?? this.atsResult,
       aiRecommendation: aiRecommendation ?? this.aiRecommendation,

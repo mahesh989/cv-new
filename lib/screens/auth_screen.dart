@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme/app_theme.dart';
+import '../core/config/app_config.dart';
+import '../services/auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -76,7 +78,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
     // Determine if this is login or registration based on tab index
     final isLogin = _tabController.index == 0;
-    final endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    final endpoint = isLogin ? '/auth/login' : '/auth/register';
     print(
         '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
 
@@ -213,7 +215,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       }
 
       // Call backend endpoint
-      final url = 'http://localhost:8000$endpoint';
+      final url = '${AppConfig.baseUrl}/api$endpoint';
       print('🔵 [FRONTEND] Making HTTP request to: $url');
       print(
           '🔵 [FRONTEND] Request headers: {\'Content-Type\': \'application/json\'}');
@@ -238,17 +240,25 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           print('🔵 [FRONTEND] Processing login response');
           // Login response includes tokens
           final accessToken = data['access_token'];
+          final refreshToken = data['refresh_token'];
+          final expiresIn = data['expires_in'];
+          final userData = data['user'];
+
           print(
               '🔵 [FRONTEND] Access token received: ${accessToken.substring(0, 20)}...');
-
-          // Save authentication data
           print(
-              '🔵 [FRONTEND] Saving authentication data to SharedPreferences');
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('is_logged_in', true);
-          await prefs.setString('auth_token', accessToken);
-          await prefs.setString('user_email', email);
-          await prefs.setString('user_name', name);
+              '🔵 [FRONTEND] Refresh token received: ${refreshToken.substring(0, 20)}...');
+          print('🔵 [FRONTEND] Token expires in: $expiresIn seconds');
+
+          // Save authentication data using AuthService
+          print('🔵 [FRONTEND] Saving authentication data using AuthService');
+          await AuthService.saveUserData(
+            email: userData['email'] ?? email,
+            name: userData['username'] ?? name,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expiresIn: expiresIn,
+          );
           print('✅ [FRONTEND] Authentication data saved successfully');
 
           if (mounted) {
@@ -354,7 +364,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       // Call backend login endpoint with Google user credentials
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/login'),
+        Uri.parse('${AppConfig.baseUrl}/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': 'demo@gmail.com',
@@ -365,13 +375,18 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final accessToken = data['access_token'];
+        final refreshToken = data['refresh_token'];
+        final expiresIn = data['expires_in'];
+        final userData = data['user'];
 
-        // Save authentication data
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_logged_in', true);
-        await prefs.setString('auth_token', accessToken);
-        await prefs.setString('user_email', 'demo@gmail.com');
-        await prefs.setString('user_name', 'Demo User');
+        // Save authentication data using AuthService
+        await AuthService.saveUserData(
+          email: userData['email'] ?? 'demo@gmail.com',
+          name: userData['username'] ?? 'Demo User',
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          expiresIn: expiresIn,
+        );
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

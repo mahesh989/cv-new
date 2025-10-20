@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import '../services/ai_model_service.dart';
 import '../services/api_service.dart';
@@ -24,6 +25,34 @@ class _AITestWidgetState extends State<AITestWidget> {
 
   Future<void> _testAICall() async {
     if (_promptController.text.isEmpty) return;
+
+    // Check if user is authenticated
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+
+    if (!isLoggedIn) {
+      setState(() {
+        _response =
+            'Error: Authentication required. Please log in to use AI features.';
+        _isLoading = false;
+      });
+
+      // Show a helpful snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '🔐 Please log in to test AI features',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+      return;
+    }
 
     setState(() {
       _isLoading = true;

@@ -4,11 +4,13 @@ import 'dart:async';
 import '../core/theme/app_theme.dart';
 import '../utils/responsive_utils.dart';
 import '../widgets/mobile_bottom_nav.dart';
+import '../services/ai_model_service.dart';
 import 'intro_screen.dart';
 import 'welcome_home_page.dart';
 import 'cv_magic_organized_page.dart';
 import 'cv_generation_screen.dart';
 import 'job_tracking_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onLogout;
@@ -29,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _shouldClearCVMagicResults = false;
 
   late final IntroScreen _introScreen;
-  final WelcomeHomePage _welcomeHomePage = const WelcomeHomePage();
+  late final WelcomeHomePage _welcomeHomePage;
   late final CVMagicOrganizedPage _cvMagicPage;
   final GlobalKey<State<CVGenerationScreen>> _cvGenerationKey =
       GlobalKey<State<CVGenerationScreen>>();
@@ -37,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<JobTrackingScreenState> _jobTrackingKey =
       GlobalKey<JobTrackingScreenState>();
   late final JobTrackingScreen _jobTrackingScreen;
+  late final ProfileScreen _profileScreen;
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
@@ -70,6 +73,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       gradient: AppTheme.primaryGradient,
       color: AppTheme.primaryTeal,
     ),
+    TabData(
+      icon: Icons.person_outline,
+      label: 'Profile',
+      gradient: AppTheme.primaryGradient,
+      color: AppTheme.primaryTeal,
+    ),
   ];
 
   @override
@@ -83,6 +92,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Initialize intro screen with navigation callback
     _introScreen = IntroScreen(
       onNavigateToTab: _onTabTapped,
+    );
+
+    // Initialize welcome home page with navigation callback
+    print(
+        '🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: ${_navigateToCVMagicTab != null ? "provided" : "null"}');
+    _welcomeHomePage = WelcomeHomePage(
+      onNavigateToCVMagic: _navigateToCVMagicTab,
     );
 
     // Initialize CV Magic page with navigation callback
@@ -103,6 +119,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _jobTrackingScreen = JobTrackingScreen(
       key: _jobTrackingKey,
     );
+
+    // Initialize Profile screen
+    _profileScreen = const ProfileScreen();
 
     _animationController = AnimationController(
       duration: AppTheme.normalAnimation,
@@ -189,6 +208,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_logged_in', false);
 
+      // Clear AI configuration state to prevent confusion when another user logs in
+      final aiModelService = AIModelService();
+      await aiModelService.clearSelection();
+      debugPrint('🧹 Cleared AI configuration state on logout');
+
       if (widget.onLogout != null) {
         widget.onLogout!();
       }
@@ -198,9 +222,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _onTabTapped(int index) {
     print('🔄 [HOME_SCREEN] Tab tapped: $index');
     if (index == 4) {
-      print('📊 [HOME_SCREEN] Job Tracking tab selected - triggering refresh');
-      // Trigger refresh of job tracking screen when tab is selected
-      _jobTrackingKey.currentState?.refreshJobs();
+      print(
+          '📊 [HOME_SCREEN] Job Tracking tab selected - displaying saved results');
+      // Job tracking tab only displays saved results, no automatic refresh needed
     }
     setState(() {
       _currentIndex = index;
@@ -287,6 +311,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _cvMagicPage, // Index 2: CV Magic
         _cvGenerationScreen, // Index 3: CV Generation
         _jobTrackingScreen, // Index 4: Job Tracking
+        _profileScreen, // Index 5: Profile
       ],
     );
   }
@@ -369,13 +394,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   if (value == 'logout') {
                     _handleLogout();
                   } else if (value == 'profile') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('👤 Profile feature coming soon!'),
-                        backgroundColor: AppTheme.primaryTeal,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    // Navigate to the Profile tab
+                    _onTabTapped(5);
                   }
                 },
               ),

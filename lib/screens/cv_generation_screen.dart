@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:html' as html
+    show AnchorElement, document, Blob, Url; // Only used on web
 import '../core/theme/app_theme.dart';
 import '../services/results_clearing_service.dart';
+import '../services/auth_service.dart';
 
 class CVGenerationScreen extends StatefulWidget {
   final VoidCallback? onNavigateToCVMagic;
@@ -108,8 +110,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
 
     try {
       // Get auth token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await AuthService.getValidAuthToken();
 
       if (token == null) {
         setState(() {
@@ -129,7 +130,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
       // First, get the list of available companies to find the latest CV
       final companiesResponse = await http.get(
         Uri.parse(
-            'http://localhost:8000/api/tailored-cv/available-companies-real'),
+            'https://cvagent.duckdns.org/api/tailored-cv/available-companies-real'),
         headers: headers,
       );
 
@@ -156,7 +157,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         // Now get the content for this company
         final response = await http.get(
           Uri.parse(
-              'http://localhost:8000/api/tailored-cv/content/$companyName'),
+              'https://cvagent.duckdns.org/api/tailored-cv/content/$companyName'),
           headers: headers,
         );
 
@@ -353,6 +354,12 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
           const SizedBox(height: 16),
           // Action buttons
           _buildActionButtons(),
+
+          // Analyze Another Job Button - shown when CV preview is displayed
+          if (tailoredCVContent != null) ...[
+            const SizedBox(height: 16),
+            _buildAnalyzeAnotherJobButton(),
+          ],
         ],
       ),
     );
@@ -499,6 +506,10 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
             ],
           ),
           const SizedBox(height: 20),
+
+          // Analyze Another Job Button - positioned based on CV preview state
+          if (tailoredCVContent == null) _buildAnalyzeAnotherJobButton(),
+
           if (tailoredCVContent != null) _buildCVPreview(),
         ],
       ),
@@ -551,7 +562,50 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
             ),
           ),
         ),
+
+        const SizedBox(width: 12),
+
+        // Save PDF Button
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: (_currentCompany != null && tailoredCVContent != null)
+                ? _savePdf
+                : null,
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Save PDF'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildAnalyzeAnotherJobButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: _navigateToCVMagicAndClear,
+        icon: const Icon(Icons.work_outline, color: Colors.white),
+        label: const Text(
+          'Analyze Another Job',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue.shade600,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
     );
   }
 
@@ -612,12 +666,11 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     if (_currentCompany == null || tailoredCVContent == null) return;
 
     try {
-      // Include auth token like in load calls
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      // Get valid auth token (with auto-refresh)
+      final token = await AuthService.getValidAuthToken();
 
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/tailored-cv/save-edited'),
+        Uri.parse('https://cvagent.duckdns.org/api/tailored-cv/save-edited'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
@@ -645,6 +698,54 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Error saving CV: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _savePdf() async {
+    if (_currentCompany == null) return;
+
+    try {
+      final token = await AuthService.getValidAuthToken();
+
+      final url = Uri.parse(
+          'https://cvagent.duckdns.org/api/tailored-cv/export-pdf/${_currentCompany!}');
+
+      final response = await http.get(url, headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final blob = html.Blob([bytes], 'application/pdf');
+        final urlObject = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: urlObject)
+          ..download = '${_currentCompany}_tailored_resume.pdf'
+          ..style.display = 'none';
+        html.document.body!.append(anchor);
+        anchor.click();
+        anchor.remove();
+        html.Url.revokeObjectUrl(urlObject);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Failed to export PDF (${response.statusCode})'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error exporting PDF: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -707,7 +808,7 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
     try {
       final response = await http.post(
         Uri.parse(
-            'http://localhost:8000/api/tailored-cv/save-additional-prompt'),
+            'https://cvagent.duckdns.org/api/tailored-cv/save-additional-prompt'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'company': _currentCompany,
@@ -791,6 +892,29 @@ class _CVGenerationScreenState extends State<CVGenerationScreen> {
       widget.onNavigateToCVMagicWithoutClearing!();
       debugPrint(
           '✅ Navigated to CV Magic tab without clearing - JD inputs preserved');
+    } else {
+      debugPrint('❌ No navigation callback provided');
+    }
+  }
+
+  void _navigateToCVMagicAndClear() {
+    debugPrint(
+        '🔀 [CV_GENERATION] Navigating to CV Magic tab and clearing everything');
+
+    // Clear all current state
+    setState(() {
+      tailoredCVContent = null;
+      _currentCompany = null;
+      _isGenerating = false;
+      _isEditMode = false;
+      _editController.clear();
+    });
+
+    // Use the callback to navigate to CV Magic tab with clearing
+    if (widget.onNavigateToCVMagic != null) {
+      widget.onNavigateToCVMagic!();
+      debugPrint(
+          '✅ Navigated to CV Magic tab - everything cleared for fresh start');
     } else {
       debugPrint('❌ No navigation callback provided');
     }
