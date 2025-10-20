@@ -263,9 +263,10 @@ Text to analyze:
 """
 
     elif key == "analyze_match":
-        from .prompts.analyze_match_prompt import ANALYZE_MATCH_PROMPT
+        from .prompts.analyze_match_prompt import LITMUS_TEST_PROMPT
         cv_text = kwargs.get('cv_text', '')
         job_text = kwargs.get('job_text', '')
-        return ANALYZE_MATCH_PROMPT.format(cv_text=cv_text, job_text=job_text)
+        current_date = kwargs.get('current_date', '2025-01-01')
+        return LITMUS_TEST_PROMPT.format(cv_text=cv_text, jd_text=job_text, current_date=current_date)
 
     raise ValueError(f"Unknown prompt key: {key}")
