@@ -732,7 +732,6 @@ async def analyze_skills(request: Request, current_user: UserData = Depends(get_
         # ALSO trigger job saving logic for the analyze endpoint
         try:
             import json
-            from datetime import datetime
             if company_name:
                 from app.utils.user_path_utils import get_user_base_path
                 try:
@@ -955,7 +954,7 @@ async def preliminary_analysis(
         
         # Create user object from token data
         from app.models.auth import UserData
-        from datetime import datetime, timezone
+        from datetime import timezone
         current_user = UserData(
             id=token_data.user_id,
             email=token_data.email,
@@ -1116,7 +1115,6 @@ async def preliminary_analysis(
             # Save JD content and job info to files
             try:
                 import json
-                from datetime import datetime
                 from app.utils.timestamp_utils import TimestampUtils
                 from app.services.job_extractor import extract_job_metadata
                 
@@ -1455,7 +1453,6 @@ async def trigger_complete_pipeline(company: str, current_user: UserData = Depen
             # Save job info to shared jobs file
             from pathlib import Path
             import json
-            from datetime import datetime
 
             saved_jobs_file = get_user_base_path(current_user.email) / "saved_jobs" / "saved_jobs.json"
             saved_jobs_file.parent.mkdir(parents=True, exist_ok=True)
