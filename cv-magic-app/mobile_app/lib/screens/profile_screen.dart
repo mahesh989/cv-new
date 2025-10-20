@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../models/profile_model.dart';
 import '../services/profile_service.dart';
 import '../services/notification_service.dart';
@@ -61,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profileExists = false;
       }
     } catch (e) {
-      print('Error loading profile: $e');
+      debugPrint('Error loading profile: $e');
       NotificationService.showError('Failed to load profile');
     } finally {
       setState(() {
@@ -92,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final now = DateTime.now();
-      
+
       if (_profileExists && _currentProfile != null) {
         // Update existing profile
         final updates = {
@@ -100,10 +99,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'email': _emailController.text.trim(),
           'phone': _phoneController.text.trim(),
           'location': _locationController.text.trim(),
-          'linkedin_url': _linkedinController.text.trim().isEmpty ? null : _linkedinController.text.trim(),
-          'github_url': _githubController.text.trim().isEmpty ? null : _githubController.text.trim(),
-          'portfolio_url': _portfolioController.text.trim().isEmpty ? null : _portfolioController.text.trim(),
-          'website_url': _websiteController.text.trim().isEmpty ? null : _websiteController.text.trim(),
+          'linkedin_url': _linkedinController.text.trim().isEmpty
+              ? null
+              : _linkedinController.text.trim(),
+          'github_url': _githubController.text.trim().isEmpty
+              ? null
+              : _githubController.text.trim(),
+          'portfolio_url': _portfolioController.text.trim().isEmpty
+              ? null
+              : _portfolioController.text.trim(),
+          'website_url': _websiteController.text.trim().isEmpty
+              ? null
+              : _websiteController.text.trim(),
         };
 
         final response = await ProfileService.updateProfile(updates);
@@ -121,10 +128,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           email: _emailController.text.trim(),
           phone: _phoneController.text.trim(),
           location: _locationController.text.trim(),
-          linkedinUrl: _linkedinController.text.trim().isEmpty ? null : _linkedinController.text.trim(),
-          githubUrl: _githubController.text.trim().isEmpty ? null : _githubController.text.trim(),
-          portfolioUrl: _portfolioController.text.trim().isEmpty ? null : _portfolioController.text.trim(),
-          websiteUrl: _websiteController.text.trim().isEmpty ? null : _websiteController.text.trim(),
+          linkedinUrl: _linkedinController.text.trim().isEmpty
+              ? null
+              : _linkedinController.text.trim(),
+          githubUrl: _githubController.text.trim().isEmpty
+              ? null
+              : _githubController.text.trim(),
+          portfolioUrl: _portfolioController.text.trim().isEmpty
+              ? null
+              : _portfolioController.text.trim(),
+          websiteUrl: _websiteController.text.trim().isEmpty
+              ? null
+              : _websiteController.text.trim(),
           createdAt: now,
           updatedAt: now,
         );
@@ -139,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
     } catch (e) {
-      print('Error saving profile: $e');
+      debugPrint('Error saving profile: $e');
       NotificationService.showError('Failed to save profile');
     } finally {
       setState(() {
@@ -153,7 +168,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Profile'),
-        content: const Text('Are you sure you want to delete your profile? This action cannot be undone.'),
+        content: const Text(
+            'Are you sure you want to delete your profile? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -180,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           NotificationService.showError(response.message);
         }
       } catch (e) {
-        print('Error deleting profile: $e');
+        debugPrint('Error deleting profile: $e');
         NotificationService.showError('Failed to delete profile');
       }
     }
@@ -216,7 +232,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String? _validateUrl(String? value, String fieldName) {
     if (value != null && value.trim().isNotEmpty) {
-      if (!Uri.tryParse(value)?.hasAbsolutePath == true) {
+      final uri = Uri.tryParse(value.trim());
+      if (uri == null || !uri.hasAbsolutePath) {
         return 'Please enter a valid URL for $fieldName';
       }
     }
@@ -263,18 +280,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'Personal Information',
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'This information will be used in all your CV generations. Update it here and all future CVs will use the new information.',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.grey.shade600,
+                                  ),
                             ),
                           ],
                         ),
@@ -291,13 +314,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             Text(
                               'Required Information',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red.shade700,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red.shade700,
+                                  ),
                             ),
                             const SizedBox(height: 16),
-                            
+
                             // Full Name
                             TextFormField(
                               controller: _fullNameController,
@@ -307,7 +333,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.person),
                               ),
-                              validator: (value) => _validateRequired(value, 'Full name'),
+                              validator: (value) =>
+                                  _validateRequired(value, 'Full name'),
                             ),
                             const SizedBox(height: 16),
 
@@ -335,7 +362,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 prefixIcon: Icon(Icons.phone),
                               ),
                               keyboardType: TextInputType.phone,
-                              validator: (value) => _validateRequired(value, 'Phone'),
+                              validator: (value) =>
+                                  _validateRequired(value, 'Phone'),
                             ),
                             const SizedBox(height: 16),
 
@@ -348,7 +376,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.location_on),
                               ),
-                              validator: (value) => _validateRequired(value, 'Location'),
+                              validator: (value) =>
+                                  _validateRequired(value, 'Location'),
                             ),
                           ],
                         ),
@@ -365,17 +394,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             Text(
                               'Optional Links',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade700,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue.shade700,
+                                  ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'These will appear as clickable links in your CV',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.grey.shade600,
+                                  ),
                             ),
                             const SizedBox(height: 16),
 
@@ -389,7 +424,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 prefixIcon: Icon(Icons.work),
                               ),
                               keyboardType: TextInputType.url,
-                              validator: (value) => _validateUrl(value, 'LinkedIn'),
+                              validator: (value) =>
+                                  _validateUrl(value, 'LinkedIn'),
                             ),
                             const SizedBox(height: 16),
 
@@ -403,7 +439,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 prefixIcon: Icon(Icons.code),
                               ),
                               keyboardType: TextInputType.url,
-                              validator: (value) => _validateUrl(value, 'GitHub'),
+                              validator: (value) =>
+                                  _validateUrl(value, 'GitHub'),
                             ),
                             const SizedBox(height: 16),
 
@@ -417,7 +454,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 prefixIcon: Icon(Icons.web),
                               ),
                               keyboardType: TextInputType.url,
-                              validator: (value) => _validateUrl(value, 'Portfolio'),
+                              validator: (value) =>
+                                  _validateUrl(value, 'Portfolio'),
                             ),
                             const SizedBox(height: 16),
 
@@ -431,7 +469,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 prefixIcon: Icon(Icons.language),
                               ),
                               keyboardType: TextInputType.url,
-                              validator: (value) => _validateUrl(value, 'Website'),
+                              validator: (value) =>
+                                  _validateUrl(value, 'Website'),
                             ),
                           ],
                         ),
@@ -458,14 +497,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
                                     ),
                                   ),
                                   SizedBox(width: 12),
                                   Text('Saving...'),
                                 ],
                               )
-                            : Text(_profileExists ? 'Update Profile' : 'Create Profile'),
+                            : Text(_profileExists
+                                ? 'Update Profile'
+                                : 'Create Profile'),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -473,8 +515,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // Profile Status
                     if (_currentProfile != null)
                       Card(
-                        color: _currentProfile!.isComplete 
-                            ? Colors.green.shade50 
+                        color: _currentProfile!.isComplete
+                            ? Colors.green.shade50
                             : Colors.orange.shade50,
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -484,24 +526,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Row(
                                 children: [
                                   Icon(
-                                    _currentProfile!.isComplete 
-                                        ? Icons.check_circle 
+                                    _currentProfile!.isComplete
+                                        ? Icons.check_circle
                                         : Icons.warning,
-                                    color: _currentProfile!.isComplete 
-                                        ? Colors.green 
+                                    color: _currentProfile!.isComplete
+                                        ? Colors.green
                                         : Colors.orange,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    _currentProfile!.isComplete 
-                                        ? 'Profile Complete' 
+                                    _currentProfile!.isComplete
+                                        ? 'Profile Complete'
                                         : 'Profile Incomplete',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: _currentProfile!.isComplete 
-                                          ? Colors.green.shade700 
-                                          : Colors.orange.shade700,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: _currentProfile!.isComplete
+                                              ? Colors.green.shade700
+                                              : Colors.orange.shade700,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -509,9 +554,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   'Missing: ${_currentProfile!.missingFields.join(', ')}',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.orange.shade700,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.orange.shade700,
+                                      ),
                                 ),
                               ],
                             ],

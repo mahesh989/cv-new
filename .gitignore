@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Backend env files
+cv-magic-app/backend/.env
+
+# Ignore nested accidental copy
+cv-magic-app/mobile_app/cv-magic-app/

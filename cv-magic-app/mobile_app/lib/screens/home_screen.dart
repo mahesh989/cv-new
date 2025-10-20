@@ -394,13 +394,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   if (value == 'logout') {
                     _handleLogout();
                   } else if (value == 'profile') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('👤 Profile feature coming soon!'),
-                        backgroundColor: AppTheme.primaryTeal,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    // Navigate to Profile tab (index 5)
+                    _onTabTapped(5);
                   }
                 },
               ),
