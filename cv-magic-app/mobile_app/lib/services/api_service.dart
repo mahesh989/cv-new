@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
 import 'auth_service.dart';
+import 'notification_service.dart';
 
 class APIService {
   static const String baseUrl = 'https://cvagent.duckdns.org';
@@ -125,6 +126,10 @@ class APIService {
         }
       } else {
         print('❌ [API_SERVICE] Token refresh failed, user needs to login');
+        
+        // Show user-friendly notification
+        NotificationService.showLoginExpired();
+        
         throw Exception('Authentication failed - please login again');
       }
     } else {

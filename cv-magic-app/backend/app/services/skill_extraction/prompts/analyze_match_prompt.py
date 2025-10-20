@@ -136,13 +136,13 @@ PRIMARY_REASON: [One clear sentence]
 CRITICAL_MISSING: [List skills that are deal-breakers, or "None"]
 IMPLICIT_LIKELY: [Skills CV probably has but didn't mention, or "None"]
 LEARNABLE_GAPS: [Adjacent skills that could be highlighted, or "None"]
-STRENGTHS: [3-5 strong matching points]
+
 
 BLOCKER_FOUND: [Yes/No - if yes, specify which blocker]
 
 ---
 DETAILED_ANALYSIS:
-[2-3 points explaining your reasoning]
+[2 points explaining your reasoning]
 
 ===== CRITICAL RULES =====
 

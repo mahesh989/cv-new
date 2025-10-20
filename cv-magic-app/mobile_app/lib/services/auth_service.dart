@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/config/app_config.dart';
+import 'notification_service.dart';
 
 class AuthService {
   static const String _baseUrl = AppConfig.baseUrl;
@@ -117,6 +118,10 @@ class AuthService {
       // If refresh failed, user needs to login again
       print('❌ Token refresh failed, user needs to login again');
       await clearAuthData();
+      
+      // Show user-friendly notification
+      NotificationService.showLoginExpired();
+      
       return null;
     } catch (e) {
       print('❌ Error getting valid auth token: $e');
