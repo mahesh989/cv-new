@@ -301,23 +301,23 @@ JSON:"""
         try:
             import re
             
-            # Look for common patterns in text
+            # Look for common patterns in text - ordered by priority
             patterns = [
-                # Job title followed by company name
-                r'^([A-Z][a-zA-Z\s&.-]{5,50}?)\s*$',
-                # Company name in job summary
-                r'Job Summary\s*\n\s*([A-Z][a-zA-Z\s&.-]{5,50}?)\s*\n',
+                # Direct company name after job title (most common pattern)
+                r'^[A-Z][a-zA-Z\s-]+\s*\n\s*([A-Z][a-zA-Z\s&().-]{10,80}?)\s*\n',
+                # Company name in job summary section
+                r'Job Summary\s*\n\s*([A-Z][a-zA-Z\s&().-]{10,80}?)\s*\n',
+                # Organization patterns with specific context
+                r'([A-Z][a-zA-Z\s&().-]{10,80}?)\s+works\s+in\s+partnership',
+                r'([A-Z][a-zA-Z\s&().-]{10,80}?)\s+plays\s+a\s+critical\s+role',
                 # About company patterns
-                r'About\s+([A-Z][a-zA-Z\s&.-]{5,50}?)\s+is',
-                r'([A-Z][a-zA-Z\s&.-]{5,50}?)\s+is\s+(?:looking|seeking|hiring)',
+                r'About\s+([A-Z][a-zA-Z\s&().-]{10,80}?)\s+is',
+                r'([A-Z][a-zA-Z\s&().-]{10,80}?)\s+is\s+(?:looking|seeking|hiring)',
                 # Direct company labels
                 r'Company:\s*([^\n\r]+)',
                 r'Employer:\s*([^\n\r]+)',
                 # Email domains
                 r'@([a-zA-Z0-9.-]+)\.(?:com|org|au|net)',
-                # Organization patterns
-                r'([A-Z][a-zA-Z\s&.-]{5,50}?)\s+works\s+in\s+partnership',
-                r'([A-Z][a-zA-Z\s&.-]{5,50}?)\s+plays\s+a\s+critical\s+role',
             ]
             
             for pattern in patterns:

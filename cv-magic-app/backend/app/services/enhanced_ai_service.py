@@ -131,6 +131,10 @@ class EnhancedAIService:
             HTTPException: If API key is missing or invalid
         """
         try:
+            # Initialize AI service for user first
+            if hasattr(self.ai_service, 'initialize_for_user') and user:
+                self.ai_service.initialize_for_user(user)
+            
             # Determine provider to use
             if provider_name:
                 target_provider = provider_name

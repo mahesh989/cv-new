@@ -181,9 +181,18 @@ class AIServiceManager:
             return False
         
         # Update configuration
-        success = self.config.set_current_model(provider_name, model_name or "")
+        if not model_name:
+            # Use the default model for this provider
+            available_models = self.config.get_available_models(provider_name)
+            if available_models:
+                model_name = available_models[0]  # Use first available model as default
+            else:
+                logger.error(f"No models available for provider {provider_name}")
+                return False
+        
+        success = self.config.set_current_model(provider_name, model_name)
         if not success:
-            logger.error(f"Failed to set model configuration for {provider_name}")
+            logger.error(f"Failed to set model configuration for {provider_name} with model {model_name}")
             return False
         
         # Update provider model if needed

@@ -102,20 +102,20 @@ _With respect, no agencies please._
     ai_service = AIServiceManager()
     extractor = CompanyExtractor(ai_service)
     
-    # Create a mock user for testing
-    class MockUser:
+    # Create a real user for testing (mahesh@gmail.com has API keys configured)
+    class RealUser:
         def __init__(self):
-            self.id = 1
-            self.email = "test@example.com"
-            self.name = "Test User"
+            self.id = 2  # Correct user ID from database
+            self.email = "mahesh@gmail.com"
+            self.name = "Mahesh"
     
-    mock_user = MockUser()
+    real_user = RealUser()
     
     # Test 1: AI Extraction (Primary Method)
     print("🤖 TEST 1: AI EXTRACTION (Primary Method)")
     print("-" * 40)
     try:
-        result = await extractor.extract(jd_url, jd_text, mock_user)
+        result = await extractor.extract(jd_url, jd_text, real_user)
         
         print(f"✅ Company Name: '{result.name}'")
         print(f"✅ Normalized: '{result.normalized}'")
