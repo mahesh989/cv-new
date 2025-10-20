@@ -30,6 +30,7 @@ from app.routes.enhanced_skills_analysis import router as enhanced_skills_router
 from app.routes.saved_jobs import router as saved_jobs_router  # Saved jobs routes
 from app.routes.api_keys import router as api_keys_router  # API key management routes
 from app.routes.ingest_files import router as ingest_router  # Ingestion routes
+from app.routes.profile import router as profile_router  # Profile management routes
 
 # Import dependencies
 from app.core.model_dependency import get_current_model
@@ -187,6 +188,7 @@ app.include_router(cv_tailoring_router, prefix="/api")  # CV tailoring routes
 app.include_router(saved_jobs_router)  # Saved jobs routes
 app.include_router(api_keys_router)  # API key management routes
 app.include_router(ingest_router)  # Ingestion routes
+app.include_router(profile_router)  # Profile management routes
 
 
 # Root endpoint

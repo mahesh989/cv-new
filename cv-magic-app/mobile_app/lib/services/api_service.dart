@@ -78,7 +78,7 @@ class APIService {
     } else if (response.statusCode == 401) {
       // Handle 401 Unauthorized - try to refresh token
       print('🔄 [API_SERVICE] Received 401, attempting token refresh...');
-      
+
       final newToken = await AuthService.refreshAccessToken();
       if (newToken != null) {
         print('✅ [API_SERVICE] Token refreshed, retrying request...');
@@ -89,7 +89,7 @@ class APIService {
           if (currentModelId != null) 'X-Current-Model': currentModelId!,
           ...?headers,
         };
-        
+
         // Retry the request
         http.Response retryResponse;
         switch (method.toUpperCase()) {
@@ -116,20 +116,22 @@ class APIService {
           default:
             throw Exception('Unsupported HTTP method: $method');
         }
-        
+
         if (retryResponse.statusCode >= 200 && retryResponse.statusCode < 300) {
           print('✅ [API_SERVICE] Retry successful after token refresh');
           return jsonDecode(retryResponse.body);
         } else {
-          print('❌ [API_SERVICE] Retry failed even after token refresh: ${retryResponse.statusCode}');
-          throw Exception('Request failed after token refresh: ${retryResponse.statusCode}');
+          print(
+              '❌ [API_SERVICE] Retry failed even after token refresh: ${retryResponse.statusCode}');
+          throw Exception(
+              'Request failed after token refresh: ${retryResponse.statusCode}');
         }
       } else {
         print('❌ [API_SERVICE] Token refresh failed, user needs to login');
-        
+
         // Show user-friendly notification
         NotificationService.showLoginExpired();
-        
+
         throw Exception('Authentication failed - please login again');
       }
     } else {

@@ -10,6 +10,7 @@ import 'welcome_home_page.dart';
 import 'cv_magic_organized_page.dart';
 import 'cv_generation_screen.dart';
 import 'job_tracking_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onLogout;
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<JobTrackingScreenState> _jobTrackingKey =
       GlobalKey<JobTrackingScreenState>();
   late final JobTrackingScreen _jobTrackingScreen;
+  late final ProfileScreen _profileScreen;
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
@@ -68,6 +70,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     TabData(
       icon: Icons.work_outline,
       label: 'Job Tracking',
+      gradient: AppTheme.primaryGradient,
+      color: AppTheme.primaryTeal,
+    ),
+    TabData(
+      icon: Icons.person_outline,
+      label: 'Profile',
       gradient: AppTheme.primaryGradient,
       color: AppTheme.primaryTeal,
     ),
@@ -111,6 +119,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _jobTrackingScreen = JobTrackingScreen(
       key: _jobTrackingKey,
     );
+
+    // Initialize Profile screen
+    _profileScreen = const ProfileScreen();
 
     _animationController = AnimationController(
       duration: AppTheme.normalAnimation,
@@ -300,6 +311,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _cvMagicPage, // Index 2: CV Magic
         _cvGenerationScreen, // Index 3: CV Generation
         _jobTrackingScreen, // Index 4: Job Tracking
+        _profileScreen, // Index 5: Profile
       ],
     );
   }

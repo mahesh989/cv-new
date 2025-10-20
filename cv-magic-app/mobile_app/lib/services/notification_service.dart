@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Global notification service for showing user-friendly messages
 class NotificationService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   /// Show a snackbar notification
   static void showSnackBar({

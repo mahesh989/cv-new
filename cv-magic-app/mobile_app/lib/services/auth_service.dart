@@ -118,10 +118,10 @@ class AuthService {
       // If refresh failed, user needs to login again
       print('❌ Token refresh failed, user needs to login again');
       await clearAuthData();
-      
+
       // Show user-friendly notification
       NotificationService.showLoginExpired();
-      
+
       return null;
     } catch (e) {
       print('❌ Error getting valid auth token: $e');
