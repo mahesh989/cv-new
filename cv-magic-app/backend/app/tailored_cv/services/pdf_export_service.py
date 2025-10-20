@@ -635,6 +635,7 @@ def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> P
     """Export the latest tailored CV as PDF (using the adapter that preserves JSON)."""
     from app.unified_latest_file_selector import get_selector_for_user
     from app.tailored_cv.services.tailored_cv_adapter import load_tailored_cv_and_convert
+    from app.services.profile_service import profile_service
     from datetime import datetime
 
     selector = get_selector_for_user(user_email)
@@ -697,6 +698,35 @@ def export_tailored_cv_pdf(user_email: str, company: str, export_dir: Path) -> P
     except Exception as e:
         logger.error("[PDF_EXPORT] normalization failed: %s", e)
         raise
+
+    # Inject profile data into personal_information section
+    try:
+        profile_data = profile_service.get_profile_for_cv_generation(user_email)
+        if profile_data:
+            logger.info("[PDF_EXPORT] Injecting profile data for user: %s", user_email)
+            
+            # Create personal_information section from profile
+            personal_info = {
+                'name': profile_data.get('full_name', ''),
+                'email': profile_data.get('email', ''),
+                'phone': profile_data.get('phone', ''),
+                'location': profile_data.get('location', ''),
+                'linkedin': profile_data.get('linkedin_url', ''),
+                'github': profile_data.get('github_url', ''),
+                'portfolio_links': {
+                    'blogs': profile_data.get('portfolio_url', ''),
+                    'website': profile_data.get('website_url', '')
+                }
+            }
+            
+            # Update the PDF data with profile information
+            pdf_data['personal_information'] = personal_info
+            logger.info("[PDF_EXPORT] Successfully injected profile data")
+        else:
+            logger.warning("[PDF_EXPORT] No profile data found for user: %s", user_email)
+    except Exception as e:
+        logger.error("[PDF_EXPORT] Failed to inject profile data: %s", e)
+        # Continue without profile data - don't fail the PDF generation
 
     export_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")

@@ -22,6 +22,7 @@ from app.tailored_cv.models.cv_models import (
     ProcessingStatus, CVValidationResult
 )
 from app.tailored_cv.services.cv_tailoring_service import CVTailoringService
+from app.services.profile_service import profile_service
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,21 @@ async def tailor_cv(
     """
     try:
         logger.info(f"🎯 CV tailoring request for user {current_user.id} - {request.recommendations.company}")
+        
+        # Check if user profile exists and is complete
+        profile_validation = profile_service.validate_profile_for_cv(current_user.email)
+        if not profile_validation.success:
+            logger.warning(f"❌ Profile validation failed for user {current_user.email}: {profile_validation.message}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "Profile validation failed",
+                    "message": profile_validation.message,
+                    "missing_fields": profile_validation.missing_fields
+                }
+            )
+        
+        logger.info(f"✅ Profile validation passed for user {current_user.email}")
         
         # Create user-specific service instance
         cv_service = CVTailoringService(user_email=current_user.email)
@@ -1054,6 +1070,21 @@ async def export_pdf(
 ):
     """Return the PDF for the latest tailored CV for the given company. Generates PDF if not found."""
     try:
+        # Check if user profile exists and is complete
+        profile_validation = profile_service.validate_profile_for_cv(current_user.email)
+        if not profile_validation.success:
+            logger.warning(f"❌ Profile validation failed for PDF export user {current_user.email}: {profile_validation.message}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "Profile validation failed",
+                    "message": profile_validation.message,
+                    "missing_fields": profile_validation.missing_fields
+                }
+            )
+        
+        logger.info(f"✅ Profile validation passed for PDF export user {current_user.email}")
+        
         from app.tailored_cv.services.pdf_file_selector import get_latest_company_pdf
         from app.tailored_cv.services.pdf_export_service import export_tailored_cv_pdf
         from app.utils.user_path_utils import get_user_base_path

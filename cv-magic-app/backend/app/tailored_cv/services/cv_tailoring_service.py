@@ -963,9 +963,34 @@ Please provide the optimized CV in the requested JSON format."""
         Convert a full TailoredCV with all metadata to a clean version with only CV content
         """
         from app.tailored_cv.models.cv_models import CleanTailoredCV
+        from app.services.profile_service import profile_service
+        
+        # Get profile data and inject into contact information
+        contact_info = full_tailored_cv.contact
+        try:
+            profile_data = profile_service.get_profile_for_cv_generation(self.user_email)
+            if profile_data:
+                logger.info(f"✅ Injecting profile data into tailored CV for user: {self.user_email}")
+                
+                # Update contact info with profile data
+                contact_info = contact_info.model_copy(update={
+                    'name': profile_data.get('full_name', contact_info.name),
+                    'email': profile_data.get('email', contact_info.email),
+                    'phone': profile_data.get('phone', contact_info.phone),
+                    'location': profile_data.get('location', contact_info.location),
+                    'linkedin_url': profile_data.get('linkedin_url', contact_info.linkedin_url),
+                    'github_url': profile_data.get('github_url', contact_info.github_url),
+                    'portfolio_url': profile_data.get('portfolio_url', contact_info.portfolio_url),
+                    'website_url': profile_data.get('website_url', contact_info.website_url),
+                })
+            else:
+                logger.warning(f"⚠️ No profile data found for user: {self.user_email}")
+        except Exception as e:
+            logger.error(f"❌ Failed to inject profile data: {e}")
+            # Continue with original contact info
         
         clean_cv = CleanTailoredCV(
-            contact=full_tailored_cv.contact,
+            contact=contact_info,
             education=full_tailored_cv.education,
             experience=full_tailored_cv.experience,
             projects=full_tailored_cv.projects,
