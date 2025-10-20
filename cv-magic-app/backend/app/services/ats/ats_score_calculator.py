@@ -94,32 +94,31 @@ class ATSScoreCalculator:
                 # Parse table rows for match rates and missing counts
                 # Format: Category    CV Total  JD Total   Matched   Missing  Match Rate (%)
                 if "Technical Skills" in line and not "TECHNICAL SKILLS" in line:
-                    # Split by whitespace and get the values
-                    parts = line.split()
-                    if len(parts) >= 6:
+                    # Use regex to extract numbers from the line
+                    numbers = re.findall(r'\d+\.?\d*', line)
+                    if len(numbers) >= 5:
                         try:
-                            # The last value is the match rate
-                            tech_rate = float(parts[-1])
-                            # The second to last is missing count
-                            tech_missing = int(parts[-2])
+                            # Format: CV Total, JD Total, Matched, Missing, Match Rate
+                            tech_missing = int(numbers[3])  # Missing count
+                            tech_rate = float(numbers[4])   # Match rate percentage
                         except (ValueError, IndexError):
                             pass
                 
                 elif "Soft Skills" in line and not "SOFT SKILLS" in line:
-                    parts = line.split()
-                    if len(parts) >= 6:
+                    numbers = re.findall(r'\d+\.?\d*', line)
+                    if len(numbers) >= 5:
                         try:
-                            soft_rate = float(parts[-1])
-                            soft_missing = int(parts[-2])
+                            soft_missing = int(numbers[3])  # Missing count
+                            soft_rate = float(numbers[4])   # Match rate percentage
                         except (ValueError, IndexError):
                             pass
                 
                 elif "Domain Keywords" in line and not "DOMAIN KEYWORDS" in line:
-                    parts = line.split()
-                    if len(parts) >= 6:
+                    numbers = re.findall(r'\d+\.?\d*', line)
+                    if len(numbers) >= 5:
                         try:
-                            domain_rate = float(parts[-1])
-                            domain_missing = int(parts[-2])
+                            domain_missing = int(numbers[3])  # Missing count
+                            domain_rate = float(numbers[4])   # Match rate percentage
                         except (ValueError, IndexError):
                             pass
                 
