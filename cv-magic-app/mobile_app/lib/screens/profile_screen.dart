@@ -85,17 +85,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
+      debugPrint('Loading profile...');
       final response = await ProfileService.getProfile();
+      debugPrint('Profile service response: success=${response.success}, profile=${response.profile != null}');
+      
       if (response.success && response.profile != null) {
         _currentProfile = response.profile;
         _profileExists = true;
+        debugPrint('Profile exists, populating fields...');
         _populateFields(_currentProfile!);
-        debugPrint(
-            'Profile loaded successfully for user: ${_currentProfile!.userEmail}');
+        debugPrint('Profile loaded successfully for user: ${_currentProfile!.userEmail}');
       } else {
         _profileExists = false;
         _currentProfile = null;
-        debugPrint('No profile found, will create new one');
+        debugPrint('No profile found, will create new one. Response: ${response.message}');
       }
     } catch (e) {
       debugPrint('Error loading profile: $e');
@@ -110,6 +113,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _populateFields(UserProfile profile) {
+    debugPrint('Populating fields with profile data:');
+    debugPrint('Full Name: ${profile.fullName}');
+    debugPrint('Email: ${profile.email}');
+    debugPrint('Phone: ${profile.phone}');
+    debugPrint('Location: ${profile.location}');
+    
     _fullNameController.text = profile.fullName;
     _emailController.text = profile.email;
     _phoneController.text = profile.phone;
@@ -118,6 +127,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _githubController.text = profile.githubUrl ?? '';
     _portfolioController.text = profile.portfolioUrl ?? '';
     _websiteController.text = profile.websiteUrl ?? '';
+    
+    debugPrint('Fields populated successfully');
   }
 
   Future<void> _saveProfile() async {
@@ -132,6 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final now = DateTime.now();
 
+      // Always try to update first if profile exists, otherwise create
       if (_profileExists && _currentProfile != null) {
         // Update existing profile
         final updates = {
@@ -157,17 +169,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (response.success) {
           NotificationService.showSuccess('Profile updated successfully!');
           _currentProfile = response.profile;
+          _profileExists = true;
         } else {
-          NotificationService.showError(response.message);
-          // If update fails, try creating a new profile
-          debugPrint('Profile update failed, attempting to create new profile');
-          _profileExists = false;
-          _currentProfile = null;
-          // Fall through to create new profile
+          NotificationService.showError('Failed to update profile: ${response.message}');
         }
-      }
-
-      if (!_profileExists || _currentProfile == null) {
+      } else {
         // Create new profile - use authenticated user's email
         final authenticatedEmail = await AuthService.getUserEmail();
         if (authenticatedEmail == null) {
@@ -227,20 +233,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Material(
           type: MaterialType.transparency,
           child: AlertDialog(
-          title: const Text('Delete Profile'),
-          content: const Text(
-              'Are you sure you want to delete your profile? This action cannot be undone.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Delete'),
-            ),
-          ],
+            title: const Text('Delete Profile'),
+            content: const Text(
+                'Are you sure you want to delete your profile? This action cannot be undone.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
         ),
       ),
