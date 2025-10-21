@@ -345,8 +345,8 @@ class ResumePDFGenerator:
         portfolio = personal_info.get('portfolio_links', {})
         if portfolio and portfolio.get('blogs'):
             elements.append(self._create_hyperlink("Portfolio", portfolio['blogs']))
-        if portfolio and portfolio.get('dashboard_portfolio'):
-            elements.append(self._create_hyperlink("Website", portfolio['dashboard_portfolio']))
+        if portfolio and portfolio.get('website'):
+            elements.append(self._create_hyperlink("Website", portfolio['website']))
 
         return elements
 
@@ -358,8 +358,8 @@ class ResumePDFGenerator:
         if not url or not url.strip():
             return Paragraph(text, self.styles['Contact'])
         
-        # Ensure URL has protocol
-        if not url.startswith(('http://', 'https://')):
+        # Ensure URL has protocol (don't modify mailto: URLs)
+        if not url.startswith(('http://', 'https://', 'mailto:')):
             url = 'https://' + url
         
         # Create hyperlink with blue color and underline
