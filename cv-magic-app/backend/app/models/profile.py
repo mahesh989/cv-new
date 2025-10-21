@@ -19,11 +19,11 @@ class UserProfile(BaseModel):
     phone: str
     location: str
     
-    # Optional fields
-    linkedin_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-    portfolio_url: Optional[HttpUrl] = None
-    website_url: Optional[HttpUrl] = None
+    # Optional fields - using str to allow any format
+    linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
+    portfolio_url: Optional[str] = None
+    website_url: Optional[str] = None
     
     # Metadata
     created_at: datetime
@@ -84,11 +84,20 @@ class UserProfile(BaseModel):
             'email': self.email,
             'phone': self.phone,
             'location': self.location,
-            'linkedin_url': str(self.linkedin_url) if self.linkedin_url else None,
-            'github_url': str(self.github_url) if self.github_url else None,
-            'portfolio_url': str(self.portfolio_url) if self.portfolio_url else None,
-            'website_url': str(self.website_url) if self.website_url else None,
+            'linkedin_url': self.linkedin_url,
+            'github_url': self.github_url,
+            'portfolio_url': self.portfolio_url,
+            'website_url': self.website_url,
         }
+    
+    def _format_url(self, url: str) -> str:
+        """Format URL to be clickable (add https:// if missing)"""
+        if not url:
+            return url
+        url = url.strip()
+        if not url.startswith(('http://', 'https://', 'mailto:')):
+            return f'https://{url}'
+        return url
     
     def get_clickable_links(self) -> list[dict]:
         """Get list of clickable links for CV"""
@@ -97,28 +106,28 @@ class UserProfile(BaseModel):
         if self.linkedin_url:
             links.append({
                 'text': 'LinkedIn',
-                'url': str(self.linkedin_url),
+                'url': self._format_url(self.linkedin_url),
                 'type': 'linkedin'
             })
         
         if self.github_url:
             links.append({
                 'text': 'GitHub',
-                'url': str(self.github_url),
+                'url': self._format_url(self.github_url),
                 'type': 'github'
             })
         
         if self.portfolio_url:
             links.append({
                 'text': 'Portfolio',
-                'url': str(self.portfolio_url),
+                'url': self._format_url(self.portfolio_url),
                 'type': 'portfolio'
             })
         
         if self.website_url:
             links.append({
                 'text': 'Website',
-                'url': str(self.website_url),
+                'url': self._format_url(self.website_url),
                 'type': 'website'
             })
         
@@ -132,10 +141,10 @@ class ProfileCreateRequest(BaseModel):
     email: EmailStr
     phone: str
     location: str
-    linkedin_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-    portfolio_url: Optional[HttpUrl] = None
-    website_url: Optional[HttpUrl] = None
+    linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
+    portfolio_url: Optional[str] = None
+    website_url: Optional[str] = None
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -144,10 +153,10 @@ class ProfileUpdateRequest(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     location: Optional[str] = None
-    linkedin_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-    portfolio_url: Optional[HttpUrl] = None
-    website_url: Optional[HttpUrl] = None
+    linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
+    portfolio_url: Optional[str] = None
+    website_url: Optional[str] = None
 
 
 class ProfileResponse(BaseModel):

@@ -90,7 +90,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
 
     // Initialize welcome home page with navigation callback
-    print('🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: provided');
+    print(
+        '🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: provided');
     _welcomeHomePage = WelcomeHomePage(
       onNavigateToCVMagic: _navigateToCVMagicTab,
     );
@@ -187,29 +188,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               'Are you sure you want to logout?',
               style: AppTheme.bodyMedium,
             ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                debugPrint('Cancel button clicked!');
-                Navigator.of(dialogContext, rootNavigator: true).pop(false);
-              },
-              child: Text(
-                'Cancel',
-                style: AppTheme.bodyMedium.copyWith(
-                  color: AppTheme.neutralGray600,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  debugPrint('Cancel button clicked!');
+                  Navigator.of(dialogContext, rootNavigator: true).pop(false);
+                },
+                child: Text(
+                  'Cancel',
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.neutralGray600,
+                  ),
                 ),
               ),
-            ),
-            AppTheme.createGradientButton(
-              text: 'Logout',
-              onPressed: () {
-                debugPrint('Logout button clicked!');
-                Navigator.of(dialogContext, rootNavigator: true).pop(true);
-              },
-              width: 80,
-              height: 36,
-            ),
-          ],
+              AppTheme.createGradientButton(
+                text: 'Logout',
+                onPressed: () {
+                  debugPrint('Logout button clicked!');
+                  Navigator.of(dialogContext, rootNavigator: true).pop(true);
+                },
+                width: 80,
+                height: 36,
+              ),
+            ],
           ),
         ),
       ),
@@ -292,16 +293,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
         child: Dialog(
-            insetPadding: const EdgeInsets.all(16),
-            child: Container(
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.9,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              child: Column(
-                children: [
+          insetPadding: const EdgeInsets.all(16),
+          child: Container(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            child: Column(
+              children: [
                 // Custom header with close button
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -322,18 +323,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                debugPrint('Profile modal close button clicked!');
-                                Navigator.of(dialogContext, rootNavigator: true).pop();
-                                
-                                // Restore web interactions when closing profile modal
-                                if (kIsWeb) {
-                                  WebHelper.enableIframeInteractions();
-                                }
-                              },
-                            ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          debugPrint('Profile modal close button clicked!');
+                          Navigator.of(dialogContext, rootNavigator: true)
+                              .pop();
+
+                          // Restore web interactions when closing profile modal
+                          if (kIsWeb) {
+                            WebHelper.enableIframeInteractions();
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -341,12 +343,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const Expanded(
                   child: ProfileScreen(hideAppBar: true),
                 ),
-                ],
-              ),
+              ],
             ),
-          ), // Dialog
-        ), // WillPopScope
-      ); // showDialog
+          ),
+        ), // Dialog
+      ), // WillPopScope
+    ); // showDialog
   }
 
   @override
