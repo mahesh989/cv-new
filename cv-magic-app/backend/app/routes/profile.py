@@ -59,6 +59,8 @@ async def create_profile(
         logger.info(f"📋 [PROFILE] Creating profile for user: {current_user.email}")
         
         # Ensure the user_email in request matches the authenticated user
+        # (This ensures the profile belongs to the authenticated user)
+        # The 'email' field can be different (for creating CVs for others)
         if request.user_email != current_user.email:
             raise HTTPException(
                 status_code=403, 

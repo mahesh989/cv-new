@@ -55,11 +55,13 @@ class UserProfile(BaseModel):
         return v.strip()
     
     @validator('email')
-    def validate_email_match(cls, v, values):
-        """Ensure email matches user_email"""
-        if 'user_email' in values and v != values['user_email']:
-            raise ValueError('Email must match user_email')
-        return v
+    def validate_email_format(cls, v):
+        """Validate email format"""
+        if not v or len(v.strip()) < 5:
+            raise ValueError('Email must be at least 5 characters')
+        if '@' not in v:
+            raise ValueError('Email must contain @ symbol')
+        return v.strip()
     
     def is_complete(self) -> bool:
         """Check if profile has all required fields"""
