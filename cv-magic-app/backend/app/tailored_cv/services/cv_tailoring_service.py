@@ -978,10 +978,8 @@ Please provide the optimized CV in the requested JSON format."""
                     'email': profile_data.get('email', contact_info.email),
                     'phone': profile_data.get('phone', contact_info.phone),
                     'location': profile_data.get('location', contact_info.location),
-                    'linkedin_url': profile_data.get('linkedin_url', contact_info.linkedin_url),
-                    'github_url': profile_data.get('github_url', contact_info.github_url),
-                    'portfolio_url': profile_data.get('portfolio_url', contact_info.portfolio_url),
-                    'website_url': profile_data.get('website_url', contact_info.website_url),
+                    'linkedin': profile_data.get('linkedin_url', contact_info.linkedin),
+                    'website': profile_data.get('website_url', contact_info.website),
                 })
             else:
                 logger.warning(f"⚠️ No profile data found for user: {self.user_email}")

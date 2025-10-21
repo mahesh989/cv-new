@@ -27,10 +27,10 @@ def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[st
             "phone": contact_section.get('phone', ''),
             "email": contact_section.get('email', ''),
             "linkedin": contact_section.get('linkedin', ''),
-            "github": contact_section.get('github', ''),
+            "github": contact_section.get('website', ''),  # Map website to github field for PDF
             "portfolio_links": {
-                "blogs": contact_section.get('blogs', ''),
-                "website": contact_section.get('portfolio', '')
+                "blogs": contact_section.get('website', ''),  # Use website for portfolio
+                "website": contact_section.get('website', '')
             }
         }
 
