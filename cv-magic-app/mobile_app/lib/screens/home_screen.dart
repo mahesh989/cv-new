@@ -168,33 +168,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       builder: (context) => WillPopScope(
         onWillPop: () async => false,
         child: AlertDialog(
-        title: Text(
-          'Logout',
-          style: AppTheme.headingMedium.copyWith(
-            color: AppTheme.neutralGray800,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to logout?',
-          style: AppTheme.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
-              style: AppTheme.bodyMedium.copyWith(
-                color: AppTheme.neutralGray600,
-              ),
+          title: Text(
+            'Logout',
+            style: AppTheme.headingMedium.copyWith(
+              color: AppTheme.neutralGray800,
             ),
           ),
-          AppTheme.createGradientButton(
-            text: 'Logout',
-            onPressed: () => Navigator.of(context).pop(true),
-            width: 80,
-            height: 36,
+          content: Text(
+            'Are you sure you want to logout?',
+            style: AppTheme.bodyMedium,
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.neutralGray600,
+                ),
+              ),
+            ),
+            AppTheme.createGradientButton(
+              text: 'Logout',
+              onPressed: () => Navigator.of(context).pop(true),
+              width: 80,
+              height: 36,
+            ),
+          ],
         ),
       ),
     );
@@ -258,21 +258,58 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _showProfileModal() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            title: const Text('Profile Settings'),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: Container(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            child: Column(
+              children: [
+                // Custom header with close button
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Profile Settings',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+                // Profile content
+                const Expanded(
+                  child: ProfileScreen(hideAppBar: true),
+                ),
+              ],
             ),
           ),
-          body: const ProfileScreen(hideAppBar: true),
         ),
-        fullscreenDialog: true,
       ),
     );
   }

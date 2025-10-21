@@ -28,11 +28,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isSaving = false;
   UserProfile? _currentProfile;
   bool _profileExists = false;
+  bool _hasFormData = false; // Track if user has entered any data
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _setupFormListeners();
+  }
+
+  void _setupFormListeners() {
+    // Listen to all text fields to track if user has entered data
+    void _checkFormData() {
+      final hasData = _fullNameController.text.trim().isNotEmpty ||
+          _emailController.text.trim().isNotEmpty ||
+          _phoneController.text.trim().isNotEmpty ||
+          _locationController.text.trim().isNotEmpty ||
+          _linkedinController.text.trim().isNotEmpty ||
+          _githubController.text.trim().isNotEmpty ||
+          _portfolioController.text.trim().isNotEmpty ||
+          _websiteController.text.trim().isNotEmpty;
+      
+      if (_hasFormData != hasData) {
+        setState(() {
+          _hasFormData = hasData;
+        });
+      }
+    }
+
+    _fullNameController.addListener(_checkFormData);
+    _emailController.addListener(_checkFormData);
+    _phoneController.addListener(_checkFormData);
+    _locationController.addListener(_checkFormData);
+    _linkedinController.addListener(_checkFormData);
+    _githubController.addListener(_checkFormData);
+    _portfolioController.addListener(_checkFormData);
+    _websiteController.addListener(_checkFormData);
   }
 
   @override
@@ -59,7 +90,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _currentProfile = response.profile;
         _profileExists = true;
         _populateFields(_currentProfile!);
-        debugPrint('Profile loaded successfully for user: ${_currentProfile!.userEmail}');
+        debugPrint(
+            'Profile loaded successfully for user: ${_currentProfile!.userEmail}');
       } else {
         _profileExists = false;
         _currentProfile = null;
@@ -134,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Fall through to create new profile
         }
       }
-      
+
       if (!_profileExists || _currentProfile == null) {
         // Create new profile - use authenticated user's email
         final authenticatedEmail = await AuthService.getUserEmail();
@@ -514,9 +546,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Text('Saving...'),
                               ],
                             )
-                          : Text(_profileExists
-                              ? 'Update Profile'
-                              : 'Create Profile'),
+                            : Text((_profileExists || _hasFormData)
+                                ? 'Update Profile'
+                                : 'Create Profile'),
                     ),
                   ),
                   const SizedBox(height: 16),
