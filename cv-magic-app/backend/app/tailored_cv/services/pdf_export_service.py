@@ -323,35 +323,77 @@ class ResumePDFGenerator:
 
         elements.append(Spacer(1, 0.05 * inch))
 
-        # Name
+        # Name - use original CV data if profile data is missing
         name = personal_info.get('name', 'N/A')
+        if not name or name == 'N/A':
+            # Fallback to original CV contact data if available
+            contact_data = self.data.get('contact', {})
+            name = contact_data.get('name', 'N/A')
         elements.append(Paragraph(name, self.styles['Name']))
 
-        # Contact Line 1
+        # Contact Line 1 - location and phone
         contact_line1 = []
-        if personal_info.get('location'):
-            contact_line1.append(personal_info['location'])
-        if personal_info.get('phone'):
-            contact_line1.append(personal_info['phone'])
+        location = personal_info.get('location', '')
+        phone = personal_info.get('phone', '')
+        
+        # Fallback to original CV data if profile data is missing
+        if not location:
+            contact_data = self.data.get('contact', {})
+            location = contact_data.get('location', '')
+        if not phone:
+            contact_data = self.data.get('contact', {})
+            phone = contact_data.get('phone', '')
+            
+        if location:
+            contact_line1.append(location)
+        if phone:
+            contact_line1.append(phone)
 
         if contact_line1:
             elements.append(Paragraph(" | ".join(contact_line1), self.styles['Contact']))
         
         # Email as clickable link
-        if personal_info.get('email'):
-            elements.append(self._create_hyperlink(personal_info['email'], f"mailto:{personal_info['email']}"))
+        email = personal_info.get('email', '')
+        if not email:
+            # Fallback to original CV data
+            contact_data = self.data.get('contact', {})
+            email = contact_data.get('email', '')
+            
+        if email:
+            elements.append(self._create_hyperlink(email, f"mailto:{email}"))
 
         # Contact Line 2 - URLs as clickable hyperlinks
-        if personal_info.get('linkedin'):
-            elements.append(self._create_hyperlink("LinkedIn", personal_info['linkedin']))
-        if personal_info.get('github'):
-            elements.append(self._create_hyperlink("GitHub", personal_info['github']))
+        linkedin = personal_info.get('linkedin', '')
+        github = personal_info.get('github', '')
+        
+        # Fallback to original CV data if profile data is missing
+        if not linkedin:
+            contact_data = self.data.get('contact', {})
+            linkedin = contact_data.get('linkedin', '')
+        if not github:
+            contact_data = self.data.get('contact', {})
+            github = contact_data.get('website', '')
+            
+        if linkedin:
+            elements.append(self._create_hyperlink("LinkedIn", linkedin))
+        if github:
+            elements.append(self._create_hyperlink("GitHub", github))
 
+        # Portfolio links - use original CV data if profile data is missing
         portfolio = personal_info.get('portfolio_links', {})
-        if portfolio and portfolio.get('blogs'):
-            elements.append(self._create_hyperlink("Portfolio", portfolio['blogs']))
-        if portfolio and portfolio.get('website'):
-            elements.append(self._create_hyperlink("Website", portfolio['website']))
+        portfolio_url = portfolio.get('blogs', '') if portfolio else ''
+        website_url = portfolio.get('website', '') if portfolio else ''
+        
+        # Fallback to original CV data
+        if not portfolio_url and not website_url:
+            contact_data = self.data.get('contact', {})
+            portfolio_url = contact_data.get('website', '')
+            website_url = contact_data.get('website', '')
+            
+        if portfolio_url:
+            elements.append(self._create_hyperlink("Portfolio", portfolio_url))
+        if website_url and website_url != portfolio_url:
+            elements.append(self._create_hyperlink("Website", website_url))
 
         return elements
 
