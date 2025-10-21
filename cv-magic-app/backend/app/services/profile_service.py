@@ -98,14 +98,11 @@ class ProfileService:
             return False
     
     def create_profile(self, request: ProfileCreateRequest) -> ProfileResponse:
-        """Create a new user profile"""
+        """Create a new user profile (overwrites existing if any)"""
         try:
-            # Check if profile already exists
+            # Allow overwriting existing profiles
             if self.profile_exists(request.user_email):
-                return ProfileResponse(
-                    success=False,
-                    message=f"Profile already exists for user: {request.user_email}"
-                )
+                logger.info(f"Profile exists for {request.user_email}, overwriting...")
             
             # Create new profile
             now = datetime.now()

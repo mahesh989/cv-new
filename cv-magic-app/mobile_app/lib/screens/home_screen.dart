@@ -291,7 +291,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       useRootNavigator: true,
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: Dialog(
+        child: GestureDetector(
+          onTap: () {}, // Block all taps outside the dialog content
+          behavior: HitTestBehavior.opaque,
+          child: Dialog(
             insetPadding: const EdgeInsets.all(16),
             child: Container(
               width: double.infinity,
@@ -345,8 +348,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ), // Dialog
-        ), // WillPopScope
-      ); // showDialog
+        ), // GestureDetector
+      ), // WillPopScope
+    ); // showDialog
   }
 
   @override

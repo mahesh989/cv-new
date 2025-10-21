@@ -145,6 +145,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final now = DateTime.now();
+      
+      debugPrint('🔍 Save Profile Debug:');
+      debugPrint('  _profileExists: $_profileExists');
+      debugPrint('  _currentProfile: ${_currentProfile != null}');
+      debugPrint('  _currentProfile.userEmail: ${_currentProfile?.userEmail}');
 
       // Always try to update first if profile exists, otherwise create
       if (_profileExists && _currentProfile != null) {
@@ -174,8 +179,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _currentProfile = response.profile;
           _profileExists = true;
         } else {
-          NotificationService.showError(
-              'Failed to update profile: ${response.message}');
+          debugPrint('❌ Update failed: ${response.message}');
+          debugPrint('🔄 Falling back to create profile (overwrite)...');
+          
+          // Fallback: Create new profile (this will overwrite existing)
+          final authenticatedEmail = await AuthService.getUserEmail();
+          if (authenticatedEmail == null) {
+            NotificationService.showError('Authentication required');
+            return;
+          }
+          
+          final profile = UserProfile(
+            userEmail: authenticatedEmail,
+            fullName: _fullNameController.text.trim(),
+            email: _emailController.text.trim(),
+            phone: _phoneController.text.trim(),
+            location: _locationController.text.trim(),
+            linkedinUrl: _linkedinController.text.trim().isEmpty
+                ? null
+                : _linkedinController.text.trim(),
+            githubUrl: _githubController.text.trim().isEmpty
+                ? null
+                : _githubController.text.trim(),
+            portfolioUrl: _portfolioController.text.trim().isEmpty
+                ? null
+                : _portfolioController.text.trim(),
+            websiteUrl: _websiteController.text.trim().isEmpty
+                ? null
+                : _websiteController.text.trim(),
+            createdAt: now,
+            updatedAt: now,
+          );
+
+          final createResponse = await ProfileService.createProfile(profile);
+          if (createResponse.success) {
+            NotificationService.showSuccess('Profile created successfully!');
+            _currentProfile = createResponse.profile;
+            _profileExists = true;
+          } else {
+            NotificationService.showError('Failed to create profile: ${createResponse.message}');
+          }
         }
       } else {
         // Create new profile - use authenticated user's email
