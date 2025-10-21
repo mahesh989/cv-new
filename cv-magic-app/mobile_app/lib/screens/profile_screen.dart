@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _githubController.text.trim().isNotEmpty ||
           _portfolioController.text.trim().isNotEmpty ||
           _websiteController.text.trim().isNotEmpty;
-      
+
       if (_hasFormData != hasData) {
         setState(() {
           _hasFormData = hasData;
@@ -220,10 +220,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black54,
+      barrierColor: Colors.black.withOpacity(0.8),
+      useRootNavigator: true,
       builder: (context) => WillPopScope(
         onWillPop: () async => false,
-        child: AlertDialog(
+        child: Material(
+          type: MaterialType.transparency,
+          child: AlertDialog(
           title: const Text('Delete Profile'),
           content: const Text(
               'Are you sure you want to delete your profile? This action cannot be undone.'),
@@ -238,6 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: const Text('Delete'),
             ),
           ],
+          ),
         ),
       ),
     );
@@ -546,9 +550,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Text('Saving...'),
                               ],
                             )
-                            : Text((_profileExists || _hasFormData)
-                                ? 'Update Profile'
-                                : 'Create Profile'),
+                          : Text((_profileExists || _hasFormData)
+                              ? 'Update Profile'
+                              : 'Create Profile'),
                     ),
                   ),
                   const SizedBox(height: 16),

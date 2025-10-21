@@ -164,10 +164,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black54,
+      barrierColor: Colors.black.withOpacity(0.8),
+      useRootNavigator: true,
       builder: (context) => WillPopScope(
         onWillPop: () async => false,
-        child: AlertDialog(
+        child: Material(
+          type: MaterialType.transparency,
+          child: AlertDialog(
           title: Text(
             'Logout',
             style: AppTheme.headingMedium.copyWith(
@@ -195,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               height: 36,
             ),
           ],
+          ),
         ),
       ),
     );
@@ -261,7 +265,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black54,
+      barrierColor: Colors.black.withOpacity(0.8),
+      useRootNavigator: true,
       builder: (context) => WillPopScope(
         onWillPop: () async => false,
         child: Dialog(
