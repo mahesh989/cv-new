@@ -15,7 +15,7 @@ from reportlab.platypus import (
     Table,
     TableStyle,
 )
-from reportlab.platypus.flowables import HyperLink
+# HyperLink import removed - not needed for current implementation
 from reportlab.lib import colors
 
 logger = logging.getLogger(__name__)
