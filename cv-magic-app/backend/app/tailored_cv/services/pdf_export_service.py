@@ -331,69 +331,58 @@ class ResumePDFGenerator:
             name = contact_data.get('name', 'N/A')
         elements.append(Paragraph(name, self.styles['Name']))
 
-        # Contact Line 1 - location and phone
-        contact_line1 = []
+        # Single contact line with all information
+        contact_parts = []
+        
+        # Get all contact information
         location = personal_info.get('location', '')
         phone = personal_info.get('phone', '')
-        
-        # Fallback to original CV data if profile data is missing
-        if not location:
-            contact_data = self.data.get('contact', {})
-            location = contact_data.get('location', '')
-        if not phone:
-            contact_data = self.data.get('contact', {})
-            phone = contact_data.get('phone', '')
-            
-        if location:
-            contact_line1.append(location)
-        if phone:
-            contact_line1.append(phone)
-
-        if contact_line1:
-            elements.append(Paragraph(" | ".join(contact_line1), self.styles['Contact']))
-        
-        # Email as clickable link
         email = personal_info.get('email', '')
-        if not email:
-            # Fallback to original CV data
-            contact_data = self.data.get('contact', {})
-            email = contact_data.get('email', '')
-            
-        if email:
-            elements.append(self._create_hyperlink(email, f"mailto:{email}"))
-
-        # Contact Line 2 - URLs as clickable hyperlinks
         linkedin = personal_info.get('linkedin', '')
         github = personal_info.get('github', '')
         
-        # Fallback to original CV data if profile data is missing
-        if not linkedin:
-            contact_data = self.data.get('contact', {})
-            linkedin = contact_data.get('linkedin', '')
-        if not github:
-            contact_data = self.data.get('contact', {})
-            github = contact_data.get('website', '')
-            
-        if linkedin:
-            elements.append(self._create_hyperlink("LinkedIn", linkedin))
-        if github:
-            elements.append(self._create_hyperlink("GitHub", github))
-
-        # Portfolio links - use original CV data if profile data is missing
+        # Portfolio links
         portfolio = personal_info.get('portfolio_links', {})
         portfolio_url = portfolio.get('blogs', '') if portfolio else ''
         website_url = portfolio.get('website', '') if portfolio else ''
         
-        # Fallback to original CV data
-        if not portfolio_url and not website_url:
+        # Fallback to original CV data if profile data is missing
+        if not location or not phone or not email:
             contact_data = self.data.get('contact', {})
-            portfolio_url = contact_data.get('website', '')
-            website_url = contact_data.get('website', '')
-            
+            if not location:
+                location = contact_data.get('location', '')
+            if not phone:
+                phone = contact_data.get('phone', '')
+            if not email:
+                email = contact_data.get('email', '')
+            if not linkedin:
+                linkedin = contact_data.get('linkedin', '')
+            if not github:
+                github = contact_data.get('website', '')
+            if not portfolio_url and not website_url:
+                portfolio_url = contact_data.get('website', '')
+                website_url = contact_data.get('website', '')
+        
+        # Build single contact line
+        if location:
+            contact_parts.append(location)
+        if phone:
+            contact_parts.append(phone)
+        if email:
+            contact_parts.append(email)
+        if linkedin:
+            contact_parts.append(f"LinkedIn: {linkedin}")
+        if github:
+            contact_parts.append(f"GitHub: {github}")
         if portfolio_url:
-            elements.append(self._create_hyperlink("Portfolio", portfolio_url))
+            contact_parts.append(f"Portfolio: {portfolio_url}")
         if website_url and website_url != portfolio_url:
-            elements.append(self._create_hyperlink("Website", website_url))
+            contact_parts.append(f"Website: {website_url}")
+
+        # Create single contact line with all information
+        if contact_parts:
+            contact_line = " | ".join(contact_parts)
+            elements.append(Paragraph(contact_line, self.styles['Contact']))
 
         return elements
 
