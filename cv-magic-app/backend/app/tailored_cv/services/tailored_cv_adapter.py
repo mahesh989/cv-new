@@ -30,7 +30,7 @@ def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[st
             "github": contact_section.get('github', ''),
             "portfolio_links": {
                 "blogs": contact_section.get('blogs', ''),
-                "dashboard_portfolio": contact_section.get('portfolio', '')
+                "website": contact_section.get('portfolio', '')
             }
         }
 
