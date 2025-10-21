@@ -87,18 +87,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       debugPrint('Loading profile...');
       final response = await ProfileService.getProfile();
-      debugPrint('Profile service response: success=${response.success}, profile=${response.profile != null}');
-      
+      debugPrint(
+          'Profile service response: success=${response.success}, profile=${response.profile != null}');
+
       if (response.success && response.profile != null) {
         _currentProfile = response.profile;
         _profileExists = true;
         debugPrint('Profile exists, populating fields...');
         _populateFields(_currentProfile!);
-        debugPrint('Profile loaded successfully for user: ${_currentProfile!.userEmail}');
+        debugPrint(
+            'Profile loaded successfully for user: ${_currentProfile!.userEmail}');
       } else {
         _profileExists = false;
         _currentProfile = null;
-        debugPrint('No profile found, will create new one. Response: ${response.message}');
+        debugPrint(
+            'No profile found, will create new one. Response: ${response.message}');
       }
     } catch (e) {
       debugPrint('Error loading profile: $e');
@@ -118,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     debugPrint('Email: ${profile.email}');
     debugPrint('Phone: ${profile.phone}');
     debugPrint('Location: ${profile.location}');
-    
+
     _fullNameController.text = profile.fullName;
     _emailController.text = profile.email;
     _phoneController.text = profile.phone;
@@ -127,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _githubController.text = profile.githubUrl ?? '';
     _portfolioController.text = profile.portfolioUrl ?? '';
     _websiteController.text = profile.websiteUrl ?? '';
-    
+
     debugPrint('Fields populated successfully');
   }
 
@@ -171,7 +174,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _currentProfile = response.profile;
           _profileExists = true;
         } else {
-          NotificationService.showError('Failed to update profile: ${response.message}');
+          NotificationService.showError(
+              'Failed to update profile: ${response.message}');
         }
       } else {
         // Create new profile - use authenticated user's email
@@ -226,27 +230,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.8),
+      barrierColor: Colors.black.withOpacity(0.95), // Increased opacity
       useRootNavigator: true,
-      builder: (context) => WillPopScope(
+      builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: Material(
-          type: MaterialType.transparency,
-          child: AlertDialog(
+        child: GestureDetector(
+          onTap: () {}, // Absorb all taps
+          behavior: HitTestBehavior.opaque,
+          child: Material(
+            type: MaterialType.transparency,
+            child: AlertDialog(
             title: const Text('Delete Profile'),
             content: const Text(
                 'Are you sure you want to delete your profile? This action cannot be undone.'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () {
+                  debugPrint('Delete Cancel button clicked!');
+                  Navigator.of(dialogContext, rootNavigator: true).pop(false);
+                },
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () {
+                  debugPrint('Delete Confirm button clicked!');
+                  Navigator.of(dialogContext, rootNavigator: true).pop(true);
+                },
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 child: const Text('Delete'),
               ),
             ],
+            ),
           ),
         ),
       ),

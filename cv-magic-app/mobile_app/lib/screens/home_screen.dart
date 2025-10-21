@@ -88,8 +88,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
 
     // Initialize welcome home page with navigation callback
-    print(
-        '🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: ${_navigateToCVMagicTab != null ? "provided" : "null"}');
+    print('🔍 [HOME_SCREEN] Initializing WelcomeHomePage with callback: provided');
     _welcomeHomePage = WelcomeHomePage(
       onNavigateToCVMagic: _navigateToCVMagicTab,
     );
@@ -164,26 +163,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.8),
+      barrierColor: Colors.black.withOpacity(0.95), // Increased opacity
       useRootNavigator: true,
-      builder: (context) => WillPopScope(
+      builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: Material(
-          type: MaterialType.transparency,
-          child: AlertDialog(
-          title: Text(
-            'Logout',
-            style: AppTheme.headingMedium.copyWith(
-              color: AppTheme.neutralGray800,
+        child: GestureDetector(
+          onTap: () {}, // Absorb all taps
+          behavior: HitTestBehavior.opaque,
+          child: Material(
+            type: MaterialType.transparency,
+            child: AlertDialog(
+            title: Text(
+              'Logout',
+              style: AppTheme.headingMedium.copyWith(
+                color: AppTheme.neutralGray800,
+              ),
             ),
-          ),
-          content: Text(
-            'Are you sure you want to logout?',
-            style: AppTheme.bodyMedium,
-          ),
+            content: Text(
+              'Are you sure you want to logout?',
+              style: AppTheme.bodyMedium,
+            ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () {
+                debugPrint('Cancel button clicked!');
+                Navigator.of(dialogContext, rootNavigator: true).pop(false);
+              },
               child: Text(
                 'Cancel',
                 style: AppTheme.bodyMedium.copyWith(
@@ -193,11 +198,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             AppTheme.createGradientButton(
               text: 'Logout',
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () {
+                debugPrint('Logout button clicked!');
+                Navigator.of(dialogContext, rootNavigator: true).pop(true);
+              },
               width: 80,
               height: 36,
             ),
           ],
+            ),
           ),
         ),
       ),
@@ -265,21 +274,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.8),
+      barrierColor: Colors.black.withOpacity(0.95), // Increased opacity
       useRootNavigator: true,
-      builder: (context) => WillPopScope(
+      builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: Dialog(
-          insetPadding: const EdgeInsets.all(16),
-          child: Container(
-            width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.9,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-            child: Column(
-              children: [
+        child: GestureDetector(
+          onTap: () {}, // Absorb all taps
+          behavior: HitTestBehavior.opaque,
+          child: Dialog(
+            insetPadding: const EdgeInsets.all(16),
+            child: Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height * 0.9,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              child: Column(
+                children: [
                 // Custom header with close button
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -300,10 +312,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                debugPrint('Profile modal close button clicked!');
+                                Navigator.of(dialogContext, rootNavigator: true).pop();
+                              },
+                            ),
                     ],
                   ),
                 ),
@@ -311,12 +326,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const Expanded(
                   child: ProfileScreen(hideAppBar: true),
                 ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          ), // Dialog
+        ), // GestureDetector
+      ), // WillPopScope
+    ); // showDialog
   }
 
   @override
