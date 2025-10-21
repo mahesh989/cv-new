@@ -59,12 +59,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _currentProfile = response.profile;
         _profileExists = true;
         _populateFields(_currentProfile!);
+        debugPrint('Profile loaded successfully for user: ${_currentProfile!.userEmail}');
       } else {
         _profileExists = false;
+        _currentProfile = null;
+        debugPrint('No profile found, will create new one');
       }
     } catch (e) {
       debugPrint('Error loading profile: $e');
-      NotificationService.showError('Failed to load profile');
+      _profileExists = false;
+      _currentProfile = null;
+      // Don't show error notification on load - user might not have profile yet
     } finally {
       setState(() {
         _isLoading = false;
@@ -122,8 +127,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _currentProfile = response.profile;
         } else {
           NotificationService.showError(response.message);
+          // If update fails, try creating a new profile
+          debugPrint('Profile update failed, attempting to create new profile');
+          _profileExists = false;
+          _currentProfile = null;
+          // Fall through to create new profile
         }
-      } else {
+      }
+      
+      if (!_profileExists || _currentProfile == null) {
         // Create new profile - use authenticated user's email
         final authenticatedEmail = await AuthService.getUserEmail();
         if (authenticatedEmail == null) {
@@ -180,20 +192,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => WillPopScope(
         onWillPop: () async => false,
         child: AlertDialog(
-        title: const Text('Delete Profile'),
-        content: const Text(
-            'Are you sure you want to delete your profile? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
+          title: const Text('Delete Profile'),
+          content: const Text(
+              'Are you sure you want to delete your profile? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
       ),
     );
