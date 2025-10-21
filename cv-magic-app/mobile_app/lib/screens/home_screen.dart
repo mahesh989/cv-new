@@ -73,12 +73,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       gradient: AppTheme.primaryGradient,
       color: AppTheme.primaryTeal,
     ),
-    TabData(
-      icon: Icons.person_outline,
-      label: 'Profile',
-      gradient: AppTheme.primaryGradient,
-      color: AppTheme.primaryTeal,
-    ),
   ];
 
   @override
@@ -262,6 +256,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _onTabTapped(2); // Switch to CV Magic tab (index 2)
   }
 
+  void _showProfileModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: const ProfileScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -311,7 +324,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _cvMagicPage, // Index 2: CV Magic
         _cvGenerationScreen, // Index 3: CV Generation
         _jobTrackingScreen, // Index 4: Job Tracking
-        _profileScreen, // Index 5: Profile
       ],
     );
   }
@@ -394,8 +406,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   if (value == 'logout') {
                     _handleLogout();
                   } else if (value == 'profile') {
-                    // Navigate to Profile tab (index 5)
-                    _onTabTapped(5);
+                    _showProfileModal();
                   }
                 },
               ),
