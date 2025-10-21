@@ -15,6 +15,7 @@ from reportlab.platypus import (
     Table,
     TableStyle,
 )
+from reportlab.platypus.flowables import HyperLink
 from reportlab.lib import colors
 
 logger = logging.getLogger(__name__)
@@ -327,32 +328,51 @@ class ResumePDFGenerator:
             contact_line1.append(personal_info['location'])
         if personal_info.get('phone'):
             contact_line1.append(personal_info['phone'])
-        if personal_info.get('email'):
-            contact_line1.append(personal_info['email'])
 
         if contact_line1:
             elements.append(Paragraph(" | ".join(contact_line1), self.styles['Contact']))
+        
+        # Email as clickable link
+        if personal_info.get('email'):
+            elements.append(self._create_hyperlink(personal_info['email'], f"mailto:{personal_info['email']}"))
 
-        # Contact Line 2
-        contact_line2 = []
+        # Contact Line 2 - URLs as clickable hyperlinks
         if personal_info.get('linkedin'):
-            contact_line2.append(personal_info['linkedin'])
+            elements.append(self._create_hyperlink("LinkedIn", personal_info['linkedin']))
         if personal_info.get('github'):
-            contact_line2.append(personal_info['github'])
+            elements.append(self._create_hyperlink("GitHub", personal_info['github']))
 
         portfolio = personal_info.get('portfolio_links', {})
         if portfolio and portfolio.get('blogs'):
-            contact_line2.append(portfolio['blogs'])
+            elements.append(self._create_hyperlink("Portfolio", portfolio['blogs']))
         if portfolio and portfolio.get('dashboard_portfolio'):
-            contact_line2.append(portfolio['dashboard_portfolio'])
-
-        if contact_line2:
-            elements.append(Paragraph(" | ".join(contact_line2), self.styles['Contact']))
+            elements.append(self._create_hyperlink("Website", portfolio['dashboard_portfolio']))
 
         return elements
 
     def _paragraph_block(self, text: str):
         return Paragraph(text, self.styles['BodyText'])
+    
+    def _create_hyperlink(self, text: str, url: str):
+        """Create a clickable hyperlink"""
+        if not url or not url.strip():
+            return Paragraph(text, self.styles['Contact'])
+        
+        # Ensure URL has protocol
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        # Create hyperlink with blue color and underline
+        link_style = ParagraphStyle(
+            'Hyperlink',
+            parent=self.styles['Contact'],
+            textColor=colors.blue,
+            underline=True,
+        )
+        
+        # Create clickable link using ReportLab's hyperlink functionality
+        link_text = f'<link href="{url}" color="blue"><u>{text}</u></link>'
+        return Paragraph(link_text, link_style)
 
     def generate(self, filename: str) -> str:
         doc = SimpleDocTemplate(
