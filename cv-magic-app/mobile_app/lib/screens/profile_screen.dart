@@ -5,7 +5,9 @@ import '../services/notification_service.dart';
 import '../services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final bool hideAppBar;
+  
+  const ProfileScreen({super.key, this.hideAppBar = false});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -128,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           NotificationService.showError('Authentication required');
           return;
         }
-        
+
         final profile = UserProfile(
           userEmail: authenticatedEmail,
           fullName: _fullNameController.text.trim(),
@@ -247,30 +249,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile Settings'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          if (_profileExists)
-            IconButton(
-              onPressed: _deleteProfile,
-              icon: const Icon(Icons.delete, color: Colors.red),
-              tooltip: 'Delete Profile',
-            ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+  Widget _buildProfileContent() {
+    return _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     // Header
                     Card(
                       child: Padding(
@@ -576,7 +564,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
+            );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: widget.hideAppBar ? null : AppBar(
+        title: const Text('Profile Settings'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          if (_profileExists)
+            IconButton(
+              onPressed: _deleteProfile,
+              icon: const Icon(Icons.delete, color: Colors.red),
+              tooltip: 'Delete Profile',
             ),
+        ],
+      ),
+      body: _buildProfileContent(),
     );
   }
 }
