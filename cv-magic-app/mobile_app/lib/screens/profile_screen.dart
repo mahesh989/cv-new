@@ -6,7 +6,7 @@ import '../services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool hideAppBar;
-  
+
   const ProfileScreen({super.key, this.hideAppBar = false});
 
   @override
@@ -175,7 +175,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _deleteProfile() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
         title: const Text('Delete Profile'),
         content: const Text(
             'Are you sure you want to delete your profile? This action cannot be undone.'),
@@ -190,6 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Delete'),
           ),
         ],
+        ),
       ),
     );
 
@@ -259,8 +264,257 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    // Header
+                  // Header
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.person,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Personal Information',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'This information will be used in all your CV generations. Update it here and all future CVs will use the new information.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.grey.shade600,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Required Fields
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Required Information',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade700,
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Full Name
+                          TextFormField(
+                            controller: _fullNameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Full Name *',
+                              hintText: 'John Smith',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person),
+                            ),
+                            validator: (value) =>
+                                _validateRequired(value, 'Full name'),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Email
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              labelText: 'Email *',
+                              hintText: 'john@example.com',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.email),
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                            validator: _validateEmail,
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Phone
+                          TextFormField(
+                            controller: _phoneController,
+                            decoration: const InputDecoration(
+                              labelText: 'Phone *',
+                              hintText: '+61 400 123 456',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.phone),
+                            ),
+                            keyboardType: TextInputType.phone,
+                            validator: (value) =>
+                                _validateRequired(value, 'Phone'),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Location
+                          TextFormField(
+                            controller: _locationController,
+                            decoration: const InputDecoration(
+                              labelText: 'Location *',
+                              hintText: 'Sydney, NSW, Australia',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.location_on),
+                            ),
+                            validator: (value) =>
+                                _validateRequired(value, 'Location'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Optional Fields
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Optional Links',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue.shade700,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'These will appear as clickable links in your CV',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey.shade600,
+                                    ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // LinkedIn
+                          TextFormField(
+                            controller: _linkedinController,
+                            decoration: const InputDecoration(
+                              labelText: 'LinkedIn URL',
+                              hintText: 'https://linkedin.com/in/johnsmith',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.work),
+                            ),
+                            keyboardType: TextInputType.url,
+                            validator: (value) =>
+                                _validateUrl(value, 'LinkedIn'),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // GitHub
+                          TextFormField(
+                            controller: _githubController,
+                            decoration: const InputDecoration(
+                              labelText: 'GitHub URL',
+                              hintText: 'https://github.com/johnsmith',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.code),
+                            ),
+                            keyboardType: TextInputType.url,
+                            validator: (value) => _validateUrl(value, 'GitHub'),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Portfolio
+                          TextFormField(
+                            controller: _portfolioController,
+                            decoration: const InputDecoration(
+                              labelText: 'Portfolio URL',
+                              hintText: 'https://johnsmith.dev',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.web),
+                            ),
+                            keyboardType: TextInputType.url,
+                            validator: (value) =>
+                                _validateUrl(value, 'Portfolio'),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Website
+                          TextFormField(
+                            controller: _websiteController,
+                            decoration: const InputDecoration(
+                              labelText: 'Website URL',
+                              hintText: 'https://www.johnsmith.com',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.language),
+                            ),
+                            keyboardType: TextInputType.url,
+                            validator: (value) =>
+                                _validateUrl(value, 'Website'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isSaving ? null : _saveProfile,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: _isSaving
+                          ? const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                ),
+                                SizedBox(width: 12),
+                                Text('Saving...'),
+                              ],
+                            )
+                          : Text(_profileExists
+                              ? 'Update Profile'
+                              : 'Create Profile'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Profile Status
+                  if (_currentProfile != null)
                     Card(
+                      color: _currentProfile!.isComplete
+                          ? Colors.green.shade50
+                          : Colors.orange.shade50,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -269,319 +523,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Row(
                               children: [
                                 Icon(
-                                  Icons.person,
-                                  color: Theme.of(context).primaryColor,
+                                  _currentProfile!.isComplete
+                                      ? Icons.check_circle
+                                      : Icons.warning,
+                                  color: _currentProfile!.isComplete
+                                      ? Colors.green
+                                      : Colors.orange,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Personal Information',
+                                  _currentProfile!.isComplete
+                                      ? 'Profile Complete'
+                                      : 'Profile Incomplete',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .titleLarge
+                                      .titleMedium
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
+                                        color: _currentProfile!.isComplete
+                                            ? Colors.green.shade700
+                                            : Colors.orange.shade700,
                                       ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'This information will be used in all your CV generations. Update it here and all future CVs will use the new information.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: Colors.grey.shade600,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Required Fields
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Required Information',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red.shade700,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Full Name
-                            TextFormField(
-                              controller: _fullNameController,
-                              decoration: const InputDecoration(
-                                labelText: 'Full Name *',
-                                hintText: 'John Smith',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.person),
-                              ),
-                              validator: (value) =>
-                                  _validateRequired(value, 'Full name'),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Email
-                            TextFormField(
-                              controller: _emailController,
-                              decoration: const InputDecoration(
-                                labelText: 'Email *',
-                                hintText: 'john@example.com',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.email),
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: _validateEmail,
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Phone
-                            TextFormField(
-                              controller: _phoneController,
-                              decoration: const InputDecoration(
-                                labelText: 'Phone *',
-                                hintText: '+61 400 123 456',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.phone),
-                              ),
-                              keyboardType: TextInputType.phone,
-                              validator: (value) =>
-                                  _validateRequired(value, 'Phone'),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Location
-                            TextFormField(
-                              controller: _locationController,
-                              decoration: const InputDecoration(
-                                labelText: 'Location *',
-                                hintText: 'Sydney, NSW, Australia',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.location_on),
-                              ),
-                              validator: (value) =>
-                                  _validateRequired(value, 'Location'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Optional Fields
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Optional Links',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade700,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'These will appear as clickable links in your CV',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: Colors.grey.shade600,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // LinkedIn
-                            TextFormField(
-                              controller: _linkedinController,
-                              decoration: const InputDecoration(
-                                labelText: 'LinkedIn URL',
-                                hintText: 'https://linkedin.com/in/johnsmith',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.work),
-                              ),
-                              keyboardType: TextInputType.url,
-                              validator: (value) =>
-                                  _validateUrl(value, 'LinkedIn'),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // GitHub
-                            TextFormField(
-                              controller: _githubController,
-                              decoration: const InputDecoration(
-                                labelText: 'GitHub URL',
-                                hintText: 'https://github.com/johnsmith',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.code),
-                              ),
-                              keyboardType: TextInputType.url,
-                              validator: (value) =>
-                                  _validateUrl(value, 'GitHub'),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Portfolio
-                            TextFormField(
-                              controller: _portfolioController,
-                              decoration: const InputDecoration(
-                                labelText: 'Portfolio URL',
-                                hintText: 'https://johnsmith.dev',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.web),
-                              ),
-                              keyboardType: TextInputType.url,
-                              validator: (value) =>
-                                  _validateUrl(value, 'Portfolio'),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Website
-                            TextFormField(
-                              controller: _websiteController,
-                              decoration: const InputDecoration(
-                                labelText: 'Website URL',
-                                hintText: 'https://www.johnsmith.com',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.language),
-                              ),
-                              keyboardType: TextInputType.url,
-                              validator: (value) =>
-                                  _validateUrl(value, 'Website'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Save Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isSaving ? null : _saveProfile,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: _isSaving
-                            ? const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
+                            if (!_currentProfile!.isComplete) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'Missing: ${_currentProfile!.missingFields.join(', ')}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.orange.shade700,
                                     ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Text('Saving...'),
-                                ],
-                              )
-                            : Text(_profileExists
-                                ? 'Update Profile'
-                                : 'Create Profile'),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Profile Status
-                    if (_currentProfile != null)
-                      Card(
-                        color: _currentProfile!.isComplete
-                            ? Colors.green.shade50
-                            : Colors.orange.shade50,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    _currentProfile!.isComplete
-                                        ? Icons.check_circle
-                                        : Icons.warning,
-                                    color: _currentProfile!.isComplete
-                                        ? Colors.green
-                                        : Colors.orange,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _currentProfile!.isComplete
-                                        ? 'Profile Complete'
-                                        : 'Profile Incomplete',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: _currentProfile!.isComplete
-                                              ? Colors.green.shade700
-                                              : Colors.orange.shade700,
-                                        ),
-                                  ),
-                                ],
                               ),
-                              if (!_currentProfile!.isComplete) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Missing: ${_currentProfile!.missingFields.join(', ')}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.orange.shade700,
-                                      ),
-                                ),
-                              ],
                             ],
-                          ),
+                          ],
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
-            );
+            ),
+          );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.hideAppBar ? null : AppBar(
-        title: const Text('Profile Settings'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          if (_profileExists)
-            IconButton(
-              onPressed: _deleteProfile,
-              icon: const Icon(Icons.delete, color: Colors.red),
-              tooltip: 'Delete Profile',
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('Profile Settings'),
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              actions: [
+                if (_profileExists)
+                  IconButton(
+                    onPressed: _deleteProfile,
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: 'Delete Profile',
+                  ),
+              ],
             ),
-        ],
-      ),
       body: _buildProfileContent(),
     );
   }

@@ -163,7 +163,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Future<void> _handleLogout() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
         title: Text(
           'Logout',
           style: AppTheme.headingMedium.copyWith(
@@ -191,6 +195,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             height: 36,
           ),
         ],
+        ),
       ),
     );
 
