@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/profile_model.dart';
 import '../services/profile_service.dart';
 import '../services/notification_service.dart';
+import '../services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -121,9 +122,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           NotificationService.showError(response.message);
         }
       } else {
-        // Create new profile
+        // Create new profile - use authenticated user's email
+        final authenticatedEmail = await AuthService.getUserEmail();
+        if (authenticatedEmail == null) {
+          NotificationService.showError('Authentication required');
+          return;
+        }
+        
         final profile = UserProfile(
-          userEmail: _emailController.text.trim(),
+          userEmail: authenticatedEmail,
           fullName: _fullNameController.text.trim(),
           email: _emailController.text.trim(),
           phone: _phoneController.text.trim(),
