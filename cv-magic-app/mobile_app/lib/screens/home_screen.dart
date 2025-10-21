@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import '../core/theme/app_theme.dart';
 import '../utils/responsive_utils.dart';
+import '../utils/web_helper_io.dart';
 import '../widgets/mobile_bottom_nav.dart';
 import '../services/ai_model_service.dart';
 import 'intro_screen.dart';
@@ -160,19 +162,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _handleLogout() async {
+    // For Flutter web, disable iframe interactions before showing dialog
+    if (kIsWeb) {
+      WebHelper.disableIframeInteractions();
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.95), // Increased opacity
+      barrierColor: Colors.black.withOpacity(0.95),
       useRootNavigator: true,
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: GestureDetector(
-          onTap: () {}, // Absorb all taps
-          behavior: HitTestBehavior.opaque,
-          child: Material(
-            type: MaterialType.transparency,
-            child: AlertDialog(
+        child: Material(
+          type: MaterialType.transparency,
+          child: AlertDialog(
             title: Text(
               'Logout',
               style: AppTheme.headingMedium.copyWith(
@@ -206,11 +210,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               height: 36,
             ),
           ],
-            ),
           ),
         ),
       ),
     );
+
+    // Restore web interactions after dialog
+    if (kIsWeb) {
+      WebHelper.enableIframeInteractions();
+    }
 
     if (confirmed == true) {
       final prefs = await SharedPreferences.getInstance();
@@ -271,17 +279,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _showProfileModal() {
+    // For Flutter web, disable iframe interactions
+    if (kIsWeb) {
+      WebHelper.disableIframeInteractions();
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.95), // Increased opacity
+      barrierColor: Colors.black.withOpacity(0.95),
       useRootNavigator: true,
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: GestureDetector(
-          onTap: () {}, // Absorb all taps
-          behavior: HitTestBehavior.opaque,
-          child: Dialog(
+        child: Dialog(
             insetPadding: const EdgeInsets.all(16),
             child: Container(
               width: double.infinity,
@@ -317,6 +327,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               onPressed: () {
                                 debugPrint('Profile modal close button clicked!');
                                 Navigator.of(dialogContext, rootNavigator: true).pop();
+                                
+                                // Restore web interactions when closing profile modal
+                                if (kIsWeb) {
+                                  WebHelper.enableIframeInteractions();
+                                }
                               },
                             ),
                     ],
@@ -330,9 +345,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ), // Dialog
-        ), // GestureDetector
-      ), // WillPopScope
-    ); // showDialog
+        ), // WillPopScope
+      ); // showDialog
   }
 
   @override

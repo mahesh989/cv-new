@@ -230,16 +230,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.95), // Increased opacity
+      barrierColor: Colors.black.withOpacity(0.95),
       useRootNavigator: true,
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: GestureDetector(
-          onTap: () {}, // Absorb all taps
-          behavior: HitTestBehavior.opaque,
-          child: Material(
-            type: MaterialType.transparency,
-            child: AlertDialog(
+        child: Material(
+          type: MaterialType.transparency,
+          child: AlertDialog(
             title: const Text('Delete Profile'),
             content: const Text(
                 'Are you sure you want to delete your profile? This action cannot be undone.'),
@@ -260,7 +257,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: const Text('Delete'),
               ),
             ],
-            ),
           ),
         ),
       ),
