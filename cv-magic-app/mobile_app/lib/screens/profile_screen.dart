@@ -39,23 +39,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _setupFormListeners() {
     // Listen to all text fields to track if user has entered data
-    void _checkFormData() {
-      final hasData = _fullNameController.text.trim().isNotEmpty ||
-          _emailController.text.trim().isNotEmpty ||
-          _phoneController.text.trim().isNotEmpty ||
-          _locationController.text.trim().isNotEmpty ||
-          _linkedinController.text.trim().isNotEmpty ||
-          _githubController.text.trim().isNotEmpty ||
-          _portfolioController.text.trim().isNotEmpty ||
-          _websiteController.text.trim().isNotEmpty;
-
-      if (_hasFormData != hasData) {
-        setState(() {
-          _hasFormData = hasData;
-        });
-      }
-    }
-
     _fullNameController.addListener(_checkFormData);
     _emailController.addListener(_checkFormData);
     _phoneController.addListener(_checkFormData);
@@ -64,6 +47,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _githubController.addListener(_checkFormData);
     _portfolioController.addListener(_checkFormData);
     _websiteController.addListener(_checkFormData);
+  }
+
+  void _checkFormData() {
+    final hasData = _fullNameController.text.trim().isNotEmpty ||
+        _emailController.text.trim().isNotEmpty ||
+        _phoneController.text.trim().isNotEmpty ||
+        _locationController.text.trim().isNotEmpty ||
+        _linkedinController.text.trim().isNotEmpty ||
+        _githubController.text.trim().isNotEmpty ||
+        _portfolioController.text.trim().isNotEmpty ||
+        _websiteController.text.trim().isNotEmpty;
+
+    if (_hasFormData != hasData) {
+      setState(() {
+        _hasFormData = hasData;
+      });
+    }
+    
+    // Auto-save profile when user makes changes
+    _autoSaveProfile();
+  }
+
+  Future<void> _autoSaveProfile() async {
+    // Only auto-save if user has entered some data and we're not already saving
+    if (_isSaving || !_hasFormData) return;
+    
+    // Debounce auto-save to avoid too many API calls
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Check if we're still not saving and have form data
+    if (_isSaving || !_hasFormData) return;
+    
+    try {
+      debugPrint('🔄 Auto-saving profile...');
+      
+      final now = DateTime.now();
+      final authenticatedEmail = await AuthService.getUserEmail();
+      if (authenticatedEmail == null) return;
+      
+      // Create or update profile
+      if (_profileExists && _currentProfile != null) {
+        // Update existing profile
+        final updates = {
+          'full_name': _fullNameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'phone': _phoneController.text.trim(),
+          'location': _locationController.text.trim(),
+          'linkedin_url': _linkedinController.text.trim().isEmpty
+              ? null
+              : _linkedinController.text.trim(),
+          'github_url': _githubController.text.trim().isEmpty
+              ? null
+              : _githubController.text.trim(),
+          'portfolio_url': _portfolioController.text.trim().isEmpty
+              ? null
+              : _portfolioController.text.trim(),
+          'website_url': _websiteController.text.trim().isEmpty
+              ? null
+              : _websiteController.text.trim(),
+        };
+
+        final response = await ProfileService.updateProfile(updates);
+        if (response.success) {
+          debugPrint('✅ Auto-saved profile successfully');
+          _currentProfile = response.profile;
+          _profileExists = true;
+        } else {
+          debugPrint('❌ Auto-save failed: ${response.message}');
+        }
+      } else {
+        // Create new profile
+        final profile = UserProfile(
+          userEmail: authenticatedEmail,
+          fullName: _fullNameController.text.trim(),
+          email: _emailController.text.trim(),
+          phone: _phoneController.text.trim(),
+          location: _locationController.text.trim(),
+          linkedinUrl: _linkedinController.text.trim().isEmpty
+              ? null
+              : _linkedinController.text.trim(),
+          githubUrl: _githubController.text.trim().isEmpty
+              ? null
+              : _githubController.text.trim(),
+          portfolioUrl: _portfolioController.text.trim().isEmpty
+              ? null
+              : _portfolioController.text.trim(),
+          websiteUrl: _websiteController.text.trim().isEmpty
+              ? null
+              : _websiteController.text.trim(),
+          createdAt: now,
+          updatedAt: now,
+        );
+
+        final response = await ProfileService.createProfile(profile);
+        if (response.success) {
+          debugPrint('✅ Auto-created profile successfully');
+          _currentProfile = response.profile;
+          _profileExists = true;
+        } else {
+          debugPrint('❌ Auto-create failed: ${response.message}');
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Auto-save error: $e');
+    }
   }
 
   @override
@@ -679,7 +767,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        // Save profile when user navigates away
+        if (_hasFormData) {
+          await _autoSaveProfile();
+        }
+        return true;
+      },
+      child: Scaffold(
       appBar: widget.hideAppBar
           ? null
           : AppBar(
@@ -695,6 +791,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
       body: _buildProfileContent(),
+      ),
     );
   }
 }
