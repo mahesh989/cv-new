@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.95),
+      barrierColor: Colors.black.withOpacity(0.5),
       useRootNavigator: true,
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
@@ -287,14 +287,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.95),
+      barrierColor: Colors.black.withOpacity(0.5),
       useRootNavigator: true,
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
-        child: GestureDetector(
-          onTap: () {}, // Block all taps outside the dialog content
-          behavior: HitTestBehavior.opaque,
-          child: Dialog(
+        child: Dialog(
             insetPadding: const EdgeInsets.all(16),
             child: Container(
               width: double.infinity,
@@ -348,9 +345,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ), // Dialog
-        ), // GestureDetector
-      ), // WillPopScope
-    ); // showDialog
+        ), // WillPopScope
+      ); // showDialog
   }
 
   @override

@@ -145,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final now = DateTime.now();
-      
+
       debugPrint('🔍 Save Profile Debug:');
       debugPrint('  _profileExists: $_profileExists');
       debugPrint('  _currentProfile: ${_currentProfile != null}');
@@ -181,14 +181,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         } else {
           debugPrint('❌ Update failed: ${response.message}');
           debugPrint('🔄 Falling back to create profile (overwrite)...');
-          
+
           // Fallback: Create new profile (this will overwrite existing)
           final authenticatedEmail = await AuthService.getUserEmail();
           if (authenticatedEmail == null) {
             NotificationService.showError('Authentication required');
             return;
           }
-          
+
           final profile = UserProfile(
             userEmail: authenticatedEmail,
             fullName: _fullNameController.text.trim(),
@@ -217,7 +217,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _currentProfile = createResponse.profile;
             _profileExists = true;
           } else {
-            NotificationService.showError('Failed to create profile: ${createResponse.message}');
+            NotificationService.showError(
+                'Failed to create profile: ${createResponse.message}');
           }
         }
       } else {
@@ -273,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.95),
+      barrierColor: Colors.black.withOpacity(0.5),
       useRootNavigator: true,
       builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
