@@ -39,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<JobTrackingScreenState> _jobTrackingKey =
       GlobalKey<JobTrackingScreenState>();
   late final JobTrackingScreen _jobTrackingScreen;
-  late final ProfileScreen _profileScreen;
 
   // 🎨 Beautiful tab data with cosmic icons and gradients
   final List<TabData> _tabData = [
@@ -113,9 +112,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _jobTrackingScreen = JobTrackingScreen(
       key: _jobTrackingKey,
     );
-
-    // Initialize Profile screen
-    _profileScreen = const ProfileScreen();
 
     _animationController = AnimationController(
       duration: AppTheme.normalAnimation,
