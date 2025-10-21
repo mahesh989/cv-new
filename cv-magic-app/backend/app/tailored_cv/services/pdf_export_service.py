@@ -315,6 +315,11 @@ class ResumePDFGenerator:
     def _contact_elements(self):
         elements = []
         personal_info = self.data.get('personal_information', {})
+        
+        # Ensure personal_info is a dictionary
+        if not isinstance(personal_info, dict):
+            logger.warning("[PDF_EXPORT] personal_information is not a dict: %s", type(personal_info))
+            personal_info = {}
 
         elements.append(Spacer(1, 0.05 * inch))
 
@@ -355,24 +360,29 @@ class ResumePDFGenerator:
     
     def _create_hyperlink(self, text: str, url: str):
         """Create a clickable hyperlink"""
-        if not url or not url.strip():
+        try:
+            if not url or not url.strip():
+                return Paragraph(text, self.styles['Contact'])
+            
+            # Ensure URL has protocol (don't modify mailto: URLs)
+            if not url.startswith(('http://', 'https://', 'mailto:')):
+                url = 'https://' + url
+            
+            # Create hyperlink with blue color and underline
+            link_style = ParagraphStyle(
+                'Hyperlink',
+                parent=self.styles['Contact'],
+                textColor=colors.blue,
+                underline=True,
+            )
+            
+            # Create clickable link using ReportLab's hyperlink functionality
+            link_text = f'<link href="{url}" color="blue"><u>{text}</u></link>'
+            return Paragraph(link_text, link_style)
+        except Exception as e:
+            logger.warning("[PDF_EXPORT] Failed to create hyperlink for %s: %s", text, e)
+            # Fallback to regular text if hyperlink creation fails
             return Paragraph(text, self.styles['Contact'])
-        
-        # Ensure URL has protocol (don't modify mailto: URLs)
-        if not url.startswith(('http://', 'https://', 'mailto:')):
-            url = 'https://' + url
-        
-        # Create hyperlink with blue color and underline
-        link_style = ParagraphStyle(
-            'Hyperlink',
-            parent=self.styles['Contact'],
-            textColor=colors.blue,
-            underline=True,
-        )
-        
-        # Create clickable link using ReportLab's hyperlink functionality
-        link_text = f'<link href="{url}" color="blue"><u>{text}</u></link>'
-        return Paragraph(link_text, link_style)
 
     def generate(self, filename: str) -> str:
         doc = SimpleDocTemplate(
@@ -387,7 +397,13 @@ class ResumePDFGenerator:
         elements: List[Any] = []
 
         # Contact section
-        elements.extend(self._contact_elements())
+        try:
+            elements.extend(self._contact_elements())
+        except Exception as e:
+            logger.error("[PDF_EXPORT] Error creating contact elements: %s", e)
+            # Add fallback contact info
+            elements.append(Paragraph("Contact Information", self.styles['Name']))
+            elements.append(Paragraph("Please check your profile settings", self.styles['Contact']))
 
         # Career profile
         profile = self.data.get('career_profile', {})
