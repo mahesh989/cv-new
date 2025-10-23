@@ -41,8 +41,10 @@ class CVPreviewService:
             if not file_path.exists():
                 raise HTTPException(status_code=404, detail="CV file not found")
             
+            logger.info(f"[CV_PREVIEW] About to call cv_processor.extract_text_from_file for: {file_path}")
             # Extract text using improved processor
             result = cv_processor.extract_text_from_file(file_path)
+            logger.info(f"[CV_PREVIEW] cv_processor.extract_text_from_file returned: {result.get('success', False)}")
             
             if not result['success']:
                 raise HTTPException(
