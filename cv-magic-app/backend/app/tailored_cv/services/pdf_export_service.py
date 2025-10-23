@@ -378,7 +378,10 @@ class ResumePDFGenerator:
         if linkedin:
             contact_parts.append(f"<link href=\"{linkedin}\" color=\"blue\"><u>LinkedIn</u></link>")
         if github:
+            logger.info(f"[PDF_EXPORT] Adding GitHub link: {github}")
             contact_parts.append(f"<link href=\"{github}\" color=\"blue\"><u>GitHub</u></link>")
+        else:
+            logger.warning(f"[PDF_EXPORT] No GitHub URL found. linkedin={linkedin}, github={github}")
         if portfolio_url:
             contact_parts.append(f"<link href=\"{portfolio_url}\" color=\"blue\"><u>Portfolio</u></link>")
         if website_url and website_url != portfolio_url:
@@ -545,13 +548,16 @@ class ResumePDFGenerator:
         # Projects
         projects = self.data.get('projects', [])
         if isinstance(projects, list) and projects:
+            logger.info(f"[PDF_EXPORT] Processing {len(projects)} projects")
             elements.extend(self._create_section_with_line('PROJECTS'))
             for i, proj in enumerate(projects):
                 if not isinstance(proj, dict):
+                    logger.warning(f"[PDF_EXPORT] Project {i} is not a dict: {type(proj)}")
                     continue
                 
                 name = proj.get('name', 'N/A')
                 date = proj.get('date', '')
+                logger.info(f"[PDF_EXPORT] Project {i}: {name}")
                 
                 if date:
                     table = self._create_aligned_two_column(f"<b>{name}</b>", date, 'JobTitle', 'DateRight')
@@ -561,11 +567,13 @@ class ResumePDFGenerator:
                 
                 # Handle bullets/descriptions
                 bullets = proj.get('bullets', [])
+                logger.info(f"[PDF_EXPORT] Project {i} bullets: {len(bullets)} items")
                 if bullets:
                     for bullet in bullets:
                         if bullet.strip():
                             elements.extend(self._make_bullet_rows([bullet]))
                 elif proj.get('description'):
+                    logger.info(f"[PDF_EXPORT] Project {i} using description fallback")
                     elements.append(Paragraph(proj['description'], self.styles['BodyText']))
                 
                 if proj.get('technologies'):
