@@ -66,6 +66,9 @@ class CVProcessor:
             from docx import Document
             doc = Document(file_path)
             text = ""
+            bullet_count = 0
+            
+            logger.info(f"[DOCX_PROCESSING] Processing DOCX file: {file_path}")
             
             for paragraph in doc.paragraphs:
                 para_text = paragraph.text.strip()
@@ -121,14 +124,19 @@ class CVProcessor:
                             is_bullet = True
                 
                 if is_bullet:
+                    bullet_count += 1
                     # Ensure it has a bullet symbol
                     if not para_text.startswith(('•', '-', '*', '◦', '▪', '▫', '→', '►')):
                         text += "• " + para_text + "\n"
+                        logger.info(f"[DOCX_PROCESSING] Added bullet: • {para_text[:50]}...")
                     else:
                         text += para_text + "\n"
+                        logger.info(f"[DOCX_PROCESSING] Existing bullet: {para_text[:50]}...")
                 else:
                     # Regular paragraph
                     text += para_text + "\n"
+            
+            logger.info(f"[DOCX_PROCESSING] Completed: {bullet_count} bullets detected")
             
             return {
                 'success': True,
