@@ -1,0 +1,67 @@
+{
+  "contact": {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+61 412 345 678",
+    "location": "Sydney, NSW, Australia",
+    "linkedin": "https://linkedin.com/in/johndoe",
+    "website": "https://johndoe.dev"
+  },
+  "career_profile": {
+    "summary": "Experienced software engineer with 5+ years in full-stack development, specializing in Python, React, and cloud technologies. Passionate about building scalable applications and leading development teams."
+  },
+  "experience": [
+    {
+      "title": "Senior Software Engineer",
+      "company": "TechCorp Australia",
+      "location": "Sydney, NSW",
+      "start_date": "2022-01",
+      "end_date": "Present",
+      "bullets": [
+        "Led development of microservices architecture serving 100k+ users",
+        "Implemented CI/CD pipelines reducing deployment time by 60%",
+        "Mentored 3 junior developers and conducted code reviews"
+      ]
+    },
+    {
+      "title": "Software Developer",
+      "company": "StartupXYZ",
+      "location": "Melbourne, VIC",
+      "start_date": "2020-03",
+      "end_date": "2021-12",
+      "bullets": [
+        "Developed React frontend applications with TypeScript",
+        "Built REST APIs using Python Flask and PostgreSQL",
+        "Collaborated with product team to define technical requirements"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of Technology Sydney",
+      "degree": "Bachelor of Engineering (Software)",
+      "location": "Sydney, NSW",
+      "year": "2019"
+    }
+  ],
+  "skills": {
+    "Programming Languages": ["Python", "JavaScript", "TypeScript", "Java"],
+    "Frameworks": ["React", "Node.js", "Flask", "Django"],
+    "Cloud": ["AWS", "Docker", "Kubernetes"],
+    "Databases": ["PostgreSQL", "MongoDB", "Redis"]
+  },
+  "projects": [
+    {
+      "name": "E-commerce Platform",
+      "description": "Full-stack e-commerce solution with payment integration",
+      "technologies": ["React", "Node.js", "PostgreSQL", "Stripe API"]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect",
+      "issuer": "Amazon Web Services",
+      "date": "2023"
+    }
+  ]
+}
