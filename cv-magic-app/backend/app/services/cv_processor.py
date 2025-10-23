@@ -61,13 +61,19 @@ class CVProcessor:
             }
     
     def _extract_from_docx(self, file_path: Path) -> Dict[str, Any]:
-        """Extract text from DOCX file"""
+        """Extract text from DOCX file with bullet point preservation"""
         try:
             from docx import Document
             doc = Document(file_path)
             text = ""
             for paragraph in doc.paragraphs:
-                text += paragraph.text + "\n"
+                # Check if paragraph has bullet formatting
+                if paragraph.style.name.startswith('List') or paragraph._element.get_or_add_pPr().get_or_add_numPr() is not None:
+                    # This is a bullet point, add bullet symbol
+                    text += "• " + paragraph.text + "\n"
+                else:
+                    # Regular paragraph
+                    text += paragraph.text + "\n"
             
             return {
                 'success': True,
