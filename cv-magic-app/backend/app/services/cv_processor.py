@@ -14,13 +14,18 @@ class CVProcessor:
     def extract_text_from_file(self, file_path: Path) -> Dict[str, Any]:
         """Extract text from a CV file"""
         try:
+            logger.info(f"[CV_PROCESSOR] Processing file: {file_path} (suffix: {file_path.suffix})")
             if file_path.suffix.lower() == '.pdf':
+                logger.info(f"[CV_PROCESSOR] Using PDF extraction for: {file_path}")
                 return self._extract_from_pdf(file_path)
             elif file_path.suffix.lower() == '.docx':
+                logger.info(f"[CV_PROCESSOR] Using DOCX extraction for: {file_path}")
                 return self._extract_from_docx(file_path)
             elif file_path.suffix.lower() == '.txt':
+                logger.info(f"[CV_PROCESSOR] Using TXT extraction for: {file_path}")
                 return self._extract_from_txt(file_path)
             else:
+                logger.warning(f"[CV_PROCESSOR] Unsupported file type: {file_path.suffix}")
                 return {
                     'success': False,
                     'error': f'Unsupported file type: {file_path.suffix}',
