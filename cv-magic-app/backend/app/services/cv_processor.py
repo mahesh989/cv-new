@@ -66,41 +66,42 @@ class CVProcessor:
             from docx import Document
             doc = Document(file_path)
             text = ""
+            
             for paragraph in doc.paragraphs:
                 para_text = paragraph.text.strip()
                 if not para_text:
                     text += "\n"
                     continue
                 
-                # Check if paragraph has bullet formatting
+                # Simple approach: Check if paragraph looks like a bullet point
+                # Look for common patterns that indicate bullet points
                 is_bullet = False
                 
-                # Method 1: Check style name
-                if paragraph.style.name.startswith('List'):
+                # Pattern 1: Already has bullet symbols
+                if para_text.startswith(('•', '-', '*', '◦', '▪', '▫', '→', '►')):
                     is_bullet = True
                 
-                # Method 2: Check for numbering properties
-                try:
-                    p_pr = paragraph._element.get_or_add_pPr()
-                    if p_pr.get_or_add_numPr() is not None:
-                        is_bullet = True
-                except:
-                    pass
+                # Pattern 2: Short lines that look like bullet points
+                elif len(para_text) < 200 and not para_text.endswith('.') and not para_text.endswith(':'):
+                    # Check if it's not a header (all caps, short)
+                    if not (para_text.isupper() and len(para_text) < 50):
+                        # Check if it starts with action words (common in bullet points)
+                        action_words = ['developed', 'created', 'implemented', 'managed', 'led', 'designed', 
+                                      'built', 'analyzed', 'improved', 'reduced', 'increased', 'delivered',
+                                      'collaborated', 'enhanced', 'optimized', 'automated', 'integrated']
+                        if any(para_text.lower().startswith(word) for word in action_words):
+                            is_bullet = True
                 
-                # Method 3: Check if text starts with common bullet patterns
-                if para_text.startswith(('•', '-', '*', '◦', '▪', '▫')):
-                    is_bullet = True
-                
-                # Method 4: Check if paragraph is indented (common for bullets)
+                # Pattern 3: Check for list-style formatting
                 try:
-                    if paragraph.paragraph_format.left_indent and paragraph.paragraph_format.left_indent > 0:
+                    if paragraph.style.name.startswith('List') or 'Bullet' in paragraph.style.name:
                         is_bullet = True
                 except:
                     pass
                 
                 if is_bullet:
-                    # This is a bullet point, ensure it has bullet symbol
-                    if not para_text.startswith(('•', '-', '*', '◦', '▪', '▫')):
+                    # Ensure it has a bullet symbol
+                    if not para_text.startswith(('•', '-', '*', '◦', '▪', '▫', '→', '►')):
                         text += "• " + para_text + "\n"
                     else:
                         text += para_text + "\n"
