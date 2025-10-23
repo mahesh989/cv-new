@@ -374,15 +374,15 @@ class ResumePDFGenerator:
         if email:
             contact_parts.append(f"<link href=\"mailto:{email}\" color=\"blue\"><u>{email}</u></link>")
         
-        # Add clickable links
+        # Add clickable links (only labels, not URLs)
         if linkedin:
-            contact_parts.append(f"LinkedIn: <link href=\"{linkedin}\" color=\"blue\"><u>{linkedin}</u></link>")
+            contact_parts.append(f"<link href=\"{linkedin}\" color=\"blue\"><u>LinkedIn</u></link>")
         if github:
-            contact_parts.append(f"GitHub: <link href=\"{github}\" color=\"blue\"><u>{github}</u></link>")
+            contact_parts.append(f"<link href=\"{github}\" color=\"blue\"><u>GitHub</u></link>")
         if portfolio_url:
-            contact_parts.append(f"Portfolio: <link href=\"{portfolio_url}\" color=\"blue\"><u>{portfolio_url}</u></link>")
+            contact_parts.append(f"<link href=\"{portfolio_url}\" color=\"blue\"><u>Portfolio</u></link>")
         if website_url and website_url != portfolio_url:
-            contact_parts.append(f"Website: <link href=\"{website_url}\" color=\"blue\"><u>{website_url}</u></link>")
+            contact_parts.append(f"<link href=\"{website_url}\" color=\"blue\"><u>Website</u></link>")
 
         # Create single contact line with all information
         if contact_parts:
