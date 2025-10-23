@@ -64,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _hasFormData = hasData;
       });
     }
-    
+
     // Auto-save profile when user makes changes
     _autoSaveProfile();
   }
@@ -72,20 +72,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _autoSaveProfile() async {
     // Only auto-save if user has entered some data and we're not already saving
     if (_isSaving || !_hasFormData) return;
-    
+
     // Debounce auto-save to avoid too many API calls
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // Check if we're still not saving and have form data
     if (_isSaving || !_hasFormData) return;
-    
+
     try {
       debugPrint('🔄 Auto-saving profile...');
-      
+
       final now = DateTime.now();
       final authenticatedEmail = await AuthService.getUserEmail();
       if (authenticatedEmail == null) return;
-      
+
       // Create or update profile
       if (_profileExists && _currentProfile != null) {
         // Update existing profile
@@ -776,21 +776,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return true;
       },
       child: Scaffold(
-      appBar: widget.hideAppBar
-          ? null
-          : AppBar(
-              title: const Text('Profile Settings'),
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              actions: [
-                if (_profileExists)
-                  IconButton(
-                    onPressed: _deleteProfile,
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    tooltip: 'Delete Profile',
-                  ),
-              ],
-            ),
-      body: _buildProfileContent(),
+        appBar: widget.hideAppBar
+            ? null
+            : AppBar(
+                title: const Text('Profile Settings'),
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                actions: [
+                  if (_profileExists)
+                    IconButton(
+                      onPressed: _deleteProfile,
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      tooltip: 'Delete Profile',
+                    ),
+                ],
+              ),
+        body: _buildProfileContent(),
       ),
     );
   }
