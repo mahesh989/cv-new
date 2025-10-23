@@ -90,7 +90,7 @@ class CVProcessor:
                     pass
                 
                 # Pattern 3: Detect bullet points by content patterns
-                if not is_bullet and len(para_text) > 10 and len(para_text) < 300:
+                if not is_bullet and len(para_text) > 10 and len(para_text) < 500:
                     # Check if it's not a header (all caps, short)
                     if not (para_text.isupper() and len(para_text) < 50):
                         # Check if it starts with action words (common in bullet points)
@@ -99,17 +99,25 @@ class CVProcessor:
                             'created', 'implemented', 'managed', 'led', 'designed', 'built', 
                             'analyzed', 'improved', 'reduced', 'increased', 'delivered',
                             'collaborated', 'enhanced', 'optimized', 'automated', 'integrated',
-                            'demonstrated', 'applied', 'contributed', 'addressed', 'presented'
+                            'demonstrated', 'applied', 'contributed', 'addressed', 'presented',
+                            'technical', 'skilled', 'expertise', 'adept', 'experienced', 'capable'
                         ]
                         if any(para_text.lower().startswith(word) for word in action_words):
                             is_bullet = True
                         
-                        # Also check for common bullet point patterns
+                        # Check for common bullet point patterns
                         bullet_patterns = [
                             'skills', 'experience', 'proficient', 'ability', 'excellent',
-                            'reduced', 'improved', 'demonstrated', 'applied', 'contributed'
+                            'reduced', 'improved', 'demonstrated', 'applied', 'contributed',
+                            'technical expertise', 'etl processes', 'data analysis', 'data management',
+                            'problem-solving', 'adaptability', 'communication', 'team collaboration',
+                            'organizational skills', 'skilled in', 'expertise in', 'adept at'
                         ]
                         if any(pattern in para_text.lower() for pattern in bullet_patterns):
+                            is_bullet = True
+                        
+                        # Check for colon-separated bullet points (like "Technical Expertise: ...")
+                        if ':' in para_text and len(para_text.split(':')[0]) < 50:
                             is_bullet = True
                 
                 if is_bullet:
