@@ -73,31 +73,44 @@ class CVProcessor:
                     text += "\n"
                     continue
                 
-                # Simple approach: Check if paragraph looks like a bullet point
-                # Look for common patterns that indicate bullet points
+                # Enhanced bullet detection for DOCX files
                 is_bullet = False
                 
                 # Pattern 1: Already has bullet symbols
                 if para_text.startswith(('•', '-', '*', '◦', '▪', '▫', '→', '►')):
                     is_bullet = True
                 
-                # Pattern 2: Short lines that look like bullet points
-                elif len(para_text) < 200 and not para_text.endswith('.') and not para_text.endswith(':'):
-                    # Check if it's not a header (all caps, short)
-                    if not (para_text.isupper() and len(para_text) < 50):
-                        # Check if it starts with action words (common in bullet points)
-                        action_words = ['developed', 'created', 'implemented', 'managed', 'led', 'designed', 
-                                      'built', 'analyzed', 'improved', 'reduced', 'increased', 'delivered',
-                                      'collaborated', 'enhanced', 'optimized', 'automated', 'integrated']
-                        if any(para_text.lower().startswith(word) for word in action_words):
-                            is_bullet = True
-                
-                # Pattern 3: Check for list-style formatting
+                # Pattern 2: Check for list-style formatting in DOCX
                 try:
-                    if paragraph.style.name.startswith('List') or 'Bullet' in paragraph.style.name:
+                    if (paragraph.style.name.startswith('List') or 
+                        'Bullet' in paragraph.style.name or
+                        'List' in paragraph.style.name):
                         is_bullet = True
                 except:
                     pass
+                
+                # Pattern 3: Detect bullet points by content patterns
+                if not is_bullet and len(para_text) > 10 and len(para_text) < 300:
+                    # Check if it's not a header (all caps, short)
+                    if not (para_text.isupper() and len(para_text) < 50):
+                        # Check if it starts with action words (common in bullet points)
+                        action_words = [
+                            'advanced', 'strong', 'proficient', 'ability', 'excellent', 'developed', 
+                            'created', 'implemented', 'managed', 'led', 'designed', 'built', 
+                            'analyzed', 'improved', 'reduced', 'increased', 'delivered',
+                            'collaborated', 'enhanced', 'optimized', 'automated', 'integrated',
+                            'demonstrated', 'applied', 'contributed', 'addressed', 'presented'
+                        ]
+                        if any(para_text.lower().startswith(word) for word in action_words):
+                            is_bullet = True
+                        
+                        # Also check for common bullet point patterns
+                        bullet_patterns = [
+                            'skills', 'experience', 'proficient', 'ability', 'excellent',
+                            'reduced', 'improved', 'demonstrated', 'applied', 'contributed'
+                        ]
+                        if any(pattern in para_text.lower() for pattern in bullet_patterns):
+                            is_bullet = True
                 
                 if is_bullet:
                     # Ensure it has a bullet symbol
