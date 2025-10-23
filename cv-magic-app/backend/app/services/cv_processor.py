@@ -97,6 +97,16 @@ class CVProcessor:
                 except:
                     pass
                 
+                # Pattern 2b: Check for numbering properties (bullet/numbered lists)
+                try:
+                    if paragraph._element.pPr is not None:
+                        numPr = paragraph._element.pPr.numPr
+                        if numPr is not None:
+                            is_bullet = True
+                            logger.info(f"[DOCX_PROCESSING] Detected bullet via numbering: {para_text[:50]}...")
+                except:
+                    pass
+                
                 # Pattern 3: Detect bullet points by content patterns
                 if not is_bullet and len(para_text) > 10 and len(para_text) < 500:
                     # Check if it's not a header (all caps, short)
