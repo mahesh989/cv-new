@@ -67,13 +67,46 @@ class CVProcessor:
             doc = Document(file_path)
             text = ""
             for paragraph in doc.paragraphs:
+                para_text = paragraph.text.strip()
+                if not para_text:
+                    text += "\n"
+                    continue
+                
                 # Check if paragraph has bullet formatting
-                if paragraph.style.name.startswith('List') or paragraph._element.get_or_add_pPr().get_or_add_numPr() is not None:
-                    # This is a bullet point, add bullet symbol
-                    text += "• " + paragraph.text + "\n"
+                is_bullet = False
+                
+                # Method 1: Check style name
+                if paragraph.style.name.startswith('List'):
+                    is_bullet = True
+                
+                # Method 2: Check for numbering properties
+                try:
+                    p_pr = paragraph._element.get_or_add_pPr()
+                    if p_pr.get_or_add_numPr() is not None:
+                        is_bullet = True
+                except:
+                    pass
+                
+                # Method 3: Check if text starts with common bullet patterns
+                if para_text.startswith(('•', '-', '*', '◦', '▪', '▫')):
+                    is_bullet = True
+                
+                # Method 4: Check if paragraph is indented (common for bullets)
+                try:
+                    if paragraph.paragraph_format.left_indent and paragraph.paragraph_format.left_indent > 0:
+                        is_bullet = True
+                except:
+                    pass
+                
+                if is_bullet:
+                    # This is a bullet point, ensure it has bullet symbol
+                    if not para_text.startswith(('•', '-', '*', '◦', '▪', '▫')):
+                        text += "• " + para_text + "\n"
+                    else:
+                        text += para_text + "\n"
                 else:
                     # Regular paragraph
-                    text += paragraph.text + "\n"
+                    text += para_text + "\n"
             
             return {
                 'success': True,
