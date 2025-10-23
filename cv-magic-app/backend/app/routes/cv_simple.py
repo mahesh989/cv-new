@@ -127,7 +127,9 @@ async def get_cv_content(
             raise HTTPException(status_code=404, detail="CV file not found")
         
         # Extract text using improved processor (fast operation)
+        logger.info(f"[CV_SIMPLE] About to call cv_processor.extract_text_from_file for: {file_path}")
         result = cv_processor.extract_text_from_file(file_path)
+        logger.info(f"[CV_SIMPLE] cv_processor.extract_text_from_file returned: {result.get('success', False)}")
         
         if not result['success']:
             raise HTTPException(
