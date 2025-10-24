@@ -44,9 +44,11 @@ class ResumePDFGenerator:
             'right': 0.5,
         }
 
-        # Alignment constants
+        # Alignment constants - all values in points for consistency
         self.content_left_margin = 0.15 * inch
-        self.bullet_indent = 18
+        self.bullet_indent = 18  # Points - consistent with ReportLab units
+        self.section_indent = 0  # No additional indent for section headers
+        self.text_indent = 0     # No indent for body text
 
         # Uniform spacing settings (in points)
         self.spacing = {
@@ -56,6 +58,8 @@ class ResumePDFGenerator:
             'bullet_gap': 3,
             'after_bullets': 8,
             'line_after_section': 6,
+            'contact_name_gap': -30,  # Special case for contact name
+            'education_gap': 3,       # Consistent education spacing
         }
 
         self._calculate_dimensions()
@@ -250,6 +254,7 @@ class ResumePDFGenerator:
             ))
 
     def _create_section_with_line(self, title: str):
+        """Create a uniform section header with consistent spacing and alignment"""
         elements = []
         elements.append(Spacer(1, self.spacing['section_above']))
         elements.append(Paragraph(title, self.styles['SectionHeader']))
@@ -266,6 +271,13 @@ class ResumePDFGenerator:
         elements.append(line)
         
         return elements
+
+    def _create_empty_section_handler(self, section_name: str, content: list) -> bool:
+        """Handle empty sections uniformly - return True if section should be skipped"""
+        if not content or (isinstance(content, list) and len(content) == 0):
+            logger.info(f"[PDF_EXPORT] Skipping empty section: {section_name}")
+            return True
+        return False
 
     def _make_bullet_row(self, text: str) -> Table:
         bullet_col = self.bullet_indent
@@ -321,7 +333,7 @@ class ResumePDFGenerator:
             logger.warning("[PDF_EXPORT] personal_information is not a dict: %s", type(personal_info))
             personal_info = {}
 
-        elements.append(Spacer(1, -30))  # Further reduced gap above contact name
+        elements.append(Spacer(1, self.spacing['contact_name_gap']))  # Consistent contact name gap
 
         # Name - use original CV data if profile data is missing
         name = personal_info.get('name', 'N/A')
@@ -452,7 +464,7 @@ class ResumePDFGenerator:
 
         # Experience
         experience = self.data.get('experience', [])
-        if isinstance(experience, list) and experience:
+        if isinstance(experience, list) and experience and not self._create_empty_section_handler('EXPERIENCE', experience):
             elements.extend(self._create_section_with_line('PROFESSIONAL EXPERIENCE'))
             for i, exp in enumerate(experience):
                 if not isinstance(exp, dict):
@@ -491,7 +503,7 @@ class ResumePDFGenerator:
 
         # Education
         education = self.data.get('education', [])
-        if isinstance(education, list) and education:
+        if isinstance(education, list) and education and not self._create_empty_section_handler('EDUCATION', education):
             elements.extend(self._create_section_with_line('EDUCATION'))
             for i, edu in enumerate(education):
                 if not isinstance(edu, dict):
@@ -520,7 +532,7 @@ class ResumePDFGenerator:
                     elements.append(Paragraph(", ".join(inst_parts), self.styles['Institution']))
                 
                 if i < len(education) - 1:
-                    elements.append(Spacer(1, 3))  # Reduced gap between degrees
+                    elements.append(Spacer(1, self.spacing['education_gap']))  # Consistent education spacing
 
         # Skills
         skills = self.data.get('skills', {})
@@ -546,7 +558,7 @@ class ResumePDFGenerator:
 
         # Projects
         projects = self.data.get('projects', [])
-        if isinstance(projects, list) and projects:
+        if isinstance(projects, list) and projects and not self._create_empty_section_handler('PROJECTS', projects):
             logger.info(f"[PDF_EXPORT] Processing {len(projects)} projects")
             elements.extend(self._create_section_with_line('PROJECTS'))
             for i, proj in enumerate(projects):
@@ -594,7 +606,7 @@ class ResumePDFGenerator:
 
         # Certifications
         certifications = self.data.get('certifications', [])
-        if isinstance(certifications, list) and certifications:
+        if isinstance(certifications, list) and certifications and not self._create_empty_section_handler('CERTIFICATIONS', certifications):
             elements.extend(self._create_section_with_line('CERTIFICATIONS'))
             for cert in certifications:
                 if isinstance(cert, dict):
