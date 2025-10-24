@@ -297,28 +297,43 @@ class RecommendationParser:
         # Look for Critical Missing Keywords section and Integration Points
         patterns = [
             r'Critical Missing Keywords[^:]*:.*?Integration Points[^:]*:([^#]*?)(?=\n\*\*|\n##|$)',
-            r'Domain Keywords[^:]*:.*?Add[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
+            r'Domain Keywords[^:]*:.*?Add[^:]*:([^#]*?)(?=\n\*\*|\n##|$)',
+            r'Emphasize[^:]*:([^#]*?)(?=\n\*\*|\n##|$)',
+            r'Safe to Add[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
         ]
         
         for pattern in patterns:
             match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
             if match:
                 section_content = match.group(1)
-                # Extract keywords in quotes
+                # Extract keywords in quotes and bullet points
                 quoted_keywords = re.findall(r'"([^"]+)"', section_content)
+                bullet_keywords = re.findall(r'[-•]\s*([A-Za-z\s]+(?:Analytics|Intelligence|Decision-Making|Efficiency|Management|Communication|Problem-Solving|Adaptability|Time Management|Collaboration|Thinking))', section_content)
+                
+                # Combine both types of keywords
+                all_keywords = quoted_keywords + bullet_keywords
+                
                 # Clean up extracted keywords - remove trailing punctuation
-                for kw in quoted_keywords:
+                for kw in all_keywords:
                     clean_kw = kw.strip().rstrip('.,;:')
-                    if len(clean_kw) < 50 and clean_kw:
+                    if len(clean_kw) < 50 and clean_kw and clean_kw not in keywords:
                         keywords.append(clean_kw)
         
-        # Also look for specific domain keywords mentioned
-        domain_keywords = ['International Aid', 'Fundraising', 'Not For Profit', 'NFP', 
-                          'Humanitarian Aid', 'Business Intelligence', 'Direct Marketing Campaigns', 
-                          'Donor-Centricity', 'Refugee Support']
-        for keyword in domain_keywords:
-            if keyword in content and keyword not in [k.rstrip('.,;:') for k in keywords]:
-                keywords.append(keyword)
+        # Only extract keywords that are explicitly recommended, not avoided
+        # Check for "Emphasize" and "Safe to Add" sections
+        emphasize_pattern = r'Emphasize[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
+        safe_to_add_pattern = r'Safe to Add[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
+        
+        for pattern in [emphasize_pattern, safe_to_add_pattern]:
+            match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+            if match:
+                section_content = match.group(1)
+                # Extract keywords from these sections
+                recommended_keywords = re.findall(r'([A-Za-z\s]+(?:Analytics|Intelligence|Decision-Making|Efficiency|Management|Communication|Problem-Solving|Adaptability|Time Management|Collaboration|Thinking))', section_content)
+                for kw in recommended_keywords:
+                    clean_kw = kw.strip().rstrip('.,;:')
+                    if len(clean_kw) < 50 and clean_kw and clean_kw not in [k.rstrip('.,;:') for k in keywords]:
+                        keywords.append(clean_kw)
         
         # Remove duplicates while preserving order
         return list(dict.fromkeys(keywords))
