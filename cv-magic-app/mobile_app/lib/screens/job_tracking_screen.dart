@@ -6,6 +6,7 @@
 /// with other tabs in the application.
 ///
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -34,8 +35,11 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
   bool _showAppliedJobs = false; // Toggle for showing applied jobs only
   final Map<String, bool> _appliedStatus =
       {}; // Track applied status for each job
-  bool _hasCachedData = false; // Track if we have cached data to show
   DateTime? _lastLoadTime; // Track when we last loaded data
+  
+  // Auto-refresh timer
+  Timer? _autoRefreshTimer;
+  bool _isAutoRefreshing = false;
 
   /// Public method to trigger refresh from external sources
   void refreshJobs() {
@@ -57,14 +61,14 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
       // Check if we need to refresh based on age
       if (_lastLoadTime != null) {
         final timeSinceLastLoad = DateTime.now().difference(_lastLoadTime!);
-        if (timeSinceLastLoad.inSeconds < 30) {
+        if (timeSinceLastLoad.inSeconds < 10) {
           debugPrint(
               '📋 [JOB_TRACKING] Data is recent (${timeSinceLastLoad.inSeconds}s ago), no refresh needed');
           return;
         }
       }
 
-      // Data is older than 30s or no timestamp, refresh silently in background
+      // Data is older than 10s or no timestamp, refresh silently in background
       debugPrint('🔄 [JOB_TRACKING] Refreshing data silently in background...');
       _silentRefresh();
     } else {
@@ -80,6 +84,13 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
     _verifyAssets();
     _preloadAppliedStatus(); // Preload applied status before loading jobs
     _loadJobs();
+    _startAutoRefresh(); // Start auto-refresh timer
+  }
+
+  @override
+  void dispose() {
+    _stopAutoRefresh(); // Stop auto-refresh timer
+    super.dispose();
   }
 
   /// Get the backup file path for applied statuses
@@ -206,12 +217,11 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
       debugPrint('🔄 [JOB_TRACKING] Loading saved jobs...');
       final jobs = await SavedJobsService.loadSavedJobs();
       debugPrint('✅ [JOB_TRACKING] Successfully loaded ${jobs.length} jobs');
-      setState(() {
-        _jobs = jobs;
-        _isLoading = false;
-        _hasCachedData = false; // Reset cached flag since we got fresh data
-        _lastLoadTime = DateTime.now(); // Track when we loaded data
-      });
+        setState(() {
+          _jobs = jobs;
+          _isLoading = false;
+          _lastLoadTime = DateTime.now(); // Track when we loaded data
+        });
       // Load applied status after jobs are loaded
       await _loadAppliedStatus();
     } catch (e, stackTrace) {
@@ -225,7 +235,6 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
         setState(() {
           _isLoading = false;
           _error = null; // Don't show error if we have cached data
-          _hasCachedData = true; // Mark that we're showing cached data
         });
         // Still load applied status for cached data
         await _loadAppliedStatus();
@@ -234,7 +243,6 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
         setState(() {
           _error = 'Failed to load saved jobs: $e';
           _isLoading = false;
-          _hasCachedData = false;
         });
       }
     }
@@ -249,7 +257,6 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
           '✅ [JOB_TRACKING] Silent refresh successful - ${jobs.length} jobs');
       setState(() {
         _jobs = jobs;
-        _hasCachedData = false; // Reset cached flag since we got fresh data
         _lastLoadTime = DateTime.now(); // Track when we loaded data
         _error = null; // Clear any previous errors
       });
@@ -307,6 +314,82 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
       });
     } catch (e) {
       debugPrint('❌ [JOB_TRACKING] Error loading applied status: $e');
+    }
+  }
+
+  /// Start auto-refresh timer
+  void _startAutoRefresh() {
+    debugPrint('🔄 [JOB_TRACKING] Starting auto-refresh timer (30 seconds)');
+    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      _performAutoRefresh();
+    });
+  }
+
+  /// Stop auto-refresh timer
+  void _stopAutoRefresh() {
+    debugPrint('⏹️ [JOB_TRACKING] Stopping auto-refresh timer');
+    _autoRefreshTimer?.cancel();
+    _autoRefreshTimer = null;
+  }
+
+  /// Perform auto-refresh in background
+  Future<void> _performAutoRefresh() async {
+    // Don't refresh if already refreshing or if no data exists
+    if (_isAutoRefreshing || _jobs.isEmpty) {
+      return;
+    }
+
+    _isAutoRefreshing = true;
+    debugPrint('🔄 [JOB_TRACKING] Auto-refreshing data in background...');
+
+    try {
+      // Load fresh data silently
+      final freshJobs = await SavedJobsService.loadSavedJobs();
+      
+      // Check if data has changed
+      bool hasChanges = false;
+      if (freshJobs.length != _jobs.length) {
+        hasChanges = true;
+        debugPrint('📊 [JOB_TRACKING] Job count changed: ${_jobs.length} → ${freshJobs.length}');
+      } else {
+        // Check for content changes
+        for (int i = 0; i < freshJobs.length; i++) {
+          if (i < _jobs.length) {
+            final oldJob = _jobs[i];
+            final newJob = freshJobs[i];
+            
+            // Compare key fields for changes
+            if (oldJob['company_name'] != newJob['company_name'] ||
+                oldJob['job_title'] != newJob['job_title'] ||
+                oldJob['location'] != newJob['location'] ||
+                oldJob['extracted_at'] != newJob['extracted_at']) {
+              hasChanges = true;
+              debugPrint('📊 [JOB_TRACKING] Job data changed for ${newJob['company_name']}');
+              break;
+            }
+          }
+        }
+      }
+
+      if (hasChanges) {
+        debugPrint('✅ [JOB_TRACKING] Auto-refresh found changes, updating UI');
+        setState(() {
+          _jobs = freshJobs;
+          _lastLoadTime = DateTime.now();
+        });
+        
+        // Reload applied status for new jobs
+        await _loadAppliedStatus();
+      } else {
+        debugPrint('📋 [JOB_TRACKING] Auto-refresh: No changes detected');
+        // Update timestamp even if no changes
+        _lastLoadTime = DateTime.now();
+      }
+    } catch (e) {
+      debugPrint('❌ [JOB_TRACKING] Auto-refresh failed: $e');
+      // Don't show error to user, just log it
+    } finally {
+      _isAutoRefreshing = false;
     }
   }
 
@@ -378,6 +461,18 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
                   ),
             ),
             const Spacer(),
+            // Auto-refresh indicator
+            if (_isAutoRefreshing) ...[
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             // Debug button to clear all applied statuses (only visible in debug mode)
             if (kDebugMode) ...[
               IconButton(
