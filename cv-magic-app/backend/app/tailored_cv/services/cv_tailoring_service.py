@@ -1314,6 +1314,8 @@ FIX: Output ONLY valid JSON!
                             recommendations.missing_soft_skills)[:5]
         
         logger.info(f"🔍 Validating {len(valid_keywords)} keywords: {valid_keywords}")
+        logger.info(f"🔍 Critical gaps from recommendations: {recommendations.critical_gaps}")
+        logger.info(f"🔍 Missing keywords from recommendations: {recommendations.missing_keywords}")
         
         # Check for critical missing keywords with variations
         missing_keywords = []

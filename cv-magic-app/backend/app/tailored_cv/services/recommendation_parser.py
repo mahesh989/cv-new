@@ -351,7 +351,13 @@ class RecommendationParser:
                         keywords.append(clean_kw)
         
         # Remove duplicates while preserving order
-        return list(dict.fromkeys(keywords))
+        final_keywords = list(dict.fromkeys(keywords))
+        
+        # Debug logging
+        print(f"🔍 [DEBUG] Extracted keywords: {final_keywords}")
+        print(f"🔍 [DEBUG] Avoided keywords: {avoided_keywords}")
+        
+        return final_keywords
     
     @staticmethod
     def load_original_cv(cv_path: str) -> Dict[str, Any]:
