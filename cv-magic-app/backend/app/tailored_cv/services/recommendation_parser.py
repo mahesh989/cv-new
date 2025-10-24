@@ -330,7 +330,8 @@ class RecommendationParser:
         avoid_match = re.search(avoid_pattern, content, re.DOTALL | re.IGNORECASE)
         if avoid_match:
             avoid_content = avoid_match.group(1)
-            avoided_items = re.findall(r'([A-Za-z\s]+(?:Campaigns|Fundraising|Management|Marketing|Stakeholder|Critical|Thinking))', avoid_content)
+            # Extract all keywords from avoid section
+            avoided_items = re.findall(r'([A-Za-z\s]+(?:Campaigns|Fundraising|Management|Marketing|Stakeholder|Critical|Thinking|Creativity|Problem-Solving|Communication|Analytics|Intelligence|Decision-Making|Efficiency|Adaptability|Time Management|Collaboration))', avoid_content)
             for item in avoided_items:
                 avoided_keywords.add(item.strip().rstrip('.,;:').lower())
         
