@@ -918,12 +918,33 @@ Please provide the optimized CV in the requested JSON format."""
         for exp in experience_data:
             experience.append(ExperienceEntry(**exp))
         
-        # Process projects if present
+        # Process projects if present - preserve original metadata
         projects = None
         if "projects" in ai_generated_data and ai_generated_data["projects"]:
             projects = []
-            for proj in ai_generated_data["projects"]:
-                projects.append(Project(**proj))
+            original_projects = original_cv.projects or []
+            
+            for i, proj in enumerate(ai_generated_data["projects"]):
+                # Preserve original project metadata if available
+                if i < len(original_projects):
+                    original_proj = original_projects[i]
+                    # Merge AI-generated content with original metadata
+                    merged_proj = {
+                        'name': proj.get('name', original_proj.get('name', '')),
+                        'context': proj.get('context', original_proj.get('context', '')),
+                        'technologies': proj.get('technologies', original_proj.get('technologies', [])),
+                        'bullets': proj.get('bullets', original_proj.get('bullets', [])),
+                        'url': proj.get('url', original_proj.get('url', '')),
+                        'duration': proj.get('duration', original_proj.get('duration', '')),
+                        'date': proj.get('date', original_proj.get('date', ''))
+                    }
+                    projects.append(Project(**merged_proj))
+                else:
+                    # New project from AI, use as-is
+                    projects.append(Project(**proj))
+        elif original_cv.projects:
+            # If no AI projects but original has projects, preserve them
+            projects = original_cv.projects
         
         # Process skills
         skills_data = ai_generated_data.get("skills", [])

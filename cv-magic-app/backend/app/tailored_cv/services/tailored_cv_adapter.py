@@ -82,6 +82,8 @@ def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[st
         pdf_project = {
             "name": project.get('name', ''),
             "date": project.get('date', ''),
+            "duration": project.get('duration', ''),  # Add duration field
+            "context": project.get('context', ''),    # Add context field
             "description": project.get('description', ''),
             "bullets": project.get('bullets', []),  # Add bullets mapping
             "technologies": project.get('technologies', [])
