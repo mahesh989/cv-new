@@ -362,6 +362,91 @@ async def get_latest_cv_content(current_user: UserData = Depends(get_current_use
         )
 
 
+@router.get("/latest-cv-content-fixed")
+async def get_latest_cv_content_fixed(current_user: UserData = Depends(get_current_user)):
+    """
+    Get the latest tailored CV content for CV Magic tab - FIXED VERSION
+    This endpoint finds the latest tailored CV across all companies and returns it with company info
+    """
+    try:
+        logger.info("📄 Latest tailored CV content request (CV Magic tab)")
+        
+        # Path to cv-analysis folder (user-isolated)
+        from app.utils.user_path_utils import get_user_base_path
+        cv_analysis_path = get_user_base_path(current_user.email)
+        
+        if not cv_analysis_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="CV analysis folder not found"
+            )
+        
+        # Find all tailored CV text files in the cvs/tailored folder
+        all_tailored_files = []
+        
+        # Check in the global cvs/tailored directory
+        tailored_dir = cv_analysis_path / "cvs" / "tailored"
+        if tailored_dir.exists():
+            # Look for all tailored CV files
+            company_files = list(tailored_dir.glob("*_tailored_cv_*.txt"))
+            all_tailored_files.extend(company_files)
+            logger.info(f"Found {len(company_files)} tailored CV files in {tailored_dir}")
+        
+        if not all_tailored_files:
+            raise HTTPException(
+                status_code=404,
+                detail="No tailored CV files found. Please complete analysis first."
+            )
+        
+        # Sort by timestamp in filename first, then by modified time as fallback
+        def get_timestamp(filepath):
+            try:
+                # Extract timestamp from filename pattern company_tailored_cv_YYYYMMDD_HHMMSS.txt
+                filename = filepath.name
+                timestamp_part = filename.split('_tailored_cv_')[1].replace('.txt', '')
+                # Convert to datetime for proper comparison
+                from datetime import datetime
+                return datetime.strptime(timestamp_part, '%Y%m%d_%H%M%S')
+            except:
+                # Fallback to file modification time if filename parsing fails
+                return filepath.stat().st_mtime
+        
+        latest_txt_file = max(all_tailored_files, key=get_timestamp)
+        
+        # Extract company name from filename (e.g., "Australia_for_UNHCR_tailored_cv_20250921_150701.txt")
+        filename = latest_txt_file.name
+        company_name = filename.split('_tailored_cv_')[0] if '_tailored_cv_' in filename else "Unknown"
+        
+        # Read the text content
+        with open(latest_txt_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        logger.info(f"✅ Served latest tailored CV for CV Magic tab: {latest_txt_file.name} from {company_name} ({len(content)} characters)")
+        
+        return JSONResponse(content={
+            "success": True,
+            "content": content,
+            "filename": latest_txt_file.name,
+            "company": company_name,
+            "source_folder": "tailored",
+            "metadata": {
+                "file_size": len(content),
+                "last_modified": latest_txt_file.stat().st_mtime,
+                "file_path": str(latest_txt_file),
+                "is_latest_tailored": True
+            }
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to get latest tailored CV for CV Magic tab: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get latest tailored CV: {str(e)}"
+        )
+
+
 @router.get("/read-tailored-cv/{company_name}")
 async def read_tailored_cv(company_name: str, current_user: UserData = Depends(get_current_user)):
     """

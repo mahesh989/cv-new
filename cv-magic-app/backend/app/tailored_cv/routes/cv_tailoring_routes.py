@@ -979,7 +979,7 @@ async def get_tailored_cv_content(
         service = CVTailoringService(user_email=current_user.email)
         
         # Create a minimal TailoredCV object for text conversion
-        from app.tailored_cv.models.cv_models import TailoredCV, ContactInfo, ExperienceEntry, SkillCategory, OptimizationStrategy
+        from app.tailored_cv.models.cv_models import TailoredCV, ContactInfo, ExperienceEntry, SkillCategory, Project, OptimizationStrategy
         
         # Create minimal required fields
         optimization_strategy = OptimizationStrategy(
@@ -995,6 +995,7 @@ async def get_tailored_cv_content(
             education=json_data.get('education', []),
             experience=[ExperienceEntry(**exp) for exp in json_data.get('experience', [])],
             skills=[SkillCategory(**skill) for skill in json_data.get('skills', [])],
+            projects=[Project(**proj) for proj in json_data.get('projects', [])],
             target_company=company_name,
             target_role='Data Analyst',
             optimization_strategy=optimization_strategy,
