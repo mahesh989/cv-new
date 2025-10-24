@@ -74,6 +74,7 @@ class Project(BaseModel):
     bullets: List[str] = Field(..., description="Project achievements/outcomes")
     url: Optional[str] = Field(None, description="Project URL/repository")
     duration: Optional[str] = Field(None, description="Project duration")
+    date: Optional[str] = Field(None, description="Project date")
 
 
 class SkillCategory(BaseModel):
