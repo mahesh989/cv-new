@@ -319,11 +319,22 @@ class RecommendationParser:
                     if len(clean_kw) < 50 and clean_kw and clean_kw not in keywords:
                         keywords.append(clean_kw)
         
-        # Only extract keywords that are explicitly recommended, not avoided
-        # Check for "Emphasize" and "Safe to Add" sections
+        # Extract keywords that are explicitly recommended (Emphasize, Safe to Add)
+        # and EXCLUDE keywords that are explicitly avoided
         emphasize_pattern = r'Emphasize[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
         safe_to_add_pattern = r'Safe to Add[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
+        avoid_pattern = r'Avoid[^:]*:([^#]*?)(?=\n\*\*|\n##|$)'
         
+        # First, get the avoided keywords to exclude them
+        avoided_keywords = set()
+        avoid_match = re.search(avoid_pattern, content, re.DOTALL | re.IGNORECASE)
+        if avoid_match:
+            avoid_content = avoid_match.group(1)
+            avoided_items = re.findall(r'([A-Za-z\s]+(?:Campaigns|Fundraising|Management|Marketing|Stakeholder|Critical|Thinking))', avoid_content)
+            for item in avoided_items:
+                avoided_keywords.add(item.strip().rstrip('.,;:').lower())
+        
+        # Extract recommended keywords from Emphasize and Safe to Add sections
         for pattern in [emphasize_pattern, safe_to_add_pattern]:
             match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
             if match:
@@ -332,7 +343,10 @@ class RecommendationParser:
                 recommended_keywords = re.findall(r'([A-Za-z\s]+(?:Analytics|Intelligence|Decision-Making|Efficiency|Management|Communication|Problem-Solving|Adaptability|Time Management|Collaboration|Thinking))', section_content)
                 for kw in recommended_keywords:
                     clean_kw = kw.strip().rstrip('.,;:')
-                    if len(clean_kw) < 50 and clean_kw and clean_kw not in [k.rstrip('.,;:') for k in keywords]:
+                    # Only add if not in avoided keywords
+                    if (len(clean_kw) < 50 and clean_kw and 
+                        clean_kw.lower() not in avoided_keywords and 
+                        clean_kw not in [k.rstrip('.,;:') for k in keywords]):
                         keywords.append(clean_kw)
         
         # Remove duplicates while preserving order

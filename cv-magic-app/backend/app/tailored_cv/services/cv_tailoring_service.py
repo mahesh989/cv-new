@@ -1313,6 +1313,8 @@ FIX: Output ONLY valid JSON!
                             recommendations.missing_technical_skills + 
                             recommendations.missing_soft_skills)[:5]
         
+        logger.info(f"🔍 Validating {len(valid_keywords)} keywords: {valid_keywords}")
+        
         # Check for critical missing keywords with variations
         missing_keywords = []
         for keyword in valid_keywords:
@@ -1344,8 +1346,8 @@ FIX: Output ONLY valid JSON!
                 # Add to missing only if no variations were found
                 missing_keywords.append(keyword)
         
-        # Require at least 70% of keywords to be integrated (30% missing allowed)
-        if missing_keywords and len(missing_keywords) > len(valid_keywords) * 0.3:
+        # Require at least 90% of keywords to be integrated (10% missing allowed)
+        if missing_keywords and len(missing_keywords) > len(valid_keywords) * 0.1:
             missing_list = ", ".join(missing_keywords)
             raise ValueError(f"Critical keyword integration failure. Missing keywords: {missing_list}. These MUST be integrated into experience bullets or skills section.")
         elif missing_keywords:
