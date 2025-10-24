@@ -321,7 +321,7 @@ class ResumePDFGenerator:
             logger.warning("[PDF_EXPORT] personal_information is not a dict: %s", type(personal_info))
             personal_info = {}
 
-        elements.append(Spacer(1, -20))  # Negative value to reduce gap
+        elements.append(Spacer(1, -80))  # Further reduced gap above contact name
 
         # Name - use original CV data if profile data is missing
         name = personal_info.get('name', 'N/A')
@@ -520,7 +520,7 @@ class ResumePDFGenerator:
                     elements.append(Paragraph(", ".join(inst_parts), self.styles['Institution']))
                 
                 if i < len(education) - 1:
-                    elements.append(Spacer(1, 6))
+                    elements.append(Spacer(1, 3))  # Reduced gap between degrees
 
         # Skills
         skills = self.data.get('skills', {})
@@ -531,19 +531,18 @@ class ResumePDFGenerator:
             is_categorized = skills.get('is_categorized', False)
             
             if is_categorized:
-                # Categorized format: Display as single lines with category headers
+                # Categorized format: Display with proper bullet alignment
                 for category_name, skills_list in skills.items():
                     if category_name != 'is_categorized' and isinstance(skills_list, list) and skills_list:
-                        # Category header with skills on same line
+                        # Use bullet formatting for proper alignment
                         skills_text = ", ".join(skills_list)
-                        elements.append(Paragraph(f"• <b>{category_name.replace('_', ' ').title()}:</b> {skills_text}", self.styles['SkillItem']))
-                        elements.append(Spacer(1, self.spacing['bullet_gap']))
+                        elements.extend(self._make_bullet_rows([f"<b>{category_name.replace('_', ' ').title()}:</b> {skills_text}"]))
             else:
-                # Simple format: Display as single line with comma separation
+                # Simple format: Display with proper bullet alignment
                 technical_skills = skills.get('technical_skills', [])
                 if technical_skills:
                     skills_text = ", ".join(technical_skills)
-                    elements.append(Paragraph(skills_text, self.styles['SkillItem']))
+                    elements.extend(self._make_bullet_rows([skills_text]))
 
         # Projects
         projects = self.data.get('projects', [])
