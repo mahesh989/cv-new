@@ -321,7 +321,7 @@ class ResumePDFGenerator:
             logger.warning("[PDF_EXPORT] personal_information is not a dict: %s", type(personal_info))
             personal_info = {}
 
-        elements.append(Spacer(1, -40))  # Further reduced gap above contact name
+        elements.append(Spacer(1, -30))  # Further reduced gap above contact name
 
         # Name - use original CV data if profile data is missing
         name = personal_info.get('name', 'N/A')
