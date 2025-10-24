@@ -990,12 +990,18 @@ async def get_tailored_cv_content(
             impact_enhancements={}
         )
         
+        # Handle None values properly to avoid 'NoneType' object is not iterable error
+        education_data = json_data.get('education', []) or []
+        experience_data = json_data.get('experience', []) or []
+        skills_data = json_data.get('skills', []) or []
+        projects_data = json_data.get('projects', []) or []
+        
         tailored_cv = TailoredCV(
             contact=ContactInfo(**json_data['contact']),
-            education=json_data.get('education', []),
-            experience=[ExperienceEntry(**exp) for exp in json_data.get('experience', [])],
-            skills=[SkillCategory(**skill) for skill in json_data.get('skills', [])],
-            projects=[Project(**proj) for proj in json_data.get('projects', [])],
+            education=education_data,
+            experience=[ExperienceEntry(**exp) for exp in experience_data],
+            skills=[SkillCategory(**skill) for skill in skills_data],
+            projects=[Project(**proj) for proj in projects_data],
             target_company=company_name,
             target_role='Data Analyst',
             optimization_strategy=optimization_strategy,
