@@ -321,7 +321,7 @@ class ResumePDFGenerator:
             logger.warning("[PDF_EXPORT] personal_information is not a dict: %s", type(personal_info))
             personal_info = {}
 
-        elements.append(Spacer(1, -50))  # Further reduced gap above contact name
+        elements.append(Spacer(1, -40))  # Further reduced gap above contact name
 
         # Name - use original CV data if profile data is missing
         name = personal_info.get('name', 'N/A')
@@ -556,13 +556,21 @@ class ResumePDFGenerator:
                 
                 name = proj.get('name', 'N/A')
                 date = proj.get('date', '')
+                duration = proj.get('duration', '')
+                context = proj.get('context', '')
                 logger.info(f"[PDF_EXPORT] Project {i}: {name}")
                 
-                if date:
-                    table = self._create_aligned_two_column(f"<b>{name}</b>", date, 'JobTitle', 'DateRight')
+                # Use duration if available, otherwise date, otherwise no alignment
+                project_date = duration or date
+                if project_date:
+                    table = self._create_aligned_two_column(f"<b>{name}</b>", project_date, 'JobTitle', 'DateRight')
                     elements.append(table)
                 else:
                     elements.append(Paragraph(f"<b>{name}</b>", self.styles['BodyText']))
+                
+                # Add context if available (like university project, individual project, etc.)
+                if context:
+                    elements.append(Paragraph(context, self.styles['Company']))
                 
                 # Handle bullets/descriptions
                 bullets = proj.get('bullets', [])

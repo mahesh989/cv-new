@@ -120,15 +120,21 @@ JSON:"""
             display_name=company
         )
     
-    def _parse_ai_response(self, response: str) -> dict:
+    def _parse_ai_response(self, response) -> dict:
         """Parse AI JSON response"""
         try:
+            # Handle both string and AIResponse objects
+            if hasattr(response, 'content'):
+                response_text = response.content
+            else:
+                response_text = str(response)
+            
             # Find JSON in response
-            json_start = response.find('{')
-            json_end = response.rfind('}') + 1
+            json_start = response_text.find('{')
+            json_end = response_text.rfind('}') + 1
             
             if json_start != -1 and json_end > json_start:
-                json_str = response[json_start:json_end]
+                json_str = response_text[json_start:json_end]
                 return json.loads(json_str)
             
             # If no JSON found, return default
