@@ -566,7 +566,8 @@ class ResumePDFGenerator:
                     table = self._create_aligned_two_column(f"<b>{name}</b>", project_date, 'JobTitle', 'DateRight')
                     elements.append(table)
                 else:
-                    elements.append(Paragraph(f"<b>{name}</b>", self.styles['BodyText']))
+                    # Use JobTitle style for consistent alignment with experience section
+                    elements.append(Paragraph(f"<b>{name}</b>", self.styles['JobTitle']))
                 
                 # Add context if available (like university project, individual project, etc.)
                 if context:
@@ -576,9 +577,10 @@ class ResumePDFGenerator:
                 bullets = proj.get('bullets', [])
                 logger.info(f"[PDF_EXPORT] Project {i} bullets: {len(bullets)} items")
                 if bullets:
-                    for bullet in bullets:
-                        if bullet.strip():
-                            elements.extend(self._make_bullet_rows([bullet]))
+                    # Process all bullets at once for consistent alignment
+                    clean_bullets = [bullet.strip() for bullet in bullets if bullet.strip()]
+                    if clean_bullets:
+                        elements.extend(self._make_bullet_rows(clean_bullets))
                 elif proj.get('description'):
                     logger.info(f"[PDF_EXPORT] Project {i} using description fallback")
                     elements.append(Paragraph(proj['description'], self.styles['BodyText']))

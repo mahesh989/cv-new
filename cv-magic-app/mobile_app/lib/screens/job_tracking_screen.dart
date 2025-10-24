@@ -36,7 +36,7 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
   final Map<String, bool> _appliedStatus =
       {}; // Track applied status for each job
   DateTime? _lastLoadTime; // Track when we last loaded data
-  
+
   // Auto-refresh timer
   Timer? _autoRefreshTimer;
   bool _isAutoRefreshing = false;
@@ -217,11 +217,11 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
       debugPrint('🔄 [JOB_TRACKING] Loading saved jobs...');
       final jobs = await SavedJobsService.loadSavedJobs();
       debugPrint('✅ [JOB_TRACKING] Successfully loaded ${jobs.length} jobs');
-        setState(() {
-          _jobs = jobs;
-          _isLoading = false;
-          _lastLoadTime = DateTime.now(); // Track when we loaded data
-        });
+      setState(() {
+        _jobs = jobs;
+        _isLoading = false;
+        _lastLoadTime = DateTime.now(); // Track when we loaded data
+      });
       // Load applied status after jobs are loaded
       await _loadAppliedStatus();
     } catch (e, stackTrace) {
@@ -345,26 +345,28 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
     try {
       // Load fresh data silently
       final freshJobs = await SavedJobsService.loadSavedJobs();
-      
+
       // Check if data has changed
       bool hasChanges = false;
       if (freshJobs.length != _jobs.length) {
         hasChanges = true;
-        debugPrint('📊 [JOB_TRACKING] Job count changed: ${_jobs.length} → ${freshJobs.length}');
+        debugPrint(
+            '📊 [JOB_TRACKING] Job count changed: ${_jobs.length} → ${freshJobs.length}');
       } else {
         // Check for content changes
         for (int i = 0; i < freshJobs.length; i++) {
           if (i < _jobs.length) {
             final oldJob = _jobs[i];
             final newJob = freshJobs[i];
-            
+
             // Compare key fields for changes
             if (oldJob['company_name'] != newJob['company_name'] ||
                 oldJob['job_title'] != newJob['job_title'] ||
                 oldJob['location'] != newJob['location'] ||
                 oldJob['extracted_at'] != newJob['extracted_at']) {
               hasChanges = true;
-              debugPrint('📊 [JOB_TRACKING] Job data changed for ${newJob['company_name']}');
+              debugPrint(
+                  '📊 [JOB_TRACKING] Job data changed for ${newJob['company_name']}');
               break;
             }
           }
@@ -377,7 +379,7 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
           _jobs = freshJobs;
           _lastLoadTime = DateTime.now();
         });
-        
+
         // Reload applied status for new jobs
         await _loadAppliedStatus();
       } else {
@@ -468,7 +470,8 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
                 ),
               ),
               const SizedBox(width: 8),
