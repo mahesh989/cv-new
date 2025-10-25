@@ -29,6 +29,9 @@ logger = logging.getLogger(__name__)
 # Create router
 router = APIRouter(prefix="/tailored-cv", tags=["CV Tailoring"])
 
+# Global service instance (will be initialized per user in endpoints)
+cv_tailoring_service = None
+
 
 @router.post("/tailor", response_model=CVTailoringResponse)
 async def tailor_cv(
@@ -267,7 +270,9 @@ async def get_available_companies_list(
     try:
         logger.info(f"📋 Fetching available companies for user {current_user.id}")
         
-        companies = cv_tailoring_service.list_available_companies()
+        # Initialize service for this user
+        service = CVTailoringService(user_email=current_user.email)
+        companies = service.list_available_companies()
         
         return {
             "success": True,
