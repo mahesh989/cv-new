@@ -2441,7 +2441,14 @@ FIX: Output ONLY valid JSON!
         # Extract from skills
         if hasattr(original_cv, 'skills') and original_cv.skills:
             for skill in original_cv.skills:
-                text_parts.append(skill)
+                if isinstance(skill, str):
+                    text_parts.append(skill)
+                elif hasattr(skill, 'skills') and hasattr(skill, 'category'):
+                    # This is a nested SkillCategory object
+                    logger.warning(f"⚠️ [TEXT_EXTRACTION] Found nested SkillCategory in skills: {skill.category}")
+                    text_parts.extend(skill.skills if isinstance(skill.skills, list) else [str(skill.skills)])
+                else:
+                    text_parts.append(str(skill))
         
         return ' '.join(text_parts)
 
