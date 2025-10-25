@@ -233,7 +233,7 @@ async def tailor_cv_with_real_data(
             )
             
             # Process the CV tailoring
-            response = await cv_tailoring_service.tailor_cv(request)
+            response = await service.tailor_cv(request)
             
             # Save tailored CV to cv-analysis folder - no fallback, fail if saving fails
             if response.success:
@@ -534,8 +534,11 @@ async def tailor_cv_with_real_data(
     try:
         logger.info(f"🎯 Real CV tailoring request for company: {company}")
         
+        # Initialize service for this user
+        service = CVTailoringService(user_email=current_user.email)
+        
         # Load real CV and recommendation data
-        original_cv, recommendations = cv_tailoring_service.load_real_cv_and_recommendation(company)
+        original_cv, recommendations = service.load_real_cv_and_recommendation(company)
         
         # Create tailoring request
         request = CVTailoringRequest(
@@ -546,7 +549,7 @@ async def tailor_cv_with_real_data(
         )
         
         # Process the CV tailoring
-        response = await cv_tailoring_service.tailor_cv(request)
+        response = await service.tailor_cv(request)
         
         return response
         
@@ -590,7 +593,7 @@ async def tailor_cv_with_real_data_test(
         )
         
         # Process the CV tailoring
-        response = await cv_tailoring_service.tailor_cv(request)
+        response = await service.tailor_cv(request)
         
         return response
         
@@ -1171,7 +1174,7 @@ async def _process_batch_tailoring(
                 )
                 
                 # Process tailoring
-                response = await cv_tailoring_service.tailor_cv(request)
+                response = await service.tailor_cv(request)
                 
                 # Save result
                 if response.success:
