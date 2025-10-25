@@ -140,7 +140,7 @@ class EnhancedCVValidator:
             logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Profile summary OK: {word_count} words")
         
         # Check experience count (1-3)
-        exp_count = len(cv_data.get('experience', []))
+        exp_count = len(cv_data.get('experience', []) or [] or [])
         if exp_count == 0:
             issues.append("No experience entries")
             score -= 30
@@ -153,7 +153,7 @@ class EnhancedCVValidator:
             logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Experience count OK: {exp_count}")
         
         # Check bullet counts (2-3 per entry)
-        for i, exp in enumerate(cv_data.get('experience', [])):
+        for i, exp in enumerate(cv_data.get('experience', []) or [] or []):
             bullet_count = len(exp.get('bullets', []))
             if bullet_count < 2:
                 issues.append(f"Experience {i+1} has only {bullet_count} bullets (min 2)")
@@ -167,7 +167,7 @@ class EnhancedCVValidator:
                 logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Experience {i+1} bullets OK: {bullet_count}")
         
         # Check projects count (0-3)
-        proj_count = len(cv_data.get('projects', []))
+        proj_count = len(cv_data.get('projects', []) or [] or [])
         if proj_count > 3:
             issues.append(f"Too many projects: {proj_count} (max 3)")
             score -= 10
@@ -194,7 +194,7 @@ class EnhancedCVValidator:
         quantified_bullets = 0
         verbose_bullets = 0
         
-        for exp in cv_data.get('experience', []):
+        for exp in cv_data.get('experience', []) or []:
             for bullet in exp.get('bullets', []):
                 total_bullets += 1
                 
@@ -339,7 +339,7 @@ class EnhancedCVValidator:
         
         # Extract skills from tailored CV
         tailored_skills = set()
-        for category_data in cv_data.get('skills', []):
+        for category_data in cv_data.get('skills', []) or []:
             tailored_skills.update([s.lower() for s in category_data.get('skills', [])])
         
         logger.info(f"📊 [{self.request_id}] [ENHANCED_VALIDATOR] Found {len(tailored_skills)} skills in tailored CV")
@@ -380,7 +380,7 @@ class EnhancedCVValidator:
         
         logger.debug(f"🔍 [{self.request_id}] [ENHANCED_VALIDATOR] Validating education selection...")
         
-        education = cv_data.get('education', [])
+        education = cv_data.get('education', []) or []
         education_count = len(education)
         
         logger.info(f"📊 [{self.request_id}] [ENHANCED_VALIDATOR] Education count: {education_count}")
@@ -456,17 +456,17 @@ class EnhancedCVValidator:
             text_parts.append(cv_data['profile_summary'])
         
         # Extract from experience bullets
-        for exp in cv_data.get('experience', []):
+        for exp in cv_data.get('experience', []) or []:
             for bullet in exp.get('bullets', []):
                 text_parts.append(bullet)
         
         # Extract from project bullets
-        for proj in cv_data.get('projects', []):
+        for proj in cv_data.get('projects', []) or []:
             for bullet in proj.get('bullets', []):
                 text_parts.append(bullet)
         
         # Extract from skills
-        for skill_cat in cv_data.get('skills', []):
+        for skill_cat in cv_data.get('skills', []) or []:
             for skill in skill_cat.get('skills', []):
                 text_parts.append(skill)
         
