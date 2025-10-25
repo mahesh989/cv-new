@@ -983,8 +983,26 @@ Please provide the optimized CV in the requested JSON format."""
         # Process skills
         skills_data = ai_generated_data.get("skills", [])
         skills = []
-        for skill in skills_data:
-            skills.append(SkillCategory(**skill))
+        logger.info(f"🔍 [TAILORING] Processing {len(skills_data)} skill categories")
+        for i, skill in enumerate(skills_data):
+            try:
+                logger.debug(f"🔍 [TAILORING] Skill {i}: {type(skill)} - {skill}")
+                skills.append(SkillCategory(**skill))
+            except Exception as e:
+                logger.error(f"❌ [TAILORING] Failed to process skill {i}: {e}")
+                logger.error(f"   Skill data: {skill}")
+                # Try to handle nested structures
+                if isinstance(skill, dict) and 'skills' in skill:
+                    logger.warning(f"⚠️ [TAILORING] Found nested skill structure, flattening...")
+                    # Flatten nested structure
+                    if isinstance(skill.get('skills'), list):
+                        for nested_skill in skill['skills']:
+                            if isinstance(nested_skill, str):
+                                skills.append(SkillCategory(category=skill.get('category', 'Other Skills'), skills=[nested_skill]))
+                            else:
+                                logger.warning(f"⚠️ [TAILORING] Skipping non-string nested skill: {nested_skill}")
+                else:
+                    logger.warning(f"⚠️ [TAILORING] Skipping malformed skill: {skill}")
         
         # Create the tailored CV with AI-generated content
         tailored_cv = TailoredCV(
@@ -1726,7 +1744,19 @@ FIX: Output ONLY valid JSON!
                 for skill_category in tailored_cv.skills:
                     if skill_category.category and skill_category.skills:
                         lines.append(f"  {skill_category.category}:")
-                        lines.append("  • " + ", ".join(skill_category.skills))
+                        # Handle nested SkillCategory objects or strings
+                        skill_list = []
+                        for skill in skill_category.skills:
+                            if isinstance(skill, str):
+                                skill_list.append(skill)
+                            elif hasattr(skill, 'skills') and hasattr(skill, 'category'):
+                                # This is a nested SkillCategory object
+                                logger.warning(f"⚠️ [TEXT_CONVERSION] Found nested SkillCategory in skills: {skill.category}")
+                                skill_list.extend(skill.skills if isinstance(skill.skills, list) else [str(skill.skills)])
+                            else:
+                                # Convert to string as fallback
+                                skill_list.append(str(skill))
+                        lines.append("  • " + ", ".join(skill_list))
                 lines.append("")
             
             # Experience - Format like original CV
