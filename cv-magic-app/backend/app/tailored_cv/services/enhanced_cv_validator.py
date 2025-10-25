@@ -296,7 +296,7 @@ class EnhancedCVValidator:
                 else:
                     logger.info(f"ℹ️ [{self.request_id}] [ENHANCED_VALIDATOR] Tier 2 keyword not integrated: {keyword}")
         
-        # Tier 1 should have high integration (80%+)
+        # Tier 1 should have high integration (80%+) - including adaptations
         if tier1_total > 0:
             tier1_rate = (tier1_integrated / tier1_total) * 100
             if tier1_rate < 80:
@@ -305,6 +305,14 @@ class EnhancedCVValidator:
                 logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Low Tier 1 integration: {tier1_rate:.0f}% (-15 points)")
             else:
                 logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Good Tier 1 integration: {tier1_rate:.0f}%")
+        
+        # Check for Tier 1 adaptations (modifications without evidence)
+        tier1_adaptations = integrator.validate_keyword_integration(critical_keywords).get('tier1_adapt', [])
+        if tier1_adaptations:
+            logger.info(f"🔧 [{self.request_id}] [ENHANCED_VALIDATOR] Tier 1 adaptations available: {len(tier1_adaptations)} keywords")
+            # Generate modifications for these keywords
+            modifications = integrator.generate_tier1_modifications(tier1_adaptations)
+            logger.info(f"🔧 [{self.request_id}] [ENHANCED_VALIDATOR] Generated {len(modifications)} Tier 1 modifications")
         
         # Tier 2 is optional (no penalty)
         if tier2_total > 0:

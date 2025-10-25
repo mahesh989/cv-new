@@ -188,7 +188,8 @@ class EnhancedKeywordIntegrator:
         logger.info(f"🔍 [{self.request_id}] [ENHANCED_KEYWORDS] Starting keyword integration validation for {len(missing_keywords)} keywords")
         
         results = {
-            'tier1_integrate': [],  # Always add
+            'tier1_integrate': [],  # Always add (generic/transferable)
+            'tier1_adapt': [],      # Tier 1 with small modifications
             'tier2_integrate': [],  # Add if evidence exists
             'tier3_reject': [],     # Never add
             'tier2_no_evidence': [] # Don't add (no evidence)
@@ -200,8 +201,15 @@ class EnhancedKeywordIntegrator:
             classification = self.classify_keyword(keyword)
             
             if classification.tier == 1:
-                results['tier1_integrate'].append(keyword)
-                logger.info(f"✅ [{self.request_id}] [ENHANCED_KEYWORDS] Tier 1 - Always integrate: '{keyword}'")
+                # Check if we can find semantic evidence first
+                has_evidence, reason = self.has_semantic_evidence(keyword)
+                if has_evidence:
+                    results['tier1_integrate'].append(keyword)
+                    logger.info(f"✅ [{self.request_id}] [ENHANCED_KEYWORDS] Tier 1 - Integrate (has evidence): '{keyword}' - {reason}")
+                else:
+                    # Even without evidence, integrate with small modifications for generic skills
+                    results['tier1_adapt'].append(keyword)
+                    logger.info(f"✅ [{self.request_id}] [ENHANCED_KEYWORDS] Tier 1 - Adapt (generic skill): '{keyword}' - Will integrate with modifications")
             
             elif classification.tier == 2:
                 has_evidence, reason = self.has_semantic_evidence(keyword)
@@ -218,12 +226,44 @@ class EnhancedKeywordIntegrator:
         
         # Summary logging
         logger.info(f"📊 [{self.request_id}] [ENHANCED_KEYWORDS] Keyword integration summary:")
-        logger.info(f"   - Tier 1 (Always): {len(results['tier1_integrate'])} keywords")
+        logger.info(f"   - Tier 1 (With Evidence): {len(results['tier1_integrate'])} keywords")
+        logger.info(f"   - Tier 1 (Adapt/Modify): {len(results['tier1_adapt'])} keywords")
         logger.info(f"   - Tier 2 (With Evidence): {len(results['tier2_integrate'])} keywords")
         logger.info(f"   - Tier 2 (No Evidence): {len(results['tier2_no_evidence'])} keywords")
         logger.info(f"   - Tier 3 (Rejected): {len(results['tier3_reject'])} keywords")
         
         return results
+    
+    def generate_tier1_modifications(self, keywords: List[str]) -> Dict[str, str]:
+        """Generate modified versions of Tier 1 keywords for integration without evidence"""
+        
+        logger.info(f"🔧 [{self.request_id}] [ENHANCED_KEYWORDS] Generating Tier 1 modifications for {len(keywords)} keywords")
+        
+        modifications = {}
+        
+        for keyword in keywords:
+            keyword_lower = keyword.lower()
+            
+            # Generate context-appropriate modifications
+            if keyword_lower in ['leadership', 'team leadership']:
+                modifications[keyword] = "Demonstrated leadership through project coordination and team collaboration"
+            elif keyword_lower in ['communication', 'verbal communication', 'written communication']:
+                modifications[keyword] = "Strong communication skills developed through stakeholder interaction and technical documentation"
+            elif keyword_lower in ['teamwork', 'collaboration']:
+                modifications[keyword] = "Proven teamwork abilities through cross-functional collaboration and project delivery"
+            elif keyword_lower in ['problem solving', 'analytical thinking']:
+                modifications[keyword] = "Strong problem-solving skills applied to technical challenges and process optimization"
+            elif keyword_lower in ['time management', 'project management']:
+                modifications[keyword] = "Effective time management demonstrated through project delivery and deadline adherence"
+            elif keyword_lower in ['adaptability', 'flexibility']:
+                modifications[keyword] = "Adaptable professional with experience across diverse technical environments"
+            else:
+                # Generic modification for other Tier 1 keywords
+                modifications[keyword] = f"Developed {keyword} skills through professional experience and continuous learning"
+            
+            logger.info(f"🔧 [{self.request_id}] [ENHANCED_KEYWORDS] Modified '{keyword}' → '{modifications[keyword]}'")
+        
+        return modifications
 
 
 class SemanticSkillsCategorizer:
