@@ -458,7 +458,7 @@ class CVTailoringService:
             # Try to parse and validate
             try:
                 tailored_data = self._extract_and_parse_json(ai_response.content)
-                assessment = self._validate_tailored_json(tailored_data, request_id=request_id)
+                assessment = self._validate_tailored_json(tailored_data, request_id=request_id, recommendations=recommendations)
                 self._validate_real_cv_data_used(tailored_data, original_cv)
                 self._validate_keyword_integration(tailored_data, recommendations, request_id=request_id)
                 
@@ -510,7 +510,7 @@ class CVTailoringService:
             )
             try:
                 tailored_data = self._extract_and_parse_json(ai_response.content)
-                assessment = self._validate_tailored_json(tailored_data, request_id=request_id)
+                assessment = self._validate_tailored_json(tailored_data, request_id=request_id, recommendations=recommendations)
                 quant_ratio = assessment.get("quantification_ratio", 0.0)
             except Exception as e:
                 logger.warning(f"[{request_id}] Enhancement attempt failed: {e}")
@@ -610,7 +610,13 @@ class CVTailoringService:
 
 ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
 
-1. CONTACT INFORMATION RULES:
+1. PROFILE SUMMARY RULES:
+   - Generate from scratch using JD + CV (don't reuse existing)
+   - 50 words max (2-3 sentences)
+   - Include: Years experience, key JD-matching skills, notable achievements, value proposition
+   - Example: "Data Analyst with 5+ years transforming datasets into insights. Expert in Python, SQL, Tableau with proven track record optimizing pipelines and creating executive dashboards. Strong statistical analysis and visualization skills."
+
+2. CONTACT INFORMATION RULES:
    - COPY ALL contact fields EXACTLY from the original CV's contact section
    - NEVER leave any contact field empty or null - use empty string if no value exists
    - If a field exists in the original CV, you MUST include it with its exact value
@@ -633,7 +639,15 @@ ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
    BAD: "Led team to deliver projects"
    GOOD: "Led 8-person team to deliver 5 projects worth $1.2M in 6 months"
 
-2. KEYWORD INTEGRATION RULES:
+2. BULLET POINT RULES:
+   - Count: 2-3 bullets per experience/project
+   - Length: Concise (~15-25 words) - avoid verbosity
+   - Consolidation (4+ bullets): Merge related achievements by JD relevance, remove non-semantic content, preserve metrics
+
+3. TIERED KEYWORD INTEGRATION RULES:
+   - TIER 1 (Always): Generic role keywords, synonyms, standard industry terms, soft skills with clear evidence
+   - TIER 2 (If Evidence): Transferable tools, platform-agnostic terms, generic technical categories
+   - TIER 3 (Never): Specific tool variants, advanced features, certifications, domain expertise without experience
    - ONLY add keywords that have semantic matches or clear evidence in the original CV
    - NEVER add keywords that cannot be reasonably inferred from existing experience
    - Look for synonyms and related terms in the original CV before adding keywords
@@ -689,6 +703,7 @@ The exact JSON structure must be:
     "phone": "EXACT phone from provided CV",
     "location": "EXACT location from provided CV"
   },
+  "profile_summary": "2-3 sentence professional summary tailored to JD (max 50 words)",
   "education": [
     {
       "institution": "EXACT institution from provided CV",
@@ -839,14 +854,26 @@ YOUR TASK - TRANSFORM THIS CV:
             prompt += "\nADDITIONAL CUSTOM INSTRUCTIONS:\n" + custom_instructions + "\n"
         
         prompt += """
+PROFILE SUMMARY GENERATION:
+- Create a 2-3 sentence professional summary (max 50 words)
+- Include: Years experience, key JD-matching skills, notable achievements, value proposition
+- Tailor specifically to the target role and company
+- Do NOT reuse existing summary from original CV
+
+EXAMPLE:
+"Data Analyst with 5+ years transforming datasets into insights. Expert in Python, SQL, Tableau with proven track record optimizing pipelines and creating executive dashboards. Strong statistical analysis and visualization skills."
+
 CRITICAL REMINDERS:
 - First, EXACTLY copy ALL contact information fields
+- Generate profile summary from scratch (don't reuse existing)
 - Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 - Add REALISTIC numbers based on CV evidence
 - ONLY integrate keywords with semantic matches in original CV
 - If a recommended keyword has no CV evidence, DO NOT ADD IT
 - Use conservative estimates when adding metrics
 - Maintain consistency in scale across all quantification
+- Limit bullets to 2-3 per role (consolidate if more)
+- Keep bullets concise (15-25 words)
 - Numbers should reflect actual role scope and company size
 - Never return whitespace-only or null values - use empty string '' instead
 
@@ -1086,7 +1113,7 @@ Please provide the optimized CV in the requested JSON format."""
             logger.error(f"JSON parsing failed. Content: {content[:1000]}...")
             raise ValueError(f"Invalid JSON format in AI response: {e}")
     
-    def _validate_tailored_json(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
+    def _validate_tailored_json(self, data: Dict[str, Any], request_id: str = 'debug', recommendations: Optional[RecommendationAnalysis] = None) -> None:
         """Validate that parsed JSON has expected structure and content quality"""
         required_fields = ['contact', 'experience', 'skills']
         
@@ -1210,6 +1237,15 @@ BULLETS NEEDING IMPROVEMENT:
             raise ValueError("Skills field must be an array")
         
         logger.info(f"✅ JSON structure and Impact Formula validation passed ({bullets_with_quantification}/{total_bullets} bullets with quantification)")
+
+        # NEW FRAMEWORK VALIDATIONS
+        self._validate_profile_summary(data, request_id)
+        self._validate_bullet_consolidation(data, request_id)
+        self._validate_education_selection(data, request_id)
+        
+        # Validate tiered keywords if recommendations are available
+        if recommendations:
+            self._validate_tiered_keywords(data, recommendations, request_id)
 
         # Return assessment so callers can make decisions (e.g., retry to improve quantification)
         return quality_assessment
@@ -2018,6 +2054,249 @@ FIX: Output ONLY valid JSON!
                             extracted_skills.append(skill)
         
         return extracted_skills
+    
+    def _validate_profile_summary(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
+        """Validate profile summary according to new framework rules"""
+        logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating profile summary...")
+        
+        profile = data.get('profile_summary')
+        if not profile:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary is missing")
+            return
+        
+        if not isinstance(profile, str):
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary is not a string")
+            return
+        
+        # Check word count (max 50 words)
+        word_count = len(profile.split())
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Profile summary word count: {word_count}")
+        
+        if word_count > 50:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary exceeds 50 words: {word_count} words")
+        else:
+            logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary word count is within limit")
+        
+        # Check for key elements
+        profile_lower = profile.lower()
+        has_experience_years = any(word in profile_lower for word in ['years', 'experience', 'experienced'])
+        has_skills = any(word in profile_lower for word in ['expert', 'proficient', 'skilled', 'knowledge'])
+        has_achievements = any(word in profile_lower for word in ['achieved', 'delivered', 'improved', 'increased', 'reduced'])
+        
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Profile summary analysis:")
+        logger.info(f"   - Has experience years: {has_experience_years}")
+        logger.info(f"   - Has skills: {has_skills}")
+        logger.info(f"   - Has achievements: {has_achievements}")
+        
+        if not has_experience_years:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary missing experience years")
+        if not has_skills:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary missing skills mention")
+        if not has_achievements:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary missing achievements")
+    
+    def _validate_bullet_consolidation(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
+        """Validate bullet consolidation according to new framework rules"""
+        logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating bullet consolidation...")
+        
+        # Check experience bullets
+        experience = data.get('experience', [])
+        total_experience_bullets = 0
+        over_limit_experience = 0
+        
+        for i, exp in enumerate(experience):
+            bullets = exp.get('bullets', [])
+            bullet_count = len(bullets)
+            total_experience_bullets += bullet_count
+            
+            logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Experience {i+1}: {bullet_count} bullets")
+            
+            if bullet_count > 3:
+                over_limit_experience += 1
+                logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Experience {i+1} has {bullet_count} bullets (max 3 recommended)")
+            
+            # Check bullet length
+            for j, bullet in enumerate(bullets):
+                word_count = len(bullet.split())
+                if word_count > 25:
+                    logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Experience {i+1}, bullet {j+1} is {word_count} words (max 25 recommended)")
+        
+        # Check project bullets
+        projects = data.get('projects', [])
+        total_project_bullets = 0
+        over_limit_projects = 0
+        
+        for i, proj in enumerate(projects):
+            bullets = proj.get('bullets', [])
+            bullet_count = len(bullets)
+            total_project_bullets += bullet_count
+            
+            logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Project {i+1}: {bullet_count} bullets")
+            
+            if bullet_count > 3:
+                over_limit_projects += 1
+                logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Project {i+1} has {bullet_count} bullets (max 3 recommended)")
+        
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Bullet consolidation summary:")
+        logger.info(f"   - Total experience bullets: {total_experience_bullets}")
+        logger.info(f"   - Experience roles over limit: {over_limit_experience}")
+        logger.info(f"   - Total project bullets: {total_project_bullets}")
+        logger.info(f"   - Projects over limit: {over_limit_projects}")
+    
+    def _validate_education_selection(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
+        """Validate education selection according to new framework rules"""
+        logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating education selection...")
+        
+        education = data.get('education', [])
+        education_count = len(education)
+        
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Education count: {education_count}")
+        
+        if education_count > 3:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Education section has {education_count} entries (max 3 recommended)")
+        
+        # Check for overqualification
+        advanced_degrees = []
+        for edu in education:
+            degree = edu.get('degree', '').lower()
+            if any(term in degree for term in ['phd', 'doctorate', 'master', 'mba']):
+                advanced_degrees.append(degree)
+        
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Advanced degrees found: {len(advanced_degrees)}")
+        for degree in advanced_degrees:
+            logger.info(f"   - {degree}")
+        
+        if len(advanced_degrees) > 2:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Multiple advanced degrees detected - consider overqualification risk")
+    
+    def _classify_tiered_keywords(self, recommendations: RecommendationAnalysis) -> Dict[str, List[str]]:
+        """Classify keywords into tiers based on framework rules"""
+        logger.info("🔍 [FRAMEWORK_VALIDATION] Classifying keywords into tiers...")
+        
+        # Get missing keywords from recommendations
+        missing_keywords = recommendations.missing_keywords or []
+        
+        tier_1_keywords = []
+        tier_2_keywords = []
+        tier_3_keywords = []
+        
+        # Define tier classification rules
+        tier_1_patterns = [
+            'data analysis', 'business intelligence', 'analytics', 'reporting',
+            'communication', 'leadership', 'teamwork', 'problem solving',
+            'project management', 'stakeholder', 'collaboration'
+        ]
+        
+        tier_2_patterns = [
+            'database', 'programming', 'scripting', 'cloud', 'platform',
+            'efficiency', 'optimization', 'automation', 'visualization'
+        ]
+        
+        tier_3_patterns = [
+            'postgresql', 'mysql', 'dax', 'tableau server', 'power bi server',
+            'scrum master', 'saf', 'agile certified', 'machine learning', 'ai'
+        ]
+        
+        for keyword in missing_keywords:
+            keyword_lower = keyword.lower()
+            
+            if any(pattern in keyword_lower for pattern in tier_1_patterns):
+                tier_1_keywords.append(keyword)
+            elif any(pattern in keyword_lower for pattern in tier_2_patterns):
+                tier_2_keywords.append(keyword)
+            elif any(pattern in keyword_lower for pattern in tier_3_patterns):
+                tier_3_keywords.append(keyword)
+            else:
+                # Default to tier 2 for unknown keywords
+                tier_2_keywords.append(keyword)
+        
+        logger.info(f"📊 [FRAMEWORK_VALIDATION] Keyword tier classification:")
+        logger.info(f"   - Tier 1 (Always): {len(tier_1_keywords)} keywords")
+        logger.info(f"   - Tier 2 (If Evidence): {len(tier_2_keywords)} keywords")
+        logger.info(f"   - Tier 3 (Never): {len(tier_3_keywords)} keywords")
+        
+        return {
+            'tier_1': tier_1_keywords,
+            'tier_2': tier_2_keywords,
+            'tier_3': tier_3_keywords
+        }
+    
+    def _validate_tiered_keywords(self, data: Dict[str, Any], recommendations: RecommendationAnalysis, request_id: str = 'debug') -> None:
+        """Validate tiered keyword integration according to new framework rules"""
+        logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating tiered keyword integration...")
+        
+        # Classify keywords into tiers
+        keyword_tiers = self._classify_tiered_keywords(recommendations)
+        tier_1_keywords = keyword_tiers['tier_1']
+        tier_2_keywords = keyword_tiers['tier_2']
+        tier_3_keywords = keyword_tiers['tier_3']
+        
+        # Extract CV text for keyword checking
+        cv_text = self._extract_cv_text(data)
+        cv_text_lower = cv_text.lower()
+        
+        # Check for Tier 3 keywords (should not be present)
+        tier_3_found = []
+        for keyword in tier_3_keywords:
+            if keyword.lower() in cv_text_lower:
+                tier_3_found.append(keyword)
+        
+        if tier_3_found:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Tier 3 keywords incorrectly added: {tier_3_found}")
+        else:
+            logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] No Tier 3 keywords found (correct)")
+        
+        # Check for Tier 1 keywords (should be present)
+        tier_1_missing = []
+        for keyword in tier_1_keywords:
+            if keyword.lower() not in cv_text_lower:
+                tier_1_missing.append(keyword)
+        
+        if tier_1_missing:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Missing Tier 1 keywords: {tier_1_missing}")
+        else:
+            logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] All Tier 1 keywords present")
+        
+        # Check for Tier 2 keywords (optional, but log if present)
+        tier_2_found = []
+        for keyword in tier_2_keywords:
+            if keyword.lower() in cv_text_lower:
+                tier_2_found.append(keyword)
+        
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Tier 2 keywords found: {len(tier_2_found)}/{len(tier_2_keywords)}")
+        if tier_2_found:
+            logger.info(f"   - Found: {tier_2_found}")
+        
+        # Summary
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Tiered keyword validation summary:")
+        logger.info(f"   - Tier 1 (Required): {len(tier_1_keywords) - len(tier_1_missing)}/{len(tier_1_keywords)} present")
+        logger.info(f"   - Tier 2 (Optional): {len(tier_2_found)}/{len(tier_2_keywords)} present")
+        logger.info(f"   - Tier 3 (Forbidden): {len(tier_3_found)}/{len(tier_3_keywords)} incorrectly added")
+    
+    def _extract_cv_text(self, data: Dict[str, Any]) -> str:
+        """Extract all text content from CV data for keyword analysis"""
+        text_parts = []
+        
+        # Extract from profile summary
+        if data.get('profile_summary'):
+            text_parts.append(data['profile_summary'])
+        
+        # Extract from experience bullets
+        for exp in data.get('experience', []):
+            for bullet in exp.get('bullets', []):
+                text_parts.append(bullet)
+        
+        # Extract from project bullets
+        for proj in data.get('projects', []):
+            for bullet in proj.get('bullets', []):
+                text_parts.append(bullet)
+        
+        # Extract from skills
+        for skill_cat in data.get('skills', []):
+            for skill in skill_cat.get('skills', []):
+                text_parts.append(skill)
+        
+        return ' '.join(text_parts)
 
 
 # Global instance removed - service now requires user_email parameter

@@ -2,128 +2,199 @@
 
 ## 🎯 **CORE OPTIMIZATION ENGINE**
 
-### **Impact Statement Formula (MANDATORY)**
-Transform every bullet point to: **[Action Verb] + [Specific Method/Technology] + [Context/Challenge] + [Quantified Result] + [Business Impact]**
+### **Impact Statement Formula**
+**[Action Verb] + [Method/Technology] + [Context] + [Quantified Result] + [Business Impact]**
 
-**Example:** "Led 5-person analytics team using Python/SQL to analyze 10M+ customer records, identifying $2M revenue opportunity and reducing churn by 15% within 6 months"
+Example: "Led 5-person analytics team using Python/SQL to analyze 10M+ customer records, identifying $2M revenue opportunity and reducing churn by 15%"
 
-### **Quantification Requirements**
-Every bullet MUST include metrics: Financial ($X savings/revenue), Scale (X people/records/%), Performance (X% faster/accurate), Growth (X% increase)
+### **Bullet Point Rules**
+- **Count:** 2-3 bullets per experience/project
+- **Length:** Concise (~15-25 words) - avoid verbosity
+- **Consolidation (4+ bullets):** Merge related achievements by JD relevance, remove non-semantic content, preserve metrics
+
+### **Quantification**
+Include metrics: Financial ($X), Scale (X records/%), Performance (X% faster), Growth (X% increase)
 
 ### **Section Structure**
 ```
-[CONTACT - NO HEADER]
-Name | Phone | Email | LinkedIn | Location
+[CONTACT] Name | Phone | Email | LinkedIn | Location
+
+[PROFILE] 2-3 sentences (MAX 50 words) tailored to JD
 
 ## Education [or Experience - most relevant first]
 ## Experience  
 Company, Title, Location | Duration
-• [Impact statements - max 4 bullets per role]
+• [2-3 bullets per role]
 
-## Projects (OPTIONAL - include only if available and relevant)
+## Projects (if relevant)
 **Project Name** - Context
-• Challenge/approach and quantified outcomes
+• [2-3 bullets]
 
 ## Skills
-Category: tools, tools | Category: tools, tools [single paragraph, ATS-optimized]
+Category: tools | Category: tools [ATS-optimized]
 ```
+
+---
+
+## 📝 **PROFILE SUMMARY**
+
+- **Generate from scratch** using JD + CV (don't reuse existing)
+- **50 words max** (2-3 sentences)
+- **Include:** Years experience, key JD-matching skills, notable achievements, value proposition
+
+Example: "Data Analyst with 5+ years transforming datasets into insights. Expert in Python, SQL, Tableau with proven track record optimizing pipelines and creating executive dashboards. Strong statistical analysis and visualization skills."
+
+---
+
+## 🎯 **CONTENT SELECTION**
+
+### **Experience (1-3 roles)**
+- Select most JD-relevant experiences
+- **Priority:** Direct match → Adjacent roles → Transferable roles
+- **Flexibility:** If only 1-2 relevant, include those (not forced to 3)
+- **Fallback:** Include less-relevant roles BUT reframe with JD keywords
+
+### **Projects (0-3)**
+- Select most JD-relevant projects
+- Include only if adding unique value beyond experience
+
+**Example:** For Data Analyst role, prioritize: Data Analyst, BI, Analytics roles. Include Software Engineer IF contains data/SQL work. Exclude pure Frontend/Marketing unless no alternatives.
 
 ---
 
 ## 🎪 **STRATEGIC POSITIONING**
 
-### **Education Decision Matrix**
-- **Recent graduates (0-3 years):** Education first, include GPA if >3.5
-- **Mid-level (3-7 years):** Experience first, education minimal
-- **Senior-level (7+ years):** Education last, degrees only
+### **Education Placement**
+- **0-3 years:** Education first, include GPA if >3.5
+- **3-7 years:** Experience first
+- **7+ years:** Education last, degrees only
 
-### **PhD/Advanced Degree Strategy**
-**Include when:** Research/R&D roles, innovation-focused companies, technical leadership
-**Minimize when:** Entry-level operational roles, startup environments, overqualification risks
+### **PhD Strategy**
+Include for research/R&D/technical leadership roles. Minimize for entry-level/startup roles (overqualification risk).
 
-### **Industry Transition Translation**
-- Research projects → Business intelligence analysis
-- Academic presentations → Stakeholder communication  
-- Thesis work → Strategic analysis and solution development
-- Teaching/mentoring → Team development and knowledge transfer
+### **Industry Transition**
+Research → BI analysis | Presentations → Stakeholder communication | Thesis → Strategic analysis | Teaching → Team development
 
 ---
 
-## 🔧 **OPTIMIZATION METHODOLOGY**
+## 🔧 **OPTIMIZATION PROTOCOL**
 
-### **Recommendations Implementation Protocol**
-**MANDATORY:** Execute ALL gap-closing strategies from the provided recommendation analysis
+### **Execute ALL Recommendation Gaps**
 
-1. **Critical Missing Keywords (Priority 1):**
-   - Extract all 0% match keywords from recommendations
-   - Integrate naturally into experience descriptions and skills section
-   - Example: If recommendations identify "Data Intelligence" as missing, weave into relevant experience bullets or project descriptions (if projects section exists)
+**Keyword Integration Tiers:**
 
-2. **Technical Skills Enhancement (Priority 2):**
-   - **Transferable Skills:** If CV has foundational skill and JD requires specific variant, include the specific tool (e.g., SQL → PostgreSQL, Python → Python/Pandas, Cloud → AWS/Azure)
-   - **Related Technologies:** Add closely related tools within existing skill domains (e.g., if proficient in Tableau, can add Power BI; if skilled in REST APIs, can mention GraphQL)
-   - **DO NOT fabricate:** Only include tools that are realistic extensions of existing competencies
-   - Example: "Proficient in SQL including PostgreSQL and MySQL" (when CV shows SQL experience) or "Data visualization using Tableau and Power BI" (when CV shows Tableau)
+**TIER 1 - Always Integrate (Simple/Transferable):**
+- Generic role keywords matching experience (e.g., CV has "Data Analyst" → add "Business Intelligence", "Analytics")
+- Common synonyms/variants (e.g., "collaborated" ↔ "teamwork", "presented" ↔ "communication")
+- Standard industry terms for described work (e.g., doing ETL work → add "data pipeline", "data integration")
+- Soft skills with clear evidence (e.g., "led 5 people" → "leadership", "team management")
 
-3. **Soft Skills Amplification (Priority 3):**
-   - Implement every soft skills gap identified in recommendations
-   - Provide concrete evidence within existing achievements
-   - Example: If "innovation" missing, reframe existing projects to highlight innovative approaches
+**TIER 2 - Integrate if Semantic Evidence (Transferable Tools):**
+- Tool families where one implies others (e.g., Excel → "spreadsheet analysis", SQL → "database querying")
+- Platform-agnostic terms (e.g., "cloud" mentioned → "cloud computing", "cloud services")
+- Generic technical categories (e.g., has Python → "programming", "scripting")
+- Related soft skills with indirect evidence (e.g., "reduced costs" → "efficiency", "optimization")
 
-4. **Company-Specific Optimization:**
-   - Apply all company fit improvements suggested in recommendations
-   - Mirror target company's preferred language and values
-   - Integrate industry-specific terminology as recommended
+**TIER 3 - DO NOT Add (Specific Tools/Unverifiable):**
+- ❌ Specific tool variants not mentioned (e.g., SQL ≠ PostgreSQL/MySQL specific features)
+- ❌ Advanced features without evidence (e.g., Tableau ≠ Tableau Server, Power BI ≠ DAX)
+- ❌ Certifications/frameworks not held (e.g., Agile ≠ "Scrum Master", "SAFe")
+- ❌ Domain expertise without experience (e.g., "analyzed data" ≠ "machine learning", "AI/ML")
 
-### **Keyword Integration Strategy**
-- **Skills Section:** Primary keyword clusters, comma-separated by category
-- **Experience Bullets:** Natural embedding within achievement context
-- **Projects (if available):** Technical keyword emphasis with outcomes
-- **No keyword stuffing:** Maintain professional readability
+**Integration Protocol:**
+1. **Missing Keywords (Priority 1):** Integrate ALL Tier 1 keywords. Add Tier 2 if semantic evidence exists in bullets/projects.
+2. **Technical Skills (Priority 2):** Add generic categories (Tier 2). Avoid specific variants (Tier 3).
+3. **Soft Skills (Priority 3):** Provide evidence for identified gaps within existing achievements.
+4. **Company-Specific:** Mirror target language, values, industry terminology.
 
-### **Psychological Triggers Integration**
-- **Authority:** Selection from competitive pools, third-party validation
-- **Problem-Solving:** Quantified complexity and analytical solutions  
-- **Growth Trajectory:** Increasing responsibility aligned with target role
-- **Cultural Alignment:** Company values language where authentic
+**Validation Questions (before adding ANY keyword):**
+- ✅ Can candidate defend this in interview with concrete example?
+- ✅ Does original CV have semantic evidence (direct or indirect)?
+- ❌ Is this a specific tool/certification they never mentioned?
+- ❌ Would this require training/experience they don't have?
+
+### **Bullet Consolidation (4+ bullets)**
+Group by theme → Merge related achievements → Preserve metrics → Remove non-JD content → **Prioritize quality over keyword density**
+
+Example:
+```
+Before (5 bullets):
+• Built Python ETL pipelines processing 10M records
+• Optimized SQL queries reducing runtime 40%
+• Created Tableau dashboards for executives
+• Led team meetings (not relevant)
+• Implemented data validation
+
+After (3 bullets - Quality focused):
+• Developed Python ETL pipelines processing 10M+ records with optimized SQL, reducing runtime 40%
+• Created executive Tableau dashboards driving decisions across 5 departments
+• Implemented data validation framework ensuring 99.9% accuracy
+```
+
+### **Keyword Integration Rules**
+**Skills Section:** 
+- Tier 1 keywords (always add)
+- Tier 2 keywords with evidence (generic categories)
+- NO Tier 3 keywords (specific unverified tools)
+
+**Experience Bullets:** 
+- Natural embedding within authentic achievements
+- Add ONLY keywords with semantic evidence
+- Maintain interview-defensibility
+
+**Quality Principle:** Better to miss a keyword than add an unverifiable one. ATS match of 75-80% with authentic content > 90% with questionable additions.
 
 ---
 
 ## 🤖 **ATS & INTERVIEW OPTIMIZATION**
 
-### **The Four Hiring Manager Questions**
-Every element must address:
-1. **Can they do the job?** → Skills alignment + proven track record
-2. **Will they do the job?** → Cultural fit + demonstrated motivation  
-3. **Can we afford them?** → Appropriate positioning for role level
-4. **Will they stay?** → Career progression logic + genuine interest
+### **Four Hiring Questions**
+1. Can they do it? → Skills + track record
+2. Will they do it? → Cultural fit + motivation
+3. Can we afford them? → Appropriate level positioning
+4. Will they stay? → Career logic + genuine interest
 
-### **ATS Score Target: 80+ Points**
-**High-Impact:** Domain keywords (+10-15), Technical alignment (+8-12), Industry language (+5-10)
-**Medium-Impact:** Soft skills evidence (+5-8), Cultural alignment (+3-7)
-**Fine-Tuning:** Consistent terminology, strategic section ordering
+### **ATS Target: 80+ Points**
+High-impact: Domain keywords (+10-15), Technical alignment (+8-12), Industry language (+5-10)
+Medium-impact: Soft skills (+5-8), Cultural alignment (+3-7)
 
-### **Interview-Triggering Elements**
-- **Specific Relevance:** Direct experience with similar challenges
-- **Quantified Success:** Measurable achievements in comparable contexts
-- **Growth Evidence:** Clear trajectory toward target requirements
-- **Curiosity Factor:** Unique achievement meriting discussion
+### **Interview Triggers**
+Specific relevance | Quantified success | Growth evidence | Unique achievements
 
 ---
 
 ## ✅ **QUALITY STANDARDS**
 
-### **Truth Constraint** 
+### **Truth Constraint**
 Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 
-### **Success Validation**
-- All bullets follow Impact Formula with quantified metrics
-- Keywords naturally integrated from job requirements  
-- Professional narrative coherence maintained
-- 80+ ATS score achievable
-- Addresses all four hiring manager concerns
-- Interview-defensible content throughout
+### **Keyword Integration Examples**
+
+**✅ GOOD (Tier 1/2 - Transferable):**
+- CV: "Analyzed sales data" + JD needs "Business Intelligence" → Add "business intelligence" ✓
+- CV: "Led team of 5" + JD needs "Leadership" → Add "team leadership" ✓
+- CV: "Used SQL daily" + JD needs "Database" → Add "database querying" ✓
+- CV: "Created Excel reports" + JD needs "Data Analysis" → Add "data analysis" ✓
+- CV: "Presented to stakeholders" + JD needs "Communication" → Add "stakeholder communication" ✓
+
+**❌ BAD (Tier 3 - Unverifiable):**
+- CV: "Used SQL" + JD needs "PostgreSQL" → Don't add "PostgreSQL" ✗ (specific variant)
+- CV: "Made dashboards" + JD needs "Power BI" → Don't add "Power BI" ✗ (never mentioned)
+- CV: "Analyzed data" + JD needs "Machine Learning" → Don't add "ML" ✗ (different skillset)
+- CV: "Used Excel" + JD needs "DAX" → Don't add "DAX" ✗ (advanced feature)
+- CV: "Team player" + JD needs "Scrum Master" → Don't add "Scrum" ✗ (certification)
+
+### **Validation Checklist**
+- ✅ Profile summary ≤50 words
+- ✅ 1-3 experiences (JD-relevant)
+- ✅ 0-3 projects (if relevant)
+- ✅ 2-3 bullets per entry (concise)
+- ✅ All bullets have metrics
+- ✅ **Only Tier 1/2 keywords integrated**
+- ✅ **No Tier 3 unverifiable keywords**
+- ✅ 75-80+ ATS score (authentic content)
+- ✅ Interview-defensible content
 
 ---
 
-**EXECUTION FOCUS:** Transform existing content into maximum professional impact while maintaining complete authenticity - create strategic marketing document optimized for ATS screening and interview generation.
+**EXECUTION:** Transform existing content into maximum impact while maintaining authenticity - optimize for ATS and interview generation.

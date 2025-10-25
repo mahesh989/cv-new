@@ -456,9 +456,18 @@ class ResumePDFGenerator:
             elements.append(Paragraph("Contact Information", self.styles['Name']))
             elements.append(Paragraph("Please check your profile settings", self.styles['Contact']))
 
-        # Career profile
+        # Profile Summary (NEW FRAMEWORK)
+        profile_summary = self.data.get('profile_summary', '')
+        if profile_summary:
+            logger.info("[PDF_EXPORT] Adding profile summary section")
+            elements.extend(self._create_section_with_line('PROFESSIONAL SUMMARY'))
+            elements.append(self._paragraph_block(profile_summary))
+            elements.append(Spacer(1, self.spacing['section_below']))
+        
+        # Career profile (legacy support)
         profile = self.data.get('career_profile', {})
         if isinstance(profile, dict) and profile.get('summary'):
+            logger.info("[PDF_EXPORT] Adding legacy career profile section")
             elements.extend(self._create_section_with_line('CAREER PROFILE'))
             elements.append(self._paragraph_block(profile['summary']))
 
