@@ -7,6 +7,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.auth import verify_token
 from app.models.auth import TokenData, UserData
+from sqlalchemy.orm import Session
 
 # Security scheme for extracting Bearer tokens
 security = HTTPBearer()
@@ -89,3 +90,18 @@ async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] 
         return user
     except HTTPException:
         return None
+
+
+def get_user_by_id(db: Session, user_id: int):
+    """
+    Get user by ID from database
+    
+    Args:
+        db: Database session
+        user_id: User ID to look up
+        
+    Returns:
+        User object or None if not found
+    """
+    from app.models.user import User
+    return db.query(User).filter(User.id == user_id).first()
