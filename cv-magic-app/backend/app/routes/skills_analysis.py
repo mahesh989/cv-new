@@ -799,7 +799,7 @@ async def analyze_skills(request: Request, current_user: UserData = Depends(get_
 @router.post("/context-aware-analysis")
 async def context_aware_analysis(
     request: Request,
-    current_model: str = Depends(get_current_model)
+    current_model: str = "gpt-4o"  # Default model
 ):
     """Context-aware analysis that intelligently selects CV and caches JD data"""
     try:
@@ -932,7 +932,7 @@ async def context_aware_analysis(
 @router.post("/preliminary-analysis")
 async def preliminary_analysis(
     request: Request,
-    current_model: str = Depends(get_current_model)
+    current_model: str = "gpt-4o"  # Default model
 ):
     """Preliminary skills analysis from CV filename and JD text"""
     try:
@@ -1058,7 +1058,7 @@ async def preliminary_analysis(
             cv_content=cv_content,
             jd_text=jd_text,
             cv_filename=cv_filename,
-            current_model=current_model,
+            current_model="gpt-4o",
             config_name=config_name,
             user_id=user_id,
             user_email=user_email,
