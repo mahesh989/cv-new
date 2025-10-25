@@ -20,6 +20,8 @@ from app.tailored_cv.models.cv_models import (
     CVValidationResult, CVValidationError
 )
 from app.tailored_cv.services.recommendation_parser import RecommendationParser
+from .enhanced_keyword_integrator import EnhancedKeywordIntegrator, SemanticSkillsCategorizer
+from .enhanced_cv_validator import EnhancedCVValidator, ValidationResult
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,7 @@ class CVTailoringService:
         self.user_email = user_email
         self.cv_analysis_path = get_user_base_path(user_email)
         self.framework_path = Path(__file__).parent.parent / "prompts" / "framework.md"
+        self._original_cv_content = ""  # Store original CV content for semantic validation
         self._load_framework()
     
     def _load_framework(self) -> None:
@@ -61,6 +64,10 @@ class CVTailoringService:
         """
         try:
             logger.info(f"🎯 Starting CV tailoring for {request.recommendations.company} - {request.recommendations.job_title}")
+            
+            # Store original CV content for semantic validation
+            self._original_cv_content = self._extract_original_cv_text(request.original_cv)
+            logger.info(f"📄 [{request.recommendations.company}] [ENHANCED_VALIDATION] Stored original CV content ({len(self._original_cv_content)} chars) for semantic validation")
             
             # Step 1: Validate input data - strict validation, no tolerance for errors
             validation_result = self._validate_cv_data(request.original_cv)
@@ -1115,7 +1122,7 @@ Please provide the optimized CV in the requested JSON format."""
             logger.error(f"JSON parsing failed. Content: {content[:1000]}...")
             raise ValueError(f"Invalid JSON format in AI response: {e}")
     
-    def _validate_tailored_json(self, data: Dict[str, Any], request_id: str = 'debug', recommendations: Optional[RecommendationAnalysis] = None) -> None:
+    def _validate_tailored_json(self, data: Dict[str, Any], request_id: str = 'debug', recommendations: Optional[RecommendationAnalysis] = None) -> ValidationResult:
         """Validate that parsed JSON has expected structure and content quality"""
         required_fields = ['contact', 'experience', 'skills']
         
@@ -1248,6 +1255,51 @@ BULLETS NEEDING IMPROVEMENT:
         # Validate tiered keywords if recommendations are available
         if recommendations:
             self._validate_tiered_keywords(data, recommendations, request_id)
+
+        # ENHANCED VALIDATION - Add quality-focused validation
+        logger.info(f"🔍 [{request_id}] [ENHANCED_VALIDATION] Starting enhanced validation")
+        
+        # Get original CV content for semantic validation
+        original_cv_content = getattr(self, '_original_cv_content', '')
+        if not original_cv_content:
+            logger.warning(f"⚠️ [{request_id}] [ENHANCED_VALIDATION] No original CV content available for semantic validation")
+            original_cv_content = "No original CV content available"
+        
+        # Convert recommendations to dict format for enhanced validator
+        recommendations_dict = {}
+        if recommendations:
+            recommendations_dict = {
+                'critical_gaps': recommendations.critical_gaps or [],
+                'missing_keywords': recommendations.missing_keywords or [],
+                'technical_enhancements': recommendations.technical_enhancements or [],
+                'soft_skill_improvements': recommendations.soft_skill_improvements or []
+            }
+            logger.info(f"📊 [{request_id}] [ENHANCED_VALIDATION] Using recommendations with {len(recommendations_dict.get('critical_gaps', []))} critical gaps")
+        else:
+            logger.warning(f"⚠️ [{request_id}] [ENHANCED_VALIDATION] No recommendations provided for validation")
+        
+        # Use enhanced validator
+        validator = EnhancedCVValidator(request_id)
+        enhanced_result = validator.validate_tailored_cv(
+            cv_data=data,
+            original_cv=original_cv_content,
+            recommendations=recommendations_dict
+        )
+        
+        # Log enhanced results
+        if enhanced_result.passed:
+            logger.info(f"✅ [{request_id}] [ENHANCED_VALIDATION] Enhanced validation PASSED with score {enhanced_result.score:.1f}/100")
+        else:
+            logger.warning(f"⚠️ [{request_id}] [ENHANCED_VALIDATION] Enhanced validation FAILED with score {enhanced_result.score:.1f}/100")
+            logger.warning(f"   Issues: {enhanced_result.issues}")
+        
+        if enhanced_result.warnings:
+            logger.warning(f"⚠️ [{request_id}] [ENHANCED_VALIDATION] Warnings: {enhanced_result.warnings}")
+        
+        # Combine results
+        quality_assessment['enhanced_validation'] = enhanced_result
+        quality_assessment['enhanced_score'] = enhanced_result.score
+        quality_assessment['enhanced_passed'] = enhanced_result.passed
 
         # Return assessment so callers can make decisions (e.g., retry to improve quantification)
         return quality_assessment
@@ -2295,6 +2347,48 @@ FIX: Output ONLY valid JSON!
         # Extract from skills
         for skill_cat in data.get('skills', []):
             for skill in skill_cat.get('skills', []):
+                text_parts.append(skill)
+        
+        return ' '.join(text_parts)
+    
+    def _extract_original_cv_text(self, original_cv: OriginalCV) -> str:
+        """Extract text content from original CV for semantic validation"""
+        text_parts = []
+        
+        # Extract from contact
+        if hasattr(original_cv, 'contact') and original_cv.contact:
+            contact = original_cv.contact
+            if hasattr(contact, 'name') and contact.name:
+                text_parts.append(contact.name)
+            if hasattr(contact, 'email') and contact.email:
+                text_parts.append(contact.email)
+            if hasattr(contact, 'phone') and contact.phone:
+                text_parts.append(contact.phone)
+            if hasattr(contact, 'location') and contact.location:
+                text_parts.append(contact.location)
+        
+        # Extract from experience
+        if hasattr(original_cv, 'experience') and original_cv.experience:
+            for exp in original_cv.experience:
+                if hasattr(exp, 'company') and exp.company:
+                    text_parts.append(exp.company)
+                if hasattr(exp, 'title') and exp.title:
+                    text_parts.append(exp.title)
+                if hasattr(exp, 'bullets') and exp.bullets:
+                    for bullet in exp.bullets:
+                        text_parts.append(bullet)
+        
+        # Extract from education
+        if hasattr(original_cv, 'education') and original_cv.education:
+            for edu in original_cv.education:
+                if hasattr(edu, 'institution') and edu.institution:
+                    text_parts.append(edu.institution)
+                if hasattr(edu, 'degree') and edu.degree:
+                    text_parts.append(edu.degree)
+        
+        # Extract from skills
+        if hasattr(original_cv, 'skills') and original_cv.skills:
+            for skill in original_cv.skills:
                 text_parts.append(skill)
         
         return ' '.join(text_parts)

@@ -53,19 +53,23 @@ class TextFormatter {
       // Handle new LITMUS_TEST_PROMPT format fields
       else if (isAnalyzeMatch && _isLitmusField(line)) {
         debugPrint('🔍 [TEXT_FORMATTER] Detected LITMUS field');
-        
+
         // Format the field name to remove underscores
         String formattedLine = line;
         if (line.contains('CRITICAL_MISSING:')) {
-          formattedLine = line.replaceFirst('CRITICAL_MISSING:', _formatFieldName('CRITICAL_MISSING'));
+          formattedLine = line.replaceFirst(
+              'CRITICAL_MISSING:', _formatFieldName('CRITICAL_MISSING'));
         } else if (line.contains('IMPLICIT_LIKELY:')) {
-          formattedLine = line.replaceFirst('IMPLICIT_LIKELY:', _formatFieldName('IMPLICIT_LIKELY'));
+          formattedLine = line.replaceFirst(
+              'IMPLICIT_LIKELY:', _formatFieldName('IMPLICIT_LIKELY'));
         } else if (line.contains('LEARNABLE_GAPS:')) {
-          formattedLine = line.replaceFirst('LEARNABLE_GAPS:', _formatFieldName('LEARNABLE_GAPS'));
+          formattedLine = line.replaceFirst(
+              'LEARNABLE_GAPS:', _formatFieldName('LEARNABLE_GAPS'));
         } else if (line.contains('BLOCKER_FOUND:')) {
-          formattedLine = line.replaceFirst('BLOCKER_FOUND:', _formatFieldName('BLOCKER_FOUND'));
+          formattedLine = line.replaceFirst(
+              'BLOCKER_FOUND:', _formatFieldName('BLOCKER_FOUND'));
         }
-        
+
         spans.add(TextSpan(
           text: '$formattedLine\n',
           style: TextStyle(
@@ -249,7 +253,7 @@ class TextFormatter {
         line.contains('DECISION: DONT_PROCEED')) {
       return true;
     }
-    
+
     // Legacy format
     return line.contains('🟢 STRONG PURSUE') ||
         line.contains('🟡 STRATEGIC PURSUE') ||
@@ -267,7 +271,7 @@ class TextFormatter {
     } else if (line.contains('DECISION: DONT_PROCEED')) {
       return const Color(0xFFEF4444); // Red
     }
-    
+
     // Legacy format support
     if (line.contains('🟢')) return const Color(0xFF10B981); // Emerald green
     if (line.contains('🟡')) return const Color(0xFFF59E0B); // Amber
@@ -292,17 +296,18 @@ class TextFormatter {
   static String _formatFieldName(String fieldName) {
     // Remove the colon if present
     String name = fieldName.replaceAll(':', '');
-    
+
     // Convert underscores to spaces
     name = name.replaceAll('_', ' ');
-    
+
     // Capitalize each word
     List<String> words = name.split(' ');
-    words = words.map((word) => 
-      word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() 
-      : word
-    ).toList();
-    
+    words = words
+        .map((word) => word.isNotEmpty
+            ? word[0].toUpperCase() + word.substring(1).toLowerCase()
+            : word)
+        .toList();
+
     return words.join(' ') + ':';
   }
 
@@ -312,9 +317,11 @@ class TextFormatter {
       return const Color(0xFF8B5CF6); // Purple for scores
     } else if (line.contains('PRIMARY_REASON:')) {
       return const Color(0xFF1F2937); // Dark gray for main reason
-    } else if (line.contains('CRITICAL_MISSING:') || line.contains('BLOCKER_FOUND:')) {
+    } else if (line.contains('CRITICAL_MISSING:') ||
+        line.contains('BLOCKER_FOUND:')) {
       return const Color(0xFFEF4444); // Red for blockers
-    } else if (line.contains('IMPLICIT_LIKELY:') || line.contains('LEARNABLE_GAPS:')) {
+    } else if (line.contains('IMPLICIT_LIKELY:') ||
+        line.contains('LEARNABLE_GAPS:')) {
       return const Color(0xFF10B981); // Green for opportunities
     } else if (line.contains('STRENGTHS:')) {
       return const Color(0xFF059669); // Darker green for strengths
