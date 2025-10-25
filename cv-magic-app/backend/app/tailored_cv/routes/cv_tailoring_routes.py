@@ -998,6 +998,7 @@ async def get_tailored_cv_content(
         
         tailored_cv = TailoredCV(
             contact=ContactInfo(**json_data['contact']),
+            profile_summary=json_data.get('profile_summary', ''),
             education=education_data,
             experience=[ExperienceEntry(**exp) for exp in experience_data],
             skills=[SkillCategory(**skill) for skill in skills_data],

@@ -54,6 +54,12 @@ Example: "Data Analyst with 5+ years transforming datasets into insights. Expert
 - **Flexibility:** If only 1-2 relevant, include those (not forced to 3)
 - **Fallback:** Include less-relevant roles BUT reframe with JD keywords
 
+### **Education (1-3 degrees)**
+- Select most JD-relevant degrees (highest degree + relevant specializations)
+- **Priority:** Highest relevant degree → JD-matching field → Recent/advanced degree
+- **Remove:** Unrelated degrees creating overqualification concerns
+- **Example:** PhD + 3 Masters → Select PhD + 1 most relevant Master's
+
 ### **Projects (0-3)**
 - Select most JD-relevant projects
 - Include only if adding unique value beyond experience
@@ -64,16 +70,49 @@ Example: "Data Analyst with 5+ years transforming datasets into insights. Expert
 
 ## 🎪 **STRATEGIC POSITIONING**
 
-### **Education Placement**
-- **0-3 years:** Education first, include GPA if >3.5
-- **3-7 years:** Experience first
-- **7+ years:** Education last, degrees only
+### **Education Selection & Placement**
 
-### **PhD Strategy**
-Include for research/R&D/technical leadership roles. Minimize for entry-level/startup roles (overqualification risk).
+**Degrees to Include (prioritize by JD relevance):**
+- **Select 1-3 most relevant degrees** based on JD requirements
+- **Prioritization:** Highest degree + Most JD-relevant degree(s)
+- **Remove:** Degrees unrelated to target role or creating overqualification concerns
+
+**Selection Logic:**
+1. **Always include:** Highest relevant degree (PhD/Master's/Bachelor's matching JD field)
+2. **Add if relevant:** Additional degrees directly related to JD (e.g., MBA for management roles)
+3. **Remove if:** Degree field unrelated to JD AND creates overqualification risk
+
+**Examples:**
+- **Case: PhD + 3 Master's + Bachelor's applying for Data Analyst:**
+  - Include: PhD (if in Data/Stats/CS), Master's in relevant field
+  - Exclude: Unrelated Master's degrees, Bachelor's (redundant)
+  
+- **Case: PhD in Biology applying for Software Engineer:**
+  - Include: Master's/Bachelor's in CS (if exists)
+  - Minimize/exclude: PhD in Biology (overqualification risk)
+
+- **Case: Multiple Master's applying for Entry-level:**
+  - Include: 1-2 most relevant Master's degrees
+  - Exclude: Additional degrees creating overqualification perception
+
+**Placement Rules:**
+- **0-3 years:** Education first, include GPA if >3.5
+- **3-7 years:** Experience first, education after
+- **7+ years:** Education last, degrees only (no GPA, coursework, or honors)
+
+**PhD Strategy:**
+- Include for: Research/R&D/technical leadership/academic roles
+- Minimize for: Entry-level/operational/startup roles (overqualification risk)
+- Reframe as: "Advanced research training in [relevant field]" when beneficial
 
 ### **Industry Transition**
 Research → BI analysis | Presentations → Stakeholder communication | Thesis → Strategic analysis | Teaching → Team development
+
+### **Overqualification Management**
+- **Multiple advanced degrees:** Select 1-2 most relevant, omit others
+- **Higher degree than required:** Consider listing only relevant Master's/Bachelor's
+- **Academic → Industry:** Emphasize applied skills, minimize theoretical degrees
+- **Career change:** Highlight transferable degree, omit unrelated specializations
 
 ---
 
@@ -102,16 +141,25 @@ Research → BI analysis | Presentations → Stakeholder communication | Thesis 
 - ❌ Domain expertise without experience (e.g., "analyzed data" ≠ "machine learning", "AI/ML")
 
 **Integration Protocol:**
-1. **Missing Keywords (Priority 1):** Integrate ALL Tier 1 keywords. Add Tier 2 if semantic evidence exists in bullets/projects.
-2. **Technical Skills (Priority 2):** Add generic categories (Tier 2). Avoid specific variants (Tier 3).
-3. **Soft Skills (Priority 3):** Provide evidence for identified gaps within existing achievements.
-4. **Company-Specific:** Mirror target language, values, industry terminology.
+1. **Filter Keywords:** Classify each missing keyword into Tier 1/2/3
+2. **Tier 1 Integration:** Add ALL to skills section and weave into relevant bullets
+3. **Tier 2 Integration:** Add ONLY if semantic evidence exists in experience/projects
+4. **Tier 3 Rejection:** Exclude entirely, log as "unverifiable keyword"
+5. **Quality Check:** Every integrated keyword must answer: "Can candidate give concrete example in interview?"
 
-**Validation Questions (before adding ANY keyword):**
-- ✅ Can candidate defend this in interview with concrete example?
-- ✅ Does original CV have semantic evidence (direct or indirect)?
-- ❌ Is this a specific tool/certification they never mentioned?
-- ❌ Would this require training/experience they don't have?
+**Skills Section Categorization:**
+Use semantic grouping (NOT hard-coded lists):
+- **Programming/Scripting:** Python, R, JavaScript, SQL, etc.
+- **Data Analysis/BI:** Excel, Tableau, Power BI, Looker, etc.
+- **Cloud/Infrastructure:** AWS, Azure, GCP, Docker, Kubernetes, etc.
+- **Databases:** PostgreSQL, MySQL, MongoDB, Snowflake, etc.
+- **Domain Expertise:** Industry-specific knowledge (e.g., Healthcare, Finance, Non-profit)
+- **Professional Skills:** Communication, Leadership, Stakeholder Management, etc.
+
+**Validation Rules:**
+- Target 70-80% keyword match (quality over quantity)
+- Reject CV if contains Tier 3 keywords (flag for manual review)
+- Prioritize interview-defensibility over ATS score
 
 ### **Bullet Consolidation (4+ bullets)**
 Group by theme → Merge related achievements → Preserve metrics → Remove non-JD content → **Prioritize quality over keyword density**
@@ -187,11 +235,13 @@ Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 ### **Validation Checklist**
 - ✅ Profile summary ≤50 words
 - ✅ 1-3 experiences (JD-relevant)
+- ✅ **1-3 education entries (most relevant degrees only)**
 - ✅ 0-3 projects (if relevant)
 - ✅ 2-3 bullets per entry (concise)
 - ✅ All bullets have metrics
 - ✅ **Only Tier 1/2 keywords integrated**
 - ✅ **No Tier 3 unverifiable keywords**
+- ✅ **No overqualification red flags (excess degrees)**
 - ✅ 75-80+ ATS score (authentic content)
 - ✅ Interview-defensible content
 

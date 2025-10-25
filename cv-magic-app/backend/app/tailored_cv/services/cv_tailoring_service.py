@@ -982,6 +982,7 @@ Please provide the optimized CV in the requested JSON format."""
         # Create the tailored CV with AI-generated content
         tailored_cv = TailoredCV(
             contact=contact,
+            profile_summary=tailored_data.get('profile_summary', ''),
             education=education if education else original_cv.education,
             experience=experience if experience else original_cv.experience,
             projects=projects if projects else original_cv.projects,
@@ -1037,6 +1038,7 @@ Please provide the optimized CV in the requested JSON format."""
         
         clean_cv = CleanTailoredCV(
             contact=contact_info,
+            profile_summary=full_tailored_cv.profile_summary,
             education=full_tailored_cv.education,
             experience=full_tailored_cv.experience,
             projects=full_tailored_cv.projects,
@@ -1659,13 +1661,12 @@ FIX: Output ONLY valid JSON!
                 lines.append("  | ".join(contact_parts))
                 lines.append("")
             
-            # Professional Summary (if available in the model)
-            # Note: This field might not exist in the current TailoredCV model
-            # if hasattr(tailored_cv, 'professional_summary') and tailored_cv.professional_summary:
-            #     lines.append("PROFESSIONAL SUMMARY")
-            #     lines.append("-" * 20)
-            #     lines.append(tailored_cv.professional_summary)
-            #     lines.append("")
+            # Profile Summary (NEW FRAMEWORK)
+            if tailored_cv.profile_summary:
+                lines.append("PROFESSIONAL SUMMARY")
+                lines.append("-" * 20)
+                lines.append(tailored_cv.profile_summary)
+                lines.append("")
             
             # Skills - Format with categories to match JSON structure
             if tailored_cv.skills:
