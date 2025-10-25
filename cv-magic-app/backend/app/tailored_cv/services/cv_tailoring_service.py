@@ -941,13 +941,13 @@ Please provide the optimized CV in the requested JSON format."""
         contact = ContactInfo(**contact_data) if contact_data else original_cv.contact
         
         # Process education entries
-        education_data = ai_generated_data.get("education", [])
+        education_data = ai_generated_data.get("education", []) or []
         education = []
         for edu in education_data:
             education.append(Education(**edu))
         
         # Process experience entries - MOST IMPORTANT
-        experience_data = ai_generated_data.get("experience", [])
+        experience_data = ai_generated_data.get("experience", []) or []
         experience = []
         for exp in experience_data:
             experience.append(ExperienceEntry(**exp))
@@ -981,7 +981,7 @@ Please provide the optimized CV in the requested JSON format."""
             projects = original_cv.projects
         
         # Process skills
-        skills_data = ai_generated_data.get("skills", [])
+        skills_data = ai_generated_data.get("skills", []) or []
         skills = []
         logger.info(f"🔍 [TAILORING] Processing {len(skills_data)} skill categories")
         for i, skill in enumerate(skills_data):
@@ -1391,14 +1391,14 @@ FIX: Output ONLY valid JSON!
         
         # Add experience bullets with logging
         logger.info(f"[{request_id}] Scanning experience bullets:")
-        for i, exp in enumerate(tailored_data.get('experience', [])):
+        for i, exp in enumerate(tailored_data.get('experience', []) or []):
             bullets = exp.get('bullets', [])
             logger.info(f"[{request_id}] - Experience {i+1}: {len(bullets)} bullets")
             cv_text += " ".join(bullets)
         
         # Add skills text with logging
         logger.info(f"[{request_id}] Scanning skills:")
-        for i, skill_cat in enumerate(tailored_data.get('skills', [])):
+        for i, skill_cat in enumerate(tailored_data.get('skills', []) or []):
             skills = skill_cat.get('skills', [])
             logger.info(f"[{request_id}] - Category {i+1}: {len(skills)} skills")
             # Handle nested SkillCategory objects
@@ -2205,7 +2205,7 @@ FIX: Output ONLY valid JSON!
         logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating bullet consolidation...")
         
         # Check experience bullets
-        experience = data.get('experience', [])
+        experience = data.get('experience', []) or []
         total_experience_bullets = 0
         over_limit_experience = 0
         
@@ -2227,7 +2227,7 @@ FIX: Output ONLY valid JSON!
                     logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Experience {i+1}, bullet {j+1} is {word_count} words (max 25 recommended)")
         
         # Check project bullets
-        projects = data.get('projects', [])
+        projects = data.get('projects', []) or []
         total_project_bullets = 0
         over_limit_projects = 0
         
@@ -2252,7 +2252,7 @@ FIX: Output ONLY valid JSON!
         """Validate education selection according to new framework rules"""
         logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating education selection...")
         
-        education = data.get('education', [])
+        education = data.get('education', []) or []
         education_count = len(education)
         
         logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Education count: {education_count}")
@@ -2387,17 +2387,17 @@ FIX: Output ONLY valid JSON!
             text_parts.append(data['profile_summary'])
         
         # Extract from experience bullets
-        for exp in data.get('experience', []):
+        for exp in data.get('experience', []) or []:
             for bullet in exp.get('bullets', []):
                 text_parts.append(bullet)
         
         # Extract from project bullets
-        for proj in data.get('projects', []):
+        for proj in data.get('projects', []) or []:
             for bullet in proj.get('bullets', []):
                 text_parts.append(bullet)
         
         # Extract from skills
-        for skill_cat in data.get('skills', []):
+        for skill_cat in data.get('skills', []) or []:
             for skill in skill_cat.get('skills', []):
                 text_parts.append(skill)
         
