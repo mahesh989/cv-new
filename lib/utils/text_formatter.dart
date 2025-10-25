@@ -53,8 +53,21 @@ class TextFormatter {
       // Handle new LITMUS_TEST_PROMPT format fields
       else if (isAnalyzeMatch && _isLitmusField(line)) {
         debugPrint('🔍 [TEXT_FORMATTER] Detected LITMUS field');
+        
+        // Format the field name to remove underscores
+        String formattedLine = line;
+        if (line.contains('CRITICAL_MISSING:')) {
+          formattedLine = line.replaceFirst('CRITICAL_MISSING:', _formatFieldName('CRITICAL_MISSING'));
+        } else if (line.contains('IMPLICIT_LIKELY:')) {
+          formattedLine = line.replaceFirst('IMPLICIT_LIKELY:', _formatFieldName('IMPLICIT_LIKELY'));
+        } else if (line.contains('LEARNABLE_GAPS:')) {
+          formattedLine = line.replaceFirst('LEARNABLE_GAPS:', _formatFieldName('LEARNABLE_GAPS'));
+        } else if (line.contains('BLOCKER_FOUND:')) {
+          formattedLine = line.replaceFirst('BLOCKER_FOUND:', _formatFieldName('BLOCKER_FOUND'));
+        }
+        
         spans.add(TextSpan(
-          text: '$line\n',
+          text: '$formattedLine\n',
           style: TextStyle(
             fontSize: baseFontSize,
             fontWeight: FontWeight.w600,
@@ -273,6 +286,24 @@ class TextFormatter {
         line.contains('LEARNABLE_GAPS:') ||
         line.contains('STRENGTHS:') ||
         line.contains('BLOCKER_FOUND:');
+  }
+
+  /// Formats field names by converting underscores to spaces and capitalizing properly
+  static String _formatFieldName(String fieldName) {
+    // Remove the colon if present
+    String name = fieldName.replaceAll(':', '');
+    
+    // Convert underscores to spaces
+    name = name.replaceAll('_', ' ');
+    
+    // Capitalize each word
+    List<String> words = name.split(' ');
+    words = words.map((word) => 
+      word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() 
+      : word
+    ).toList();
+    
+    return words.join(' ') + ':';
   }
 
   /// Gets color for LITMUS_TEST_PROMPT fields
