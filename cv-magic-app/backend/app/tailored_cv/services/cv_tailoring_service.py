@@ -1401,7 +1401,18 @@ FIX: Output ONLY valid JSON!
         for i, skill_cat in enumerate(tailored_data.get('skills', [])):
             skills = skill_cat.get('skills', [])
             logger.info(f"[{request_id}] - Category {i+1}: {len(skills)} skills")
-            cv_text += " ".join(skills)
+            # Handle nested SkillCategory objects
+            skill_strings = []
+            for skill in skills:
+                if isinstance(skill, str):
+                    skill_strings.append(skill)
+                elif hasattr(skill, 'skills') and hasattr(skill, 'category'):
+                    # This is a nested SkillCategory object
+                    logger.warning(f"⚠️ [{request_id}] Found nested SkillCategory in skills: {skill.category}")
+                    skill_strings.extend(skill.skills if isinstance(skill.skills, list) else [str(skill.skills)])
+                else:
+                    skill_strings.append(str(skill))
+            cv_text += " ".join(skill_strings)
         
         # Convert to lowercase for case-insensitive matching
         cv_text_lower = cv_text.lower()
@@ -1582,7 +1593,18 @@ FIX: Output ONLY valid JSON!
         
         # Skills
         for skill_cat in cv.skills:
-            text_parts.append(f"{skill_cat.category}: {', '.join(skill_cat.skills)}")
+            # Handle nested SkillCategory objects
+            skill_strings = []
+            for skill in skill_cat.skills:
+                if isinstance(skill, str):
+                    skill_strings.append(skill)
+                elif hasattr(skill, 'skills') and hasattr(skill, 'category'):
+                    # This is a nested SkillCategory object
+                    logger.warning(f"⚠️ [TEXT_CONVERSION] Found nested SkillCategory in skills: {skill.category}")
+                    skill_strings.extend(skill.skills if isinstance(skill.skills, list) else [str(skill.skills)])
+                else:
+                    skill_strings.append(str(skill))
+            text_parts.append(f"{skill_cat.category}: {', '.join(skill_strings)}")
         
         # Projects
         if cv.projects:
