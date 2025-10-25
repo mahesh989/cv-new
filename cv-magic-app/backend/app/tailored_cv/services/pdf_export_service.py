@@ -654,10 +654,11 @@ def _map_tailored_json_to_generator_schema(data: Dict[str, Any]) -> Dict[str, An
             
             cleaned_exp = exp.copy()
             
-            # Clean company/location duplication
+            # Clean company/location duplication - only if location is at the end of company name
             company = exp.get('company', '')
             location = exp.get('location', '')
-            if company and location and location in company:
+            if company and location and company.endswith(f', {location}'):
+                # Only remove location if it's clearly duplicated at the end with a comma
                 cleaned_exp['location'] = ''
             
             # Build duration if missing
