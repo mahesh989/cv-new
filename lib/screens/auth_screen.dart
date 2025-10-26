@@ -469,7 +469,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                               const SizedBox(height: 16),
                               _buildGoogleSignInButton(),
                               const SizedBox(height: 16),
-                              _buildDemoNotice(isSmallScreen),
                             ],
                           ),
                         ),
@@ -730,36 +729,4 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildDemoNotice(bool isSmallScreen) {
-    return Container(
-      padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryTeal.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.primaryTeal.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            color: AppTheme.primaryTeal,
-            size: isSmallScreen ? 18 : 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '✨ Demo Mode: Click Sign In to login instantly (no credentials required)',
-              style: AppTheme.bodySmall.copyWith(
-                color: AppTheme.primaryTeal,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
