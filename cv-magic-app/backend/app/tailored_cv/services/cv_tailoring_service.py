@@ -2040,6 +2040,10 @@ FIX: Output ONLY valid JSON!
                     except Exception as e:
                         logger.warning(f"⚠️ [TAILORING] Failed to parse original_text: {e}")
             
+            # Map parsed CV data structure to OriginalCV model structure
+            if isinstance(cv_data, dict):
+                cv_data = self._map_parsed_cv_to_original_cv_structure(cv_data)
+            
             # Convert skills format if needed (from List[str] to List[SkillCategory])
             if isinstance(cv_data, dict) and 'skills' in cv_data:
                 skills_data = cv_data['skills']
@@ -2466,6 +2470,93 @@ FIX: Output ONLY valid JSON!
                     text_parts.append(str(skill))
         
         return ' '.join(text_parts)
+    
+    def _map_parsed_cv_to_original_cv_structure(self, cv_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Map parsed CV data structure to OriginalCV model structure
+        
+        The CV parser creates a structure with 'personal_information' but OriginalCV expects 'contact'.
+        This function maps the parsed structure to match the expected model.
+        """
+        logger.info("🔄 [CV_MAPPING] Mapping parsed CV data to OriginalCV structure")
+        
+        # Create a copy to avoid modifying the original
+        mapped_data = cv_data.copy()
+        
+        # Map personal_information to contact
+        if 'personal_information' in mapped_data and 'contact' not in mapped_data:
+            logger.info("🔄 [CV_MAPPING] Mapping personal_information to contact")
+            personal_info = mapped_data['personal_information']
+            
+            # Create contact structure
+            contact = {
+                'name': personal_info.get('name', ''),
+                'email': personal_info.get('email', ''),
+                'phone': personal_info.get('phone', ''),
+                'location': personal_info.get('location', ''),
+                'linkedin': personal_info.get('linkedin', ''),
+                'github': personal_info.get('github', ''),
+                'portfolio_links': personal_info.get('portfolio_links', []),
+                'residency_status': personal_info.get('residency_status', ''),
+                'open_to': personal_info.get('open_to', '')
+            }
+            mapped_data['contact'] = contact
+            logger.info(f"✅ [CV_MAPPING] Mapped contact: {contact.get('name', 'Unknown')}")
+        
+        # Map skills from dict to list of SkillCategory
+        if 'skills' in mapped_data and isinstance(mapped_data['skills'], dict):
+            logger.info("🔄 [CV_MAPPING] Converting skills dict to SkillCategory list")
+            skills_dict = mapped_data['skills']
+            skills_list = []
+            
+            # Map each skill category
+            for category, skills in skills_dict.items():
+                if isinstance(skills, list) and skills:
+                    skills_list.append({
+                        'category': category.replace('_', ' ').title(),
+                        'skills': skills
+                    })
+            
+            mapped_data['skills'] = skills_list
+            logger.info(f"✅ [CV_MAPPING] Mapped {len(skills_list)} skill categories")
+        
+        # Ensure experience entries have required fields
+        if 'experience' in mapped_data and isinstance(mapped_data['experience'], list):
+            logger.info("🔄 [CV_MAPPING] Ensuring experience entries have required fields")
+            for i, exp in enumerate(mapped_data['experience']):
+                # Add missing required fields with defaults
+                if 'start_date' not in exp:
+                    exp['start_date'] = exp.get('duration', '').split(' - ')[0] if exp.get('duration') else ''
+                if 'bullets' not in exp:
+                    # Convert responsibilities and achievements to bullets
+                    bullets = []
+                    if exp.get('responsibilities'):
+                        bullets.extend(exp['responsibilities'])
+                    if exp.get('achievements'):
+                        bullets.extend(exp['achievements'])
+                    exp['bullets'] = bullets
+                if 'end_date' not in exp:
+                    exp['end_date'] = exp.get('duration', '').split(' - ')[1] if ' - ' in exp.get('duration', '') else 'Present'
+            
+            logger.info(f"✅ [CV_MAPPING] Mapped {len(mapped_data['experience'])} experience entries")
+        
+        # Ensure project entries have required fields
+        if 'projects' in mapped_data and isinstance(mapped_data['projects'], list):
+            logger.info("🔄 [CV_MAPPING] Ensuring project entries have required fields")
+            for i, proj in enumerate(mapped_data['projects']):
+                if 'bullets' not in proj:
+                    # Convert achievements to bullets
+                    bullets = []
+                    if proj.get('achievements'):
+                        bullets.extend(proj['achievements'])
+                    if proj.get('description'):
+                        bullets.append(proj['description'])
+                    proj['bullets'] = bullets
+            
+            logger.info(f"✅ [CV_MAPPING] Mapped {len(mapped_data['projects'])} project entries")
+        
+        logger.info("✅ [CV_MAPPING] CV data mapping completed")
+        return mapped_data
 
 
 # Global instance removed - service now requires user_email parameter
