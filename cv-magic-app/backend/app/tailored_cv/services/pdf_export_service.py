@@ -549,16 +549,19 @@ class ResumePDFGenerator:
         if skills:
             elements.extend(self._create_section_with_line('SKILLS'))
             
-            # Check if skills are categorized
-            is_categorized = skills.get('is_categorized', False)
+            # Check if skills are categorized (skills is a list of SkillCategory objects)
+            is_categorized = isinstance(skills, list) and skills and isinstance(skills[0], dict) and 'category' in skills[0]
             
             if is_categorized:
                 # Categorized format: Display with proper bullet alignment
-                for category_name, skills_list in skills.items():
-                    if category_name != 'is_categorized' and isinstance(skills_list, list) and skills_list:
-                        # Use bullet formatting for proper alignment
-                        skills_text = ", ".join(skills_list)
-                        elements.extend(self._make_bullet_rows([f"<b>{category_name.replace('_', ' ').title()}:</b> {skills_text}"]))
+                for skill_category in skills:
+                    if isinstance(skill_category, dict) and 'category' in skill_category and 'skills' in skill_category:
+                        category_name = skill_category['category']
+                        skills_list = skill_category['skills']
+                        if isinstance(skills_list, list) and skills_list:
+                            # Use bullet formatting for proper alignment
+                            skills_text = ", ".join(skills_list)
+                            elements.extend(self._make_bullet_rows([f"<b>{category_name}:</b> {skills_text}"]))
             else:
                 # Simple format: Display with proper bullet alignment
                 technical_skills = skills.get('technical_skills', [])
