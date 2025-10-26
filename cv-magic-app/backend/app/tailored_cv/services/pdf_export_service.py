@@ -545,7 +545,7 @@ class ResumePDFGenerator:
                     elements.append(Spacer(1, self.spacing['education_gap']))  # Consistent education spacing
 
         # Skills
-        skills = self.data.get('skills', {})
+        skills = self.data.get('skills', [])  # Changed from {} to []
         if skills:
             elements.extend(self._create_section_with_line('SKILLS'))
             
