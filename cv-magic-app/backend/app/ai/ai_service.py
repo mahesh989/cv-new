@@ -65,6 +65,15 @@ class AIServiceManager:
         logger.info(f"🔍 [AI_SERVICE] After initialization:")
         logger.info(f"- Current providers: {list(self._providers.keys())}")
         logger.info(f"- Current provider name: {self.config.get_current_provider()}")
+        
+        # Auto-select first available provider if none is current
+        if self._providers and not self.config.get_current_provider():
+            logger.warning("⚠️ [AI_SERVICE] No current provider set, attempting auto-selection")
+            first_provider = list(self._providers.keys())[0]
+            if self.switch_provider(first_provider):
+                logger.info(f"✅ [AI_SERVICE] Auto-selected provider: {first_provider}")
+            else:
+                logger.error(f"❌ [AI_SERVICE] Failed to auto-select provider: {first_provider}")
     
     def refresh_providers(self, user: Optional[Any] = None):
         """Refresh all providers after API keys have been updated"""
