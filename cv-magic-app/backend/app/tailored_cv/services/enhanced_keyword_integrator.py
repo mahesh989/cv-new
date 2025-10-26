@@ -72,7 +72,9 @@ class EnhancedKeywordIntegrator:
         # Domain-specific terms that shouldn't be integrated
         'refugees', 'refugee support', 'humanitarian emergencies', 'donor-centricity',
         'fundraising', 'community engagement', 'refugee', 'humanitarian',
-        'emergency response', 'disaster relief', 'aid work', 'non-profit sector'
+        'emergency response', 'disaster relief', 'aid work', 'non-profit sector',
+        'not for profit', 'nfp', 'social impact', 'community support',
+        'non-profit', 'charity', 'philanthropy', 'social work'
     ]
     
     def __init__(self, cv_content: str, request_id: str = 'debug'):
