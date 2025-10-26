@@ -963,14 +963,32 @@ Please provide the optimized CV in the requested JSON format."""
                 if i < len(original_projects):
                     original_proj = original_projects[i]
                     # Merge AI-generated content with original metadata
+                    # Handle both dict and Project object for original_proj
+                    if isinstance(original_proj, dict):
+                        original_name = original_proj.get('name', '')
+                        original_context = original_proj.get('context', '')
+                        original_technologies = original_proj.get('technologies', [])
+                        original_bullets = original_proj.get('bullets', [])
+                        original_url = original_proj.get('url', '')
+                        original_duration = original_proj.get('duration', '')
+                        original_date = original_proj.get('date', '')
+                    else:
+                        original_name = getattr(original_proj, 'name', '')
+                        original_context = getattr(original_proj, 'context', '')
+                        original_technologies = getattr(original_proj, 'technologies', [])
+                        original_bullets = getattr(original_proj, 'bullets', [])
+                        original_url = getattr(original_proj, 'url', '')
+                        original_duration = getattr(original_proj, 'duration', '')
+                        original_date = getattr(original_proj, 'date', '')
+                    
                     merged_proj = {
-                        'name': proj.get('name', original_proj.get('name', '')),
-                        'context': proj.get('context', original_proj.get('context', '')),
-                        'technologies': proj.get('technologies', original_proj.get('technologies', [])),
-                        'bullets': proj.get('bullets', original_proj.get('bullets', [])),
-                        'url': proj.get('url', original_proj.get('url', '')),
-                        'duration': proj.get('duration', original_proj.get('duration', '')),
-                        'date': proj.get('date', original_proj.get('date', ''))
+                        'name': proj.get('name', original_name),
+                        'context': proj.get('context', original_context),
+                        'technologies': proj.get('technologies', original_technologies),
+                        'bullets': proj.get('bullets', original_bullets),
+                        'url': proj.get('url', original_url),
+                        'duration': proj.get('duration', original_duration),
+                        'date': proj.get('date', original_date)
                     }
                     projects.append(Project(**merged_proj))
                 else:
