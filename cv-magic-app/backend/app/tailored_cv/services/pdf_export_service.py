@@ -468,7 +468,7 @@ class ResumePDFGenerator:
             profile = self.data.get('career_profile', {})
             if isinstance(profile, dict) and profile.get('summary'):
                 logger.info("[PDF_EXPORT] Adding legacy career profile section")
-                elements.extend(self._create_section_with_line('CAREER PROFILE'))
+                elements.extend(self._create_section_with_line('PROFESSIONAL SUMMARY'))
                 elements.append(self._paragraph_block(profile['summary']))
                 elements.append(Spacer(1, self.spacing['section_below']))
 
