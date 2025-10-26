@@ -2232,7 +2232,12 @@ FIX: Output ONLY valid JSON!
         over_limit_projects = 0
         
         for i, proj in enumerate(projects):
-            bullets = proj.get('bullets', [])
+            # Handle both dict and Project object
+            if isinstance(proj, dict):
+                bullets = proj.get('bullets', [])
+            else:
+                bullets = getattr(proj, 'bullets', [])
+            
             bullet_count = len(bullets)
             total_project_bullets += bullet_count
             
@@ -2397,7 +2402,13 @@ FIX: Output ONLY valid JSON!
         
         # Extract from project bullets
         for proj in data.get('projects', []) or []:
-            for bullet in proj.get('bullets', []):
+            # Handle both dict and Project object
+            if isinstance(proj, dict):
+                bullets = proj.get('bullets', [])
+            else:
+                bullets = getattr(proj, 'bullets', [])
+            
+            for bullet in bullets:
                 text_parts.append(bullet)
         
         # Extract from skills
