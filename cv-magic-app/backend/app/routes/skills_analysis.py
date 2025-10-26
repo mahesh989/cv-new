@@ -2432,6 +2432,10 @@ async def perform_preliminary_skills_analysis(
         # Get AI service instance
         from app.ai.ai_service import ai_service
         
+        # Initialize AI service for the current user
+        if current_user:
+            ai_service.initialize_for_user(current_user)
+        
         # Log current AI service status
         current_status = ai_service.get_current_status()
         if logging_params["enable_detailed_logging"]:
