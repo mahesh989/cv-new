@@ -2575,7 +2575,11 @@ FIX: Output ONLY valid JSON!
                             elif isinstance(achievement, list):
                                 bullets.extend([str(item) for item in achievement])
                     if proj.get('description'):
-                        bullets.append(proj['description'])
+                        # Handle description as either string or list
+                        if isinstance(proj['description'], str):
+                            bullets.append(proj['description'])
+                        elif isinstance(proj['description'], list):
+                            bullets.extend([str(item) for item in proj['description']])
                     proj['bullets'] = bullets
                 else:
                     # Ensure existing bullets are strings, not lists
