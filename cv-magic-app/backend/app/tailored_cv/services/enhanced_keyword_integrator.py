@@ -25,15 +25,18 @@ class EnhancedKeywordIntegrator:
     TIER1_PATTERNS = {
         'role_keywords': [
             'data analysis', 'business intelligence', 'analytics',
-            'project management', 'team collaboration', 'stakeholder management'
+            'project management', 'team collaboration', 'stakeholder management',
+            'stakeholder collaboration', 'stakeholder engagement'
         ],
         'soft_skills': [
             'leadership', 'communication', 'problem solving', 'critical thinking',
-            'teamwork', 'adaptability', 'time management', 'attention to detail'
+            'teamwork', 'adaptability', 'time management', 'attention to detail',
+            'organization', 'detail-oriented', 'analytical thinking'
         ],
         'generic_technical': [
             'programming', 'scripting', 'database querying', 'data visualization',
-            'data pipeline', 'data integration', 'reporting', 'automation'
+            'data pipeline', 'data integration', 'reporting', 'automation',
+            'data management', 'data processing'
         ]
     }
     
@@ -65,7 +68,11 @@ class EnhancedKeywordIntegrator:
         'scrum master', 'pmp', 'safe', 'cissp', 'cpa',
         # Advanced technologies
         'machine learning', 'deep learning', 'neural networks', 'ai/ml',
-        'kubernetes', 'terraform', 'ansible'
+        'kubernetes', 'terraform', 'ansible',
+        # Domain-specific terms that shouldn't be integrated
+        'refugees', 'refugee support', 'humanitarian emergencies', 'donor-centricity',
+        'fundraising', 'community engagement', 'refugee', 'humanitarian',
+        'emergency response', 'disaster relief', 'aid work', 'non-profit sector'
     ]
     
     def __init__(self, cv_content: str, request_id: str = 'debug'):
@@ -94,7 +101,7 @@ class EnhancedKeywordIntegrator:
                     reason=f"Specific tool/certification: {tier3_keyword}"
                 )
         
-        # Check Tier 1 (always safe)
+        # Check Tier 1 (always safe - generic/transferable skills)
         for category, keywords in self.TIER1_PATTERNS.items():
             if any(k in keyword_lower for k in keywords):
                 logger.info(f"✅ [{self.request_id}] [ENHANCED_KEYWORDS] Tier 1 keyword: '{keyword}' (category: {category})")
@@ -102,7 +109,7 @@ class EnhancedKeywordIntegrator:
                     tier=1,
                     keyword=keyword,
                     category=category,
-                    reason="Generic/transferable keyword"
+                    reason="Generic/transferable keyword - safe to integrate"
                 )
         
         # Check Tier 2 (needs semantic evidence)
@@ -201,6 +208,7 @@ class EnhancedKeywordIntegrator:
             classification = self.classify_keyword(keyword)
             
             if classification.tier == 1:
+                # Tier 1 keywords are always safe to integrate (generic/transferable skills)
                 # Check if we can find semantic evidence first
                 has_evidence, reason = self.has_semantic_evidence(keyword)
                 if has_evidence:

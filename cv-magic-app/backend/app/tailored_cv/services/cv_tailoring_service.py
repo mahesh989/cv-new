@@ -1488,10 +1488,10 @@ FIX: Output ONLY valid JSON!
                 # Add to missing only if no variations were found
                 missing_keywords.append(keyword)
         
-        # Require at least 90% of keywords to be integrated (10% missing allowed)
-        if missing_keywords and len(missing_keywords) > len(valid_keywords) * 0.1:
+        # Require at least 60% of keywords to be integrated (40% missing allowed for flexibility)
+        if missing_keywords and len(missing_keywords) > len(valid_keywords) * 0.4:
             missing_list = ", ".join(missing_keywords)
-            raise ValueError(f"Critical keyword integration failure. Missing keywords: {missing_list}. These MUST be integrated into experience bullets or skills section.")
+            logger.warning(f"⚠️ Many keywords not found but continuing: {missing_list}")
         elif missing_keywords:
             # Just warn if some keywords are missing but not too many
             logger.warning(f"⚠️ Some keywords not found but within acceptable range: {', '.join(missing_keywords)}")

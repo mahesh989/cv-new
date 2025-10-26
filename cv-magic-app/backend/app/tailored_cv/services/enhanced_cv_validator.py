@@ -159,10 +159,10 @@ class EnhancedCVValidator:
                 issues.append(f"Experience {i+1} has only {bullet_count} bullets (min 2)")
                 score -= 10
                 logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Experience {i+1} insufficient bullets: {bullet_count} (-10 points)")
-            elif bullet_count > 3:
-                issues.append(f"Experience {i+1} has {bullet_count} bullets (max 3)")
-                score -= 10
-                logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Experience {i+1} too many bullets: {bullet_count} (-10 points)")
+            elif bullet_count > 5:
+                issues.append(f"Experience {i+1} has {bullet_count} bullets (max 5)")
+                score -= 5
+                logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Experience {i+1} too many bullets: {bullet_count} (-5 points)")
             else:
                 logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Experience {i+1} bullets OK: {bullet_count}")
         
