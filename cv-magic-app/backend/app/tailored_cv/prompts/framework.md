@@ -73,7 +73,8 @@ Example: "Data Analyst with 5+ years transforming datasets into insights. Expert
 ### **Education Selection & Placement**
 
 **Degrees to Include (prioritize by JD relevance):**
-- **Select 1-3 most relevant degrees** based on JD requirements
+- **Select 2-3 most relevant degrees** based on JD requirements
+- **Minimum 2 degrees** unless only 1 degree exists in original CV
 - **Prioritization:** Highest degree + Most JD-relevant degree(s)
 - **Remove:** Degrees unrelated to target role or creating overqualification concerns
 
@@ -84,15 +85,15 @@ Example: "Data Analyst with 5+ years transforming datasets into insights. Expert
 
 **Examples:**
 - **Case: PhD + 3 Master's + Bachelor's applying for Data Analyst:**
-  - Include: PhD (if in Data/Stats/CS), Master's in relevant field
+  - Include: PhD (if in Data/Stats/CS), Master's in relevant field (minimum 2 degrees)
   - Exclude: Unrelated Master's degrees, Bachelor's (redundant)
   
 - **Case: PhD in Biology applying for Software Engineer:**
-  - Include: Master's/Bachelor's in CS (if exists)
-  - Minimize/exclude: PhD in Biology (overqualification risk)
-
+  - Include: Master's/Bachelor's in CS (if exists) + PhD (if relevant) (minimum 2 degrees)
+  - Minimize/exclude: PhD in Biology only if creates overqualification risk
+  
 - **Case: Multiple Master's applying for Entry-level:**
-  - Include: 1-2 most relevant Master's degrees
+  - Include: 2 most relevant Master's degrees (minimum 2)
   - Exclude: Additional degrees creating overqualification perception
 
 **Placement Rules:**
@@ -230,9 +231,10 @@ Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 - CV: "Used SQL daily" + JD needs "Database" → Add "database querying" ✓
 - CV: "Created Excel reports" + JD needs "Data Analysis" → Add "data analysis" ✓
 - CV: "Presented to stakeholders" + JD needs "Communication" → Add "stakeholder communication" ✓
+- CV: "Used SQL" + JD needs "PostgreSQL" → Add "PostgreSQL" ✓
 
 **❌ BAD (Tier 3 - Unverifiable):**
-- CV: "Used SQL" + JD needs "PostgreSQL" → Don't add "PostgreSQL" ✗ (specific variant)
+
 - CV: "Made dashboards" + JD needs "Power BI" → Don't add "Power BI" ✗ (never mentioned)
 - CV: "Analyzed data" + JD needs "Machine Learning" → Don't add "ML" ✗ (different skillset)
 - CV: "Used Excel" + JD needs "DAX" → Don't add "DAX" ✗ (advanced feature)
@@ -241,9 +243,9 @@ Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 ### **Validation Checklist**
 - ✅ Profile summary ≤50 words
 - ✅ 1-3 experiences (JD-relevant)
-- ✅ **1-3 education entries (most relevant degrees only)**
+- ✅ **2-3 education entries (minimum 2, most relevant degrees)**
 - ✅ 0-3 projects (if relevant)
-- ✅ 2-5 bullets per entry (flexible, prefer concise)
+- ✅ 2-3 bullets per entry (flexible, prefer concise)
 - ✅ **60%+ bullets have metrics (flexible quantification)**
 - ✅ **Only justifiable/transferable keywords integrated**
 - ✅ **No domain-specific/unverifiable keywords**

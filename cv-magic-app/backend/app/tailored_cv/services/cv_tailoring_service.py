@@ -2257,6 +2257,10 @@ FIX: Output ONLY valid JSON!
         
         logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Education count: {education_count}")
         
+        # Check minimum education requirement
+        if education_count < 2:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Education section has only {education_count} entries (minimum 2 recommended)")
+        
         if education_count > 3:
             logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Education section has {education_count} entries (max 3 recommended)")
         
