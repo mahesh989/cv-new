@@ -1007,7 +1007,7 @@ Please provide the optimized CV in the requested JSON format."""
         # Create the tailored CV with AI-generated content
         tailored_cv = TailoredCV(
             contact=contact,
-            profile_summary=tailored_data.get('profile_summary', ''),
+            profile_summary=ai_generated_data.get('profile_summary', ''),
             education=education if education else original_cv.education,
             experience=experience if experience else original_cv.experience,
             projects=projects if projects else original_cv.projects,

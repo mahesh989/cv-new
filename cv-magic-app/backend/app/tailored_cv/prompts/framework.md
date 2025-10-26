@@ -122,11 +122,17 @@ Research → BI analysis | Presentations → Stakeholder communication | Thesis 
 
 **Keyword Integration Tiers:**
 
-**TIER 1 - Always Integrate (Simple/Transferable):**
-- Generic role keywords matching experience (e.g., CV has "Data Analyst" → add "Business Intelligence", "Analytics")
-- Common synonyms/variants (e.g., "collaborated" ↔ "teamwork", "presented" ↔ "communication")
-- Standard industry terms for described work (e.g., doing ETL work → add "data pipeline", "data integration")
-- Soft skills with clear evidence (e.g., "led 5 people" → "leadership", "team management")
+**TIER 1 - Always Integrate (Justifiable/Transferable Skills):**
+- **Generic soft skills** that can be reasonably inferred (e.g., "leadership", "communication", "teamwork", "problem solving")
+- **Transferable technical skills** (e.g., "data analysis", "project management", "stakeholder collaboration")
+- **Role-appropriate keywords** matching experience level (e.g., "analytics", "business intelligence", "data visualization")
+- **Professional competencies** that can be demonstrated through existing experience (e.g., "attention to detail", "time management", "adaptability")
+
+**DO NOT INTEGRATE (Domain-Specific/Unverifiable):**
+- Domain-specific terms (e.g., "refugees", "humanitarian emergencies", "donor-centricity")
+- Industry-specific jargon without evidence (e.g., "fundraising", "community engagement")
+- Advanced certifications not mentioned (e.g., "PMP", "Scrum Master", "AWS Certified")
+- Specific tools not used (e.g., "PostgreSQL", "Kubernetes", "Terraform")
 
 **TIER 2 - Integrate if Semantic Evidence (Transferable Tools):**
 - Tool families where one implies others (e.g., Excel → "spreadsheet analysis", SQL → "database querying")
@@ -213,7 +219,7 @@ Specific relevance | Quantified success | Growth evidence | Unique achievements
 
 ## ✅ **QUALITY STANDARDS**
 
-### **Truth Constraint**
+### **Truth Constraint** 
 Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 
 ### **Keyword Integration Examples**
@@ -237,10 +243,10 @@ Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 - ✅ 1-3 experiences (JD-relevant)
 - ✅ **1-3 education entries (most relevant degrees only)**
 - ✅ 0-3 projects (if relevant)
-- ✅ 2-3 bullets per entry (concise)
-- ✅ All bullets have metrics
-- ✅ **Only Tier 1/2 keywords integrated**
-- ✅ **No Tier 3 unverifiable keywords**
+- ✅ 2-5 bullets per entry (flexible, prefer concise)
+- ✅ **60%+ bullets have metrics (flexible quantification)**
+- ✅ **Only justifiable/transferable keywords integrated**
+- ✅ **No domain-specific/unverifiable keywords**
 - ✅ **No overqualification red flags (excess degrees)**
 - ✅ 75-80+ ATS score (authentic content)
 - ✅ Interview-defensible content
