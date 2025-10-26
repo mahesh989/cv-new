@@ -2531,10 +2531,30 @@ FIX: Output ONLY valid JSON!
                     # Convert responsibilities and achievements to bullets
                     bullets = []
                     if exp.get('responsibilities'):
-                        bullets.extend(exp['responsibilities'])
+                        # Ensure responsibilities are strings, not lists
+                        for resp in exp['responsibilities']:
+                            if isinstance(resp, str):
+                                bullets.append(resp)
+                            elif isinstance(resp, list):
+                                bullets.extend([str(item) for item in resp])
                     if exp.get('achievements'):
-                        bullets.extend(exp['achievements'])
+                        # Ensure achievements are strings, not lists
+                        for achievement in exp['achievements']:
+                            if isinstance(achievement, str):
+                                bullets.append(achievement)
+                            elif isinstance(achievement, list):
+                                bullets.extend([str(item) for item in achievement])
                     exp['bullets'] = bullets
+                else:
+                    # Ensure existing bullets are strings, not lists
+                    if isinstance(exp['bullets'], list):
+                        flattened_bullets = []
+                        for bullet in exp['bullets']:
+                            if isinstance(bullet, str):
+                                flattened_bullets.append(bullet)
+                            elif isinstance(bullet, list):
+                                flattened_bullets.extend([str(item) for item in bullet])
+                        exp['bullets'] = flattened_bullets
                 if 'end_date' not in exp:
                     exp['end_date'] = exp.get('duration', '').split(' - ')[1] if ' - ' in exp.get('duration', '') else 'Present'
             
@@ -2548,10 +2568,25 @@ FIX: Output ONLY valid JSON!
                     # Convert achievements to bullets
                     bullets = []
                     if proj.get('achievements'):
-                        bullets.extend(proj['achievements'])
+                        # Ensure achievements are strings, not lists
+                        for achievement in proj['achievements']:
+                            if isinstance(achievement, str):
+                                bullets.append(achievement)
+                            elif isinstance(achievement, list):
+                                bullets.extend([str(item) for item in achievement])
                     if proj.get('description'):
                         bullets.append(proj['description'])
                     proj['bullets'] = bullets
+                else:
+                    # Ensure existing bullets are strings, not lists
+                    if isinstance(proj['bullets'], list):
+                        flattened_bullets = []
+                        for bullet in proj['bullets']:
+                            if isinstance(bullet, str):
+                                flattened_bullets.append(bullet)
+                            elif isinstance(bullet, list):
+                                flattened_bullets.extend([str(item) for item in bullet])
+                        proj['bullets'] = flattened_bullets
             
             logger.info(f"✅ [CV_MAPPING] Mapped {len(mapped_data['projects'])} project entries")
         
