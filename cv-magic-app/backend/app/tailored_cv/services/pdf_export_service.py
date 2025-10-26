@@ -562,6 +562,13 @@ class ResumePDFGenerator:
                             # Use bullet formatting for proper alignment
                             skills_text = ", ".join(skills_list)
                             elements.extend(self._make_bullet_rows([f"<b>{category_name}:</b> {skills_text}"]))
+            elif isinstance(skills, dict) and skills.get('is_categorized'):
+                # Handle mapped categorized format from _map_tailored_json_to_generator_schema
+                for category, skills_list in skills.items():
+                    if category != 'is_categorized' and isinstance(skills_list, list) and skills_list:
+                        # Use bullet formatting for proper alignment
+                        skills_text = ", ".join(skills_list)
+                        elements.extend(self._make_bullet_rows([f"<b>{category}:</b> {skills_text}"]))
             else:
                 # Simple format: Display with proper bullet alignment
                 technical_skills = skills.get('technical_skills', [])
