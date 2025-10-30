@@ -1,6 +1,9 @@
 import json
+import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
+
+logger = logging.getLogger(__name__)
 
 
 def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -33,6 +36,17 @@ def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[st
                 "website": contact_section.get('website', '')
             }
         }
+
+    # Profile Summary (NEW FRAMEWORK) - Critical field mapping
+    # Maps profile_summary from tailored CV to both new and legacy formats
+    profile_summary = tailored_cv_data.get('profile_summary', '')
+    if profile_summary:
+        logger.info("[ADAPTER] Mapping profile_summary to PDF format")
+        pdf_data["profile_summary"] = profile_summary
+        # Also populate career_profile for backward compatibility
+        pdf_data["career_profile"] = {"summary": profile_summary}
+    else:
+        logger.warning("[ADAPTER] ⚠️ No profile_summary found in tailored CV data")
 
     # Experience
     for exp in tailored_cv_data.get('experience', []) or []:
@@ -98,14 +112,81 @@ def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[st
             pdf_data["certifications"].append({"name": cert})
 
     # Remove empty sections not present in source
-    if not pdf_data["career_profile"]:
-        pdf_data.pop("career_profile")
+    if not pdf_data.get("career_profile"):
+        pdf_data.pop("career_profile", None)
     if not pdf_data["projects"]:
         pdf_data.pop("projects")
     if not pdf_data["certifications"]:
         pdf_data.pop("certifications")
 
+    # VALIDATION LAYER: Ensure important fields are mapped
+    _validate_field_mappings(tailored_cv_data, pdf_data)
+
     return pdf_data
+
+
+def _validate_field_mappings(source_data: Dict[str, Any], pdf_data: Dict[str, Any]) -> None:
+    """
+    Validation layer to ensure all important fields from source are mapped to PDF format.
+    Logs warnings for any missing mappings to help maintain consistency.
+    """
+    # Define important fields and their possible mapped names in PDF
+    field_mappings = {
+        'profile_summary': ['profile_summary', 'career_profile'],
+        'contact': ['personal_information'],
+        'experience': ['experience'],
+        'education': ['education'],
+        'skills': ['skills'],
+        'projects': ['projects'],
+        'certifications': ['certifications']
+    }
+    
+    missing_mappings: List[str] = []
+    
+    for source_field, possible_pdf_fields in field_mappings.items():
+        # Check if field exists in source and has content
+        source_value = source_data.get(source_field)
+        
+        # Skip empty/None values
+        if not source_value:
+            continue
+        
+        # For lists, skip if empty
+        if isinstance(source_value, list) and len(source_value) == 0:
+            continue
+        
+        # For dicts, skip if empty
+        if isinstance(source_value, dict) and len(source_value) == 0:
+            continue
+        
+        # Check if at least one of the possible PDF fields has the content
+        is_mapped = False
+        for pdf_field in possible_pdf_fields:
+            pdf_value = pdf_data.get(pdf_field)
+            if pdf_value:
+                # Check if it has actual content
+                if isinstance(pdf_value, (str, list, dict)):
+                    if pdf_value:  # Non-empty string, list, or dict
+                        is_mapped = True
+                        break
+                else:
+                    is_mapped = True
+                    break
+        
+        if not is_mapped:
+            missing_mappings.append(f"{source_field} -> {possible_pdf_fields}")
+            logger.warning(
+                f"⚠️ [ADAPTER_VALIDATION] Field '{source_field}' exists in source but not found in PDF data. "
+                f"Expected in: {possible_pdf_fields}"
+            )
+    
+    if missing_mappings:
+        logger.warning(
+            f"⚠️ [ADAPTER_VALIDATION] {len(missing_mappings)} field(s) may not be properly mapped: "
+            f"{', '.join(missing_mappings)}"
+        )
+    else:
+        logger.info("✅ [ADAPTER_VALIDATION] All important fields are properly mapped to PDF format")
 
 
 def load_tailored_cv_and_convert(json_file_path: str) -> Dict[str, Any]:
