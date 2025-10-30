@@ -31,34 +31,236 @@ class CompanyResult:
 class CompanyExtractor:
     """Single source of truth for company name extraction"""
     
-    PROMPT = """Extract the company name from this job posting. Return ONLY a JSON object.
+    # Universal Company Name Extraction Prompt - Production Ready
+    # Works for any country, any company type, any JD format
+    PROMPT = """You are an expert at extracting company names from job descriptions worldwide. Your task is to identify the ACTUAL HIRING COMPANY with 100% accuracy.
 
-SIMPLE RULES:
-1. Look for the ACTUAL company name (not job boards like Seek, Indeed)
-2. If it's a recruitment agency posting → return the AGENCY name
-3. If it's a direct company posting → return the COMPANY name
-4. NEVER extract benefits like "superannuation", "leave loading", "salary package"
-5. If no company found → return null
+═══════════════════════════════════════════════════════════════════════
+CRITICAL RULES - FOLLOW THESE ABSOLUTELY
+═══════════════════════════════════════════════════════════════════════
 
-EXAMPLES:
+1. EXTRACT THE HIRING ORGANIZATION - NOT:
+   ❌ Job boards (LinkedIn, Indeed, SEEK, Glassdoor, etc.)
+   ❌ Recruitment agencies (unless they ARE the employer)
+   ❌ Locations/cities/states/countries alone
+   ❌ Job titles or position names
+   ❌ Department names alone
+   ❌ Benefits or perks
+   ❌ Industry sectors
 
-Recruitment Agency:
-Text: "Robert Half is seeking a Data Analyst for our client..."
-JSON: {{"company": "Robert Half", "confidence": "high", "is_agency": true}}
+2. INCLUDE STATE/REGION SUFFIX IF IT'S PART OF THE OFFICIAL NAME:
+   ✓ "Transport for NSW" (not just "NSW")
+   ✓ "Energy and Water Ombudsman NSW" (not just "NSW")
+   ✓ "Government of Western Australia" (not just "Western Australia")
+   ✓ "Département du Val-d'Oise" (not just "Val-d'Oise")
+   ✓ "State of California Department of Education" (full name)
 
-Direct Company:
-Text: "Microsoft is looking for a Software Engineer..."
-JSON: {{"company": "Microsoft", "confidence": "high", "is_agency": false}}
+3. RECOGNIZE ORGANIZATIONAL PATTERNS GLOBALLY:
+   - Government: "[Agency Name] + [Region/State]"
+   - Corporations: "[Brand/Company Name] [Legal Entity]"
+   - NGOs: "[Organization Name] + [Region]" or "[Full Legal Name]"
+   - Educational: "[Institution Name] [Type]"
+   - Healthcare: "[Hospital/Clinic Name] [Location]"
 
-Benefits Text (NOT a company):
-Text: "Salary plus superannuation and leave loading..."
-JSON: {{"company": null, "confidence": "low", "is_agency": false}}
+4. NEVER EXTRACT ONLY:
+   - State abbreviations (NSW, CA, TX, VIC, QLD, etc.)
+   - Country names alone (USA, UK, Australia, etc.)
+   - City names alone (Sydney, London, Paris, etc.)
+   - Generic terms (Government, Hospital, University, etc.)
 
-EXTRACT FROM:
-URL: {url}
-Text: {text}
+═══════════════════════════════════════════════════════════════════════
+EXTRACTION STRATEGY - FOLLOW THIS PROCESS
+═══════════════════════════════════════════════════════════════════════
 
-JSON:"""
+STEP 1: LOCATE THE COMPANY REFERENCE
+Look in these sections (in order of priority):
+a) Header/Title area (first 500 characters)
+b) "About [Company]" or "About Us" sections
+c) "Who We Are" or "Our Company" sections
+d) Footer/Contact information
+e) Email domains (e.g., jobs@company.com → "company")
+
+STEP 2: IDENTIFY THE PATTERN
+Determine the structure:
+- [Job Title] at [Company] [Location]
+- [Company] is seeking a [Job Title]
+- Join [Company] as a [Job Title]
+- [Department] at [Company]
+- [Company] - [Job Title]
+
+STEP 3: EXTRACT COMPLETE NAME
+Rules for completeness:
+- If government/public sector: Include department + jurisdiction
+  Example: "Department of Education Victoria" NOT just "Victoria"
+  
+- If corporate: Include full legal entity if present
+  Example: "Accenture Australia Pty Ltd" NOT just "Accenture"
+  
+- If regional organization: Include region as part of name
+  Example: "Red Cross Queensland" NOT just "Red Cross"
+  
+- If subsidiary: Include parent if mentioned together
+  Example: "Google Cloud Australia" NOT just "Google"
+
+STEP 4: VALIDATE YOUR EXTRACTION
+Ask yourself:
+□ Is this a complete organization name? (Not just a fragment?)
+□ Can this entity legally hire employees? (Not just a location?)
+□ Would someone searching for this company find them with this name?
+□ Does this make sense as an employer in context?
+□ Is this specific enough? (Not too generic?)
+
+STEP 5: DETERMINE CONFIDENCE
+- HIGH: Company name explicitly stated, clear and unambiguous
+- MEDIUM: Company name inferred from context, reasonable certainty
+- LOW: Multiple possible interpretations, unclear hiring entity
+
+═══════════════════════════════════════════════════════════════════════
+REAL-WORLD EXAMPLES - LEARN FROM THESE
+═══════════════════════════════════════════════════════════════════════
+
+EXAMPLE 1 - Government Agency (Australia)
+Text: "Data Analyst Energy and Water Ombudsman NSW 2 days left to apply..."
+Analysis:
+- Job Title: "Data Analyst"
+- Organization: "Energy and Water Ombudsman NSW"
+- Location suffix: "NSW" is PART of the official name
+✓ CORRECT: {{"company": "Energy and Water Ombudsman NSW", "confidence": "high", "is_agency": false}}
+✗ WRONG: {{"company": "NSW"}} ← This is just a state!
+
+EXAMPLE 2 - Government Department (USA)
+Text: "Software Engineer - California Department of Transportation - Sacramento, CA"
+Analysis:
+- Job Title: "Software Engineer"
+- Organization: "California Department of Transportation"
+- Location: "Sacramento, CA" is work location, not part of name
+✓ CORRECT: {{"company": "California Department of Transportation", "confidence": "high", "is_agency": false}}
+✗ WRONG: {{"company": "California"}} ← Too generic!
+
+EXAMPLE 3 - International Corporation
+Text: "Senior Analyst at Deloitte Touche Tohmatsu Limited (Australia)"
+Analysis:
+- Organization: "Deloitte Touche Tohmatsu Limited"
+- Region: "(Australia)" indicates regional office
+✓ CORRECT: {{"company": "Deloitte Australia", "confidence": "high", "is_agency": false}}
+
+EXAMPLE 4 - Healthcare (UK)
+Text: "Nurse Practitioner | NHS Greater Glasgow and Clyde | Glasgow"
+Analysis:
+- Organization: "NHS Greater Glasgow and Clyde"
+- Location: "Glasgow" is city, not part of official name
+✓ CORRECT: {{"company": "NHS Greater Glasgow and Clyde", "confidence": "high", "is_agency": false}}
+✗ WRONG: {{"company": "NHS"}} ← Too generic!
+
+EXAMPLE 5 - University (Global)
+Text: "Research Fellow - University of Tokyo Department of Physics"
+Analysis:
+- Primary employer: "University of Tokyo"
+- Department: "Department of Physics" is subdivision
+✓ CORRECT: {{"company": "University of Tokyo", "confidence": "high", "is_agency": false}}
+
+EXAMPLE 6 - Recruitment Agency Posted (Tricky!)
+Text: "Posted by Hays Recruitment on behalf of a leading financial services company..."
+Analysis:
+- Poster: "Hays Recruitment" (agent)
+- Actual employer: "leading financial services company" (confidential)
+✓ CORRECT: {{"company": "Hays Recruitment", "confidence": "medium", "is_agency": true}}
+
+EXAMPLE 7 - Small Business (Any Country)
+Text: "Join our family-owned bakery 'Sunshine Breads' in downtown..."
+Analysis:
+- Organization: "Sunshine Breads"
+- Type: Small business
+✓ CORRECT: {{"company": "Sunshine Breads", "confidence": "high", "is_agency": false}}
+
+EXAMPLE 8 - Multinational with Country Suffix
+Text: "Amazon Web Services (AWS) Japan is hiring..."
+Analysis:
+- Parent: "Amazon Web Services"
+- Regional entity: "Japan"
+✓ CORRECT: {{"company": "Amazon Web Services Japan", "confidence": "high", "is_agency": false}}
+
+═══════════════════════════════════════════════════════════════════════
+SPECIAL CASES - HANDLE THESE CORRECTLY
+═══════════════════════════════════════════════════════════════════════
+
+CASE 1: Confidential/Unnamed Employer
+If the company is deliberately not named:
+- Look for: "confidential", "leading company", "our client"
+- Response: {{"company": "Confidential Client", "confidence": "low", "is_agency": false}}
+
+CASE 2: Multiple Entities Mentioned
+If multiple organizations are mentioned:
+- Priority 1: "We are looking for..." (the "we" is the employer)
+- Priority 2: "Join [Company]..." (direct statement)
+- Priority 3: Context clues about who's hiring
+
+CASE 3: Parent Company vs Subsidiary
+If both mentioned:
+- Use the most specific entity doing the hiring
+- Example: "Google Cloud Australia" not just "Google"
+
+CASE 4: Abbreviations and Full Names
+If both appear:
+- Prefer full name: "International Business Machines" over "IBM"
+- Unless full name is never stated, then use abbreviation
+
+CASE 5: Non-English Names
+Preserve original:
+- "Société Générale" not "General Society"
+- "Deutsche Bank" not "German Bank"
+- Keep accents, special characters, proper spelling
+
+CASE 6: Merged/Partnership Organizations
+Include all partners if that's the official name:
+- "Ernst & Young" ✓
+- "PricewaterhouseCoopers" ✓
+- "Kellogg Brown & Root" ✓
+
+═══════════════════════════════════════════════════════════════════════
+YOUR RESPONSE FORMAT
+═══════════════════════════════════════════════════════════════════════
+
+Return ONLY valid JSON in this exact format:
+
+{{
+  "company": "Complete Company Name Here",
+  "confidence": "high|medium|low",
+  "reasoning": "Brief explanation of why you extracted this name",
+  "is_agency": true|false
+}}
+
+Rules for the response:
+1. "company" must be a string, never empty, never just a location
+2. "confidence" must be exactly: "high", "medium", or "low"
+3. "reasoning" should be 1-2 sentences explaining your decision
+4. "is_agency" should be true if this is a recruitment/staffing agency doing the posting
+
+═══════════════════════════════════════════════════════════════════════
+FINAL VALIDATION CHECKLIST
+═══════════════════════════════════════════════════════════════════════
+
+Before you submit your answer, verify:
+
+✓ Is the name more than 2-3 characters? (Not just "UK", "NSW", "CA")
+✓ Is it a legal entity that can employ people? (Not just a location)
+✓ Is it the HIRING organization? (Not the job board, not just a recruiter)
+✓ Is it complete? (Not missing key parts like state/region if official)
+✓ Would someone searching for this company find them?
+✓ Does the name make sense in the context of the job?
+✓ Have you included official suffixes/prefixes that are part of the name?
+
+═══════════════════════════════════════════════════════════════════════
+
+Now extract the company name from this job description:
+
+JOB URL: {url}
+
+JOB DESCRIPTION:
+{text}
+
+Remember: Extract the ACTUAL HIRING ORGANIZATION with its COMPLETE OFFICIAL NAME. Be thorough, be accurate, be bold.
+"""
 
     def __init__(self, ai_service: AIServiceManager):
         """Initialize with AI service dependency"""
@@ -81,15 +283,15 @@ JSON:"""
             if hasattr(self.ai_service, 'initialize_for_user') and user:
                 self.ai_service.initialize_for_user(user)
             
-            # Call AI service
+            # Call AI service with increased context window for better extraction
             response = await self.ai_service.generate_response(
                 prompt=self.PROMPT.format(
                     url=jd_url[:500] if jd_url else "No URL provided",
-                    text=jd_text[:4000]
+                    text=jd_text[:8000]  # Increased from 4000 to capture more context
                 ),
                 user=user,
                 temperature=0.0,
-                max_tokens=256
+                max_tokens=512  # Increased from 256 to accommodate reasoning field
             )
             
             # Parse JSON response
@@ -121,7 +323,7 @@ JSON:"""
         )
     
     def _parse_ai_response(self, response) -> dict:
-        """Parse AI JSON response"""
+        """Parse AI JSON response with backward compatibility"""
         try:
             # Handle both string and AIResponse objects
             if hasattr(response, 'content'):
@@ -135,7 +337,15 @@ JSON:"""
             
             if json_start != -1 and json_end > json_start:
                 json_str = response_text[json_start:json_end]
-                return json.loads(json_str)
+                data = json.loads(json_str)
+                
+                # New format includes "reasoning" field, old format doesn't
+                # Both are valid - we just extract what we need
+                # Log reasoning if present for debugging
+                if "reasoning" in data:
+                    print(f"🧠 AI reasoning: {data['reasoning']}")
+                
+                return data
             
             # If no JSON found, return default
             return {"company": "Unknown", "confidence": "low", "is_agency": False}
@@ -155,6 +365,19 @@ JSON:"""
         ]
         
         name_lower = name.lower().strip()
+        
+        # CRITICAL: Check if result is ONLY a state/territory abbreviation
+        # This catches the "NSW" bug directly
+        state_abbreviations = [
+            'nsw', 'vic', 'qld', 'sa', 'wa', 'tas', 'nt', 'act',  # Australia
+            'ca', 'tx', 'ny', 'fl', 'il', 'pa', 'oh', 'ga', 'nc', 'mi',  # USA (common)
+            'on', 'bc', 'qc', 'ab', 'mb', 'sk', 'ns', 'nb',  # Canada
+            'uk', 'usa', 'au', 'nz', 'sg'  # Countries often misidentified as companies
+        ]
+        
+        if name_lower in state_abbreviations:
+            print(f"⚠️ Rejected: '{name}' is just a location abbreviation, not a company")
+            return "Unknown"
         
         # Check for invalid names
         if name_lower in invalid_names:
