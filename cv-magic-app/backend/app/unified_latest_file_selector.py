@@ -222,14 +222,55 @@ class UnifiedLatestFileSelector:
             # best-effort logging only
             pass
 
-        # Sort by (timestamp desc, mtime desc) to always pick the freshest file
+        # CRITICAL FIX: When original_cv has been recently updated (newer mtime than any tailored CV),
+        # it should be selected for the first analysis after CV upload.
+        # This ensures the rule: "Always use original_cv for the first analysis after uploading a new CV"
+        
+        # First, check if original_cv is significantly newer than any tailored CV for this company
+        original_candidates = [c for c in candidates if c[3] == "original"]
+        tailored_candidates = [c for c in candidates if c[3] == "tailored"]
+        
+        should_prefer_original = False
+        if original_candidates and tailored_candidates:
+            # Get the newest original CV mtime
+            original_json, _, _, _ = original_candidates[0]
+            try:
+                original_mtime = original_json.stat().st_mtime if original_json and original_json.exists() else 0
+            except Exception:
+                original_mtime = 0
+            
+            # Get the newest tailored CV mtime for this company
+            max_tailored_mtime = 0
+            for tailored_json, _, _, _ in tailored_candidates:
+                try:
+                    t_mtime = tailored_json.stat().st_mtime if tailored_json and tailored_json.exists() else 0
+                    max_tailored_mtime = max(max_tailored_mtime, t_mtime)
+                except Exception:
+                    pass
+            
+            # If original_cv is newer than ALL tailored CVs by at least 60 seconds,
+            # it means a new CV was uploaded and should be used for the first analysis
+            if original_mtime > 0 and (original_mtime - max_tailored_mtime) > 60:
+                should_prefer_original = True
+                print(f"🆕 [UNIFIED] Original CV is significantly newer (mtime diff: {original_mtime - max_tailored_mtime:.0f}s), preferring it for first analysis")
+        
+        # Sort by (timestamp desc, mtime desc) to pick the freshest file
+        # BUT if should_prefer_original is True, prioritize original type first
         def _candidate_key(c):
-            json_path, _txt_path, ts, _ftype = c
+            json_path, _txt_path, ts, ftype = c
             try:
                 mtime = json_path.stat().st_mtime if json_path and json_path.exists() else 0
             except Exception:
                 mtime = 0
-            return (ts, mtime)
+            
+            # If we should prefer original, put original type first
+            if should_prefer_original:
+                # Use reverse priority (1 for original, 0 for tailored) since we sort with reverse=True
+                type_priority = 1 if ftype == "original" else 0
+                return (type_priority, mtime, ts)  # Sort by: type, then mtime, then timestamp
+            else:
+                return (ts, mtime)  # Original behavior: sort by timestamp, then mtime
+        
         candidates.sort(key=_candidate_key, reverse=True)
         json_path, txt_path, ts, ftype = candidates[0]
         
