@@ -421,11 +421,37 @@ async def _run_pipeline(cname: str, token_data=None):
         saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
         logger.info(f"✅ [PIPELINE] JD analysis saved for {cname} at: {saved_path}")
         
-        # Store JD info for recording usage at END of pipeline (not here!)
-        # This ensures entire pipeline sees JD as "first-time" and uses consistent CV selection
-        jd_url_for_recording = jd_result.get('jd_url', '') or ''
-        jd_text_for_recording = jd_result.get('jd_text', '') or ''
-        job_title_for_recording = jd_result.get('job_title', '') or ''
+        # CRITICAL FIX: Read JD URL and text from job_info file (not from JD analysis result)
+        # The JD analysis result doesn't include the URL or text, so we must read from the job_info file
+        jd_url_for_recording = ''
+        jd_text_for_recording = ''
+        job_title_for_recording = ''
+        
+        try:
+            from app.utils.timestamp_utils import TimestampUtils
+            
+            # Find the job_info file
+            job_info_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"job_info_{cname}", "json")
+            if job_info_file and job_info_file.exists():
+                with open(job_info_file, 'r', encoding='utf-8') as f:
+                    job_info = json.load(f)
+                    jd_url_for_recording = job_info.get('job_url', '') or ''
+                    job_title_for_recording = job_info.get('job_title', '') or ''
+                    logger.info(f"📝 [PIPELINE] Loaded JD info from {job_info_file.name}: url={jd_url_for_recording}, title={job_title_for_recording}")
+            
+            # Also read JD text from jd_original file
+            jd_original_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+            if jd_original_file and jd_original_file.exists():
+                with open(jd_original_file, 'r', encoding='utf-8') as f:
+                    jd_data = json.load(f)
+                    # The jd_original file has the structure: {"jd_text": "...", "jd_url": "..."}
+                    jd_text_for_recording = jd_data.get('jd_text', '') or ''
+                    # Fallback to jd_url from jd_original if not in job_info
+                    if not jd_url_for_recording:
+                        jd_url_for_recording = jd_data.get('jd_url', '') or ''
+                    logger.info(f"📝 [PIPELINE] Loaded JD text from {jd_original_file.name}: {len(jd_text_for_recording)} chars")
+        except Exception as load_err:
+            logger.warning(f"⚠️ [PIPELINE] Failed to load JD info for tracking: {load_err}")
         
         pipeline_results["jd_analysis"] = True
     except Exception as e:
