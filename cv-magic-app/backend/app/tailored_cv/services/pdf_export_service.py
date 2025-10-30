@@ -149,6 +149,20 @@ class ResumePDFGenerator:
                 leading=12
             ))
 
+        # Bullet text style (for text inside bullet tables - NO leftIndent to avoid double indentation)
+        if 'BulletText' not in style_names:
+            self.styles.add(ParagraphStyle(
+                name='BulletText',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#333333'),
+                spaceAfter=6,
+                alignment=TA_JUSTIFY,
+                leftIndent=0,  # NO indent - table handles positioning
+                rightIndent=0,
+                leading=12
+            ))
+
         # Job Title style
         if 'JobTitle' not in style_names:
             self.styles.add(ParagraphStyle(
@@ -259,6 +273,7 @@ class ResumePDFGenerator:
         elements.append(Spacer(1, self.spacing['section_above']))
         elements.append(Paragraph(title, self.styles['SectionHeader']))
         
+        # Create horizontal line
         line = HRFlowable(
             width=self._usable_width() - self.content_left_margin,
             thickness=0.5,
@@ -267,8 +282,16 @@ class ResumePDFGenerator:
             spaceAfter=self.spacing['line_after_section'],
             hAlign='LEFT'
         )
-        line._xoffset = self.content_left_margin
-        elements.append(line)
+        
+        # Wrap line in table for proper positioning (instead of unreliable _xoffset)
+        line_table = Table([[line]], colWidths=[self._usable_width()])
+        line_table.setStyle(TableStyle([
+            ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+            ('RIGHTPADDING', (0, 0), (0, 0), 0),
+            ('TOPPADDING', (0, 0), (0, 0), 0),
+            ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+        ]))
+        elements.append(line_table)
         
         return elements
 
@@ -285,7 +308,7 @@ class ResumePDFGenerator:
         text_col = usable - bullet_col
         
         bullet_par = Paragraph("•", self.styles['BulletChar'])
-        text_par = Paragraph(text, self.styles['BodyText'])
+        text_par = Paragraph(text, self.styles['BulletText'])  # Use BulletText to avoid double indentation
         
         tbl = Table([[bullet_par, text_par]], colWidths=[bullet_col, text_col])
         tbl.setStyle(TableStyle([
@@ -407,7 +430,18 @@ class ResumePDFGenerator:
         return elements
 
     def _paragraph_block(self, text: str):
-        return Paragraph(text, self.styles['BodyText'])
+        """Create a paragraph block with consistent left margin alignment"""
+        para = Paragraph(text, self.styles['BodyText'])
+        
+        # Wrap in table for consistent positioning (leftIndent on BodyText may not work in all contexts)
+        table = Table([[para]], colWidths=[self._usable_width()])
+        table.setStyle(TableStyle([
+            ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+            ('RIGHTPADDING', (0, 0), (0, 0), 0),
+            ('TOPPADDING', (0, 0), (0, 0), 0),
+            ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+        ]))
+        return table
     
     def _create_hyperlink(self, text: str, url: str):
         """Create a clickable hyperlink"""
