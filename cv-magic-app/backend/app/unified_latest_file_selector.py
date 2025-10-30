@@ -105,25 +105,25 @@ class UnifiedLatestFileSelector:
         
         Args:
             company: Company name
-            jd_url: Job description URL (optional) - used for company uniqueness if provided
+            jd_url: Job description URL (optional) - used for JD tracking only
             jd_text: Job description text (optional)
         """
         if not self.user_email:
             raise ValueError("user_email must be provided for file selection operations")
         
-        # Use JD URL for company uniqueness if provided, otherwise use company name
-        effective_company = self._get_effective_company_name(company, jd_url)
-        print(f"🔍 Searching for CV for company: {company} (effective: {effective_company})")
+        print(f"🔍 Searching for CV for company: {company}")
         
-        # Check if this is first-time JD usage
+        # Check if this is first-time JD usage (JD URL is used for tracking, not for CV file lookup)
         is_first_time = self._is_jd_first_time_usage(jd_url, jd_text)
         
         if is_first_time:
             print("🆕 First-time JD usage detected - using original CV")
-            return self._get_original_cv_for_company(effective_company)
+            # CRITICAL: Use base company name for CV lookup (CVs are stored with base name)
+            return self._get_original_cv_for_company(company)
         else:
             print("🔄 Subsequent JD usage - using latest CV (original or tailored)")
-            return self.get_latest_cv_across_all(effective_company)
+            # CRITICAL: Use base company name for CV lookup (CVs are stored with base name)
+            return self.get_latest_cv_across_all(company)
     
     def _get_original_cv_for_company(self, company: str) -> FileContext:
         """Get original CV for a company"""
