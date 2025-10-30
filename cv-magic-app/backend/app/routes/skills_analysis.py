@@ -421,21 +421,11 @@ async def _run_pipeline(cname: str, token_data=None):
         saved_path = jd_result_obj.metadata.get("saved_path") if hasattr(jd_result_obj, 'metadata') and jd_result_obj.metadata else None
         logger.info(f"✅ [PIPELINE] JD analysis saved for {cname} at: {saved_path}")
         
-        # Record JD usage for tracking first-time vs subsequent usage
-        try:
-            from app.services.jd_usage_tracker import JDUsageTracker
-            tracker = JDUsageTracker(user_email)
-            
-            # Get JD URL and text from the analysis result
-            jd_url = jd_result.get('jd_url', '') or ''
-            jd_text = jd_result.get('jd_text', '') or ''
-            job_title = jd_result.get('job_title', '') or ''
-            
-            # Record the JD usage
-            tracker.record_jd_usage(jd_url, jd_text, cname, job_title)
-            logger.info(f"📝 [PIPELINE] JD usage recorded for {cname}")
-        except Exception as e:
-            logger.warning(f"⚠️ [PIPELINE] Failed to record JD usage: {e}")
+        # Store JD info for recording usage at END of pipeline (not here!)
+        # This ensures entire pipeline sees JD as "first-time" and uses consistent CV selection
+        jd_url_for_recording = jd_result.get('jd_url', '') or ''
+        jd_text_for_recording = jd_result.get('jd_text', '') or ''
+        job_title_for_recording = jd_result.get('job_title', '') or ''
         
         pipeline_results["jd_analysis"] = True
     except Exception as e:
@@ -445,26 +435,22 @@ async def _run_pipeline(cname: str, token_data=None):
     # Step 2: CV-JD Matching
     try:
         logger.info(f"🔧 [PIPELINE] Starting CV–JD matching for {cname}")
-        # Prefer tailored CV if available; else fall back to dynamic latest
+        # Use unified selector with JD tracking (respects first-time JD rule)
         try:
             from app.utils.user_path_utils import get_user_base_path
             user_email = getattr(token_data, 'email', None)
             if not user_email:
                 raise ValueError("User authentication required for CV operations")
-            base_dir_local = get_user_base_path(user_email)
-            company_tailored_dir = base_dir_local / "applied_companies" / cname
-            preferred_txt = None
-            if company_tailored_dir.exists():
-                txt_candidates = list(company_tailored_dir.glob(f"{cname}_tailored_cv_*.txt"))
-                if txt_candidates:
-                    preferred_txt = max(txt_candidates, key=lambda p: p.stat().st_mtime)
-            cv_txt_path_for_match = str(preferred_txt) if preferred_txt else None
-            if not cv_txt_path_for_match:
-                # Use unified selector instead of missing dynamic_cv_selector
-                from app.unified_latest_file_selector import get_selector_for_user
-                user_selector = get_selector_for_user(user_email)
-                cv_context = user_selector.get_latest_cv_across_all(cname)
-                cv_txt_path_for_match = str(cv_context.txt_path) if cv_context and cv_context.txt_path else None
+            
+            # Get JD URL for tracking (from JD analysis result)
+            jd_url_for_cv_selection = jd_url_for_recording if 'jd_url_for_recording' in locals() else ""
+            jd_text_for_cv_selection = jd_text_for_recording if 'jd_text_for_recording' in locals() else ""
+            
+            # Use unified selector with JD tracking
+            from app.unified_latest_file_selector import get_selector_for_user
+            user_selector = get_selector_for_user(user_email)
+            cv_context = user_selector.get_latest_cv_for_company(cname, jd_url_for_cv_selection, jd_text_for_cv_selection)
+            cv_txt_path_for_match = str(cv_context.txt_path) if cv_context and cv_context.txt_path else None
             if cv_txt_path_for_match:
                 logger.info(f"📄 [PIPELINE] CV–JD matching will use CV TXT: {cv_txt_path_for_match}")
         except Exception as _sel_err:
@@ -504,11 +490,15 @@ async def _run_pipeline(cname: str, token_data=None):
         # Create user-specific orchestrator
         user_orchestrator = get_modular_ats_orchestrator(user_email=user_email)
         
-        # Get latest CV context across tailored+original, log paths, then read content
+        # Get latest CV context using JD tracking (respects first-time JD rule)
         try:
+            # Get JD URL for tracking (from JD analysis result)
+            jd_url_for_cv_selection = jd_url_for_recording if 'jd_url_for_recording' in locals() else ""
+            jd_text_for_cv_selection = jd_text_for_recording if 'jd_text_for_recording' in locals() else ""
+            
             # Create user-specific selector
             user_selector = get_selector_for_user(user_email)
-            cv_ctx_debug = user_selector.get_latest_cv_across_all(cname)
+            cv_ctx_debug = user_selector.get_latest_cv_for_company(cname, jd_url_for_cv_selection, jd_text_for_cv_selection)
             logger.info(
                 "📄 [PIPELINE] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
                 cv_ctx_debug.file_type,
@@ -658,6 +648,16 @@ async def _run_pipeline(cname: str, token_data=None):
     else:
         logger.info(f"⏭️ [PIPELINE] Skipping tailored CV generation for {cname} (AI recommendation failed)")
         pipeline_results["tailored_cv"] = False
+    
+    # Record JD usage NOW (at end of pipeline) so entire pipeline run uses consistent CV selection
+    try:
+        if 'jd_url_for_recording' in locals():
+            from app.services.jd_usage_tracker import JDUsageTracker
+            tracker = JDUsageTracker(user_email)
+            tracker.record_jd_usage(jd_url_for_recording, jd_text_for_recording, cname, job_title_for_recording)
+            logger.info(f"📝 [PIPELINE] JD usage recorded for {cname} (at end of pipeline)")
+    except Exception as e:
+        logger.warning(f"⚠️ [PIPELINE] Failed to record JD usage: {e}")
     
     # Log pipeline summary
     successful_steps = [step for step, success in pipeline_results.items() if success]
@@ -1018,7 +1018,8 @@ async def preliminary_analysis(
         try:
             # Create user-specific selector
             user_selector = get_selector_for_user(user_email)
-            # Log JD URL if available via latest job_info for this company (once per analysis)
+            # Extract JD URL from latest job_info for this company (for JD usage tracking)
+            jd_url_for_tracking = ""
             try:
                 from app.utils.user_path_utils import get_user_base_path
                 from pathlib import Path as _Path
@@ -1030,13 +1031,15 @@ async def preliminary_analysis(
                     import json as _json
                     with open(latest_job_info, 'r', encoding='utf-8') as _jf:
                         _job = _json.load(_jf)
-                    _jd_url_logged = _job.get("job_url") or _job.get("url")
-                    if _jd_url_logged:
-                        logger.info(f"🔗 [PRELIM_ANALYSIS] JD URL (latest job_info): {_jd_url_logged}")
+                    jd_url_for_tracking = _job.get("job_url") or _job.get("url") or ""
+                    if jd_url_for_tracking:
+                        logger.info(f"🔗 [PRELIM_ANALYSIS] JD URL (latest job_info): {jd_url_for_tracking}")
             except Exception as _e:
-                logger.debug(f"(debug) JD URL logging skipped: {_e}")
+                logger.debug(f"(debug) JD URL extraction skipped: {_e}")
 
-            cv_ctx = user_selector.get_latest_cv_across_all(company_name)
+            # CRITICAL FIX: Use get_latest_cv_for_company() which respects JD usage tracking
+            # This ensures first-time JD usage always gets original CV
+            cv_ctx = user_selector.get_latest_cv_for_company(company_name, jd_url_for_tracking, jd_text)
             logger.info(
                 "📄 [PRELIM_ANALYSIS] Latest CV selected → type=%s, ts=%s, json=%s, txt=%s",
                 cv_ctx.file_type, cv_ctx.timestamp, cv_ctx.json_path, cv_ctx.txt_path
