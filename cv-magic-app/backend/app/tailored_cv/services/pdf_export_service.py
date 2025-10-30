@@ -14,6 +14,7 @@ from reportlab.platypus import (
     HRFlowable,
     Table,
     TableStyle,
+    Indenter,  # NEW: Use Indenter for proper left margin
 )
 # HyperLink import removed - not needed for current implementation
 from reportlab.lib import colors
@@ -268,12 +269,16 @@ class ResumePDFGenerator:
             ))
 
     def _create_section_with_line(self, title: str):
-        """Create a uniform section header with consistent spacing and alignment"""
+        """Create section header with perfectly aligned horizontal line"""
         elements = []
         elements.append(Spacer(1, self.spacing['section_above']))
+        
+        # Section title - uses leftIndent from SectionHeader style
         elements.append(Paragraph(title, self.styles['SectionHeader']))
         
-        # Create horizontal line
+        # CRITICAL FIX: Use Indenter to position the line correctly
+        elements.append(Indenter(left=self.content_left_margin))
+        
         line = HRFlowable(
             width=self._usable_width() - self.content_left_margin,
             thickness=0.5,
@@ -282,16 +287,9 @@ class ResumePDFGenerator:
             spaceAfter=self.spacing['line_after_section'],
             hAlign='LEFT'
         )
+        elements.append(line)
         
-        # Wrap line in table for proper positioning (instead of unreliable _xoffset)
-        line_table = Table([[line]], colWidths=[self._usable_width()])
-        line_table.setStyle(TableStyle([
-            ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
-            ('RIGHTPADDING', (0, 0), (0, 0), 0),
-            ('TOPPADDING', (0, 0), (0, 0), 0),
-            ('BOTTOMPADDING', (0, 0), (0, 0), 0),
-        ]))
-        elements.append(line_table)
+        elements.append(Indenter(left=-self.content_left_margin))  # Pop back
         
         return elements
 
@@ -430,18 +428,11 @@ class ResumePDFGenerator:
         return elements
 
     def _paragraph_block(self, text: str):
-        """Create a paragraph block with consistent left margin alignment"""
-        para = Paragraph(text, self.styles['BodyText'])
-        
-        # Wrap in table for consistent positioning (leftIndent on BodyText may not work in all contexts)
-        table = Table([[para]], colWidths=[self._usable_width()])
-        table.setStyle(TableStyle([
-            ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
-            ('RIGHTPADDING', (0, 0), (0, 0), 0),
-            ('TOPPADDING', (0, 0), (0, 0), 0),
-            ('BOTTOMPADDING', (0, 0), (0, 0), 0),
-        ]))
-        return table
+        """
+        CRITICAL FIX: Use paragraph with leftIndent directly - NO table wrapping
+        This ensures consistent positioning with section headers
+        """
+        return Paragraph(text, self.styles['BodyText'])
     
     def _create_hyperlink(self, text: str, url: str):
         """Create a clickable hyperlink"""
@@ -524,7 +515,15 @@ class ResumePDFGenerator:
                     table = self._create_aligned_two_column(f"<b>{title}</b>", duration, 'JobTitle', 'DateRight')
                     elements.append(table)
                 else:
-                    elements.append(Paragraph(f"<b>{title}</b>", self.styles['BodyText']))
+                    para = Paragraph(f"<b>{title}</b>", self.styles['JobTitle'])
+                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+                    tbl.setStyle(TableStyle([
+                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+                        ('TOPPADDING', (0, 0), (0, 0), 0),
+                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+                    ]))
+                    elements.append(tbl)
                 
                 # Company and location
                 company_parts = []
@@ -534,7 +533,15 @@ class ResumePDFGenerator:
                     company_parts.append(location)
                 
                 if company_parts:
-                    elements.append(Paragraph(" | ".join(company_parts), self.styles['Company']))
+                    para = Paragraph(" | ".join(company_parts), self.styles['Company'])
+                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+                    tbl.setStyle(TableStyle([
+                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+                        ('TOPPADDING', (0, 0), (0, 0), 0),
+                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+                    ]))
+                    elements.append(tbl)
                 
                 # Responsibilities
                 if exp.get('responsibilities') and isinstance(exp['responsibilities'], list):
@@ -563,7 +570,15 @@ class ResumePDFGenerator:
                     table = self._create_aligned_two_column(f"<b>{degree}</b>", year, 'Degree', 'DateRight')
                     elements.append(table)
                 else:
-                    elements.append(Paragraph(f"<b>{degree}</b>", self.styles['BodyText']))
+                    para = Paragraph(f"<b>{degree}</b>", self.styles['Degree'])
+                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+                    tbl.setStyle(TableStyle([
+                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+                        ('TOPPADDING', (0, 0), (0, 0), 0),
+                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+                    ]))
+                    elements.append(tbl)
                 
                 # Institution and location
                 inst_parts = []
@@ -573,7 +588,15 @@ class ResumePDFGenerator:
                     inst_parts.append(location)
                 
                 if inst_parts:
-                    elements.append(Paragraph(", ".join(inst_parts), self.styles['Institution']))
+                    para = Paragraph(", ".join(inst_parts), self.styles['Institution'])
+                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+                    tbl.setStyle(TableStyle([
+                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+                        ('TOPPADDING', (0, 0), (0, 0), 0),
+                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+                    ]))
+                    elements.append(tbl)
                 
                 if i < len(education) - 1:
                     elements.append(Spacer(1, self.spacing['education_gap']))  # Consistent education spacing
@@ -633,11 +656,27 @@ class ResumePDFGenerator:
                     elements.append(table)
                 else:
                     # Use JobTitle style for consistent alignment with experience section
-                    elements.append(Paragraph(f"<b>{name}</b>", self.styles['JobTitle']))
+                    para = Paragraph(f"<b>{name}</b>", self.styles['JobTitle'])
+                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+                    tbl.setStyle(TableStyle([
+                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+                        ('TOPPADDING', (0, 0), (0, 0), 0),
+                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+                    ]))
+                    elements.append(tbl)
                 
                 # Add context if available (like university project, individual project, etc.)
                 if context:
-                    elements.append(Paragraph(context, self.styles['Company']))
+                    para = Paragraph(context, self.styles['Company'])
+                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+                    tbl.setStyle(TableStyle([
+                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+                        ('TOPPADDING', (0, 0), (0, 0), 0),
+                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+                    ]))
+                    elements.append(tbl)
                 
                 # Handle bullets/descriptions
                 bullets = proj.get('bullets', [])
@@ -649,11 +688,19 @@ class ResumePDFGenerator:
                         elements.extend(self._make_bullet_rows(clean_bullets))
                 elif proj.get('description'):
                     logger.info(f"[PDF_EXPORT] Project {i} using description fallback")
-                    elements.append(Paragraph(proj['description'], self.styles['BodyText']))
+                    elements.append(self._paragraph_block(proj['description']))
                 
                 if proj.get('technologies'):
                     tech_text = f"Technologies: {', '.join(proj['technologies'])}"
-                    elements.append(Paragraph(tech_text, self.styles['Company']))
+                    para = Paragraph(tech_text, self.styles['Company'])
+                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+                    tbl.setStyle(TableStyle([
+                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+                        ('TOPPADDING', (0, 0), (0, 0), 0),
+                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+                    ]))
+                    elements.append(tbl)
                 
                 if i < len(projects) - 1:
                     elements.append(Spacer(1, self.spacing['subsection_gap']))
