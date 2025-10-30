@@ -5,7 +5,7 @@ Validates consistency across different analyzers to ensure they interpret the sa
 """
 
 import logging
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +47,9 @@ class ConsistencyValidator:
             industry_data = results.get("industry", {}).get("industry_analysis", {})
             technical_data = results.get("technical", {}).get("technical_analysis", {})
             
-            # Check experience years consistency
-            exp_years = experience_data.get("cv_experience_years", 0)
-            seniority_years = seniority_data.get("cv_experience_years", 0)
+            # Check experience years consistency (TYPE-SAFE: handle both strings and numbers)
+            exp_years = self._safe_numeric(experience_data.get("cv_experience_years", 0))
+            seniority_years = self._safe_numeric(seniority_data.get("cv_experience_years", 0))
             
             if abs(exp_years - seniority_years) > self.tolerance_thresholds["experience_years"]:
                 validation_results["is_consistent"] = False
@@ -81,13 +81,13 @@ class ConsistencyValidator:
                     "Ensure consistent interpretation of academic roles."
                 )
             
-            # Check score consistency
+            # Check score consistency (TYPE-SAFE: handle both strings and numbers)
             scores = {
-                "experience": experience_data.get("alignment_score", 0),
-                "seniority": seniority_data.get("seniority_score", 0),
-                "skills": skills_data.get("overall_skills_score", 0),
-                "industry": industry_data.get("industry_alignment_score", 0),
-                "technical": technical_data.get("technical_depth_score", 0)
+                "experience": self._safe_numeric(experience_data.get("alignment_score", 0)),
+                "seniority": self._safe_numeric(seniority_data.get("seniority_score", 0)),
+                "skills": self._safe_numeric(skills_data.get("overall_skills_score", 0)),
+                "industry": self._safe_numeric(industry_data.get("industry_alignment_score", 0)),
+                "technical": self._safe_numeric(technical_data.get("technical_depth_score", 0))
             }
             
             # Calculate overall consistency score
@@ -113,6 +113,39 @@ class ConsistencyValidator:
             })
         
         return validation_results
+    
+    def _safe_numeric(self, value: Any, default: float = 0.0) -> float:
+        """
+        Safely convert a value to numeric (float), handling strings, ints, and None.
+        
+        Args:
+            value: Value to convert (can be str, int, float, or None)
+            default: Default value if conversion fails
+            
+        Returns:
+            float: Numeric value
+        """
+        if value is None:
+            return default
+        
+        # Already a number
+        if isinstance(value, (int, float)):
+            return float(value)
+        
+        # Try to convert string to number
+        if isinstance(value, str):
+            try:
+                # Remove any whitespace
+                cleaned = value.strip()
+                # Try float conversion
+                return float(cleaned)
+            except (ValueError, AttributeError):
+                logger.warning(f"[CONSISTENCY] Could not convert '{value}' to numeric, using default: {default}")
+                return default
+        
+        # Fallback for any other type
+        logger.warning(f"[CONSISTENCY] Unexpected type {type(value)} for numeric value, using default: {default}")
+        return default
     
     def _is_role_level_inconsistent(self, exp_level: str, seniority_scope: str) -> bool:
         """Check if role levels are inconsistent."""
