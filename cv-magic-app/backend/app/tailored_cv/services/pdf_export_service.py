@@ -287,10 +287,19 @@ class ResumePDFGenerator:
         elements = []
         elements.append(Spacer(1, self.spacing['section_above']))
         
-        # Section title - no indent needed, aligns at frame edge (36pts)
-        elements.append(Paragraph(title, self.styles['SectionHeader']))
+        # CRITICAL FIX: Wrap section header in table for consistent alignment with all content
+        # This ensures headers align exactly with content below (both at frame edge)
+        header_para = Paragraph(title, self.styles['SectionHeader'])
+        header_tbl = Table([[header_para]], colWidths=[self._usable_width()])
+        header_tbl.setStyle(TableStyle([
+            ('LEFTPADDING', (0, 0), (0, 0), 0),
+            ('RIGHTPADDING', (0, 0), (0, 0), 0),
+            ('TOPPADDING', (0, 0), (0, 0), 0),
+            ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+        ]))
+        elements.append(header_tbl)
         
-        # Horizontal line - no indent needed since content_left_margin = 0
+        # Horizontal line - wrapped in table for consistent alignment
         line = HRFlowable(
             width=self._usable_width(),  # Full width from frame edge
             thickness=0.5,
@@ -299,7 +308,14 @@ class ResumePDFGenerator:
             spaceAfter=self.spacing['line_after_section'],
             hAlign='LEFT'
         )
-        elements.append(line)
+        line_tbl = Table([[line]], colWidths=[self._usable_width()])
+        line_tbl.setStyle(TableStyle([
+            ('LEFTPADDING', (0, 0), (0, 0), 0),
+            ('RIGHTPADDING', (0, 0), (0, 0), 0),
+            ('TOPPADDING', (0, 0), (0, 0), 0),
+            ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+        ]))
+        elements.append(line_tbl)
         
         return elements
 
