@@ -111,14 +111,14 @@ class ResumePDFGenerator:
         if 'SectionHeader' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='SectionHeader',
-                parent=self.styles['Heading2'],
+                parent=self.styles['Normal'],  # Changed from Heading2 to avoid inherited indents
                 fontSize=14,
                 textColor=colors.HexColor('#1a1a1a'),
                 spaceAfter=self.spacing['section_below'],
                 spaceBefore=0,
                 fontName='Helvetica-Bold',
                 alignment=TA_LEFT,
-                leftIndent=self.content_left_margin,
+                leftIndent=self.content_left_margin,  # Now 0
                 rightIndent=0,
                 leading=14
             ))
