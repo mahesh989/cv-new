@@ -287,14 +287,12 @@ class ResumePDFGenerator:
         elements = []
         elements.append(Spacer(1, self.spacing['section_above']))
         
-        # Section title - uses leftIndent from SectionHeader style
+        # Section title - no indent needed, aligns at frame edge (36pts)
         elements.append(Paragraph(title, self.styles['SectionHeader']))
         
-        # CRITICAL FIX: Use Indenter to position the line correctly
-        elements.append(Indenter(left=self.content_left_margin))
-        
+        # Horizontal line - no indent needed since content_left_margin = 0
         line = HRFlowable(
-            width=self._usable_width() - self.content_left_margin,
+            width=self._usable_width(),  # Full width from frame edge
             thickness=0.5,
             color=colors.HexColor('#666666'),
             spaceBefore=2,
@@ -302,8 +300,6 @@ class ResumePDFGenerator:
             hAlign='LEFT'
         )
         elements.append(line)
-        
-        elements.append(Indenter(left=-self.content_left_margin))  # Pop back
         
         return elements
 
