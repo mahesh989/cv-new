@@ -46,7 +46,7 @@ class ResumePDFGenerator:
         }
 
         # Alignment constants - all values in points for consistency
-        self.content_left_margin = 0.15 * inch
+        self.content_left_margin = 0  # No additional content margin - align to page edge
         self.bullet_indent = 18  # Points - consistent with ReportLab units
         self.section_indent = 0  # No additional indent for section headers
         self.text_indent = 0     # No indent for body text
