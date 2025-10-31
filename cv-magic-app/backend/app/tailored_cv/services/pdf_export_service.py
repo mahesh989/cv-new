@@ -164,6 +164,20 @@ class ResumePDFGenerator:
                 leading=12
             ))
 
+        # Paragraph block style (for content wrapped in tables - NO leftIndent to avoid double indentation)
+        if 'TableParagraph' not in style_names:
+            self.styles.add(ParagraphStyle(
+                name='TableParagraph',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#333333'),
+                spaceAfter=6,
+                alignment=TA_JUSTIFY,
+                leftIndent=0,  # NO indent - table handles positioning
+                rightIndent=0,
+                leading=12
+            ))
+
         # Job Title style
         if 'JobTitle' not in style_names:
             self.styles.add(ParagraphStyle(
@@ -429,10 +443,18 @@ class ResumePDFGenerator:
 
     def _paragraph_block(self, text: str):
         """
-        CRITICAL FIX: Use paragraph with leftIndent directly - NO table wrapping
-        This ensures consistent positioning with section headers
+        CRITICAL FIX: Wrap in table for consistent alignment with all other content
+        Use TableParagraph style (leftIndent=0) to avoid double indentation
         """
-        return Paragraph(text, self.styles['BodyText'])
+        para = Paragraph(text, self.styles['TableParagraph'])
+        tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
+        tbl.setStyle(TableStyle([
+            ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
+            ('RIGHTPADDING', (0, 0), (0, 0), 0),
+            ('TOPPADDING', (0, 0), (0, 0), 0),
+            ('BOTTOMPADDING', (0, 0), (0, 0), 0),
+        ]))
+        return tbl
     
     def _create_hyperlink(self, text: str, url: str):
         """Create a clickable hyperlink"""
