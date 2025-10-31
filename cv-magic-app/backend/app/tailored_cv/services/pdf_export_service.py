@@ -299,13 +299,16 @@ class ResumePDFGenerator:
         ]))
         elements.append(header_tbl)
         
+        # Add small spacer before line
+        elements.append(Spacer(1, 2))
+        
         # Horizontal line - wrapped in table for consistent alignment
         line = HRFlowable(
             width=self._usable_width(),  # Full width from frame edge
             thickness=0.5,
             color=colors.HexColor('#666666'),
-            spaceBefore=2,
-            spaceAfter=self.spacing['line_after_section'],
+            spaceBefore=0,  # Handled by explicit Spacer above
+            spaceAfter=0,   # Handled by explicit Spacer below
             hAlign='LEFT'
         )
         line_tbl = Table([[line]], colWidths=[self._usable_width()])
@@ -316,6 +319,9 @@ class ResumePDFGenerator:
             ('BOTTOMPADDING', (0, 0), (0, 0), 0),
         ]))
         elements.append(line_tbl)
+        
+        # Add spacer after line
+        elements.append(Spacer(1, self.spacing['line_after_section']))
         
         return elements
 
