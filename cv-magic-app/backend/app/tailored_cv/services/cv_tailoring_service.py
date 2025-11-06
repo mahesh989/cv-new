@@ -1799,9 +1799,8 @@ FIX: Output ONLY valid JSON!
             
             # Role Highlights (NEW FRAMEWORK)
             if tailored_cv.role_highlights:
-                # Extract role title from target_role if available
-                role_title = tailored_cv.target_role if hasattr(tailored_cv, 'target_role') and tailored_cv.target_role else "PROFESSIONAL"
-                lines.append(f"{role_title.upper()} HIGHLIGHTS")
+                # Use static header "CAREER HIGHLIGHTS"
+                lines.append("CAREER HIGHLIGHTS")
                 lines.append("-" * 20)
                 lines.append(tailored_cv.role_highlights)
                 lines.append("")

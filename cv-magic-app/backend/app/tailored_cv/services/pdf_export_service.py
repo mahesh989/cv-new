@@ -525,9 +525,8 @@ class ResumePDFGenerator:
         role_highlights = self.data.get('role_highlights', '')
         if role_highlights:
             logger.info("[PDF_EXPORT] Adding role highlights section")
-            # Extract role title from target_role if available, otherwise use generic
-            role_title = self.data.get('target_role', 'PROFESSIONAL')
-            elements.extend(self._create_section_with_line(f'{role_title.upper()} HIGHLIGHTS'))
+            # Use static header "CAREER HIGHLIGHTS"
+            elements.extend(self._create_section_with_line('CAREER HIGHLIGHTS'))
             elements.append(self._paragraph_block(role_highlights))
             elements.append(Spacer(1, self.spacing['section_below']))
         else:
