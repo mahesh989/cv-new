@@ -1110,6 +1110,8 @@ Please provide the optimized CV in the requested JSON format."""
             experience=full_tailored_cv.experience,
             projects=full_tailored_cv.projects,
             skills=full_tailored_cv.skills,
+            target_role=full_tailored_cv.target_role,
+            target_company=full_tailored_cv.target_company,
             created_at=full_tailored_cv.created_at
         )
         

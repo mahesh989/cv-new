@@ -179,6 +179,10 @@ class CleanTailoredCV(BaseModel):
     projects: Optional[List[Project]] = Field(None, description="Projects section")
     skills: List[SkillCategory] = Field(..., description="Skills")
     
+    # Target role for dynamic PDF headers
+    target_role: Optional[str] = Field(None, description="Target job title for dynamic section headers")
+    target_company: Optional[str] = Field(None, description="Target company name")
+    
     # Minimal metadata for tracking
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
     last_edited: Optional[datetime] = Field(None, description="Last edit timestamp")
