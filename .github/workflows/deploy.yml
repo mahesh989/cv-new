@@ -13,7 +13,8 @@ jobs:
     
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'
+        flutter-version: '3.27.0'  # Updated to include Dart SDK 3.5.4+
+        channel: 'stable'
     
     - name: Install dependencies
       run: flutter pub get
