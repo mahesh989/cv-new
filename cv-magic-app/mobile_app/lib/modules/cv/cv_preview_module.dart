@@ -88,6 +88,11 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
         continue;
       }
 
+      // Skip dash separator lines (used after section headers)
+      if (line.trim().replaceAll('-', '').isEmpty && line.contains('-')) {
+        continue; // Skip lines that are just dashes
+      }
+
       // Format section headers (all caps words)
       if (line == line.toUpperCase() &&
           line.length > 3 &&
