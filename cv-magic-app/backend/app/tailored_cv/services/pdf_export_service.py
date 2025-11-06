@@ -357,6 +357,53 @@ class ResumePDFGenerator:
             if i < len(texts) - 1:
                 out.append(Spacer(1, self.spacing['bullet_gap']))
         return out
+    
+    def _format_role_highlights(self, role_highlights: str):
+        """
+        Parse and format role highlights content with proper structure:
+        - First line: Value statement (paragraph)
+        - Lines with •: Bullet points (properly formatted)
+        - Skills: line: Skills section (paragraph)
+        """
+        elements = []
+        lines = role_highlights.strip().split('\n')
+        
+        bullets = []
+        value_statement = None
+        skills_line = None
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Check if it's a bullet point
+            if line.startswith('•'):
+                # Remove the bullet character and add to bullets list
+                bullet_text = line[1:].strip()
+                bullets.append(bullet_text)
+            # Check if it's the skills line
+            elif line.lower().startswith('skills:'):
+                skills_line = line
+            # Otherwise it's the value statement (first non-bullet line)
+            elif value_statement is None:
+                value_statement = line
+        
+        # Add value statement
+        if value_statement:
+            elements.append(self._paragraph_block(value_statement))
+            elements.append(Spacer(1, self.spacing['bullet_gap']))
+        
+        # Add bullet points
+        if bullets:
+            elements.extend(self._make_bullet_rows(bullets))
+            elements.append(Spacer(1, self.spacing['bullet_gap']))
+        
+        # Add skills line
+        if skills_line:
+            elements.append(self._paragraph_block(skills_line))
+        
+        return elements
 
     def _create_aligned_two_column(self, left_content: str, right_content: str, 
                                    left_style: str = 'JobTitle', right_style: str = 'DateRight'):
@@ -527,7 +574,8 @@ class ResumePDFGenerator:
             logger.info("[PDF_EXPORT] Adding role highlights section")
             # Use static header "CAREER HIGHLIGHTS"
             elements.extend(self._create_section_with_line('CAREER HIGHLIGHTS'))
-            elements.append(self._paragraph_block(role_highlights))
+            # Use the new formatting method to properly parse and format the content
+            elements.extend(self._format_role_highlights(role_highlights))
             elements.append(Spacer(1, self.spacing['section_below']))
         else:
             # Fallback to profile_summary (transition period) or career_profile (legacy)

@@ -31,7 +31,7 @@ show_menu() {
     echo -e "${BLUE}║  ${YELLOW}2)${NC} Quick Deployment (fast, minimal cleanup)             ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${CYAN}3)${NC} Check Status Only (monitoring)                        ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${RED}5)${NC} Reset Database (⚠️  DESTROYS ALL DATA + TABLES)        ${BLUE}║${NC}"
-    echo -e "${BLUE}║  ${YELLOW}6)${NC} Clear All Data (keeps tables/schema intact)          ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${YELLOW}6)${NC} Clear All Data + Rebuild (keeps schema intact)       ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${RED}4)${NC} Exit                                                   ${BLUE}║${NC}"
     echo -e "${BLUE}║                                                              ║${NC}"
     echo -e "${BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
@@ -213,9 +213,10 @@ EOF
 
 # Clear all data function (keeps schema intact)
 clear_all_data() {
-    print_header "🧹 CLEAR ALL DATA - Keeps Tables/Schema"
+    print_header "🧹 CLEAR ALL DATA + REBUILD - Keeps Tables/Schema"
     print_warning "This will delete all rows from database tables but keep the structure!"
     print_warning "User files will also be cleared!"
+    print_warning "Containers will be rebuilt for a fresh start!"
     print_info "Database schema and tables will remain intact for fresh data."
     echo ""
     echo -n "Are you sure? Type 'CLEAR' to confirm: "
@@ -226,16 +227,24 @@ clear_all_data() {
         exit 0
     fi
     
+    echo ""
     print_info "Connecting to VPS: $VPS_USER@$VPS_HOST"
     print_info "Target path: $VPS_PATH"
+    echo ""
     
     ssh $VPS_USER@$VPS_HOST << 'EOF'
         set -e
         
-        echo "🔍 Checking current directory..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🔍 STEP 1: Checking current directory..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         cd ~/cv-new/cv-magic-app
+        pwd
+        echo ""
         
-        echo "📋 Clearing all database tables (keeping schema)..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📋 STEP 2: Clearing all database tables (keeping schema)..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         docker compose exec -T db psql -U cv_user -d cv_database << 'SQLEOF'
 -- Disable foreign key checks temporarily
 SET session_replication_role = 'replica';
@@ -263,8 +272,12 @@ FROM pg_tables
 WHERE schemaname = 'public' 
 LIMIT 1;
 SQLEOF
+        echo "✅ Database tables cleared"
+        echo ""
         
-        echo "🗑️  Clearing user data files (keeping directory structure)..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🗑️  STEP 3: Clearing user data files (keeping directory structure)..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         docker compose exec -T backend bash << 'BASHEOF'
 # Clear user data but keep directory structure
 find /app/user -type f -delete 2>/dev/null || true
@@ -276,26 +289,60 @@ mkdir -p /app/user
 echo "✅ User data files cleared"
 ls -la /app/user/ 2>/dev/null || echo "User directory empty (as expected)"
 BASHEOF
+        echo ""
         
-        echo "🔄 Restarting backend to clear caches..."
-        docker compose restart backend
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🛑 STEP 4: Stopping containers..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        docker compose down
+        echo "✅ Containers stopped"
+        echo ""
         
-        echo "⏳ Waiting for backend to restart..."
-        sleep 5
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🔨 STEP 5: Rebuilding containers..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        docker compose build --no-cache
+        echo "✅ Containers rebuilt"
+        echo ""
         
-        echo "🔍 Verifying services..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🚀 STEP 6: Starting containers with fresh setup..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        docker compose up -d
+        echo "✅ Containers started"
+        echo ""
+        
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "⏳ STEP 7: Waiting for services to stabilize..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        sleep 10
+        echo "✅ Services ready"
+        echo ""
+        
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🔍 STEP 8: Verifying services..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         docker compose ps
+        echo ""
         
-        echo "✅ All data cleared successfully!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✅ ALL STEPS COMPLETED SUCCESSFULLY!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "📊 Database tables remain intact and ready for fresh data"
+        echo "🔄 Containers rebuilt with latest code"
+        echo "🗑️  All user data cleared"
+        echo ""
 EOF
 
+    echo ""
     if [ $? -eq 0 ]; then
-        print_status "All data cleared successfully!"
-        print_info "Database schema is intact - tables are empty and ready"
-        print_info "Users will need to register again"
+        print_status "All data cleared and containers rebuilt successfully!"
+        print_info "✅ Database schema is intact - tables are empty and ready"
+        print_info "✅ Containers rebuilt with fresh configuration"
+        print_info "✅ Users will need to register again"
+        print_info "🌐 Backend available at: https://cvagent.duckdns.org"
     else
-        print_error "Clear data operation failed!"
+        print_error "Clear data and rebuild operation failed!"
         exit 1
     fi
 }
