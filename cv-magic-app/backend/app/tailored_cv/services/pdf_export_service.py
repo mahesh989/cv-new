@@ -18,8 +18,25 @@ from reportlab.platypus import (
 )
 # HyperLink import removed - not needed for current implementation
 from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 logger = logging.getLogger(__name__)
+
+# Register Calibri font family
+# Note: Calibri is typically available on Windows systems
+# For Linux/Mac, you may need to install Calibri or use a fallback font
+try:
+    # Attempt to register Calibri fonts if available
+    pdfmetrics.registerFont(TTFont('Calibri', 'Calibri.ttf'))
+    pdfmetrics.registerFont(TTFont('Calibri-Bold', 'Calibrib.ttf'))
+    pdfmetrics.registerFont(TTFont('Calibri-Italic', 'Calibrii.ttf'))
+    pdfmetrics.registerFont(TTFont('Calibri-BoldItalic', 'Calibriz.ttf'))
+    logger.info("[PDF_EXPORT] Successfully registered Calibri font family")
+except Exception as e:
+    # Fallback to Helvetica if Calibri is not available
+    logger.warning(f"[PDF_EXPORT] Could not register Calibri font, using Helvetica as fallback: {e}")
+    # We'll handle this in the style definitions with try-except
 
 
 class ResumePDFGenerator:
@@ -35,6 +52,9 @@ class ResumePDFGenerator:
                 raise TypeError("ResumePDFGenerator expects a dict or JSON string that parses to a dict")
         self.data = data  # type: ignore[assignment]
         self.styles = getSampleStyleSheet()
+        
+        # Determine which font family to use (Calibri or Helvetica fallback)
+        self.font_family = self._get_font_family()
 
         # Page configuration
         self.page_width, self.page_height = A4
@@ -65,6 +85,30 @@ class ResumePDFGenerator:
 
         self._calculate_dimensions()
         self._setup_custom_styles()
+    
+    def _get_font_family(self) -> Dict[str, str]:
+        """
+        Get the font family to use, with fallback from Calibri to Helvetica.
+        Returns a dict with keys: regular, bold, italic, bolditalic
+        """
+        try:
+            # Check if Calibri is registered
+            pdfmetrics.getFont('Calibri')
+            return {
+                'regular': 'Calibri',
+                'bold': 'Calibri-Bold',
+                'italic': 'Calibri-Italic',
+                'bolditalic': 'Calibri-BoldItalic'
+            }
+        except Exception:
+            # Fallback to Helvetica
+            logger.info("[PDF_EXPORT] Using Helvetica as font family")
+            return {
+                'regular': 'Helvetica',
+                'bold': 'Helvetica-Bold',
+                'italic': 'Helvetica-Oblique',
+                'bolditalic': 'Helvetica-BoldOblique'
+            }
 
     def _calculate_dimensions(self) -> None:
         self.text_width = self.page_width - (self.margins['left'] + self.margins['right']) * inch
@@ -91,7 +135,7 @@ class ResumePDFGenerator:
                 spaceAfter=6,
                 spaceBefore=0,
                 alignment=TA_CENTER,
-                fontName='Helvetica-Bold',
+                fontName=self.font_family['bold'],
                 leading=24
             ))
 
@@ -104,6 +148,7 @@ class ResumePDFGenerator:
                 textColor=colors.HexColor('#444444'),
                 alignment=TA_CENTER,
                 spaceAfter=4,
+                fontName=self.font_family['regular'],
                 leading=10
             ))
 
@@ -112,15 +157,15 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='SectionHeader',
                 parent=self.styles['Normal'],  # Changed from Heading2 to avoid inherited indents
-                fontSize=14,
+                fontSize=10,
                 textColor=colors.HexColor('#1a1a1a'),
                 spaceAfter=self.spacing['section_below'],
                 spaceBefore=0,
-                fontName='Helvetica-Bold',
+                fontName=self.font_family['bold'],
                 alignment=TA_LEFT,
                 leftIndent=self.content_left_margin,  # Now 0
                 rightIndent=0,
-                leading=14
+                leading=11
             ))
 
         # Body text style
@@ -128,13 +173,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='BodyText',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#333333'),
                 spaceAfter=6,
                 alignment=TA_JUSTIFY,
+                fontName=self.font_family['regular'],
                 leftIndent=self.content_left_margin,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Bullet character style
@@ -142,12 +188,13 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='BulletChar',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#333333'),
                 alignment=TA_LEFT,
+                fontName=self.font_family['regular'],
                 leftIndent=0,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Bullet text style (for text inside bullet tables - NO leftIndent to avoid double indentation)
@@ -155,13 +202,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='BulletText',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#333333'),
                 spaceAfter=6,
                 alignment=TA_JUSTIFY,
+                fontName=self.font_family['regular'],
                 leftIndent=0,  # NO indent - table handles positioning
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Paragraph block style (for content wrapped in tables - NO leftIndent to avoid double indentation)
@@ -169,13 +217,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='TableParagraph',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#333333'),
                 spaceAfter=6,
                 alignment=TA_JUSTIFY,
+                fontName=self.font_family['regular'],
                 leftIndent=0,  # NO indent - table handles positioning
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Job Title style
@@ -183,14 +232,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='JobTitle',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#1a1a1a'),
-                fontName='Helvetica-Bold',
+                fontName=self.font_family['bold'],
                 spaceAfter=0,
                 alignment=TA_LEFT,
                 leftIndent=0,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Date style - right aligned
@@ -198,14 +247,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='DateRight',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#555555'),
-                fontName='Helvetica',
+                fontName=self.font_family['regular'],
                 alignment=TA_RIGHT,
                 spaceAfter=0,
                 leftIndent=0,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Company style
@@ -213,14 +262,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='Company',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#555555'),
-                fontName='Helvetica-Oblique',
+                fontName=self.font_family['italic'],
                 spaceAfter=8,
                 alignment=TA_LEFT,
                 leftIndent=self.content_left_margin,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Degree style
@@ -228,14 +277,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='Degree',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#1a1a1a'),
-                fontName='Helvetica-Bold',
+                fontName=self.font_family['bold'],
                 spaceAfter=0,
                 alignment=TA_LEFT,
                 leftIndent=0,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Institution style
@@ -243,13 +292,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='Institution',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#555555'),
+                fontName=self.font_family['regular'],
                 spaceAfter=12,
                 alignment=TA_LEFT,
                 leftIndent=self.content_left_margin,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Skill Category style
@@ -257,14 +307,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='SkillCategory',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#1a1a1a'),
-                fontName='Helvetica-Bold',
+                fontName=self.font_family['bold'],
                 spaceAfter=4,
                 alignment=TA_LEFT,
                 leftIndent=0,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
         # Skill Item style
@@ -272,14 +322,14 @@ class ResumePDFGenerator:
             self.styles.add(ParagraphStyle(
                 name='SkillItem',
                 parent=self.styles['Normal'],
-                fontSize=11,
+                fontSize=10,
                 textColor=colors.HexColor('#333333'),
-                fontName='Helvetica',
+                fontName=self.font_family['regular'],
                 spaceAfter=0,
                 alignment=TA_LEFT,
                 leftIndent=0,
                 rightIndent=0,
-                leading=12
+                leading=11
             ))
 
     def _create_section_with_line(self, title: str):
