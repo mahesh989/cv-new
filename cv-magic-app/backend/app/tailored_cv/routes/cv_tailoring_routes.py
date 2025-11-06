@@ -1006,13 +1006,13 @@ async def get_tailored_cv_content(
         
         tailored_cv = TailoredCV(
             contact=ContactInfo(**json_data['contact']),
-            profile_summary=json_data.get('profile_summary', ''),
+            role_highlights=json_data.get('role_highlights', ''),  # NEW: Use role_highlights instead of profile_summary
             education=education_data,
             experience=[ExperienceEntry(**exp) for exp in experience_data],
             skills=[SkillCategory(**skill) for skill in skills_data],
             projects=[Project(**proj) for proj in projects_data],
-            target_company=company_name,
-            target_role='Data Analyst',
+            target_company=json_data.get('target_company', company_name),
+            target_role=json_data.get('target_role', 'Data Analyst'),
             optimization_strategy=optimization_strategy,
             enhancements_applied={},
             keywords_integrated=[],
