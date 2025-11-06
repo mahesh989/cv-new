@@ -153,8 +153,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         return;
       }
 
-      // Additional validation for password length
-      if (password.length < 6) {
+      // Additional validation for password length - ONLY during registration
+      if (!isLogin && password.length < 6) {
         print(
             '🔴 [FRONTEND] Validation failed: Password too short (${password.length} characters)');
         setState(() => _isLoading = false);
