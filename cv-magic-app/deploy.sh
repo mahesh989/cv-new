@@ -30,7 +30,8 @@ show_menu() {
     echo -e "${BLUE}║  ${GREEN}1)${NC} Full Deployment (thorough, preserves data)           ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${YELLOW}2)${NC} Quick Deployment (fast, minimal cleanup)             ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${CYAN}3)${NC} Check Status Only (monitoring)                        ${BLUE}║${NC}"
-    echo -e "${BLUE}║  ${RED}5)${NC} Reset Database (⚠️  DESTROYS ALL DATA)                 ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${RED}5)${NC} Reset Database (⚠️  DESTROYS ALL DATA + TABLES)        ${BLUE}║${NC}"
+    echo -e "${BLUE}║  ${YELLOW}6)${NC} Clear All Data (keeps tables/schema intact)          ${BLUE}║${NC}"
     echo -e "${BLUE}║  ${RED}4)${NC} Exit                                                   ${BLUE}║${NC}"
     echo -e "${BLUE}║                                                              ║${NC}"
     echo -e "${BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
@@ -38,7 +39,7 @@ show_menu() {
     echo -e "${CYAN}Target: ${VPS_USER}@${VPS_HOST}${NC}"
     echo -e "${CYAN}Branch: ${BRANCH}${NC}"
     echo ""
-    echo -n "Enter your choice [1-5]: "
+    echo -n "Enter your choice [1-6]: "
 }
 
 # Function to get user choice
@@ -67,8 +68,12 @@ get_user_choice() {
                 MODE="reset"
                 break
                 ;;
+            6)
+                MODE="clear_data"
+                break
+                ;;
             *)
-                echo -e "${RED}❌ Invalid option. Please enter 1, 2, 3, 4, or 5.${NC}"
+                echo -e "${RED}❌ Invalid option. Please enter 1, 2, 3, 4, 5, or 6.${NC}"
                 echo ""
                 echo -n "Press Enter to continue..."
                 read -r
@@ -206,10 +211,99 @@ EOF
     fi
 }
 
-# Reset database function (DANGEROUS - destroys all data)
+# Clear all data function (keeps schema intact)
+clear_all_data() {
+    print_header "🧹 CLEAR ALL DATA - Keeps Tables/Schema"
+    print_warning "This will delete all rows from database tables but keep the structure!"
+    print_warning "User files will also be cleared!"
+    print_info "Database schema and tables will remain intact for fresh data."
+    echo ""
+    echo -n "Are you sure? Type 'CLEAR' to confirm: "
+    read -r confirmation
+    
+    if [ "$confirmation" != "CLEAR" ]; then
+        print_info "Clear data cancelled. No changes made."
+        exit 0
+    fi
+    
+    print_info "Connecting to VPS: $VPS_USER@$VPS_HOST"
+    print_info "Target path: $VPS_PATH"
+    
+    ssh $VPS_USER@$VPS_HOST << 'EOF'
+        set -e
+        
+        echo "🔍 Checking current directory..."
+        cd ~/cv-new/cv-magic-app
+        
+        echo "📋 Clearing all database tables (keeping schema)..."
+        docker compose exec -T db psql -U cv_user -d cv_database << 'SQLEOF'
+-- Disable foreign key checks temporarily
+SET session_replication_role = 'replica';
+
+-- Delete all data from tables (keeps structure)
+TRUNCATE TABLE job_comparisons RESTART IDENTITY CASCADE;
+TRUNCATE TABLE cv_analyses RESTART IDENTITY CASCADE;
+TRUNCATE TABLE job_applications RESTART IDENTITY CASCADE;
+TRUNCATE TABLE cvs RESTART IDENTITY CASCADE;
+TRUNCATE TABLE users RESTART IDENTITY CASCADE;
+
+-- Re-enable foreign key checks
+SET session_replication_role = 'origin';
+
+-- Verify tables are empty but exist
+SELECT 
+    schemaname,
+    tablename,
+    (SELECT COUNT(*) FROM users) as users_count,
+    (SELECT COUNT(*) FROM cvs) as cvs_count,
+    (SELECT COUNT(*) FROM job_applications) as jobs_count,
+    (SELECT COUNT(*) FROM cv_analyses) as analyses_count,
+    (SELECT COUNT(*) FROM job_comparisons) as comparisons_count
+FROM pg_tables 
+WHERE schemaname = 'public' 
+LIMIT 1;
+SQLEOF
+        
+        echo "🗑️  Clearing user data files (keeping directory structure)..."
+        docker compose exec -T backend bash << 'BASHEOF'
+# Clear user data but keep directory structure
+find /app/user -type f -delete 2>/dev/null || true
+find /app/user -type d -empty -delete 2>/dev/null || true
+
+# Recreate base user directory
+mkdir -p /app/user
+
+echo "✅ User data files cleared"
+ls -la /app/user/ 2>/dev/null || echo "User directory empty (as expected)"
+BASHEOF
+        
+        echo "🔄 Restarting backend to clear caches..."
+        docker compose restart backend
+        
+        echo "⏳ Waiting for backend to restart..."
+        sleep 5
+        
+        echo "🔍 Verifying services..."
+        docker compose ps
+        
+        echo "✅ All data cleared successfully!"
+        echo "📊 Database tables remain intact and ready for fresh data"
+EOF
+
+    if [ $? -eq 0 ]; then
+        print_status "All data cleared successfully!"
+        print_info "Database schema is intact - tables are empty and ready"
+        print_info "Users will need to register again"
+    else
+        print_error "Clear data operation failed!"
+        exit 1
+    fi
+}
+
+# Reset database function (DANGEROUS - destroys all data AND schema)
 deploy_reset() {
-    print_header "⚠️  RESET DATABASE - DESTROYS ALL DATA"
-    print_warning "This will permanently delete all user data, analysis files, and database records!"
+    print_header "⚠️  RESET DATABASE - DESTROYS ALL DATA + TABLES"
+    print_warning "This will permanently delete all user data, analysis files, database volumes, and schema!"
     print_warning "This action cannot be undone!"
     echo ""
     echo -n "Are you absolutely sure? Type 'RESET' to confirm: "
@@ -351,6 +445,10 @@ case $MODE in
         echo -e "${RED}⚠️  Selected: Reset Database${NC}"
         echo ""
         ;;
+    "clear_data")
+        echo -e "${YELLOW}🧹 Selected: Clear All Data${NC}"
+        echo ""
+        ;;
 esac
 
 # Execute based on mode
@@ -366,6 +464,9 @@ case $MODE in
         ;;
     "reset")
         deploy_reset
+        ;;
+    "clear_data")
+        clear_all_data
         ;;
     *)
         print_error "Unknown mode: $MODE"
