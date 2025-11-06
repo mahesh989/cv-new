@@ -521,21 +521,31 @@ class ResumePDFGenerator:
             elements.append(Paragraph("Contact Information", self.styles['Name']))
             elements.append(Paragraph("Please check your profile settings", self.styles['Contact']))
 
-        # Profile Summary (NEW FRAMEWORK) - Priority
-        profile_summary = self.data.get('profile_summary', '')
-        if profile_summary:
-            logger.info("[PDF_EXPORT] Adding profile summary section")
-            elements.extend(self._create_section_with_line('PROFESSIONAL SUMMARY'))
-            elements.append(self._paragraph_block(profile_summary))
+        # Role Highlights (NEW FRAMEWORK) - Priority
+        role_highlights = self.data.get('role_highlights', '')
+        if role_highlights:
+            logger.info("[PDF_EXPORT] Adding role highlights section")
+            # Extract role title from target_role if available, otherwise use generic
+            role_title = self.data.get('target_role', 'PROFESSIONAL')
+            elements.extend(self._create_section_with_line(f'{role_title.upper()} HIGHLIGHTS'))
+            elements.append(self._paragraph_block(role_highlights))
             elements.append(Spacer(1, self.spacing['section_below']))
         else:
-            # Career profile (legacy support) - Fallback
-            profile = self.data.get('career_profile', {})
-            if isinstance(profile, dict) and profile.get('summary'):
-                logger.info("[PDF_EXPORT] Adding legacy career profile section")
+            # Fallback to profile_summary (transition period) or career_profile (legacy)
+            profile_summary = self.data.get('profile_summary', '')
+            if profile_summary:
+                logger.info("[PDF_EXPORT] Adding profile summary section (fallback)")
                 elements.extend(self._create_section_with_line('PROFESSIONAL SUMMARY'))
-                elements.append(self._paragraph_block(profile['summary']))
+                elements.append(self._paragraph_block(profile_summary))
                 elements.append(Spacer(1, self.spacing['section_below']))
+            else:
+                # Career profile (legacy support) - Final fallback
+                profile = self.data.get('career_profile', {})
+                if isinstance(profile, dict) and profile.get('summary'):
+                    logger.info("[PDF_EXPORT] Adding legacy career profile section")
+                    elements.extend(self._create_section_with_line('PROFESSIONAL SUMMARY'))
+                    elements.append(self._paragraph_block(profile['summary']))
+                    elements.append(Spacer(1, self.spacing['section_below']))
 
         # Experience
         experience = self.data.get('experience', [])
@@ -778,11 +788,19 @@ def _map_tailored_json_to_generator_schema(data: Dict[str, Any]) -> Dict[str, An
     if 'personal_information' in data:
         mapped['personal_information'] = data['personal_information']
     
-    # Profile summary (NEW FRAMEWORK) - Priority
+    # Role highlights (NEW FRAMEWORK) - Priority
+    if 'role_highlights' in data:
+        mapped['role_highlights'] = data['role_highlights']
+    
+    # Target role for dynamic section header
+    if 'target_role' in data:
+        mapped['target_role'] = data['target_role']
+    
+    # Profile summary (transition period) - Fallback
     if 'profile_summary' in data:
         mapped['profile_summary'] = data['profile_summary']
     
-    # Career profile (legacy support) - Fallback
+    # Career profile (legacy support) - Final fallback
     if 'career_profile' in data:
         mapped['career_profile'] = data['career_profile']
     

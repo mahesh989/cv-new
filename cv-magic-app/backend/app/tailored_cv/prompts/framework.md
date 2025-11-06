@@ -36,13 +36,29 @@ Category: tools | Category: tools [ATS-optimized]
 
 ---
 
-## 📝 **PROFILE SUMMARY**
+## 🎯 **[ROLE TITLE] HIGHLIGHTS**
 
-- **Generate from scratch** using JD + CV (don't reuse existing)
-- **50 words max** (2-3 sentences)
-- **Include:** Years experience, key JD-matching skills, notable achievements, value proposition
+Generate three components:
 
-Example: "Data Analyst with 5+ years transforming datasets into insights. Expert in Python, SQL, Tableau with proven track record optimizing pipelines and creating executive dashboards. Strong statistical analysis and visualization skills."
+1. **VALUE STATEMENT** (~25 words):
+   - Role title + years experience + industries/clients
+   
+2. **KEY ACCOMPLISHMENTS** (3 bullets):
+   - Quantified achievements from CV matching JD requirements
+   - 15-25 words each
+   
+3. **SKILLS SNAPSHOT** (6-8 skills):
+   - Technical/domain skills matching JD keywords
+   - Format: Skill1 | Skill2 | Skill3 | ...
+
+Example:
+"Data Analyst with 3 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications.
+
+• Delivered 15+ interactive dashboards and analytical insights for Google's Autobot project by processing large-scale data from 300+ e-commerce and retail websites
+• Drove 12% improvement in regional sales forecasting accuracy by analysing and modelling sales and financial data
+• Collaborated with senior stakeholders across HR and Finance to translate business priorities into actionable analytics
+
+Skills: Power BI | DAX | Tableau | Excel (Advanced) | SQL | Python | Looker Studio | R"
 
 ---
 

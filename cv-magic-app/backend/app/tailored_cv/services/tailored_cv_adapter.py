@@ -37,16 +37,24 @@ def adapt_tailored_cv_to_pdf_format(tailored_cv_data: Dict[str, Any]) -> Dict[st
             }
         }
 
-    # Profile Summary (NEW FRAMEWORK) - Critical field mapping
-    # Maps profile_summary from tailored CV to both new and legacy formats
-    profile_summary = tailored_cv_data.get('profile_summary', '')
-    if profile_summary:
-        logger.info("[ADAPTER] Mapping profile_summary to PDF format")
-        pdf_data["profile_summary"] = profile_summary
-        # Also populate career_profile for backward compatibility
-        pdf_data["career_profile"] = {"summary": profile_summary}
+    # Role Highlights (NEW FRAMEWORK) - Critical field mapping
+    # Maps role_highlights from tailored CV to PDF format
+    role_highlights = tailored_cv_data.get('role_highlights', '')
+    if role_highlights:
+        logger.info("[ADAPTER] Mapping role_highlights to PDF format")
+        pdf_data["role_highlights"] = role_highlights
+        # Include target_role for dynamic section header
+        pdf_data["target_role"] = tailored_cv_data.get('target_role', 'PROFESSIONAL')
     else:
-        logger.warning("[ADAPTER] ⚠️ No profile_summary found in tailored CV data")
+        # Fallback to profile_summary for transition period
+        profile_summary = tailored_cv_data.get('profile_summary', '')
+        if profile_summary:
+            logger.info("[ADAPTER] Mapping profile_summary to PDF format (fallback)")
+            pdf_data["profile_summary"] = profile_summary
+            # Also populate career_profile for backward compatibility
+            pdf_data["career_profile"] = {"summary": profile_summary}
+        else:
+            logger.warning("[ADAPTER] ⚠️ No role_highlights or profile_summary found in tailored CV data")
 
     # Experience
     for exp in tailored_cv_data.get('experience', []) or []:
@@ -132,7 +140,8 @@ def _validate_field_mappings(source_data: Dict[str, Any], pdf_data: Dict[str, An
     """
     # Define important fields and their possible mapped names in PDF
     field_mappings = {
-        'profile_summary': ['profile_summary', 'career_profile'],
+        'role_highlights': ['role_highlights', 'profile_summary', 'career_profile'],
+        'profile_summary': ['role_highlights', 'profile_summary', 'career_profile'],  # Fallback for transition
         'contact': ['personal_information'],
         'experience': ['experience'],
         'education': ['education'],

@@ -617,11 +617,18 @@ class CVTailoringService:
 
 ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
 
-1. PROFILE SUMMARY RULES:
-   - Generate from scratch using JD + CV (don't reuse existing)
-   - 50 words max (2-3 sentences)
-   - Include: Years experience, key JD-matching skills, notable achievements, value proposition
-   - Example: "Data Analyst with 5+ years transforming datasets into insights. Expert in Python, SQL, Tableau with proven track record optimizing pipelines and creating executive dashboards. Strong statistical analysis and visualization skills."
+1. ROLE HIGHLIGHTS RULES:
+   - Generate Role Highlights with 3 components:
+     a) VALUE STATEMENT (1 sentence, ~25 words): Role title + years experience + industries/clients
+     b) KEY ACCOMPLISHMENTS (3 bullets): Quantified achievements matching JD requirements (15-25 words each)
+     c) SKILLS SNAPSHOT (6-8 skills): Technical/domain skills matching JD keywords (pipe-separated)
+   - Start with exact role title from JD
+   - Each accomplishment bullet MUST include quantified impact
+   - Example: "Data Analyst with 3 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications.
+     • Delivered 15+ interactive dashboards and analytical insights for Google's Autobot project by processing large-scale data from 300+ e-commerce and retail websites
+     • Drove 12% improvement in regional sales forecasting accuracy by analysing and modelling sales and financial data
+     • Collaborated with senior stakeholders across HR and Finance to translate business priorities into actionable analytics
+     Skills: Power BI | DAX | Tableau | Excel (Advanced) | SQL | Python | Looker Studio | R"
 
 2. CONTACT INFORMATION RULES:
    - COPY ALL contact fields EXACTLY from the original CV's contact section
@@ -710,7 +717,7 @@ The exact JSON structure must be:
     "phone": "EXACT phone from provided CV",
     "location": "EXACT location from provided CV"
   },
-  "profile_summary": "2-3 sentence professional summary tailored to JD (max 50 words)",
+  "role_highlights": "Role-specific highlights section with value statement, 3 key accomplishments, and skills snapshot",
   "education": [
     {
       "institution": "EXACT institution from provided CV",
@@ -861,18 +868,35 @@ YOUR TASK - TRANSFORM THIS CV:
             prompt += "\nADDITIONAL CUSTOM INSTRUCTIONS:\n" + custom_instructions + "\n"
         
         prompt += """
-PROFILE SUMMARY GENERATION:
-- Create a 2-3 sentence professional summary (max 50 words)
-- Include: Years experience, key JD-matching skills, notable achievements, value proposition
-- Tailor specifically to the target role and company
-- Do NOT reuse existing summary from original CV
+[ROLE TITLE] HIGHLIGHTS GENERATION:
+Generate a tailored highlights section with three components:
 
-EXAMPLE:
-"Data Analyst with 5+ years transforming datasets into insights. Expert in Python, SQL, Tableau with proven track record optimizing pipelines and creating executive dashboards. Strong statistical analysis and visualization skills."
+1. VALUE STATEMENT (1 sentence, ~25 words):
+   - Start with exact role title from JD
+   - Include years of experience
+   - Mention industries/company types worked with
+   - Example: "Data Analyst with 3 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications."
+
+2. KEY ACCOMPLISHMENTS (3 bullet points):
+   - Pull from CV experiences, projects, or education that match JD requirements
+   - Each bullet must include quantified impact
+   - Focus on relevance to target role
+   - 15-25 words per bullet
+   - Example bullets:
+     • Delivered 15+ interactive dashboards and analytical insights for Google's Autobot project by processing large-scale data from 300+ e-commerce and retail websites using Looker Studio, and Power BI
+     • Recommended data-backed strategies by analysing and modelling sales and financial data, identifying performance gaps, and driving a 12% improvement in regional sales forecasting accuracy
+     • Collaborated with senior stakeholders across HR and Finance to translate business priorities into actionable analytics, and secure buy-in for dashboard adoption
+
+3. SKILLS SNAPSHOT (6-8 skills):
+   - List technical/domain skills that match JD keywords
+   - Format: Skill1 | Skill2 | Skill3 | Skill4 | Skill5 | Skill6
+   - Example: "Power BI | DAX | Tableau | Excel (Advanced) | SQL | Python | Looker Studio | R"
+
+CRITICAL: Do NOT use generic career summary language. The entire section must be hyper-relevant to the specific role.
 
 CRITICAL REMINDERS:
 - First, EXACTLY copy ALL contact information fields
-- Generate profile summary from scratch (don't reuse existing)
+- Generate [ROLE TITLE] HIGHLIGHTS from scratch (don't reuse existing summary)
 - Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 - Add REALISTIC numbers based on CV evidence
 - ONLY integrate keywords with semantic matches in original CV
@@ -1025,7 +1049,7 @@ Please provide the optimized CV in the requested JSON format."""
         # Create the tailored CV with AI-generated content
         tailored_cv = TailoredCV(
             contact=contact,
-            profile_summary=ai_generated_data.get('profile_summary', ''),
+            role_highlights=ai_generated_data.get('role_highlights', ''),
             education=education if education else original_cv.education,
             experience=experience if experience else original_cv.experience,
             projects=projects if projects else original_cv.projects,
@@ -1081,7 +1105,7 @@ Please provide the optimized CV in the requested JSON format."""
         
         clean_cv = CleanTailoredCV(
             contact=contact_info,
-            profile_summary=full_tailored_cv.profile_summary,
+            role_highlights=full_tailored_cv.role_highlights,
             education=full_tailored_cv.education,
             experience=full_tailored_cv.experience,
             projects=full_tailored_cv.projects,
@@ -1284,7 +1308,7 @@ BULLETS NEEDING IMPROVEMENT:
         logger.info(f"✅ JSON structure and Impact Formula validation passed ({bullets_with_quantification}/{total_bullets} bullets with quantification)")
 
         # NEW FRAMEWORK VALIDATIONS
-        self._validate_profile_summary(data, request_id)
+        self._validate_role_highlights(data, request_id)
         self._validate_bullet_consolidation(data, request_id)
         self._validate_education_selection(data, request_id)
         
@@ -1771,11 +1795,13 @@ FIX: Output ONLY valid JSON!
                 lines.append("  | ".join(contact_parts))
                 lines.append("")
             
-            # Profile Summary (NEW FRAMEWORK)
-            if tailored_cv.profile_summary:
-                lines.append("PROFESSIONAL SUMMARY")
+            # Role Highlights (NEW FRAMEWORK)
+            if tailored_cv.role_highlights:
+                # Extract role title from target_role if available
+                role_title = tailored_cv.target_role if hasattr(tailored_cv, 'target_role') and tailored_cv.target_role else "PROFESSIONAL"
+                lines.append(f"{role_title.upper()} HIGHLIGHTS")
                 lines.append("-" * 20)
-                lines.append(tailored_cv.profile_summary)
+                lines.append(tailored_cv.role_highlights)
                 lines.append("")
             
             # Skills - Format with categories to match JSON structure
@@ -2182,45 +2208,49 @@ FIX: Output ONLY valid JSON!
         
         return extracted_skills
     
-    def _validate_profile_summary(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
-        """Validate profile summary according to new framework rules"""
-        logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating profile summary...")
+    def _validate_role_highlights(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
+        """Validate role highlights according to new framework rules"""
+        logger.info(f"🔍 [{request_id}] [FRAMEWORK_VALIDATION] Validating role highlights...")
         
-        profile = data.get('profile_summary')
-        if not profile:
-            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary is missing")
+        highlights = data.get('role_highlights')
+        if not highlights:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights is missing")
             return
         
-        if not isinstance(profile, str):
-            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary is not a string")
+        if not isinstance(highlights, str):
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights is not a string")
             return
         
-        # Check word count (max 50 words)
-        word_count = len(profile.split())
-        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Profile summary word count: {word_count}")
+        # Check for key components: value statement, accomplishments (bullets), skills snapshot
+        has_bullets = '•' in highlights or '-' in highlights
+        has_pipe = '|' in highlights
+        word_count = len(highlights.split())
         
-        if word_count > 50:
-            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary exceeds 50 words: {word_count} words")
-        else:
-            logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary word count is within limit")
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Role highlights word count: {word_count}")
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Contains bullets: {has_bullets}, Contains skills separator (|): {has_pipe}")
         
-        # Check for key elements
-        profile_lower = profile.lower()
-        has_experience_years = any(word in profile_lower for word in ['years', 'experience', 'experienced'])
-        has_skills = any(word in profile_lower for word in ['expert', 'proficient', 'skilled', 'knowledge'])
-        has_achievements = any(word in profile_lower for word in ['achieved', 'delivered', 'improved', 'increased', 'reduced'])
+        if not has_bullets:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights missing bullet points for accomplishments")
+        if not has_pipe:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights missing skills snapshot (pipe-separated)")
         
-        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Profile summary analysis:")
+        # Check for key elements in role highlights
+        highlights_lower = highlights.lower()
+        has_experience_years = any(word in highlights_lower for word in ['years', 'experience', 'experienced'])
+        has_role_title = data.get('target_role', '').lower() in highlights_lower if data.get('target_role') else False
+        has_quantification = any(char.isdigit() for char in highlights)
+        
+        logger.info(f"📊 [{request_id}] [FRAMEWORK_VALIDATION] Role highlights analysis:")
         logger.info(f"   - Has experience years: {has_experience_years}")
-        logger.info(f"   - Has skills: {has_skills}")
-        logger.info(f"   - Has achievements: {has_achievements}")
+        logger.info(f"   - Has role title: {has_role_title}")
+        logger.info(f"   - Has quantified achievements: {has_quantification}")
+        logger.info(f"   - Has bullet structure: {has_bullets}")
+        logger.info(f"   - Has skills snapshot: {has_pipe}")
         
-        if not has_experience_years:
-            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary missing experience years")
-        if not has_skills:
-            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary missing skills mention")
-        if not has_achievements:
-            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Profile summary missing achievements")
+        if has_bullets and has_pipe and has_quantification:
+            logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights validation passed")
+        else:
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights may be incomplete")
     
     def _validate_bullet_consolidation(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
         """Validate bullet consolidation according to new framework rules"""
@@ -2413,9 +2443,9 @@ FIX: Output ONLY valid JSON!
         """Extract all text content from CV data for keyword analysis"""
         text_parts = []
         
-        # Extract from profile summary
-        if data.get('profile_summary'):
-            text_parts.append(data['profile_summary'])
+        # Extract from role highlights
+        if data.get('role_highlights'):
+            text_parts.append(data['role_highlights'])
         
         # Extract from experience bullets
         for exp in data.get('experience', []) or []:

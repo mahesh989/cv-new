@@ -142,7 +142,7 @@ class TailoredCV(BaseModel):
     """Tailored CV data structure - FULL VERSION with all metadata"""
     # Core CV Structure
     contact: ContactInfo
-    profile_summary: Optional[str] = Field(None, description="2-3 sentence professional summary (max 50 words)")
+    role_highlights: Optional[str] = Field(None, description="Role-specific highlights with value statement, 3 key accomplishments, and skills snapshot")
     education: List[Education]
     experience: List[ExperienceEntry]
     projects: Optional[List[Project]] = Field(None, description="Enhanced projects section")
@@ -173,7 +173,7 @@ class CleanTailoredCV(BaseModel):
     """Clean tailored CV data structure - ONLY CV content, no metadata"""
     # Core CV Structure Only
     contact: ContactInfo
-    profile_summary: Optional[str] = Field(None, description="Professional summary")
+    role_highlights: Optional[str] = Field(None, description="Role-specific highlights section")
     education: List[Education]
     experience: List[ExperienceEntry]
     projects: Optional[List[Project]] = Field(None, description="Projects section")
