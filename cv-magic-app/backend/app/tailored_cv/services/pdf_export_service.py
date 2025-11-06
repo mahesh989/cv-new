@@ -657,12 +657,14 @@ class ResumePDFGenerator:
                 company = exp.get('company', '')
                 location = exp.get('location', '')
                 
-                # Title and date
-                if duration:
-                    table = self._create_aligned_two_column(f"<b>{title}</b>", duration, 'JobTitle', 'DateRight')
+                # NEW FORMAT: Company and Location (first line)
+                if company and location:
+                    # Company (left, bold) + Location (right, gray)
+                    table = self._create_aligned_two_column(f"<b>{company}</b>", location, 'JobTitle', 'DateRight')
                     elements.append(table)
-                else:
-                    para = Paragraph(f"<b>{title}</b>", self.styles['JobTitle'])
+                elif company:
+                    # Company only (no location)
+                    para = Paragraph(f"<b>{company}</b>", self.styles['JobTitle'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -672,15 +674,14 @@ class ResumePDFGenerator:
                     ]))
                     elements.append(tbl)
                 
-                # Company and location
-                company_parts = []
-                if company:
-                    company_parts.append(company)
-                if location:
-                    company_parts.append(location)
-                
-                if company_parts:
-                    para = Paragraph(" | ".join(company_parts), self.styles['Company'])
+                # NEW FORMAT: Title and Duration (second line)
+                if duration:
+                    # Title (left, italic) + Duration (right, gray)
+                    table = self._create_aligned_two_column(f"<i>{title}</i>", duration, 'Company', 'DateRight')
+                    elements.append(table)
+                else:
+                    # Title only (no duration)
+                    para = Paragraph(f"<i>{title}</i>", self.styles['Company'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -712,12 +713,14 @@ class ResumePDFGenerator:
                 year = edu.get('year', '')
                 location = edu.get('location', '')
                 
-                # Degree and year
-                if year:
-                    table = self._create_aligned_two_column(f"<b>{degree}</b>", year, 'Degree', 'DateRight')
+                # NEW FORMAT: Institution and Location (first line)
+                if institution and location and location not in institution:
+                    # Institution (left, bold) + Location (right, gray)
+                    table = self._create_aligned_two_column(f"<b>{institution}</b>", location, 'JobTitle', 'DateRight')
                     elements.append(table)
-                else:
-                    para = Paragraph(f"<b>{degree}</b>", self.styles['Degree'])
+                elif institution:
+                    # Institution only (no location or location already in institution name)
+                    para = Paragraph(f"<b>{institution}</b>", self.styles['JobTitle'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -727,15 +730,14 @@ class ResumePDFGenerator:
                     ]))
                     elements.append(tbl)
                 
-                # Institution and location
-                inst_parts = []
-                if institution:
-                    inst_parts.append(institution)
-                if location and location not in institution:
-                    inst_parts.append(location)
-                
-                if inst_parts:
-                    para = Paragraph(", ".join(inst_parts), self.styles['Institution'])
+                # NEW FORMAT: Degree and Year (second line)
+                if year:
+                    # Degree (left, bold) + Year (right, gray)
+                    table = self._create_aligned_two_column(f"<b>{degree}</b>", year, 'Degree', 'DateRight')
+                    elements.append(table)
+                else:
+                    # Degree only (no year)
+                    para = Paragraph(f"<b>{degree}</b>", self.styles['Degree'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -796,14 +798,9 @@ class ResumePDFGenerator:
                 context = proj.get('context', '')
                 logger.info(f"[PDF_EXPORT] Project {i}: {name}")
                 
-                # Use duration if available, otherwise date, otherwise no alignment
-                project_date = duration or date
-                if project_date:
-                    table = self._create_aligned_two_column(f"<b>{name}</b>", project_date, 'JobTitle', 'DateRight')
-                    elements.append(table)
-                else:
-                    # Use JobTitle style for consistent alignment with experience section
-                    para = Paragraph(f"<b>{name}</b>", self.styles['JobTitle'])
+                # NEW FORMAT: Context first if available (like "University Project", "Personal Project")
+                if context:
+                    para = Paragraph(f"<b>{context}</b>", self.styles['JobTitle'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -813,9 +810,15 @@ class ResumePDFGenerator:
                     ]))
                     elements.append(tbl)
                 
-                # Add context if available (like university project, individual project, etc.)
-                if context:
-                    para = Paragraph(context, self.styles['Company'])
+                # NEW FORMAT: Project Name and Date (second line, or first if no context)
+                project_date = duration or date
+                if project_date:
+                    # Project name (left, italic) + Date (right, gray)
+                    table = self._create_aligned_two_column(f"<i>{name}</i>", project_date, 'Company', 'DateRight')
+                    elements.append(table)
+                else:
+                    # Project name only (no date)
+                    para = Paragraph(f"<i>{name}</i>", self.styles['Company'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
