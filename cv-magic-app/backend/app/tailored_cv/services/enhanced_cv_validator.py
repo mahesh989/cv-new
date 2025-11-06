@@ -125,19 +125,33 @@ class EnhancedCVValidator:
         
         logger.debug(f"🔍 [{self.request_id}] [ENHANCED_VALIDATOR] Validating structure...")
         
-        # Check profile summary
-        if 'profile_summary' not in cv_data or not cv_data['profile_summary']:
-            issues.append("Missing profile summary")
+        # Check role highlights (NEW FRAMEWORK) with fallback to profile_summary
+        role_highlights = cv_data.get('role_highlights', '')
+        profile_summary = cv_data.get('profile_summary', '')
+        
+        if not role_highlights and not profile_summary:
+            issues.append("Missing role highlights or profile summary")
             score -= 20
-            logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Missing profile summary (-20 points)")
-        elif len(cv_data['profile_summary'].split()) > 50:
-            word_count = len(cv_data['profile_summary'].split())
-            issues.append(f"Profile summary exceeds 50 words: {word_count} words")
-            score -= 15
-            logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Profile summary too long: {word_count} words (-15 points)")
-        else:
-            word_count = len(cv_data['profile_summary'].split())
-            logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Profile summary OK: {word_count} words")
+            logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Missing role highlights (-20 points)")
+        elif role_highlights:
+            # Validate role highlights structure (value statement + bullets + skills)
+            lines = role_highlights.strip().split('\n')
+            if len(lines) < 3:
+                issues.append("Role highlights missing components (need: value statement, bullets, skills)")
+                score -= 15
+                logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Role highlights incomplete (-15 points)")
+            else:
+                logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Role highlights OK: {len(lines)} lines")
+        elif profile_summary:
+            # Fallback validation for legacy profile_summary
+            if len(profile_summary.split()) > 50:
+                word_count = len(profile_summary.split())
+                issues.append(f"Profile summary exceeds 50 words: {word_count} words")
+                score -= 15
+                logger.warning(f"⚠️ [{self.request_id}] [ENHANCED_VALIDATOR] Profile summary too long: {word_count} words (-15 points)")
+            else:
+                word_count = len(profile_summary.split())
+                logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Profile summary OK: {word_count} words (legacy)")
         
         # Check experience count (1-3)
         exp_count = len(cv_data.get('experience', []) or [] or [])
