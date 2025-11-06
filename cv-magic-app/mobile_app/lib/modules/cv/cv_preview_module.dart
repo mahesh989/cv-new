@@ -75,6 +75,12 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
   String _formatCVContent(String content) {
     if (content.isEmpty) return content;
 
+    // First, fix bullet points that might be inline (split at •)
+    content = content.replaceAll('•', '\n•');
+    
+    // Fix Skills: line if it's inline
+    content = content.replaceAll(RegExp(r'(\S)\s+Skills:', multiLine: true), r'$1\nSkills:');
+
     // Split content into lines
     List<String> lines = content.split('\n');
     List<String> formattedLines = [];
@@ -105,7 +111,16 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
 
       // Format bullet points
       if (line.startsWith('•')) {
+        formattedLines.add('');
         formattedLines.add('  ' + line);
+        continue;
+      }
+      
+      // Format Skills line
+      if (line.startsWith('Skills:')) {
+        formattedLines.add('');
+        formattedLines.add('  ' + line);
+        formattedLines.add('');
         continue;
       }
 
