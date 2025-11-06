@@ -1807,7 +1807,7 @@ FIX: Output ONLY valid JSON!
             
             # Skills - Format with categories to match JSON structure
             if tailored_cv.skills:
-                lines.append("TECHNICAL SKILLS")
+                lines.append("SKILLS")
                 for skill_category in tailored_cv.skills:
                     if skill_category.category and skill_category.skills:
                         lines.append(f"  {skill_category.category}:")
