@@ -78,12 +78,82 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
     // First, fix bullet points that might be inline (split at •)
     content = content.replaceAll('•', '\n•');
     
-    // Fix Skills: line if it's inline
-    content = content.replaceAll(RegExp(r'(\S)\s+Skills:', multiLine: true), r'$1\nSkills:');
+    // Fix Skills: line if it's inline - FIXED REGEX BUG
+    content = content.replaceAllMapped(
+      RegExp(r'(\S)\s+Skills:', multiLine: true),
+      (match) => '${match.group(1)}\nSkills:'
+    );
 
     // Split content into lines
     List<String> lines = content.split('\n');
     List<String> formattedLines = [];
+
+    // Known section headers
+    final sectionHeaders = [
+      'Experience',
+      'Education',
+      'Featured Projects',
+      'Technical Skills',
+      'Professional Certifications',
+      'Career Highlights',
+      'Projects',
+      'Certifications',
+      'Skills'
+    ];
+
+    // Helper function to check if line is a job position with dates
+    bool _isJobPosition(String line) {
+      return RegExp(r'(Jan\.|Feb\.|Mar\.|Apr\.|May|June|July|Aug\.|Sept\.|Oct\.|Nov\.|Dec\.|20\d{2})\s*(–|-|to)\s*(Present|20\d{2})').hasMatch(line) ||
+             line.contains('Present');
+    }
+
+    // Helper function to check if line is a company/location
+    bool _isCompanyLocation(String line, int index, List<String> allLines) {
+      // Check if next line or this line contains location indicators
+      if (line.trim().endsWith('Remote')) return true;
+      if (line.contains(',') && (
+        line.contains('Australia') || 
+        line.contains('France') || 
+        line.contains('Nepal') ||
+        line.contains('NSW') ||
+        line.contains('Victoria') ||
+        line.contains('Sydney') ||
+        line.contains('Melbourne'))) {
+        return true;
+      }
+      return false;
+    }
+
+    // Helper function to check if line is contact info (first 5 lines only)
+    bool _isContactInfo(String line, int index) {
+      if (index > 5) return false;
+      
+      // Email with phone or just email
+      if (line.contains('@gmail.com') || line.contains('@') && line.contains('+61')) {
+        return true;
+      }
+      
+      // LinkedIn/GitHub links
+      if (line.contains('linkedin.com/') || line.contains('github.com/')) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    // Helper function to check if line is a project header
+    bool _isProjectHeader(String line) {
+      // Project headers typically have name | technologies OR name – description
+      return line.contains('|') && (
+        line.contains('Flutter') ||
+        line.contains('Python') ||
+        line.contains('PyTorch') ||
+        line.contains('ML') ||
+        line.contains('AI') ||
+        line.contains('Data') ||
+        line.contains('SQL')
+      );
+    }
 
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i].trim();
@@ -94,79 +164,152 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
         continue;
       }
 
-      // Skip dash separator lines (used after section headers)
+      // Skip dash separator lines
       if (line.trim().replaceAll('-', '').isEmpty && line.contains('-')) {
-        continue; // Skip lines that are just dashes
+        continue;
       }
 
-      // Format section headers (all caps words)
-      if (line == line.toUpperCase() &&
-          line.length > 3 &&
-          !line.contains('•')) {
+      // Format section headers
+      if (sectionHeaders.any((header) => line.trim() == header || line.trim().startsWith(header))) {
         formattedLines.add('');
-        formattedLines.add('┌─ ' + line + ' ─' + '─' * (70 - line.length));
+        formattedLines.add('═══════════════════════════════════════════════════════');
+        formattedLines.add('${_getSectionIcon(line)} ${line.toUpperCase()}');
+        formattedLines.add('═══════════════════════════════════════════════════════');
+        formattedLines.add('');
+        continue;
+      }
+
+      // Format name (first line, all caps or title case name)
+      if (i == 0 && !line.contains('@')) {
+        formattedLines.add('');
+        formattedLines.add(line);
+        formattedLines.add('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        formattedLines.add('');
+        continue;
+      }
+
+      // Format contact information (email, phone, location - first few lines only)
+      if (_isContactInfo(line, i)) {
+        // Split email/phone line
+        if (line.contains('|') && line.contains('@')) {
+          List<String> parts = line.split('|');
+          for (var part in parts) {
+            part = part.trim();
+            if (part.contains('@')) {
+              formattedLines.add('📧 $part');
+            } else if (part.contains('+')) {
+              formattedLines.add('📱 $part');
+            } else if (part.isNotEmpty) {
+              formattedLines.add('🔗 $part');
+            }
+          }
+        } else {
+          formattedLines.add('🔗 ' + line);
+        }
+        continue;
+      }
+
+      // Format location (near beginning, contains address)
+      if (i <= 3 && line.contains(',') && (line.contains('NSW') || line.contains('Australia'))) {
+        formattedLines.add('📍 ' + line);
         formattedLines.add('');
         continue;
       }
 
       // Format bullet points
       if (line.startsWith('•')) {
-        formattedLines.add('');
         formattedLines.add('  ' + line);
         continue;
       }
       
-      // Format Skills line
+      // Format Skills summary line (with colon)
       if (line.startsWith('Skills:')) {
         formattedLines.add('');
-        formattedLines.add('  ' + line);
+        formattedLines.add('⚡ ' + line);
         formattedLines.add('');
         continue;
       }
 
-      // Format job titles (lines ending with date ranges)
-      if (line.contains(' – ') ||
-          line.contains(' - ') ||
-          (line.contains('Present') ||
-              line.contains('2024') ||
-              line.contains('2023') ||
-              line.contains('2022') ||
-              line.contains('2021') ||
-              line.contains('2020'))) {
+      // Format job positions (lines with dates)
+      if (_isJobPosition(line)) {
         formattedLines.add('');
-        formattedLines.add('📅 ' + line);
-        formattedLines.add('');
+        formattedLines.add('👔 ' + line);
         continue;
       }
 
-      // Format company names (lines that might be company names)
-      if (line.contains(',') &&
-          (line.contains('Australia') ||
-              line.contains('France') ||
-              line.contains('Sydney') ||
-              line.contains('Victoria') ||
-              line.contains('Cergy'))) {
+      // Format company/location lines
+      if (_isCompanyLocation(line, i, lines)) {
         formattedLines.add('🏢 ' + line);
-        formattedLines.add('');
         continue;
       }
 
-      // Format education entries
-      if (line.contains('University') ||
-          line.contains('Master') ||
-          line.contains('PhD')) {
+      // Format project headers
+      if (_isProjectHeader(line)) {
+        // Split project name and technologies
+        if (line.contains('|')) {
+          List<String> parts = line.split('|');
+          if (parts.length >= 2) {
+            formattedLines.add('');
+            formattedLines.add('🚀 ${parts[0].trim()}');
+            formattedLines.add('💻 ${parts.sublist(1).join(" | ").trim()}');
+            continue;
+          }
+        }
         formattedLines.add('');
+        formattedLines.add('🚀 ' + line);
+        continue;
+      }
+
+      // Format education entries (degree lines)
+      if (line.contains('University') || 
+          (line.contains('Master') && line.contains('20')) ||
+          (line.contains('PhD') && line.contains('20')) ||
+          (line.contains('Bachelor') && line.contains('20'))) {
         formattedLines.add('🎓 ' + line);
         continue;
       }
 
-      // Format contact information
-      if (line.contains('@') ||
-          line.contains('|') ||
-          line.contains('LinkedIn') ||
-          line.contains('GitHub') ||
-          line.contains('Portfolio')) {
-        formattedLines.add('📧 ' + line);
+      // Format degree year/location lines
+      if (i > 0 && lines[i-1].contains('University') && 
+          (line.contains('20') || line.contains(',') && !line.startsWith('•'))) {
+        formattedLines.add('📅 ' + line);
+        continue;
+      }
+
+      // Format certifications (lines with – and year)
+      if (line.contains('–') && line.contains('20') && 
+          !_isJobPosition(line) && 
+          (line.contains('Professional') || line.contains('Certification') || line.contains('Training'))) {
+        formattedLines.add('🏆 ' + line);
+        continue;
+      }
+
+      // Format technical skills categories
+      if (line.endsWith(':') && 
+          (line.startsWith('Programming') || 
+           line.startsWith('Machine Learning') ||
+           line.startsWith('Data Engineering') ||
+           line.startsWith('Visualization') ||
+           line.startsWith('Development') ||
+           line.startsWith('Analytics'))) {
+        formattedLines.add('');
+        formattedLines.add('▸ ' + line);
+        continue;
+      }
+
+      // Format URLs in project details
+      if (line.contains('Live:') || line.contains('Code:') || line.contains('github.com')) {
+        // Split if multiple URLs on one line
+        if (line.contains('|')) {
+          List<String> parts = line.split('|');
+          for (var part in parts) {
+            if (part.trim().isNotEmpty) {
+              formattedLines.add('  🔗 ${part.trim()}');
+            }
+          }
+        } else {
+          formattedLines.add('  🔗 ' + line);
+        }
         continue;
       }
 
@@ -175,6 +318,17 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
     }
 
     return formattedLines.join('\n');
+  }
+
+  // Helper method to get section-specific icons
+  String _getSectionIcon(String section) {
+    if (section.contains('Experience')) return '💼';
+    if (section.contains('Education')) return '🎓';
+    if (section.contains('Project')) return '🎯';
+    if (section.contains('Skills') || section.contains('Technical')) return '⚡';
+    if (section.contains('Certification')) return '🏆';
+    if (section.contains('Career') || section.contains('Highlight')) return '⭐';
+    return '📌';
   }
 
   @override

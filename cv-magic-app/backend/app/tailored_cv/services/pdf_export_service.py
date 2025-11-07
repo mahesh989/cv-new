@@ -139,13 +139,13 @@ class ResumePDFGenerator:
                 leading=24
             ))
 
-        # Contact info style
+        # Contact info style - ALL BLACK
         if 'Contact' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='Contact',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#444444'),
+                textColor=colors.HexColor('#000000'),
                 alignment=TA_CENTER,
                 spaceAfter=4,
                 fontName=self.font_family['regular'],
@@ -168,13 +168,13 @@ class ResumePDFGenerator:
                 leading=11
             ))
 
-        # Body text style
+        # Body text style - ALL BLACK
         if 'BodyText' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='BodyText',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#333333'),
+                textColor=colors.HexColor('#000000'),
                 spaceAfter=6,
                 alignment=TA_JUSTIFY,
                 fontName=self.font_family['regular'],
@@ -183,13 +183,13 @@ class ResumePDFGenerator:
                 leading=11
             ))
 
-        # Bullet character style
+        # Bullet character style - ALL BLACK
         if 'BulletChar' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='BulletChar',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#333333'),
+                textColor=colors.HexColor('#000000'),
                 alignment=TA_LEFT,
                 fontName=self.font_family['regular'],
                 leftIndent=0,
@@ -197,13 +197,13 @@ class ResumePDFGenerator:
                 leading=11
             ))
 
-        # Bullet text style (for text inside bullet tables - NO leftIndent to avoid double indentation)
+        # Bullet text style (for text inside bullet tables - NO leftIndent to avoid double indentation) - ALL BLACK
         if 'BulletText' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='BulletText',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#333333'),
+                textColor=colors.HexColor('#000000'),
                 spaceAfter=6,
                 alignment=TA_JUSTIFY,
                 fontName=self.font_family['regular'],
@@ -212,13 +212,13 @@ class ResumePDFGenerator:
                 leading=11
             ))
 
-        # Paragraph block style (for content wrapped in tables - NO leftIndent to avoid double indentation)
+        # Paragraph block style (for content wrapped in tables - NO leftIndent to avoid double indentation) - ALL BLACK
         if 'TableParagraph' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='TableParagraph',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#333333'),
+                textColor=colors.HexColor('#000000'),
                 spaceAfter=6,
                 alignment=TA_JUSTIFY,
                 fontName=self.font_family['regular'],
@@ -242,13 +242,13 @@ class ResumePDFGenerator:
                 leading=11
             ))
 
-        # Date style - right aligned
+        # Date style - right aligned - ALL BLACK
         if 'DateRight' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='DateRight',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#555555'),
+                textColor=colors.HexColor('#000000'),
                 fontName=self.font_family['regular'],
                 alignment=TA_RIGHT,
                 spaceAfter=0,
@@ -257,14 +257,14 @@ class ResumePDFGenerator:
                 leading=11
             ))
 
-        # Company style
+        # Company style - ALL BLACK, NO ITALIC
         if 'Company' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='Company',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#555555'),
-                fontName=self.font_family['italic'],
+                textColor=colors.HexColor('#000000'),
+                fontName=self.font_family['regular'],
                 spaceAfter=8,
                 alignment=TA_LEFT,
                 leftIndent=self.content_left_margin,
@@ -287,19 +287,35 @@ class ResumePDFGenerator:
                 leading=11
             ))
 
-        # Institution style
+        # Institution style - ALL BLACK
         if 'Institution' not in style_names:
             self.styles.add(ParagraphStyle(
                 name='Institution',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#555555'),
+                textColor=colors.HexColor('#000000'),
                 fontName=self.font_family['regular'],
                 spaceAfter=12,
                 alignment=TA_LEFT,
                 leftIndent=self.content_left_margin,
                 rightIndent=0,
                 leading=11
+            ))
+        
+        # Link style - NAVY BLUE, NO UNDERLINE
+        if 'Link' not in style_names:
+            self.styles.add(ParagraphStyle(
+                name='Link',
+                parent=self.styles['Normal'],
+                fontSize=10,
+                textColor=colors.HexColor('#000080'),  # Navy blue
+                fontName=self.font_family['regular'],
+                alignment=TA_RIGHT,
+                spaceAfter=0,
+                leftIndent=0,
+                rightIndent=0,
+                leading=11,
+                underline=0  # No underline
             ))
 
         # Skill Category style
@@ -323,7 +339,7 @@ class ResumePDFGenerator:
                 name='SkillItem',
                 parent=self.styles['Normal'],
                 fontSize=10,
-                textColor=colors.HexColor('#333333'),
+                textColor=colors.HexColor('#000000'),
                 fontName=self.font_family['regular'],
                 spaceAfter=0,
                 alignment=TA_LEFT,
@@ -352,11 +368,11 @@ class ResumePDFGenerator:
         # Add small spacer before line
         elements.append(Spacer(1, 2))
         
-        # Horizontal line - wrapped in table for consistent alignment
+        # Horizontal line - wrapped in table for consistent alignment - ALL BLACK
         line = HRFlowable(
             width=self._usable_width(),  # Full width from frame edge
             thickness=0.5,
-            color=colors.HexColor('#666666'),
+            color=colors.HexColor('#000000'),
             spaceBefore=0,  # Handled by explicit Spacer above
             spaceAfter=0,   # Handled by explicit Spacer below
             hAlign='LEFT'
@@ -730,14 +746,14 @@ class ResumePDFGenerator:
                     ]))
                     elements.append(tbl)
                 
-                # NEW FORMAT: Degree and Year (second line)
+                # NEW FORMAT: Degree and Year (second line) - DEGREE IS NOT BOLD
                 if year:
-                    # Degree (left, bold) + Year (right, gray)
-                    table = self._create_aligned_two_column(f"<b>{degree}</b>", year, 'Degree', 'DateRight')
+                    # Degree (left, normal text) + Year (right, gray)
+                    table = self._create_aligned_two_column(degree, year, 'Degree', 'DateRight')
                     elements.append(table)
                 else:
-                    # Degree only (no year)
-                    para = Paragraph(f"<b>{degree}</b>", self.styles['Degree'])
+                    # Degree only (no year) - normal text, not bold
+                    para = Paragraph(degree, self.styles['Degree'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -798,27 +814,55 @@ class ResumePDFGenerator:
                 context = proj.get('context', '')
                 logger.info(f"[PDF_EXPORT] Project {i}: {name}")
                 
-                # NEW FORMAT: Context first if available (like "University Project", "Personal Project")
-                if context:
-                    para = Paragraph(f"<b>{context}</b>", self.styles['JobTitle'])
-                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
-                    tbl.setStyle(TableStyle([
-                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
-                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
-                        ('TOPPADDING', (0, 0), (0, 0), 0),
-                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
-                    ]))
-                    elements.append(tbl)
+                # NEW FORMAT: Project Name | Technologies (left) | Status | Link (right)
+                # Build the project header line (left side)
+                project_header = name  # Start with project name (normal text, not italic)
                 
-                # NEW FORMAT: Project Name and Date (second line, or first if no context)
-                project_date = duration or date
+                # Add technologies if available (separated by |)
+                if proj.get('technologies'):
+                    tech_string = ', '.join(proj['technologies'])
+                    project_header += f" | {tech_string}"
+                
+                # Build right side: Status | Link
+                project_url = proj.get('url', '')
+                project_date = duration or date or context
+                
+                # Build right side text
+                right_side = ""
                 if project_date:
-                    # Project name (left, italic) + Date (right, gray)
-                    table = self._create_aligned_two_column(f"<i>{name}</i>", project_date, 'Company', 'DateRight')
+                    right_side = project_date
+                
+                # Add Link if URL exists
+                if project_url:
+                    # Add separator if there's content before Link
+                    if right_side:
+                        right_side += " | "
+                    else:
+                        right_side = "| "
+                    
+                    # Add clickable link in navy blue with no underline
+                    right_side += f'<font color="#000080"><link href="{project_url}">Link</link></font>'
+                
+                if right_side:
+                    # Project name + technologies (left) + Status + Link (right)
+                    left_para = Paragraph(project_header, self.styles['Company'])
+                    right_para = Paragraph(right_side, self.styles['DateRight'])
+                    
+                    table = Table(
+                        [[left_para, right_para]], 
+                        colWidths=self.two_column_widths,
+                        style=[
+                            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                            ('LEFTPADDING', (0, 0), (-1, -1), self.content_left_margin),
+                            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                            ('TOPPADDING', (0, 0), (-1, -1), 0),
+                            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                        ]
+                    )
                     elements.append(table)
                 else:
-                    # Project name only (no date)
-                    para = Paragraph(f"<i>{name}</i>", self.styles['Company'])
+                    # Project name + technologies only (no date or link)
+                    para = Paragraph(project_header, self.styles['Company'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -839,18 +883,6 @@ class ResumePDFGenerator:
                 elif proj.get('description'):
                     logger.info(f"[PDF_EXPORT] Project {i} using description fallback")
                     elements.append(self._paragraph_block(proj['description']))
-                
-                if proj.get('technologies'):
-                    tech_text = f"Technologies: {', '.join(proj['technologies'])}"
-                    para = Paragraph(tech_text, self.styles['Company'])
-                    tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
-                    tbl.setStyle(TableStyle([
-                        ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
-                        ('RIGHTPADDING', (0, 0), (0, 0), 0),
-                        ('TOPPADDING', (0, 0), (0, 0), 0),
-                        ('BOTTOMPADDING', (0, 0), (0, 0), 0),
-                    ]))
-                    elements.append(tbl)
                 
                 if i < len(projects) - 1:
                     elements.append(Spacer(1, self.spacing['subsection_gap']))
