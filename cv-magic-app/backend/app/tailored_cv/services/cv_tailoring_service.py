@@ -918,12 +918,28 @@ CRITICAL REMINDERS FOR EDUCATION:
 Generate a tailored highlights section with three components:
 
 1. VALUE STATEMENT (1 sentence, ~25 words):
-   - SENIORITY LEVEL RULES (CRITICAL):
-     * Analyze CV's job titles to determine if candidate has held senior/lead positions
-     * If CV contains "Senior", "Lead", "Principal", "Staff", "Manager", or "Director" titles → Use seniority prefix
-     * If CV only has junior/regular positions → DO NOT add seniority prefix
-     * Example: CV has "Senior Data Analyst" role → Use "Senior Data Analyst with X years..."
-     * Example: CV only has "Data Analyst" roles → Use "Data Analyst with X years..." (NO "Senior")
+   - SENIORITY LEVEL RULES (CRITICAL - MUST FOLLOW EXACTLY):
+     * STEP 1: Check CV's experience section job titles ONLY
+     * STEP 2: Look for EXACT words: "Senior", "Lead", "Principal", "Staff", "Manager", or "Director" in job titles
+     * STEP 3: If found → Use that seniority level (e.g., "Senior Data Analyst")
+     * STEP 4: If NOT found → Use ONLY the JD role title WITHOUT any seniority prefix
+     
+     * ❌ DO NOT infer seniority from:
+       - Years of experience (5 years ≠ "Senior")
+       - Phrases like "Results-driven", "Experienced", "Skilled"
+       - Achievements or accomplishments
+       - Leadership activities (unless title says "Lead" or "Manager")
+     
+     * ✅ ONLY use seniority if CV job title EXPLICITLY contains the word:
+       - CV title: "Senior Data Analyst" → Use "Senior Data Analyst"
+       - CV title: "Lead Software Engineer" → Use "Lead Software Engineer"
+       - CV title: "Data Analyst" → Use "Data Analyst" (NO "Senior")
+       - CV title: "Data Analyst & AI Engineer" → Use "Data Analyst" (NO "Senior")
+     
+     * Examples:
+       → CV has "Data Analyst & AI Engineer (Contract)" → Output: "Data Analyst with X years..."
+       → CV has "Senior Data Analyst" → Output: "Senior Data Analyst with X years..."
+       → CV has "AI Data Trainer & Evaluator" → Output: "Data Analyst with X years..." (use JD title)
    
    - YEARS OF EXPERIENCE CALCULATION (CRITICAL):
      * Calculate ONLY relevant experience to the target role from JD
@@ -938,7 +954,8 @@ Generate a tailored highlights section with three components:
      * Example: CV has 5 years total (3 software dev + 2 data analyst) applying for Data Analyst
        → Use "5 years' experience" (both relevant to target role)
    
-   - Structure: [Seniority if present in CV] [JD Role Title] with [Relevant Years] years' experience...
+   - Structure: [Seniority ONLY if in CV job titles] [JD Role Title] with [Relevant Years] years' experience...
+   - Start with descriptive phrase (e.g., "Results-driven", "Accomplished") AFTER the role title
    - Mention industries/company types worked with
    - Example: "Data Analyst with 2 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications."
 

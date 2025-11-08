@@ -42,10 +42,18 @@ Generate three components:
 
 1. **VALUE STATEMENT** (~25 words):
    
-   **SENIORITY RULES:**
-   - ✅ Use seniority prefix ONLY if CV contains "Senior", "Lead", "Principal", "Staff", "Manager", or "Director" titles
-   - ❌ DO NOT add seniority if CV only has regular/junior positions
-   - Extract from CV's actual job titles, not from JD
+   **SENIORITY RULES (CRITICAL - CHECK CV JOB TITLES ONLY):**
+   - ✅ Use seniority ONLY if CV job title EXPLICITLY contains: "Senior", "Lead", "Principal", "Staff", "Manager", or "Director"
+   - ❌ DO NOT infer seniority from:
+     * Years of experience (5 years ≠ "Senior")
+     * Descriptive phrases ("Results-driven", "Experienced", "Skilled")
+     * Achievements or leadership activities
+   - Extract from CV's actual job titles, NOT from JD
+   
+   **Examples:**
+   - CV title: "Data Analyst & AI Engineer" → Use "Data Analyst" (NO "Senior")
+   - CV title: "Senior Data Analyst" → Use "Senior Data Analyst"
+   - CV title: "AI Data Trainer" → Use "Data Analyst" (use JD title, NO "Senior")
    
    **EXPERIENCE CALCULATION:**
    - Count ONLY relevant experience to target role
@@ -53,7 +61,7 @@ Generate three components:
    - Relevance: Direct match → Adjacent roles → Transferable technical skills
    - Example: 5 years total (3 research + 2 data analysis) for Data Analyst → Use "2 years"
    
-   **Structure:** [Seniority if in CV] [JD Role Title] with [Relevant Years] years' experience + industries/clients
+   **Structure:** [Seniority ONLY if in CV titles] [JD Role Title] with [Relevant Years] years' experience + industries/clients
    
 2. **KEY ACCOMPLISHMENTS** (3 bullets):
    - Quantified achievements from CV matching JD requirements
