@@ -554,16 +554,24 @@ class ResumePDFGenerator:
         
         # Add clickable links (only labels, not URLs) - NAVY BLUE, NO UNDERLINE
         if linkedin:
-            contact_parts.append(f"<link href=\"{linkedin}\" color=\"#000080\">LinkedIn</link>")
+            # Add https:// if not present
+            linkedin_url = linkedin if linkedin.startswith(('http://', 'https://')) else f'https://{linkedin}'
+            contact_parts.append(f"<link href=\"{linkedin_url}\" color=\"#000080\">LinkedIn</link>")
         if github:
-            logger.info(f"[PDF_EXPORT] Adding GitHub link: {github}")
-            contact_parts.append(f"<link href=\"{github}\" color=\"#000080\">GitHub</link>")
+            # Add https:// if not present
+            github_url = github if github.startswith(('http://', 'https://')) else f'https://{github}'
+            logger.info(f"[PDF_EXPORT] Adding GitHub link: {github_url}")
+            contact_parts.append(f"<link href=\"{github_url}\" color=\"#000080\">GitHub</link>")
         else:
             logger.warning(f"[PDF_EXPORT] No GitHub URL found. linkedin={linkedin}, github={github}")
         if portfolio_url:
-            contact_parts.append(f"<link href=\"{portfolio_url}\" color=\"#000080\">Portfolio</link>")
+            # Add https:// if not present
+            portfolio_full = portfolio_url if portfolio_url.startswith(('http://', 'https://')) else f'https://{portfolio_url}'
+            contact_parts.append(f"<link href=\"{portfolio_full}\" color=\"#000080\">Portfolio</link>")
         if website_url and website_url != portfolio_url:
-            contact_parts.append(f"<link href=\"{website_url}\" color=\"#000080\">Website</link>")
+            # Add https:// if not present
+            website_full = website_url if website_url.startswith(('http://', 'https://')) else f'https://{website_url}'
+            contact_parts.append(f"<link href=\"{website_full}\" color=\"#000080\">Website</link>")
 
         # Create single contact line with all information
         if contact_parts:
@@ -834,6 +842,10 @@ class ResumePDFGenerator:
                 
                 # Add Link if URL exists (always show, even if no status)
                 if project_url:
+                    # Add https:// if not present
+                    if not project_url.startswith(('http://', 'https://')):
+                        project_url = f'https://{project_url}'
+                    
                     # Add separator before Link
                     if right_side:
                         right_side += " | "
