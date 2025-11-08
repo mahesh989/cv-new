@@ -550,20 +550,20 @@ class ResumePDFGenerator:
         if phone:
             contact_parts.append(phone)
         if email:
-            contact_parts.append(f"<link href=\"mailto:{email}\" color=\"blue\"><u>{email}</u></link>")
+            contact_parts.append(f"<link href=\"mailto:{email}\" color=\"#000080\">{email}</link>")
         
-        # Add clickable links (only labels, not URLs)
+        # Add clickable links (only labels, not URLs) - NAVY BLUE, NO UNDERLINE
         if linkedin:
-            contact_parts.append(f"<link href=\"{linkedin}\" color=\"blue\"><u>LinkedIn</u></link>")
+            contact_parts.append(f"<link href=\"{linkedin}\" color=\"#000080\">LinkedIn</link>")
         if github:
             logger.info(f"[PDF_EXPORT] Adding GitHub link: {github}")
-            contact_parts.append(f"<link href=\"{github}\" color=\"blue\"><u>GitHub</u></link>")
+            contact_parts.append(f"<link href=\"{github}\" color=\"#000080\">GitHub</link>")
         else:
             logger.warning(f"[PDF_EXPORT] No GitHub URL found. linkedin={linkedin}, github={github}")
         if portfolio_url:
-            contact_parts.append(f"<link href=\"{portfolio_url}\" color=\"blue\"><u>Portfolio</u></link>")
+            contact_parts.append(f"<link href=\"{portfolio_url}\" color=\"#000080\">Portfolio</link>")
         if website_url and website_url != portfolio_url:
-            contact_parts.append(f"<link href=\"{website_url}\" color=\"blue\"><u>Website</u></link>")
+            contact_parts.append(f"<link href=\"{website_url}\" color=\"#000080\">Website</link>")
 
         # Create single contact line with all information
         if contact_parts:
@@ -818,10 +818,10 @@ class ResumePDFGenerator:
                 # Build the project header line (left side)
                 project_header = name  # Start with project name (normal text, not italic)
                 
-                # Add technologies if available (separated by |)
+                # Add technologies if available (separated by | in italic)
                 if proj.get('technologies'):
                     tech_string = ', '.join(proj['technologies'])
-                    project_header += f" | {tech_string}"
+                    project_header += f" | <i>{tech_string}</i>"
                 
                 # Build right side: Status | Link
                 project_url = proj.get('url', '')
@@ -832,17 +832,16 @@ class ResumePDFGenerator:
                 if project_date:
                     right_side = project_date
                 
-                # Add Link if URL exists
+                # Add Link if URL exists (always show, even if no status)
                 if project_url:
-                    # Add separator if there's content before Link
+                    # Add separator before Link
                     if right_side:
                         right_side += " | "
-                    else:
-                        right_side = "| "
                     
                     # Add clickable link in navy blue with no underline
                     right_side += f'<font color="#000080"><link href="{project_url}">Link</link></font>'
                 
+                # Show right side if there's any content (status or link)
                 if right_side:
                     # Project name + technologies (left) + Status + Link (right)
                     left_para = Paragraph(project_header, self.styles['Company'])
