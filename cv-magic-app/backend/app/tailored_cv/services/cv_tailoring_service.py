@@ -918,10 +918,29 @@ CRITICAL REMINDERS FOR EDUCATION:
 Generate a tailored highlights section with three components:
 
 1. VALUE STATEMENT (1 sentence, ~25 words):
-   - Start with exact role title from JD
-   - Include years of experience
+   - SENIORITY LEVEL RULES (CRITICAL):
+     * Analyze CV's job titles to determine if candidate has held senior/lead positions
+     * If CV contains "Senior", "Lead", "Principal", "Staff", "Manager", or "Director" titles → Use seniority prefix
+     * If CV only has junior/regular positions → DO NOT add seniority prefix
+     * Example: CV has "Senior Data Analyst" role → Use "Senior Data Analyst with X years..."
+     * Example: CV only has "Data Analyst" roles → Use "Data Analyst with X years..." (NO "Senior")
+   
+   - YEARS OF EXPERIENCE CALCULATION (CRITICAL):
+     * Calculate ONLY relevant experience to the target role from JD
+     * IGNORE irrelevant experience (e.g., research/teaching when applying for IT)
+     * Relevance criteria:
+       → Direct match: Same role type (e.g., Data Analyst for Data Analyst role)
+       → Adjacent: Related domain (e.g., BI Analyst for Data Analyst role)
+       → Transferable: Similar technical skills (e.g., Software Engineer with data work for Data Analyst)
+     * EXCLUDE: Unrelated experience (e.g., research/teaching for IT roles, unless role requires research)
+     * Example: CV has 5 years total (3 research + 2 data analysis) applying for Data Analyst
+       → Use "2 years' experience" (only data analysis, exclude research)
+     * Example: CV has 5 years total (3 software dev + 2 data analyst) applying for Data Analyst
+       → Use "5 years' experience" (both relevant to target role)
+   
+   - Structure: [Seniority if present in CV] [JD Role Title] with [Relevant Years] years' experience...
    - Mention industries/company types worked with
-   - Example: "Data Analyst with 3 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications."
+   - Example: "Data Analyst with 2 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications."
 
 2. KEY ACCOMPLISHMENTS (3 bullet points):
    - Pull from CV experiences, projects, or education that match JD requirements

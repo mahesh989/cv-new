@@ -41,7 +41,19 @@ Category: tools | Category: tools [ATS-optimized]
 Generate three components:
 
 1. **VALUE STATEMENT** (~25 words):
-   - Role title + years experience + industries/clients
+   
+   **SENIORITY RULES:**
+   - ✅ Use seniority prefix ONLY if CV contains "Senior", "Lead", "Principal", "Staff", "Manager", or "Director" titles
+   - ❌ DO NOT add seniority if CV only has regular/junior positions
+   - Extract from CV's actual job titles, not from JD
+   
+   **EXPERIENCE CALCULATION:**
+   - Count ONLY relevant experience to target role
+   - EXCLUDE unrelated experience (e.g., research/teaching for IT roles)
+   - Relevance: Direct match → Adjacent roles → Transferable technical skills
+   - Example: 5 years total (3 research + 2 data analysis) for Data Analyst → Use "2 years"
+   
+   **Structure:** [Seniority if in CV] [JD Role Title] with [Relevant Years] years' experience + industries/clients
    
 2. **KEY ACCOMPLISHMENTS** (3 bullets):
    - Quantified achievements from CV matching JD requirements
@@ -52,7 +64,7 @@ Generate three components:
    - Format: Skill1 | Skill2 | Skill3 | ...
 
 Example:
-"Data Analyst with 3 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications.
+"Data Analyst with 2 years' experience delivering automated reporting solutions and workforce insights through data modelling, analysis, and visualisation using SQL, PowerBI, and Python for Google, T-Mobile, among other clients across tech and telecommunications.
 
 • Delivered 15+ interactive dashboards and analytical insights for Google's Autobot project by processing large-scale data from 300+ e-commerce and retail websites
 • Drove 12% improvement in regional sales forecasting accuracy by analysing and modelling sales and financial data
