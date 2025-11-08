@@ -465,9 +465,15 @@ class ResumePDFGenerator:
             elements.extend(self._make_bullet_rows(bullets))
             elements.append(Spacer(1, self.spacing['bullet_gap']))
         
-        # Add skills line
+        # Add skills line with skills in italic
         if skills_line:
-            elements.append(self._paragraph_block(skills_line))
+            # Format: "Skills:" (normal) + skills list (italic)
+            if ':' in skills_line:
+                label, skills_content = skills_line.split(':', 1)
+                formatted_skills = f"{label}: <i>{skills_content.strip()}</i>"
+                elements.append(self._paragraph_block(formatted_skills))
+            else:
+                elements.append(self._paragraph_block(skills_line))
         
         return elements
 
@@ -835,6 +841,8 @@ class ResumePDFGenerator:
                 project_url = proj.get('url', '')
                 project_date = duration or date or context
                 
+                logger.info(f"[PDF_EXPORT] Project {i}: URL='{project_url}', date='{project_date}'")
+                
                 # Build right side text
                 right_side = ""
                 if project_date:
@@ -846,15 +854,19 @@ class ResumePDFGenerator:
                     if not project_url.startswith(('http://', 'https://')):
                         project_url = f'https://{project_url}'
                     
+                    logger.info(f"[PDF_EXPORT] Adding Link with URL: {project_url}")
+                    
                     # Add separator before Link
                     if right_side:
                         right_side += " | "
                     
                     # Add clickable link in navy blue with no underline
                     right_side += f'<font color="#000080"><link href="{project_url}">Link</link></font>'
+                    logger.info(f"[PDF_EXPORT] Right side after adding Link: '{right_side}'")
                 
                 # Show right side if there's any content (status or link)
                 if right_side:
+                    logger.info(f"[PDF_EXPORT] Showing right side for project {i}")
                     # Project name + technologies (left) + Status + Link (right)
                     left_para = Paragraph(project_header, self.styles['Company'])
                     right_para = Paragraph(right_side, self.styles['DateRight'])

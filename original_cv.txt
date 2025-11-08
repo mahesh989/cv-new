@@ -1,0 +1,85 @@
+Maheshwor Tiwari
+Hurstville, NSW 2220, Australia
+maheshtwari99@gmail.com|+61 414 032 507
+linkedin.com/in/maheshwortiwari|github.com/mahesh989|Tableau Public
+Data Analyst & AI Engineer – Career Highlights
+Results-driven Data Analyst and AI Engineer with 2+ years of experience delivering data-driven solutions across
+property tech, construction, and AI sectors. Proven track record building production AI applications, automating data
+pipelines, and creating actionable dashboards that drive 25-30% efficiency gains.
+•Built CV Agent AI application serving 500+ users with multi-LLM orchestration, real-time ATS optimization, and
+full-stack development (Flutter/Dart, Python), demonstrating end-to-end AI product development
+•Optimized YOLOv8n deep learning model achieving 39.34% faster inference and 11.39% size reduction for edge
+deployment, showcasing advanced ML optimization and computer vision expertise
+•Delivered 25% forecasting improvement through PostgreSQL database analysis and Power BI dashboards, reducing
+client reporting time by 30% and driving data-informed business decisions
+Skills: Python|SQL (PostgreSQL, MySQL)|Machine Learning/AI|Tableau/Power BI|Cloud Computing
+(Snowflake, AWS)|Data Engineering|Deep Learning|Statistical Analysis
+Experience
+The Bitrates Hurstville, NSW, Australia
+Data Analyst & AI Engineer (Contract) July 2024 – Present
+•Analyzed client website databases using PostgreSQL and Power BI, improving forecasting accuracy by 25%
+•Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users
+•Implemented real-time ATS optimization algorithms analyzing keywords, structure, and readability
+•Collaborated with cross-functional teams to identify business opportunities through statistical analysis
+Outlier.ai Remote
+AI Data Trainer & Evaluator (Freelance) July 2024 – Present
+•Evaluated and improved AI model responses for accuracy, quality, and alignment with expectations
+•Developed training prompts to identify AI performance gaps and enhance model capabilities
+•Provided detailed feedback on AI training projects, contributing to reliable AI systems
+iBuild Building SolutionsVictoria, Australia
+Data Analyst Mar. 2024 – June 2024
+•Automated data extraction for population datasets using Python, improving accuracy by 20%
+•Built Power BI dashboards reducing client reporting time by 30% and improving decision-making
+•Optimized customer support response times through data analysis, achieving 15% efficiency gain
+•Enhanced team collaboration through automated workflows and standardized data processes
+Property Console Sydney, Australia
+Software Engineer and Analyst June 2023 – Nov. 2023
+•Built Python scripts to track key metrics, ensuring 99% data accuracy and improved data integrity
+•Collaborated with development teams to enhance analytics, improving processing speed by 25%
+•Preprocessed and analyzed large datasets, producing Tableau dashboards for stakeholder reporting
+•Supported customer-focused initiatives with Python-driven insights and data visualizations
+Featured Projects
+CV Agent – AI-Powered Resume Builder|Flutter, Python, Multi-LLM, APIsLive Production
+•Developed full-stack AI application with 500+ active users; real-time ATS scoring and optimization
+•Implemented multi-model fallback system ensuring 99% uptime and reliable content generation
+•Created role-specific templates with quantified achievement suggestions and skills gap analysis
+•Built export functionality (PDF/Doc) with professional templating and formatting
+•Live: mahesh989.github.io/cv-new|Code: github.com/mahesh989/cv-new
+YOLOv8n Corrosion Detection Optimization|PyTorch, Computer Vision, Edge AIResearch
+•Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices
+•Achieved 11.39% model size reduction through L1-norm structured pruning
+•Improved inference speed by 39.34%, making model deployable on resource-constrained devices
+•Applied fine-tuning to mitigate 7.43% mAP@50-95 accuracy drop post-pruning
+•Code: github.com/mahesh989/corrosion-detection
+Heart Attack Risk Prediction System|Python, scikit-learn, Deep LearningML Application
+•Built ensemble ML system for cardiovascular risk prediction achieving 92% accuracy
+•Implemented logistic regression, random forests, and deep learning with class imbalance handling
+•Created clear visualizations for medical stakeholders and model interpretability
+•Code: github.com/mahesh989/heart-attack-prediction
+SQL Data Pipeline Automation|SQL, PostgreSQL, Python, ETLData Engineering
+•Automated ETL pipeline for property listing analysis with real-time processing capabilities
+•Reduced data processing time by 30% through optimized queries and validation frameworks
+•Enabled real-time business intelligence dashboards for strategic decision-making
+•Code: github.com/mahesh989/sql-pipeline
+Technical Skills
+Programming: Python (Pandas, NumPy), SQL (PostgreSQL, MySQL), R
+Machine Learning: scikit-learn, TensorFlow, PyTorch, Deep Learning, Computer Vision, NLP
+Data Engineering: ETL Pipelines, Snowflake, AWS, Data Warehousing
+Visualization: Tableau, Power BI, Matplotlib, Seaborn, Plotly
+Development: Git/GitHub, Docker, VS Code, Jupyter, Flutter/Dart, REST APIs
+Analytics: Statistical Analysis, A/B Testing, Predictive Modeling, Time Series, Optimization
+Education
+Charles Darwin UniversitySydney, Australia
+Master of Data Science (GPA: 6.35/7) 2023 – 2024
+CY Cergy Paris UniversityCergy-Pontoise, France
+PhD in Physics 2018 – 2022
+CY Cergy Paris UniversityCergy-Pontoise, France
+Master in Theoretical Physics 2016 – 2018
+Tribhuvan UniversityKathmandu, Nepal
+Bachelor of Science in Information Technology (GPA: 83%) July 2014 – Aug. 2018
+Professional Certifications
+Snowflake Data Engineering Professional– Snowflake2024
+Snowflake Data Warehousing Professional– Snowflake2024
+Google Analytics Certification– Google Skillshop2024
+SQL Essential Training– LinkedIn Learning2024
+

@@ -1,0 +1,227 @@
+{
+  "personal_information": {
+    "name": "Maheshwor Tiwari",
+    "phone": "+61 414 032 507",
+    "email": "maheshtwari99@gmail.com",
+    "location": "Hurstville, NSW 2220, Australia",
+    "linkedin": "linkedin.com/in/maheshwortiwari",
+    "github": "github.com/mahesh989",
+    "portfolio_links": {
+      "blogs": "",
+      "dashboard_portfolio": "Tableau Public",
+      "website": ""
+    },
+    "residency_status": "",
+    "open_to": ""
+  },
+  "career_profile": {
+    "summary": "Results-driven Data Analyst and AI Engineer with 2+ years of experience delivering data-driven solutions across property tech, construction, and AI sectors. Proven track record building production AI applications, automating data pipelines, and creating actionable dashboards that drive 25-30% efficiency gains."
+  },
+  "skills": {
+    "technical_skills": [
+      "Python|SQL (PostgreSQL, MySQL)|Machine Learning/AI|Tableau/Power BI|Cloud Computing (Snowflake, AWS)|Data Engineering|Deep Learning|Statistical Analysis"
+    ],
+    "key_skills": [],
+    "soft_skills": [],
+    "domain_expertise": []
+  },
+  "education": [
+    {
+      "degree": "Master of Data Science (GPA: 6.35/7)",
+      "institution": "Charles Darwin University",
+      "year": "2023 – 2024",
+      "gpa": "GPA: 6.35/7",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Sydney, Australia"
+    },
+    {
+      "degree": "PhD in Physics",
+      "institution": "CY Cergy Paris University",
+      "year": "2018 – 2022",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Cergy-Pontoise, France"
+    },
+    {
+      "degree": "Master in Theoretical Physics",
+      "institution": "CY Cergy Paris University",
+      "year": "2016 – 2018",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Cergy-Pontoise, France"
+    },
+    {
+      "degree": "Bachelor of Science in Information Technology (GPA: 83%)",
+      "institution": "Tribhuvan University",
+      "year": "July 2014 – Aug. 2018",
+      "gpa": "GPA: 83%",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Kathmandu, Nepal"
+    }
+  ],
+  "experience": [
+    {
+      "title": "Data Analyst & AI Engineer (Contract)",
+      "company": "The Bitrates",
+      "duration": "July 2024 – Present",
+      "location": "Hurstville, NSW, Australia",
+      "responsibilities": [
+        "Analyzed client website databases using PostgreSQL and Power BI, improving forecasting accuracy by 25%",
+        "Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users",
+        "Implemented real-time ATS optimization algorithms analyzing keywords, structure, and readability",
+        "Collaborated with cross-functional teams to identify business opportunities through statistical analysis"
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "AI Data Trainer & Evaluator (Freelance)",
+      "company": "Outlier.ai",
+      "duration": "July 2024 – Present",
+      "location": "Remote",
+      "responsibilities": [
+        "Evaluated and improved AI model responses for accuracy, quality, and alignment with expectations",
+        "Developed training prompts to identify AI performance gaps and enhance model capabilities",
+        "Provided detailed feedback on AI training projects, contributing to reliable AI systems"
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Data Analyst",
+      "company": "iBuild Building Solutions",
+      "duration": "Mar. 2024 – June 2024",
+      "location": "Victoria, Australia",
+      "responsibilities": [
+        "Automated data extraction for population datasets using Python, improving accuracy by 20%",
+        "Built Power BI dashboards reducing client reporting time by 30% and improving decision-making",
+        "Optimized customer support response times through data analysis, achieving 15% efficiency gain",
+        "Enhanced team collaboration through automated workflows and standardized data processes"
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Software Engineer and Analyst",
+      "company": "Property Console",
+      "duration": "June 2023 – Nov. 2023",
+      "location": "Sydney, Australia",
+      "responsibilities": [
+        "Built Python scripts to track key metrics, ensuring 99% data accuracy and improved data integrity",
+        "Collaborated with development teams to enhance analytics, improving processing speed by 25%",
+        "Preprocessed and analyzed large datasets, producing Tableau dashboards for stakeholder reporting",
+        "Supported customer-focused initiatives with Python-driven insights and data visualizations"
+      ],
+      "achievements": [],
+      "technologies": []
+    }
+  ],
+  "projects": [
+    {
+      "name": "CV Agent – AI-Powered Resume Builder",
+      "description": [
+        "Developed full-stack AI application with 500+ active users; real-time ATS scoring and optimization",
+        "Implemented multi-model fallback system ensuring 99% uptime and reliable content generation",
+        "Created role-specific templates with quantified achievement suggestions and skills gap analysis",
+        "Built export functionality (PDF/Doc) with professional templating and formatting",
+        "Live: mahesh989.github.io/cv-new|Code: github.com/mahesh989/cv-new"
+      ],
+      "technologies": [
+        "Flutter",
+        "Python",
+        "Multi-LLM",
+        "APIs"
+      ],
+      "duration": "",
+      "role": "",
+      "achievements": [],
+      "url": "mahesh989.github.io/cv-new"
+    },
+    {
+      "name": "YOLOv8n Corrosion Detection Optimization",
+      "description": [
+        "Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices",
+        "Achieved 11.39% model size reduction through L1-norm structured pruning",
+        "Improved inference speed by 39.34%, making model deployable on resource-constrained devices",
+        "Applied fine-tuning to mitigate 7.43% mAP@50-95 accuracy drop post-pruning",
+        "Code: github.com/mahesh989/corrosion-detection"
+      ],
+      "technologies": [
+        "PyTorch",
+        "Computer Vision",
+        "Edge AI"
+      ],
+      "duration": "",
+      "role": "",
+      "achievements": [],
+      "url": "github.com/mahesh989/corrosion-detection"
+    },
+    {
+      "name": "Heart Attack Risk Prediction System",
+      "description": [
+        "Built ensemble ML system for cardiovascular risk prediction achieving 92% accuracy",
+        "Implemented logistic regression, random forests, and deep learning with class imbalance handling",
+        "Created clear visualizations for medical stakeholders and model interpretability",
+        "Code: github.com/mahesh989/heart-attack-prediction"
+      ],
+      "technologies": [
+        "Python",
+        "scikit-learn",
+        "Deep Learning"
+      ],
+      "duration": "",
+      "role": "",
+      "achievements": [],
+      "url": "github.com/mahesh989/heart-attack-prediction"
+    },
+    {
+      "name": "SQL Data Pipeline Automation",
+      "description": [
+        "Automated ETL pipeline for property listing analysis with real-time processing capabilities",
+        "Reduced data processing time by 30% through optimized queries and validation frameworks",
+        "Enabled real-time business intelligence dashboards for strategic decision-making",
+        "Code: github.com/mahesh989/sql-pipeline"
+      ],
+      "technologies": [
+        "SQL",
+        "PostgreSQL",
+        "Python",
+        "ETL"
+      ],
+      "duration": "",
+      "role": "",
+      "achievements": [],
+      "url": "github.com/mahesh989/sql-pipeline"
+    }
+  ],
+  "certifications": [
+    "Snowflake Data Engineering Professional– Snowflake2024",
+    "Snowflake Data Warehousing Professional– Snowflake2024",
+    "Google Analytics Certification– Google Skillshop2024",
+    "SQL Essential Training– LinkedIn Learning2024"
+  ],
+  "languages": [],
+  "awards": [],
+  "publications": [],
+  "volunteer_work": [],
+  "professional_memberships": [],
+  "unknown_sections": {},
+  "original_sections": {
+    "section_headers_found": [],
+    "parsing_approach": "content_preserving"
+  },
+  "saved_at": "2025-11-06T23:58:54.015679",
+  "metadata": {
+    "source_filename": "latest_cv.pdf",
+    "processed_at": "2025-11-06T23:58:54.015905",
+    "processing_version": "1.0",
+    "title": "",
+    "description": "",
+    "user_id": ""
+  }
+}
+
