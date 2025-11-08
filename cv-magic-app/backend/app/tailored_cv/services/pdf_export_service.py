@@ -743,14 +743,14 @@ class ResumePDFGenerator:
                 year = edu.get('year', '')
                 location = edu.get('location', '')
                 
-                # NEW FORMAT: Institution and Location (first line)
-                if institution and location and location not in institution:
-                    # Institution (left, bold) + Location (right, gray)
-                    table = self._create_aligned_two_column(f"<b>{institution}</b>", location, 'JobTitle', 'DateRight')
+                # NEW FORMAT: Degree and Year (first line) - DEGREE IS BOLD
+                if year:
+                    # Degree (left, BOLD) + Year (right, gray)
+                    table = self._create_aligned_two_column(f"<b>{degree}</b>", year, 'JobTitle', 'DateRight')
                     elements.append(table)
-                elif institution:
-                    # Institution only (no location or location already in institution name)
-                    para = Paragraph(f"<b>{institution}</b>", self.styles['JobTitle'])
+                else:
+                    # Degree only (no year) - BOLD
+                    para = Paragraph(f"<b>{degree}</b>", self.styles['JobTitle'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
@@ -760,14 +760,14 @@ class ResumePDFGenerator:
                     ]))
                     elements.append(tbl)
                 
-                # NEW FORMAT: Degree and Year (second line) - DEGREE IS NOT BOLD
-                if year:
-                    # Degree (left, normal text) + Year (right, gray)
-                    table = self._create_aligned_two_column(degree, year, 'Degree', 'DateRight')
+                # NEW FORMAT: Institution and Location (second line) - INSTITUTION IS NOT BOLD
+                if institution and location and location not in institution:
+                    # Institution (left, normal text) + Location (right, gray)
+                    table = self._create_aligned_two_column(institution, location, 'Degree', 'DateRight')
                     elements.append(table)
-                else:
-                    # Degree only (no year) - normal text, not bold
-                    para = Paragraph(degree, self.styles['Degree'])
+                elif institution:
+                    # Institution only (no location or location already in institution name)
+                    para = Paragraph(institution, self.styles['Degree'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
