@@ -763,11 +763,12 @@ class ResumePDFGenerator:
                 # NEW FORMAT: Institution and Location (second line) - INSTITUTION IS NOT BOLD
                 if institution and location and location not in institution:
                     # Institution (left, normal text) + Location (right, gray)
-                    table = self._create_aligned_two_column(institution, location, 'Degree', 'DateRight')
+                    # Use 'Institution' style (regular font, not bold)
+                    table = self._create_aligned_two_column(institution, location, 'Institution', 'DateRight')
                     elements.append(table)
                 elif institution:
                     # Institution only (no location or location already in institution name)
-                    para = Paragraph(institution, self.styles['Degree'])
+                    para = Paragraph(institution, self.styles['Institution'])
                     tbl = Table([[para]], colWidths=[self._usable_width() - self.content_left_margin])
                     tbl.setStyle(TableStyle([
                         ('LEFTPADDING', (0, 0), (0, 0), self.content_left_margin),
