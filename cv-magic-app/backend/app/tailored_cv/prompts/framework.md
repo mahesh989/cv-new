@@ -89,38 +89,58 @@ Skills: Power BI | DAX | Tableau | Excel (Advanced) | SQL | Python | Looker Stud
 ### **Education Selection & Placement**
 
 **Degrees to Include (prioritize by JD relevance):**
-- **Select 2-3 most relevant degrees** based on JD requirements
+- **Select 2-3 most relevant degrees** based on JD requirements and experience level
 - **Minimum 2 degrees** unless only 1 degree exists in original CV
-- **Prioritization:** Highest degree + Most JD-relevant degree(s)
+- **Prioritization:** Highest appropriate degree + Most JD-relevant degree(s)
 - **Remove:** Degrees unrelated to target role or creating overqualification concerns
 
-**Selection Logic:**
-1. **Always include:** Highest relevant degree (PhD/Master's/Bachelor's matching JD field)
-2. **Add if relevant:** Additional degrees directly related to JD (e.g., MBA for management roles)
-3. **Remove if:** Degree field unrelated to JD AND creates overqualification risk
+**Selection Logic Based on JD Experience Requirements:**
+
+**FOR ENTRY-LEVEL (0-2 years required OR no experience specified):**
+1. **EXCLUDE PhD** - Always exclude PhD for entry-level roles to avoid overqualification
+2. **Include Master's** (if relevant) + **Bachelor's** (most relevant)
+3. **Minimum 2 degrees** (e.g., relevant Master's + Bachelor's in related field)
+4. **Example:** For "Data Analyst - 0-2 years experience":
+   - ✅ Include: Master of Data Science + Bachelor of IT
+   - ❌ Exclude: PhD in Physics (even if relevant - creates overqualification)
+
+**FOR MID-LEVEL (3-6 years required):**
+1. **Consider PhD** only if directly relevant to role AND field matches JD
+2. **Prioritize:** Most relevant Master's + Bachelor's OR PhD + Master's if both relevant
+3. **Example:** For "Data Analyst - 3-5 years experience":
+   - ✅ Include: PhD in Data Science (if relevant) + Master's OR Master's + Bachelor's
+   - ❌ Exclude: Unrelated PhD (e.g., PhD in Biology for Data Analyst)
+
+**FOR SENIOR/SPECIALIZED (7+ years OR research/R&D roles):**
+1. **Include PhD** if relevant to technical leadership, research, or specialized roles
+2. **Prioritize:** Highest degree + Most relevant additional degree
+3. **Example:** For "Senior Data Scientist - 7+ years":
+   - ✅ Include: PhD in ML/Stats/CS + relevant Master's
 
 **Examples:**
-- **Case: PhD + 3 Master's + Bachelor's applying for Data Analyst:**
-  - Include: PhD (if in Data/Stats/CS), Master's in relevant field (minimum 2 degrees)
-  - Exclude: Unrelated Master's degrees, Bachelor's (redundant)
+- **Case: PhD + Master's in Data Science + Bachelor's applying for "Data Analyst - Entry Level (0-2 years)":**
+  - ✅ Include: Master of Data Science + Bachelor's in IT (minimum 2 degrees)
+  - ❌ Exclude: PhD (overqualification for 0-2 years role)
   
-- **Case: PhD in Biology applying for Software Engineer:**
-  - Include: Master's/Bachelor's in CS (if exists) + PhD (if relevant) (minimum 2 degrees)
-  - Minimize/exclude: PhD in Biology only if creates overqualification risk
+- **Case: PhD in Physics + Master's in Data Science + Bachelor's applying for "Data Analyst - 3 years":**
+  - ✅ Include: Master of Data Science + Bachelor's OR PhD + Master's (if PhD relevant)
+  - ❌ Exclude: Unrelated PhD (PhD in Physics if role doesn't require physics background)
   
-- **Case: Multiple Master's applying for Entry-level:**
-  - Include: 2 most relevant Master's degrees (minimum 2)
-  - Exclude: Additional degrees creating overqualification perception
+- **Case: Multiple Master's applying for Entry-level (0-1 years):**
+  - ✅ Include: 2 most relevant Master's degrees (minimum 2)
+  - ❌ Exclude: PhD or additional degrees creating overqualification perception
 
 **Placement Rules:**
-- **0-3 years:** Education first, include GPA if >3.5
-- **3-7 years:** Experience first, education after
-- **7+ years:** Education last, degrees only (no GPA, coursework, or honors)
+- **0-3 years:** Education first, include GPA if >3.5, **NEVER include PhD**
+- **3-7 years:** Experience first, education after, include PhD only if directly relevant
+- **7+ years:** Education last, degrees only (no GPA, coursework, or honors), include PhD for senior/research roles
 
-**PhD Strategy:**
-- Include for: Research/R&D/technical leadership/academic roles
-- Minimize for: Entry-level/operational/startup roles (overqualification risk)
-- Reframe as: "Advanced research training in [relevant field]" when beneficial
+**PhD Inclusion Rules (CRITICAL):**
+- **✅ INCLUDE PhD for:** Research/R&D/technical leadership/academic roles with 7+ years OR specialized requirements
+- **❌ EXCLUDE PhD for:** Entry-level (0-2 years) / operational / junior roles regardless of relevance
+- **🔍 CONSIDER PhD for:** Mid-level (3-6 years) only if field directly matches JD requirements
+- **When excluded:** Select next highest degrees (Master's + Bachelor's) to maintain minimum 2 degrees
+- **Reframe tip:** If PhD excluded, emphasize Master's degree achievements and relevant skills instead
 
 ### **Industry Transition**
 Research → BI analysis | Presentations → Stakeholder communication | Thesis → Strategic analysis | Teaching → Team development

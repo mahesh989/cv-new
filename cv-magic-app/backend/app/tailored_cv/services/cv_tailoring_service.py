@@ -868,6 +868,52 @@ YOUR TASK - TRANSFORM THIS CV:
             prompt += "\nADDITIONAL CUSTOM INSTRUCTIONS:\n" + custom_instructions + "\n"
         
         prompt += """
+EDUCATION SELECTION RULES (CRITICAL - MUST FOLLOW):
+
+STEP 1: ANALYZE JD EXPERIENCE REQUIREMENTS
+First, examine the job description above for experience requirements:
+- Look for phrases like "X years experience", "X-Y years", "entry level", "junior", "senior", etc.
+- Extract the number of years required (e.g., 0-2, 3-5, 7+)
+- If unclear or not specified, assume ENTRY-LEVEL (0-2 years)
+
+STEP 2: APPLY EDUCATION SELECTION BASED ON EXPERIENCE LEVEL
+
+**IF JD REQUIRES 0-2 YEARS (Entry-Level) OR NO EXPERIENCE SPECIFIED:**
+- ❌ **EXCLUDE PhD** - Never include PhD for entry-level roles (creates overqualification)
+- ✅ **Include:** Master's degree (if relevant) + Bachelor's degree
+- **Minimum:** 2 degrees (e.g., Master of Data Science + Bachelor of IT)
+- **Example:** For "Data Analyst - Entry Level" with PhD + Master's + Bachelor's:
+  → Select: Master of Data Science + Bachelor of IT
+  → Exclude: PhD in Physics
+
+**IF JD REQUIRES 3-6 YEARS (Mid-Level):**
+- 🔍 **Consider PhD** only if directly relevant to role AND field matches JD
+- ✅ **Prefer:** Most relevant Master's + Bachelor's OR PhD + Master's (if PhD relevant)
+- **Minimum:** 2 degrees
+- **Example:** For "Data Analyst - 3 years" with PhD in Stats + Master in DS + Bachelor:
+  → Option 1: Master of Data Science + Bachelor of IT (safer)
+  → Option 2: PhD in Statistics + Master of Data Science (if PhD very relevant)
+
+**IF JD REQUIRES 7+ YEARS (Senior) OR MENTIONS Research/R&D/Technical Leadership:**
+- ✅ **Include PhD** if relevant to technical leadership, research, or specialized roles
+- **Prioritize:** Highest degree + Most relevant additional degree
+- **Example:** For "Senior Data Scientist - 7+ years":
+  → Select: PhD in Machine Learning + Master of Data Science
+
+STEP 3: SELECT EDUCATION ENTRIES
+From the original CV's education section, select 2-3 degrees following the rules above:
+1. Determine experience level from JD
+2. Apply PhD inclusion/exclusion rule
+3. Select most JD-relevant degrees
+4. Maintain minimum of 2 degrees unless only 1 exists in original CV
+
+CRITICAL REMINDERS FOR EDUCATION:
+- For 0-2 years OR unspecified: NEVER include PhD
+- For 3-6 years: Include PhD only if highly relevant to role field
+- For 7+ years: Include PhD for senior/research/specialized roles
+- Always maintain minimum 2 degrees
+- Prioritize field relevance to JD requirements
+
 [ROLE TITLE] HIGHLIGHTS GENERATION:
 Generate a tailored highlights section with three components:
 
