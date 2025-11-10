@@ -19,11 +19,15 @@ from app.services.ats.components import (
     SeniorityAnalyzer,
     TechnicalAnalyzer
 )
+from app.services.ats.components.technical_skills_analyzer import TechnicalSkillsAnalyzer
+from app.services.ats.components.experience_fit_analyzer import ExperienceFitAnalyzer
+from app.services.ats.components.new_to_legacy_mapper import NewToLegacyMapper
 from app.services.ats.components.consistency_validator import ConsistencyValidator
 from app.services.ats.components.batched_analyzer import BatchedAnalyzer
 from app.services.ats.requirement_bonus_calculator import RequirementBonusCalculator
 from app.services.jd_analysis.jd_analyzer import RequirementsExtractor
 from app.services.ats.ats_score_calculator import ATSScoreCalculator
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +50,20 @@ class ComponentAssembler:
         self.seniority_analyzer = SeniorityAnalyzer()
         self.technical_analyzer = TechnicalAnalyzer()
         self.batched_analyzer = BatchedAnalyzer()  # New batched analyzer for performance
+        
+        # New unified analyzers
+        self.technical_skills_analyzer = TechnicalSkillsAnalyzer()
+        self.experience_fit_analyzer = ExperienceFitAnalyzer()
+        self.new_to_legacy_mapper = NewToLegacyMapper()
+        
         self.bonus_calculator = RequirementBonusCalculator()
         self.requirements_extractor = RequirementsExtractor()
         self.ats_calculator = ATSScoreCalculator()
         self.consistency_validator = ConsistencyValidator()
+        
+        # Feature flag for new analyzers
+        self.use_new_analyzers = os.getenv("USE_NEW_ANALYZERS", "false").lower() == "true"
+        logger.info(f"[ASSEMBLER] USE_NEW_ANALYZERS feature flag: {self.use_new_analyzers}")
 
     def _read_cv_text(self, company_name: str = "Unknown", jd_url: str = "") -> str:
         """Read CV text from the appropriate CV based on JD usage history."""
@@ -205,9 +219,10 @@ class ComponentAssembler:
             logger.info("[ASSEMBLER] Falling back to individual component analyses...")
             return await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
 
+
     async def _run_component_analyses(self, cv_text: str, jd_text: str, matched_skills: str, company: str) -> Dict[str, Any]:
-        """Run all component analyses in parallel."""
-        logger.info("[ASSEMBLER] Starting parallel component analyses...")
+        """Run all component analyses in parallel (old 5-analyzer system)."""
+        logger.info("[ASSEMBLER] Starting parallel component analyses (old system)...")
         
         # Run all analyses in parallel
         skills_task = self.skills_analyzer.analyze(cv_text, jd_text, matched_skills, self.user_email)
@@ -250,8 +265,15 @@ class ComponentAssembler:
         logger.info("[ASSEMBLER] All component analyses completed successfully")
         return results
 
-    def _extract_scores(self, component_results: Dict[str, Any]) -> Dict[str, float]:
+    def _extract_scores(self, component_results: Dict[str, Any], use_new_analyzers: bool = False) -> Dict[str, float]:
         """Extract scores from component results."""
+        # If using new analyzers, use the mapper's extraction method
+        if use_new_analyzers:
+            # For new analyzers, we need to extract from the original new results
+            # This will be handled separately in _run_ats_calculation
+            # For now, fall through to legacy extraction
+            pass
+        
         scores = {}
         
         # Skills relevance
@@ -438,12 +460,22 @@ class ComponentAssembler:
             latest_preextracted = preextracted_entries[-1]
             preextracted_data = {"content": latest_preextracted.get("content", "")}
             
-            # Calculate ATS score
-            ats_breakdown = self.ats_calculator.calculate_ats_score(
-                preextracted_data=preextracted_data,
-                component_analysis={},  # Not used in current implementation
-                extracted_scores=extracted_scores
-            )
+            # Calculate ATS score (use v2 if new analyzers enabled)
+            use_v2 = self.use_new_analyzers
+            if use_v2:
+                logger.info("[ASSEMBLER] Using ATS score calculator V2 (65/35 split)")
+                ats_breakdown = self.ats_calculator.calculate_ats_score_v2(
+                    preextracted_data=preextracted_data,
+                    component_analysis={},  # Not used in current implementation
+                    extracted_scores=extracted_scores
+                )
+            else:
+                logger.info("[ASSEMBLER] Using ATS score calculator V1 (40/60 split)")
+                ats_breakdown = self.ats_calculator.calculate_ats_score(
+                    preextracted_data=preextracted_data,
+                    component_analysis={},  # Not used in current implementation
+                    extracted_scores=extracted_scores
+                )
             
             # Convert to dictionary for saving
             ats_result = {
@@ -679,11 +711,38 @@ class ComponentAssembler:
             
             matched_skills = self._read_matched_skills(company)
             
-            # Run component analyses
-            component_results = await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
-            
-            # Extract scores
-            scores = self._extract_scores(component_results)
+            # Run component analyses (new or old based on feature flag)
+            if self.use_new_analyzers:
+                logger.info("[ASSEMBLER] Using NEW unified analyzers (2 analyzers)")
+                # Run new analyzers and get both mapped results and original results
+                tech_skills_task = self.technical_skills_analyzer.analyze(cv_text, jd_text, matched_skills, self.user_email)
+                exp_fit_task = self.experience_fit_analyzer.analyze(cv_text, jd_text, self.user_email)
+                bonus_task = asyncio.get_event_loop().run_in_executor(
+                    None, self._calculate_requirement_bonus, company
+                )
+                
+                tech_skills_result, exp_fit_result, bonus_result = await asyncio.gather(
+                    tech_skills_task, exp_fit_task, bonus_task, return_exceptions=True
+                )
+                
+                # Check for exceptions and fallback if needed
+                if isinstance(tech_skills_result, Exception) or isinstance(exp_fit_result, Exception):
+                    logger.warning("[ASSEMBLER] New analyzers failed, falling back to old system")
+                    component_results = await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
+                    scores = self._extract_scores(component_results)
+                else:
+                    # Map to legacy structure
+                    component_results = self.new_to_legacy_mapper.map_to_legacy_structure(
+                        tech_skills_result, exp_fit_result
+                    )
+                    component_results["requirement_bonus"] = bonus_result
+                    # Extract scores from original results
+                    scores = self.new_to_legacy_mapper.extract_scores_for_calculator(tech_skills_result, exp_fit_result)
+            else:
+                logger.info("[ASSEMBLER] Using OLD analyzers (5 analyzers)")
+                component_results = await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
+                # Extract scores
+                scores = self._extract_scores(component_results)
             
             # Validate consistency across analyzers
             logger.info("[ASSEMBLER] Validating cross-analyzer consistency...")

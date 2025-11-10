@@ -330,3 +330,154 @@ class ATSScoreCalculator:
                 category_status="❌ Poor fit", recommendation="Error in calculation",
                 technical_missing_count=0, soft_missing_count=0, domain_missing_count=0
             )
+    
+    def _calculate_category1_v2(self, tech_rate: float, domain_rate: float, soft_rate: float) -> Tuple[float, Dict[str, float]]:
+        """
+        Calculate Category 1: Direct Match Rates (65 points total) - NEW VERSION
+        
+        Returns:
+            Tuple of (total_score, breakdown_dict)
+        """
+        tech_points = (tech_rate / 100.0) * 40  # 40 points max (was 20)
+        domain_points = (domain_rate / 100.0) * 10  # 10 points max (was 5)
+        soft_points = (soft_rate / 100.0) * 15  # 15 points max (unchanged)
+        
+        total = tech_points + domain_points + soft_points
+        
+        breakdown = {
+            "technical_points": tech_points,
+            "domain_points": domain_points,
+            "soft_points": soft_points,
+            "total": total
+        }
+        
+        logger.info(f"[ATS] Category 1 V2 - Tech: {tech_points:.1f}, Domain: {domain_points:.1f}, Soft: {soft_points:.1f}, Total: {total:.1f}")
+        return total, breakdown
+    
+    def _calculate_category2_v2(self, extracted_scores: Dict[str, float]) -> Tuple[float, Dict[str, Any]]:
+        """
+        Calculate Category 2: Component Analysis (35 points total) - NEW VERSION
+        
+        Returns:
+            Tuple of (total_score, breakdown_dict)
+        """
+        # Technical & Skills Component (22 points) - Average of 4 metrics
+        tech_skills_metrics = [
+            extracted_scores.get("technical_depth", 0),
+            extracted_scores.get("required_skills_coverage", extracted_scores.get("core_skills_match_percentage", 0)),
+            extracted_scores.get("tech_stack_similarity", extracted_scores.get("technical_stack_fit_percentage", 0)),
+            extracted_scores.get("business_readiness", extracted_scores.get("data_familiarity_score", 0))
+        ]
+        tech_skills_avg = sum(tech_skills_metrics) / len(tech_skills_metrics) if tech_skills_metrics else 0
+        tech_skills_points = (tech_skills_avg / 100.0) * 22
+        
+        # Experience & Fit Component (13 points) - Average of 4 metrics
+        exp_fit_metrics = [
+            extracted_scores.get("experience_alignment", 0),
+            extracted_scores.get("role_similarity", 0),
+            extracted_scores.get("seniority_match", extracted_scores.get("role_seniority", 0)),
+            extracted_scores.get("industry_transition_fit", extracted_scores.get("industry_fit", 0))
+        ]
+        exp_fit_avg = sum(exp_fit_metrics) / len(exp_fit_metrics) if exp_fit_metrics else 0
+        exp_fit_points = (exp_fit_avg / 100.0) * 13
+        
+        total = tech_skills_points + exp_fit_points
+        
+        breakdown = {
+            "technical_skills": {
+                "average": tech_skills_avg,
+                "points": tech_skills_points,
+                "metrics": tech_skills_metrics
+            },
+            "experience_fit": {
+                "average": exp_fit_avg,
+                "points": exp_fit_points,
+                "metrics": exp_fit_metrics
+            },
+            "total": total
+        }
+        
+        logger.info(f"[ATS] Category 2 V2 - Tech&Skills: {tech_skills_points:.1f}, Exp&Fit: {exp_fit_points:.1f}, Total: {total:.1f}")
+        return total, breakdown
+    
+    def calculate_ats_score_v2(
+        self, 
+        preextracted_data: Dict[str, Any],
+        component_analysis: Dict[str, Any],
+        extracted_scores: Dict[str, float]
+    ) -> ATSScoreBreakdown:
+        """
+        Calculate comprehensive ATS score using the NEW 65/35 framework
+        
+        Args:
+            preextracted_data: Data from preextracted comparison
+            component_analysis: Component analysis results (not used in current implementation)
+            extracted_scores: Extracted numerical scores
+            
+        Returns:
+            ATSScoreBreakdown with complete analysis
+        """
+        logger.info("[ATS] Starting comprehensive ATS score calculation (V2 - 65/35 split)")
+        
+        try:
+            # Extract match rates and missing counts
+            tech_rate, domain_rate, soft_rate, tech_missing, soft_missing, domain_missing = self._calculate_match_rates(preextracted_data)
+            
+            # Calculate Category 1: Direct Match Rates (65 points)
+            cat1_score, cat1_breakdown = self._calculate_category1_v2(tech_rate, domain_rate, soft_rate)
+            
+            # Calculate Category 2: Component Analysis (35 points)
+            cat2_score, cat2_breakdown = self._calculate_category2_v2(extracted_scores)
+            
+            # Calculate ATS1 (pre-bonus)
+            ats1_score = cat1_score + cat2_score
+            
+            # Get bonus points
+            bonus_points = extracted_scores.get("requirement_bonus", 0)
+            
+            # Calculate final ATS score with ceiling
+            final_ats_score = min(100.0, ats1_score + bonus_points)
+            
+            # Get category status and recommendation
+            category_status, recommendation = self._get_category_status(final_ats_score)
+            
+            # Create breakdown object (using legacy structure for compatibility)
+            # Map new breakdown to legacy format
+            breakdown = ATSScoreBreakdown(
+                technical_skills_match_rate=tech_rate,
+                domain_keywords_match_rate=domain_rate,
+                soft_skills_match_rate=soft_rate,
+                cat1_score=cat1_score,
+                
+                # Map new structure to legacy fields for backward compatibility
+                core_competency_avg=cat2_breakdown["technical_skills"]["average"],
+                experience_seniority_avg=cat2_breakdown["experience_fit"]["average"],
+                potential_ability_avg=0,  # Not used in v2, set to 0
+                company_fit_avg=0,  # Not used in v2, set to 0
+                cat2_score=cat2_score,
+                
+                ats1_score=ats1_score,
+                bonus_points=bonus_points,
+                final_ats_score=final_ats_score,
+                
+                category_status=category_status,
+                recommendation=recommendation,
+                
+                technical_missing_count=tech_missing,
+                soft_missing_count=soft_missing,
+                domain_missing_count=domain_missing
+            )
+            
+            logger.info(f"[ATS] Final ATS Score (V2): {final_ats_score:.1f}/100 ({category_status})")
+            return breakdown
+            
+        except Exception as e:
+            logger.error(f"[ATS] Error calculating ATS score (V2): {e}")
+            # Return default breakdown on error
+            return ATSScoreBreakdown(
+                technical_skills_match_rate=0, domain_keywords_match_rate=0, soft_skills_match_rate=0, cat1_score=0,
+                core_competency_avg=0, experience_seniority_avg=0, potential_ability_avg=0, company_fit_avg=0, cat2_score=0,
+                ats1_score=0, bonus_points=0, final_ats_score=0,
+                category_status="❌ Poor fit", recommendation="Error in calculation",
+                technical_missing_count=0, soft_missing_count=0, domain_missing_count=0
+            )
