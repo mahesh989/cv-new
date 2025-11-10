@@ -600,57 +600,40 @@ class SkillsAnalysisController extends ChangeNotifier {
       '✅ Skills extracted! Found ${_fullResult!.cvSkills.totalSkillsCount} CV skills and ${_fullResult!.jdSkills.totalSkillsCount} JD skills.',
     );
 
-    // Step 2: Show analyze match loading immediately, then results after 10 seconds
+    // Step 2: Show analyze match immediately (no artificial delay)
     if (_fullResult?.analyzeMatch != null) {
-      // Immediately show loading state and notification
+      // Show analyze match results immediately
       _showAnalyzeMatch = true;
+      _result = _result!.copyWith(analyzeMatch: _fullResult!.analyzeMatch);
       notifyListeners();
-      _showNotification('📎 Starting recruiter assessment analysis...');
+      _showNotification('🎯 Recruiter assessment completed!');
 
-      Timer(Duration(seconds: 10), () {
-        // Show analyze match results
-        _result = _result!.copyWith(analyzeMatch: _fullResult!.analyzeMatch);
+      // Step 3: Show preextracted comparison immediately if available
+      if (_fullResult?.preextractedRawOutput != null) {
+        _showPreextractedComparison = true;
+        _result = _result!.copyWith(
+          preextractedRawOutput: _fullResult!.preextractedRawOutput,
+          preextractedCompanyName: _fullResult!.preextractedCompanyName,
+        );
         notifyListeners();
-        _showNotification('🎯 Recruiter assessment completed!');
+        _showNotification('📊 Skills comparison analysis completed!');
 
-        // Step 3: Immediately show preextracted comparison loading
-        if (_fullResult?.preextractedRawOutput != null) {
-          _showPreextractedComparison = true;
-          notifyListeners();
-          _showNotification('📈 Starting skills comparison analysis...');
-
-          Timer(Duration(seconds: 10), () {
-            // Show preextracted comparison results
-            _result = _result!.copyWith(
-              preextractedRawOutput: _fullResult!.preextractedRawOutput,
-              preextractedCompanyName: _fullResult!.preextractedCompanyName,
-            );
-            notifyListeners();
-            _showNotification('📊 Skills comparison analysis completed!');
-
-            // Step 4: Start polling for component analysis and ATS results
-            _startPollingForCompleteResults();
-          });
-        }
-      });
+        // Step 4: Start polling for component analysis and ATS results immediately
+        _startPollingForCompleteResults();
+      }
     } else {
       // No analyze match, go directly to preextracted comparison
       if (_fullResult?.preextractedRawOutput != null) {
         _showPreextractedComparison = true;
+        _result = _result!.copyWith(
+          preextractedRawOutput: _fullResult!.preextractedRawOutput,
+          preextractedCompanyName: _fullResult!.preextractedCompanyName,
+        );
         notifyListeners();
-        _showNotification('📈 Starting skills comparison analysis...');
+        _showNotification('📊 Skills comparison analysis completed!');
 
-        Timer(Duration(seconds: 10), () {
-          _result = _result!.copyWith(
-            preextractedRawOutput: _fullResult!.preextractedRawOutput,
-            preextractedCompanyName: _fullResult!.preextractedCompanyName,
-          );
-          notifyListeners();
-          _showNotification('📊 Skills comparison analysis completed!');
-
-          // Step 4: Start polling for component analysis and ATS results
-          _startPollingForCompleteResults();
-        });
+        // Step 4: Start polling for component analysis and ATS results immediately
+        _startPollingForCompleteResults();
       }
     }
   }
@@ -688,8 +671,10 @@ class SkillsAnalysisController extends ChangeNotifier {
     );
 
     try {
+      // Increase timeout for v2 analysis which may take longer
+      print('🔄 [POLLING] Starting polling with extended timeout (120s) for v2 analysis...');
       final completeResults =
-          await SkillsAnalysisService.waitForCompleteResults(company);
+          await SkillsAnalysisService.waitForCompleteResults(company, maxWaitTimeSeconds: 120);
 
       if (completeResults != null) {
         print('✅ [POLLING] Complete results obtained!');
@@ -763,6 +748,11 @@ class SkillsAnalysisController extends ChangeNotifier {
         // Show ATS results IMMEDIATELY when available (no artificial delays)
         if (atsResult != null) {
           print('🎯 [CONTROLLER] ATS result available - showing immediately');
+          print('   ATS Score: ${atsResult.finalATSScore}');
+          print('   Version: ${atsResult.scoringVersion}');
+          print('   Category1: ${atsResult.breakdown.category1.score}/${atsResult.breakdown.category1.maxPoints}');
+          print('   Category2: ${atsResult.breakdown.category2.score}/${atsResult.breakdown.category2.maxPoints}');
+          
           _showATSLoading = false; // Hide loading indicator
           _showATSResults = true;  // Show results immediately
           _result = _result!.copyWith(
@@ -770,46 +760,60 @@ class SkillsAnalysisController extends ChangeNotifier {
             // aiRecommendation: _fullResult!.aiRecommendation, // ❌ REMOVED - Don't add until display time
           );
           notifyListeners();
+          print('✅ [CONTROLLER] ATS widget should now be visible (showATSResults=true, hasATSResult=true)');
 
           // Show notification with ATS score
           _showNotification(
             '🎯 ATS Score: ${atsResult.finalATSScore.toStringAsFixed(1)}/100 (${atsResult.categoryStatus})',
           );
 
-          // Step 6: Show AI recommendations AFTER ATS score is displayed (with short delay for UX)
-          Timer(Duration(seconds: 2), () {
-            if (_fullResult?.aiRecommendation != null &&
-                !_showAIRecommendationResults) {
-              print(
-                  '✅ [ATS_COMPLETE] Now showing AI recommendations after ATS score');
-              _showAIRecommendationLoading = false;
-              _showAIRecommendationResults = true;
-              _result = _result!.copyWith(
-                  aiRecommendation: _fullResult!.aiRecommendation);
-              notifyListeners();
-              _showNotification('🤖 AI recommendations are ready!');
-            }
-            _finishAnalysis();
-          });
-        } else {
-          // No ATS result - hide loading and finish
-          _showATSLoading = false;
-          _showNotification('✅ Advanced analysis completed!');
+          // Step 6: Show AI recommendations immediately after ATS score (no artificial delay)
+          if (_fullResult?.aiRecommendation != null &&
+              !_showAIRecommendationResults) {
+            print(
+                '✅ [ATS_COMPLETE] Showing AI recommendations immediately after ATS score');
+            _showAIRecommendationLoading = false;
+            _showAIRecommendationResults = true;
+            _result = _result!.copyWith(
+                aiRecommendation: _fullResult!.aiRecommendation);
+            notifyListeners();
+            _showNotification('🤖 AI recommendations are ready!');
+          }
           _finishAnalysis();
+        } else {
+          // No ATS result - this shouldn't happen if backend is working
+          print('⚠️ [CONTROLLER] No ATS result found in completeResults');
+          print('   completeResults keys: ${completeResults.keys.toList()}');
+          print('   ats_score present: ${completeResults.containsKey('ats_score')}');
+          if (completeResults.containsKey('ats_score')) {
+            print('   ats_score value: ${completeResults['ats_score']}');
+            print('   ats_score type: ${completeResults['ats_score'].runtimeType}');
+          }
+          _showATSLoading = false;
+          _showNotification('⚠️ ATS analysis not available - backend may still be processing');
+          // Don't finish analysis yet - keep polling indicator visible
+          // _finishAnalysis();
         }
       } else {
-        print('⚠️ [POLLING] Polling timed out, analysis incomplete');
+        print('⚠️ [POLLING] Polling timed out after 120 seconds, analysis incomplete');
+        print('   Company: $company');
+        print('   This may indicate the backend is still processing v2 analysis');
+        _showATSLoading = false;
         _showNotification(
-          '⚠️ Advanced analysis timed out - basic analysis complete',
+          '⚠️ ATS analysis is taking longer than expected. The backend may still be processing.',
         );
-        _finishAnalysis();
+        // Keep the UI in a state where user can see what's happening
+        // Don't finish analysis - let user know it's still processing
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('❌ [POLLING] Error during polling: $e');
+      print('   Stack trace: $stackTrace');
+      _showATSLoading = false;
       _showNotification(
-        '⚠️ Advanced analysis failed - basic analysis complete',
+        '⚠️ Error during ATS analysis: ${e.toString()}',
+        isError: true,
       );
-      _finishAnalysis();
+      // Don't finish analysis on error - show error state instead
     }
   }
 

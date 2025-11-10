@@ -409,17 +409,22 @@ class SkillsAnalysisService {
           }
         } catch (_) {}
 
-        // Relaxed gate: return as soon as any major section is available
-        final hasAny = data['ats_score'] != null ||
-            data['component_analysis'] != null ||
-            data['ai_recommendation'] != null;
-
-        if (hasAny) {
-          print('✅ [POLLING] Results available (partial or complete)');
+        // For v2, we specifically need ats_score to be present
+        // Don't return partial results - wait for ATS score
+        final hasATS = data['ats_score'] != null;
+        final hasComponent = data['component_analysis'] != null;
+        
+        if (hasATS) {
+          print('✅ [POLLING] ATS score available - returning results');
+          print('   Component analysis present: $hasComponent');
           return data;
         }
 
-        print('⏳ [POLLING] Still waiting for results...');
+        if (hasComponent) {
+          print('⏳ [POLLING] Component analysis available but waiting for ATS score...');
+        } else {
+          print('⏳ [POLLING] Still waiting for results (no component_analysis or ats_score yet)...');
+        }
         return null;
       }
 
