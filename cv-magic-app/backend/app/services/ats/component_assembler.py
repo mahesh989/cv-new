@@ -5,6 +5,7 @@ Assembles individual component analyses into a unified ATS analysis result.
 """
 
 import asyncio
+import os
 import json
 import logging
 from datetime import datetime
@@ -19,15 +20,14 @@ from app.services.ats.components import (
     SeniorityAnalyzer,
     TechnicalAnalyzer
 )
-from app.services.ats.components.technical_skills_analyzer import TechnicalSkillsAnalyzer
-from app.services.ats.components.experience_fit_analyzer import ExperienceFitAnalyzer
-from app.services.ats.components.new_to_legacy_mapper import NewToLegacyMapper
 from app.services.ats.components.consistency_validator import ConsistencyValidator
 from app.services.ats.components.batched_analyzer import BatchedAnalyzer
 from app.services.ats.requirement_bonus_calculator import RequirementBonusCalculator
 from app.services.jd_analysis.jd_analyzer import RequirementsExtractor
 from app.services.ats.ats_score_calculator import ATSScoreCalculator
-import os
+from app.services.ats.components.technical_skills_analyzer import TechnicalSkillsAnalyzer
+from app.services.ats.components.experience_fit_analyzer import ExperienceFitAnalyzer
+from app.services.ats.components.new_to_legacy_mapper import NewToLegacyMapper
 
 logger = logging.getLogger(__name__)
 
@@ -50,20 +50,17 @@ class ComponentAssembler:
         self.seniority_analyzer = SeniorityAnalyzer()
         self.technical_analyzer = TechnicalAnalyzer()
         self.batched_analyzer = BatchedAnalyzer()  # New batched analyzer for performance
-        
-        # New unified analyzers
-        self.technical_skills_analyzer = TechnicalSkillsAnalyzer()
-        self.experience_fit_analyzer = ExperienceFitAnalyzer()
-        self.new_to_legacy_mapper = NewToLegacyMapper()
-        
         self.bonus_calculator = RequirementBonusCalculator()
         self.requirements_extractor = RequirementsExtractor()
         self.ats_calculator = ATSScoreCalculator()
         self.consistency_validator = ConsistencyValidator()
-        
-        # Feature flag for new analyzers
-        self.use_new_analyzers = os.getenv("USE_NEW_ANALYZERS", "false").lower() == "true"
-        logger.info(f"[ASSEMBLER] USE_NEW_ANALYZERS feature flag: {self.use_new_analyzers}")
+        # New unified analyzers and mapper
+        self.tech_skills_analyzer_v2 = TechnicalSkillsAnalyzer()
+        self.exp_fit_analyzer_v2 = ExperienceFitAnalyzer()
+        self.mapper = NewToLegacyMapper()
+        # Feature flag
+        self.use_new_analyzers = os.getenv('USE_NEW_ANALYZERS', 'false').lower() == 'true'
+        logger.info(f"[ASSEMBLER] New analyzers enabled: {self.use_new_analyzers}")
 
     def _read_cv_text(self, company_name: str = "Unknown", jd_url: str = "") -> str:
         """Read CV text from the appropriate CV based on JD usage history."""
@@ -219,10 +216,93 @@ class ComponentAssembler:
             logger.info("[ASSEMBLER] Falling back to individual component analyses...")
             return await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
 
+    async def _run_new_component_analyses(self, cv_text: str, jd_text: str, matched_skills: str, company: str) -> Dict[str, Any]:
+        """
+        Run NEW 2-analyzer approach in parallel and map to legacy structure.
+        """
+        logger.info("[ASSEMBLER] Running NEW 2-analyzer approach")
+        try:
+            tech_skills_task = self.tech_skills_analyzer_v2.analyze(cv_text, jd_text, matched_skills, self.user_email)
+            exp_fit_task = self.exp_fit_analyzer_v2.analyze(cv_text, jd_text, self.user_email)
+            bonus_task = asyncio.get_event_loop().run_in_executor(None, self._calculate_requirement_bonus, company)
+            tech_skills_result, exp_fit_result, bonus_result = await asyncio.gather(
+                tech_skills_task, exp_fit_task, bonus_task, return_exceptions=True
+            )
+            if isinstance(tech_skills_result, Exception):
+                logger.error(f"[ASSEMBLER] Technical & Skills analysis failed: {tech_skills_result}")
+                raise tech_skills_result
+            if isinstance(exp_fit_result, Exception):
+                logger.error(f"[ASSEMBLER] Experience & Fit analysis failed: {exp_fit_result}")
+                raise exp_fit_result
+            if isinstance(bonus_result, Exception):
+                logger.warning(f"[ASSEMBLER] Bonus calculation failed: {bonus_result}")
+                bonus_result = {"total_bonus": 0, "bonus_breakdown": {"total_bonus": 0}}
+            legacy_results = self.mapper.map_to_legacy_structure(tech_skills_result, exp_fit_result, bonus_result)
+            logger.info("[ASSEMBLER] NEW analyzer results mapped to legacy structure successfully")
+            return legacy_results
+        except Exception as e:
+            logger.error(f"[ASSEMBLER] New analyzer approach failed: {str(e)}", exc_info=True)
+            raise
+
+    async def _run_component_analyses_with_fallback(self, cv_text: str, jd_text: str, matched_skills: str, company: str) -> Dict[str, Any]:
+        """
+        Run component analyses with automatic fallback controlled by feature flag.
+        """
+        if self.use_new_analyzers:
+            logger.info("[ASSEMBLER] Feature flag enabled - trying NEW 2-analyzer approach")
+            try:
+                return await self._run_new_component_analyses(cv_text, jd_text, matched_skills, company)
+            except Exception as e:
+                logger.error(f"[ASSEMBLER] NEW analyzer approach failed, falling back to OLD approach: {str(e)}")
+                return await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
+        else:
+            logger.info("[ASSEMBLER] Feature flag disabled - using OLD 5-analyzer approach")
+            return await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
+
+    def _get_match_rates_for_company(self, company: str) -> Dict[str, float]:
+        """
+        Extract match rates from latest preextracted comparison entry for ATS v2.
+        """
+        try:
+            company_dir = self.base_dir / "applied_companies" / company
+            file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+            if not file_path:
+                file_path = company_dir / f"{company}_skills_analysis.json"
+            if not file_path.exists():
+                logger.warning("[ASSEMBLER] No skills analysis file found for match rates")
+                return {
+                    "technical_skills_match_rate": 0.0,
+                    "domain_keywords_match_rate": 0.0,
+                    "soft_skills_match_rate": 0.0
+                }
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            preextracted_entries = data.get("preextracted_comparison_entries", [])
+            if not preextracted_entries:
+                return {
+                    "technical_skills_match_rate": 0.0,
+                    "domain_keywords_match_rate": 0.0,
+                    "soft_skills_match_rate": 0.0
+                }
+            latest_preextracted = preextracted_entries[-1]
+            preextracted_data = {"content": latest_preextracted.get("content", "")}
+            tech_rate, domain_rate, soft_rate, *_ = self.ats_calculator._calculate_match_rates(preextracted_data)
+            return {
+                "technical_skills_match_rate": tech_rate,
+                "domain_keywords_match_rate": domain_rate,
+                "soft_skills_match_rate": soft_rate
+            }
+        except Exception as e:
+            logger.error("[ASSEMBLER] Failed to extract match rates for v2: %s", e)
+            return {
+                "technical_skills_match_rate": 0.0,
+                "domain_keywords_match_rate": 0.0,
+                "soft_skills_match_rate": 0.0
+            }
 
     async def _run_component_analyses(self, cv_text: str, jd_text: str, matched_skills: str, company: str) -> Dict[str, Any]:
-        """Run all component analyses in parallel (old 5-analyzer system)."""
-        logger.info("[ASSEMBLER] Starting parallel component analyses (old system)...")
+        """Run all component analyses in parallel."""
+        logger.info("[ASSEMBLER] Starting parallel component analyses...")
         
         # Run all analyses in parallel
         skills_task = self.skills_analyzer.analyze(cv_text, jd_text, matched_skills, self.user_email)
@@ -265,15 +345,8 @@ class ComponentAssembler:
         logger.info("[ASSEMBLER] All component analyses completed successfully")
         return results
 
-    def _extract_scores(self, component_results: Dict[str, Any], use_new_analyzers: bool = False) -> Dict[str, float]:
+    def _extract_scores(self, component_results: Dict[str, Any]) -> Dict[str, float]:
         """Extract scores from component results."""
-        # If using new analyzers, use the mapper's extraction method
-        if use_new_analyzers:
-            # For new analyzers, we need to extract from the original new results
-            # This will be handled separately in _run_ats_calculation
-            # For now, fall through to legacy extraction
-            pass
-        
         scores = {}
         
         # Skills relevance
@@ -460,22 +533,12 @@ class ComponentAssembler:
             latest_preextracted = preextracted_entries[-1]
             preextracted_data = {"content": latest_preextracted.get("content", "")}
             
-            # Calculate ATS score (use v2 if new analyzers enabled)
-            use_v2 = self.use_new_analyzers
-            if use_v2:
-                logger.info("[ASSEMBLER] Using ATS score calculator V2 (65/35 split)")
-                ats_breakdown = self.ats_calculator.calculate_ats_score_v2(
-                    preextracted_data=preextracted_data,
-                    component_analysis={},  # Not used in current implementation
-                    extracted_scores=extracted_scores
-                )
-            else:
-                logger.info("[ASSEMBLER] Using ATS score calculator V1 (40/60 split)")
-                ats_breakdown = self.ats_calculator.calculate_ats_score(
-                    preextracted_data=preextracted_data,
-                    component_analysis={},  # Not used in current implementation
-                    extracted_scores=extracted_scores
-                )
+            # Calculate ATS score
+            ats_breakdown = self.ats_calculator.calculate_ats_score(
+                preextracted_data=preextracted_data,
+                component_analysis={},  # Not used in current implementation
+                extracted_scores=extracted_scores
+            )
             
             # Convert to dictionary for saving
             ats_result = {
@@ -711,38 +774,11 @@ class ComponentAssembler:
             
             matched_skills = self._read_matched_skills(company)
             
-            # Run component analyses (new or old based on feature flag)
-            if self.use_new_analyzers:
-                logger.info("[ASSEMBLER] Using NEW unified analyzers (2 analyzers)")
-                # Run new analyzers and get both mapped results and original results
-                tech_skills_task = self.technical_skills_analyzer.analyze(cv_text, jd_text, matched_skills, self.user_email)
-                exp_fit_task = self.experience_fit_analyzer.analyze(cv_text, jd_text, self.user_email)
-                bonus_task = asyncio.get_event_loop().run_in_executor(
-                    None, self._calculate_requirement_bonus, company
-                )
-                
-                tech_skills_result, exp_fit_result, bonus_result = await asyncio.gather(
-                    tech_skills_task, exp_fit_task, bonus_task, return_exceptions=True
-                )
-                
-                # Check for exceptions and fallback if needed
-                if isinstance(tech_skills_result, Exception) or isinstance(exp_fit_result, Exception):
-                    logger.warning("[ASSEMBLER] New analyzers failed, falling back to old system")
-                    component_results = await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
-                    scores = self._extract_scores(component_results)
-                else:
-                    # Map to legacy structure
-                    component_results = self.new_to_legacy_mapper.map_to_legacy_structure(
-                        tech_skills_result, exp_fit_result
-                    )
-                    component_results["requirement_bonus"] = bonus_result
-                    # Extract scores from original results
-                    scores = self.new_to_legacy_mapper.extract_scores_for_calculator(tech_skills_result, exp_fit_result)
-            else:
-                logger.info("[ASSEMBLER] Using OLD analyzers (5 analyzers)")
-                component_results = await self._run_component_analyses(cv_text, jd_text, matched_skills, company)
-                # Extract scores
-                scores = self._extract_scores(component_results)
+            # Run component analyses with feature-flagged fallback
+            component_results = await self._run_component_analyses_with_fallback(cv_text, jd_text, matched_skills, company)
+            
+            # Extract scores
+            scores = self._extract_scores(component_results)
             
             # Validate consistency across analyzers
             logger.info("[ASSEMBLER] Validating cross-analyzer consistency...")
@@ -759,7 +795,41 @@ class ComponentAssembler:
             
             # Run ATS calculation after component analysis
             logger.info("[ASSEMBLER] Starting ATS score calculation...")
-            ats_result = await self._run_ats_calculation(company, scores)
+            if self.use_new_analyzers:
+                logger.info("[ASSEMBLER] Using NEW score calculation (v2 - 65/35 split)")
+                match_rates = self._get_match_rates_for_company(company)
+                ats_result = self.ats_calculator.calculate_ats_score_v2(
+                    match_rates=match_rates,
+                    extracted_scores=scores
+                )
+                # Persist ATS v2 result to the same file structure
+                company_dir = self.base_dir / "applied_companies" / company
+                file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+                if not file_path:
+                    file_path = company_dir / f"{company}_skills_analysis.json"
+                try:
+                    existing = {}
+                    if file_path.exists():
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            existing = json.load(f)
+                    if "ats_calculation_entries" not in existing:
+                        existing["ats_calculation_entries"] = []
+                    ats_entry = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                        "final_ats_score": ats_result["final_ats_score"],
+                        "category_status": ats_result["category_status"],
+                        "recommendation": ats_result["recommendation"],
+                        "breakdown": ats_result["breakdown"],
+                        "scoring_version": ats_result.get("scoring_version", "v2_65_35_split")
+                    }
+                    existing["ats_calculation_entries"].append(ats_entry)
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        json.dump(existing, f, indent=2, ensure_ascii=False)
+                except Exception as e:
+                    logger.error("[ASSEMBLER] Failed to persist ATS v2 calculation: %s", e)
+            else:
+                logger.info("[ASSEMBLER] Using OLD score calculation (v1 - 40/60 split)")
+                ats_result = await self._run_ats_calculation(company, scores)
             
             # Prepare return result
             result = {

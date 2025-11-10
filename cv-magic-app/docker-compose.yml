@@ -14,7 +14,6 @@ services:
       - DEBUG=false
       - DEVELOPMENT_MODE=false
       - LOG_LEVEL=INFO
-      - USE_NEW_ANALYZERS=true
       - DATABASE_URL=postgresql://mahesh:password123@postgres:5432/cv_app
       - DATABASE_HOST=postgres
       - DATABASE_PORT=5432

@@ -149,11 +149,11 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // Category 1: Skills Matching (Max: 65 points)
+        // Category 1: Skills Matching (Max: 40 points)
         _buildCategory1ProgressBars(atsResult.breakdown.category1),
         const SizedBox(height: 24),
 
-        // Category 2: Component Analysis (Max: 35 points)
+        // Category 2: Experience & Competency (Max: 60 points)
         _buildCategory2ProgressBars(atsResult.breakdown.category2),
         const SizedBox(height: 24),
 
@@ -168,30 +168,30 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
   }
 
   Widget _buildCategory1ProgressBars(ATSCategory1 category1) {
-    // Convert percentage rates back to actual point values (NEW: 65 points total)
+    // Convert percentage rates back to actual point values
     final techScore =
-        (category1.technicalSkillsMatchRate / 100) * 40; // Max: 40 points (was 20)
+        (category1.technicalSkillsMatchRate / 100) * 20; // Max: 20 points
     final domainScore =
-        (category1.domainKeywordsMatchRate / 100) * 10; // Max: 10 points (was 5)
+        (category1.domainKeywordsMatchRate / 100) * 5; // Max: 5 points
     final softScore =
-        (category1.softSkillsMatchRate / 100) * 15; // Max: 15 points (unchanged)
-    final totalScore = category1.score; // Total for category (0-65)
+        (category1.softSkillsMatchRate / 100) * 15; // Max: 15 points
+    final totalScore = category1.score; // Total for category (0-40)
 
     return _buildCategorySection(
-      title: 'Category 1: Keyword Matching',
+      title: 'Category 1: Skills Matching',
       totalScore: totalScore,
-      maxScore: 65,
+      maxScore: 40,
       color: const Color(0xFF4A90E2),
       items: [
         _ProgressBarItem(
             label: 'Technical Skills',
             value: techScore,
-            maxValue: 40,
+            maxValue: 20,
             percentage: category1.technicalSkillsMatchRate),
         _ProgressBarItem(
             label: 'Domain Keywords',
             value: domainScore,
-            maxValue: 10,
+            maxValue: 5,
             percentage: category1.domainKeywordsMatchRate),
         _ProgressBarItem(
             label: 'Soft Skills',
@@ -203,31 +203,42 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
   }
 
   Widget _buildCategory2ProgressBars(ATSCategory2 category2) {
-    // Convert percentage rates back to actual point values (NEW: 35 points total)
-    // In V2, coreCompetencyAvg represents Technical & Skills Component (22 points)
-    // and experienceSeniorityAvg represents Experience & Fit Component (13 points)
-    final techSkillsScore =
-        (category2.coreCompetencyAvg / 100) * 22; // Max: 22 points (Technical & Skills)
-    final expFitScore =
-        (category2.experienceSeniorityAvg / 100) * 13; // Max: 13 points (Experience & Fit)
-    final totalScore = category2.score; // Total for category (0-35)
+    // Convert percentage rates back to actual point values
+    final coreScore =
+        (category2.coreCompetencyAvg / 100) * 25; // Max: 25 points
+    final expScore =
+        (category2.experienceSeniorityAvg / 100) * 20; // Max: 20 points
+    final potentialScore =
+        (category2.potentialAbilityAvg / 100) * 10; // Max: 10 points
+    final companyScore = (category2.companyFitAvg / 100) * 5; // Max: 5 points
+    final totalScore = category2.score; // Total for category (0-60)
 
     return _buildCategorySection(
-      title: 'Category 2: Component Analysis',
+      title: 'Category 2: Experience & Competency',
       totalScore: totalScore,
-      maxScore: 35,
+      maxScore: 60,
       color: const Color(0xFFE67E22),
       items: [
         _ProgressBarItem(
-            label: 'Technical & Skills Component',
-            value: techSkillsScore,
-            maxValue: 22,
+            label: 'Core Competency',
+            value: coreScore,
+            maxValue: 25,
             percentage: category2.coreCompetencyAvg),
         _ProgressBarItem(
-            label: 'Experience & Fit Component',
-            value: expFitScore,
-            maxValue: 13,
+            label: 'Experience & Seniority',
+            value: expScore,
+            maxValue: 20,
             percentage: category2.experienceSeniorityAvg),
+        _ProgressBarItem(
+            label: 'Potential & Ability',
+            value: potentialScore,
+            maxValue: 10,
+            percentage: category2.potentialAbilityAvg),
+        _ProgressBarItem(
+            label: 'Company Fit',
+            value: companyScore,
+            maxValue: 5,
+            percentage: category2.companyFitAvg),
       ],
     );
   }
