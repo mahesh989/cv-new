@@ -679,6 +679,10 @@ class SkillsAnalysisController extends ChangeNotifier {
     print('🔄 [POLLING] Using company name for polling: $company');
 
     print('🔄 [POLLING] Starting polling for complete results...');
+    // Show ATS loading immediately when polling starts
+    print('🔍 [CONTROLLER] Setting ATS loading state to true (immediate)');
+    _showATSLoading = true;
+    notifyListeners();
     _showNotification(
       '🔧 Running advanced analysis (component analysis & ATS calculation)...',
     );
@@ -756,54 +760,40 @@ class SkillsAnalysisController extends ChangeNotifier {
         );
         notifyListeners();
 
-        // Step 5: Wait for AI-Powered Skills Analysis to complete, then show ATS loading
+        // Show ATS results IMMEDIATELY when available (no artificial delays)
         if (atsResult != null) {
-          // Wait for AI-Powered Skills Analysis to complete (it has a 10s timer)
-          // Then show ATS loading after AI Skills Analysis is done
-          Timer(Duration(seconds: 12), () {
-            // Show ATS loading state and notification
-            print('🔍 [CONTROLLER] Setting ATS loading state to true');
-            _showATSLoading = true;
-            notifyListeners();
-            _showNotification('⚡ Generating enhanced ATS analysis...');
+          print('🎯 [CONTROLLER] ATS result available - showing immediately');
+          _showATSLoading = false; // Hide loading indicator
+          _showATSResults = true;  // Show results immediately
+          _result = _result!.copyWith(
+            atsResult: atsResult,
+            // aiRecommendation: _fullResult!.aiRecommendation, // ❌ REMOVED - Don't add until display time
+          );
+          notifyListeners();
 
-            Timer(Duration(seconds: 10), () {
-              // Show ATS results after 10-second delay
-              _showATSResults = true;
+          // Show notification with ATS score
+          _showNotification(
+            '🎯 ATS Score: ${atsResult.finalATSScore.toStringAsFixed(1)}/100 (${atsResult.categoryStatus})',
+          );
+
+          // Step 6: Show AI recommendations AFTER ATS score is displayed (with short delay for UX)
+          Timer(Duration(seconds: 2), () {
+            if (_fullResult?.aiRecommendation != null &&
+                !_showAIRecommendationResults) {
+              print(
+                  '✅ [ATS_COMPLETE] Now showing AI recommendations after ATS score');
+              _showAIRecommendationLoading = false;
+              _showAIRecommendationResults = true;
               _result = _result!.copyWith(
-                atsResult: _fullResult!.atsResult,
-                // aiRecommendation: _fullResult!.aiRecommendation, // ❌ REMOVED - Don't add until display time
-              );
+                  aiRecommendation: _fullResult!.aiRecommendation);
               notifyListeners();
-
-              // Use the stored ATS result from _fullResult for notification
-              final finalAtsResult = _fullResult!.atsResult;
-              if (finalAtsResult != null) {
-                _showNotification(
-                  '🎯 ATS Score: ${finalAtsResult.finalATSScore.toStringAsFixed(1)}/100 (${finalAtsResult.categoryStatus})',
-                );
-              } else {
-                _showNotification('✅ ATS Analysis completed!');
-              }
-
-              // Step 6: Now show AI recommendations AFTER ATS score is displayed
-              Timer(Duration(seconds: 2), () {
-                if (_fullResult?.aiRecommendation != null &&
-                    !_showAIRecommendationResults) {
-                  print(
-                      '✅ [ATS_COMPLETE] Now showing AI recommendations after ATS score');
-                  _showAIRecommendationLoading = false;
-                  _showAIRecommendationResults = true;
-                  _result = _result!.copyWith(
-                      aiRecommendation: _fullResult!.aiRecommendation);
-                  notifyListeners();
-                  _showNotification('🤖 AI recommendations are ready!');
-                }
-                _finishAnalysis();
-              });
-            });
+              _showNotification('🤖 AI recommendations are ready!');
+            }
+            _finishAnalysis();
           });
         } else {
+          // No ATS result - hide loading and finish
+          _showATSLoading = false;
           _showNotification('✅ Advanced analysis completed!');
           _finishAnalysis();
         }
