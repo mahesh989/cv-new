@@ -179,9 +179,9 @@ class ATSScoreWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Category 1: Skills Matching
+              // Category 1: Keyword Matching (65 points)
               _buildBreakdownSection(
-                'Skills Matching',
+                'Keyword Matching (65 points)',
                 atsResult.breakdown.category1.score,
                 [
                   'Technical Skills: ${atsResult.breakdown.category1.technicalSkillsMatchRate.toStringAsFixed(1)}%',
@@ -191,15 +191,13 @@ class ATSScoreWidget extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               
-              // Category 2: Experience & Competency
+              // Category 2: Component Analysis (35 points)
               _buildBreakdownSection(
-                'Experience & Competency',
+                'Component Analysis (35 points)',
                 atsResult.breakdown.category2.score,
                 [
-                  'Core Competency: ${atsResult.breakdown.category2.coreCompetencyAvg.toStringAsFixed(1)}%',
-                  'Experience/Seniority: ${atsResult.breakdown.category2.experienceSeniorityAvg.toStringAsFixed(1)}%',
-                  'Potential/Ability: ${atsResult.breakdown.category2.potentialAbilityAvg.toStringAsFixed(1)}%',
-                  'Company Fit: ${atsResult.breakdown.category2.companyFitAvg.toStringAsFixed(1)}%',
+                  'Technical & Skills Component: ${atsResult.breakdown.category2.coreCompetencyAvg.toStringAsFixed(1)}%',
+                  'Experience & Fit Component: ${atsResult.breakdown.category2.experienceSeniorityAvg.toStringAsFixed(1)}%',
                 ],
               ),
               
