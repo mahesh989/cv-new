@@ -369,6 +369,9 @@ class CVTailoringService:
         request_id = str(uuid.uuid4())[:8]
         logger.info(f"[{request_id}] 🎯 Starting CV tailoring for {recommendations.company} with strategy: {strategy.education_strategy}")
         
+        # Store original CV for seniority validation
+        self._original_cv = original_cv
+        
         # Log initial stats
         logger.info(f"[{request_id}] Initial stats:")
         logger.info(f"[{request_id}] - Experience entries: {len(original_cv.experience)}")
@@ -918,28 +921,39 @@ CRITICAL REMINDERS FOR EDUCATION:
 Generate a tailored highlights section with three components:
 
 1. VALUE STATEMENT (1 sentence, ~25 words):
-   - SENIORITY LEVEL RULES (CRITICAL - MUST FOLLOW EXACTLY):
-     * STEP 1: Check CV's experience section job titles ONLY
-     * STEP 2: Look for EXACT words: "Senior", "Lead", "Principal", "Staff", "Manager", or "Director" in job titles
-     * STEP 3: If found → Use that seniority level (e.g., "Senior Data Analyst")
-     * STEP 4: If NOT found → Use ONLY the JD role title WITHOUT any seniority prefix
+   - SENIORITY LEVEL RULES (CRITICAL - MUST FOLLOW EXACTLY - NO EXCEPTIONS):
      
-     * ❌ DO NOT infer seniority from:
-       - Years of experience (5 years ≠ "Senior")
-       - Phrases like "Results-driven", "Experienced", "Skilled"
-       - Achievements or accomplishments
-       - Leadership activities (unless title says "Lead" or "Manager")
+     **MANDATORY CHECK PROCESS:**
+     * STEP 1: Look ONLY at the CV's "experience" section → "title" field for each job
+     * STEP 2: Search for EXACT words in job titles: "Senior", "Lead", "Principal", "Staff", "Manager", "Director"
+     * STEP 3: If ANY job title contains one of these words → Use that seniority level
+     * STEP 4: If NO job title contains these words → DO NOT add any seniority prefix
      
-     * ✅ ONLY use seniority if CV job title EXPLICITLY contains the word:
-       - CV title: "Senior Data Analyst" → Use "Senior Data Analyst"
-       - CV title: "Lead Software Engineer" → Use "Lead Software Engineer"
-       - CV title: "Data Analyst" → Use "Data Analyst" (NO "Senior")
-       - CV title: "Data Analyst & AI Engineer" → Use "Data Analyst" (NO "Senior")
+     **CRITICAL - DO NOT CHECK THESE (they are NOT job titles):**
+     * ❌ DO NOT check the career_profile/summary section
+     * ❌ DO NOT check descriptive phrases like "Results-driven", "Experienced", "Accomplished"
+     * ❌ DO NOT check achievements or accomplishments
+     * ❌ DO NOT check years of experience (2 years ≠ "Senior", 5 years ≠ "Senior", 10 years ≠ "Senior")
+     * ❌ DO NOT check leadership activities unless the job title explicitly says "Lead" or "Manager"
      
-     * Examples:
-       → CV has "Data Analyst & AI Engineer (Contract)" → Output: "Data Analyst with X years..."
-       → CV has "Senior Data Analyst" → Output: "Senior Data Analyst with X years..."
-       → CV has "AI Data Trainer & Evaluator" → Output: "Data Analyst with X years..." (use JD title)
+     **EXAMPLES OF WHAT TO DO:**
+     * CV job titles: ["Data Analyst & AI Engineer", "AI Data Trainer & Evaluator", "Data Analyst"]
+       → NO "Senior" found in any title → Output: "Data Analyst with X years..." (NO "Senior")
+     
+     * CV job titles: ["Senior Data Analyst", "Data Engineer"]
+       → "Senior" found in first title → Output: "Senior Data Analyst with X years..."
+     
+     * CV job titles: ["Lead Software Engineer", "Software Developer"]
+       → "Lead" found in first title → Output: "Lead Software Engineer with X years..."
+     
+     * CV job titles: ["Data Analyst & AI Engineer (Contract)"]
+       → NO seniority word found → Output: "Data Analyst with X years..." (NO "Senior")
+     
+     **EXAMPLES OF WHAT NOT TO DO:**
+     * ❌ WRONG: CV summary says "Results-driven Data Analyst" → Output: "Senior Data Analyst" (WRONG - summary is not a job title)
+     * ❌ WRONG: CV has 5 years experience → Output: "Senior Data Analyst" (WRONG - years don't determine seniority)
+     * ❌ WRONG: CV has leadership achievements → Output: "Senior Data Analyst" (WRONG - achievements don't determine seniority)
+     * ✅ CORRECT: CV job title is "Data Analyst" → Output: "Data Analyst" (NO "Senior")
    
    - YEARS OF EXPERIENCE CALCULATION (CRITICAL):
      * Calculate ONLY relevant experience to the target role from JD
@@ -2334,6 +2348,63 @@ FIX: Output ONLY valid JSON!
             logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights validation passed")
         else:
             logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Role highlights may be incomplete")
+        
+        # CRITICAL: Validate seniority - remove "Senior" if not in original CV job titles
+        self._validate_and_fix_seniority_in_highlights(data, request_id)
+    
+    def _validate_and_fix_seniority_in_highlights(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
+        """
+        CRITICAL: Remove seniority prefixes (Senior, Lead, etc.) from role_highlights 
+        if they are NOT present in the original CV's job titles.
+        """
+        highlights = data.get('role_highlights', '')
+        if not highlights or not isinstance(highlights, str):
+            return
+        
+        # Get original CV from stored attribute
+        original_cv = getattr(self, '_original_cv', None)
+        if not original_cv:
+            logger.warning(f"⚠️ [{request_id}] [SENIORITY_VALIDATION] No original CV available for seniority check")
+            return
+        
+        # Extract all job titles from original CV experience section
+        original_job_titles = []
+        if hasattr(original_cv, 'experience') and original_cv.experience:
+            for exp in original_cv.experience:
+                if hasattr(exp, 'title') and exp.title:
+                    original_job_titles.append(exp.title)
+        
+        # Check if any original job title contains seniority words
+        seniority_words = ['Senior', 'Lead', 'Principal', 'Staff', 'Manager', 'Director']
+        has_seniority_in_cv = False
+        for title in original_job_titles:
+            for word in seniority_words:
+                if word in title:
+                    has_seniority_in_cv = True
+                    logger.info(f"✅ [{request_id}] [SENIORITY_VALIDATION] Found '{word}' in original CV job title: {title}")
+                    break
+            if has_seniority_in_cv:
+                break
+        
+        # If no seniority in original CV, remove it from highlights
+        if not has_seniority_in_cv:
+            import re
+            original_highlights = highlights
+            # Remove "Senior " at the start of role title patterns
+            highlights = re.sub(r'\bSenior\s+', '', highlights, flags=re.IGNORECASE)
+            highlights = re.sub(r'\bLead\s+', '', highlights, flags=re.IGNORECASE)
+            highlights = re.sub(r'\bPrincipal\s+', '', highlights, flags=re.IGNORECASE)
+            highlights = re.sub(r'\bStaff\s+', '', highlights, flags=re.IGNORECASE)
+            
+            if highlights != original_highlights:
+                logger.warning(f"🔧 [{request_id}] [SENIORITY_VALIDATION] Removed seniority prefix from role_highlights (not in original CV)")
+                logger.info(f"   Original: {original_highlights[:100]}...")
+                logger.info(f"   Fixed: {highlights[:100]}...")
+                data['role_highlights'] = highlights
+            else:
+                logger.info(f"✅ [{request_id}] [SENIORITY_VALIDATION] No seniority prefix found in role_highlights (correct)")
+        else:
+            logger.info(f"✅ [{request_id}] [SENIORITY_VALIDATION] Seniority found in original CV, keeping it in highlights")
     
     def _validate_bullet_consolidation(self, data: Dict[str, Any], request_id: str = 'debug') -> None:
         """Validate bullet consolidation according to new framework rules"""
