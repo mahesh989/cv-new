@@ -704,8 +704,22 @@ class SkillsAnalysisController extends ChangeNotifier {
         // Parse ATS result
         ATSResult? atsResult;
         if (completeResults['ats_score'] != null) {
-          atsResult = ATSResult.fromJson(completeResults['ats_score']);
-          print('🎯 [POLLING] ATS result parsed: ${atsResult.finalATSScore}');
+          print('🔍 [POLLING] Parsing ATS result from completeResults');
+          print('   ats_score type: ${completeResults['ats_score'].runtimeType}');
+          print('   ats_score keys: ${(completeResults['ats_score'] as Map).keys.toList()}');
+          final atsJson = completeResults['ats_score'] as Map<String, dynamic>;
+          print('   final_ats_score: ${atsJson['final_ats_score']}');
+          print('   scoring_version: ${atsJson['scoring_version']}');
+          print('   breakdown present: ${atsJson.containsKey('breakdown')}');
+          
+          atsResult = ATSResult.fromJson(atsJson);
+          print('🎯 [POLLING] ATS result parsed successfully');
+          print('   Final Score: ${atsResult.finalATSScore}');
+          print('   Version: ${atsResult.scoringVersion}');
+          print('   Category1: ${atsResult.breakdown.category1.score}/${atsResult.breakdown.category1.maxPoints}');
+          print('   Category2: ${atsResult.breakdown.category2.score}/${atsResult.breakdown.category2.maxPoints}');
+        } else {
+          print('⚠️ [POLLING] No ats_score in completeResults');
         }
 
         // Parse AI recommendation

@@ -187,8 +187,19 @@ class SkillsAnalysisResult {
     }
 
     if (json['ats_score'] != null) {
-      atsResult = ATSResult.fromJson(json['ats_score'] as Map<String, dynamic>);
-      debugPrint('   ats_score parsed successfully');
+      debugPrint('🔍 [SKILLS_RESULT] Found ats_score in JSON');
+      final atsJson = json['ats_score'] as Map<String, dynamic>;
+      debugPrint('   ats_score keys: ${atsJson.keys.toList()}');
+      debugPrint('   final_ats_score: ${atsJson['final_ats_score']}');
+      debugPrint('   scoring_version: ${atsJson['scoring_version']}');
+      debugPrint('   breakdown present: ${atsJson.containsKey('breakdown')}');
+      
+      atsResult = ATSResult.fromJson(atsJson);
+      debugPrint('✅ [SKILLS_RESULT] ats_score parsed successfully');
+      debugPrint('   Parsed score: ${atsResult.finalATSScore}');
+      debugPrint('   Parsed version: ${atsResult.scoringVersion}');
+    } else {
+      debugPrint('⚠️ [SKILLS_RESULT] No ats_score found in JSON');
     }
 
     // Parse AI recommendation content
@@ -407,13 +418,14 @@ class AnalyzeMatchResult {
   bool get hasError => error != null && error!.isNotEmpty;
 }
 
-/// ATS Score calculation result
+/// ATS Score calculation result (v2 only - 65/35 split)
 class ATSResult {
   final String timestamp;
   final double finalATSScore;
   final String categoryStatus;
   final String recommendation;
   final ATSBreakdown breakdown;
+  final String scoringVersion; // Always 'v2_65_35_split'
 
   ATSResult({
     required this.timestamp,
@@ -421,18 +433,30 @@ class ATSResult {
     required this.categoryStatus,
     required this.recommendation,
     required this.breakdown,
+    required this.scoringVersion,
   });
 
   factory ATSResult.fromJson(Map<String, dynamic> json) {
-    return ATSResult(
+    debugPrint('🔍 [ATS_RESULT] Parsing ATSResult from JSON');
+    debugPrint('   Keys: ${json.keys.toList()}');
+    debugPrint('   final_ats_score: ${json['final_ats_score']}');
+    debugPrint('   category_status: ${json['category_status']}');
+    debugPrint('   scoring_version: ${json['scoring_version']}');
+    
+    final breakdownJson = json['breakdown'] as Map<String, dynamic>? ?? {};
+    debugPrint('   breakdown keys: ${breakdownJson.keys.toList()}');
+    
+    final result = ATSResult(
       timestamp: json['timestamp'] as String? ?? '',
       finalATSScore: (json['final_ats_score'] as num?)?.toDouble() ?? 0.0,
       categoryStatus: json['category_status'] as String? ?? '',
       recommendation: json['recommendation'] as String? ?? '',
-      breakdown: ATSBreakdown.fromJson(
-        json['breakdown'] as Map<String, dynamic>? ?? {},
-      ),
+      breakdown: ATSBreakdown.fromJson(breakdownJson),
+      scoringVersion: json['scoring_version'] as String? ?? 'v2_65_35_split',
     );
+    
+    debugPrint('✅ [ATS_RESULT] Parsed: score=${result.finalATSScore}, version=${result.scoringVersion}');
+    return result;
   }
 
   Map<String, dynamic> toJson() {
@@ -442,128 +466,219 @@ class ATSResult {
       'category_status': categoryStatus,
       'recommendation': recommendation,
       'breakdown': breakdown.toJson(),
+      'scoring_version': scoringVersion,
     };
   }
 }
 
-/// ATS Breakdown containing detailed scoring
+/// ATS Breakdown containing detailed scoring (v2 only)
 class ATSBreakdown {
   final ATSCategory1 category1;
   final ATSCategory2 category2;
-  final double ats1Score;
+  final double baseScore;
   final double bonusPoints;
+  final double boostApplied;
 
   ATSBreakdown({
     required this.category1,
     required this.category2,
-    required this.ats1Score,
+    required this.baseScore,
     required this.bonusPoints,
+    required this.boostApplied,
   });
 
   factory ATSBreakdown.fromJson(Map<String, dynamic> json) {
-    return ATSBreakdown(
-      category1: ATSCategory1.fromJson(
-        json['category1'] as Map<String, dynamic>? ?? {},
-      ),
-      category2: ATSCategory2.fromJson(
-        json['category2'] as Map<String, dynamic>? ?? {},
-      ),
-      ats1Score: (json['ats1_score'] as num?)?.toDouble() ?? 0.0,
+    debugPrint('🔍 [ATS_BREAKDOWN] Parsing ATSBreakdown from JSON');
+    debugPrint('   Keys: ${json.keys.toList()}');
+    debugPrint('   base_score: ${json['base_score']}');
+    debugPrint('   bonus_points: ${json['bonus_points']}');
+    debugPrint('   boost_applied: ${json['boost_applied']}');
+    
+    final category1Json = json['category1'] as Map<String, dynamic>? ?? {};
+    final category2Json = json['category2'] as Map<String, dynamic>? ?? {};
+    
+    debugPrint('   category1 keys: ${category1Json.keys.toList()}');
+    debugPrint('   category2 keys: ${category2Json.keys.toList()}');
+    
+    final result = ATSBreakdown(
+      category1: ATSCategory1.fromJson(category1Json),
+      category2: ATSCategory2.fromJson(category2Json),
+      baseScore: (json['base_score'] as num?)?.toDouble() ?? 0.0,
       bonusPoints: (json['bonus_points'] as num?)?.toDouble() ?? 0.0,
+      boostApplied: (json['boost_applied'] as num?)?.toDouble() ?? 0.0,
     );
+    
+    debugPrint('✅ [ATS_BREAKDOWN] Parsed: base=${result.baseScore}, bonus=${result.bonusPoints}, boost=${result.boostApplied}');
+    return result;
   }
 
   Map<String, dynamic> toJson() {
     return {
       'category1': category1.toJson(),
       'category2': category2.toJson(),
-      'ats1_score': ats1Score,
+      'base_score': baseScore,
       'bonus_points': bonusPoints,
+      'boost_applied': boostApplied,
     };
   }
 }
 
-/// ATS Category 1 - Skills matching
+/// ATS Category 1 - Keyword Matching (v2 only - 65 points)
 class ATSCategory1 {
   final double score;
+  final double maxPoints; // Always 65 for v2
   final double technicalSkillsMatchRate;
   final double domainKeywordsMatchRate;
   final double softSkillsMatchRate;
+  final double technicalPoints; // Points from technical skills (max 40)
+  final double domainPoints; // Points from domain keywords (max 10)
+  final double softPoints; // Points from soft skills (max 15)
   final Map<String, int> missingCounts;
 
   ATSCategory1({
     required this.score,
+    required this.maxPoints,
     required this.technicalSkillsMatchRate,
     required this.domainKeywordsMatchRate,
     required this.softSkillsMatchRate,
+    required this.technicalPoints,
+    required this.domainPoints,
+    required this.softPoints,
     required this.missingCounts,
   });
 
   factory ATSCategory1.fromJson(Map<String, dynamic> json) {
+    debugPrint('🔍 [CATEGORY1] Parsing ATSCategory1 from JSON');
+    debugPrint('   Keys: ${json.keys.toList()}');
+    debugPrint('   score: ${json['score']}');
+    debugPrint('   max_points: ${json['max_points']}');
+    debugPrint('   technical_skills_match_rate: ${json['technical_skills_match_rate']}');
+    debugPrint('   technical_points: ${json['technical_points']}');
+    
     final missingCounts = json['missing_counts'] as Map<String, dynamic>? ?? {};
-    return ATSCategory1(
+    
+    final result = ATSCategory1(
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
+      maxPoints: (json['max_points'] as num?)?.toDouble() ?? 65.0,
       technicalSkillsMatchRate:
           (json['technical_skills_match_rate'] as num?)?.toDouble() ?? 0.0,
       domainKeywordsMatchRate:
           (json['domain_keywords_match_rate'] as num?)?.toDouble() ?? 0.0,
       softSkillsMatchRate:
           (json['soft_skills_match_rate'] as num?)?.toDouble() ?? 0.0,
+      technicalPoints: (json['technical_points'] as num?)?.toDouble() ?? 0.0,
+      domainPoints: (json['domain_points'] as num?)?.toDouble() ?? 0.0,
+      softPoints: (json['soft_points'] as num?)?.toDouble() ?? 0.0,
       missingCounts: {
         'technical': missingCounts['technical'] as int? ?? 0,
         'domain': missingCounts['domain'] as int? ?? 0,
         'soft': missingCounts['soft'] as int? ?? 0,
       },
     );
+    
+    debugPrint('✅ [CATEGORY1] Parsed: score=${result.score}/${result.maxPoints}, tech=${result.technicalPoints}/40, domain=${result.domainPoints}/10, soft=${result.softPoints}/15');
+    return result;
   }
 
   Map<String, dynamic> toJson() {
     return {
       'score': score,
+      'max_points': maxPoints,
       'technical_skills_match_rate': technicalSkillsMatchRate,
       'domain_keywords_match_rate': domainKeywordsMatchRate,
       'soft_skills_match_rate': softSkillsMatchRate,
+      'technical_points': technicalPoints,
+      'domain_points': domainPoints,
+      'soft_points': softPoints,
       'missing_counts': missingCounts,
     };
   }
 }
 
-/// ATS Category 2 - Experience and competency
+/// ATS Category 2 - AI Component Analysis (v2 only - 35 points)
 class ATSCategory2 {
   final double score;
-  final double coreCompetencyAvg;
-  final double experienceSeniorityAvg;
-  final double potentialAbilityAvg;
-  final double companyFitAvg;
+  final double maxPoints; // Always 35 for v2
+  final ATSCategory2Component technicalSkillsComponent; // 22 points
+  final ATSCategory2Component experienceFitComponent; // 13 points
 
   ATSCategory2({
     required this.score,
-    required this.coreCompetencyAvg,
-    required this.experienceSeniorityAvg,
-    required this.potentialAbilityAvg,
-    required this.companyFitAvg,
+    required this.maxPoints,
+    required this.technicalSkillsComponent,
+    required this.experienceFitComponent,
   });
 
   factory ATSCategory2.fromJson(Map<String, dynamic> json) {
-    return ATSCategory2(
+    debugPrint('🔍 [CATEGORY2] Parsing ATSCategory2 from JSON');
+    debugPrint('   Keys: ${json.keys.toList()}');
+    debugPrint('   score: ${json['score']}');
+    debugPrint('   max_points: ${json['max_points']}');
+    debugPrint('   technical_skills_component: ${json['technical_skills_component']}');
+    debugPrint('   experience_fit_component: ${json['experience_fit_component']}');
+    
+    final techSkillsJson = json['technical_skills_component'] as Map<String, dynamic>?;
+    final expFitJson = json['experience_fit_component'] as Map<String, dynamic>?;
+    
+    if (techSkillsJson == null || expFitJson == null) {
+      debugPrint('❌ [CATEGORY2] Missing required components!');
+      throw Exception('Category2 must have both technical_skills_component and experience_fit_component');
+    }
+    
+    final result = ATSCategory2(
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
-      coreCompetencyAvg:
-          (json['core_competency_avg'] as num?)?.toDouble() ?? 0.0,
-      experienceSeniorityAvg:
-          (json['experience_seniority_avg'] as num?)?.toDouble() ?? 0.0,
-      potentialAbilityAvg:
-          (json['potential_ability_avg'] as num?)?.toDouble() ?? 0.0,
-      companyFitAvg: (json['company_fit_avg'] as num?)?.toDouble() ?? 0.0,
+      maxPoints: (json['max_points'] as num?)?.toDouble() ?? 35.0,
+      technicalSkillsComponent: ATSCategory2Component.fromJson(techSkillsJson),
+      experienceFitComponent: ATSCategory2Component.fromJson(expFitJson),
     );
+    
+    debugPrint('✅ [CATEGORY2] Parsed: score=${result.score}/${result.maxPoints}, tech=${result.technicalSkillsComponent.score}/22, exp=${result.experienceFitComponent.score}/13');
+    return result;
   }
 
   Map<String, dynamic> toJson() {
     return {
       'score': score,
-      'core_competency_avg': coreCompetencyAvg,
-      'experience_seniority_avg': experienceSeniorityAvg,
-      'potential_ability_avg': potentialAbilityAvg,
-      'company_fit_avg': companyFitAvg,
+      'max_points': maxPoints,
+      'technical_skills_component': technicalSkillsComponent.toJson(),
+      'experience_fit_component': experienceFitComponent.toJson(),
+    };
+  }
+}
+
+/// ATS Category 2 Component (v2 structure)
+class ATSCategory2Component {
+  final double score;
+  final double maxPoints;
+  final double average;
+
+  ATSCategory2Component({
+    required this.score,
+    required this.maxPoints,
+    required this.average,
+  });
+
+  factory ATSCategory2Component.fromJson(Map<String, dynamic> json) {
+    debugPrint('🔍 [CATEGORY2_COMPONENT] Parsing component');
+    debugPrint('   score: ${json['score']}');
+    debugPrint('   max_points: ${json['max_points']}');
+    debugPrint('   average: ${json['average']}');
+    
+    final result = ATSCategory2Component(
+      score: (json['score'] as num?)?.toDouble() ?? 0.0,
+      maxPoints: (json['max_points'] as num?)?.toDouble() ?? 0.0,
+      average: (json['average'] as num?)?.toDouble() ?? 0.0,
+    );
+    
+    debugPrint('✅ [CATEGORY2_COMPONENT] Parsed: ${result.score}/${result.maxPoints} (avg: ${result.average}%)');
+    return result;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'score': score,
+      'max_points': maxPoints,
+      'average': average,
     };
   }
 }

@@ -167,9 +167,20 @@ class ATSScoreWidget extends StatelessWidget {
   }
 
   Widget _buildATSBreakdown(BuildContext context, ATSResult atsResult) {
+    debugPrint('🎨 [ATS_WIDGET] Building ATS breakdown');
+    debugPrint('   Final Score: ${atsResult.finalATSScore}');
+    debugPrint('   Version: ${atsResult.scoringVersion}');
+    debugPrint('   Category1 Score: ${atsResult.breakdown.category1.score}/${atsResult.breakdown.category1.maxPoints}');
+    debugPrint('   Category2 Score: ${atsResult.breakdown.category2.score}/${atsResult.breakdown.category2.maxPoints}');
+    debugPrint('   Base Score: ${atsResult.breakdown.baseScore}');
+    debugPrint('   Bonus: ${atsResult.breakdown.bonusPoints}');
+    debugPrint('   Boost: ${atsResult.breakdown.boostApplied}');
+    
+    final breakdown = atsResult.breakdown;
+    
     return ExpansionTile(
       title: const Text(
-        'Detailed ATS Breakdown',
+        'Detailed ATS Breakdown (v2 - 65/35 Split)',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       leading: const Icon(Icons.analytics, color: Colors.blue),
@@ -179,29 +190,16 @@ class ATSScoreWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Category 1: Skills Matching
-              _buildBreakdownSection(
-                'Skills Matching',
-                atsResult.breakdown.category1.score,
-                [
-                  'Technical Skills: ${atsResult.breakdown.category1.technicalSkillsMatchRate.toStringAsFixed(1)}%',
-                  'Soft Skills: ${atsResult.breakdown.category1.softSkillsMatchRate.toStringAsFixed(1)}%',
-                  'Domain Keywords: ${atsResult.breakdown.category1.domainKeywordsMatchRate.toStringAsFixed(1)}%',
-                ],
+              // Category 1: Keyword Matching (65 points)
+              _buildCategory1Section(
+                'Category 1: Keyword Matching (${breakdown.category1.maxPoints.toInt()} points)',
+                breakdown.category1.score,
+                _buildCategory1Details(breakdown.category1),
               ),
               const SizedBox(height: 16),
               
-              // Category 2: Experience & Competency
-              _buildBreakdownSection(
-                'Experience & Competency',
-                atsResult.breakdown.category2.score,
-                [
-                  'Core Competency: ${atsResult.breakdown.category2.coreCompetencyAvg.toStringAsFixed(1)}%',
-                  'Experience/Seniority: ${atsResult.breakdown.category2.experienceSeniorityAvg.toStringAsFixed(1)}%',
-                  'Potential/Ability: ${atsResult.breakdown.category2.potentialAbilityAvg.toStringAsFixed(1)}%',
-                  'Company Fit: ${atsResult.breakdown.category2.companyFitAvg.toStringAsFixed(1)}%',
-                ],
-              ),
+              // Category 2: AI Component Analysis (35 points)
+              _buildCategory2Section(breakdown.category2),
               
               const SizedBox(height: 16),
               
@@ -209,16 +207,39 @@ class ATSScoreWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Base ATS Score:',
+                  const Text(
+                    'Base Score:',
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    '${atsResult.breakdown.ats1Score.toStringAsFixed(1)}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    '${breakdown.baseScore.toStringAsFixed(1)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
+              if (breakdown.boostApplied > 0) ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Boost Applied:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    Text(
+                      '+${breakdown.boostApplied.toStringAsFixed(1)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -226,14 +247,14 @@ class ATSScoreWidget extends StatelessWidget {
                     'Bonus Points:',
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
-                      color: atsResult.breakdown.bonusPoints >= 0 ? Colors.green : Colors.red,
+                      color: breakdown.bonusPoints >= 0 ? Colors.green : Colors.red,
                     ),
                   ),
                   Text(
-                    '${atsResult.breakdown.bonusPoints >= 0 ? '+' : ''}${atsResult.breakdown.bonusPoints.toStringAsFixed(1)}',
+                    '${breakdown.bonusPoints >= 0 ? '+' : ''}${breakdown.bonusPoints.toStringAsFixed(1)}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: atsResult.breakdown.bonusPoints >= 0 ? Colors.green : Colors.red,
+                      color: breakdown.bonusPoints >= 0 ? Colors.green : Colors.red,
                     ),
                   ),
                 ],
@@ -245,16 +266,92 @@ class ATSScoreWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildBreakdownSection(String title, double score, List<String> details) {
+  List<Widget> _buildCategory1Details(ATSCategory1 category1) {
+    debugPrint('🎨 [ATS_WIDGET] Building Category1 details');
+    debugPrint('   Tech: ${category1.technicalSkillsMatchRate}% → ${category1.technicalPoints}/40');
+    debugPrint('   Domain: ${category1.domainKeywordsMatchRate}% → ${category1.domainPoints}/10');
+    debugPrint('   Soft: ${category1.softSkillsMatchRate}% → ${category1.softPoints}/15');
+    
+    return [
+      _buildDetailRow('Technical Skills', 
+        '${category1.technicalSkillsMatchRate.toStringAsFixed(1)}% → ${category1.technicalPoints.toStringAsFixed(1)}/40'),
+      _buildDetailRow('Domain Keywords', 
+        '${category1.domainKeywordsMatchRate.toStringAsFixed(1)}% → ${category1.domainPoints.toStringAsFixed(1)}/10'),
+      _buildDetailRow('Soft Skills', 
+        '${category1.softSkillsMatchRate.toStringAsFixed(1)}% → ${category1.softPoints.toStringAsFixed(1)}/15'),
+    ];
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, bottom: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.circle, size: 6, color: Colors.grey),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '$label: $value',
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategory2Section(ATSCategory2 category2) {
+    debugPrint('🎨 [ATS_WIDGET] Building Category2 section');
+    debugPrint('   Score: ${category2.score}/${category2.maxPoints}');
+    debugPrint('   Tech Component: ${category2.technicalSkillsComponent.score}/22 (avg: ${category2.technicalSkillsComponent.average}%)');
+    debugPrint('   Exp Component: ${category2.experienceFitComponent.score}/13 (avg: ${category2.experienceFitComponent.average}%)');
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Expanded(
+              child: Text(
+                'Category 2: AI Component Analysis (${category2.maxPoints.toInt()} points)',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
             Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              '${category2.score.toStringAsFixed(1)}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: _getScoreColor(category2.score),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _buildDetailRow(
+          'Technical & Skills Component',
+          '${category2.technicalSkillsComponent.score.toStringAsFixed(1)}/22 (avg: ${category2.technicalSkillsComponent.average.toStringAsFixed(1)}%)',
+        ),
+        _buildDetailRow(
+          'Experience & Fit Component',
+          '${category2.experienceFitComponent.score.toStringAsFixed(1)}/13 (avg: ${category2.experienceFitComponent.average.toStringAsFixed(1)}%)',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategory1Section(String title, double score, List<Widget> details) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
             Text(
               '${score.toStringAsFixed(1)}',
@@ -266,24 +363,11 @@ class ATSScoreWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        ...details.map((detail) => Padding(
-          padding: const EdgeInsets.only(left: 16, bottom: 4),
-          child: Row(
-            children: [
-              const Icon(Icons.circle, size: 6, color: Colors.grey),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  detail,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                ),
-              ),
-            ],
-          ),
-        )),
+        ...details,
       ],
     );
   }
+
 
   Color _getScoreColor(double score) {
     if (score >= 80) {

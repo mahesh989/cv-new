@@ -19,6 +19,15 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
     }
 
     final atsResult = controller.atsResult!;
+    debugPrint('🎨 [PROGRESS_BARS_WIDGET] Building widget');
+    debugPrint('   Final Score: ${atsResult.finalATSScore}');
+    debugPrint('   Version: ${atsResult.scoringVersion}');
+    debugPrint(
+        '   Category1: ${atsResult.breakdown.category1.score}/${atsResult.breakdown.category1.maxPoints}');
+    debugPrint(
+        '   Category2: ${atsResult.breakdown.category2.score}/${atsResult.breakdown.category2.maxPoints}');
+    debugPrint(
+        '   Base: ${atsResult.breakdown.baseScore}, Boost: ${atsResult.breakdown.boostApplied}, Bonus: ${atsResult.breakdown.bonusPoints}');
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -149,11 +158,11 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // Category 1: Skills Matching (Max: 40 points)
+        // Category 1: Keyword Matching (v2 - Max: 65 points)
         _buildCategory1ProgressBars(atsResult.breakdown.category1),
         const SizedBox(height: 24),
 
-        // Category 2: Experience & Competency (Max: 60 points)
+        // Category 2: AI Component Analysis (v2 - Max: 35 points)
         _buildCategory2ProgressBars(atsResult.breakdown.category2),
         const SizedBox(height: 24),
 
@@ -168,34 +177,38 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
   }
 
   Widget _buildCategory1ProgressBars(ATSCategory1 category1) {
-    // Convert percentage rates back to actual point values
-    final techScore =
-        (category1.technicalSkillsMatchRate / 100) * 20; // Max: 20 points
-    final domainScore =
-        (category1.domainKeywordsMatchRate / 100) * 5; // Max: 5 points
-    final softScore =
-        (category1.softSkillsMatchRate / 100) * 15; // Max: 15 points
-    final totalScore = category1.score; // Total for category (0-40)
+    debugPrint('🎨 [PROGRESS_BARS] Building Category1 (v2)');
+    debugPrint(
+        '   Tech: ${category1.technicalPoints}/40 (${category1.technicalSkillsMatchRate}%)');
+    debugPrint(
+        '   Domain: ${category1.domainPoints}/10 (${category1.domainKeywordsMatchRate}%)');
+    debugPrint(
+        '   Soft: ${category1.softPoints}/15 (${category1.softSkillsMatchRate}%)');
+    debugPrint('   Total: ${category1.score}/${category1.maxPoints}');
+
+    // v2: Use actual points from category1 (already calculated)
+    final totalScore = category1.score; // Total for category (0-65)
+    final maxScore = category1.maxPoints.toInt(); // 65 for v2
 
     return _buildCategorySection(
-      title: 'Category 1: Skills Matching',
+      title: 'Category 1: Keyword Matching (v2)',
       totalScore: totalScore,
-      maxScore: 40,
+      maxScore: maxScore,
       color: const Color(0xFF4A90E2),
       items: [
         _ProgressBarItem(
             label: 'Technical Skills',
-            value: techScore,
-            maxValue: 20,
+            value: category1.technicalPoints,
+            maxValue: 40,
             percentage: category1.technicalSkillsMatchRate),
         _ProgressBarItem(
             label: 'Domain Keywords',
-            value: domainScore,
-            maxValue: 5,
+            value: category1.domainPoints,
+            maxValue: 10,
             percentage: category1.domainKeywordsMatchRate),
         _ProgressBarItem(
             label: 'Soft Skills',
-            value: softScore,
+            value: category1.softPoints,
             maxValue: 15,
             percentage: category1.softSkillsMatchRate),
       ],
@@ -203,124 +216,190 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
   }
 
   Widget _buildCategory2ProgressBars(ATSCategory2 category2) {
-    // Convert percentage rates back to actual point values
-    final coreScore =
-        (category2.coreCompetencyAvg / 100) * 25; // Max: 25 points
-    final expScore =
-        (category2.experienceSeniorityAvg / 100) * 20; // Max: 20 points
-    final potentialScore =
-        (category2.potentialAbilityAvg / 100) * 10; // Max: 10 points
-    final companyScore = (category2.companyFitAvg / 100) * 5; // Max: 5 points
-    final totalScore = category2.score; // Total for category (0-60)
+    debugPrint('🎨 [PROGRESS_BARS] Building Category2 (v2)');
+    debugPrint(
+        '   Tech Component: ${category2.technicalSkillsComponent.score}/22 (avg: ${category2.technicalSkillsComponent.average}%)');
+    debugPrint(
+        '   Exp Component: ${category2.experienceFitComponent.score}/13 (avg: ${category2.experienceFitComponent.average}%)');
+    debugPrint('   Total: ${category2.score}/${category2.maxPoints}');
+
+    // v2: Use actual component scores
+    final totalScore = category2.score; // Total for category (0-35)
+    final maxScore = category2.maxPoints.toInt(); // 35 for v2
 
     return _buildCategorySection(
-      title: 'Category 2: Experience & Competency',
+      title: 'Category 2: AI Component Analysis (v2)',
       totalScore: totalScore,
-      maxScore: 60,
+      maxScore: maxScore,
       color: const Color(0xFFE67E22),
       items: [
         _ProgressBarItem(
-            label: 'Core Competency',
-            value: coreScore,
-            maxValue: 25,
-            percentage: category2.coreCompetencyAvg),
+            label: 'Technical & Skills Component',
+            value: category2.technicalSkillsComponent.score,
+            maxValue: 22,
+            percentage: category2.technicalSkillsComponent.average),
         _ProgressBarItem(
-            label: 'Experience & Seniority',
-            value: expScore,
-            maxValue: 20,
-            percentage: category2.experienceSeniorityAvg),
-        _ProgressBarItem(
-            label: 'Potential & Ability',
-            value: potentialScore,
-            maxValue: 10,
-            percentage: category2.potentialAbilityAvg),
-        _ProgressBarItem(
-            label: 'Company Fit',
-            value: companyScore,
-            maxValue: 5,
-            percentage: category2.companyFitAvg),
+            label: 'Experience & Fit Component',
+            value: category2.experienceFitComponent.score,
+            maxValue: 13,
+            percentage: category2.experienceFitComponent.average),
       ],
     );
   }
 
   Widget _buildCategory3BonusSection(ATSBreakdown breakdown) {
     final bonusPoints = breakdown.bonusPoints;
+    final boostApplied = breakdown.boostApplied;
+    final hasBoost = boostApplied > 0;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: bonusPoints >= 0
-              ? [Colors.green[50]!, Colors.green[100]!]
-              : [Colors.red[50]!, Colors.red[100]!],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: bonusPoints >= 0 ? Colors.green[300]! : Colors.red[300]!,
-          width: 2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      children: [
+        // Boost Applied (if any)
+        if (hasBoost) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.orange[50]!, Colors.orange[100]!],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.orange[300]!,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.bolt,
+                    color: Colors.orange,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Boost Applied',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange[700],
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[600],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '+${boostApplied.toStringAsFixed(1)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Bonus Points
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: bonusPoints >= 0
+                  ? [Colors.green[50]!, Colors.green[100]!]
+                  : [Colors.red[50]!, Colors.red[100]!],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: bonusPoints >= 0 ? Colors.green[300]! : Colors.red[300]!,
+              width: 2,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (bonusPoints >= 0 ? Colors.green : Colors.red)
-                      .withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  bonusPoints >= 0 ? Icons.trending_up : Icons.trending_down,
-                  color: bonusPoints >= 0 ? Colors.green[700] : Colors.red[700],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Category 3: Bonus Points',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        bonusPoints >= 0 ? Colors.green[700] : Colors.red[700],
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (bonusPoints >= 0 ? Colors.green : Colors.red)
+                          .withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      bonusPoints >= 0
+                          ? Icons.trending_up
+                          : Icons.trending_down,
+                      color: bonusPoints >= 0
+                          ? Colors.green[700]
+                          : Colors.red[700],
+                      size: 24,
+                    ),
                   ),
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: bonusPoints >= 0 ? Colors.green[600] : Colors.red[600],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${bonusPoints >= 0 ? '+' : ''}${bonusPoints.toStringAsFixed(1)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Bonus Points',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: bonusPoints >= 0
+                            ? Colors.green[700]
+                            : Colors.red[700],
+                      ),
+                    ),
                   ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: bonusPoints >= 0
+                          ? Colors.green[600]
+                          : Colors.red[600],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${bonusPoints >= 0 ? '+' : ''}${bonusPoints.toStringAsFixed(1)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                bonusPoints >= 0
+                    ? 'Bonus points awarded for exceptional keyword matches'
+                    : 'Points deducted for missing critical keywords',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  fontStyle: FontStyle.italic,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            bonusPoints >= 0
-                ? 'Bonus points awarded for exceptional keyword matches'
-                : 'Points deducted for missing critical keywords',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -514,7 +593,7 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Category 1 (${atsResult.breakdown.category1.score.toStringAsFixed(1)}) + Category 2 (${atsResult.breakdown.category2.score.toStringAsFixed(1)}) + Bonus (${atsResult.breakdown.bonusPoints >= 0 ? '+' : ''}${atsResult.breakdown.bonusPoints.toStringAsFixed(1)})',
+                  'Base (${atsResult.breakdown.baseScore.toStringAsFixed(1)}) + Boost (${atsResult.breakdown.boostApplied > 0 ? '+' : ''}${atsResult.breakdown.boostApplied.toStringAsFixed(1)}) + Bonus (${atsResult.breakdown.bonusPoints >= 0 ? '+' : ''}${atsResult.breakdown.bonusPoints.toStringAsFixed(1)})',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withOpacity(0.9),
