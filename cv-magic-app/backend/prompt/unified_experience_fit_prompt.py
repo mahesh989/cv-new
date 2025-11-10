@@ -130,19 +130,19 @@ Subtract points for:
 
 ## OUTPUT FORMAT
 Return ONLY valid JSON (no markdown, no preamble, no explanation):
-{
-  "experience_alignment": {
+{{
+  "experience_alignment": {{
     "score": 85,
     "cv_corporate_years": 5.0,
     "cv_academic_years": 3.0,
     "jd_required_years": 5.0,
     "calculation": "Corporate: 5 years full-time at TechCorp + 1 year at Startup = 6 years. Academic: 3 years PhD research × 0.3 = 0.9 years equivalent. Total weighted: 6.9 years. JD requires 5+ years. Score: 85 (exceeds requirement slightly)"
-  },
-  "role_similarity": {
+  }},
+  "role_similarity": {{
     "score": 90,
     "reasoning": "CV shows Senior Backend Engineer role for 5 years building payment systems and APIs. JD seeks Senior Backend Engineer for payment platform. Exact role match with highly relevant domain experience (payment systems). Both roles involve microservices, APIs, and high-transaction systems."
-  },
-  "seniority_match": {
+  }},
+  "seniority_match": {{
     "score": 90,
     "cv_level": "Senior",
     "jd_level": "Senior",
@@ -151,8 +151,8 @@ Return ONLY valid JSON (no markdown, no preamble, no explanation):
       "Owned technical roadmap for payment processing system",
       "Managed stakeholder relationships with product and finance teams"
     ]
-  },
-  "leadership_readiness": {
+  }},
+  "leadership_readiness": {{
     "score": 80,
     "evidence": [
       "Managed team of 4 engineers with hiring and performance review responsibilities",
@@ -163,16 +163,16 @@ Return ONLY valid JSON (no markdown, no preamble, no explanation):
       "No mention of managing multiple teams or senior leadership responsibilities",
       "Limited evidence of executive stakeholder management (mostly product/engineering level)"
     ]
-  },
-  "industry_transition_fit": {
+  }},
+  "industry_transition_fit": {{
     "score": 75,
     "cv_industry": "E-commerce",
     "jd_industry": "Fintech",
     "transition_type": "Related industry, same role",
     "risk_level": "MEDIUM RISK",
     "reasoning": "Both e-commerce and fintech are transaction-heavy domains requiring high reliability, security, and scale. Payment processing experience from e-commerce directly transfers to fintech. However, fintech has stricter regulatory requirements (PCI-DSS, financial regulations) which aren't evident in CV. Needs compliance training but technical skills are highly transferable."
-  }
-}
+  }}
+}}
 
 ## CRITICAL RULES:
 1. ALL scores must be integers 0-100

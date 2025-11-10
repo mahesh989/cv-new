@@ -105,8 +105,8 @@ Then calculate weighted average across all matched skills.
 
 ## OUTPUT FORMAT
 Return ONLY valid JSON (no markdown, no preamble, no explanation):
-{
-  "technical_depth": {
+{{
+  "technical_depth": {{
     "score": 85,
     "evidence": [
       "Built distributed cache serving 50M requests/day with Redis cluster",
@@ -117,22 +117,22 @@ Return ONLY valid JSON (no markdown, no preamble, no explanation):
       "No Kubernetes/container orchestration experience mentioned",
       "Limited observability tooling (no mention of Datadog, Prometheus, etc.)"
     ]
-  },
-  "required_skills_coverage": {
+  }},
+  "required_skills_coverage": {{
     "score": 75,
     "calculation": "Has 9 of 12 required skills (75%). Has Python, Docker, PostgreSQL, Redis, REST APIs, Git, CI/CD, AWS, Microservices. Missing: Kubernetes, Terraform, GraphQL. No adjustments needed - all skills demonstrated in production.",
     "missing_critical": ["Kubernetes", "Terraform", "GraphQL"]
-  },
-  "tech_stack_similarity": {
+  }},
+  "tech_stack_similarity": {{
     "score": 80,
     "reasoning": "Uses FastAPI (JD requires Flask) - both Python web frameworks with similar patterns. PostgreSQL matches exactly. Docker/containerization matches. AWS cloud experience transfers well."
-  },
-  "business_readiness": {
+  }},
+  "business_readiness": {{
     "score": 85,
     "breakdown": "Python used in corporate production (100%), Docker in corporate (100%), PostgreSQL in corporate (100%), Redis in corporate (100%), Machine Learning only in academic research (40%)",
     "weighted_avg": 85
-  },
-  "complexity_handling": {
+  }},
+  "complexity_handling": {{
     "score": 80,
     "evidence": [
       "Handled 10M daily active users across payment system",
@@ -140,16 +140,16 @@ Return ONLY valid JSON (no markdown, no preamble, no explanation):
       "Real-time transaction processing with 99.99% uptime SLA"
     ],
     "jd_complexity_level": 8
-  },
-  "learning_adaptation": {
+  }},
+  "learning_adaptation": {{
     "score": 75,
     "evidence": [
       "Self-taught Go and built production service within 6 months",
       "Successfully transitioned from monolithic architecture to microservices",
       "Learned Kubernetes through side project, now deploying at work"
     ]
-  }
-}
+  }}
+}}
 
 ## CRITICAL RULES:
 1. ALL scores must be integers 0-100
