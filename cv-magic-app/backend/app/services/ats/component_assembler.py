@@ -418,80 +418,51 @@ class ComponentAssembler:
         logger.info("[ASSEMBLER] Minimal CV results saved to: %s", file_path)
 
     async def _run_ats_calculation(self, company: str, extracted_scores: Dict[str, float]) -> Dict[str, Any]:
-        """Run ATS score calculation and save results."""
+        """Run ATS score calculation and save results using v2 method."""
         try:
-            # Read preextracted comparison data
-            # Use timestamped analysis file with fallback
-            from app.utils.timestamp_utils import TimestampUtils
+            # Use v2 calculation method for consistency
+            logger.info("[ASSEMBLER] Using v2 ATS calculation method")
+            match_rates = self._get_match_rates_for_company(company)
+            
+            # Calculate ATS score using v2
+            ats_result = self.ats_calculator.calculate_ats_score_v2(
+                match_rates=match_rates,
+                extracted_scores=extracted_scores
+            )
+            
+            # Add timestamp and ensure all required fields are present
+            ats_result_dict = {
+                "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                "final_ats_score": ats_result["final_ats_score"],
+                "category_status": ats_result["category_status"],
+                "recommendation": ats_result["recommendation"],
+                "breakdown": ats_result["breakdown"],
+                "scoring_version": ats_result.get("scoring_version", "v2_65_35_split")
+            }
+            
+            # Save ATS results to the analysis file
             company_dir = self.base_dir / "applied_companies" / company
             file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
             if not file_path:
                 file_path = company_dir / f"{company}_skills_analysis.json"
-            if not file_path.exists():
-                logger.warning("[ASSEMBLER] Skills analysis file not found for ATS calculation")
-                return {"error": "Skills analysis file not found"}
             
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            if file_path.exists():
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            else:
+                data = {}
             
-            # Get the latest preextracted comparison entry
-            preextracted_entries = data.get("preextracted_comparison_entries", [])
-            if not preextracted_entries:
-                logger.warning("[ASSEMBLER] No preextracted comparison found for ATS calculation")
-                return {"error": "No preextracted comparison data"}
-            
-            latest_preextracted = preextracted_entries[-1]
-            preextracted_data = {"content": latest_preextracted.get("content", "")}
-            
-            # Calculate ATS score
-            ats_breakdown = self.ats_calculator.calculate_ats_score(
-                preextracted_data=preextracted_data,
-                component_analysis={},  # Not used in current implementation
-                extracted_scores=extracted_scores
-            )
-            
-            # Convert to dictionary for saving
-            ats_result = {
-                "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
-                "final_ats_score": ats_breakdown.final_ats_score,
-                "category_status": ats_breakdown.category_status,
-                "recommendation": ats_breakdown.recommendation,
-                "breakdown": {
-                    "category1": {
-                        "score": ats_breakdown.cat1_score,
-                        "technical_skills_match_rate": ats_breakdown.technical_skills_match_rate,
-                        "domain_keywords_match_rate": ats_breakdown.domain_keywords_match_rate,
-                        "soft_skills_match_rate": ats_breakdown.soft_skills_match_rate,
-                        "missing_counts": {
-                            "technical": ats_breakdown.technical_missing_count,
-                            "domain": ats_breakdown.domain_missing_count,
-                            "soft": ats_breakdown.soft_missing_count
-                        }
-                    },
-                    "category2": {
-                        "score": ats_breakdown.cat2_score,
-                        "core_competency_avg": ats_breakdown.core_competency_avg,
-                        "experience_seniority_avg": ats_breakdown.experience_seniority_avg,
-                        "potential_ability_avg": ats_breakdown.potential_ability_avg,
-                        "company_fit_avg": ats_breakdown.company_fit_avg
-                    },
-                    "ats1_score": ats_breakdown.ats1_score,
-                    "bonus_points": ats_breakdown.bonus_points
-                }
-            }
-            
-            # Save ATS results to the analysis file
             if "ats_calculation_entries" not in data:
                 data["ats_calculation_entries"] = []
             
-            data["ats_calculation_entries"].append(ats_result)
+            data["ats_calculation_entries"].append(ats_result_dict)
             
             # Save back to file
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             
             logger.info("[ASSEMBLER] ATS calculation completed. Score: %.1f/100 (%s)", 
-                       ats_breakdown.final_ats_score, ats_breakdown.category_status)
+                       ats_result_dict["final_ats_score"], ats_result_dict["category_status"])
             
             # Create recommendation file after ATS calculation is completed
             try:
@@ -506,7 +477,7 @@ class ComponentAssembler:
             except Exception as e:
                 logger.error("[ASSEMBLER] Error creating recommendation file for %s: %s", company, e)
             
-            return ats_result
+            return ats_result_dict
             
         except Exception as e:
             logger.error("[ASSEMBLER] ATS calculation failed: %s", e)
