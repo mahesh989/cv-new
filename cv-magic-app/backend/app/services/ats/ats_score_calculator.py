@@ -333,7 +333,7 @@ class ATSScoreCalculator:
 
     def calculate_ats_score_v2(
         self,
-        match_rates: Dict[str, float],
+        match_rates: Dict[str, Any],
         extracted_scores: Dict[str, float]
     ) -> Dict[str, Any]:
         """
@@ -343,6 +343,11 @@ class ATSScoreCalculator:
         tech_match_rate = match_rates.get('technical_skills_match_rate', 0.0) or 0.0
         domain_match_rate = match_rates.get('domain_keywords_match_rate', 0.0) or 0.0
         soft_match_rate = match_rates.get('soft_skills_match_rate', 0.0) or 0.0
+        
+        # Extract missing counts for frontend display
+        tech_missing = match_rates.get('technical_missing_count', 0)
+        soft_missing = match_rates.get('soft_missing_count', 0)
+        domain_missing = match_rates.get('domain_missing_count', 0)
         tech_points = (tech_match_rate / 100.0) * 40.0
         domain_points = (domain_match_rate / 100.0) * 10.0
         soft_points = (soft_match_rate / 100.0) * 15.0
@@ -402,7 +407,12 @@ class ATSScoreCalculator:
                     'soft_skills_match_rate': soft_match_rate,
                     'technical_points': round(tech_points, 1),
                     'domain_points': round(domain_points, 1),
-                    'soft_points': round(soft_points, 1)
+                    'soft_points': round(soft_points, 1),
+                    'missing_counts': {
+                        'technical': tech_missing,
+                        'soft': soft_missing,
+                        'domain': domain_missing
+                    }
                 },
                 'category2': {
                     'score': round(cat2_score, 1),

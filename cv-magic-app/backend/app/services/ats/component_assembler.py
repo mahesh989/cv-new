@@ -201,9 +201,9 @@ class ComponentAssembler:
         logger.info("[ASSEMBLER] Using NEW v2 2-analyzer approach (v1 removed)")
         return await self._run_new_component_analyses(cv_text, jd_text, matched_skills, company)
 
-    def _get_match_rates_for_company(self, company: str) -> Dict[str, float]:
+    def _get_match_rates_for_company(self, company: str) -> Dict[str, Any]:
         """
-        Extract match rates from latest preextracted comparison entry for ATS v2.
+        Extract match rates and missing counts from latest preextracted comparison entry for ATS v2.
         """
         try:
             company_dir = self.base_dir / "applied_companies" / company
@@ -215,7 +215,10 @@ class ComponentAssembler:
                 return {
                     "technical_skills_match_rate": 0.0,
                     "domain_keywords_match_rate": 0.0,
-                    "soft_skills_match_rate": 0.0
+                    "soft_skills_match_rate": 0.0,
+                    "technical_missing_count": 0,
+                    "soft_missing_count": 0,
+                    "domain_missing_count": 0
                 }
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -224,22 +227,31 @@ class ComponentAssembler:
                 return {
                     "technical_skills_match_rate": 0.0,
                     "domain_keywords_match_rate": 0.0,
-                    "soft_skills_match_rate": 0.0
+                    "soft_skills_match_rate": 0.0,
+                    "technical_missing_count": 0,
+                    "soft_missing_count": 0,
+                    "domain_missing_count": 0
                 }
             latest_preextracted = preextracted_entries[-1]
             preextracted_data = {"content": latest_preextracted.get("content", "")}
-            tech_rate, domain_rate, soft_rate, *_ = self.ats_calculator._calculate_match_rates(preextracted_data)
+            tech_rate, domain_rate, soft_rate, tech_missing, soft_missing, domain_missing = self.ats_calculator._calculate_match_rates(preextracted_data)
             return {
                 "technical_skills_match_rate": tech_rate,
                 "domain_keywords_match_rate": domain_rate,
-                "soft_skills_match_rate": soft_rate
+                "soft_skills_match_rate": soft_rate,
+                "technical_missing_count": tech_missing,
+                "soft_missing_count": soft_missing,
+                "domain_missing_count": domain_missing
             }
         except Exception as e:
             logger.error("[ASSEMBLER] Failed to extract match rates for v2: %s", e)
             return {
                 "technical_skills_match_rate": 0.0,
                 "domain_keywords_match_rate": 0.0,
-                "soft_skills_match_rate": 0.0
+                "soft_skills_match_rate": 0.0,
+                "technical_missing_count": 0,
+                "soft_missing_count": 0,
+                "domain_missing_count": 0
             }
 
 
@@ -706,42 +718,58 @@ class ComponentAssembler:
             
             # Run ATS calculation after component analysis (v2 only)
             logger.info("[ASSEMBLER] Starting ATS score calculation (v2 - 65/35 split)")
-            match_rates = self._get_match_rates_for_company(company)
-            logger.info(f"[ASSEMBLER] Match rates: tech={match_rates.get('technical_skills_match_rate', 0):.1f}%, domain={match_rates.get('domain_keywords_match_rate', 0):.1f}%, soft={match_rates.get('soft_skills_match_rate', 0):.1f}%")
-            
-            ats_result = self.ats_calculator.calculate_ats_score_v2(
-                match_rates=match_rates,
-                extracted_scores=scores
-            )
-            logger.info(f"[ASSEMBLER] ATS v2 calculated: {ats_result['final_ats_score']}/100")
-            
-            # Persist ATS v2 result to the same file structure
-            company_dir = self.base_dir / "applied_companies" / company
-            file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
-            if not file_path:
-                file_path = company_dir / f"{company}_skills_analysis.json"
+            ats_result = None
             try:
-                existing = {}
-                if file_path.exists():
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        existing = json.load(f)
-                if "ats_calculation_entries" not in existing:
-                    existing["ats_calculation_entries"] = []
-                ats_entry = {
-                    "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
-                    "final_ats_score": ats_result["final_ats_score"],
-                    "category_status": ats_result["category_status"],
-                    "recommendation": ats_result["recommendation"],
-                    "breakdown": ats_result["breakdown"],
-                    "scoring_version": ats_result.get("scoring_version", "v2_65_35_split")
-                }
-                existing["ats_calculation_entries"].append(ats_entry)
-                with open(file_path, "w", encoding="utf-8") as f:
-                    json.dump(existing, f, indent=2, ensure_ascii=False)
-                logger.info(f"[ASSEMBLER] ATS v2 result persisted to {file_path}")
+                match_rates = self._get_match_rates_for_company(company)
+                logger.info(f"[ASSEMBLER] Match rates: tech={match_rates.get('technical_skills_match_rate', 0):.1f}%, domain={match_rates.get('domain_keywords_match_rate', 0):.1f}%, soft={match_rates.get('soft_skills_match_rate', 0):.1f}%")
+                logger.info(f"[ASSEMBLER] Missing counts: tech={match_rates.get('technical_missing_count', 0)}, domain={match_rates.get('domain_missing_count', 0)}, soft={match_rates.get('soft_missing_count', 0)}")
+                
+                ats_result = self.ats_calculator.calculate_ats_score_v2(
+                    match_rates=match_rates,
+                    extracted_scores=scores
+                )
+                logger.info(f"[ASSEMBLER] ATS v2 calculated: {ats_result['final_ats_score']}/100")
+                
+                # Verify missing_counts are included
+                missing_counts = ats_result.get('breakdown', {}).get('category1', {}).get('missing_counts')
+                if missing_counts:
+                    logger.info(f"[ASSEMBLER] ✅ Missing counts included: {missing_counts}")
+                else:
+                    logger.warning("[ASSEMBLER] ⚠️ Missing counts NOT found in breakdown!")
+                
+                # Persist ATS v2 result to the same file structure
+                company_dir = self.base_dir / "applied_companies" / company
+                file_path = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+                if not file_path:
+                    file_path = company_dir / f"{company}_skills_analysis.json"
+                try:
+                    existing = {}
+                    if file_path.exists():
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            existing = json.load(f)
+                    if "ats_calculation_entries" not in existing:
+                        existing["ats_calculation_entries"] = []
+                    ats_entry = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+                        "final_ats_score": ats_result["final_ats_score"],
+                        "category_status": ats_result["category_status"],
+                        "recommendation": ats_result["recommendation"],
+                        "breakdown": ats_result["breakdown"],
+                        "scoring_version": ats_result.get("scoring_version", "v2_65_35_split")
+                    }
+                    existing["ats_calculation_entries"].append(ats_entry)
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        json.dump(existing, f, indent=2, ensure_ascii=False)
+                    logger.info(f"[ASSEMBLER] ✅ ATS v2 result persisted to {file_path}")
+                    logger.info(f"[ASSEMBLER] ATS entry saved with breakdown keys: {list(ats_entry['breakdown'].keys())}")
+                    logger.info(f"[ASSEMBLER] Category1 keys in saved entry: {list(ats_entry['breakdown'].get('category1', {}).keys())}")
+                except Exception as e:
+                    logger.error("[ASSEMBLER] Failed to persist ATS v2 calculation: %s", e, exc_info=True)
+                    raise
             except Exception as e:
-                logger.error("[ASSEMBLER] Failed to persist ATS v2 calculation: %s", e)
-                raise
+                logger.error(f"[ASSEMBLER] ❌ ATS calculation failed: {e}", exc_info=True)
+                # Don't raise - allow component analysis to complete even if ATS fails
+                logger.warning("[ASSEMBLER] Continuing without ATS score due to calculation error")
             
             # Prepare return result
             result = {
@@ -753,6 +781,12 @@ class ComponentAssembler:
                 "consistency_validation": consistency_results,
                 "status": "success"
             }
+            
+            # Log ATS result availability for debugging
+            if ats_result:
+                logger.info(f"[ASSEMBLER] ✅ ATS result included in response: score={ats_result.get('final_ats_score')}")
+            else:
+                logger.warning("[ASSEMBLER] ⚠️ ATS result not available in response")
             
             logger.info(
                 "===== [ASSEMBLER] Completed assembly. Scores: skills=%.1f exp=%.1f industry=%.1f seniority=%.1f tech=%.1f =====",
