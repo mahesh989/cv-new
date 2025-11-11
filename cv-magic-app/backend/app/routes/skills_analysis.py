@@ -2165,7 +2165,43 @@ async def get_analysis_results(company: str, request: Request = None):
                 logger.warning(f"Failed to get user email from token, using default: {e}")
         
         base_dir = get_user_base_path(user_email)
-        company_dir = base_dir / "applied_companies" / company
+        
+        # Normalize company param to match on-disk slug
+        def _normalize_company_dir(base, name: str):
+            # Try exact
+            candidate = base / "applied_companies" / name
+            if candidate.exists():
+                return candidate, name
+            # Try space ↔ underscore variants
+            variants = {
+                name.replace(" ", "_"),
+                name.replace("_", " "),
+            }
+            for v in variants:
+                cand = base / "applied_companies" / v
+                if cand.exists():
+                    return cand, v
+            # Case-insensitive scan of directories
+            applied_root = base / "applied_companies"
+            try:
+                if applied_root.exists():
+                    lower_target_variants = {
+                        name.lower(),
+                        name.replace(" ", "_").lower(),
+                        name.replace("_", " ").lower(),
+                    }
+                    for d in applied_root.iterdir():
+                        if not d.is_dir():
+                            continue
+                        dn = d.name
+                        if dn.lower() in lower_target_variants:
+                            return d, dn
+            except Exception:
+                pass
+            # Fallback to original (may not exist; caller will handle 404)
+            return base / "applied_companies" / name, name
+        
+        company_dir, resolved_company = _normalize_company_dir(base_dir, company)
         # Debug: which directories/files are used
         try:
             path_debug.start_operation("get_analysis_results")
@@ -2176,9 +2212,9 @@ async def get_analysis_results(company: str, request: Request = None):
         
         # Use timestamped analysis file with fallback
         from app.utils.timestamp_utils import TimestampUtils
-        analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+        analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{resolved_company}_skills_analysis", "json")
         if not analysis_file:
-            analysis_file = company_dir / f"{company}_skills_analysis.json"
+            analysis_file = company_dir / f"{resolved_company}_skills_analysis.json"
         
         if not analysis_file.exists():
             try:
@@ -2256,7 +2292,7 @@ async def get_analysis_results(company: str, request: Request = None):
             latest_ats = ats_entries[-1]
 
         result = {
-            "company": company,
+            "company": resolved_company,
             "skills_analysis": {
                 "cv_skills": cv_skills_sorted,
                 "jd_skills": jd_skills_sorted
@@ -2301,15 +2337,15 @@ async def get_analysis_results(company: str, request: Request = None):
         from app.utils.timestamp_utils import TimestampUtils
         # company_dir already set to base_dir / "applied_companies" / company above
         # Try multiple naming patterns for AI recommendations
-        ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
+        ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{resolved_company}_ai_recommendation", "json")
         if not ai_recommendation_file:
             # Try input_recommendation pattern
-            ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
+            ai_recommendation_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{resolved_company}_input_recommendation", "json")
         if not ai_recommendation_file:
             # Try non-timestamped files
-            ai_recommendation_file = company_dir / f"{company}_ai_recommendation.json"
+            ai_recommendation_file = company_dir / f"{resolved_company}_ai_recommendation.json"
         if not ai_recommendation_file.exists():
-            ai_recommendation_file = company_dir / f"{company}_input_recommendation.json"
+            ai_recommendation_file = company_dir / f"{resolved_company}_input_recommendation.json"
         
         if ai_recommendation_file.exists():
             try:
@@ -2365,8 +2401,8 @@ async def get_analysis_results(company: str, request: Request = None):
             result["ai_recommendation"] = None
         
         # Get tailored CV information if available from company-specific folder
-        tailored_cv_dir = base_dir / "applied_companies" / company
-        tailored_cv_file = TimestampUtils.find_latest_timestamped_file(tailored_cv_dir, f"{company}_tailored_cv", "json")
+        tailored_cv_dir = company_dir
+        tailored_cv_file = TimestampUtils.find_latest_timestamped_file(tailored_cv_dir, f"{resolved_company}_tailored_cv", "json")
         
         if tailored_cv_file and tailored_cv_file.exists():
             try:

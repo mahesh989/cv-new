@@ -285,41 +285,39 @@ class AuthService {
           throw Exception('Unsupported HTTP method: $method');
       }
 
-      // If token expired during request, try to refresh and retry once
+      // If unauthorized, refresh token and retry ONCE (works even if body doesn't say "expired")
       if (response.statusCode == 401) {
-        final responseBody = response.body;
-        if (responseBody.contains('Token has expired') ||
-            responseBody.contains('expired')) {
-          print('🔄 Token expired during request, refreshing...');
-          final newToken = await refreshAccessToken();
-
-          if (newToken != null) {
-            // Retry request with new token
-            requestHeaders['Authorization'] = 'Bearer $newToken';
-
-            switch (method.toUpperCase()) {
-              case 'GET':
-                response = await http.get(url, headers: requestHeaders);
-                break;
-              case 'POST':
-                response = await http.post(
-                  url,
-                  headers: requestHeaders,
-                  body: body,
-                );
-                break;
-              case 'PUT':
-                response = await http.put(
-                  url,
-                  headers: requestHeaders,
-                  body: body,
-                );
-                break;
-              case 'DELETE':
-                response = await http.delete(url, headers: requestHeaders);
-                break;
-            }
+        print('🔄 [AUTH_SERVICE] 401 received, attempting token refresh...');
+        final newToken = await refreshAccessToken();
+        if (newToken != null) {
+          print('✅ [AUTH_SERVICE] Token refreshed, retrying request once...');
+          // Retry request with new token
+          requestHeaders['Authorization'] = 'Bearer $newToken';
+          switch (method.toUpperCase()) {
+            case 'GET':
+              response = await http.get(url, headers: requestHeaders);
+              break;
+            case 'POST':
+              response = await http.post(
+                url,
+                headers: requestHeaders,
+                body: body,
+              );
+              break;
+            case 'PUT':
+              response = await http.put(
+                url,
+                headers: requestHeaders,
+                body: body,
+              );
+              break;
+            case 'DELETE':
+              response = await http.delete(url, headers: requestHeaders);
+              break;
           }
+        } else {
+          print('❌ [AUTH_SERVICE] Token refresh failed; clearing auth state');
+          await clearAuthData();
         }
       }
 
