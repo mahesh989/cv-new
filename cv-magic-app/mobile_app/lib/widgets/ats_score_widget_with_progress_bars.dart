@@ -191,7 +191,7 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
     final maxScore = category1.maxPoints.toInt(); // 65 for v2
 
     return _buildCategorySection(
-      title: 'Category 1: Keyword Matching (v2)',
+      title: 'Category 1: Keyword Matching',
       totalScore: totalScore,
       maxScore: maxScore,
       color: const Color(0xFF4A90E2),
@@ -228,7 +228,7 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
     final maxScore = category2.maxPoints.toInt(); // 35 for v2
 
     return _buildCategorySection(
-      title: 'Category 2: AI Component Analysis (v2)',
+      title: 'Category 2: AI Component Analysis',
       totalScore: totalScore,
       maxScore: maxScore,
       color: const Color(0xFFE67E22),

@@ -14,7 +14,9 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-VPS_HOST="13.210.217.204"
+# Try hostname first, fallback to IP if needed
+VPS_HOST="${VPS_HOST:-cvagent.duckdns.org}"
+VPS_HOST_IP="13.210.217.204"  # Backup IP if hostname doesn't work
 VPS_USER="ubuntu"
 VPS_PATH="~/cv-new/cv-magic-app"
 BRANCH="enhanced-vps-ghs"
@@ -109,6 +111,50 @@ if [ ! -f ~/.ssh/id_rsa ] && [ ! -f ~/.ssh/id_ed25519 ]; then
     print_warning "No SSH key found. Make sure you have SSH access to the VPS."
 fi
 
+# Function to test SSH connection
+test_ssh_connection() {
+    print_info "Testing SSH connection to $VPS_USER@$VPS_HOST..."
+    
+    # Try hostname first, then IP if hostname fails
+    SSH_SUCCESS=false
+    if ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o BatchMode=yes $VPS_USER@$VPS_HOST "echo 'Connection OK'" 2>/dev/null; then
+        SSH_SUCCESS=true
+    elif [ "$VPS_HOST" != "$VPS_HOST_IP" ]; then
+        print_warning "Hostname failed, trying IP address $VPS_HOST_IP..."
+        if ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o BatchMode=yes $VPS_USER@$VPS_HOST_IP "echo 'Connection OK'" 2>/dev/null; then
+            VPS_HOST=$VPS_HOST_IP
+            SSH_SUCCESS=true
+            print_info "Using IP address instead of hostname"
+        fi
+    fi
+    
+    if [ "$SSH_SUCCESS" = false ]; then
+        print_error "❌ SSH connection test FAILED!"
+        print_error "Cannot connect to $VPS_USER@$VPS_HOST"
+        if [ "$VPS_HOST" != "$VPS_HOST_IP" ]; then
+            print_error "Also tried IP: $VPS_HOST_IP"
+        fi
+        echo ""
+        print_warning "Possible issues:"
+        echo "  - VPS is down or unreachable from your network"
+        echo "  - IP address has changed"
+        echo "  - Firewall blocking connection (corporate network?)"
+        echo "  - SSH service not running on VPS"
+        echo "  - You may need to be on a VPN or different network"
+        echo ""
+        print_info "Troubleshooting steps:"
+        echo "  1. Check VPS status in your cloud provider dashboard"
+        echo "  2. Try: ping $VPS_HOST"
+        echo "  3. Try: ssh $VPS_USER@$VPS_HOST"
+        echo "  4. Check if you need to be on a VPN"
+        echo "  5. Verify IP address: nslookup cvagent.duckdns.org"
+        return 1
+    else
+        print_status "SSH connection test passed ✓"
+        return 0
+    fi
+}
+
 # Function to show cleanup summary
 show_cleanup_summary() {
     echo ""
@@ -140,7 +186,13 @@ deploy_full() {
     
     show_cleanup_summary
 
-    ssh $VPS_USER@$VPS_HOST << EOF
+    echo ""
+    if ! test_ssh_connection; then
+        exit 1
+    fi
+    echo ""
+
+    ssh -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
         set -e
         
         echo "🔍 Checking current directory and git status..."
@@ -232,7 +284,12 @@ clear_all_data() {
     print_info "Target path: $VPS_PATH"
     echo ""
     
-    ssh $VPS_USER@$VPS_HOST << 'EOF'
+    if ! test_ssh_connection; then
+        exit 1
+    fi
+    echo ""
+    
+    ssh -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
         set -e
         
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -245,7 +302,7 @@ clear_all_data() {
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "📋 STEP 2: Clearing all database tables (keeping schema)..."
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        docker compose exec -T db psql -U cv_user -d cv_database << 'SQLEOF'
+        docker compose exec -T postgres psql -U mahesh -d cv_app << 'SQLEOF'
 -- Disable foreign key checks temporarily
 SET session_replication_role = 'replica';
 
@@ -364,7 +421,12 @@ deploy_reset() {
     print_info "Connecting to VPS: $VPS_USER@$VPS_HOST"
     print_info "Target path: $VPS_PATH"
     
-    ssh $VPS_USER@$VPS_HOST << EOF
+    if ! test_ssh_connection; then
+        exit 1
+    fi
+    echo ""
+    
+    ssh -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
         set -e
         
         echo "🔍 Checking current directory..."
@@ -409,8 +471,13 @@ EOF
 deploy_quick() {
     print_header "⚡ Quick VPS Deployment"
     print_info "Connecting to VPS: $VPS_USER@$VPS_HOST"
+    
+    if ! test_ssh_connection; then
+        exit 1
+    fi
+    echo ""
 
-    ssh $VPS_USER@$VPS_HOST << EOF
+    ssh -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
         cd $VPS_PATH
         echo "📥 Pulling latest changes..."
         git pull origin $BRANCH
@@ -432,8 +499,13 @@ EOF
 # Check deployment status function
 check_deployment() {
     print_header "🔍 Checking VPS Deployment Status"
+    
+    if ! test_ssh_connection; then
+        exit 1
+    fi
+    echo ""
 
-    ssh $VPS_USER@$VPS_HOST << EOF
+    ssh -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
         echo "📁 Current directory:"
         pwd
         
@@ -449,7 +521,7 @@ check_deployment() {
     
         echo ""
         echo "📊 Container health:"
-        docker compose exec backend curl -f http://localhost:8000/health 2>/dev/null && echo "✅ Backend is healthy" || echo "❌ Backend health check failed"
+        docker compose exec -T backend curl -f http://localhost:8000/health 2>/dev/null && echo "✅ Backend is healthy" || echo "❌ Backend health check failed"
         
         echo ""
         echo "📋 Recent logs (last 10 lines):"

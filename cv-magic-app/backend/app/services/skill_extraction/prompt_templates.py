@@ -1,69 +1,261 @@
 """
-Enhanced Prompt Templates for Skill Extraction - Detailed Output Format
-
-This version generates the comprehensive analysis format shown in document 5
-Contains all the prompt templates used for AI-based skill extraction
+Production-Grade Skill Extraction Prompts - Maximum Precision
+Version 2.0 - Designed for 95%+ extraction accuracy with zero hallucination
 """
 
 class SkillExtractionPrompts:
-    """Centralized prompt templates for skill extraction"""
+    """Precision-focused prompt templates for skill extraction"""
     
     @staticmethod
     def get_skill_extraction_template(document_type: str, document_text: str) -> str:
         """
-        Create standardized prompt for both CV and JD extraction
+        Create precision extraction prompt for CV or JD
         
         Args:
-            document_type: Type of document ("CV" or "Job Description")
+            document_type: "CV" or "Job Description"
             document_text: The actual text content to analyze
             
         Returns:
-            Formatted prompt string
+            Formatted prompt string with strict extraction rules
         """
         return f'''
-Extract and categorize ALL professional skills and keywords from this {document_type.lower()}:
+You are a precision keyword extractor. Extract EVERY skill and keyword from this {document_type.lower()} using VERBATIM text only.
 
-RULES:
-1. Extract ONLY job-relevant skills and keywords
-2. Remove ALL qualifiers ("Advanced", "Expert", "5+ years", etc.) - extract PURE skills only
-3. NO duplicates across or within categories - each skill appears ONLY ONCE
-4. Priority order: Technical Skills > Soft Skills > Domain Keywords
-5. Keep exact capitalization for proper nouns and brand names
+═══════════════════════════════════════════════════════════════
+CARDINAL RULES - VIOLATING THESE INVALIDATES THE ENTIRE OUTPUT
+═══════════════════════════════════════════════════════════════
 
-## {document_type.upper()}:
-{document_text}
+1. VERBATIM EXTRACTION ONLY
+   ✓ Copy EXACT phrases from the text
+   ✗ Do NOT use synonyms, paraphrasing, or your interpretation
+   
+   Examples:
+   Text says: "Power BI"          → Extract: "Power BI" ✓
+   Text says: "Power BI"          → Extract: "BI Tools" ✗ WRONG
+   Text says: "Data cleaning"     → Extract: "Data cleaning" ✓
+   Text says: "Data cleaning"     → Extract: "Data preparation" ✗ WRONG
 
-## SOFT SKILLS (Interpersonal & Behavioral):
-EXPLICIT: Extract interpersonal, behavioral, and personal effectiveness skills directly mentioned
-STRONGLY IMPLIED: Only include if specific job duties strongly indicate the need
+2. ZERO HALLUCINATION
+   ✓ Extract ONLY what is explicitly written
+   ✗ Do NOT infer, assume, or add skills based on role/context
+   
+   Examples:
+   Text mentions: "Data Analyst role"      → Do NOT add "Excel" unless stated
+   Text mentions: "Python developer"       → Do NOT add "programming" unless stated
+   Text mentions: "5+ years experience"    → Do NOT extract "Senior level"
 
-## TECHNICAL SKILLS (Tools & Technologies):
-EXPLICIT: Extract ALL technical tools, languages, platforms, frameworks, databases, APIs mentioned
-STRONGLY IMPLIED: Only include if job explicitly requires technical implementation
+3. PRESERVE GRANULARITY
+   ✓ Keep separate mentions as separate extractions
+   ✗ Do NOT consolidate related skills
+   
+   Examples:
+   Text: "Data cleaning, data preprocessing, data transformation"
+   Extract: ["Data cleaning", "Data preprocessing", "Data transformation"] ✓
+   Do NOT: ["Data management"] ✗ WRONG - loses specificity
 
-## DOMAIN KEYWORDS (Industry & Business):
-EXPLICIT: Extract industry sectors, business functions, methodologies, regulations, domain processes
-STRONGLY IMPLIED: Only include if clearly indicated by industry context
+4. SINGLE CATEGORIZATION
+   ✓ Each keyword appears in EXACTLY ONE category
+   ✗ Do NOT duplicate across Technical/Soft/Domain
+   
+   Priority: Technical > Domain > Soft Skills
+   If "SQL" appears → Technical only (not also in Domain)
 
-AVOID EXTRACTING:
-- Company names, locations, dates
-- Generic business terms
-- Job titles or seniority levels
-- Values or mission statements
+5. NO QUALIFIERS IN OUTPUT
+   ✓ Extract the pure skill without level/experience descriptors
+   ✗ Remove: "Advanced", "Expert", "5+ years", "Strong", "Excellent"
+   
+   Examples:
+   Text: "Advanced SQL skills"        → Extract: "SQL" ✓
+   Text: "Expert in Power BI"         → Extract: "Power BI" ✓
+   Text: "5+ years Python"            → Extract: "Python" ✓
+   Text: "Strong communication"       → Extract: "Communication" ✓
 
-## CONTEXT EVIDENCE:
-Provide brief quotes supporting each extraction
+═══════════════════════════════════════════════════════════════
+CATEGORIZATION GUIDELINES
+═══════════════════════════════════════════════════════════════
 
-**FINAL OUTPUT - THREE DEDUPLICATED LISTS:**
-Ensure NO skill appears in multiple lists. End with EXACTLY:
+## TECHNICAL SKILLS
+Extract if it's a:
+- Programming/scripting language (Python, SQL, R, JavaScript, VBA, C#, Java)
+- Software tool (Power BI, Tableau, Excel, Salesforce, JIRA, Git)
+- Database system (PostgreSQL, MySQL, SQL Server, MongoDB, Oracle)
+- Cloud platform (AWS, Azure, GCP, Databricks, Snowflake)
+- Framework/library (React, Django, Pandas, NumPy, TensorFlow)
+- Technical process (ETL, Data cleaning, Data preprocessing, API integration, CI/CD)
+- Development tool (Docker, Kubernetes, Jenkins, VS Code)
+- Technical methodology (Agile development, DevOps, Test-driven development)
 
-SOFT_SKILLS = [list of pure soft skills]
-TECHNICAL_SKILLS = [list of pure technical skills]  
-DOMAIN_KEYWORDS = [list of industry/business keywords]
+MUST BE EXPLICITLY MENTIONED - no assumptions based on job title
 
-Text: """
+Examples from text:
+"Experience with SQL, Python, and Power BI" → ["SQL", "Python", "Power BI"]
+"Data cleaning and preprocessing required" → ["Data cleaning", "Data preprocessing"]
+"Tableau or similar tools" → ["Tableau"] only (ignore "similar tools")
+
+## SOFT SKILLS
+Extract ONLY if explicitly stated as a skill/ability with phrases like:
+- "Strong [skill]" / "Excellent [skill]" / "[Skill] skills"
+- "Ability to [action]" / "Capable of [action]"
+- "Demonstrated [skill]" / "Proven [skill]"
+
+Common soft skills:
+- Communication, Collaboration, Teamwork, Leadership
+- Problem-solving, Analytical thinking, Critical thinking
+- Stakeholder management, Time management, Project management
+- Attention to detail, Adaptability, Creativity
+
+DO NOT extract:
+- Personality traits without "skills" context ("detail-oriented" ✗ unless "attention to detail" ✓)
+- Generic adjectives ("motivated", "driven" ✗ unless "self-motivated" explicitly stated)
+- Inferred skills (don't assume "leadership" from "led team" unless stated as skill)
+
+Examples from text:
+"Strong communication and stakeholder management skills" → ["Communication", "Stakeholder management"]
+"Excellent problem-solving ability" → ["Problem-solving"]
+"Led a team of 5" → Do NOT extract "Leadership" (action, not stated skill)
+
+## DOMAIN KEYWORDS
+Extract industry-specific and business-specific terms that aren't technical tools:
+
+Include:
+- Industry sectors (Healthcare, Financial Services, Supply Chain, E-commerce, Education)
+- Business functions (Fundraising, Marketing campaigns, Risk management, Procurement)
+- Domain methodologies (Agile methodology, Lean Six Sigma, Theory of Change, Design thinking)
+- Regulatory/compliance (GDPR, HIPAA, NDIS, SOX compliance, Data governance)
+- Domain-specific processes (Clinical trials, Social procurement, Impact measurement)
+- Sector-specific concepts (Donor management, Food relief, Refugee support)
+
+EXCLUDE these generic terms (too broad, appear everywhere):
+✗ "Stakeholders", "Business processes", "Insights", "Trends"
+✗ "Best practices", "Innovation", "Strategy"
+✗ "Analysis", "Reporting", "Management" (unless part of specific phrase)
+
+Examples from text:
+"Experience in healthcare data management" → ["Healthcare"] (Technical="Data management", Domain="Healthcare")
+"Social procurement and impact measurement" → ["Social procurement", "Impact measurement"]
+"Fundraising campaigns for refugee support" → ["Fundraising", "Refugee support"]
+"Working with stakeholders" → Do NOT extract (too generic)
+
+═══════════════════════════════════════════════════════════════
+EDGE CASE HANDLING
+═══════════════════════════════════════════════════════════════
+
+1. COMPOUND LISTINGS
+   Text: "Python, SQL, and R"
+   Extract: ["Python", "SQL", "R"] - split into separate items
+   
+   Text: "Data collection and analysis"
+   Extract: ["Data collection", "Data analysis"] - split compound phrases
+
+2. TOOLS WITH VERSIONS
+   Text: "Python 3.x"
+   Extract: "Python" (remove version unless version is critical, e.g., "Python 2" vs "Python 3")
+
+3. ALTERNATIVE PHRASINGS
+   Text: "Power BI or Tableau"
+   Extract: ["Power BI", "Tableau"] - both explicitly mentioned
+   
+   Text: "SQL or equivalent"
+   Extract: ["SQL"] only - ignore "equivalent"
+
+4. MULTI-WORD TOOLS/SKILLS
+   Keep together as single extraction:
+   - "Power BI" (not "Power" and "BI")
+   - "SQL Server" (not "SQL" and "Server")
+   - "Google Cloud Platform" (not separate words)
+   - "Stakeholder management" (not "Stakeholder" and "Management")
+   - "Machine learning" (not "Machine" and "Learning")
+
+5. ACRONYMS AND FULL NAMES
+   Use what appears in text:
+   Text says "GCP" → Extract "GCP"
+   Text says "Google Cloud Platform" → Extract "Google Cloud Platform"
+   Do NOT convert between them
+
+6. CASE SENSITIVITY
+   Maintain exact capitalization for:
+   - Proper nouns: "Salesforce", "Databricks", "Excel"
+   - Acronyms: "SQL", "API", "ETL", "AWS"
+   - Brand names: "Power BI", "Microsoft Azure"
+
+═══════════════════════════════════════════════════════════════
+EXTRACTION PROCEDURE
+═══════════════════════════════════════════════════════════════
+
+Step 1: Read entire {document_type.lower()} carefully
+Step 2: For each skill/keyword found:
+   a) Copy EXACT phrase (verbatim)
+   b) Remove qualifiers (Advanced, Expert, Strong, etc.)
+   c) Determine category: Technical > Domain > Soft
+   d) Check if already extracted (prevent duplicates)
+   e) Verify it's not a generic term (for Domain category)
+Step 3: Do NOT add any skills not explicitly in text
+Step 4: Do NOT consolidate separate mentions
+Step 5: Do NOT use synonyms or rephrase
+
+═══════════════════════════════════════════════════════════════
+{document_type.upper()} TEXT TO ANALYZE
+═══════════════════════════════════════════════════════════════
+
 {document_text.strip()}
-"""
+
+═══════════════════════════════════════════════════════════════
+REQUIRED OUTPUT FORMAT
+═══════════════════════════════════════════════════════════════
+
+Provide your analysis in two parts:
+
+PART 1 - DETAILED EXTRACTION WITH EVIDENCE:
+
+## TECHNICAL SKILLS
+**EXPLICIT (directly stated in text):**
+[List each technical skill with supporting quote]
+- [Skill name] - "[exact quote from text where it appears]"
+
+**STRONGLY IMPLIED (clear from technical responsibilities):**
+[Only if job explicitly requires technical implementation]
+- [Skill name] - "[quote showing technical requirement]"
+
+## SOFT SKILLS
+**EXPLICIT (directly stated as a skill/ability):**
+[List each soft skill with supporting quote]
+- [Skill name] - "[exact quote from text where it appears]"
+
+**STRONGLY IMPLIED (clear from interpersonal responsibilities):**
+[Only if clearly indicated by specific duties]
+- [Skill name] - "[quote showing requirement]"
+
+## DOMAIN KEYWORDS
+**EXPLICIT (directly stated):**
+[List each domain keyword with supporting quote]
+- [Keyword] - "[exact quote from text where it appears]"
+
+**STRONGLY IMPLIED (clear from industry/business context):**
+[Only if clearly indicated]
+- [Keyword] - "[quote showing context]"
+
+---
+
+PART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):
+
+After your detailed analysis, you MUST end with these three Python lists:
+
+SOFT_SKILLS = ["skill1", "skill2", "skill3"]
+TECHNICAL_SKILLS = ["tool1", "tool2", "tool3"]
+DOMAIN_KEYWORDS = ["keyword1", "keyword2", "keyword3"]
+
+DEDUPLICATION CHECKLIST:
+□ No skill appears in multiple lists
+□ All verbatim from text (no synonyms)
+□ No qualifiers included (no "Advanced", "Expert", etc.)
+□ Granularity preserved (separate mentions kept separate)
+□ No generic domain terms ("Stakeholders", "Insights", etc.)
+□ No hallucinated skills (only what's in text)
+□ Multi-word skills kept together ("Power BI" not split)
+
+═══════════════════════════════════════════════════════════════
+END OF INSTRUCTIONS - BEGIN EXTRACTION
+═══════════════════════════════════════════════════════════════
 '''
 
     @staticmethod
@@ -77,190 +269,154 @@ Text: """
         Returns:
             System prompt string
         """
-        return f"You are a precise extractor of skills from professional {document_type.lower()}s. Analyze the text and provide detailed skill extraction with supporting evidence, then end with clean Python lists."
+        return f"""You are a precision skill extraction specialist with zero tolerance for hallucination.
+
+Your task: Extract VERBATIM keywords from {document_type.lower()}s with 100% accuracy.
+
+Core principles:
+1. Extract only what is explicitly written - never infer or assume
+2. Use exact wording from the text - never paraphrase or use synonyms
+3. Preserve granularity - keep separate mentions separate
+4. Single categorization - each skill in exactly one category
+5. No qualifiers - extract pure skills without level descriptors
+
+You prioritize accuracy over completeness. Better to miss an ambiguous skill than hallucinate one that isn't there."""
 
 
-# Lightweight centralized prompt accessor for preliminary analysis
 def get_prompt(key: str, **kwargs) -> str:
-    """Return optimized extraction prompts by key.
-
+    """
+    Return precision extraction prompts by key
+    
     Supported keys:
-    - 'technical_skills'
-    - 'soft_skills'
-    - 'domain_keywords'
+    - 'technical_skills': Extract technical skills only
+    - 'soft_skills': Extract soft skills only  
+    - 'domain_keywords': Extract domain keywords only
+    - 'combined_structured': Extract all with full analysis
+    - 'analyze_match': CV-JD matching analysis
+    
+    Args:
+        key: Prompt type identifier
+        **kwargs: Context variables (text, document_type, etc.)
+        
+    Returns:
+        Formatted prompt string
     """
     text = kwargs.get("text", "")
-    document_type = kwargs.get("document_type", "document")  # e.g., "CV" or "Job Description"
+    document_type = kwargs.get("document_type", "document")
 
     if key == "technical_skills":
-        return (
-            "Extract technical skills from this text. Return ONLY a comma-separated list of technical skills, "
-            "tools, languages, and platforms. No explanations or qualifiers.\n\n"
-            "Rules:\n"
-            "- Extract PURE skills without qualifiers (SQL not 'Advanced SQL')\n"
-            "- Include ALL technical tools mentioned\n"
-            "- Keep exact capitalization and brand names\n\n"
-            "Focus on: Programming languages, software tools, databases, cloud platforms, frameworks, libraries, APIs, protocols\n"
-            "Avoid: Soft skills, business terms, company names, job titles, generic words\n\n"
-            "Examples: Python, SQL, Tableau, AWS, Docker, React, REST API, Kubernetes, PostgreSQL, Git\n\n"
-            f"Text: {text}"
-        )
+        return f"""Extract ONLY technical skills from this text. Return a comma-separated list.
 
-    if key == "soft_skills":
-        return (
-            "Extract soft skills from this text. Return ONLY a comma-separated list of interpersonal and behavioral skills. "
-            "No explanations.\n\n"
-            "Focus on: Communication, leadership, problem-solving, teamwork, adaptability, time management\n"
-            "Avoid: Job titles, technical skills, company names, business processes\n\n"
-            "Examples: Communication, Leadership, Problem Solving, Teamwork, Adaptability, Time Management, Collaboration\n\n"
-            f"Text: {text}"
-        )
+CRITICAL RULES:
+1. VERBATIM ONLY - Use exact words from text (no synonyms)
+2. NO HALLUCINATION - Only extract what is explicitly mentioned
+3. NO QUALIFIERS - Remove "Advanced", "Expert", "5+ years" etc.
+4. PRESERVE GRANULARITY - Keep separate mentions separate
+5. NO GENERIC TERMS - Must be specific tools/technologies
 
-    if key == "domain_keywords":
-        return (
-            "Extract domain-specific keywords from this text. Return ONLY a comma-separated list of industry terms, "
-            "business functions, and sector concepts. No explanations.\n\n"
-            "Focus on: Industry sectors, business functions, domain processes, methodologies, regulations, business concepts\n"
-            "Avoid: Technical tools (those go in technical skills), soft skills, company names, job titles\n\n"
-            "Examples: Financial Services, Risk Management, Agile, GDPR Compliance, Supply Chain, Market Research, Healthcare\n\n"
-            f"Text: {text}"
-        )
+WHAT TO EXTRACT:
+✓ Programming languages: Python, SQL, R, JavaScript, VBA, C++, Java
+✓ Software tools: Power BI, Tableau, Excel, Salesforce, JIRA, Git
+✓ Databases: PostgreSQL, MySQL, SQL Server, MongoDB, Oracle
+✓ Cloud platforms: AWS, Azure, GCP, Databricks, Snowflake
+✓ Frameworks/libraries: React, Django, Pandas, NumPy, scikit-learn
+✓ Technical processes: Data cleaning, Data preprocessing, ETL, API development
+✓ Dev tools: Docker, Kubernetes, Jenkins, Visual Studio
 
-    # Enhanced combined_structured prompt for comprehensive skill extraction
-    if key == "combined_structured":
-        return f"""You are a senior CV strategist and hiring consultant. Extract ALL skills and keywords from this {document_type.lower()}.
+WHAT TO AVOID:
+✗ Soft skills (Communication, Leadership, etc.)
+✗ Domain/business terms (Healthcare, Marketing, etc.)
+✗ Generic words (Analysis, Management, Development - unless part of specific tool)
+✗ Company names, job titles, qualifiers
 
-{document_type.upper()} Content:
-{text}
-
-CRITICAL INSTRUCTIONS FOR PURE KEYWORD EXTRACTION:
-- Extract ONLY job-relevant skills, tools, technologies, and professional keywords
-- DO NOT extract: general words, articles, prepositions, company names, locations, dates, generic business terms
-- List each skill INDIVIDUALLY with proper capitalization
-- DO NOT include qualifiers like "Advanced", "Basic", "Expert", "Strong", "Senior", "Junior" - extract PURE SKILL only
-- If text says "Advanced SQL" → extract "SQL"
-- If text says "5+ years Python" → extract "Python" 
-- If text says "Expert in Power BI" → extract "Power BI"
-- Extract compound skills as separate items ("SQL and Python" → "SQL", "Python")
-- Include nice-to-have/desirable skills from all sections
-- AVOID DUPLICATES: If a skill can fit in multiple categories, place it ONLY in the most specific category
-- PRIORITY ORDER: Technical Skills > Soft Skills > Domain Keywords (more specific wins)
-- NO SEMANTIC DUPLICATES: Don't repeat similar concepts (e.g., if "Python" is in Technical, don't add "Python programming" anywhere)
-
-## SOFT SKILLS:
-
-**EXPLICIT (directly stated):**
-[Extract ONLY interpersonal, behavioral, and personality skills that are directly mentioned in professional context]
-
-FOCUS ON:
-- Interpersonal skills: Communication, Leadership, Teamwork, Collaboration, Negotiation
-- Personal effectiveness: Time Management, Organization, Adaptability, Problem-solving
-- Professional traits: Analytical Thinking, Critical Thinking, Creativity, Innovation
-- Work style: Detail-oriented, Self-motivated, Proactive, Results-driven
-
-AVOID:
-- Technical abilities (goes to Technical Skills)
-- Industry knowledge (goes to Domain Keywords)
-- Generic adjectives not specific to professional skills
-- Company values or mission statements
-
-**STRONGLY IMPLIED (very likely based on responsibilities):**
-[Only include if there's STRONG evidence from specific job duties - not generic assumptions]
-
-## TECHNICAL SKILLS:
-
-**EXPLICIT (directly stated):**
-[Extract EVERY technical skill, tool, technology, platform, or system that requires specific technical knowledge]
-
-CATEGORIES TO SCAN:
-- Programming/Scripting Languages (any mentioned)
-- Software/Applications (domain-specific tools, not generic like MS Word)
-- Databases/Data Storage (all types)
-- Cloud/Infrastructure (platforms, containers, orchestration)
-- Frameworks/Libraries (technical ones only)
-- Development/Analytics Tools
-- Technical Certifications (extract the skill, not the cert name)
-- Technical Methodologies (CI/CD, DevOps, etc.)
-- APIs/Protocols/Standards (REST, GraphQL, TCP/IP, etc.)
-- Hardware/Systems (if relevant)
-
-EXTRACTION RULES:
-- Include version numbers if meaningful (e.g., "Python 3", "Java 8")
-- Keep brand names exact ("Google Cloud Platform" not "GCP" unless text uses "GCP")
-- Technical skills take priority - if something could be technical or domain, put in technical
-- Include emerging tech mentioned anywhere in the document
-
-**STRONGLY IMPLIED (very likely based on responsibilities):**
-[Only include if job explicitly requires technical implementation - not business use]
-
-## DOMAIN KEYWORDS:
-
-**EXPLICIT:**
-[Extract industry-specific and role-specific concepts that aren't technical skills or soft skills]
-
-FOCUS ON:
-- Industry/Sector terminology (e.g., "Financial Services", "Healthcare", "E-commerce")
-- Business functions (e.g., "Risk Management", "Supply Chain", "Revenue Operations")
-- Domain-specific processes (e.g., "Clinical Trials", "Regulatory Compliance", "Customer Acquisition")
-- Professional methodologies (e.g., "Agile", "Lean Six Sigma", "Design Thinking")
-- Industry standards/regulations (e.g., "GDPR", "HIPAA", "SOX Compliance")
-- Business concepts (e.g., "ROI Analysis", "Market Research", "Strategic Planning")
-
-AVOID:
-- Skills already in Technical Skills (tools, languages, platforms)
-- Skills already in Soft Skills (interpersonal abilities)
-- Company/organization names
-- Generic business terms ("management", "operations", "business")
-- Job titles or seniority levels
-
-**STRONGLY IMPLIED:**
-[Only include if clearly indicated by industry context or specific responsibilities]
-
-## CONTEXT EVIDENCE:
-
-**Soft Skills:**
-[For EACH soft skill identified above, provide the exact quote or context that supports it]
-
-**Technical Skills:**
-[For EACH technical skill identified above, provide the exact quote or context that supports it]
-
-**Domain Keywords:**
-[For EACH domain keyword identified above, provide the exact quote or context that supports it]
-
-**CRITICAL OUTPUT REQUIREMENT:**
-After providing the detailed analysis above, you MUST end your response with EXACTLY these three Python lists:
-
-DEDUPLICATION RULES:
-1. NO skill/keyword should appear in more than one list
-2. Technical Skills list gets priority for any tool/technology/platform
-3. Soft Skills list gets priority for any interpersonal/behavioral skill
-4. Domain Keywords gets what remains (industry/business concepts)
-5. Remove semantic duplicates (e.g., "Data Analysis" and "Data Analytics" - keep only one)
-6. Keep the most specific version (e.g., "Python" over "Programming")
-
-SOFT_SKILLS = ["skill1", "skill2", "skill3"]
-TECHNICAL_SKILLS = ["skill1", "skill2", "skill3"]  
-DOMAIN_KEYWORDS = ["keyword1", "keyword2", "keyword3"]
-
-**DETAILED EXTRACTION EXAMPLE:**
-
-## TECHNICAL SKILLS:
-**EXPLICIT (directly stated):**
-- Python - "Specialized in Python programming"
-- Pandas - "using libraries such as Pandas"
-- NumPy - "using libraries such as Pandas, NumPy"
-- scikit-learn - "and scikit-learn"
-- SQL - "Proficient in SQL"
-- PostgreSQL - "complex relational databases like PostgreSQL"
-- MySQL - "PostgreSQL and MySQL"
-- Tableau - "creating interactive dashboards and visualizations using Tableau"
-- Power BI - "Tableau, Power BI"
-- Matplotlib - "Power BI, and Matplotlib"
-[Continue for EVERY skill mentioned...]
+EXAMPLES:
+Text: "Advanced SQL and Python experience" → Extract: "SQL, Python"
+Text: "Power BI or Tableau" → Extract: "Power BI, Tableau"
+Text: "Data cleaning and preprocessing" → Extract: "Data cleaning, Data preprocessing"
+Text: "5+ years with AWS" → Extract: "AWS"
 
 Text to analyze:
-{text.strip()}
-"""
+{text}
+
+Return format: skill1, skill2, skill3 (comma-separated, no brackets)"""
+
+    elif key == "soft_skills":
+        return f"""Extract ONLY soft skills from this text. Return a comma-separated list.
+
+CRITICAL RULES:
+1. MUST BE EXPLICITLY STATED - Look for phrases like:
+   - "Strong [skill]" / "Excellent [skill]" / "[Skill] skills"
+   - "Ability to [action]" / "Demonstrated [skill]"
+2. VERBATIM EXTRACTION - Use exact wording (without qualifiers)
+3. NO HALLUCINATION - Don't infer from job duties
+4. NO PERSONALITY TRAITS - Unless explicitly stated as skills
+
+WHAT TO EXTRACT (if explicitly mentioned):
+✓ Communication, Collaboration, Teamwork, Leadership
+✓ Problem-solving, Analytical thinking, Critical thinking
+✓ Stakeholder management, Time management, Project management
+✓ Attention to detail, Adaptability, Organizational skills
+✓ Creativity, Innovation (if stated as skills)
+
+WHAT TO AVOID:
+✗ Technical skills (Python, SQL, etc.)
+✗ Domain knowledge (Healthcare, Marketing, etc.)
+✗ Personality traits NOT stated as skills ("motivated", "driven")
+✗ Inferred skills (don't assume "leadership" from "led team")
+
+EXAMPLES:
+Text: "Strong communication and collaboration skills" → Extract: "Communication, Collaboration"
+Text: "Excellent stakeholder management" → Extract: "Stakeholder management"
+Text: "Ability to solve complex problems" → Extract: "Problem-solving"
+Text: "Led a team of 5 developers" → Do NOT extract "Leadership" (action, not stated skill)
+Text: "Detail-oriented professional" → Do NOT extract (trait, not stated as skill)
+
+Text to analyze:
+{text}
+
+Return format: skill1, skill2, skill3 (comma-separated, no brackets)"""
+
+    elif key == "domain_keywords":
+        return f"""Extract ONLY domain-specific keywords from this text. Return a comma-separated list.
+
+CRITICAL RULES:
+1. VERBATIM ONLY - Use exact phrases from text
+2. DOMAIN-SPECIFIC - Must be industry/business/sector terms
+3. NO GENERIC TERMS - Exclude common words that appear in all jobs
+4. NOT TECHNICAL TOOLS - Those belong in technical skills
+
+WHAT TO EXTRACT:
+✓ Industry sectors: Healthcare, Financial Services, Supply Chain, E-commerce, Education, Nonprofit
+✓ Business functions: Fundraising, Marketing campaigns, Risk management, Procurement, Impact measurement
+✓ Methodologies: Agile methodology, Lean Six Sigma, Theory of Change, Design thinking
+✓ Regulatory/compliance: GDPR, HIPAA, NDIS, SOX compliance, Data governance
+✓ Domain processes: Clinical trials, Social procurement, Donor management, Food relief
+
+WHAT TO AVOID (TOO GENERIC):
+✗ "Stakeholders" - appears in every job
+✗ "Business processes" - too generic
+✗ "Insights", "Trends", "Analysis" - too common
+✗ "Best practices", "Strategy" - buzzwords
+✗ "Innovation", "Excellence", "Quality" - values, not keywords
+✗ Technical tools (SQL, Power BI) - belong in technical skills
+✗ Soft skills (Communication, Leadership) - belong in soft skills
+
+EXAMPLES:
+Text: "Healthcare data analytics" → Extract: "Healthcare" (not "data analytics" - that's technical)
+Text: "Social procurement and impact measurement" → Extract: "Social procurement, Impact measurement"
+Text: "Fundraising campaigns for refugee support" → Extract: "Fundraising, Refugee support"
+Text: "GDPR compliance and data governance" → Extract: "GDPR compliance, Data governance"
+Text: "Working with stakeholders to drive insights" → Do NOT extract (both too generic)
+Text: "Agile methodology and Lean processes" → Extract: "Agile methodology, Lean"
+
+Text to analyze:
+{text}
+
+Return format: keyword1, keyword2, keyword3 (comma-separated, no brackets)"""
+
+    elif key == "combined_structured":
+        extractor = SkillExtractionPrompts()
+        return extractor.get_skill_extraction_template(document_type, text)
 
     elif key == "analyze_match":
         from .prompts.analyze_match_prompt import LITMUS_TEST_PROMPT
@@ -269,4 +425,64 @@ Text to analyze:
         current_date = kwargs.get('current_date', '2025-01-01')
         return LITMUS_TEST_PROMPT.format(cv_text=cv_text, jd_text=job_text, current_date=current_date)
 
-    raise ValueError(f"Unknown prompt key: {key}")
+    else:
+        raise ValueError(f"Unknown prompt key: {key}. Supported: technical_skills, soft_skills, domain_keywords, combined_structured, analyze_match")
+
+
+# Validation helpers for extraction quality
+def validate_extraction_quality(skills_dict: dict) -> dict:
+    """
+    Validate extracted skills meet quality standards
+    
+    Args:
+        skills_dict: Dict with 'technical', 'soft_skills', 'domain_keywords'
+        
+    Returns:
+        Dict with validation results and warnings
+    """
+    warnings = []
+    
+    # Check for generic domain terms
+    generic_terms = {'stakeholders', 'insights', 'trends', 'decision-making', 
+                     'business processes', 'analysis', 'reporting', 'management',
+                     'data-driven', 'best practices', 'strategy', 'innovation'}
+    
+    domain_keywords = [k.lower() for k in skills_dict.get('domain_keywords', [])]
+    for term in generic_terms:
+        if term in domain_keywords:
+            warnings.append(f"Generic domain term detected: '{term}' - consider removing")
+    
+    # Check for qualifiers
+    qualifier_words = ['advanced', 'expert', 'senior', 'junior', 'strong', 'excellent', 
+                       'basic', 'intermediate', 'proficient', 'years']
+    
+    all_skills = (skills_dict.get('technical', []) + 
+                  skills_dict.get('soft_skills', []) + 
+                  skills_dict.get('domain_keywords', []))
+    
+    for skill in all_skills:
+        for qualifier in qualifier_words:
+            if qualifier in skill.lower():
+                warnings.append(f"Qualifier detected in '{skill}' - should be removed")
+    
+    # Check for duplicates across categories
+    technical_set = set(s.lower() for s in skills_dict.get('technical', []))
+    soft_set = set(s.lower() for s in skills_dict.get('soft_skills', []))
+    domain_set = set(s.lower() for s in skills_dict.get('domain_keywords', []))
+    
+    tech_soft_overlap = technical_set & soft_set
+    tech_domain_overlap = technical_set & domain_set
+    soft_domain_overlap = soft_set & domain_set
+    
+    if tech_soft_overlap:
+        warnings.append(f"Duplicates in Technical & Soft Skills: {tech_soft_overlap}")
+    if tech_domain_overlap:
+        warnings.append(f"Duplicates in Technical & Domain: {tech_domain_overlap}")
+    if soft_domain_overlap:
+        warnings.append(f"Duplicates in Soft Skills & Domain: {soft_domain_overlap}")
+    
+    return {
+        'is_valid': len(warnings) == 0,
+        'warnings': warnings,
+        'quality_score': max(0, 100 - (len(warnings) * 10))
+    }

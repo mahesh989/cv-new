@@ -180,7 +180,7 @@ class ATSScoreWidget extends StatelessWidget {
     
     return ExpansionTile(
       title: const Text(
-        'Detailed ATS Breakdown (v2 - 65/35 Split)',
+        'Detailed ATS Breakdown',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       leading: const Icon(Icons.analytics, color: Colors.blue),

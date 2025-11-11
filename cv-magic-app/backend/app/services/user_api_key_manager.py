@@ -54,6 +54,9 @@ class UserAPIKeyManager:
             if not api_key or len(api_key.strip()) < 10:
                 return False, "API key appears to be invalid (too short)"
             
+            # Strip whitespace from API key before storing
+            api_key = api_key.strip()
+            
             user_id = str(user.id)
             
             # Use database session
