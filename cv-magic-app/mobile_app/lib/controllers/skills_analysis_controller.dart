@@ -755,10 +755,21 @@ class SkillsAnalysisController extends ChangeNotifier {
           
           _showATSLoading = false; // Hide loading indicator
           _showATSResults = true;  // Show results immediately
-          _result = _result!.copyWith(
-            atsResult: atsResult,
-            // aiRecommendation: _fullResult!.aiRecommendation, // ❌ REMOVED - Don't add until display time
-          );
+          if (_result == null) {
+            _result = SkillsAnalysisResult(
+              cvSkills: _fullResult?.cvSkills ??
+                  SkillsData(technicalSkills: [], softSkills: [], domainKeywords: []),
+              jdSkills: _fullResult?.jdSkills ??
+                  SkillsData(technicalSkills: [], softSkills: [], domainKeywords: []),
+              atsResult: atsResult,
+              isSuccess: true,
+            );
+          } else {
+            _result = _result!.copyWith(
+              atsResult: atsResult,
+              // aiRecommendation: _fullResult!.aiRecommendation, // ❌ REMOVED - Don't add until display time
+            );
+          }
           notifyListeners();
           print('✅ [CONTROLLER] ATS widget should now be visible (showATSResults=true, hasATSResult=true)');
 
