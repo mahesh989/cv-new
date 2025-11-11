@@ -51707,7 +51707,7 @@ A.n().$1("   Soft: "+A.c(a6)+"/15 ("+A.c(q)+"%)")
 A.n().$1("   Total: "+o+"/"+m)
 a7=B.d.av(n)
 n=t.sb
-p=a9.Qm(B.Hs,A.a([new A.lJ("Technical Skills",a1,40,a2),new A.lJ("Domain Keywords",a4,10,a5),new A.lJ("Soft Skills",a6,15,q)],n),a7,"Category 1: Keyword Matching (v2)",p)
+p=a9.Qm(B.Hs,A.a([new A.lJ("Technical Skills",a1,40,a2),new A.lJ("Domain Keywords",a4,10,a5),new A.lJ("Soft Skills",a6,15,q)],n),a7,"Category 1: Keyword Matching",p)
 A.n().$1("\ud83c\udfa8 [PROGRESS_BARS] Building Category2 (v2)")
 q=l.c
 a6=q.a
@@ -51719,7 +51719,7 @@ l=l.c
 A.n().$1("   Exp Component: "+A.c(a5)+"/13 (avg: "+A.c(l)+"%)")
 A.n().$1("   Total: "+j+"/"+h)
 a7=B.d.av(i)
-k=a9.Qm(B.Hh,A.a([new A.lJ("Technical & Skills Component",a6,22,q),new A.lJ("Experience & Fit Component",a5,13,l)],n),a7,"Category 2: AI Component Analysis (v2)",k)
+k=a9.Qm(B.Hh,A.a([new A.lJ("Technical & Skills Component",a6,22,q),new A.lJ("Experience & Fit Component",a5,13,l)],n),a7,"Category 2: AI Component Analysis",k)
 a8=f>0
 n=A.a([],d)
 if(a8){q=A.a([B.co,B.fy],c)
