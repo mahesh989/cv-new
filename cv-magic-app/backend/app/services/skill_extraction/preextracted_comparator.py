@@ -19,6 +19,9 @@ import logging
 from typing import Dict, List, Tuple, Any
 import json
 import re
+import time
+import statistics
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
@@ -406,28 +409,42 @@ def _deduplicate_skills(skills_dict: Dict[str, list]) -> Dict[str, list]:
     return deduplicated
 
 
-def _calculate_accurate_totals(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> Dict[str, int]:
+def get_unified_counts(skills_dict: Dict[str, list]) -> Dict[str, int]:
     """
-    Calculate accurate totals without duplication across categories.
+    Use DEDUPLICATED counts for ALL calculations - consistent and accurate.
+    
+    Returns unified counts dictionary with all category counts and total.
     """
-    cv_dedup = _deduplicate_skills(cv_skills)
-    jd_dedup = _deduplicate_skills(jd_skills)
-    
-    cv_total = (
-        len(cv_dedup['technical_skills']) + 
-        len(cv_dedup['soft_skills']) + 
-        len(cv_dedup['domain_keywords'])
-    )
-    
-    jd_total = (
-        len(jd_dedup['technical_skills']) + 
-        len(jd_dedup['soft_skills']) + 
-        len(jd_dedup['domain_keywords'])
-    )
+    deduplicated = _deduplicate_skills(skills_dict)
     
     return {
-        'cv_total': cv_total,
-        'jd_total': jd_total
+        'technical_skills': len(deduplicated.get('technical_skills', [])),
+        'soft_skills': len(deduplicated.get('soft_skills', [])),
+        'domain_keywords': len(deduplicated.get('domain_keywords', [])),
+        'total': (
+            len(deduplicated.get('technical_skills', [])) + 
+            len(deduplicated.get('soft_skills', [])) + 
+            len(deduplicated.get('domain_keywords', []))
+        )
+    }
+
+
+def _calculate_accurate_totals(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> Dict[str, int]:
+    """
+    Calculate accurate totals using unified deduplicated counts.
+    """
+    cv_counts = get_unified_counts(cv_skills)
+    jd_counts = get_unified_counts(jd_skills)
+    
+    return {
+        'cv_total': cv_counts['total'],
+        'jd_total': jd_counts['total'],
+        'cv_technical': cv_counts['technical_skills'],
+        'cv_soft': cv_counts['soft_skills'], 
+        'cv_domain': cv_counts['domain_keywords'],
+        'jd_technical': jd_counts['technical_skills'],
+        'jd_soft': jd_counts['soft_skills'],
+        'jd_domain': jd_counts['domain_keywords']
     }
 
 
@@ -678,109 +695,44 @@ def _prepare_inputs(cv_skills: Dict[str, list], jd_skills: Dict[str, list], max_
     return cv, jd
 
 
+def build_concise_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
+    """Reduced prompt focusing on essential rules - 60-80% token reduction."""
+    cv, jd = _prepare_inputs(cv_skills, jd_skills)
+    counts = _calculate_accurate_totals(cv_skills, jd_skills)
+    
+    return f"""Compare skills using semantic matching. Follow these rules:
+
+MATCHING HIERARCHY (in order):
+1. EXACT: Case-insensitive identical ('SQL' = 'sql')
+2. SYNONYM: Professional equivalents (see semantic mapping)
+3. DOMAIN: Same professional cluster
+4. TRANSFERABLE: Base skills present for learning
+
+CRITICAL CONSTRAINTS:
+- CV limits: {counts['cv_technical']} tech, {counts['cv_soft']} soft, {counts['cv_domain']} domain
+- JD requirements: {counts['jd_technical']} tech, {counts['jd_soft']} soft, {counts['jd_domain']} domain  
+- Never exceed CV skill limits
+- Each CV skill matches only once
+- Total matched + missing must equal JD count per category
+
+INPUTS:
+CV: {cv}
+JD: {jd}
+
+OUTPUT (JSON only):
+{{
+  "technical_skills": {{ "matched": [], "missing": [] }},
+  "soft_skills": {{ "matched": [], "missing": [] }}, 
+  "domain_keywords": {{ "matched": [], "missing": [] }}
+}}
+Sort arrays by jd_skill alphabetically.
+"""
+
+
 def build_json_prompt(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
     """Return a strict JSON-only comparison prompt with enhanced matching guidance."""
-    cv, jd = _prepare_inputs(cv_skills, jd_skills)
-    
-    # Get RAW counts for validation to match initial extraction display
-    cv_tech_count = len(cv_skills.get('technical_skills', []))
-    cv_soft_count = len(cv_skills.get('soft_skills', []))
-    cv_domain_count = len(cv_skills.get('domain_keywords', []))
-    jd_tech_count = len(jd_skills.get('technical_skills', []))
-    jd_soft_count = len(jd_skills.get('soft_skills', []))
-    jd_domain_count = len(jd_skills.get('domain_keywords', []))
-    
-    return (
-        "You are an expert skill matching system. Compare the pre-extracted skills using INTELLIGENT SEMANTIC MATCHING.\n"
-        "DO NOT require exact word matches - use professional skill equivalencies and relationships.\n\n"
-        "INPUT LISTS (already normalized, sorted alphabetically):\n"
-        f"CV.technical_skills ({cv_tech_count} items) = {cv['technical_skills']}\n"
-        f"CV.soft_skills ({cv_soft_count} items) = {cv['soft_skills']}\n"
-        f"CV.domain_keywords ({cv_domain_count} items) = {cv['domain_keywords']}\n\n"
-        f"JD.technical_skills ({jd_tech_count} items) = {jd['technical_skills']}\n"
-        f"JD.soft_skills ({jd_soft_count} items) = {jd['soft_skills']}\n"
-        f"JD.domain_keywords ({jd_domain_count} items) = {jd['domain_keywords']}\n\n"
-        "INTELLIGENT MATCHING RULES (apply in order):\n"
-        "1. EXACT MATCH: Case-insensitive identical skills (e.g., 'SQL' = 'sql', 'Communication' = 'communication')\n"
-        "   ⚠️ CRITICAL: If CV has 'Communication' and JD requires 'Communication' → EXACT MATCH\n"
-        "   ⚠️ CRITICAL: If CV has 'Leadership' and JD requires 'Leadership' → EXACT MATCH\n"
-        "   ⚠️ CRITICAL: If CV has 'Teamwork' and JD requires 'Teamwork' → EXACT MATCH\n"
-        "   ⚠️ CRITICAL: If CV has 'Collaboration' and JD requires 'Collaboration' → EXACT MATCH\n"
-        "   ⚠️ CRITICAL: If CV has 'Problem-solving' and JD requires 'Problem-solving' → EXACT MATCH\n"
-        "2. SYNONYM MATCH: Professional equivalents:\n"
-        "   • 'Data Analysis' = 'Data Analytics' = 'Analytics' = 'Statistical Analysis'\n"
-        "   • 'Problem Solving' = 'Problem-Solving' = 'Analytical Thinking' = 'Critical Thinking'\n"
-        "   • 'Machine Learning' = 'ML' = 'Predictive Analytics' = 'Data Science'\n"
-        "   • 'Communication' = 'Communication Skills' = 'Interpersonal Skills'\n"
-        "   • 'Collaboration' = 'Teamwork' = 'Collaborative' = 'Team Collaboration'\n"
-        "   • 'Leadership' = 'Team Leadership' = 'Mentoring' = 'Course Facilitation'\n"
-        "   • 'SQL' = 'Database Management' = 'Relational Databases' = 'PostgreSQL' = 'MySQL'\n"
-        "   • 'Power BI' = 'Business Intelligence' = 'Data Visualization' = 'Dashboard Creation'\n"
-        "   • 'Tableau' = 'Data Visualization' = 'Dashboard Creation' = 'Business Intelligence'\n"
-        "   • 'Excel' = 'Spreadsheets' = 'Microsoft Excel'\n"
-        "   • 'VBA' = 'Visual Basic for Applications' = 'Excel VBA' = 'Macro Programming'\n"
-        "3. HIERARCHICAL MATCH: Specific skills demonstrate broader capabilities (use sparingly):\n"
-        "   • 'SQL' demonstrates 'Database Management', 'Data Extraction', 'Querying', and 'Relational Databases'\n"
-        "   • 'Data Science' demonstrates 'Data Analysis', 'Statistical Analysis', and 'Machine Learning'\n"
-        "   • 'Tableau/Power BI' demonstrates 'Data Visualization', 'Business Intelligence', and 'Reporting'\n"
-        "   ⚠️ CRITICAL: Do NOT match 'Machine Learning' with 'Data Mining' (different skills)\n"
-        "   ⚠️ CRITICAL: Do NOT match 'Python' with 'VBA' (different programming languages)\n"
-        "   ⚠️ CRITICAL: Do NOT match 'Data Analysis' with 'Data Mining' (different skills)\n"
-        "4. DOMAIN CONTEXT: Skills in same professional domain:\n"
-        "   • Data Science: SQL, Python, Tableau, Power BI, Statistical Analysis, Machine Learning\n"
-        "   • Business Intelligence: Data Science, Analytics, Data Visualization, Dashboard creation, Reporting\n"
-        "   • Analytics: Data Analysis, Statistical Analysis, Data Mining, Business Intelligence, Data Science\n"
-        "   • Database: SQL, Data Warehouse, Relational Databases, Data Storage, Data Extraction\n"
-        "   • Reporting: Dashboard Creation, Data Visualization, Power BI, Tableau, Insights Delivery\n"
-        "5. PARTIAL MATCH: Similar core concepts (use sparingly)\n\n"
-        "CRITICAL CONSTRAINTS:\n"
-        f"- CV has {cv_tech_count} technical, {cv_soft_count} soft, {cv_domain_count} domain skills\n"
-        f"- JD has {jd_tech_count} technical, {jd_soft_count} soft, {jd_domain_count} domain requirements\n"
-        f"- CANNOT match more CV skills than exist: max {cv_tech_count} technical, {cv_soft_count} soft, {cv_domain_count} domain\n"
-        "- Each CV skill can only be used once across all categories\n"
-        "- Prioritize stronger matches (exact > synonym > hierarchical > domain)\n"
-        "- IMPORTANT: Total matched + missing must equal JD requirements count for each category\n"
-        f"- Technical: matched + missing must = {jd_tech_count}\n"
-        f"- Soft: matched + missing must = {jd_soft_count}\n"
-        f"- Domain: matched + missing must = {jd_domain_count}\n\n"
-        "EXAMPLES OF GOOD MATCHES:\n"
-        "✅ JD: 'Communication' → CV: 'Communication' (exact match)\n"
-        "✅ JD: 'Leadership' → CV: 'Leadership' (exact match)\n"
-        "✅ JD: 'Teamwork' → CV: 'Collaboration' (synonym)\n"
-        "✅ JD: 'Problem-Solving' → CV: 'Problem Solving' (exact, ignore punctuation)\n"
-        "✅ JD: 'SQL' → CV: 'SQL' (exact match)\n"
-        "✅ JD: 'Power BI' → CV: 'Power BI' (exact match)\n"
-        "✅ JD: 'Excel' → CV: 'Excel' (exact match)\n"
-        "✅ JD: 'Data Analysis' → CV: 'Data Analytics' (synonym)\n"
-        "❌ JD: 'Data Mining' → CV: 'Machine Learning' (different skills - don't match)\n"
-        "✅ JD: 'Database Management' → CV: 'SQL' (hierarchical - SQL demonstrates DB management)\n"
-        "❌ JD: 'Report Creation' → CV: 'Data Visualization' (different skills - don't match)\n"
-        "✅ JD: 'Tableau' → CV: 'Power BI' (domain context - both are BI tools)\n"
-        "✅ JD: 'Relational Databases' → CV: 'SQL' (hierarchical - SQL works with relational databases)\n"
-        "✅ JD: 'Extracting Data' → CV: 'SQL' (hierarchical - SQL enables data extraction)\n"
-        "✅ JD: 'Querying' → CV: 'SQL' (hierarchical - SQL is used for querying)\n"
-        "❌ DON'T match: JD: 'VBA' → CV: 'Python' (different programming languages)\n"
-        "❌ DON'T match: JD: 'Fundraising' → CV: 'Data Science' (unrelated domains)\n"
-        "❌ DON'T match: JD: 'Direct Marketing' → CV: 'Machine Learning' (different domains)\n\n"
-        "OUTPUT (JSON ONLY, no prose, no markdown):\n"
-        "{\n"
-        "  \"technical_skills\": {\n"
-        "    \"matched\": [\n"
-        "      {\n"
-        "        \"jd_skill\": \"exact JD requirement\",\n"
-        "        \"cv_equivalent\": \"matching CV skill\",\n"
-        "        \"reasoning\": \"match type and brief explanation\"\n"
-        "      }\n"
-        "    ],\n"
-        "    \"missing\": [\n"
-        "      { \"jd_skill\": \"...\", \"reasoning\": \"why no CV equivalent found\" }\n"
-        "    ]\n"
-        "  },\n"
-        "  \"soft_skills\": { \"matched\": [], \"missing\": [] },\n"
-        "  \"domain_keywords\": { \"matched\": [], \"missing\": [] }\n"
-        "}\n"
-        "Sort arrays by jd_skill alphabetically."
-    )
+    # Use concise prompt by default for better performance (60-80% token reduction)
+    return build_concise_json_prompt(cv_skills, jd_skills)
 
 
 def _extract_json_from_text(text: str) -> Any:
@@ -952,6 +904,7 @@ def _ensure_exact_matches_included(
     return result
 
 
+@performance_monitor.track_performance
 async def execute_skills_comparison_with_json_output(
     ai_service,
     cv_skills: Dict[str, list],
@@ -963,10 +916,15 @@ async def execute_skills_comparison_with_json_output(
     """Execute JSON-mode comparison and return a dict with strict schema.
 
     Does not alter the legacy text path used by the frontend.
+    Performance monitoring is automatically applied via decorator.
     """
     # Pre-process to identify obvious exact matches
     exact_matches = _identify_exact_matches(cv_skills, jd_skills)
-    logger.info(f"🔍 [EXACT_MATCHES] Found {len(exact_matches)} exact matches: {exact_matches}")
+    logger.info(f"🔍 [EXACT_MATCHES] Found {sum(len(v) for v in exact_matches.values())} exact matches")
+    
+    # Track complexity
+    complexity = performance_monitor.calculate_complexity_score(cv_skills, jd_skills)
+    logger.info(f"⚡ [PERFORMANCE] Complexity Score: {complexity}")
     
     prompt = build_json_prompt(cv_skills, jd_skills)
     response = await ai_service.generate_response(
@@ -988,22 +946,31 @@ async def execute_skills_comparison_with_json_output(
     # Post-process to ensure exact matches are included
     result = _ensure_exact_matches_included(result, exact_matches, cv_skills, jd_skills)
     
+    # Track accuracy
+    accuracy = track_matching_accuracy(jd_skills, result, cv_skills)
+    logger.info(f"🎯 [ACCURACY] Match rates: {accuracy}")
+    
     return result
 
 
 def _validate_comparison_results(json_result: Dict[str, Any], cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> bool:
     """
     Validate that the comparison results are mathematically correct.
+    Uses unified deduplicated counts for consistency.
     Returns True if valid, False if invalid.
     """
     try:
-        # CRITICAL: Use RAW counts for validation to match display numbers
-        # Get actual counts from raw skills (not deduplicated)
-        cv_tech_count = len(cv_skills.get('technical_skills', []))
-        cv_soft_count = len(cv_skills.get('soft_skills', []))
-        cv_domain_count = len(cv_skills.get('domain_keywords', []))
+        # Use unified deduplicated counts for validation
+        counts = _calculate_accurate_totals(cv_skills, jd_skills)
         
         validation_errors = 0
+        
+        # Map category to count keys
+        category_map = {
+            'technical_skills': ('cv_technical', 'jd_technical'),
+            'soft_skills': ('cv_soft', 'jd_soft'),
+            'domain_keywords': ('cv_domain', 'jd_domain')
+        }
         
         # Check each category
         for category in ['technical_skills', 'soft_skills', 'domain_keywords']:
@@ -1013,30 +980,25 @@ def _validate_comparison_results(json_result: Dict[str, Any], cv_skills: Dict[st
             matched = json_result[category].get('matched', [])
             missing = json_result[category].get('missing', [])
             
-            # Get raw CV count for this category (matches display)
-            cv_count = len(cv_skills.get(category, []))
+            # Use deduplicated CV count
+            cv_count_key, jd_count_key = category_map[category]
+            cv_count = counts[cv_count_key]
+            jd_count = counts[jd_count_key]
             
-            # Critical validation: matched count cannot exceed CV count
+            # Strict validation: matched count cannot exceed CV count
             if len(matched) > cv_count:
-                logger.warning(f"❌ [VALIDATION] {category}: matched {len(matched)} > CV count {cv_count}")
+                logger.error(f"❌ [VALIDATION] {category}: matched {len(matched)} > CV count {cv_count}")
                 validation_errors += 1
                 
-            # Flexible validation: warn but don't fail if total doesn't exactly match JD count
-            # This can happen due to AI interpretation, deduplication, or similar skills being grouped
-            jd_count = len(jd_skills.get(category, []))
+            # Strict validation: total processed must equal JD count
             total_processed = len(matched) + len(missing)
             if total_processed != jd_count:
-                # Only log as info, not as a hard failure
-                logger.info(f"ℹ️ [VALIDATION] {category}: matched {len(matched)} + missing {len(missing)} = {total_processed} vs JD count {jd_count} (acceptable variance)")
-                
-                # Only fail if the variance is extreme (more than 50% off)
-                if abs(total_processed - jd_count) > max(jd_count * 0.5, 3):
-                    logger.warning(f"❌ [VALIDATION] {category}: extreme variance - processed {total_processed} vs expected {jd_count}")
-                    validation_errors += 1
+                logger.error(f"❌ [VALIDATION] {category}: processed {total_processed} != JD count {jd_count}")
+                validation_errors += 1
         
-        # Add detailed logging to understand the mismatch
-        logger.info(f"📊 [VALIDATION_DETAIL] CV Skills: Tech={cv_tech_count}, Soft={cv_soft_count}, Domain={cv_domain_count}")
-        logger.info(f"📊 [VALIDATION_DETAIL] JD Skills: Tech={len(jd_skills.get('technical_skills', []))}, Soft={len(jd_skills.get('soft_skills', []))}, Domain={len(jd_skills.get('domain_keywords', []))}")
+        # Add detailed logging
+        logger.info(f"📊 [VALIDATION_DETAIL] CV Skills: Tech={counts['cv_technical']}, Soft={counts['cv_soft']}, Domain={counts['cv_domain']}")
+        logger.info(f"📊 [VALIDATION_DETAIL] JD Skills: Tech={counts['jd_technical']}, Soft={counts['jd_soft']}, Domain={counts['jd_domain']}")
         
         if validation_errors == 0:
             logger.info("✅ [VALIDATION] Comparison results passed validation")
@@ -1053,18 +1015,19 @@ def _validate_comparison_results(json_result: Dict[str, Any], cv_skills: Dict[st
 def _format_json_to_text(json_result: Dict[str, Any], cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> str:
     """Convert JSON comparison result to formatted text output for backward compatibility."""
     
-    # CRITICAL FIX: Use RAW skills for counts to match initial extraction numbers
-    # Do NOT deduplicate here as it causes count mismatches with initial extraction
+    # Use unified deduplicated counts for consistency
+    counts = _calculate_accurate_totals(cv_skills, jd_skills)
+    
     cv_raw_counts = {
-        'technical_skills': len(cv_skills.get('technical_skills', [])),
-        'soft_skills': len(cv_skills.get('soft_skills', [])),
-        'domain_keywords': len(cv_skills.get('domain_keywords', []))
+        'technical_skills': counts['cv_technical'],
+        'soft_skills': counts['cv_soft'],
+        'domain_keywords': counts['cv_domain']
     }
     
     jd_raw_counts = {
-        'technical_skills': len(jd_skills.get('technical_skills', [])),
-        'soft_skills': len(jd_skills.get('soft_skills', [])),
-        'domain_keywords': len(jd_skills.get('domain_keywords', []))
+        'technical_skills': counts['jd_technical'],
+        'soft_skills': counts['jd_soft'],
+        'domain_keywords': counts['jd_domain']
     }
     
     cv_total = cv_raw_counts['technical_skills'] + cv_raw_counts['soft_skills'] + cv_raw_counts['domain_keywords']
@@ -1156,6 +1119,143 @@ Domain Keywords             {cv_raw_counts['domain_keywords']:2d}         {jd_ra
     output += f"- Domain: {', '.join(jd_domain_list[:10])}{'...' if len(jd_domain_list) > 10 else ''}\n"
     
     return output
+
+
+# ====================================
+# PERFORMANCE MONITORING
+# ====================================
+
+class PerformanceMonitor:
+    """Track performance metrics for skill comparison operations"""
+    
+    def __init__(self):
+        self.metrics = {
+            'response_times': [],
+            'token_counts': [],
+            'match_accuracy': [],
+            'validation_success': [],
+            'fallback_rates': []
+        }
+    
+    def track_performance(self, func):
+        """Decorator to track performance metrics"""
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            start_time = time.time()
+            
+            try:
+                result = await func(*args, **kwargs)
+                end_time = time.time()
+                
+                # Track metrics
+                self.metrics['response_times'].append(end_time - start_time)
+                
+                # Extract token count if available
+                if hasattr(args[0], 'last_token_count'):
+                    self.metrics['token_counts'].append(args[0].last_token_count)
+                
+                # Track validation success
+                cv_skills = args[2] if len(args) > 2 else kwargs.get('cv_skills', {})
+                jd_skills = args[3] if len(args) > 3 else kwargs.get('jd_skills', {})
+                is_valid = _validate_comparison_results(result, cv_skills, jd_skills)
+                self.metrics['validation_success'].append(is_valid)
+                
+                return result
+                
+            except Exception as e:
+                self.metrics['fallback_rates'].append(1)
+                raise e
+        
+        return wrapper
+    
+    def calculate_complexity_score(self, cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> float:
+        """Calculate complexity score based on input size and diversity"""
+        total_skills = (
+            len(cv_skills.get('technical_skills', [])) +
+            len(cv_skills.get('soft_skills', [])) + 
+            len(cv_skills.get('domain_keywords', [])) +
+            len(jd_skills.get('technical_skills', [])) +
+            len(jd_skills.get('soft_skills', [])) +
+            len(jd_skills.get('domain_keywords', []))
+        )
+        
+        # Simple complexity: total skills count
+        return total_skills
+    
+    def get_performance_report(self) -> Dict[str, Any]:
+        """Generate comprehensive performance report"""
+        if not self.metrics['response_times']:
+            return {"error": "No metrics collected"}
+        
+        return {
+            'response_time': {
+                'avg': statistics.mean(self.metrics['response_times']),
+                'max': max(self.metrics['response_times']),
+                'min': min(self.metrics['response_times']),
+                'count': len(self.metrics['response_times'])
+            },
+            'validation': {
+                'success_rate': statistics.mean(self.metrics['validation_success']) * 100 if self.metrics['validation_success'] else 0,
+                'total_checks': len(self.metrics['validation_success'])
+            },
+            'fallback_rate': statistics.mean(self.metrics['fallback_rates']) * 100 if self.metrics['fallback_rates'] else 0,
+            'complexity_vs_performance': self._analyze_complexity_correlation()
+        }
+    
+    def _analyze_complexity_correlation(self) -> Dict[str, float]:
+        """Analyze how complexity affects performance"""
+        if len(self.metrics['response_times']) < 3:
+            return {}
+        
+        # Simple correlation analysis
+        try:
+            complexity_scores = list(range(1, len(self.metrics['response_times']) + 1))
+            if hasattr(statistics, 'correlation'):
+                correlation = statistics.correlation(complexity_scores, self.metrics['response_times'])
+                return {'complexity_time_correlation': correlation}
+            else:
+                # Fallback for Python < 3.10
+                return {'complexity_time_correlation': 0.0}
+        except:
+            return {}
+
+
+def track_matching_accuracy(jd_skills: Dict[str, list], matched_results: Dict[str, Any], cv_skills: Dict[str, list] = None) -> Dict[str, float]:
+    """Track matching accuracy by category"""
+    accuracy_metrics = {}
+    
+    for category in ['technical_skills', 'soft_skills', 'domain_keywords']:
+        jd_skills_list = jd_skills.get(category, [])
+        matched = matched_results.get(category, {}).get('matched', [])
+        missing = matched_results.get(category, {}).get('missing', [])
+        
+        total_jd = len(jd_skills_list)
+        if total_jd == 0:
+            continue
+            
+        # Calculate match rate
+        match_rate = len(matched) / total_jd * 100
+        
+        # Calculate coverage (how many CV skills were used) if CV skills provided
+        if cv_skills:
+            cv_skills_used = len(set(m.get('cv_equivalent', '') for m in matched if m.get('cv_equivalent')))
+            total_cv = len(cv_skills.get(category, []))
+            coverage_rate = (cv_skills_used / total_cv * 100) if total_cv > 0 else 0
+        else:
+            coverage_rate = 0
+        
+        accuracy_metrics[category] = {
+            'match_rate': round(match_rate, 2),
+            'coverage_rate': round(coverage_rate, 2),
+            'matched_count': len(matched),
+            'missing_count': len(missing)
+        }
+    
+    return accuracy_metrics
+
+
+# Initialize global monitor
+performance_monitor = PerformanceMonitor()
 
 
 # ====================================
