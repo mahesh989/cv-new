@@ -122,9 +122,15 @@ app.add_middleware(
     expose_headers=["*"],  # Expose all headers
 )
 
-# Add authentication debugging middleware
+# Add comprehensive request logging middleware for frontend tracking
 @app.middleware("http")
-async def auth_debug_middleware(request: Request, call_next):
+async def frontend_request_logging_middleware(request: Request, call_next):
+    import time
+    from app.core.dependencies import get_optional_user
+    from fastapi import HTTPException
+    
+    start_time = time.time()
+    
     # Handle OPTIONS requests (CORS preflight) immediately
     if request.method == "OPTIONS":
         from fastapi.responses import Response
@@ -137,23 +143,94 @@ async def auth_debug_middleware(request: Request, call_next):
         return response
     
     path = request.url.path
+    method = request.method
     auth_header = request.headers.get("authorization")
+    user_agent = request.headers.get("user-agent", "Unknown")
+    client_ip = request.client.host if request.client else "Unknown"
     
     # Define public endpoints that don't need auth
     public_endpoints = ["/api/auth/login", "/api/auth/register", "/api/auth/refresh-session", "/api/quick-login", "/health", "/api/info", "/api/ai/health", "/api/tailored-cv/save-edited"]
     
-    # Only log auth attempts for protected API routes
+    # Try to get user info for logging (non-blocking)
+    user_email = None
+    try:
+        if auth_header and path not in public_endpoints:
+            # Extract user email from token if possible (non-blocking)
+            try:
+                from app.core.auth import verify_token
+                token = auth_header.replace("Bearer ", "").strip()
+                if token:
+                    token_data = verify_token(token)
+                    user_email = token_data.email
+            except:
+                pass  # Don't fail if we can't extract user
+    except:
+        pass
+    
+    # Log frontend request with detailed information
+    is_analysis_endpoint = any(keyword in path.lower() for keyword in [
+        "analysis", "skills", "preliminary", "component", "ats", "recommendation", 
+        "preextracted", "matching", "jd", "cv"
+    ])
+    
+    if is_analysis_endpoint or path.startswith("/api/"):
+        logger.info(f"📱 [FRONTEND_REQUEST] {method} {path}")
+        logger.info(f"   User: {user_email or 'Anonymous'}")
+        logger.info(f"   IP: {client_ip}")
+        logger.info(f"   User-Agent: {user_agent[:100] if len(user_agent) > 100 else user_agent}")
+        
+        # Log request body for POST/PUT/PATCH analysis requests (non-blocking preview)
+        if method in ["POST", "PUT", "PATCH"] and is_analysis_endpoint:
+            try:
+                # Read body once for logging
+                body_bytes = await request.body()
+                if body_bytes:
+                    body_str = body_bytes.decode('utf-8', errors='ignore')
+                    # Log first 500 chars of body for analysis requests
+                    body_preview = body_str[:500] + "..." if len(body_str) > 500 else body_str
+                    logger.info(f"   Request Body Preview: {body_preview}")
+                    
+                    # Restore body for downstream handlers
+                    async def receive():
+                        return {"type": "http.request", "body": body_bytes}
+                    request._receive = receive
+            except Exception as e:
+                logger.debug(f"   Could not read request body: {e}")
+    
+    # Log auth attempts for protected API routes
     if path.startswith("/api/") and path not in public_endpoints:
         if not auth_header:
-            logger.debug(f"❌ No auth header on {request.method} {path}")
+            logger.debug(f"❌ No auth header on {method} {path}")
         else:
-            logger.debug(f"🔑 Auth attempt on {request.method} {path}")
+            logger.debug(f"🔑 Auth attempt on {method} {path}")
     
-    response = await call_next(request)
+    # Process request
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        elapsed = time.time() - start_time
+        logger.error(f"❌ [FRONTEND_ERROR] {method} {path} - Error: {str(e)} (took {elapsed:.3f}s)")
+        raise
     
-    # Log auth failures only for non-public endpoints
+    # Calculate request duration
+    elapsed = time.time() - start_time
+    
+    # Log response details for analysis endpoints
+    if is_analysis_endpoint:
+        logger.info(f"📱 [FRONTEND_RESPONSE] {method} {path} - Status: {response.status_code} (took {elapsed:.3f}s)")
+        
+        # Log response headers for analysis endpoints
+        if hasattr(response, 'headers'):
+            content_type = response.headers.get('content-type', 'unknown')
+            logger.info(f"   Content-Type: {content_type}")
+    
+    # Log auth failures
     if response.status_code == 403 and path not in public_endpoints:
-        logger.warning(f"🚫 Auth failed (403) for {request.method} {path}")
+        logger.warning(f"🚫 Auth failed (403) for {method} {path} (took {elapsed:.3f}s)")
+    
+    # Log slow requests
+    if elapsed > 5.0:
+        logger.warning(f"⚠️ [SLOW_REQUEST] {method} {path} took {elapsed:.3f}s")
     
     return response
 

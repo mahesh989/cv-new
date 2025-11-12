@@ -558,6 +558,22 @@ class SkillsAnalysisController extends ChangeNotifier {
       debugPrint('🧹 [CONTROLLER] _setState: No state change needed ($_state)');
     }
   }
+  
+  // Debug method to check state
+  void debugPrintState() {
+    print('🔍 [CONTROLLER_STATE_DEBUG] Current state:');
+    print('   _state: $_state');
+    print('   _result is null: ${_result == null}');
+    print('   _result?.atsResult is null: ${_result?.atsResult == null}');
+    print('   _showATSLoading: $_showATSLoading');
+    print('   _showATSResults: $_showATSResults');
+    print('   hasATSResult: $hasATSResult');
+    print('   showATSResults: $showATSResults');
+    print('   showATSLoading: $showATSLoading');
+    if (_result?.atsResult != null) {
+      print('   ATS Score: ${_result!.atsResult!.finalATSScore}');
+    }
+  }
 
   void _setError(String error) {
     _errorMessage = error;
@@ -753,9 +769,17 @@ class SkillsAnalysisController extends ChangeNotifier {
           print('   Category1: ${atsResult.breakdown.category1.score}/${atsResult.breakdown.category1.maxPoints}');
           print('   Category2: ${atsResult.breakdown.category2.score}/${atsResult.breakdown.category2.maxPoints}');
           
+          print('🔍 [CONTROLLER_DEBUG] Before ATS state update:');
+          print('   _result is null: ${_result == null}');
+          print('   _showATSLoading: $_showATSLoading');
+          print('   _showATSResults: $_showATSResults');
+          print('   _result?.atsResult is null: ${_result?.atsResult == null}');
+          
           _showATSLoading = false; // Hide loading indicator
           _showATSResults = true;  // Show results immediately
+          
           if (_result == null) {
+            print('🔍 [CONTROLLER_DEBUG] _result is null, creating new SkillsAnalysisResult');
             _result = SkillsAnalysisResult(
               cvSkills: _fullResult?.cvSkills ??
                   SkillsData(technicalSkills: [], softSkills: [], domainKeywords: []),
@@ -764,13 +788,27 @@ class SkillsAnalysisController extends ChangeNotifier {
               atsResult: atsResult,
               isSuccess: true,
             );
+            print('🔍 [CONTROLLER_DEBUG] New _result created with atsResult: ${_result?.atsResult != null}');
           } else {
+            print('🔍 [CONTROLLER_DEBUG] _result exists, updating with copyWith');
             _result = _result!.copyWith(
               atsResult: atsResult,
               // aiRecommendation: _fullResult!.aiRecommendation, // ❌ REMOVED - Don't add until display time
             );
+            print('🔍 [CONTROLLER_DEBUG] _result updated with atsResult: ${_result?.atsResult != null}');
           }
+          
+          print('🔍 [CONTROLLER_DEBUG] After ATS state update:');
+          print('   _result is null: ${_result == null}');
+          print('   _result?.atsResult is null: ${_result?.atsResult == null}');
+          print('   _showATSLoading: $_showATSLoading');
+          print('   _showATSResults: $_showATSResults');
+          print('   hasATSResult getter: $hasATSResult');
+          
+          print('🔍 [CONTROLLER_DEBUG] Calling notifyListeners()...');
           notifyListeners();
+          print('🔍 [CONTROLLER_DEBUG] notifyListeners() completed');
+          
           print('✅ [CONTROLLER] ATS widget should now be visible (showATSResults=true, hasATSResult=true)');
 
           // Show notification with ATS score
@@ -829,27 +867,6 @@ class SkillsAnalysisController extends ChangeNotifier {
   }
 
   /// Finish the analysis process
-  Future<void> _saveJobFromAnalysis(String jdText) async {
-    try {
-      final jobDetails = JobParser.parseJobDetails(jdText);
-      if (jobDetails['company_name'] != null &&
-          jobDetails['job_title'] != null &&
-          jobDetails['location'] != null) {
-        await JobsStateManager.saveNewJob(
-          companyName: jobDetails['company_name']!,
-          jobTitle: jobDetails['job_title']!,
-          jobUrl: jobDetails['job_url'] ?? '',
-          location: jobDetails['location']!,
-          phoneNumber: jobDetails['phone_number'],
-          email: jobDetails['email'],
-        );
-      }
-    } catch (e) {
-      debugPrint('⚠️ [SKILLS_CONTROLLER] Error saving job details: $e');
-      // Continue with analysis even if saving fails
-    }
-  }
-
   void _finishAnalysis() {
     _executionDuration = _fullResult?.executionDuration ?? Duration.zero;
     notifyListeners();

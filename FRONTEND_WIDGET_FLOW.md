@@ -1,3 +1,4 @@
+
 # Frontend Widget Display Flow & Timing
 
 ## Complete Flow Diagram

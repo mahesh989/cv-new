@@ -962,9 +962,12 @@ async def preliminary_analysis(
 ):
     """Preliminary skills analysis from CV filename and JD text"""
     try:
+        logger.info(f"📱 [FRONTEND] POST /api/preliminary-analysis - Frontend starting analysis")
+        
         # Verify authentication
         auth_header = request.headers.get("authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
+            logger.warning(f"📱 [FRONTEND] POST /api/preliminary-analysis - No auth header")
             return JSONResponse(
                 status_code=401,
                 content={"detail": "Authentication required"}
@@ -2146,6 +2149,7 @@ async def get_analysis_results(company: str, request: Request = None):
     """Get complete analysis results for a company (skills, components, ATS) for frontend display"""
     try:
         logger.info(f"📊 [API] Fetching analysis results for company: {company}")
+        logger.info(f"📱 [FRONTEND] GET /api/analysis-results/{company} - Frontend polling for ATS data")
         
         # Build file path using timestamped files
         from app.utils.user_path_utils import get_user_base_path

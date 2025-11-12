@@ -13,13 +13,20 @@ class ATSScoreWidgetWithProgressBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🎨 [PROGRESS_BARS_WIDGET] ===== BUILD CALLED =====');
+    debugPrint('   hasATSResult: ${controller.hasATSResult}');
+    debugPrint('   controller.atsResult is null: ${controller.atsResult == null}');
+    debugPrint('   controller.showATSResults: ${controller.showATSResults}');
+    
     // Only show if we have ATS results
     if (!controller.hasATSResult) {
+      debugPrint('   → ❌ NOT RENDERING - hasATSResult is false');
+      debugPrint('      Returning SizedBox.shrink()');
       return const SizedBox.shrink();
     }
 
     final atsResult = controller.atsResult!;
-    debugPrint('🎨 [PROGRESS_BARS_WIDGET] Building widget');
+    debugPrint('   → ✅ RENDERING ATS Widget');
     debugPrint('   Final Score: ${atsResult.finalATSScore}');
     debugPrint('   Version: ${atsResult.scoringVersion}');
     debugPrint(

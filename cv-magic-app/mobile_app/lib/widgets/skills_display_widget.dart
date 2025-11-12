@@ -26,11 +26,14 @@ class SkillsDisplayWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        debugPrint('🔍 [SKILLS_DISPLAY] AnimatedBuilder rebuild triggered');
+        debugPrint('🔄 [WIDGET] ===== SKILLS_DISPLAY REBUILD =====');
         debugPrint('   controller.hasError: ${controller.hasError}');
         debugPrint('   controller.hasResults: ${controller.hasResults}');
         debugPrint('   controller.isLoading: ${controller.isLoading}');
         debugPrint('   controller.state: ${controller.state}');
+        debugPrint('   showATSResults: ${controller.showATSResults}');
+        debugPrint('   showATSLoading: ${controller.showATSLoading}');
+        debugPrint('   hasATSResult: ${controller.hasATSResult}');
 
         // Main content based on state
         if (controller.hasError) {
@@ -293,14 +296,23 @@ class SkillsDisplayWidget extends StatelessWidget {
             Builder(
               builder: (context) {
                 debugPrint(
-                  '🔍 [SKILLS_DISPLAY] Rendering ATS section (progressive)',
+                  '🔍 [SKILLS_DISPLAY] ===== ATS SECTION BUILD =====',
                 );
                 debugPrint('   showATSLoading: ${controller.showATSLoading}');
                 debugPrint('   showATSResults: ${controller.showATSResults}');
                 debugPrint('   hasATSResult: ${controller.hasATSResult}');
+                debugPrint('   controller.result is null: ${controller.result == null}');
+                debugPrint('   controller.result?.atsResult is null: ${controller.result?.atsResult == null}');
+                debugPrint('   controller.atsResult is null: ${controller.atsResult == null}');
+                if (controller.atsResult != null) {
+                  debugPrint('   ATS Score: ${controller.atsResult!.finalATSScore}');
+                }
+                debugPrint('   Condition check: showATSLoading || showATSResults = ${controller.showATSLoading || controller.showATSResults}');
+                debugPrint('   Condition check: showATSResults && hasATSResult = ${controller.showATSResults && controller.hasATSResult}');
 
                 // Show loading state if ATS should show but results aren't available yet
                 if (controller.showATSLoading && !controller.showATSResults) {
+                  debugPrint('   → Showing ATS loading state');
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     child: Container(
@@ -340,7 +352,19 @@ class SkillsDisplayWidget extends StatelessWidget {
 
                 // Show actual ATS results when available
                 if (controller.showATSResults && controller.hasATSResult) {
+                  debugPrint('   → ✅ RENDERING ATSScoreWidgetWithProgressBars');
+                  debugPrint('      showATSResults: ${controller.showATSResults}');
+                  debugPrint('      hasATSResult: ${controller.hasATSResult}');
+                  debugPrint('      atsResult: ${controller.atsResult != null}');
+                  if (controller.atsResult != null) {
+                    debugPrint('      Final Score: ${controller.atsResult!.finalATSScore}');
+                  }
                   return ATSScoreWidgetWithProgressBars(controller: controller);
+                } else {
+                  debugPrint('   → ❌ NOT RENDERING ATS Widget - conditions not met:');
+                  debugPrint('      showATSResults: ${controller.showATSResults}');
+                  debugPrint('      hasATSResult: ${controller.hasATSResult}');
+                  debugPrint('      Both must be true to render widget');
                 }
 
                 return const SizedBox.shrink();
