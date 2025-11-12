@@ -1251,6 +1251,12 @@ async def preliminary_analysis(
         except Exception as e:
             logger.warning(f"⚠️ [PIPELINE] (preliminary-analysis) failed to schedule: {e}")
         
+        # Log successful completion
+        logger.info(f"📱 [FRONTEND] POST /api/preliminary-analysis - Analysis completed successfully")
+        logger.info(f"   Company: {company_name or 'Unknown'}")
+        logger.info(f"   CV Skills: {len(result.get('cv_skills', {}).get('technical_skills', []))}")
+        logger.info(f"   JD Skills: {len(result.get('jd_skills', {}).get('technical_skills', []))}")
+        
         return JSONResponse(content=result)
         
     except Exception as e:
