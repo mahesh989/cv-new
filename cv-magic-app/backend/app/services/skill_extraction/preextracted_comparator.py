@@ -904,7 +904,6 @@ def _ensure_exact_matches_included(
     return result
 
 
-@performance_monitor.track_performance
 async def execute_skills_comparison_with_json_output(
     ai_service,
     cv_skills: Dict[str, list],
@@ -916,15 +915,26 @@ async def execute_skills_comparison_with_json_output(
     """Execute JSON-mode comparison and return a dict with strict schema.
 
     Does not alter the legacy text path used by the frontend.
-    Performance monitoring is automatically applied via decorator.
     """
     # Pre-process to identify obvious exact matches
     exact_matches = _identify_exact_matches(cv_skills, jd_skills)
     logger.info(f"🔍 [EXACT_MATCHES] Found {sum(len(v) for v in exact_matches.values())} exact matches")
     
-    # Track complexity
-    complexity = performance_monitor.calculate_complexity_score(cv_skills, jd_skills)
-    logger.info(f"⚡ [PERFORMANCE] Complexity Score: {complexity}")
+    # Track complexity (if performance_monitor is available)
+    try:
+        # Calculate complexity score directly (simple calculation)
+        total_skills = (
+            len(cv_skills.get('technical_skills', [])) +
+            len(cv_skills.get('soft_skills', [])) + 
+            len(cv_skills.get('domain_keywords', [])) +
+            len(jd_skills.get('technical_skills', [])) +
+            len(jd_skills.get('soft_skills', [])) +
+            len(jd_skills.get('domain_keywords', []))
+        )
+        logger.info(f"⚡ [PERFORMANCE] Complexity Score: {total_skills}")
+    except Exception:
+        # Skip complexity tracking if calculation fails
+        pass
     
     prompt = build_json_prompt(cv_skills, jd_skills)
     response = await ai_service.generate_response(
