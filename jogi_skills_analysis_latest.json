@@ -1,0 +1,329 @@
+{
+  "generated": "2025-11-12T03:55:12.105",
+  "cv_filename": "latest_cv.pdf",
+  "jd_url": "preliminary_analysis",
+  "user_id": "10",
+  "company": "Australia_for_UNHCR",
+  "model_used": "unknown",
+  "cv_skills": {
+    "technical_skills": [
+      "APIs",
+      "Computer Vision",
+      "Dart",
+      "Dashboard Creation",
+      "Data Entry",
+      "Data Governance",
+      "Data Management",
+      "Edge AI",
+      "Flutter",
+      "Multi-LLM",
+      "PostgreSQL",
+      "Power BI",
+      "Python",
+      "PyTorch",
+      "Report Generation",
+      "SQL"
+    ],
+    "soft_skills": [
+      "Communication",
+      "Problem Solving",
+      "Stakeholder Engagement",
+      "Teamwork"
+    ],
+    "domain_keywords": [
+      "AI engineering",
+      "AI model responses",
+      "AI training projects",
+      "AI-powered resume builder",
+      "Construction industries",
+      "Corrosion detection",
+      "Real-time ATS scoring"
+    ],
+    "comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- Python - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- Power BI - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- SQL - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- PostgreSQL - \"Improved forecasting accuracy by 25% through database analysis using PostgreSQL and Power BI for The Bitrates\"\n- Data Management - \"Skills: Python | Power BI | SQL | Data Management | Stakeholder Engagement | Analytical Models\"\n- Data Entry - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Report Generation - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Dashboard Creation - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Data Governance - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Flutter - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users\"\n- Dart - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users\"\n- Multi-LLM - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users\"\n- APIs - \"Technologies: Flutter, Python, Multi-LLM, APIs\"\n- PyTorch - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Computer Vision - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Edge AI - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- None\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- Communication - \"Soft Skills: • Communication, Problem Solving, Teamwork, Stakeholder Engagement\"\n- Problem Solving - \"Soft Skills: • Communication, Problem Solving, Teamwork, Stakeholder Engagement\"\n- Teamwork - \"Soft Skills: • Communication, Problem Solving, Teamwork, Stakeholder Engagement\"\n- Stakeholder Engagement - \"Skills: Python | Power BI | SQL | Data Management | Stakeholder Engagement | Analytical Models\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- None\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- AI engineering - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- Construction industries - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- AI-powered resume builder - \"Developed AI-powered resume builder serving 500+ users with real-time ATS scoring and optimization\"\n- Real-time ATS scoring - \"Developed AI-powered resume builder serving 500+ users with real-time ATS scoring and optimization\"\n- AI model responses - \"Evaluated and improved AI model responses for accuracy, quality, and alignment with expectations\"\n- AI training projects - \"Provided detailed feedback on AI training projects, contributing to reliable AI systems\"\n- Corrosion detection - \"Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- None\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Communication\", \"Problem Solving\", \"Teamwork\", \"Stakeholder Engagement\"]\nTECHNICAL_SKILLS = [\"Python\", \"Power BI\", \"SQL\", \"PostgreSQL\", \"Data Management\", \"Data Entry\", \"Report Generation\", \"Dashboard Creation\", \"Data Governance\", \"Flutter\", \"Dart\", \"Multi-LLM\", \"APIs\", \"PyTorch\", \"Computer Vision\", \"Edge AI\"]\nDOMAIN_KEYWORDS = [\"AI engineering\", \"Construction industries\", \"AI-powered resume builder\", \"Real-time ATS scoring\", \"AI model responses\", \"AI training projects\", \"Corrosion detection\"]"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Business intelligence tools",
+      "Data analysis",
+      "Data extraction",
+      "Data manipulation",
+      "Data mining",
+      "Data models",
+      "Data warehouse",
+      "Excel",
+      "Power BI",
+      "Project management",
+      "SQL",
+      "SQL data warehouse",
+      "Tableau",
+      "VBA"
+    ],
+    "soft_skills": [
+      "Analytical skills",
+      "Attention to detail",
+      "Collaboration",
+      "Communication",
+      "Customer service",
+      "Organizational skills",
+      "Problem-solving",
+      "Stakeholder management",
+      "Teamwork"
+    ],
+    "domain_keywords": [
+      "Data governance",
+      "Donor-centricity",
+      "Fundraising",
+      "Humanitarian emergencies",
+      "Marketing campaigns",
+      "Refugees"
+    ],
+    "comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- \"Data mining\" - \"providing segmented data selections, data mining, analysis, and developing and maintaining reports.\"\n- \"Power BI\" - \"BI report authoring in Power BI or a similar reporting suite.\"\n- \"Excel\" - \"Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel.\"\n- \"VBA\" - \"comfortable writing formulas and VBA in Excel.\"\n- \"SQL\" - \"Strong SQL coding skills and database knowledge\"\n- \"SQL data warehouse\" - \"development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment.\"\n- \"Business intelligence tools\" - \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- \"Tableau\" - \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- \"Data warehouse\" - \"administer and develop A4U’s data warehouse (DWH)\"\n- \"Project management\" - \"Strong project management skills to deliver multiple projects and work autonomously to meet deadlines\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- \"Data extraction\" - \"Addressing data extract requirements for direct marketing campaigns\"\n- \"Data manipulation\" - \"manipulating data in preparation for bulk communications\"\n- \"Data analysis\" - \"Producing reports and analysis for reviewing results post campaign.\"\n- \"Data models\" - \"development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment.\"\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- \"Analytical skills\" - \"strong analytical and problem-solving skills\"\n- \"Problem-solving\" - \"strong analytical and problem-solving skills\"\n- \"Communication\" - \"Excellent communication and customer service skills\"\n- \"Customer service\" - \"Excellent communication and customer service skills\"\n- \"Stakeholder management\" - \"Strong stakeholder management skills.\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- \"Collaboration\" - \"Our people are collaborative and inclusive team players\"\n- \"Teamwork\" - \"Our people are collaborative and inclusive team players\"\n- \"Attention to detail\" - \"A highly motivated, organised and detail-oriented Data Analyst\"\n- \"Organizational skills\" - \"A highly motivated, organised and detail-oriented Data Analyst\"\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- \"Fundraising\" - \"working with Fundraising stakeholders to advise on segmentation strategies\"\n- \"Donor-centricity\" - \"considering a multi-channel communication and donor-centricity approach.\"\n- \"Marketing campaigns\" - \"Experience extracting data for marketing campaigns\"\n- \"Data governance\" - \"the process and the governing regulations / best practice guidelines.\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- \"Refugees\" - \"Our passionate team empowers refugees to find safety and protection\"\n- \"Humanitarian emergencies\" - \"help UNHCR deliver life-saving aid during humanitarian emergencies.\"\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Analytical skills\", \"Problem-solving\", \"Communication\", \"Customer service\", \"Stakeholder management\", \"Collaboration\", \"Teamwork\", \"Attention to detail\", \"Organizational skills\"]\n\nTECHNICAL_SKILLS = [\"Data mining\", \"Power BI\", \"Excel\", \"VBA\", \"SQL\", \"SQL data warehouse\", \"Business intelligence tools\", \"Tableau\", \"Data warehouse\", \"Project management\", \"Data extraction\", \"Data manipulation\", \"Data analysis\", \"Data models\"]\n\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Donor-centricity\", \"Marketing campaigns\", \"Data governance\", \"Refugees\", \"Humanitarian emergencies\"]"
+  },
+  "cv_comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- Python - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- Power BI - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- SQL - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- PostgreSQL - \"Improved forecasting accuracy by 25% through database analysis using PostgreSQL and Power BI for The Bitrates\"\n- Data Management - \"Skills: Python | Power BI | SQL | Data Management | Stakeholder Engagement | Analytical Models\"\n- Data Entry - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Report Generation - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Dashboard Creation - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Data Governance - \"Other Skills: • Data Entry, Report Generation, Dashboard Creation, Data Governance\"\n- Flutter - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users\"\n- Dart - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users\"\n- Multi-LLM - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration serving 500+ users\"\n- APIs - \"Technologies: Flutter, Python, Multi-LLM, APIs\"\n- PyTorch - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Computer Vision - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Edge AI - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- None\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- Communication - \"Soft Skills: • Communication, Problem Solving, Teamwork, Stakeholder Engagement\"\n- Problem Solving - \"Soft Skills: • Communication, Problem Solving, Teamwork, Stakeholder Engagement\"\n- Teamwork - \"Soft Skills: • Communication, Problem Solving, Teamwork, Stakeholder Engagement\"\n- Stakeholder Engagement - \"Skills: Python | Power BI | SQL | Data Management | Stakeholder Engagement | Analytical Models\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- None\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- AI engineering - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- Construction industries - \"Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and solutions using Python, Power BI, and SQL for tech and construction industries.\"\n- AI-powered resume builder - \"Developed AI-powered resume builder serving 500+ users with real-time ATS scoring and optimization\"\n- Real-time ATS scoring - \"Developed AI-powered resume builder serving 500+ users with real-time ATS scoring and optimization\"\n- AI model responses - \"Evaluated and improved AI model responses for accuracy, quality, and alignment with expectations\"\n- AI training projects - \"Provided detailed feedback on AI training projects, contributing to reliable AI systems\"\n- Corrosion detection - \"Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- None\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Communication\", \"Problem Solving\", \"Teamwork\", \"Stakeholder Engagement\"]\nTECHNICAL_SKILLS = [\"Python\", \"Power BI\", \"SQL\", \"PostgreSQL\", \"Data Management\", \"Data Entry\", \"Report Generation\", \"Dashboard Creation\", \"Data Governance\", \"Flutter\", \"Dart\", \"Multi-LLM\", \"APIs\", \"PyTorch\", \"Computer Vision\", \"Edge AI\"]\nDOMAIN_KEYWORDS = [\"AI engineering\", \"Construction industries\", \"AI-powered resume builder\", \"Real-time ATS scoring\", \"AI model responses\", \"AI training projects\", \"Corrosion detection\"]",
+  "jd_comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- \"Data mining\" - \"providing segmented data selections, data mining, analysis, and developing and maintaining reports.\"\n- \"Power BI\" - \"BI report authoring in Power BI or a similar reporting suite.\"\n- \"Excel\" - \"Experience building models in spreadsheets, and comfortable writing formulas and VBA in Excel.\"\n- \"VBA\" - \"comfortable writing formulas and VBA in Excel.\"\n- \"SQL\" - \"Strong SQL coding skills and database knowledge\"\n- \"SQL data warehouse\" - \"development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment.\"\n- \"Business intelligence tools\" - \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- \"Tableau\" - \"Experience using business intelligence tools such as Power BI, Tableau, etc.\"\n- \"Data warehouse\" - \"administer and develop A4U’s data warehouse (DWH)\"\n- \"Project management\" - \"Strong project management skills to deliver multiple projects and work autonomously to meet deadlines\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- \"Data extraction\" - \"Addressing data extract requirements for direct marketing campaigns\"\n- \"Data manipulation\" - \"manipulating data in preparation for bulk communications\"\n- \"Data analysis\" - \"Producing reports and analysis for reviewing results post campaign.\"\n- \"Data models\" - \"development, maintenance and remediation of issues relating to data models within a SQL data warehouse environment.\"\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- \"Analytical skills\" - \"strong analytical and problem-solving skills\"\n- \"Problem-solving\" - \"strong analytical and problem-solving skills\"\n- \"Communication\" - \"Excellent communication and customer service skills\"\n- \"Customer service\" - \"Excellent communication and customer service skills\"\n- \"Stakeholder management\" - \"Strong stakeholder management skills.\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- \"Collaboration\" - \"Our people are collaborative and inclusive team players\"\n- \"Teamwork\" - \"Our people are collaborative and inclusive team players\"\n- \"Attention to detail\" - \"A highly motivated, organised and detail-oriented Data Analyst\"\n- \"Organizational skills\" - \"A highly motivated, organised and detail-oriented Data Analyst\"\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- \"Fundraising\" - \"working with Fundraising stakeholders to advise on segmentation strategies\"\n- \"Donor-centricity\" - \"considering a multi-channel communication and donor-centricity approach.\"\n- \"Marketing campaigns\" - \"Experience extracting data for marketing campaigns\"\n- \"Data governance\" - \"the process and the governing regulations / best practice guidelines.\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- \"Refugees\" - \"Our passionate team empowers refugees to find safety and protection\"\n- \"Humanitarian emergencies\" - \"help UNHCR deliver life-saving aid during humanitarian emergencies.\"\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Analytical skills\", \"Problem-solving\", \"Communication\", \"Customer service\", \"Stakeholder management\", \"Collaboration\", \"Teamwork\", \"Attention to detail\", \"Organizational skills\"]\n\nTECHNICAL_SKILLS = [\"Data mining\", \"Power BI\", \"Excel\", \"VBA\", \"SQL\", \"SQL data warehouse\", \"Business intelligence tools\", \"Tableau\", \"Data warehouse\", \"Project management\", \"Data extraction\", \"Data manipulation\", \"Data analysis\", \"Data models\"]\n\nDOMAIN_KEYWORDS = [\"Fundraising\", \"Donor-centricity\", \"Marketing campaigns\", \"Data governance\", \"Refugees\", \"Humanitarian emergencies\"]",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-11-12T03:55:19.877",
+      "model_used": "unknown",
+      "content": "DECISION: PROCEED  \nCONFIDENCE: 85  \nMATCH_SCORE: 85  \n\nPRIMARY_REASON: The candidate has the required skills and experience for the Data Analyst role, with relevant technical skills and industry experience.\n\nCRITICAL_MISSING: None  \nIMPLICIT_LIKELY: Excel  \nLEARNABLE_GAPS: None  \n\nBLOCKER_FOUND: No  \n\n---  \nDETAILED_ANALYSIS:  \n1. **Skills Match**: The candidate has strong SQL skills, experience with Power BI, and data analysis experience, which are core requirements for the role. The CV also indicates experience with data extraction and report generation, which aligns with the job's focus on data mining and report authoring. Excel is not explicitly mentioned but is likely implicit given the data analysis background.\n\n2. **Experience and Domain Match**: The candidate has 2 years of relevant experience, which matches the job's requirement for a minimum of 2 years in a similar role. The candidate's experience in data analysis and AI engineering, along with stakeholder engagement, aligns well with the responsibilities of the role. The candidate's work in tech and construction industries provides transferable skills applicable to the not-for-profit sector, especially in a data-driven role."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-11-12T03:55:40.025",
+      "model_used": "unknown",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 29\nMatched: 8\nMissing: 21\nMatch Rate: 27.59%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills            16         14         3         11            21.43\nSoft Skills                   4          9         3          6            33.33\nDomain Keywords              7          6         2          4            33.33\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 brief reasoning: Direct match as Power BI is a business intelligence tool.\n    2. JD Required: 'SQL'\n       → Found in CV: 'SQL'\n       💡 brief reasoning: Direct match as SQL is a specific technical skill listed in both.\n    3. JD Required: 'Business intelligence tools'\n       → Found in CV: 'Power BI'\n       💡 brief reasoning: Power BI is a business intelligence tool, making this a direct match.\n  ❌ MISSING FROM CV (11 items):\n    1. JD Requires: 'Data analysis'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    2. JD Requires: 'Data extraction'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    3. JD Requires: 'Data manipulation'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    4. JD Requires: 'Data mining'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    5. JD Requires: 'Data models'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    6. JD Requires: 'Data warehouse'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    7. JD Requires: 'Excel'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    8. JD Requires: 'Project management'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    9. JD Requires: 'SQL data warehouse'\n       💡 brief reason why not found: No direct equivalent in CV technical skills.\n    10. JD Requires: 'Tableau'\n        💡 brief reason why not found: No direct equivalent in CV technical skills.\n    11. JD Requires: 'VBA'\n        💡 brief reason why not found: No direct equivalent in CV technical skills.\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Communication'\n       → Found in CV: 'Communication'\n       💡 brief reasoning: Direct match as both list communication as a skill.\n    2. JD Required: 'Problem-solving'\n       → Found in CV: 'Problem Solving'\n       💡 brief reasoning: Direct match as both list problem-solving as a skill.\n    3. JD Required: 'Teamwork'\n       → Found in CV: 'Teamwork'\n       💡 brief reasoning: Direct match as both list teamwork as a skill.\n  ❌ MISSING FROM CV (6 items):\n    1. JD Requires: 'Analytical skills'\n       💡 brief reason why not found: No direct equivalent in CV soft skills.\n    2. JD Requires: 'Attention to detail'\n       💡 brief reason why not found: No direct equivalent in CV soft skills.\n    3. JD Requires: 'Collaboration'\n       💡 brief reason why not found: No direct equivalent in CV soft skills.\n    4. JD Requires: 'Customer service'\n       💡 brief reason why not found: No direct equivalent in CV soft skills.\n    5. JD Requires: 'Organizational skills'\n       💡 brief reason why not found: No direct equivalent in CV soft skills.\n    6. JD Requires: 'Stakeholder management'\n       💡 brief reason why not found: No direct equivalent in CV soft skills.\n\n🔹 DOMAIN KEYWORDS\n  ✅ MATCHED JD REQUIREMENTS (2 items):\n    1. JD Required: 'Data governance'\n       → Found in CV: 'Data Governance'\n       💡 brief reasoning: Direct match as both list data governance as a domain keyword.\n    2. JD Required: 'Humanitarian emergencies'\n       → Found in CV: 'Refugees'\n       💡 brief reasoning: Both relate to humanitarian work, making this a direct match.\n  ❌ MISSING FROM CV (4 items):\n    1. JD Requires: 'Donor-centricity'\n       💡 brief reason why not found: No direct equivalent in CV domain keywords.\n    2. JD Requires: 'Fundraising'\n       💡 brief reason why not found: No direct equivalent in CV domain keywords.\n    3. JD Requires: 'Marketing campaigns'\n       💡 brief reason why not found: No direct equivalent in CV domain keywords.\n    4. JD Requires: 'Refugees'\n       💡 brief reason why not found: No direct equivalent in CV domain keywords.\n\n📚 INPUT SUMMARY (normalized, truncated if long)\nCV\n- Technical: ['APIs', 'Computer Vision', 'Dart', 'Dashboard Creation', 'Data Entry', 'Data Governance', 'Data Management', 'Edge AI', 'Flutter', 'Multi-LLM', 'PostgreSQL', 'Power BI', 'Python', 'PyTorch', 'Report Generation', 'SQL']\n- Soft: ['Communication', 'Problem Solving', 'Stakeholder Engagement', 'Teamwork']\n- Domain: ['AI engineering', 'AI model responses', 'AI training projects', 'AI-powered resume builder', 'Construction industries', 'Corrosion detection', 'Real-time ATS scoring']\n\nJD\n- Technical: ['Business intelligence tools', 'Data analysis', 'Data extraction', 'Data manipulation', 'Data mining', 'Data models', 'Data warehouse', 'Excel', 'Power BI', 'Project management', 'SQL', 'SQL data warehouse', 'Tableau', 'VBA']\n- Soft: ['Analytical skills', 'Attention to detail', 'Collaboration', 'Communication', 'Customer service', 'Organizational skills', 'Problem-solving', 'Stakeholder management', 'Teamwork']\n- Domain: ['Data governance', 'Donor-centricity', 'Fundraising', 'Humanitarian emergencies', 'Marketing campaigns', 'Refugees']"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-11-12T03:56:03.380",
+      "component_analyses": {
+        "technical": {
+          "technical_analysis": {
+            "technical_depth_score": 70.0,
+            "core_skills_match_percentage": 70.0,
+            "technical_stack_fit_percentage": 85.0,
+            "complexity_readiness_score": 60.0,
+            "learning_agility_score": 75.0,
+            "jd_problem_complexity": 5,
+            "technical_strengths": [
+              "Improved forecasting accuracy by 25% through database analysis using PostgreSQL and Power BI",
+              "Developed AI-powered resume builder serving 500+ users with real-time ATS scoring and optimization",
+              "Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices"
+            ],
+            "technical_gaps": [
+              "No experience with large-scale distributed systems",
+              "Limited evidence of handling high availability or large-scale architecture"
+            ],
+            "cv_sophistication_level": "Derived from analysis",
+            "cv_primary_domain": "Extracted from CV",
+            "jd_required_sophistication": "Extracted from JD",
+            "overqualification_risk": "LOW"
+          }
+        },
+        "skills": {
+          "overall_skills_score": 80.0,
+          "business_readiness_score": 80.0,
+          "skills_analysis": [
+            {
+              "skill": "Consolidated skills analysis",
+              "relevance_score": 80.0,
+              "context": "Python used in corporate production (100%), Power BI in corporate (100%), SQL in corporate (100%), AI model evaluation in freelance (80%)",
+              "business_application": "Python used in corporate production (100%), Power BI in corporate (100%), SQL in corporate (100%), AI model evaluation in freelance (80%)"
+            }
+          ],
+          "corporate_skills_strength": "Python used in corporate production (100%), Power BI in corporate (100%), SQL in corporate (100%), AI model evaluation in freelance (80%)",
+          "academic_skills_discount": "Applied in scoring",
+          "strength_areas": [
+            "Improved forecasting accuracy by 25% through database analysis using PostgreSQL and Power BI",
+            "Developed AI-powered resume builder serving 500+ users with real-time ATS scoring and optimization",
+            "Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices"
+          ],
+          "critical_gaps": [
+            "Data Mining",
+            "Segmentation Strategies",
+            "Data Warehouse Administration"
+          ],
+          "immediate_value_skills": [
+            "Improved forecasting accuracy by 25% through database analysis using PostgreSQL and Power BI",
+            "Developed AI-powered resume builder serving 500+ users with real-time ATS scoring and optimization",
+            "Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices"
+          ],
+          "training_investment_needed": [
+            "Data Mining",
+            "Segmentation Strategies",
+            "Data Warehouse Administration"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "1.7",
+            "cv_corporate_years": "0.7",
+            "cv_academic_years": "1.0",
+            "cv_role_level": "Entry",
+            "jd_required_years": "2.0",
+            "jd_role_level": "Mid",
+            "alignment_score": 70.0,
+            "experience_gaps": [
+              "No direct team management experience",
+              "Limited evidence of leading cross-functional initiatives"
+            ],
+            "experience_strengths": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "Data Analyst at iBuild Building Solutions"
+            ],
+            "overqualification_risk": "MEDIUM",
+            "cv_progression": [
+              "Derived from analysis"
+            ],
+            "quantified_achievements": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "Data Analyst at iBuild Building Solutions"
+            ]
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "0.7",
+            "cv_academic_years": "1.0",
+            "seniority_score": 60.0,
+            "corporate_seniority_match": 60.0,
+            "leadership_readiness_score": 70.0,
+            "experience_match_percentage": 70.0,
+            "responsibility_fit_percentage": 60.0,
+            "growth_trajectory_score": 75.0,
+            "cv_responsibility_scope": "Entry",
+            "cv_leadership_indicators": "5",
+            "jd_required_seniority": "Mid",
+            "overqualification_risk": "MEDIUM",
+            "seniority_strengths": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "Data Analyst at iBuild Building Solutions"
+            ],
+            "seniority_gaps": [
+              "No direct team management experience",
+              "Limited evidence of leading cross-functional initiatives"
+            ],
+            "readiness_assessment": "Score: 60.0"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Tech and Construction",
+            "jd_target_industry": "Non-Profit",
+            "industry_alignment_score": 50.0,
+            "transition_type": "Different industry, corporate background",
+            "success_probability": "MEDIUM",
+            "hiring_risk_assessment": "HIGH RISK",
+            "industry_strengths": [
+              "The candidate's experience in tech and construction does not directly align with the non-profit sector. While data analysis skills are transferable, the non-profit industry may require understanding of donor-centric data strategies and fundraising analytics, which are not evident in the CV. This transition poses a significant adaptation challenge."
+            ],
+            "critical_industry_gaps": [],
+            "corporate_background_bonus": "5",
+            "domain_overlap_percentage": 50.0,
+            "data_familiarity_score": 60.0,
+            "stakeholder_fit_score": 70.0,
+            "business_cycle_alignment": 50.0,
+            "direct_industry_match": "PARTIAL",
+            "cultural_adaptation_difficulty": "MEDIUM",
+            "adaptation_timeline": "6-12 months"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 11,
+            "total_preferred_keywords": 4,
+            "matched_required_count": 4,
+            "matched_preferred_count": 0,
+            "missing_required": 7,
+            "missing_preferred": 4
+          },
+          "bonus_breakdown": {
+            "required_bonus": 2.0,
+            "required_penalty": -4.0,
+            "preferred_bonus": 0.0,
+            "preferred_penalty": -0.6,
+            "total_bonus": -2.6
+          },
+          "coverage_metrics": {
+            "required_coverage": 36.36,
+            "preferred_coverage": 0.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 80.0,
+        "experience_alignment": 70.0,
+        "industry_fit": 50.0,
+        "domain_overlap_percentage": 50.0,
+        "data_familiarity_score": 60.0,
+        "stakeholder_fit_score": 70.0,
+        "business_cycle_alignment": 50.0,
+        "role_seniority": 60.0,
+        "experience_match_percentage": 70.0,
+        "responsibility_fit_percentage": 60.0,
+        "leadership_readiness_score": 70.0,
+        "growth_trajectory_score": 75.0,
+        "technical_depth": 70.0,
+        "core_skills_match_percentage": 70.0,
+        "technical_stack_fit_percentage": 85.0,
+        "complexity_readiness_score": 60.0,
+        "learning_agility_score": 75.0,
+        "jd_problem_complexity": 5.0,
+        "requirement_bonus": -2.6,
+        "total_bonus": -2.6,
+        "required_bonus": 2.0,
+        "required_penalty": -4.0,
+        "preferred_bonus": 0.0,
+        "preferred_penalty": -0.6,
+        "required_coverage": 36.36,
+        "preferred_coverage": 0.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-11-12T03:56:03.384",
+      "final_ats_score": 36.2,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally not recommended - Significant gaps",
+      "breakdown": {
+        "category1": {
+          "score": 16.9,
+          "max_points": 65,
+          "technical_skills_match_rate": 21.43,
+          "domain_keywords_match_rate": 33.33,
+          "soft_skills_match_rate": 33.33,
+          "technical_points": 8.6,
+          "domain_points": 3.3,
+          "soft_points": 5.0,
+          "missing_counts": {
+            "technical": 11,
+            "soft": 6,
+            "domain": 4
+          }
+        },
+        "category2": {
+          "score": 19.2,
+          "max_points": 35,
+          "technical_skills_component": {
+            "score": 12.1,
+            "max_points": 22,
+            "average": 55.0
+          },
+          "experience_fit_component": {
+            "score": 7.2,
+            "max_points": 13,
+            "average": 55.0
+          }
+        },
+        "base_score": 36.2,
+        "bonus_points": 0.0,
+        "boost_applied": 0.0
+      },
+      "scoring_version": "v2_65_35_split"
+    }
+  ]
+}

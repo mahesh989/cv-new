@@ -1,12 +1,16 @@
 """
-ATS Recommendation Service
+ATS Recommendation Service - Optimized for AI Consumption
 
-This service extracts ATS calculation entries from skills analysis files 
-and creates recommendation files in the specified format.
+This service creates highly optimized recommendation files with:
+- Zero redundancy
+- Structured data only
+- Keyword tier classification
+- Strategic tailoring guidance
 """
 
 import logging
 import json
+import re
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from datetime import datetime
@@ -16,273 +20,597 @@ logger = logging.getLogger(__name__)
 
 
 class ATSRecommendationService:
-    """Service for extracting ATS data and creating recommendation files"""
+    """Service for creating optimized AI recommendation input files"""
     
     def __init__(self, user_email: str):
         from app.utils.user_path_utils import get_user_base_path
         self.user_email = user_email
-        # get_user_base_path already returns the per-user cv-analysis directory
-        # Avoid duplicating "cv-analysis" in the path
         self.base_dir = get_user_base_path(user_email)
     
     def extract_ats_recommendation_data(self, company: str) -> Optional[Dict[str, Any]]:
         """
-        Extract comprehensive analysis data from skills analysis file
+        Extract and optimize recommendation data from skills analysis file
         
         Args:
             company: Company name
             
         Returns:
-            Dictionary containing the comprehensive recommendation data or None if not found
+            Optimized dictionary for AI consumption or None if not found
         """
         try:
-            # Construct file paths
+            # Locate analysis file
             company_dir = self.base_dir / "applied_companies" / company
-            
-            # Use timestamped analysis file with fallback
-            from app.utils.timestamp_utils import TimestampUtils
-            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+            analysis_file = TimestampUtils.find_latest_timestamped_file(
+                company_dir, f"{company}_skills_analysis", "json"
+            )
             if not analysis_file:
                 analysis_file = company_dir / f"{company}_skills_analysis.json"
             
-            # Check if analysis file exists
             if not analysis_file.exists():
                 logger.error(f"Skills analysis file not found: {analysis_file}")
                 return None
             
-            # Read the analysis file
+            # Read analysis file
             with open(analysis_file, 'r', encoding='utf-8') as f:
                 analysis_data = json.load(f)
             
-            # Extract comprehensive analysis data
-            recommendation_data = {}
-            
-            # Extract CV comprehensive analysis
+            # Extract components
             cv_skills = analysis_data.get("cv_skills", {})
-            if cv_skills:
-                recommendation_data["cv_comprehensive_analysis"] = self._format_cv_comprehensive_analysis(cv_skills)
-            else:
-                logger.warning(f"No CV skills found in {analysis_file}")
-                recommendation_data["cv_comprehensive_analysis"] = "CV analysis not available"
-            
-            # Extract JD comprehensive analysis  
             jd_skills = analysis_data.get("jd_skills", {})
-            if jd_skills:
-                recommendation_data["jd_comprehensive_analysis"] = self._format_jd_comprehensive_analysis(jd_skills)
-            else:
-                logger.warning(f"No JD skills found in {analysis_file}")
-                recommendation_data["jd_comprehensive_analysis"] = "JD analysis not available"
-            
-            # Extract analyze match entries
             match_entries = analysis_data.get("analyze_match_entries", [])
-            if match_entries:
-                recommendation_data["analyze_match_entries"] = match_entries
-            else:
-                logger.warning(f"No analyze match entries found in {analysis_file}")
-                recommendation_data["analyze_match_entries"] = []
-            
-            # Extract preextracted comparison entries
             preextracted_entries = analysis_data.get("preextracted_comparison_entries", [])
-            if preextracted_entries:
-                recommendation_data["preextracted_comparison_entries"] = preextracted_entries
-            else:
-                logger.warning(f"No preextracted comparison entries found in {analysis_file}")
-                recommendation_data["preextracted_comparison_entries"] = []
-            
-            # Extract component analysis entries
             component_entries = analysis_data.get("component_analysis_entries", [])
-            if component_entries:
-                recommendation_data["component_analysis_entries"] = component_entries
-            else:
-                logger.warning(f"No component analysis entries found in {analysis_file}")
-                recommendation_data["component_analysis_entries"] = []
-            
-            # Extract ATS calculation entries
             ats_entries = analysis_data.get("ats_calculation_entries", [])
-            if ats_entries:
-                recommendation_data["ats_calculation_entries"] = ats_entries
-                latest_ats_entry = ats_entries[-1]
-                logger.info(f"Final ATS Score: {latest_ats_entry.get('final_ats_score', 'N/A')}")
-                logger.info(f"Category Status: {latest_ats_entry.get('category_status', 'N/A')}")
-            else:
-                logger.warning(f"No ATS calculation entries found in {analysis_file}")
-                recommendation_data["ats_calculation_entries"] = []
             
-            logger.info(f"Successfully extracted comprehensive recommendation data for {company}")
+            # Parse and simplify each component
+            preliminary_decision = self._extract_preliminary_decision(match_entries)
+            match_summary = self._extract_match_summary(preextracted_entries)
+            component_summary = self._extract_component_summary(component_entries)
+            ats_scoring = self._extract_ats_scoring(ats_entries)
+            
+            # Generate optimized recommendation data
+            recommendation_data = {
+                "metadata": {
+                    "company": company,
+                    "generated_at": datetime.utcnow().isoformat(),
+                    "ats_score_current": ats_scoring.get("final_score", 0),
+                    "match_rate_current": match_summary.get("overall_match_rate", 0)
+                },
+                
+                # Clean structured skills (no verbose text)
+                "skills_extraction": {
+                    "cv": {
+                        "technical": cv_skills.get("technical_skills", []),
+                        "soft": cv_skills.get("soft_skills", []),
+                        "domain": cv_skills.get("domain_keywords", [])
+                    },
+                    "jd": {
+                        "technical": jd_skills.get("technical_skills", []),
+                        "soft": jd_skills.get("soft_skills", []),
+                        "domain": jd_skills.get("domain_keywords", [])
+                    }
+                },
+                
+                # Simplified preliminary decision (no verbose analysis)
+                "preliminary_decision": preliminary_decision,
+                
+                # Clean match summary (no emoji, no verbose reasoning)
+                "match_summary": match_summary,
+                
+                # Keyword tier classification for CV framework
+                "keyword_integration_guidance": self._classify_keywords(
+                    match_summary.get("missing_keywords", {}),
+                    cv_skills
+                ),
+                
+                # Simplified component summary (no redundant fields)
+                "component_summary": component_summary,
+                
+                # Strategic tailoring guidance
+                "tailoring_strategy": self._generate_tailoring_strategy(
+                    component_summary,
+                    match_summary,
+                    ats_scoring
+                ),
+                
+                # Simplified ATS scoring (no deep nesting)
+                "ats_scoring": ats_scoring
+            }
+            
+            logger.info(f"✅ Generated optimized recommendation data for {company}")
+            logger.info(f"   ATS Score: {ats_scoring.get('final_score', 0)}")
+            logger.info(f"   Match Rate: {match_summary.get('overall_match_rate', 0):.1f}%")
+            logger.info(f"   Tier 1 Keywords: {len(recommendation_data['keyword_integration_guidance']['tier1_always_add']['technical']) + len(recommendation_data['keyword_integration_guidance']['tier1_always_add']['soft'])}")
+            
             return recommendation_data
             
         except Exception as e:
-            logger.error(f"Error extracting comprehensive recommendation data for {company}: {e}")
+            logger.error(f"Error extracting recommendation data for {company}: {e}")
             return None
     
-    def _format_cv_comprehensive_analysis(self, cv_skills: Dict[str, Any]) -> str:
+    def _extract_preliminary_decision(self, match_entries: List[Dict]) -> Dict[str, Any]:
         """
-        Format CV skills data into comprehensive analysis text
+        Extract structured preliminary decision (remove verbose analysis)
         
         Args:
-            cv_skills: CV skills data from the analysis file
+            match_entries: List of analyze match entries
             
         Returns:
-            Formatted comprehensive analysis string
+            Clean structured decision data
         """
-        try:
-            # Extract skills from the CV skills data structure
-            technical_skills = cv_skills.get("technical_skills", [])
-            soft_skills = cv_skills.get("soft_skills", [])
-            domain_keywords = cv_skills.get("domain_keywords", [])
-            
-            # Build the comprehensive analysis text
-            analysis_text = "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n"
-            
-            # Add technical skills
-            for skill in technical_skills[:17]:  # Limit to match the example
-                analysis_text += f"- {skill.replace('_', ' ').title()}\n"
-            
-            analysis_text += "\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n"
-            # Add implied technical skills
-            implied_technical = ["Data Cleaning", "Data Preprocessing", "Data Analysis", 
-                               "Predictive Analytics", "Automation", "Data Visualization", 
-                               "Reporting", "Computational Modeling", "Workflow Management"]
-            for skill in implied_technical:
-                analysis_text += f"- {skill}\n"
-            
-            analysis_text += "\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n"
-            
-            # Add soft skills
-            for skill in soft_skills[:5]:  # Limit to match the example
-                analysis_text += f"- {skill.replace('_', ' ').title()}\n"
-            
-            analysis_text += "\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n"
-            # Add implied soft skills
-            implied_soft = ["Problem-solving", "Adaptability", "Time Management", "Detail-oriented"]
-            for skill in implied_soft:
-                analysis_text += f"- {skill}\n"
-            
-            analysis_text += "\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n"
-            
-            # Add domain keywords
-            for keyword in domain_keywords[:10]:  # Limit to match the example
-                analysis_text += f"- {keyword.replace('_', ' ').title()}\n"
-            
-            analysis_text += "\n**STRONGLY IMPLIED:**\n"
-            # Add implied domain keywords
-            implied_domain = ["Predictive Analytics", "Operational Efficiency", "Strategic Decision-making"]
-            for keyword in implied_domain:
-                analysis_text += f"- {keyword}\n"
-            
-            # Add Python code section
-            analysis_text += "\n```python\n"
-            analysis_text += f"SOFT_SKILLS = {soft_skills}\n"
-            analysis_text += f"TECHNICAL_SKILLS = {technical_skills}\n"
-            analysis_text += f"DOMAIN_KEYWORDS = {domain_keywords}\n"
-            analysis_text += "```"
-            
-            return analysis_text
-            
-        except Exception as e:
-            logger.error(f"Error formatting CV comprehensive analysis: {e}")
-            return "Error formatting CV analysis"
+        if not match_entries:
+            return {
+                "decision": "UNKNOWN",
+                "confidence": 0,
+                "match_score": 0,
+                "primary_reason": "",
+                "critical_missing": [],
+                "implicit_likely": [],
+                "blocker_found": False
+            }
+        
+        latest_entry = match_entries[-1]
+        content = latest_entry.get("content", "")
+        
+        # Parse structured fields only (ignore verbose DETAILED_ANALYSIS)
+        decision_data = {
+            "decision": "UNKNOWN",
+            "confidence": 0,
+            "match_score": 0,
+            "primary_reason": "",
+            "critical_missing": [],
+            "implicit_likely": [],
+            "blocker_found": False
+        }
+        
+        lines = content.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line.startswith("DECISION:"):
+                decision_data["decision"] = line.split(":", 1)[1].strip()
+            elif line.startswith("CONFIDENCE:"):
+                try:
+                    decision_data["confidence"] = int(line.split(":", 1)[1].strip())
+                except:
+                    pass
+            elif line.startswith("MATCH_SCORE:"):
+                try:
+                    decision_data["match_score"] = int(line.split(":", 1)[1].strip())
+                except:
+                    pass
+            elif line.startswith("PRIMARY_REASON:"):
+                decision_data["primary_reason"] = line.split(":", 1)[1].strip()
+            elif line.startswith("CRITICAL_MISSING:"):
+                missing = line.split(":", 1)[1].strip()
+                if missing and missing.lower() != "none":
+                    decision_data["critical_missing"] = [m.strip() for m in missing.split(",")]
+            elif line.startswith("IMPLICIT_LIKELY:"):
+                implicit = line.split(":", 1)[1].strip()
+                if implicit and implicit.lower() != "none":
+                    decision_data["implicit_likely"] = [i.strip() for i in implicit.split(",")]
+            elif line.startswith("BLOCKER_FOUND:"):
+                blocker = line.split(":", 1)[1].strip()
+                decision_data["blocker_found"] = blocker.lower() in ["yes", "true"]
+            elif line.startswith("---"):
+                # Stop at detailed analysis section (we don't need verbose paragraphs)
+                break
+        
+        return decision_data
     
-    def _format_jd_comprehensive_analysis(self, jd_skills: Dict[str, Any]) -> str:
+    def _extract_match_summary(self, preextracted_entries: List[Dict]) -> Dict[str, Any]:
         """
-        Format JD skills data into comprehensive analysis text
+        Extract clean match summary (remove emoji, verbose reasoning, duplicate lists)
         
         Args:
-            jd_skills: JD skills data from the analysis file
+            preextracted_entries: List of preextracted comparison entries
             
         Returns:
-            Formatted comprehensive analysis string
+            Clean structured match data
         """
-        try:
-            # Extract skills from the JD skills data structure
-            technical_skills = jd_skills.get("technical_skills", [])
-            soft_skills = jd_skills.get("soft_skills", [])
-            domain_keywords = jd_skills.get("domain_keywords", [])
+        if not preextracted_entries:
+            return {
+                "overall_match_rate": 0,
+                "by_category": {},
+                "missing_keywords": {"technical": [], "soft": [], "domain": []}
+            }
+        
+        latest_entry = preextracted_entries[-1]
+        content = latest_entry.get("content", "")
+        
+        match_summary = {
+            "overall_match_rate": 0,
+            "by_category": {
+                "technical": {"matched": [], "missing": [], "match_rate": 0},
+                "soft": {"matched": [], "missing": [], "match_rate": 0},
+                "domain": {"matched": [], "missing": [], "match_rate": 0}
+            },
+            "missing_keywords": {"technical": [], "soft": [], "domain": []}
+        }
+        
+        # Extract overall match rate
+        match_rate_pattern = r"Match Rate:\s*([\d.]+)%"
+        match = re.search(match_rate_pattern, content)
+        if match:
+            match_summary["overall_match_rate"] = float(match.group(1))
+        
+        # Parse by category
+        current_category = None
+        lines = content.split('\n')
+        
+        for line in lines:
+            line_upper = line.upper()
             
-            # Build the comprehensive analysis text
-            analysis_text = "## TECHNICAL SKILLS:\n**EXPLICIT (directly stated):**\n"
+            # Identify category sections
+            if "TECHNICAL SKILLS" in line_upper:
+                current_category = "technical"
+            elif "SOFT SKILLS" in line_upper:
+                current_category = "soft"
+            elif "DOMAIN KEYWORDS" in line_upper:
+                current_category = "domain"
+            elif "INPUT SUMMARY" in line_upper:
+                # Stop before the redundant INPUT SUMMARY section
+                break
             
-            # Add technical skills
-            for skill in technical_skills[:16]:  # Limit to match the example
-                analysis_text += f"- {skill.replace('_', ' ').title()}\n"
+            # Extract matched skills (look for "→ Found in CV: 'skill'")
+            if "→ Found in CV:" in line and current_category:
+                try:
+                    skill = line.split("'")[1]
+                    match_summary["by_category"][current_category]["matched"].append(skill)
+                except:
+                    pass
             
-            analysis_text += "\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n"
-            # Add implied technical skills
-            implied_technical = ["Analytical Models", "Bulk Communications", 
-                               "Evidence-Based Decision Making", "Clean Data", "De-duplication"]
-            for skill in implied_technical:
-                analysis_text += f"- {skill}\n"
+            # Extract missing skills (look for "JD Requires: 'skill'")
+            if ("JD Required:" in line or "JD Requires:" in line) and current_category:
+                try:
+                    skill = line.split("'")[1]
+                    match_summary["by_category"][current_category]["missing"].append(skill)
+                    match_summary["missing_keywords"][current_category].append(skill)
+                except:
+                    pass
+        
+        # Calculate match rates per category
+        for category in ["technical", "soft", "domain"]:
+            matched = len(match_summary["by_category"][category]["matched"])
+            missing = len(match_summary["by_category"][category]["missing"])
+            total = matched + missing
+            if total > 0:
+                match_summary["by_category"][category]["match_rate"] = round((matched / total) * 100, 2)
+        
+        return match_summary
+    
+    def _extract_component_summary(self, component_entries: List[Dict]) -> Dict[str, Any]:
+        """
+        Extract clean component summary (remove duplicates, placeholder text, verbose context)
+        
+        Args:
+            component_entries: List of component analysis entries
             
-            analysis_text += "\n## SOFT SKILLS:\n**EXPLICIT (directly stated):**\n"
+        Returns:
+            Clean structured component data
+        """
+        if not component_entries:
+            return {}
+        
+        latest_entry = component_entries[-1]
+        component_analyses = latest_entry.get("component_analyses", {})
+        
+        component_summary = {}
+        
+        # Technical component (keep scores, strengths, gaps only)
+        technical = component_analyses.get("technical", {}).get("technical_analysis", {})
+        if technical:
+            component_summary["technical"] = {
+                "score": technical.get("technical_depth_score", 0),
+                "core_match": technical.get("core_skills_match_percentage", 0),
+                "stack_fit": technical.get("technical_stack_fit_percentage", 0),
+                "strengths": technical.get("technical_strengths", [])[:3],  # Top 3 only
+                "gaps": technical.get("technical_gaps", [])[:3]  # Top 3 only
+            }
+        
+        # Skills component (remove duplicate fields)
+        skills = component_analyses.get("skills", {})
+        if skills:
+            component_summary["skills"] = {
+                "score": skills.get("overall_skills_score", 0),
+                "business_readiness": skills.get("business_readiness_score", 0),
+                "strengths": skills.get("strength_areas", [])[:3],  # No need for immediate_value_skills duplicate
+                "critical_gaps": skills.get("critical_gaps", [])  # No need for training_investment_needed duplicate
+            }
+        
+        # Experience component (keep only essential data)
+        experience = component_analyses.get("experience", {}).get("experience_analysis", {})
+        if experience:
+            component_summary["experience"] = {
+                "years": experience.get("cv_experience_years", "0"),
+                "corporate_years": experience.get("cv_corporate_years", "0"),
+                "alignment_score": experience.get("alignment_score", 0),
+                "strengths": experience.get("experience_strengths", [])[:3],
+                "gaps": experience.get("experience_gaps", [])[:3]
+            }
+        
+        # Seniority component
+        seniority = component_analyses.get("seniority", {}).get("seniority_analysis", {})
+        if seniority:
+            component_summary["seniority"] = {
+                "score": seniority.get("seniority_score", 0),
+                "cv_level": seniority.get("cv_responsibility_scope", "Unknown"),
+                "jd_level": seniority.get("jd_required_seniority", "Unknown"),
+                "match": seniority.get("corporate_seniority_match", 0)
+            }
+        
+        # Industry component (essential fields only)
+        industry = component_analyses.get("industry", {}).get("industry_analysis", {})
+        if industry:
+            component_summary["industry"] = {
+                "cv_industry": industry.get("cv_primary_industry", "Unknown"),
+                "jd_industry": industry.get("jd_target_industry", "Unknown"),
+                "alignment_score": industry.get("industry_alignment_score", 0),
+                "transition_type": industry.get("transition_type", "Unknown"),
+                "transition_difficulty": industry.get("cultural_adaptation_difficulty", "UNKNOWN"),
+                "adaptation_timeline": industry.get("adaptation_timeline", "Unknown")
+            }
+        
+        return component_summary
+    
+    def _extract_ats_scoring(self, ats_entries: List[Dict]) -> Dict[str, Any]:
+        """
+        Extract simplified ATS scoring (flatten structure, remove duplicates)
+        
+        Args:
+            ats_entries: List of ATS calculation entries
             
-            # Add soft skills
-            for skill in soft_skills[:6]:  # Limit to match the example
-                analysis_text += f"- {skill.replace('_', ' ').title()}\n"
+        Returns:
+            Clean structured ATS data
+        """
+        if not ats_entries:
+            return {
+                "final_score": 0,
+                "status": "Unknown",
+                "category1_keywords": 0,
+                "category2_ai_analysis": 0,
+                "missing_counts": {}
+            }
+        
+        latest_entry = ats_entries[-1]
+        breakdown = latest_entry.get("breakdown", {})
+        
+        # Clean status (remove emoji)
+        status = latest_entry.get("category_status", "Unknown")
+        status = status.replace("❌", "").replace("✅", "").replace("⚠️", "").strip()
+        
+        return {
+            "final_score": latest_entry.get("final_ats_score", 0),
+            "status": status,
+            "target_score": 75.0,
+            "improvement_needed": max(0, 75.0 - latest_entry.get("final_ats_score", 0)),
+            "category1_keywords": breakdown.get("category1", {}).get("score", 0),
+            "category2_ai_analysis": breakdown.get("category2", {}).get("score", 0),
+            "missing_counts": breakdown.get("category1", {}).get("missing_counts", {}),
+            "scoring_version": latest_entry.get("scoring_version", "unknown")
+        }
+    
+    def _classify_keywords(self, missing_keywords: Dict[str, List[str]], 
+                          cv_skills: Dict[str, List[str]]) -> Dict[str, Any]:
+        """
+        Classify missing keywords into tiers based on CV tailoring framework
+        
+        Tier 1: Always add (generic/transferable)
+        Tier 2: Add if semantic evidence exists
+        Tier 3: Never add (domain-specific/unverifiable)
+        """
+        # Tier 1 patterns (generic soft skills and transferable competencies)
+        tier1_patterns = {
+            "soft": [
+                "leadership", "communication", "teamwork", "problem solving", "problem-solving",
+                "collaboration", "time management", "adaptability", "attention to detail",
+                "analytical thinking", "critical thinking", "interpersonal", "presentation",
+                "organizational", "numeracy", "proactive"
+            ],
+            "technical": [
+                "data analysis", "project management", "stakeholder management",
+                "business intelligence", "reporting", "data visualization", "visualisation"
+            ]
+        }
+        
+        # Tier 3 patterns (domain-specific terms - NEVER add)
+        tier3_patterns = {
+            "domain": [
+                "refugee", "humanitarian", "fundraising", "donor", "charity", "nfp",
+                "not for profit", "community engagement", "social impact", "food relief",
+                "school breakfast", "food bank", "volunteer", "non-profit"
+            ],
+            "certifications": [
+                "pmp", "scrum master", "aws certified", "azure certified", "google cloud",
+                "comptia", "cissp", "cisa", "prince2"
+            ]
+        }
+        
+        classified = {
+            "tier1_always_add": {"technical": [], "soft": [], "domain": []},
+            "tier2_add_if_evidence": {"technical": [], "soft": [], "domain": []},
+            "tier3_never_add": {"technical": [], "soft": [], "domain": []},
+            "integration_instructions": (
+                "Tier 1: Integrate ALL keywords into skills section and relevant bullets. "
+                "Tier 2: Integrate ONLY if semantic evidence exists in CV experience. "
+                "Tier 3: DO NOT add - domain-specific, unverifiable, or lacks evidence."
+            )
+        }
+        
+        cv_technical = [s.lower() for s in cv_skills.get("technical_skills", [])]
+        
+        for category in ["technical", "soft", "domain"]:
+            for keyword in missing_keywords.get(category, []):
+                keyword_lower = keyword.lower()
+                
+                # Check Tier 1 (generic/transferable)
+                is_tier1 = any(
+                    pattern in keyword_lower 
+                    for pattern in tier1_patterns.get(category, [])
+                )
+                
+                if is_tier1:
+                    classified["tier1_always_add"][category].append(keyword)
+                    continue
+                
+                # Check Tier 3 (domain-specific/unverifiable)
+                is_tier3_domain = any(
+                    pattern in keyword_lower 
+                    for pattern in tier3_patterns.get("domain", [])
+                )
+                
+                is_tier3_cert = any(
+                    pattern in keyword_lower 
+                    for pattern in tier3_patterns.get("certifications", [])
+                )
+                
+                is_specific_variant = self._is_specific_tool_variant(keyword_lower, cv_technical)
+                
+                if is_tier3_domain or is_tier3_cert or is_specific_variant:
+                    classified["tier3_never_add"][category].append(keyword)
+                    continue
+                
+                # Default to Tier 2
+                classified["tier2_add_if_evidence"][category].append(keyword)
+        
+        return classified
+    
+    def _is_specific_tool_variant(self, keyword: str, cv_technical_lower: List[str]) -> bool:
+        """Check if keyword is a specific tool variant not in CV"""
+        # SQL variants without generic SQL
+        if keyword in ["postgresql", "mysql", "mssql", "oracle", "mariadb"]:
+            return not any("sql" in skill for skill in cv_technical_lower)
+        
+        # Power BI advanced features without Power BI
+        if keyword in ["dax", "power query", "power bi service"]:
+            return not any("power bi" in skill for skill in cv_technical_lower)
+        
+        # Tableau variants without Tableau
+        if keyword in ["tableau server", "tableau prep", "tableau desktop"]:
+            return not any("tableau" in skill for skill in cv_technical_lower)
+        
+        # Excel advanced features without Excel
+        if keyword in ["vba", "pivot tables", "pivot table", "macros"]:
+            return not any("excel" in skill for skill in cv_technical_lower)
+        
+        # Python frameworks without Python
+        if keyword in ["django", "flask", "fastapi", "pandas", "numpy", "scikit-learn"]:
+            return not any("python" in skill for skill in cv_technical_lower)
+        
+        return False
+    
+    def _generate_tailoring_strategy(self, component_summary: Dict, 
+                                     match_summary: Dict,
+                                     ats_scoring: Dict) -> Dict[str, Any]:
+        """Generate strategic tailoring guidance"""
+        
+        industry_data = component_summary.get("industry", {})
+        cv_industry = industry_data.get("cv_industry", "Unknown")
+        jd_industry = industry_data.get("jd_industry", "Unknown")
+        is_transition = cv_industry.lower() != jd_industry.lower()
+        
+        # Get gaps from match summary
+        technical_gaps = match_summary.get("by_category", {}).get("technical", {}).get("missing", [])[:5]
+        soft_gaps = match_summary.get("by_category", {}).get("soft", {}).get("missing", [])[:3]
+        domain_gaps = match_summary.get("by_category", {}).get("domain", {}).get("missing", [])[:2]
+        
+        # Get CV skills that are not in JD (to de-emphasize)
+        cv_technical = match_summary.get("by_category", {}).get("technical", {}).get("matched", [])
+        all_missing = match_summary.get("by_category", {}).get("technical", {}).get("missing", [])
+        
+        # Identify non-relevant skills (skills in CV but not matched or missing in JD)
+        # This is a simplified approach - in practice, you'd need the full CV and JD skill lists
+        non_relevant = []
+        technical_strengths = component_summary.get("technical", {}).get("strengths", [])
+        for strength in technical_strengths:
+            # Extract skill names from strength descriptions
+            if any(keyword in strength.lower() for keyword in ["ai", "ml", "edge", "flutter", "dart", "yolo", "pytorch"]):
+                non_relevant.append(strength.split()[0:3])  # First few words
+        
+        strategy = {
+            "primary_objective": (
+                f"Transition from {cv_industry} to {jd_industry}" 
+                if is_transition 
+                else f"Optimize CV for {jd_industry} role"
+            ),
             
-            analysis_text += "\n**STRONGLY IMPLIED (very likely based on responsibilities):**\n"
-            # Add implied soft skills
-            implied_soft = ["Teamwork", "Adaptability", "Results-Driven"]
-            for skill in implied_soft:
-                analysis_text += f"- {skill}\n"
+            "emphasis_areas": [
+                "Highlight transferable data analysis and technical skills",
+                "Emphasize stakeholder engagement and business impact",
+                "Frame achievements with quantified metrics and results"
+            ],
             
-            analysis_text += "\n## DOMAIN KEYWORDS:\n**EXPLICIT:**\n"
+            "de_emphasize": [
+                "Minimize AI engineering specifics (PyTorch, Edge AI, YOLOv8n)",
+                "Reduce focus on Flutter/Dart development details",
+                "De-emphasize hardware optimization and edge computing"
+            ] if non_relevant else [],
             
-            # Add domain keywords
-            for keyword in domain_keywords[:7]:  # Limit to match the example
-                analysis_text += f"- {keyword.replace('_', ' ').title()}\n"
+            "critical_additions": {
+                "technical": technical_gaps,
+                "soft": soft_gaps,
+                "domain": [] if is_transition else domain_gaps  # Don't add domain keywords for transitions
+            },
             
-            analysis_text += "\n**STRONGLY IMPLIED:**\n"
-            # Add implied domain keywords
-            implied_domain = ["Campaign Outcomes", "Business Intelligence"]
-            for keyword in implied_domain:
-                analysis_text += f"- {keyword}\n"
+            "tone_guidance": self._get_tone_guidance(jd_industry, ats_scoring.get("final_score", 0)),
             
-            # Add Python code section
-            analysis_text += "\n```python\n"
-            analysis_text += f"SOFT_SKILLS = {soft_skills}\n"
-            analysis_text += f"TECHNICAL_SKILLS = {technical_skills}\n"
-            analysis_text += f"DOMAIN_KEYWORDS = {domain_keywords}\n"
-            analysis_text += "```"
-            
-            return analysis_text
-            
-        except Exception as e:
-            logger.error(f"Error formatting JD comprehensive analysis: {e}")
-            return "Error formatting JD analysis"
+            "industry_bridging": self._get_bridging_statements(
+                cv_industry, jd_industry
+            ) if is_transition else []
+        }
+        
+        return strategy
+    
+    def _get_tone_guidance(self, industry: str, ats_score: float) -> str:
+        """Generate tone guidance based on industry"""
+        industry_lower = industry.lower()
+        
+        if any(term in industry_lower for term in ["non-profit", "charity", "nfp", "ngo", "humanitarian"]):
+            return "Professional yet passionate about social impact; data-focused but human-centered"
+        elif any(term in industry_lower for term in ["tech", "software", "it", "saas"]):
+            return "Technical and results-driven; emphasize innovation and scalability"
+        elif any(term in industry_lower for term in ["finance", "banking", "investment", "fintech"]):
+            return "Precise and analytical; emphasize accuracy, compliance, and risk management"
+        elif any(term in industry_lower for term in ["healthcare", "medical", "clinical", "pharma"]):
+            return "Detail-oriented and patient-focused; emphasize accuracy and care quality"
+        else:
+            return "Professional and results-oriented; emphasize business value and stakeholder impact"
+    
+    def _get_bridging_statements(self, cv_industry: str, jd_industry: str) -> List[str]:
+        """Generate industry transition bridging statements"""
+        return [
+            f"{cv_industry} data analysis experience → Operational efficiency for {jd_industry}",
+            f"Technical skills from {cv_industry} → Modern data practices for {jd_industry}",
+            "Cross-industry analytical mindset → Adaptable problem-solving approach"
+        ]
     
     def create_recommendation_file(self, company: str) -> bool:
-        """
-        Create the recommendation file for a company
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            True if successful, False otherwise
-        """
+        """Create optimized recommendation file"""
         try:
-            # Extract the ATS recommendation data
+            # Extract optimized recommendation data
             recommendation_data = self.extract_ats_recommendation_data(company)
             
             if not recommendation_data:
                 logger.error(f"Could not extract ATS data for {company}")
                 return False
             
-            # Construct the output file path with timestamp
+            # Save recommendation file
             company_dir = self.base_dir / "applied_companies" / company
             timestamp = TimestampUtils.get_timestamp()
             recommendation_file = company_dir / f"{company}_input_recommendation_{timestamp}.json"
             
-            # Ensure the company directory exists
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save the recommendation file
             with open(recommendation_file, 'w', encoding='utf-8') as f:
                 json.dump(recommendation_data, f, indent=2)
             
-            logger.info(f"Successfully created recommendation file: {recommendation_file}")
+            file_size_kb = recommendation_file.stat().st_size / 1024
+            logger.info(f"✅ Created optimized recommendation file: {recommendation_file}")
+            logger.info(f"   📊 File size: {file_size_kb:.1f} KB (optimized)")
+            logger.info(f"   🎯 ATS Score: {recommendation_data['metadata']['ats_score_current']}")
+            logger.info(f"   📈 Match Rate: {recommendation_data['metadata']['match_rate_current']:.1f}%")
+            logger.info(f"   🔑 Tier 1 Keywords: {len(recommendation_data['keyword_integration_guidance']['tier1_always_add'].get('technical', [])) + len(recommendation_data['keyword_integration_guidance']['tier1_always_add'].get('soft', []))}")
 
-            # Register in DB (best-effort)
+            # Register in DB
             try:
                 from app.database import SessionLocal
                 from app.services.file_registry_service import FileRegistryService
@@ -298,78 +626,53 @@ class ATSRecommendationService:
             except Exception as reg_err:
                 logger.warning(f"⚠️ [DB] Failed to register input recommendation: {reg_err}")
             
-            # Create the AI recommendation prompt file in company directory
+            # Trigger AI recommendation generation
             try:
-                # Generate prompt content using recommendation data
-                prompt_content = self._create_ai_recommendation_prompt(recommendation_data)
+                from .ai_recommendation_generator import AIRecommendationGenerator
                 
-                # Save prompt to company directory
-                prompt_file = company_dir / f"{company}_prompt_recommendation.py"
-                with open(prompt_file, 'w', encoding='utf-8') as f:
-                    f.write(prompt_content)
-                    
-                logger.info(f"Successfully created AI recommendation prompt: {prompt_file}")
+                logger.info(f"🤖 [TRIGGER] Starting AI recommendation generation for {company}")
+                ai_generator = AIRecommendationGenerator(user_email=self.user_email)
                 
-                # Trigger AI recommendation generation after prompt file creation
                 try:
-                    from .ai_recommendation_generator import AIRecommendationGenerator
-                    
-                    logger.info(f"🤖 [TRIGGER] Starting AI recommendation generation for {company}")
-                    
-                    # Create user-specific AI recommendation generator
-                    ai_generator = AIRecommendationGenerator(user_email=self.user_email)
-                    
-                    # Schedule AI generation as a background task (if event loop exists)
-                    try:
-                        import asyncio
-                        loop = asyncio.get_event_loop()
-                        if loop and loop.is_running():
-                            # Create background task without blocking
-                            async def background_ai_generation():
-                                try:
-                                    success = await ai_generator.generate_ai_recommendation(company, force_regenerate=False)
-                                    if success:
-                                        logger.info(f"✅ [TRIGGER] AI recommendation generated successfully for {company}")
-                                    else:
-                                        logger.warning(f"⚠️ [TRIGGER] AI recommendation generation failed for {company}")
-                                except Exception as e:
-                                    logger.error(f"❌ [TRIGGER] AI recommendation generation error for {company}: {e}")
-                            
-                            # Schedule as background task
-                            asyncio.create_task(background_ai_generation())
-                            logger.info(f"📋 [TRIGGER] AI generation scheduled as background task for {company}")
-                        else:
-                            # Fallback to thread-based execution if no event loop
-                            def run_ai_generation():
-                                new_loop = asyncio.new_event_loop()
-                                asyncio.set_event_loop(new_loop)
-                                try:
-                                    success = new_loop.run_until_complete(
-                                        ai_generator.generate_ai_recommendation(company, force_regenerate=False)
-                                    )
-                                    if success:
-                                        logger.info(f"✅ [TRIGGER] AI recommendation generated successfully for {company}")
-                                    else:
-                                        logger.warning(f"⚠️ [TRIGGER] AI recommendation generation failed for {company}")
-                                except Exception as e:
-                                    logger.error(f"❌ [TRIGGER] AI recommendation generation error for {company}: {e}")
-                                finally:
-                                    new_loop.close()
-                            
-                            import threading
-                            ai_thread = threading.Thread(target=run_ai_generation, daemon=True)
-                            ai_thread.start()
-                            logger.info(f"🧵 [TRIGGER] AI generation started in background thread for {company}")
-                    except Exception as loop_e:
-                        logger.error(f"Error with event loop handling for {company}: {loop_e}")
-                        # Final fallback - just log that it should be run manually
-                        logger.info(f"🔄 [TRIGGER] AI generation should be run manually for {company}")
-                    
-                except Exception as e:
-                    logger.error(f"Error triggering AI recommendation generation for {company}: {e}")
+                    import asyncio
+                    loop = asyncio.get_event_loop()
+                    if loop and loop.is_running():
+                        async def background_ai_generation():
+                            try:
+                                success = await ai_generator.generate_ai_recommendation(company, force_regenerate=False)
+                                if success:
+                                    logger.info(f"✅ [TRIGGER] AI recommendation generated for {company}")
+                                else:
+                                    logger.warning(f"⚠️ [TRIGGER] AI generation failed for {company}")
+                            except Exception as e:
+                                logger.error(f"❌ [TRIGGER] AI generation error for {company}: {e}")
+                        
+                        asyncio.create_task(background_ai_generation())
+                        logger.info(f"📋 [TRIGGER] AI generation scheduled for {company}")
+                    else:
+                        def run_ai_generation():
+                            new_loop = asyncio.new_event_loop()
+                            asyncio.set_event_loop(new_loop)
+                            try:
+                                success = new_loop.run_until_complete(
+                                    ai_generator.generate_ai_recommendation(company, force_regenerate=False)
+                                )
+                                if success:
+                                    logger.info(f"✅ [TRIGGER] AI recommendation generated for {company}")
+                            except Exception as e:
+                                logger.error(f"❌ [TRIGGER] AI generation error: {e}")
+                            finally:
+                                new_loop.close()
+                        
+                        import threading
+                        ai_thread = threading.Thread(target=run_ai_generation, daemon=True)
+                        ai_thread.start()
+                        logger.info(f"🧵 [TRIGGER] AI generation started in thread for {company}")
+                except Exception as loop_e:
+                    logger.error(f"Error with event loop for {company}: {loop_e}")
                     
             except Exception as e:
-                logger.error(f"Error creating AI recommendation prompt for {company}: {e}")
+                logger.error(f"Error triggering AI generation for {company}: {e}")
             
             return True
             
@@ -378,111 +681,41 @@ class ATSRecommendationService:
             return False
     
     def get_recommendation_file_path(self, company: str) -> Path:
-        """
-        Get the path for a company's latest recommendation file
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            Path object for the latest recommendation file
-        """
+        """Get latest recommendation file path"""
         company_dir = self.base_dir / "applied_companies" / company
-        latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
+        latest_file = TimestampUtils.find_latest_timestamped_file(
+            company_dir, f"{company}_input_recommendation", "json"
+        )
         if latest_file:
             return latest_file
-        # Return expected path for new file (without timestamp)
         return company_dir / f"{company}_input_recommendation.json"
     
     def check_if_recommendation_exists(self, company: str) -> bool:
-        """
-        Check if a recommendation file already exists for a company
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            True if file exists, False otherwise
-        """
+        """Check if recommendation file exists"""
         company_dir = self.base_dir / "applied_companies" / company
-        latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
+        latest_file = TimestampUtils.find_latest_timestamped_file(
+            company_dir, f"{company}_input_recommendation", "json"
+        )
         return latest_file is not None and latest_file.exists()
     
-    def _create_ai_recommendation_prompt(self, recommendation_data: Dict[str, Any]) -> str:
-        """Create a dynamic prompt module for AI recommendation generation
-        
-        Args:
-            recommendation_data: The extracted ATS recommendation data
-            
-        Returns:
-            String content for the prompt module
-        """
-        # Extract relevant data for the prompt
-        company = recommendation_data.get('company', '')
-        required_skills = recommendation_data.get('required_skills', {})
-        preferred_skills = recommendation_data.get('preferred_skills', {})
-        experience_years = recommendation_data.get('experience_years', 0)
-        
-        # Format the prompt template as a valid Python module string
-        prompt_content = f'''"""
-Dynamic AI Recommendation Prompt for {company}
-
-This module provides the AI prompt template for generating CV recommendations.
-"""
-
-def get_prompt() -> str:
-    """Generate the AI recommendation prompt"""
-    return """
-Analyze this job requirement data and provide specific CV optimization recommendations:
-
-COMPANY REQUIREMENTS:
-- Required Technical Skills: {list(required_skills.get('technical', []))}
-- Required Soft Skills: {list(required_skills.get('soft_skills', []))}
-- Preferred Technical Skills: {list(preferred_skills.get('technical', []))}
-- Preferred Soft Skills: {list(preferred_skills.get('soft_skills', []))}
-- Experience Required: {experience_years} years
-
-PROVIDE RECOMMENDATIONS FOR:
-1. Skills to Emphasize
-2. Experience Highlights
-3. CV Structure Optimization
-4. Keywords to Include
-5. Formatting Suggestions
-
-Format your response as structured recommendations with clear sections and bullet points.
-"""
-'''
-        return prompt_content
-
     def update_existing_recommendation(self, company: str, force_update: bool = False) -> bool:
-        """
-        Update an existing recommendation file if needed
-        
-        Args:
-            company: Company name
-            force_update: Force update even if file is newer
-            
-        Returns:
-            True if update was performed, False otherwise
-        """
+        """Update recommendation file if needed"""
         try:
             recommendation_file = self.get_recommendation_file_path(company)
             
-            # Use timestamped analysis file with fallback
-            from app.utils.timestamp_utils import TimestampUtils
             company_dir = self.base_dir / "applied_companies" / company
-            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_skills_analysis", "json")
+            analysis_file = TimestampUtils.find_latest_timestamped_file(
+                company_dir, f"{company}_skills_analysis", "json"
+            )
             if not analysis_file:
                 analysis_file = company_dir / f"{company}_skills_analysis.json"
             
-            # Check if we need to update
+            # Check if update needed
             if not force_update and recommendation_file.exists():
-                # Compare modification times
                 if recommendation_file.stat().st_mtime >= analysis_file.stat().st_mtime:
-                    logger.info(f"Recommendation file for {company} is already up to date")
+                    logger.info(f"Recommendation file for {company} is up to date")
                     return False
             
-            # Create/update the recommendation file
             return self.create_recommendation_file(company)
             
         except Exception as e:
@@ -490,23 +723,19 @@ Format your response as structured recommendations with clear sections and bulle
             return False
     
     def list_companies_with_ats_data(self) -> List[str]:
-        """
-        List all companies that have ATS calculation entries
-        
-        Returns:
-            List of company names that have ATS data
-        """
+        """List all companies with ATS calculation entries"""
         companies_with_ats = []
         
         try:
-            if not self.base_dir.exists():
+            applied_companies_dir = self.base_dir / "applied_companies"
+            if not applied_companies_dir.exists():
                 return companies_with_ats
             
-            for company_dir in self.base_dir.iterdir():
+            for company_dir in applied_companies_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    # Use timestamped analysis file with fallback
-                    from app.utils.timestamp_utils import TimestampUtils
-                    analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_skills_analysis", "json")
+                    analysis_file = TimestampUtils.find_latest_timestamped_file(
+                        company_dir, f"{company_dir.name}_skills_analysis", "json"
+                    )
                     if not analysis_file:
                         analysis_file = company_dir / f"{company_dir.name}_skills_analysis.json"
                     
@@ -515,7 +744,6 @@ Format your response as structured recommendations with clear sections and bulle
                             with open(analysis_file, 'r', encoding='utf-8') as f:
                                 data = json.load(f)
                             
-                            # Check if ATS calculation entries exist
                             if data.get("ats_calculation_entries"):
                                 companies_with_ats.append(company_dir.name)
                                 
@@ -529,17 +757,9 @@ Format your response as structured recommendations with clear sections and bulle
             logger.error(f"Error listing companies with ATS data: {e}")
             return companies_with_ats
     
-    def batch_create_recommendations(self, companies: Optional[List[str]] = None, force_update: bool = False) -> Dict[str, bool]:
-        """
-        Create recommendation files for multiple companies
-        
-        Args:
-            companies: List of company names (if None, process all companies with ATS data)
-            force_update: Force update even if files exist and are newer
-            
-        Returns:
-            Dictionary mapping company names to success status
-        """
+    def batch_create_recommendations(self, companies: Optional[List[str]] = None, 
+                                    force_update: bool = False) -> Dict[str, bool]:
+        """Create recommendation files for multiple companies"""
         results = {}
         
         if companies is None:
@@ -565,7 +785,3 @@ Format your response as structured recommendations with clear sections and bulle
         logger.info(f"Batch processing complete: {successful_count}/{len(companies)} successful")
         
         return results
-
-
-# Global instance removed - service now requires user_email parameter
-# Create instances per request with proper user context

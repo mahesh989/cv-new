@@ -1,0 +1,319 @@
+{
+  "generated": "2025-11-11T12:18:58.974",
+  "cv_filename": "latest_cv.pdf",
+  "jd_url": "preliminary_analysis",
+  "user_id": "10",
+  "company": "Foodbank",
+  "model_used": "unknown",
+  "cv_skills": {
+    "technical_skills": [
+      "APIs",
+      "Computer Vision",
+      "Dart",
+      "Dashboard Creation",
+      "Data Analysis",
+      "Data Entry",
+      "Edge AI",
+      "Excel",
+      "Flutter",
+      "Multi-LLM",
+      "PostgreSQL",
+      "Power BI",
+      "Python",
+      "PyTorch",
+      "Real-time ATS optimization",
+      "Report Generation",
+      "SQL",
+      "Structured pruning"
+    ],
+    "soft_skills": [
+      "Analytical",
+      "Communication",
+      "Problem Solving",
+      "Teamwork"
+    ],
+    "domain_keywords": [
+      "AI engineering",
+      "Charity infrastructure projects",
+      "Charity initiatives",
+      "Charity projects",
+      "Community impact",
+      "Construction industry",
+      "Food relief",
+      "School breakfast programs",
+      "Social responsibility",
+      "Tech industry"
+    ],
+    "comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- Power BI - \"delivering insights and solutions using SQL, Power BI, and Python\"\n- SQL - \"delivering insights and solutions using SQL, Power BI, and Python\"\n- Python - \"delivering insights and solutions using SQL, Power BI, and Python\"\n- Excel - \"Skills: Power BI | SQL | Python | Excel\"\n- Data Analysis - \"Skills: Power BI | SQL | Python | Excel | Data Analysis\"\n- Dashboard Creation - \"Skills: Power BI | SQL | Python | Excel | Data Analysis | Dashboard Creation\"\n- PostgreSQL - \"Analyzed client website databases using PostgreSQL and Power BI\"\n- Flutter - \"Built CV Agent (Flutter/Dart frontend, Python backend)\"\n- Dart - \"Built CV Agent (Flutter/Dart frontend, Python backend)\"\n- Multi-LLM - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration\"\n- APIs - \"Technologies: Flutter, Python, Multi-LLM, APIs\"\n- PyTorch - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Computer Vision - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Edge AI - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Data Entry - \"Other Skills: Data Entry, Report Generation, Dashboard Creation\"\n- Report Generation - \"Other Skills: Data Entry, Report Generation, Dashboard Creation\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- Real-time ATS optimization - \"Implemented real-time ATS optimization algorithms analyzing keywords, structure, and readability\"\n- Structured pruning - \"Achieved 11.39% model size reduction through L1-norm structured pruning\"\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- Communication - \"Skills: Power BI | SQL | Python | Excel | Data Analysis | Dashboard Creation | Communication\"\n- Problem Solving - \"Skills: Power BI | SQL | Python | Excel | Data Analysis | Dashboard Creation | Communication | Problem Solving\"\n- Teamwork - \"Soft Skills: Communication, Problem Solving, Teamwork, Analytical\"\n- Analytical - \"Soft Skills: Communication, Problem Solving, Teamwork, Analytical\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- None\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- AI engineering - \"Data Analyst with 2 years' experience in data analysis and AI engineering\"\n- Tech industry - \"delivering insights and solutions using SQL, Power BI, and Python for tech and construction industries\"\n- Construction industry - \"delivering insights and solutions using SQL, Power BI, and Python for tech and construction industries\"\n- Community impact - \"improving forecasting accuracy by 25% for community impact\"\n- Social responsibility - \"enhancing social responsibility\"\n- Charity initiatives - \"supporting charity initiatives\"\n- Food relief - \"supporting food relief efforts\"\n- School breakfast programs - \"supporting school breakfast programs\"\n- Charity projects - \"improving decision-making for charity projects\"\n- Social responsibility - \"supporting social responsibility\"\n- Community impact - \"reliable content generation for community impact\"\n- Charity infrastructure projects - \"supporting charity infrastructure projects\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- None\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Communication\", \"Problem Solving\", \"Teamwork\", \"Analytical\"]\nTECHNICAL_SKILLS = [\"Power BI\", \"SQL\", \"Python\", \"Excel\", \"Data Analysis\", \"Dashboard Creation\", \"PostgreSQL\", \"Flutter\", \"Dart\", \"Multi-LLM\", \"APIs\", \"PyTorch\", \"Computer Vision\", \"Edge AI\", \"Data Entry\", \"Report Generation\", \"Real-time ATS optimization\", \"Structured pruning\"]\nDOMAIN_KEYWORDS = [\"AI engineering\", \"Tech industry\", \"Construction industry\", \"Community impact\", \"Social responsibility\", \"Charity initiatives\", \"Food relief\", \"School breakfast programs\", \"Charity projects\", \"Charity infrastructure projects\"]"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Data Analysis",
+      "Data Cleaning",
+      "Data Collection",
+      "Data preprocessing",
+      "Data transformation",
+      "Data warehousing",
+      "Excel",
+      "Power BI",
+      "Reporting",
+      "SQL",
+      "Visualisation"
+    ],
+    "soft_skills": [
+      "Analytical thinking",
+      "Attention to detail",
+      "Collaboration",
+      "Communication",
+      "Interpersonal skill",
+      "Numeracy skills",
+      "Presentation skills",
+      "Proactive problem solving",
+      "Problem-solving"
+    ],
+    "domain_keywords": [
+      "Charity",
+      "Food relief",
+      "Hunger relief",
+      "School Breakfast Programs"
+    ],
+    "comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- Power BI - \"this national role will use Power BI and SQL\"\n- SQL - \"this national role will use Power BI and SQL\"\n- Data Collection - \"Data Collection and Cleaning: Gather data from various sources\"\n- Data Cleaning - \"Data Collection and Cleaning: Gather data from various sources, ensuring its accuracy, completeness, and reliability. Clean and preprocess data to prepare it for analysis.\"\n- Data Analysis - \"Data Analysis: Utilise statistical methods, data mining techniques, and analysis to extract meaningful insights from datasets.\"\n- Excel - \"High level of proficiency with Excel and other office products.\"\n- Data warehousing - \"Understanding of Data warehousing concepts\"\n- Data transformation - \"experience with data cleaning and transformation\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- Data preprocessing - \"Clean and preprocess data to prepare it for analysis.\"\n- Reporting - \"Develop dashboards, reports, and visualisations to communicate findings effectively to stakeholders.\"\n- Visualisation - \"Develop dashboards, reports, and visualisations to communicate findings effectively to stakeholders.\"\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- Numeracy skills - \"High degree of numeracy skills.\"\n- Analytical thinking - \"Strong analytical thinking and problem-solving abilities.\"\n- Problem-solving - \"Strong analytical thinking and problem-solving abilities.\"\n- Communication - \"Excellent communication and presentation skills with ability to convey technical concepts to non-technical stakeholders in clear and concise manner.\"\n- Presentation skills - \"Excellent communication and presentation skills with ability to convey technical concepts to non-technical stakeholders in clear and concise manner.\"\n- Interpersonal skill - \"Strong interpersonal skill with ability to collaborate effectively in cross-functional teams.\"\n- Attention to detail - \"Meticulous attention to detail and a commitment to data accuracy and integrity.\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- Collaboration - \"Strong interpersonal skill with ability to collaborate effectively in cross-functional teams.\"\n- Proactive problem solving - \"Proactive problem solving with ability to find innovative solutions.\"\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- Food relief - \"Foodbank is the largest hunger relief charity in Australia, providing more than 70% of the food rescued for food relief nation-wide.\"\n- Charity - \"Outstanding opportunity to join this incredible national charity at an exciting time of growth.\"\n- School Breakfast Programs - \"are support more than 3000 School Breakfast Programs nationally.\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- Hunger relief - \"Foodbank is the largest hunger relief charity in Australia, providing more than 70% of the food rescued for food relief nation-wide.\"\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Numeracy skills\", \"Analytical thinking\", \"Problem-solving\", \"Communication\", \"Presentation skills\", \"Interpersonal skill\", \"Attention to detail\", \"Collaboration\", \"Proactive problem solving\"]\n\nTECHNICAL_SKILLS = [\"Power BI\", \"SQL\", \"Data Collection\", \"Data Cleaning\", \"Data Analysis\", \"Excel\", \"Data warehousing\", \"Data transformation\", \"Data preprocessing\", \"Reporting\", \"Visualisation\"]\n\nDOMAIN_KEYWORDS = [\"Food relief\", \"Charity\", \"School Breakfast Programs\", \"Hunger relief\"]"
+  },
+  "cv_comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- Power BI - \"delivering insights and solutions using SQL, Power BI, and Python\"\n- SQL - \"delivering insights and solutions using SQL, Power BI, and Python\"\n- Python - \"delivering insights and solutions using SQL, Power BI, and Python\"\n- Excel - \"Skills: Power BI | SQL | Python | Excel\"\n- Data Analysis - \"Skills: Power BI | SQL | Python | Excel | Data Analysis\"\n- Dashboard Creation - \"Skills: Power BI | SQL | Python | Excel | Data Analysis | Dashboard Creation\"\n- PostgreSQL - \"Analyzed client website databases using PostgreSQL and Power BI\"\n- Flutter - \"Built CV Agent (Flutter/Dart frontend, Python backend)\"\n- Dart - \"Built CV Agent (Flutter/Dart frontend, Python backend)\"\n- Multi-LLM - \"Built CV Agent (Flutter/Dart frontend, Python backend) with multi-LLM orchestration\"\n- APIs - \"Technologies: Flutter, Python, Multi-LLM, APIs\"\n- PyTorch - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Computer Vision - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Edge AI - \"Technologies: PyTorch, Computer Vision, Edge AI\"\n- Data Entry - \"Other Skills: Data Entry, Report Generation, Dashboard Creation\"\n- Report Generation - \"Other Skills: Data Entry, Report Generation, Dashboard Creation\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- Real-time ATS optimization - \"Implemented real-time ATS optimization algorithms analyzing keywords, structure, and readability\"\n- Structured pruning - \"Achieved 11.39% model size reduction through L1-norm structured pruning\"\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- Communication - \"Skills: Power BI | SQL | Python | Excel | Data Analysis | Dashboard Creation | Communication\"\n- Problem Solving - \"Skills: Power BI | SQL | Python | Excel | Data Analysis | Dashboard Creation | Communication | Problem Solving\"\n- Teamwork - \"Soft Skills: Communication, Problem Solving, Teamwork, Analytical\"\n- Analytical - \"Soft Skills: Communication, Problem Solving, Teamwork, Analytical\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- None\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- AI engineering - \"Data Analyst with 2 years' experience in data analysis and AI engineering\"\n- Tech industry - \"delivering insights and solutions using SQL, Power BI, and Python for tech and construction industries\"\n- Construction industry - \"delivering insights and solutions using SQL, Power BI, and Python for tech and construction industries\"\n- Community impact - \"improving forecasting accuracy by 25% for community impact\"\n- Social responsibility - \"enhancing social responsibility\"\n- Charity initiatives - \"supporting charity initiatives\"\n- Food relief - \"supporting food relief efforts\"\n- School breakfast programs - \"supporting school breakfast programs\"\n- Charity projects - \"improving decision-making for charity projects\"\n- Social responsibility - \"supporting social responsibility\"\n- Community impact - \"reliable content generation for community impact\"\n- Charity infrastructure projects - \"supporting charity infrastructure projects\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- None\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Communication\", \"Problem Solving\", \"Teamwork\", \"Analytical\"]\nTECHNICAL_SKILLS = [\"Power BI\", \"SQL\", \"Python\", \"Excel\", \"Data Analysis\", \"Dashboard Creation\", \"PostgreSQL\", \"Flutter\", \"Dart\", \"Multi-LLM\", \"APIs\", \"PyTorch\", \"Computer Vision\", \"Edge AI\", \"Data Entry\", \"Report Generation\", \"Real-time ATS optimization\", \"Structured pruning\"]\nDOMAIN_KEYWORDS = [\"AI engineering\", \"Tech industry\", \"Construction industry\", \"Community impact\", \"Social responsibility\", \"Charity initiatives\", \"Food relief\", \"School breakfast programs\", \"Charity projects\", \"Charity infrastructure projects\"]",
+  "jd_comprehensive_analysis": "PART 1 - DETAILED EXTRACTION WITH EVIDENCE:\n\n## TECHNICAL SKILLS\n**EXPLICIT (directly stated in text):**\n- Power BI - \"this national role will use Power BI and SQL\"\n- SQL - \"this national role will use Power BI and SQL\"\n- Data Collection - \"Data Collection and Cleaning: Gather data from various sources\"\n- Data Cleaning - \"Data Collection and Cleaning: Gather data from various sources, ensuring its accuracy, completeness, and reliability. Clean and preprocess data to prepare it for analysis.\"\n- Data Analysis - \"Data Analysis: Utilise statistical methods, data mining techniques, and analysis to extract meaningful insights from datasets.\"\n- Excel - \"High level of proficiency with Excel and other office products.\"\n- Data warehousing - \"Understanding of Data warehousing concepts\"\n- Data transformation - \"experience with data cleaning and transformation\"\n\n**STRONGLY IMPLIED (clear from technical responsibilities):**\n- Data preprocessing - \"Clean and preprocess data to prepare it for analysis.\"\n- Reporting - \"Develop dashboards, reports, and visualisations to communicate findings effectively to stakeholders.\"\n- Visualisation - \"Develop dashboards, reports, and visualisations to communicate findings effectively to stakeholders.\"\n\n## SOFT SKILLS\n**EXPLICIT (directly stated as a skill/ability):**\n- Numeracy skills - \"High degree of numeracy skills.\"\n- Analytical thinking - \"Strong analytical thinking and problem-solving abilities.\"\n- Problem-solving - \"Strong analytical thinking and problem-solving abilities.\"\n- Communication - \"Excellent communication and presentation skills with ability to convey technical concepts to non-technical stakeholders in clear and concise manner.\"\n- Presentation skills - \"Excellent communication and presentation skills with ability to convey technical concepts to non-technical stakeholders in clear and concise manner.\"\n- Interpersonal skill - \"Strong interpersonal skill with ability to collaborate effectively in cross-functional teams.\"\n- Attention to detail - \"Meticulous attention to detail and a commitment to data accuracy and integrity.\"\n\n**STRONGLY IMPLIED (clear from interpersonal responsibilities):**\n- Collaboration - \"Strong interpersonal skill with ability to collaborate effectively in cross-functional teams.\"\n- Proactive problem solving - \"Proactive problem solving with ability to find innovative solutions.\"\n\n## DOMAIN KEYWORDS\n**EXPLICIT (directly stated):**\n- Food relief - \"Foodbank is the largest hunger relief charity in Australia, providing more than 70% of the food rescued for food relief nation-wide.\"\n- Charity - \"Outstanding opportunity to join this incredible national charity at an exciting time of growth.\"\n- School Breakfast Programs - \"are support more than 3000 School Breakfast Programs nationally.\"\n\n**STRONGLY IMPLIED (clear from industry/business context):**\n- Hunger relief - \"Foodbank is the largest hunger relief charity in Australia, providing more than 70% of the food rescued for food relief nation-wide.\"\n\n---\n\nPART 2 - FINAL DEDUPLICATED LISTS (REQUIRED):\n\nSOFT_SKILLS = [\"Numeracy skills\", \"Analytical thinking\", \"Problem-solving\", \"Communication\", \"Presentation skills\", \"Interpersonal skill\", \"Attention to detail\", \"Collaboration\", \"Proactive problem solving\"]\n\nTECHNICAL_SKILLS = [\"Power BI\", \"SQL\", \"Data Collection\", \"Data Cleaning\", \"Data Analysis\", \"Excel\", \"Data warehousing\", \"Data transformation\", \"Data preprocessing\", \"Reporting\", \"Visualisation\"]\n\nDOMAIN_KEYWORDS = [\"Food relief\", \"Charity\", \"School Breakfast Programs\", \"Hunger relief\"]",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-11-11T12:19:09.137",
+      "model_used": "unknown",
+      "content": "DECISION: PROCEED  \nCONFIDENCE: 85  \nMATCH_SCORE: 85  \n\nPRIMARY_REASON: The candidate has relevant data analysis skills and experience, aligning well with the job requirements for a Data Analytics Officer at Foodbank.\n\nCRITICAL_MISSING: None  \nIMPLICIT_LIKELY: Excel, Data Warehousing Concepts  \nLEARNABLE_GAPS: MSSQL  \n\nBLOCKER_FOUND: No  \n\n---  \nDETAILED_ANALYSIS:  \n1. **Skill Match**: The candidate has strong skills in Power BI, SQL, and Python, which are core technical requirements for the role. While MSSQL is not explicitly mentioned, the candidate's experience with SQL and data analysis tools suggests this is a learnable gap. Excel and data warehousing concepts are likely implicit given the candidate's data analysis background.\n\n2. **Experience and Domain Match**: The candidate's experience level is appropriate for this entry-level to mid-level role, with 2 years of relevant experience in data analysis and AI engineering. The candidate has demonstrated the ability to analyze and interpret large datasets, develop dashboards, and communicate insights, which aligns well with the responsibilities of the role. Additionally, the candidate's involvement in projects supporting social responsibility and charity initiatives indicates a good cultural fit for a not-for-profit organization like Foodbank."
+    }
+  ],
+  "preextracted_comparison_entries": [],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-11-11T12:19:48.411",
+      "component_analyses": {
+        "technical": {
+          "technical_analysis": {
+            "technical_depth_score": 70.0,
+            "core_skills_match_percentage": 80.0,
+            "technical_stack_fit_percentage": 85.0,
+            "complexity_readiness_score": 70.0,
+            "learning_agility_score": 75.0,
+            "jd_problem_complexity": 5,
+            "technical_strengths": [
+              "Developed full-stack AI application with 500+ active users, ensuring 99% uptime and reliable content generation",
+              "Implemented real-time ATS optimization algorithms analyzing keywords, structure, and readability"
+            ],
+            "technical_gaps": [
+              "No mention of large-scale distributed systems or high availability architecture",
+              "Limited evidence of handling complex integrations or multi-service architectures"
+            ],
+            "cv_sophistication_level": "Derived from analysis",
+            "cv_primary_domain": "Extracted from CV",
+            "jd_required_sophistication": "Extracted from JD",
+            "overqualification_risk": "LOW"
+          }
+        },
+        "skills": {
+          "overall_skills_score": 85.0,
+          "business_readiness_score": 85.0,
+          "skills_analysis": [
+            {
+              "skill": "Consolidated skills analysis",
+              "relevance_score": 85.0,
+              "context": "Power BI used in corporate production (100%), SQL in corporate (100%), Python in corporate (100%), Data Analysis in corporate (100%)",
+              "business_application": "Power BI used in corporate production (100%), SQL in corporate (100%), Python in corporate (100%), Data Analysis in corporate (100%)"
+            }
+          ],
+          "corporate_skills_strength": "Power BI used in corporate production (100%), SQL in corporate (100%), Python in corporate (100%), Data Analysis in corporate (100%)",
+          "academic_skills_discount": "Applied in scoring",
+          "strength_areas": [
+            "Developed full-stack AI application with 500+ active users, ensuring 99% uptime and reliable content generation",
+            "Implemented real-time ATS optimization algorithms analyzing keywords, structure, and readability"
+          ],
+          "critical_gaps": [
+            "Statistical methods"
+          ],
+          "immediate_value_skills": [
+            "Developed full-stack AI application with 500+ active users, ensuring 99% uptime and reliable content generation",
+            "Implemented real-time ATS optimization algorithms analyzing keywords, structure, and readability"
+          ],
+          "training_investment_needed": [
+            "Statistical methods"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "0.7",
+            "cv_corporate_years": "0.7",
+            "cv_academic_years": "0.0",
+            "cv_role_level": "Entry",
+            "jd_required_years": "0.0",
+            "jd_role_level": "Entry",
+            "alignment_score": 70.0,
+            "experience_gaps": [
+              "No direct team management experience",
+              "Limited evidence of stakeholder management"
+            ],
+            "experience_strengths": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "AI Data Trainer & Evaluator (Freelance) at Outlier.ai",
+              "Data Analyst at iBuild Building Solutions"
+            ],
+            "overqualification_risk": "MEDIUM",
+            "cv_progression": [
+              "Derived from analysis"
+            ],
+            "quantified_achievements": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "AI Data Trainer & Evaluator (Freelance) at Outlier.ai",
+              "Data Analyst at iBuild Building Solutions"
+            ]
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "0.7",
+            "cv_academic_years": "0.0",
+            "seniority_score": 90.0,
+            "corporate_seniority_match": 90.0,
+            "leadership_readiness_score": 70.0,
+            "experience_match_percentage": 85.0,
+            "responsibility_fit_percentage": 90.0,
+            "growth_trajectory_score": 75.0,
+            "cv_responsibility_scope": "Entry",
+            "cv_leadership_indicators": "5",
+            "jd_required_seniority": "Entry",
+            "overqualification_risk": "LOW",
+            "seniority_strengths": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "AI Data Trainer & Evaluator (Freelance) at Outlier.ai",
+              "Data Analyst at iBuild Building Solutions"
+            ],
+            "seniority_gaps": [
+              "No direct team management experience",
+              "Limited evidence of stakeholder management"
+            ],
+            "readiness_assessment": "Score: 90.0"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Tech and Construction",
+            "jd_target_industry": "Not For Profit (NFP)",
+            "industry_alignment_score": 80.0,
+            "transition_type": "Different industry, corporate background",
+            "success_probability": "HIGH",
+            "hiring_risk_assessment": "MEDIUM RISK",
+            "industry_strengths": [
+              "The candidate has experience in tech and construction, which involves data analysis and problem-solving skills applicable to the NFP sector. However, transitioning to a charity-focused role may require adaptation to the specific goals and values of the NFP industry."
+            ],
+            "critical_industry_gaps": [],
+            "corporate_background_bonus": "15",
+            "domain_overlap_percentage": 80.0,
+            "data_familiarity_score": 70.0,
+            "stakeholder_fit_score": 70.0,
+            "business_cycle_alignment": 80.0,
+            "direct_industry_match": "PARTIAL",
+            "cultural_adaptation_difficulty": "LOW",
+            "adaptation_timeline": "3-6 months"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 10,
+            "total_preferred_keywords": 2,
+            "matched_required_count": 7,
+            "matched_preferred_count": 1,
+            "missing_required": 3,
+            "missing_preferred": 1
+          },
+          "bonus_breakdown": {
+            "required_bonus": 3.0,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.2,
+            "preferred_penalty": -0.15,
+            "total_bonus": 1.55
+          },
+          "coverage_metrics": {
+            "required_coverage": 70.0,
+            "preferred_coverage": 50.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 85.0,
+        "experience_alignment": 70.0,
+        "industry_fit": 80.0,
+        "domain_overlap_percentage": 80.0,
+        "data_familiarity_score": 70.0,
+        "stakeholder_fit_score": 70.0,
+        "business_cycle_alignment": 80.0,
+        "role_seniority": 90.0,
+        "experience_match_percentage": 85.0,
+        "responsibility_fit_percentage": 90.0,
+        "leadership_readiness_score": 70.0,
+        "growth_trajectory_score": 75.0,
+        "technical_depth": 70.0,
+        "core_skills_match_percentage": 80.0,
+        "technical_stack_fit_percentage": 85.0,
+        "complexity_readiness_score": 70.0,
+        "learning_agility_score": 75.0,
+        "jd_problem_complexity": 5.0,
+        "requirement_bonus": 1.55,
+        "total_bonus": 1.55,
+        "required_bonus": 3.0,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.2,
+        "preferred_penalty": -0.15,
+        "required_coverage": 70.0,
+        "preferred_coverage": 50.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-11-11T12:19:48.413",
+      "final_ats_score": 20.8,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally not recommended - Significant gaps",
+      "breakdown": {
+        "category1": {
+          "score": 0.0,
+          "max_points": 65,
+          "technical_skills_match_rate": 0.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 0.0,
+          "technical_points": 0.0,
+          "domain_points": 0.0,
+          "soft_points": 0.0,
+          "missing_counts": {
+            "technical": 0,
+            "soft": 0,
+            "domain": 0
+          }
+        },
+        "category2": {
+          "score": 19.2,
+          "max_points": 35,
+          "technical_skills_component": {
+            "score": 12.1,
+            "max_points": 22,
+            "average": 55.0
+          },
+          "experience_fit_component": {
+            "score": 7.2,
+            "max_points": 13,
+            "average": 55.0
+          }
+        },
+        "base_score": 19.2,
+        "bonus_points": 1.6,
+        "boost_applied": 0.0
+      },
+      "scoring_version": "v2_65_35_split"
+    }
+  ]
+}
