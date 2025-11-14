@@ -277,6 +277,8 @@ class ComponentAssembler:
             scores["data_familiarity_score"] = float(industry_analysis.get("data_familiarity_score", 0.0))
             scores["stakeholder_fit_score"] = float(industry_analysis.get("stakeholder_fit_score", 0.0))
             scores["business_cycle_alignment"] = float(industry_analysis.get("business_cycle_alignment", 0.0))
+            # Map industry_alignment_score to industry_transition_fit for v2 calculation
+            scores["industry_transition_fit"] = float(industry_analysis.get("industry_alignment_score", 0.0))
         
         # Role seniority - include detailed scores
         if "seniority_analysis" in component_results["seniority"]:
@@ -285,12 +287,17 @@ class ComponentAssembler:
                 scores["role_seniority"] = float(seniority_analysis["seniority_score"])
             if "experience_match_percentage" in seniority_analysis:
                 scores["experience_match_percentage"] = float(seniority_analysis["experience_match_percentage"])
+                # Map experience_match_percentage to role_similarity for v2 calculation
+                scores["role_similarity"] = float(seniority_analysis["experience_match_percentage"])
             if "responsibility_fit_percentage" in seniority_analysis:
                 scores["responsibility_fit_percentage"] = float(seniority_analysis["responsibility_fit_percentage"])
             if "leadership_readiness_score" in seniority_analysis:
                 scores["leadership_readiness_score"] = float(seniority_analysis["leadership_readiness_score"])
             if "growth_trajectory_score" in seniority_analysis:
                 scores["growth_trajectory_score"] = float(seniority_analysis["growth_trajectory_score"])
+            if "corporate_seniority_match" in seniority_analysis:
+                # Map corporate_seniority_match to seniority_match for v2 calculation
+                scores["seniority_match"] = float(seniority_analysis["corporate_seniority_match"])
         
         # Technical depth - include detailed scores
         if "technical_analysis" in component_results["technical"]:
@@ -299,14 +306,23 @@ class ComponentAssembler:
                 scores["technical_depth"] = float(technical_analysis["technical_depth_score"])
             if "core_skills_match_percentage" in technical_analysis:
                 scores["core_skills_match_percentage"] = float(technical_analysis["core_skills_match_percentage"])
+                # Map core_skills_match_percentage to required_skills_coverage for v2 calculation
+                scores["required_skills_coverage"] = float(technical_analysis["core_skills_match_percentage"])
             if "technical_stack_fit_percentage" in technical_analysis:
                 scores["technical_stack_fit_percentage"] = float(technical_analysis["technical_stack_fit_percentage"])
+                # Map technical_stack_fit_percentage to tech_stack_similarity for v2 calculation
+                scores["tech_stack_similarity"] = float(technical_analysis["technical_stack_fit_percentage"])
             if "complexity_readiness_score" in technical_analysis:
                 scores["complexity_readiness_score"] = float(technical_analysis["complexity_readiness_score"])
             if "learning_agility_score" in technical_analysis:
                 scores["learning_agility_score"] = float(technical_analysis["learning_agility_score"])
             if "jd_problem_complexity" in technical_analysis:
                 scores["jd_problem_complexity"] = float(technical_analysis["jd_problem_complexity"])
+        
+        # Business readiness - extract from skills section for v2 calculation
+        if "skills" in component_results:
+            if "business_readiness_score" in component_results["skills"]:
+                scores["business_readiness"] = float(component_results["skills"]["business_readiness_score"])
         
         # Requirement bonus scores
         if "requirement_bonus" in component_results:
