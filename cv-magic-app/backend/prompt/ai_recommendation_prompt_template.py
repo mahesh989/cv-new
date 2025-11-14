@@ -5,6 +5,7 @@ This template generates strategic CV optimization recommendations based on compr
 including CV/JD analysis, skills comparison, component analysis, and ATS scores.
 
 UPDATED: Compatible with optimized recommendation input structure
+OUTPUT: Structured JSON for machine-readable CV generation
 """
 
 def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
@@ -78,373 +79,230 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     implicit_likely = preliminary_decision.get("implicit_likely", [])
     blocker_found = preliminary_decision.get("blocker_found", False)
     
-    prompt = f"""# Strategic CV Optimization Recommendations Generator
-
-**Role:** You are a Senior CV Strategist and Hiring Consultant with expertise in ATS optimization, skills matching, and strategic positioning.  
-
-**Objective:** Analyze the candidate's comprehensive profile against {company}'s job requirements and generate precise, actionable recommendations to maximize interview probability and ATS performance.
-
----
-
-## 📊 Comprehensive Analysis Data
-
-### Current ATS Performance
-- **Final ATS Score:** {final_ats_score}/100
-- **Category Status:** {category_status}
-- **Target Score:** {target_score}/100
-- **Improvement Needed:** {improvement_needed} points
-
-### Preliminary Match Assessment
-- **Decision:** {decision}
-- **Confidence:** {confidence}%
-- **Match Score:** {match_score}%
-- **Primary Reason:** {primary_reason}
-- **Critical Missing:** {', '.join(critical_missing) if critical_missing else 'None'}
-- **Implicit Likely:** {', '.join(implicit_likely) if implicit_likely else 'None'}
-- **Blocker Found:** {'Yes' if blocker_found else 'No'}
-
-### Skills Match Summary
-**Overall Match Rate:** {overall_match_rate}%
-
-**Technical Skills (Match Rate: {technical_match.get('match_rate', 0)}%):**
-- **Matched:** {', '.join(technical_match.get('matched', [])[:10])}{'...' if len(technical_match.get('matched', [])) > 10 else ''}
-- **Missing:** {', '.join(technical_match.get('missing', [])[:10])}{'...' if len(technical_match.get('missing', [])) > 10 else ''}
-
-**Soft Skills (Match Rate: {soft_match.get('match_rate', 0)}%):**
-- **Matched:** {', '.join(soft_match.get('matched', []))}
-- **Missing:** {', '.join(soft_match.get('missing', []))}
-
-**Domain Keywords (Match Rate: {domain_match.get('match_rate', 0)}%):**
-- **Matched:** {', '.join(domain_match.get('matched', []))}
-- **Missing:** {', '.join(domain_match.get('missing', []))}
-
-### CV Skills Inventory
-**Technical Skills:** {', '.join(cv_skills.get('technical', [])[:15])}{'...' if len(cv_skills.get('technical', [])) > 15 else ''}
-**Soft Skills:** {', '.join(cv_skills.get('soft', []))}
-**Domain Keywords:** {', '.join(cv_skills.get('domain', []))}
-
-### JD Requirements
-**Technical Skills:** {', '.join(jd_skills.get('technical', [])[:15])}{'...' if len(jd_skills.get('technical', [])) > 15 else ''}
-**Soft Skills:** {', '.join(jd_skills.get('soft', []))}
-**Domain Keywords:** {', '.join(jd_skills.get('domain', []))}
-
-### Component Analysis Scores
-**Technical:**
-- Overall Score: {technical_component.get('score', 0)}/100
-- Core Skills Match: {technical_component.get('core_match', 0)}%
-- Stack Fit: {technical_component.get('stack_fit', 0)}%
-- Strengths: {'; '.join(technical_component.get('strengths', [])[:3])}
-- Gaps: {'; '.join(technical_component.get('gaps', [])[:3])}
-
-**Skills:**
-- Overall Score: {skills_component.get('score', 0)}/100
-- Business Readiness: {skills_component.get('business_readiness', 0)}/100
-- Strengths: {'; '.join(skills_component.get('strengths', [])[:3])}
-- Critical Gaps: {', '.join(skills_component.get('critical_gaps', []))}
-
-**Experience:**
-- Total Years: {experience_component.get('years', 0)}
-- Corporate Years: {experience_component.get('corporate_years', 0)}
-- Alignment Score: {experience_component.get('alignment_score', 0)}/100
-- Strengths: {'; '.join(experience_component.get('strengths', [])[:3])}
-- Gaps: {'; '.join(experience_component.get('gaps', [])[:3])}
-
-**Seniority:**
-- Score: {seniority_component.get('score', 0)}/100
-- CV Level: {seniority_component.get('cv_level', 'Unknown')}
-- JD Level: {seniority_component.get('jd_level', 'Unknown')}
-- Match: {seniority_component.get('match', 0)}%
-
-**Industry:**
-- CV Industry: {industry_component.get('cv_industry', 'Unknown')}
-- JD Industry: {industry_component.get('jd_industry', 'Unknown')}
-- Alignment Score: {industry_component.get('alignment_score', 0)}/100
-- Transition Type: {industry_component.get('transition_type', 'Unknown')}
-- Transition Difficulty: {industry_component.get('transition_difficulty', 'UNKNOWN')}
-- Adaptation Timeline: {industry_component.get('adaptation_timeline', 'Unknown')}
-
-### ATS Category Breakdown
-- **Category 1 (Keyword Matching):** {category1_score} points
-  - Missing Technical: {missing_counts.get('technical', 0)} keywords
-  - Missing Soft: {missing_counts.get('soft', 0)} keywords
-  - Missing Domain: {missing_counts.get('domain', 0)} keywords
-
-- **Category 2 (AI Analysis):** {category2_score} points
-
----
-
-## 🔑 Keyword Integration Guidance (Framework-Based)
-
-{integration_instructions}
-
-### TIER 1 - ALWAYS ADD (Generic/Transferable Skills)
-These are generic/transferable skills. Integrate ALL into CV naturally in skills section and relevant bullets.
-
-**Technical:** {', '.join(tier1_keywords.get('technical', [])) if tier1_keywords.get('technical') else 'None'}
-**Soft Skills:** {', '.join(tier1_keywords.get('soft', [])) if tier1_keywords.get('soft') else 'None'}
-**Domain:** {', '.join(tier1_keywords.get('domain', [])) if tier1_keywords.get('domain') else 'None'}
-
-### TIER 2 - ADD IF EVIDENCE EXISTS
-Add ONLY if you can find semantic evidence in CV experience. Require validation.
-
-**Technical:** {', '.join(tier2_keywords.get('technical', [])) if tier2_keywords.get('technical') else 'None'}
-**Soft Skills:** {', '.join(tier2_keywords.get('soft', [])) if tier2_keywords.get('soft') else 'None'}
-**Domain:** {', '.join(tier2_keywords.get('domain', [])) if tier2_keywords.get('domain') else 'None'}
-
-### TIER 3 - NEVER ADD (Unverifiable/Domain-Specific)
-DO NOT add these. They are domain-specific, certifications, or unverifiable without direct evidence.
-
-**Technical:** {', '.join(tier3_keywords.get('technical', [])) if tier3_keywords.get('technical') else 'None'}
-**Soft Skills:** {', '.join(tier3_keywords.get('soft', [])) if tier3_keywords.get('soft') else 'None'}
-**Domain:** {', '.join(tier3_keywords.get('domain', [])) if tier3_keywords.get('domain') else 'None'}
-
----
-
-## 🎯 Strategic Tailoring Guidance
-
-### Primary Objective
-{primary_objective}
-
-### EMPHASIS AREAS (Highlight These Strengths)
-{chr(10).join(f'- {area}' for area in emphasis_areas) if emphasis_areas else '- Focus on transferable skills and achievements'}
-
-### DE-EMPHASIZE (Minimize These)
-{chr(10).join(f'- {area}' for area in de_emphasize_areas) if de_emphasize_areas else '- No specific areas to de-emphasize'}
-
-### CRITICAL ADDITIONS NEEDED
-**Technical:** {', '.join(critical_additions.get('technical', [])) if critical_additions.get('technical') else 'None'}
-**Soft Skills:** {', '.join(critical_additions.get('soft', [])) if critical_additions.get('soft') else 'None'}
-**Domain:** {', '.join(critical_additions.get('domain', [])) if critical_additions.get('domain') else 'None'}
-
-### TONE GUIDANCE
-{tone_guidance}
-
-### INDUSTRY TRANSITION BRIDGING
-{chr(10).join(f'- {bridge}' for bridge in industry_bridging) if industry_bridging else '- No industry transition required'}
-
----
-
-## 🎯 Strategic Constraints & Guidelines
-
-### Constraints
-- **No Fabrication:** Only reframe or highlight existing CV experiences. Do not invent new ones.
-- **Transferable Skills:** Soft skills can be inferred if logically supported (e.g., teaching → communication; leading tutorials → team management).
-- **Evidence Required:** Each recommendation must include:
-  - **Basis:** CV evidence supporting the claim
-  - **Integration:** How to add naturally
-  - **Validation:** How to defend if asked in interview
-  - **Risk Level:** Low/Medium/High likelihood of challenge
-
-### Section Completeness Guidance
-- If the provided CV lacks certain sections (e.g., Projects, Certifications), DO NOT recommend creating entirely new sections.
-- Instead, provide concise recommendations on how to strengthen the CV within the existing sections only.
-- If a section is missing but relevant, suggest content ideas as guidance, clearly labeled as suggestions, not mandatory additions.
-
-### Keyword Integration Rules
-- **Tier 1 Keywords:** Integrate ALL - these are generic/transferable
-- **Tier 2 Keywords:** Integrate ONLY if semantic evidence exists
-- **Tier 3 Keywords:** NEVER add - unverifiable or domain-specific
-
-### Validation Requirements
-For each recommendation provide:
-- **Basis:** Existing CV evidence supporting the claim
-- **Integration:** How to naturally incorporate into CV
-- **Validation:** How to defend if questioned in interview
-- **Risk Level:** Low/Medium/High likelihood of challenge
-
----
-
-## 📋 Required Analysis & Recommendations
-
-Generate a comprehensive strategic report covering:
-
-### 1. Missing Keywords Analysis
-Focus on the missing keywords identified:
-- **Critical Technical Gaps:** {missing_counts.get('technical', 0)} missing keywords with {technical_match.get('match_rate', 0)}% current match
-- **Soft Skills Gaps:** {missing_counts.get('soft', 0)} missing keywords with {soft_match.get('match_rate', 0)}% current match
-- **Domain Gaps:** {missing_counts.get('domain', 0)} missing keywords with {domain_match.get('match_rate', 0)}% current match
-
-For each gap, classify as:
-- **Safe to Add (Tier 1):** Generic/transferable, integrate immediately
-- **Add with Evidence (Tier 2):** Requires validation, add if semantic evidence exists
-- **Do Not Add (Tier 3):** Unverifiable or domain-specific without direct experience
-
-### 2. ATS Score Optimization Strategy
-Current score: {final_ats_score}/100, Target: {target_score}/100, Gap: {improvement_needed} points
-
-**Category 1 Improvements (Keyword Matching - {category1_score} points):**
-- Address {missing_counts.get('technical', 0)} missing technical keywords
-- Address {missing_counts.get('soft', 0)} missing soft skill keywords
-- Address {missing_counts.get('domain', 0)} missing domain keywords
-
-**Category 2 Enhancement (AI Analysis - {category2_score} points):**
-- Technical depth optimization
-- Experience alignment improvement
-- Industry fit enhancement
-
-### 3. Industry Transition Strategy
-Based on {industry_component.get('alignment_score', 0)}/100 industry fit score:
-- **Current Industry:** {industry_component.get('cv_industry', 'Unknown')}
-- **Target Industry:** {industry_component.get('jd_industry', 'Unknown')}
-- **Transition Difficulty:** {industry_component.get('transition_difficulty', 'UNKNOWN')}
-- **Adaptation Timeline:** {industry_component.get('adaptation_timeline', 'Unknown')}
-
-Strategy:
-- **Transferable Strengths:** Leverage existing skills for new domain
-- **Domain Knowledge Gaps:** Address industry-specific terminology using Tier 1/2 keywords only
-- **Soft/Transferable Skills:** Suggested inferences following the Evidence Required format
-- **Skills Gap Mitigation:** Show transferable skills, learning trajectory, and foundational strengths for missing requirements
-- **Bridging Statements:** Use the industry bridging guidance provided above
-
-### 4. Experience & Seniority Positioning
-Current seniority score: {seniority_component.get('score', 0)}/100
-- **CV Level:** {seniority_component.get('cv_level', 'Unknown')}
-- **JD Level:** {seniority_component.get('jd_level', 'Unknown')}
-- **Match:** {seniority_component.get('match', 0)}%
-
-Strategy:
-- **Leadership Indicators:** How to highlight existing leadership experience
-- **Responsibility Scope:** Reframe current roles for target seniority
-- **Growth Trajectory:** Position career progression strategically
-
-### 5. Technical Stack Alignment
-Technical score: {technical_component.get('score', 0)}/100
-- **Core Skills Match:** {technical_component.get('core_match', 0)}%
-- **Stack Fit:** {technical_component.get('stack_fit', 0)}%
-- **Strengths:** {'; '.join(technical_component.get('strengths', [])[:3])}
-- **Gaps:** {'; '.join(technical_component.get('gaps', [])[:3])}
-
-Strategy:
-- **Core Skills Emphasis:** Highlight matched technical skills prominently
-- **Stack Fit Optimization:** Bridge gaps using Tier 1/2 keywords
-- **Learning Agility:** Showcase adaptability and quick learning
-
----
-
-## 📄 Required Output Format
-
-# 🎯 CV Tailoring Strategy Report for {company}
-
-## 🔍 Executive Summary
-- **Current ATS Score:** {final_ats_score}/100
-- **Target Score:** {target_score}/100
-- **Improvement Needed:** {improvement_needed} points
-- **Overall Match Rate:** {overall_match_rate}%
-- **Primary Objective:** {primary_objective}
-- **Key Challenge:** {industry_component.get('transition_difficulty', 'UNKNOWN')} industry transition from {industry_component.get('cv_industry', 'Unknown')} to {industry_component.get('jd_industry', 'Unknown')}
-
-## 🔍 Priority Gap Analysis
-**Immediate Action Required (Critical Gaps):**
-- Category 1: {missing_counts.get('technical', 0)} technical, {missing_counts.get('soft', 0)} soft, {missing_counts.get('domain', 0)} domain keywords missing
-- Technical Match: {technical_match.get('match_rate', 0)}%
-- Soft Skills Match: {soft_match.get('match_rate', 0)}%
-- Domain Match: {domain_match.get('match_rate', 0)}%
-
-**Optimization Opportunities:**
-- Technical Depth: {technical_component.get('score', 0)}/100
-- Experience Alignment: {experience_component.get('alignment_score', 0)}/100
-- Industry Fit: {industry_component.get('alignment_score', 0)}/100
-
-## 🔑 Keyword Integration Strategy
-
-### TIER 1 - INTEGRATE IMMEDIATELY (Low Risk)
-**Technical Keywords to Add:**
-- List each Tier 1 technical keyword with:
-  - **Basis:** Why it's safe to add (generic/transferable nature)
-  - **Integration:** Where to add in CV (skills section, which bullets)
-  - **Validation:** How to explain if asked
-  - **Risk:** Low (generic/transferable skill)
-
-**Soft Skills to Add:**
-- List each Tier 1 soft skill with same format
-
-### TIER 2 - ADD WITH EVIDENCE (Medium Risk)
-**Technical Keywords (If Evidence Exists):**
-- List each Tier 2 technical keyword with:
-  - **Basis:** Semantic evidence in CV (specific experience/project)
-  - **Integration:** How to naturally incorporate
-  - **Validation:** Concrete example to give in interview
-  - **Risk:** Medium (requires defense)
-
-**Soft Skills (If Evidence Exists):**
-- List each Tier 2 soft skill with same format
-
-### TIER 3 - DO NOT ADD (High Risk)
-**Keywords to Avoid:**
-- List each Tier 3 keyword with:
-  - **Why Not:** Reason (domain-specific, unverifiable, certification)
-  - **Risk:** High (cannot defend in interview)
-  - **Alternative:** Suggest Tier 1/2 alternatives if applicable
-
-## 🎪 Experience Reframing Strategy
-
-### Industry Transition Focus
-**Objective:** {primary_objective}
-
-**Emphasis Areas:**
-{chr(10).join(f'- {area}' for area in emphasis_areas) if emphasis_areas else '- Focus on transferable skills'}
-
-**De-Emphasize:**
-{chr(10).join(f'- {area}' for area in de_emphasize_areas) if de_emphasize_areas else '- No specific de-emphasis needed'}
-
-**Bridging Statements to Use:**
-{chr(10).join(f'- {bridge}' for bridge in industry_bridging) if industry_bridging else '- Direct industry match'}
-
-### Seniority Positioning
-**Current:** {seniority_component.get('cv_level', 'Unknown')}
-**Target:** {seniority_component.get('jd_level', 'Unknown')}
-**Strategy:** [Leadership and responsibility indicators to emphasize]
-
-### Technical Depth Showcase
-**Strengths to Highlight:**
-{chr(10).join(f'- {strength}' for strength in technical_component.get('strengths', []))}
-
-**Gaps to Address:**
-{chr(10).join(f'- {gap}' for gap in technical_component.get('gaps', []))}
-
-## ⚠️ Strategic Warnings
-
-### Don't Oversell (Avoid These Claims)
-- **Tier 3 Keywords:** Never add without direct evidence
-- **Domain-Specific Terms:** {', '.join(tier3_keywords.get('domain', []))} - Cannot claim without industry experience
-- **Unverifiable Skills:** {', '.join(tier3_keywords.get('technical', [])[:5])} - No supporting evidence
-
-### Don't Undersell (Emphasize These Strengths)
-- **Matched Skills:** {', '.join(technical_match.get('matched', [])[:5])}
-- **Transferable Experience:** {'; '.join(experience_component.get('strengths', [])[:3])}
-- **Core Competencies:** {'; '.join(skills_component.get('strengths', [])[:3])}
-
-## 📌 Implementation Roadmap
-
-### Phase 1: High-Impact Quick Wins
-1. Add ALL Tier 1 keywords to skills section
-2. Emphasize matched technical skills in experience bullets
-3. Reframe experience using industry bridging statements
-
-### Phase 2: Evidence-Based Additions
-1. Review Tier 2 keywords for semantic evidence
-2. Add only keywords with concrete validation
-3. Document defense strategy for each addition
-
-### Phase 3: Strategic Positioning
-1. Adjust tone per guidance: {tone_guidance}
-2. De-emphasize non-relevant skills
-3. Optimize for target seniority level
-
-## 📌 Section Completeness Notes
-- Identify any missing sections in the current CV structure (purely observational).
-- Provide targeted suggestions on how the candidate could improve those areas in the future.
-- Do NOT instruct to add new sections in the immediate tailoring; recommendations should respect the current CV structure.
-
----
-
-**Strategic Note:** This analysis uses optimized data structures with keyword tier classification and strategic tailoring guidance. Focus on evidence-based improvements that maximize authenticity while optimizing for ATS performance ({final_ats_score} → {target_score}) and interview success.
-
-**Integration Priority:** 
-1. Tier 1 keywords (100% safe)
-2. Tier 2 keywords with evidence (validation required)
-3. Strategic reframing (no fabrication)
-4. Never add Tier 3 keywords without direct experience
+    prompt = f"""Strategic CV Optimization Recommendations Generator
+
+Role: Senior CV Strategist and Hiring Consultant with expertise in ATS optimization, skills matching, and strategic positioning.
+
+Objective: Generate precise, actionable recommendations in structured JSON format for programmatic CV generation.
+
+ANALYSIS DATA:
+
+Current ATS Performance:
+- Final Score: {final_ats_score}/100
+- Status: {category_status}
+- Target: {target_score}/100
+- Improvement Needed: {improvement_needed} points
+
+Match Assessment:
+- Decision: {decision} (Confidence: {confidence}%, Match: {match_score}%)
+- Primary Reason: {primary_reason}
+- Critical Missing: {', '.join(critical_missing) if critical_missing else 'None'}
+- Implicit Likely: {', '.join(implicit_likely) if implicit_likely else 'None'}
+
+Skills Match (Overall: {overall_match_rate}%):
+- Technical: {technical_match.get('match_rate', 0)}% ({len(technical_match.get('matched', []))} matched, {len(technical_match.get('missing', []))} missing)
+- Soft: {soft_match.get('match_rate', 0)}% ({len(soft_match.get('matched', []))} matched, {len(soft_match.get('missing', []))} missing)
+- Domain: {domain_match.get('match_rate', 0)}% ({len(domain_match.get('matched', []))} matched, {len(domain_match.get('missing', []))} missing)
+
+Component Scores:
+- Technical: {technical_component.get('score', 0)}/100 (Core Match: {technical_component.get('core_match', 0)}%, Stack Fit: {technical_component.get('stack_fit', 0)}%)
+- Skills: {skills_component.get('score', 0)}/100 (Business Readiness: {skills_component.get('business_readiness', 0)}/100)
+- Experience: {experience_component.get('alignment_score', 0)}/100 ({experience_component.get('years', 0)} years total, {experience_component.get('corporate_years', 0)} corporate)
+- Seniority: {seniority_component.get('score', 0)}/100 (CV: {seniority_component.get('cv_level', 'Unknown')}, JD: {seniority_component.get('jd_level', 'Unknown')})
+- Industry: {industry_component.get('alignment_score', 0)}/100 ({industry_component.get('cv_industry', 'Unknown')} → {industry_component.get('jd_industry', 'Unknown')}, Difficulty: {industry_component.get('transition_difficulty', 'UNKNOWN')})
+
+ATS Breakdown:
+- Category 1 (Keywords): {category1_score} points (Missing: {missing_counts.get('technical', 0)} technical, {missing_counts.get('soft', 0)} soft, {missing_counts.get('domain', 0)} domain)
+- Category 2 (AI Analysis): {category2_score} points
+
+Keyword Tiers:
+- Tier 1 (Always Add): Technical: {', '.join(tier1_keywords.get('technical', [])) if tier1_keywords.get('technical') else 'None'} | Soft: {', '.join(tier1_keywords.get('soft', [])) if tier1_keywords.get('soft') else 'None'}
+- Tier 2 (Add with Evidence): Technical: {', '.join(tier2_keywords.get('technical', [])) if tier2_keywords.get('technical') else 'None'} | Soft: {', '.join(tier2_keywords.get('soft', [])) if tier2_keywords.get('soft') else 'None'}
+- Tier 3 (Never Add): Technical: {', '.join(tier3_keywords.get('technical', [])) if tier3_keywords.get('technical') else 'None'} | Domain: {', '.join(tier3_keywords.get('domain', [])) if tier3_keywords.get('domain') else 'None'}
+
+Strategic Guidance:
+- Primary Objective: {primary_objective}
+- Tone: {tone_guidance}
+- Emphasis: {', '.join(emphasis_areas) if emphasis_areas else 'Transferable skills and achievements'}
+- De-emphasize: {', '.join(de_emphasize_areas) if de_emphasize_areas else 'None'}
+- Bridging: {', '.join(industry_bridging) if industry_bridging else 'None'}
+
+Constraints:
+- No Fabrication: Only reframe/highlight existing CV experiences
+- Evidence Required: All recommendations need basis, integration, validation, risk
+- Tier 1: Integrate ALL (generic/transferable)
+- Tier 2: Add ONLY with semantic evidence
+- Tier 3: NEVER add (unverifiable/domain-specific)
+
+REQUIRED OUTPUT FORMAT (CRITICAL)
+
+**IMPORTANT:** You MUST return a valid JSON object with the following structure. Do NOT return markdown or any other format.
+
+Return ONLY this JSON structure (no preamble, no markdown formatting, no code blocks):
+
+```json
+{{
+  "executive_summary": {{
+    "current_ats_score": {final_ats_score},
+    "target_score": {target_score},
+    "improvement_needed": {improvement_needed},
+    "overall_match_rate": {overall_match_rate},
+    "primary_objective": "{primary_objective}",
+    "key_challenge": "{industry_component.get('transition_difficulty', 'UNKNOWN')} industry transition from {industry_component.get('cv_industry', 'Unknown')} to {industry_component.get('jd_industry', 'Unknown')}"
+  }},
+  
+  "priority_gaps": {{
+    "immediate_action": {{
+      "category1_missing": {{
+        "technical": {missing_counts.get('technical', 0)},
+        "soft": {missing_counts.get('soft', 0)},
+        "domain": {missing_counts.get('domain', 0)}
+      }},
+      "match_rates": {{
+        "technical": {technical_match.get('match_rate', 0)},
+        "soft": {soft_match.get('match_rate', 0)},
+        "domain": {domain_match.get('match_rate', 0)}
+      }}
+    }},
+    "optimization_opportunities": {{
+      "technical_depth": {technical_component.get('score', 0)},
+      "experience_alignment": {experience_component.get('alignment_score', 0)},
+      "industry_fit": {industry_component.get('alignment_score', 0)}
+    }}
+  }},
+  
+  "keyword_integration": {{
+    "tier1_integrate_immediately": {{
+      "technical": [
+        {{
+          "keyword": "keyword_name",
+          "basis": "Why it's safe to add (generic/transferable nature)",
+          "integration": "Where to add in CV (skills section, which bullets)",
+          "validation": "How to explain if asked",
+          "risk": "low"
+        }}
+      ],
+      "soft": [
+        {{
+          "keyword": "Collaboration",
+          "basis": "Already present in CV, can be expanded",
+          "integration": "Highlight in skills section and in bullets related to teamwork",
+          "validation": "Discuss examples of successful team projects",
+          "risk": "low"
+        }}
+      ]
+    }},
+    
+    "tier2_add_with_evidence": {{
+      "technical": [
+        {{
+          "keyword": "Business process design",
+          "basis": "If any project involved process optimization",
+          "integration": "Mention in relevant project bullet points",
+          "validation": "Describe a specific instance of process improvement",
+          "risk": "medium"
+        }}
+      ],
+      "soft": [
+        {{
+          "keyword": "Relationship development",
+          "basis": "If involved in stakeholder or client interactions",
+          "integration": "Highlight in skills section and in bullets related to stakeholder engagement",
+          "validation": "Provide examples of building and maintaining professional relationships",
+          "risk": "medium"
+        }}
+      ]
+    }},
+    
+    "tier3_never_add": {{
+      "technical": [
+        {{
+          "keyword": "IAM",
+          "why_not": "No direct experience or evidence in CV",
+          "risk": "high",
+          "alternative": "Focus on transferable skills and learning potential"
+        }}
+      ],
+      "domain": [
+        {{
+          "keyword": "Christian identity",
+          "why_not": "Domain-specific without direct experience",
+          "risk": "high",
+          "alternative": "Emphasize adaptability and willingness to learn"
+        }}
+      ]
+    }}
+  }},
+  
+  "experience_reframing": {{
+    "industry_transition": {{
+      "objective": "{primary_objective}",
+      "emphasis_areas": {emphasis_areas if emphasis_areas else ["Focus on transferable skills and achievements"]},
+      "de_emphasize": {de_emphasize_areas if de_emphasize_areas else []},
+      "bridging_statements": {industry_bridging if industry_bridging else []}
+    }},
+    
+    "seniority_positioning": {{
+      "current_level": "{seniority_component.get('cv_level', 'Unknown')}",
+      "target_level": "{seniority_component.get('jd_level', 'Unknown')}",
+      "strategy": "Highlight leadership potential through project ownership and initiative-taking in current roles"
+    }},
+    
+    "technical_showcase": {{
+      "strengths_to_highlight": {technical_component.get('strengths', [])},
+      "gaps_to_address": {technical_component.get('gaps', [])}
+    }}
+  }},
+  
+  "strategic_warnings": {{
+    "dont_oversell": {{
+      "tier3_keywords": "Never add without direct evidence",
+      "domain_specific": {tier3_keywords.get('domain', [])},
+      "unverifiable_skills": {tier3_keywords.get('technical', [])[:5]}
+    }},
+    "dont_undersell": {{
+      "matched_skills": {technical_match.get('matched', [])[:5]},
+      "transferable_experience": {experience_component.get('strengths', [])[:3]},
+      "core_competencies": {skills_component.get('strengths', [])[:3]}
+    }}
+  }},
+  
+  "implementation_roadmap": {{
+    "phase1_quick_wins": [
+      "Add ALL Tier 1 keywords to skills section",
+      "Emphasize matched technical skills in experience bullets",
+      "Reframe experience using industry bridging statements"
+    ],
+    "phase2_evidence_based": [
+      "Review Tier 2 keywords for semantic evidence",
+      "Add only keywords with concrete validation",
+      "Document defense strategy for each addition"
+    ],
+    "phase3_positioning": [
+      "Adjust tone per guidance: {tone_guidance}",
+      "De-emphasize non-relevant skills",
+      "Optimize for target seniority level"
+    ]
+  }},
+  
+  "tone_and_style": {{
+    "overall_tone": "{tone_guidance}",
+    "key_messages": {emphasis_areas if emphasis_areas else ["Transferable skills", "Business impact", "Quantified results"]},
+    "avoid_messages": {de_emphasize_areas if de_emphasize_areas else []}
+  }}
+}}
+```
+
+**VALIDATION RULES:**
+1. All keyword recommendations MUST include: keyword, basis, integration, validation, risk
+2. Risk levels MUST be: "low", "medium", or "high"
+3. All arrays MUST be valid JSON arrays
+4. All strings MUST be properly escaped
+5. Return ONLY valid JSON, no markdown formatting
+6. No preamble text before the JSON
+7. No code block markers (no ```json or ```)
+
+**CRITICAL:** The output will be parsed programmatically. Invalid JSON will cause system failure. Ensure perfect JSON syntax.
 """
 
     return prompt
@@ -472,6 +330,7 @@ def generate_company_specific_prompt(company: str, analysis_data: dict) -> str:
     company_prompt = f'''"""
 AI Recommendation Prompt for {company}
 Generated automatically from optimized analysis data
+OUTPUT: Structured JSON for machine-readable CV generation
 """
 
 # Company: {company}

@@ -3,6 +3,8 @@ AI Recommendation Generator Service
 
 This service executes AI recommendation prompts using the centralized AI system
 and saves the generated recommendations as structured JSON files.
+
+UPDATED: Handles JSON output from AI and converts to markdown for frontend display
 """
 
 import logging
@@ -33,8 +35,6 @@ class AIRecommendationGenerator:
     def __init__(self, user_email: str):
         from app.utils.user_path_utils import get_user_base_path
         self.user_email = user_email
-        # get_user_base_path already returns the per-user cv-analysis directory
-        # Avoid duplicating "cv-analysis" in the path
         self.base_dir = get_user_base_path(user_email)
         self.prompt_dir = Path("/app/prompt")
     
@@ -57,12 +57,10 @@ class AIRecommendationGenerator:
             if not force_regenerate:
                 try:
                     company_dir = self.base_dir / "applied_companies" / company
-                    # Find latest input recommendation (timestamped preferred)
                     latest_input = TimestampUtils.find_latest_timestamped_file(
                         company_dir, f"{company}_input_recommendation", "json"
                     ) or (company_dir / f"{company}_input_recommendation.json")
 
-                    # Find latest AI recommendation (timestamped preferred)
                     latest_ai = TimestampUtils.find_latest_timestamped_file(
                         company_dir, f"{company}_ai_recommendation", "json"
                     ) or (company_dir / f"{company}_ai_recommendation.json")
@@ -70,8 +68,6 @@ class AIRecommendationGenerator:
                     latest_input_mtime = latest_input.stat().st_mtime if latest_input and latest_input.exists() else 0
                     latest_ai_mtime = latest_ai.stat().st_mtime if latest_ai and latest_ai.exists() else 0
 
-                    # If an AI file exists and is newer or equal to input, we can skip;
-                    # otherwise we must regenerate to reflect the latest input recommendations.
                     if latest_ai.exists() and latest_ai_mtime >= latest_input_mtime:
                         logger.info(
                             f"🟢 [AI GENERATOR] Latest AI recommendation ({latest_ai.name}) is up-to-date vs input ({latest_input.name if latest_input else 'N/A'}); skipping regeneration"
@@ -82,7 +78,6 @@ class AIRecommendationGenerator:
                             f"🟡 [AI GENERATOR] Input recommendation is newer (ai_mtime={latest_ai_mtime}, input_mtime={latest_input_mtime}); regenerating AI recommendation"
                         )
                 except Exception as time_err:
-                    # If any error during timestamp checks, fall back to default existence check
                     logger.warning(f"⚠️ [AI GENERATOR] Timestamp check failed, proceeding with generation: {time_err}")
             
             # Check if CV has been updated since input recommendation was generated
@@ -125,7 +120,6 @@ class AIRecommendationGenerator:
                         logger.warning(f"⚠️ [AI GENERATOR] CV tailoring failed for {company}")
                 except Exception as cv_error:
                     logger.error(f"❌ [AI GENERATOR] CV tailoring error for {company}: {cv_error}")
-                    # Don't fail the AI recommendation generation if CV tailoring fails
             
             return success
             
@@ -139,55 +133,37 @@ class AIRecommendationGenerator:
         latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "json")
         if latest_file:
             return latest_file
-        # Return expected path for new file (without timestamp - will be added during save)
         return company_dir / f"{company}_ai_recommendation.json"
     
     def _get_input_recommendation_file_path(self, company: str) -> Path:
         """Get the input recommendation file path for a company"""
         company_dir = self.base_dir / "applied_companies" / company
-        
-        # Use timestamped file with fallback
-        from app.utils.timestamp_utils import TimestampUtils
         input_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_input_recommendation", "json")
         if not input_file:
             input_file = company_dir / f"{company}_input_recommendation.json"
-        
         return input_file
     
     def _check_cv_freshness(self, company: str) -> bool:
-        """
-        Check if the CV has been updated since the input recommendation was generated
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            True if CV is fresh (not updated since input recommendation), False otherwise
-        """
+        """Check if the CV has been updated since the input recommendation was generated"""
         try:
             from app.unified_latest_file_selector import get_selector_for_user
             
-            # Get the latest CV context using user-specific selector
             user_selector = get_selector_for_user(self.user_email)
             cv_context = user_selector.get_latest_cv_across_all(company)
             if not cv_context.exists:
                 logger.warning(f"⚠️ [AI GENERATOR] No CV found for {company}")
-                return True  # Assume fresh if no CV found
+                return True
             
-            # Get the input recommendation file
             input_file = self._get_input_recommendation_file_path(company)
             if not input_file.exists():
                 logger.warning(f"⚠️ [AI GENERATOR] No input recommendation file found for {company}")
-                return True  # Assume fresh if no input recommendation found
+                return True
             
-            # Compare timestamps
             cv_mtime = cv_context.timestamp.timestamp() if cv_context.timestamp else 0
             input_mtime = input_file.stat().st_mtime
             
             if cv_mtime > input_mtime:
                 logger.warning(f"⚠️ [AI GENERATOR] CV is newer than input recommendation")
-                logger.warning(f"   CV timestamp: {cv_context.timestamp}")
-                logger.warning(f"   Input recommendation timestamp: {input_mtime}")
                 return False
             
             logger.info(f"✅ [AI GENERATOR] CV is fresh - no updates since input recommendation")
@@ -195,30 +171,19 @@ class AIRecommendationGenerator:
             
         except Exception as e:
             logger.error(f"❌ [AI GENERATOR] Error checking CV freshness: {e}")
-            return True  # Assume fresh on error to avoid blocking generation
+            return True
     
     def _load_ai_prompt(self, company: str) -> Optional[str]:
-        """
-        Generate AI prompt using the centralized template with company analysis data
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            Generated prompt content or None if data not found
-        """
+        """Generate AI prompt using the centralized template with company analysis data"""
         try:
-            # Load the input recommendation data for the company
             input_file = self._get_input_recommendation_file_path(company)
             if not input_file.exists():
                 logger.error(f"Input recommendation file not found: {input_file}")
                 return None
             
-            # Load analysis data
             with open(input_file, 'r', encoding='utf-8') as f:
                 analysis_data = json.load(f)
             
-            # Import the centralized prompt template using absolute path
             import sys
             import importlib.util
             
@@ -227,12 +192,10 @@ class AIRecommendationGenerator:
                 logger.error(f"AI recommendation template not found: {template_path}")
                 return None
             
-            # Load the template module
             spec = importlib.util.spec_from_file_location("ai_recommendation_prompt_template", template_path)
             template_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(template_module)
             
-            # Generate the prompt using the template
             prompt_content = template_module.generate_ai_recommendation_prompt(company, analysis_data)
             
             logger.info(f"📋 [AI GENERATOR] Generated AI prompt for {company} using centralized template ({len(prompt_content)} characters)")
@@ -243,34 +206,24 @@ class AIRecommendationGenerator:
             return None
     
     async def _execute_ai_prompt(self, prompt_content: str) -> Optional[AIResponse]:
-        """
-        Execute the AI prompt using the centralized AI system
-        
-        Args:
-            prompt_content: The prompt to execute
-            
-        Returns:
-            AIResponse object or None if failed
-        """
+        """Execute the AI prompt using the centralized AI system"""
         try:
-            # Create user object from stored user_email
             from app.models.auth import UserData
             from datetime import datetime, timezone
             current_user = UserData(
-                id="pipeline_user",  # Use a placeholder ID for pipeline operations
+                id="pipeline_user",
                 email=self.user_email,
                 name=self.user_email.split("@")[0] if self.user_email else "user",
                 created_at=datetime.now(timezone.utc),
                 is_active=True
             )
             
-            # Use the centralized AI service
             response = await ai_service.generate_response(
                 prompt=prompt_content,
                 user=current_user,
-                system_prompt="You are an expert CV strategist and career consultant. Provide detailed, actionable recommendations in the exact format requested.",
-                temperature=0.0,  # Zero temperature for maximum consistency
-                max_tokens=4000   # Allow for detailed responses
+                system_prompt="You are an expert CV strategist and career consultant. Provide detailed, actionable recommendations in the exact JSON format requested. Return ONLY valid JSON, no markdown formatting.",
+                temperature=0.0,
+                max_tokens=4000
             )
             
             logger.info(f"🧠 [AI GENERATOR] AI response generated - Provider: {response.provider}, Model: {response.model}")
@@ -284,48 +237,331 @@ class AIRecommendationGenerator:
     
     def _structure_ai_response(self, ai_response: AIResponse, company: str) -> Dict[str, Any]:
         """
-        Structure the AI response as JSON data
+        Structure the AI response - parse JSON and convert to markdown for frontend display
         
         Args:
             ai_response: Raw AI response
             company: Company name
             
         Returns:
-            Structured JSON data with recommendation content and metadata
-        """
-        return {
-            "company": company,
-            "generated_at": datetime.now().isoformat(),
-            "recommendation_content": ai_response.content,
-            "ai_model_info": {
-                "provider": ai_response.provider,
-                "model": ai_response.model,
-                "cost": ai_response.cost,
-                "tokens_used": ai_response.tokens_used
-            },
-            "metadata": {
-                "content_length": len(ai_response.content),
-                "format_version": "1.0"
-            }
-        }
-    
-    def _save_ai_recommendation(self, company: str, recommendation_data: Dict[str, Any]) -> bool:
-        """
-        Save the AI recommendation data as JSON file
-        
-        Args:
-            company: Company name
-            recommendation_data: The structured recommendation data
-            
-        Returns:
-            True if successful, False otherwise
+            Structured JSON data with both markdown (for display) and JSON (for CV generation)
         """
         try:
-            # Ensure company directory exists
+            # Try to parse response as JSON
+            json_data = json.loads(ai_response.content)
+            logger.info(f"✅ [AI GENERATOR] Successfully parsed AI response as JSON")
+            
+            # Convert JSON to markdown for frontend display
+            markdown_content = self._convert_json_to_markdown(json_data, company)
+            
+            return {
+                "company": company,
+                "generated_at": datetime.now().isoformat(),
+                "recommendation_content": markdown_content,  # Markdown for frontend display
+                "structured_recommendations": json_data,     # JSON for programmatic CV generation
+                "ai_model_info": {
+                    "provider": ai_response.provider,
+                    "model": ai_response.model,
+                    "cost": ai_response.cost,
+                    "tokens_used": ai_response.tokens_used
+                },
+                "metadata": {
+                    "content_length": len(markdown_content),
+                    "format_version": "2.0",  # Updated format with structured data
+                    "has_structured_data": True
+                }
+            }
+            
+        except json.JSONDecodeError as e:
+            # Fallback: If AI returns markdown instead of JSON
+            logger.warning(f"⚠️ [AI GENERATOR] AI response is not valid JSON, treating as markdown: {e}")
+            return {
+                "company": company,
+                "generated_at": datetime.now().isoformat(),
+                "recommendation_content": ai_response.content,  # Raw markdown
+                "ai_model_info": {
+                    "provider": ai_response.provider,
+                    "model": ai_response.model,
+                    "cost": ai_response.cost,
+                    "tokens_used": ai_response.tokens_used
+                },
+                "metadata": {
+                    "content_length": len(ai_response.content),
+                    "format_version": "1.0",  # Legacy markdown format
+                    "has_structured_data": False
+                }
+            }
+    
+    def _convert_json_to_markdown(self, json_data: Dict[str, Any], company: str) -> str:
+        """
+        Convert structured JSON recommendations to formatted markdown for frontend display
+        
+        Args:
+            json_data: Structured JSON recommendation data
+            company: Company name
+            
+        Returns:
+            Formatted markdown string
+        """
+        lines = []
+        
+        # Title
+        lines.append(f"# CV Tailoring Strategy Report for {company}\n")
+        
+        # Executive Summary
+        exec_summary = json_data.get("executive_summary", {})
+        if exec_summary:
+            lines.append("## Executive Summary\n")
+            lines.append(f"- **Current ATS Score:** {exec_summary.get('current_ats_score', 'N/A')}/100")
+            lines.append(f"- **Target Score:** {exec_summary.get('target_score', 75)}/100")
+            lines.append(f"- **Improvement Needed:** {exec_summary.get('improvement_needed', 'N/A')} points")
+            lines.append(f"- **Overall Match Rate:** {exec_summary.get('overall_match_rate', 'N/A')}%")
+            lines.append(f"- **Primary Objective:** {exec_summary.get('primary_objective', 'N/A')}")
+            lines.append(f"- **Key Challenge:** {exec_summary.get('key_challenge', 'N/A')}\n")
+        
+        # Priority Gaps
+        priority_gaps = json_data.get("priority_gaps", {})
+        if priority_gaps:
+            lines.append("## Priority Gap Analysis\n")
+            
+            immediate = priority_gaps.get("immediate_action", {})
+            if immediate:
+                lines.append("**Immediate Action Required (Critical Gaps):**")
+                category1 = immediate.get("category1_missing", {})
+                lines.append(f"- Category 1: {category1.get('technical', 0)} technical, {category1.get('soft', 0)} soft, {category1.get('domain', 0)} domain keywords missing")
+                
+                rates = immediate.get("match_rates", {})
+                lines.append(f"- Technical Match: {rates.get('technical', 0)}%")
+                lines.append(f"- Soft Skills Match: {rates.get('soft', 0)}%")
+                lines.append(f"- Domain Match: {rates.get('domain', 0)}%\n")
+            
+            opportunities = priority_gaps.get("optimization_opportunities", {})
+            if opportunities:
+                lines.append("**Optimization Opportunities:**")
+                lines.append(f"- Technical Depth: {opportunities.get('technical_depth', 0)}/100")
+                lines.append(f"- Experience Alignment: {opportunities.get('experience_alignment', 0)}/100")
+                lines.append(f"- Industry Fit: {opportunities.get('industry_fit', 0)}/100\n")
+        
+        # Keyword Integration
+        keyword_integration = json_data.get("keyword_integration", {})
+        if keyword_integration:
+            lines.append("## Keyword Integration Strategy\n")
+            
+            # Tier 1
+            tier1 = keyword_integration.get("tier1_integrate_immediately", {})
+            if tier1:
+                lines.append("### TIER 1 - INTEGRATE IMMEDIATELY (Low Risk)")
+                
+                tech = tier1.get("technical", [])
+                if tech:
+                    lines.append("**Technical Keywords to Add:**")
+                    for item in tech:
+                        lines.append(f"- **{item.get('keyword', 'N/A')}**")
+                        lines.append(f"  - **Basis:** {item.get('basis', 'N/A')}")
+                        lines.append(f"  - **Integration:** {item.get('integration', 'N/A')}")
+                        lines.append(f"  - **Validation:** {item.get('validation', 'N/A')}")
+                        lines.append(f"  - **Risk:** {item.get('risk', 'low')}")
+                
+                soft = tier1.get("soft", [])
+                if soft:
+                    lines.append("\n**Soft Skills to Add:**")
+                    for item in soft:
+                        lines.append(f"- **{item.get('keyword', 'N/A')}**")
+                        lines.append(f"  - **Basis:** {item.get('basis', 'N/A')}")
+                        lines.append(f"  - **Integration:** {item.get('integration', 'N/A')}")
+                        lines.append(f"  - **Validation:** {item.get('validation', 'N/A')}")
+                        lines.append(f"  - **Risk:** {item.get('risk', 'low')}")
+                lines.append("")
+            
+            # Tier 2
+            tier2 = keyword_integration.get("tier2_add_with_evidence", {})
+            if tier2:
+                lines.append("### TIER 2 - ADD WITH EVIDENCE (Medium Risk)")
+                
+                tech = tier2.get("technical", [])
+                if tech:
+                    lines.append("**Technical Keywords (If Evidence Exists):**")
+                    for item in tech:
+                        lines.append(f"- **{item.get('keyword', 'N/A')}**")
+                        lines.append(f"  - **Basis:** {item.get('basis', 'N/A')}")
+                        lines.append(f"  - **Integration:** {item.get('integration', 'N/A')}")
+                        lines.append(f"  - **Validation:** {item.get('validation', 'N/A')}")
+                        lines.append(f"  - **Risk:** {item.get('risk', 'medium')}")
+                
+                soft = tier2.get("soft", [])
+                if soft:
+                    lines.append("\n**Soft Skills (If Evidence Exists):**")
+                    for item in soft:
+                        lines.append(f"- **{item.get('keyword', 'N/A')}**")
+                        lines.append(f"  - **Basis:** {item.get('basis', 'N/A')}")
+                        lines.append(f"  - **Integration:** {item.get('integration', 'N/A')}")
+                        lines.append(f"  - **Validation:** {item.get('validation', 'N/A')}")
+                        lines.append(f"  - **Risk:** {item.get('risk', 'medium')}")
+                lines.append("")
+            
+            # Tier 3
+            tier3 = keyword_integration.get("tier3_never_add", {})
+            if tier3:
+                lines.append("### TIER 3 - DO NOT ADD (High Risk)")
+                lines.append("**Keywords to Avoid:**")
+                
+                tech = tier3.get("technical", [])
+                for item in tech:
+                    lines.append(f"- **{item.get('keyword', 'N/A')}**")
+                    lines.append(f"  - **Why Not:** {item.get('why_not', 'N/A')}")
+                    lines.append(f"  - **Risk:** {item.get('risk', 'high')}")
+                    if item.get('alternative'):
+                        lines.append(f"  - **Alternative:** {item.get('alternative')}")
+                
+                domain = tier3.get("domain", [])
+                for item in domain:
+                    lines.append(f"- **{item.get('keyword', 'N/A')}**")
+                    lines.append(f"  - **Why Not:** {item.get('why_not', 'N/A')}")
+                    lines.append(f"  - **Risk:** {item.get('risk', 'high')}")
+                    if item.get('alternative'):
+                        lines.append(f"  - **Alternative:** {item.get('alternative')}")
+                lines.append("")
+        
+        # Experience Reframing
+        exp_reframing = json_data.get("experience_reframing", {})
+        if exp_reframing:
+            lines.append("## Experience Reframing Strategy\n")
+            
+            industry = exp_reframing.get("industry_transition", {})
+            if industry:
+                lines.append("### Industry Transition Focus")
+                lines.append(f"**Objective:** {industry.get('objective', 'N/A')}\n")
+                
+                emphasis = industry.get("emphasis_areas", [])
+                if emphasis:
+                    lines.append("**Emphasis Areas:**")
+                    for area in emphasis:
+                        lines.append(f"- {area}")
+                    lines.append("")
+                
+                de_emphasize = industry.get("de_emphasize", [])
+                if de_emphasize:
+                    lines.append("**De-Emphasize:**")
+                    for area in de_emphasize:
+                        lines.append(f"- {area}")
+                    lines.append("")
+                
+                bridging = industry.get("bridging_statements", [])
+                if bridging:
+                    lines.append("**Bridging Statements to Use:**")
+                    for statement in bridging:
+                        lines.append(f"- {statement}")
+                    lines.append("")
+            
+            seniority = exp_reframing.get("seniority_positioning", {})
+            if seniority:
+                lines.append("### Seniority Positioning")
+                lines.append(f"**Current:** {seniority.get('current_level', 'Unknown')}")
+                lines.append(f"**Target:** {seniority.get('target_level', 'Unknown')}")
+                lines.append(f"**Strategy:** {seniority.get('strategy', 'N/A')}\n")
+            
+            technical = exp_reframing.get("technical_showcase", {})
+            if technical:
+                lines.append("### Technical Depth Showcase")
+                
+                strengths = technical.get("strengths_to_highlight", [])
+                if strengths:
+                    lines.append("**Strengths to Highlight:**")
+                    for strength in strengths:
+                        lines.append(f"- {strength}")
+                    lines.append("")
+                
+                gaps = technical.get("gaps_to_address", [])
+                if gaps:
+                    lines.append("**Gaps to Address:**")
+                    for gap in gaps:
+                        lines.append(f"- {gap}")
+                    lines.append("")
+        
+        # Strategic Warnings
+        warnings = json_data.get("strategic_warnings", {})
+        if warnings:
+            lines.append("## Strategic Warnings\n")
+            
+            dont_oversell = warnings.get("dont_oversell", {})
+            if dont_oversell:
+                lines.append("### Don't Oversell (Avoid These Claims)")
+                lines.append(f"- **Tier 3 Keywords:** {dont_oversell.get('tier3_keywords', 'Never add without direct evidence')}")
+                
+                domain_specific = dont_oversell.get("domain_specific", [])
+                if domain_specific:
+                    lines.append(f"- **Domain-Specific Terms:** {', '.join(domain_specific)} - Cannot claim without industry experience")
+                
+                unverifiable = dont_oversell.get("unverifiable_skills", [])
+                if unverifiable:
+                    lines.append(f"- **Unverifiable Skills:** {', '.join(unverifiable)} - No supporting evidence")
+                lines.append("")
+            
+            dont_undersell = warnings.get("dont_undersell", {})
+            if dont_undersell:
+                lines.append("### Don't Undersell (Emphasize These Strengths)")
+                
+                matched = dont_undersell.get("matched_skills", [])
+                if matched:
+                    lines.append(f"- **Matched Skills:** {', '.join(matched)}")
+                
+                transferable = dont_undersell.get("transferable_experience", [])
+                if transferable:
+                    lines.append(f"- **Transferable Experience:** {'; '.join(transferable)}")
+                
+                core = dont_undersell.get("core_competencies", [])
+                if core:
+                    lines.append(f"- **Core Competencies:** {'; '.join(core)}")
+                lines.append("")
+        
+        # Implementation Roadmap
+        roadmap = json_data.get("implementation_roadmap", {})
+        if roadmap:
+            lines.append("## Implementation Roadmap\n")
+            
+            phase1 = roadmap.get("phase1_quick_wins", [])
+            if phase1:
+                lines.append("### Phase 1: High-Impact Quick Wins")
+                for item in phase1:
+                    lines.append(f"{item}")
+                lines.append("")
+            
+            phase2 = roadmap.get("phase2_evidence_based", [])
+            if phase2:
+                lines.append("### Phase 2: Evidence-Based Additions")
+                for item in phase2:
+                    lines.append(f"{item}")
+                lines.append("")
+            
+            phase3 = roadmap.get("phase3_positioning", [])
+            if phase3:
+                lines.append("### Phase 3: Strategic Positioning")
+                for item in phase3:
+                    lines.append(f"{item}")
+                lines.append("")
+        
+        # Tone and Style
+        tone_style = json_data.get("tone_and_style", {})
+        if tone_style:
+            lines.append("## Section Completeness Notes")
+            lines.append(f"- **Overall Tone:** {tone_style.get('overall_tone', 'Professional and results-oriented')}")
+            
+            key_messages = tone_style.get("key_messages", [])
+            if key_messages:
+                lines.append(f"- **Key Messages:** {', '.join(key_messages)}")
+            
+            avoid = tone_style.get("avoid_messages", [])
+            if avoid:
+                lines.append(f"- **Avoid:** {', '.join(avoid)}")
+        
+        return "\n".join(lines)
+    
+    def _save_ai_recommendation(self, company: str, recommendation_data: Dict[str, Any]) -> bool:
+        """Save the AI recommendation data as JSON file"""
+        try:
             company_dir = self.base_dir / "applied_companies" / company
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save to JSON file with timestamp
             timestamp = TimestampUtils.get_timestamp()
             output_file = company_dir / f"{company}_ai_recommendation_{timestamp}.json"
             with open(output_file, 'w', encoding='utf-8') as f:
@@ -333,6 +569,11 @@ class AIRecommendationGenerator:
             
             file_size = output_file.stat().st_size / 1024
             logger.info(f"💾 [AI GENERATOR] Saved AI recommendation: {output_file} ({file_size:.1f}KB)")
+            
+            # Log if structured data is available
+            if recommendation_data.get("structured_recommendations"):
+                logger.info(f"📊 [AI GENERATOR] Structured JSON data available for programmatic CV generation")
+            
             # Register in DB (best-effort)
             try:
                 from app.database import SessionLocal
@@ -366,21 +607,16 @@ class AIRecommendationGenerator:
         return latest_file is not None and latest_file.exists()
     
     def list_companies_with_ai_recommendations(self) -> List[str]:
-        """
-        List all companies that have AI recommendation files
-        
-        Returns:
-            List of company names
-        """
+        """List all companies that have AI recommendation files"""
         companies = []
         
         try:
-            if not self.base_dir.exists():
+            applied_companies_dir = self.base_dir / "applied_companies"
+            if not applied_companies_dir.exists():
                 return companies
             
-            for company_dir in self.base_dir.iterdir():
+            for company_dir in applied_companies_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    # Check for timestamped AI recommendation files
                     latest_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_ai_recommendation", "json")
                     if latest_file and latest_file.exists():
                         companies.append(company_dir.name)
@@ -398,23 +634,12 @@ class AIRecommendationGenerator:
         force_regenerate: bool = False,
         max_concurrent: int = 3
     ) -> Dict[str, bool]:
-        """
-        Generate AI recommendations for multiple companies in batch
-        
-        Args:
-            companies: List of company names (if None, process all with prompts)
-            force_regenerate: Force regeneration even if files exist
-            max_concurrent: Maximum concurrent AI requests
-            
-        Returns:
-            Dictionary mapping company names to success status
-        """
+        """Generate AI recommendations for multiple companies in batch"""
         if companies is None:
             companies = self._find_companies_with_prompts()
         
         logger.info(f"🔄 [AI GENERATOR] Starting batch AI recommendation generation for {len(companies)} companies")
         
-        # Create semaphore to limit concurrent AI requests
         semaphore = asyncio.Semaphore(max_concurrent)
         
         async def generate_with_semaphore(company: str) -> tuple[str, bool]:
@@ -422,11 +647,9 @@ class AIRecommendationGenerator:
                 success = await self.generate_ai_recommendation(company, force_regenerate)
                 return company, success
         
-        # Execute batch generation with concurrency control
         tasks = [generate_with_semaphore(company) for company in companies]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # Process results
         final_results = {}
         for result in results:
             if isinstance(result, Exception):
@@ -460,25 +683,15 @@ class AIRecommendationGenerator:
             return companies
     
     def get_ai_recommendation_info(self, company: str) -> Optional[Dict[str, Any]]:
-        """
-        Get information about an AI recommendation file
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            Information dictionary or None if not found
-        """
+        """Get information about an AI recommendation file"""
         try:
             ai_file = self._get_output_file_path(company)
             
             if not ai_file.exists():
                 return None
             
-            # Get file stats
             stat_info = ai_file.stat()
             
-            # Read content from JSON file
             with open(ai_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
@@ -489,6 +702,7 @@ class AIRecommendationGenerator:
                 "last_modified": stat_info.st_mtime,
                 "content_length": len(data.get("recommendation_content", "")),
                 "has_content": bool(data.get("recommendation_content", "").strip()),
+                "has_structured_data": data.get("metadata", {}).get("has_structured_data", False),
                 "generated_at": data.get("generated_at"),
                 "ai_model": data.get("ai_model_info", {}).get("model")
             }
@@ -497,22 +711,11 @@ class AIRecommendationGenerator:
             logger.error(f"Error getting AI recommendation info for {company}: {e}")
             return None
 
-
     def convert_txt_to_json(self, company: str) -> bool:
-        """
-        Convert existing TXT recommendation file to JSON format
-        
-        Args:
-            company: Company name
-            
-        Returns:
-            True if successful, False otherwise
-        """
+        """Convert existing TXT recommendation file to JSON format"""
         try:
             company_dir = self.base_dir / "applied_companies" / company
             
-            # Use timestamped files with fallback
-            from app.utils.timestamp_utils import TimestampUtils
             txt_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company}_ai_recommendation", "txt")
             if not txt_file:
                 txt_file = company_dir / f"{company}_ai_recommendation.txt"
@@ -525,29 +728,27 @@ class AIRecommendationGenerator:
                 logger.error(f"TXT file not found: {txt_file}")
                 return False
             
-            # Read the TXT content
             with open(txt_file, 'r', encoding='utf-8') as f:
                 txt_content = f.read()
             
-            # Structure the data as JSON
             json_data = {
                 "company": company,
                 "generated_at": datetime.fromtimestamp(txt_file.stat().st_mtime).isoformat(),
                 "recommendation_content": txt_content,
                 "ai_model_info": {
-                    "provider": "unknown",  # Not available from TXT file
-                    "model": "unknown",     # Not available from TXT file
-                    "cost": 0.0,           # Not available from TXT file
-                    "tokens_used": 0       # Not available from TXT file
+                    "provider": "unknown",
+                    "model": "unknown",
+                    "cost": 0.0,
+                    "tokens_used": 0
                 },
                 "metadata": {
                     "content_length": len(txt_content),
                     "format_version": "1.0",
-                    "converted_from_txt": True
+                    "converted_from_txt": True,
+                    "has_structured_data": False
                 }
             }
             
-            # Save as JSON
             with open(json_file, 'w', encoding='utf-8') as f:
                 json.dump(json_data, f, indent=2, ensure_ascii=False)
             
@@ -561,22 +762,16 @@ class AIRecommendationGenerator:
             return False
     
     def batch_convert_txt_to_json(self) -> Dict[str, bool]:
-        """
-        Convert all existing TXT recommendation files to JSON format
-        
-        Returns:
-            Dictionary mapping company names to conversion success status
-        """
+        """Convert all existing TXT recommendation files to JSON format"""
         results = {}
         
         try:
-            if not self.base_dir.exists():
+            applied_companies_dir = self.base_dir / "applied_companies"
+            if not applied_companies_dir.exists():
                 return results
             
-            for company_dir in self.base_dir.iterdir():
+            for company_dir in applied_companies_dir.iterdir():
                 if company_dir.is_dir() and company_dir.name != "Unknown_Company":
-                    # Use timestamped files with fallback
-                    from app.utils.timestamp_utils import TimestampUtils
                     txt_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_dir.name}_ai_recommendation", "txt")
                     if not txt_file:
                         txt_file = company_dir / f"{company_dir.name}_ai_recommendation.txt"
@@ -585,11 +780,9 @@ class AIRecommendationGenerator:
                     if not json_file:
                         json_file = company_dir / f"{company_dir.name}_ai_recommendation.json"
                     
-                    # Only convert if TXT exists and JSON doesn't exist (or is older)
                     if txt_file.exists():
                         should_convert = not json_file.exists()
                         if json_file.exists():
-                            # Convert if TXT is newer than JSON
                             should_convert = txt_file.stat().st_mtime > json_file.stat().st_mtime
                         
                         if should_convert:
@@ -608,15 +801,7 @@ class AIRecommendationGenerator:
             return results
     
     async def _trigger_cv_tailoring(self, company: str) -> bool:
-        """
-        Automatically trigger CV tailoring after AI recommendations are generated
-        
-        Args:
-            company: Company name that just had AI recommendations generated
-            
-        Returns:
-            True if CV tailoring was successful, False otherwise
-        """
+        """Automatically trigger CV tailoring after AI recommendations are generated"""
         if not CV_TAILORING_AVAILABLE:
             logger.warning(f"⚠️ [AI GENERATOR] CV tailoring service not available for {company}")
             return False
@@ -624,28 +809,22 @@ class AIRecommendationGenerator:
         try:
             logger.info(f"🚀 [AI GENERATOR] Starting automatic CV tailoring for {company}")
             
-            # Create user-specific CV tailoring service instance
             cv_tailoring_service = CVTailoringService(user_email=self.user_email)
             
-            # Load the original CV and the recommendation we just generated
             original_cv, recommendation = cv_tailoring_service.load_real_cv_and_recommendation(company)
             
-            # Import the required models here to avoid circular imports
             from app.tailored_cv.models.cv_models import CVTailoringRequest
             
-            # Create tailoring request
             request = CVTailoringRequest(
                 original_cv=original_cv,
                 recommendations=recommendation,
                 custom_instructions="Auto-generated after AI recommendations",
-                company_folder=None  # We'll save manually
+                company_folder=None
             )
             
-            # Process the CV tailoring
             response = await cv_tailoring_service.tailor_cv(request)
             
             if response.success:
-                # Save tailored CV to company-specific folder in applied_companies
                 file_path = cv_tailoring_service.save_tailored_cv_to_analysis_folder(response.tailored_cv, company)
                 logger.info(f"✅ [AI GENERATOR] Tailored CV saved automatically to {file_path}")
                 logger.info(f"📊 [AI GENERATOR] Estimated ATS score: {response.tailored_cv.estimated_ats_score}")
@@ -658,7 +837,3 @@ class AIRecommendationGenerator:
         except Exception as e:
             logger.error(f"❌ [AI GENERATOR] Error during automatic CV tailoring for {company}: {e}")
             return False
-
-
-# Global instance removed - service now requires user_email parameter
-# Create instances per request with proper user context
