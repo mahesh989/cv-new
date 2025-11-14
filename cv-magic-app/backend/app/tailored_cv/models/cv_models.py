@@ -127,6 +127,46 @@ class RecommendationAnalysis(BaseModel):
     match_score: Optional[int] = Field(None, description="Current CV-JD match score")
     target_score: Optional[int] = Field(None, description="Target score after optimization")
     analysis_date: Optional[datetime] = Field(None, description="Analysis timestamp")
+    
+    # NEW: Enhanced fields from actionable_guidance (v2.0+)
+    tier1_keywords: Optional[Dict[str, List[Dict[str, str]]]] = Field(
+        None, 
+        description="Tier 1 keywords with integration/validation metadata (technical/soft/domain)"
+    )
+    tier2_keywords: Optional[Dict[str, List[Dict[str, str]]]] = Field(
+        None, 
+        description="Tier 2 keywords with integration/validation metadata (technical/soft/domain)"
+    )
+    tier3_avoid: Optional[List[str]] = Field(
+        None, 
+        description="Tier 3 keywords to never add (unverifiable/domain-specific)"
+    )
+    
+    strategic_positioning: Optional[Dict[str, Any]] = Field(
+        None, 
+        description="Strategic positioning guidance (emphasis_areas, de_emphasize, bridging_statements, strategy)"
+    )
+    experience_optimization: Optional[Dict[str, List[str]]] = Field(
+        None, 
+        description="Experience optimization guidance (strengths_to_highlight, gaps_to_address)"
+    )
+    achievements: Optional[Dict[str, List[str]]] = Field(
+        None, 
+        description="Achievements to emphasize (transferable_experience, core_competencies)"
+    )
+    implementation_plan: Optional[Dict[str, List[str]]] = Field(
+        None, 
+        description="Implementation roadmap (phase1_quick_wins, phase2_evidence_based, phase3_positioning)"
+    )
+    messaging: Optional[Dict[str, List[str]]] = Field(
+        None, 
+        description="Messaging guidance (key_messages, avoid_messages)"
+    )
+    
+    format_version: Optional[str] = Field(
+        None, 
+        description="Format version of the recommendation file (1.0, 2.0, etc.)"
+    )
 
 
 class OptimizationStrategy(BaseModel):

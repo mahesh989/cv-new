@@ -23,29 +23,54 @@ class RecommendationParser:
     def parse_recommendation_file(file_path: str) -> Dict[str, Any]:
         """
         Parse a recommendation file and extract structured data
+        Prioritizes actionable_guidance (v2.0+) > structured_recommendations (v2.0) > markdown (v1.0)
         
         Args:
             file_path: Path to the recommendation JSON file
             
         Returns:
-            Structured recommendation data
+            Structured recommendation data compatible with RecommendationAnalysis model
         """
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
             company = data.get('company', 'Unknown')
-            recommendation_content = data.get('recommendation_content', '')
+            metadata = data.get('metadata', {})
+            format_version = metadata.get('format_version', '1.0')
+            has_actionable = bool(data.get('actionable_guidance'))
+            has_structured = metadata.get('has_structured_data', False)
             
-            parsed_data = RecommendationParser.parse_markdown_content(
-                recommendation_content, company
-            )
+            # PRIORITY 1: Use actionable_guidance if available (v2.0+ - preferred method)
+            if has_actionable and 'actionable_guidance' in data:
+                logger.info(f"✅ [PARSER] Using actionable_guidance (v{format_version}) for {company}")
+                parsed_data = RecommendationParser.parse_actionable_guidance(
+                    data['actionable_guidance'], 
+                    data.get('structured_recommendations', {}),
+                    company
+                )
             
-            # Add metadata
+            # PRIORITY 2: Use structured_recommendations (v2.0)
+            elif has_structured and 'structured_recommendations' in data:
+                logger.info(f"✅ [PARSER] Using structured_recommendations (v{format_version}) for {company}")
+                parsed_data = RecommendationParser.parse_structured_recommendations(
+                    data['structured_recommendations'], company
+                )
+            
+            # PRIORITY 3: Fallback to markdown parsing (v1.0)
+            else:
+                logger.info(f"⚠️ [PARSER] Falling back to markdown parsing (v{format_version}) for {company}")
+                recommendation_content = data.get('recommendation_content', '')
+                parsed_data = RecommendationParser.parse_markdown_content(
+                    recommendation_content, company
+                )
+            
+            # Add metadata (common to all formats)
             parsed_data['generated_at'] = data.get('generated_at')
             parsed_data['ai_model_info'] = data.get('ai_model_info', {})
+            parsed_data['format_version'] = format_version
             
-            logger.info(f"✅ Parsed recommendation for {company}")
+            logger.info(f"✅ Parsed recommendation for {company} (format: {format_version})")
             return parsed_data
             
         except Exception as e:
@@ -112,6 +137,299 @@ class RecommendationParser:
             'target_score': target_ats_score,
             'raw_recommendation_content': content
         }
+    
+    @staticmethod
+    def parse_actionable_guidance(
+        actionable: Dict[str, Any], 
+        structured: Dict[str, Any],
+        company: str
+    ) -> Dict[str, Any]:
+        """
+        Parse v2.0+ actionable_guidance into RecommendationAnalysis format
+        
+        This is the PREFERRED parsing method - uses pre-flattened, easy-to-access data.
+        
+        Args:
+            actionable: The actionable_guidance section
+            structured: The structured_recommendations section (for fallback data like ATS scores)
+            company: Company name
+            
+        Returns:
+            Dict compatible with RecommendationAnalysis model
+        """
+        
+        # Extract Tier 1 keywords (add immediately)
+        tier1 = actionable.get('tier1_add_immediately', {})
+        tier1_technical = [item.get('keyword', '') for item in tier1.get('technical', []) if item.get('keyword')]
+        tier1_soft = [item.get('keyword', '') for item in tier1.get('soft', []) if item.get('keyword')]
+        tier1_domain = [item.get('keyword', '') for item in tier1.get('domain', []) if item.get('keyword')]
+        
+        # Extract Tier 2 keywords (add with evidence)
+        tier2 = actionable.get('tier2_add_with_evidence', {})
+        tier2_technical = [item.get('keyword', '') for item in tier2.get('technical', []) if item.get('keyword')]
+        tier2_soft = [item.get('keyword', '') for item in tier2.get('soft', []) if item.get('keyword')]
+        tier2_domain = [item.get('keyword', '') for item in tier2.get('domain', []) if item.get('keyword')]
+        
+        # Extract Tier 3 keywords (never add)
+        tier3_keywords = actionable.get('tier3_never_add', [])
+        
+        # Extract strategic positioning
+        strategic = actionable.get('strategic_positioning', {})
+        
+        # Extract experience optimization
+        experience = actionable.get('experience_optimization', {})
+        
+        # Extract achievements
+        achievements = actionable.get('achievements', {})
+        
+        # Extract implementation plan
+        implementation = actionable.get('implementation_plan', {})
+        
+        # Extract messaging
+        messaging = actionable.get('messaging', {})
+        
+        # Get ATS scores from structured data (fallback)
+        exec_summary = structured.get('executive_summary', {})
+        current_ats_score = int(exec_summary.get('current_ats_score', 65))
+        target_ats_score = int(exec_summary.get('target_score', 85))
+        
+        # Extract job title from primary objective or use default
+        primary_objective = exec_summary.get('primary_objective', '')
+        job_title = RecommendationParser._extract_job_title_from_objective(
+            primary_objective, company
+        )
+        
+        # Combine keywords for backward compatibility
+        missing_technical_skills = tier1_technical + tier2_technical
+        missing_soft_skills = tier1_soft + tier2_soft
+        missing_keywords = tier1_domain + tier2_domain
+        
+        # Extract technical enhancements from experience optimization
+        technical_enhancements = experience.get('strengths_to_highlight', [])
+        
+        return {
+            'company': company,
+            'job_title': job_title,
+            
+            # BACKWARD COMPATIBLE: Core fields
+            'missing_technical_skills': missing_technical_skills,
+            'missing_soft_skills': missing_soft_skills,
+            'missing_keywords': missing_keywords,
+            'technical_enhancements': technical_enhancements,
+            'soft_skill_improvements': missing_soft_skills,
+            'keyword_integration': missing_technical_skills + missing_keywords,
+            'critical_gaps': tier1_technical[:3] + tier1_soft[:3] + tier1_domain[:3],  # Tier 1 = critical
+            'important_gaps': tier2_technical[:3] + tier2_soft[:3],  # Tier 2 = important
+            'nice_to_have': [],
+            'match_score': current_ats_score,
+            'target_score': target_ats_score,
+            
+            # NEW: Tier-based fields with full metadata
+            'tier1_keywords': {
+                'technical': tier1.get('technical', []),  # Full objects with integration/validation
+                'soft': tier1.get('soft', []),
+                'domain': tier1.get('domain', [])
+            },
+            'tier2_keywords': {
+                'technical': tier2.get('technical', []),
+                'soft': tier2.get('soft', []),
+                'domain': tier2.get('domain', [])
+            },
+            'tier3_avoid': tier3_keywords,
+            
+            # NEW: Strategic guidance (ready to use!)
+            'strategic_positioning': {
+                'emphasis_areas': strategic.get('emphasis_areas', []),
+                'de_emphasize': strategic.get('de_emphasize', []),
+                'bridging_statements': strategic.get('bridging_statements', []),
+                'strategy': strategic.get('strategy', '')
+            },
+            
+            # NEW: Experience optimization
+            'experience_optimization': {
+                'strengths_to_highlight': experience.get('strengths_to_highlight', []),
+                'gaps_to_address': experience.get('gaps_to_address', [])
+            },
+            
+            # NEW: Achievements
+            'achievements': {
+                'transferable_experience': achievements.get('transferable_experience', []),
+                'core_competencies': achievements.get('core_competencies', [])
+            },
+            
+            # NEW: Implementation roadmap
+            'implementation_plan': {
+                'phase1_quick_wins': implementation.get('phase1_quick_wins', []),
+                'phase2_evidence_based': implementation.get('phase2_evidence_based', []),
+                'phase3_positioning': implementation.get('phase3_positioning', [])
+            },
+            
+            # NEW: Messaging guidance
+            'messaging': {
+                'key_messages': messaging.get('key_messages', []),
+                'avoid_messages': messaging.get('avoid_messages', [])
+            },
+            
+            # Metadata
+            'company_values': [],
+            'industry_terminology': missing_keywords[:5] if missing_keywords else [],
+            'culture_alignment': [strategic.get('strategy', '')] if strategic.get('strategy') else [],
+            'raw_recommendation_content': json.dumps(actionable, indent=2)
+        }
+    
+    @staticmethod
+    def parse_structured_recommendations(
+        structured_data: Dict[str, Any], 
+        company: str
+    ) -> Dict[str, Any]:
+        """
+        Parse structured JSON recommendations (v2.0 format) into RecommendationAnalysis format
+        
+        Args:
+            structured_data: The structured_recommendations JSON object
+            company: Company name
+            
+        Returns:
+            Structured data compatible with RecommendationAnalysis model
+        """
+        # Extract executive summary
+        exec_summary = structured_data.get('executive_summary', {})
+        current_ats_score = int(exec_summary.get('current_ats_score', 65))
+        target_ats_score = int(exec_summary.get('target_score', 85))
+        
+        # Extract keyword integration (tier-based)
+        keyword_integration = structured_data.get('keyword_integration', {})
+        
+        # Extract Tier 1 keywords (safe to integrate immediately)
+        tier1 = keyword_integration.get('tier1_integrate_immediately', {})
+        tier1_technical = [kw.get('keyword', '') for kw in tier1.get('technical', []) if kw.get('keyword')]
+        tier1_soft = [kw.get('keyword', '') for kw in tier1.get('soft', []) if kw.get('keyword')]
+        tier1_domain = [kw.get('keyword', '') for kw in tier1.get('domain', []) if kw.get('keyword')]
+        
+        # Extract Tier 2 keywords (add with evidence)
+        tier2 = keyword_integration.get('tier2_add_with_evidence', {})
+        tier2_technical = [kw.get('keyword', '') for kw in tier2.get('technical', []) if kw.get('keyword')]
+        tier2_soft = [kw.get('keyword', '') for kw in tier2.get('soft', []) if kw.get('keyword')]
+        tier2_domain = [kw.get('keyword', '') for kw in tier2.get('domain', []) if kw.get('keyword')]
+        
+        # Extract Tier 3 keywords (never add - for reference)
+        tier3 = keyword_integration.get('tier3_never_add', {})
+        tier3_keywords = []
+        for category in ['technical', 'soft', 'domain']:
+            tier3_keywords.extend([
+                kw.get('keyword', '') for kw in tier3.get(category, []) if kw.get('keyword')
+            ])
+        
+        # Combine all missing keywords (Tier 1 + Tier 2)
+        missing_technical_skills = tier1_technical + tier2_technical
+        missing_soft_skills = tier1_soft + tier2_soft
+        missing_keywords = tier1_domain + tier2_domain
+        
+        # Extract priority gaps
+        priority_gaps = structured_data.get('priority_gaps', {})
+        immediate_action = priority_gaps.get('immediate_action', {})
+        
+        # Build critical gaps (Tier 1 keywords are most critical)
+        critical_gaps = tier1_technical[:3] + tier1_soft[:3] + tier1_domain[:3]
+        
+        # Extract important gaps from optimization opportunities
+        optimization = priority_gaps.get('optimization_opportunities', {})
+        important_gaps = []
+        if optimization.get('technical_depth', 0) < 75:
+            important_gaps.append("Improve technical depth")
+        if optimization.get('experience_alignment', 0) < 75:
+            important_gaps.append("Better align experience with job requirements")
+        if optimization.get('industry_fit', 0) < 75:
+            important_gaps.append("Improve industry fit")
+        
+        # Extract nice-to-have from implementation roadmap
+        roadmap = structured_data.get('implementation_roadmap', {})
+        nice_to_have = roadmap.get('phase3_positioning', [])
+        
+        # Extract experience reframing guidance
+        experience_reframing = structured_data.get('experience_reframing', {})
+        industry_transition = experience_reframing.get('industry_transition', {})
+        technical_showcase = experience_reframing.get('technical_showcase', {})
+        
+        # Extract technical enhancements (from technical showcase strengths)
+        technical_enhancements = technical_showcase.get('strengths_to_highlight', [])
+        
+        # Extract company values and culture alignment from tone_and_style
+        tone_style = structured_data.get('tone_and_style', {})
+        key_messages = tone_style.get('key_messages', [])
+        
+        # Infer company values from key messages
+        company_values = []
+        if any('social impact' in msg.lower() for msg in key_messages):
+            company_values.append('social impact')
+        if any('data-driven' in msg.lower() for msg in key_messages):
+            company_values.append('data-driven decisions')
+        if any('collaboration' in msg.lower() for msg in key_messages):
+            company_values.append('collaboration')
+        
+        # Extract industry terminology (use Tier 1 domain keywords)
+        industry_terminology = tier1_domain[:5]
+        
+        # Extract culture alignment from experience reframing
+        culture_alignment = []
+        emphasis_areas = industry_transition.get('emphasis_areas', [])
+        culture_alignment.extend(emphasis_areas[:3])
+        
+        # Extract job title (try to infer from executive summary or use default)
+        primary_objective = exec_summary.get('primary_objective', '')
+        job_title = RecommendationParser._extract_job_title_from_objective(
+            primary_objective, company
+        )
+        
+        # Build keyword integration list (all Tier 1 + Tier 2)
+        keyword_integration_list = missing_technical_skills + missing_keywords
+        
+        return {
+            'company': company,
+            'job_title': job_title,
+            'missing_technical_skills': missing_technical_skills,
+            'missing_soft_skills': missing_soft_skills,
+            'missing_keywords': missing_keywords,
+            'technical_enhancements': technical_enhancements,
+            'soft_skill_improvements': missing_soft_skills,  # Same as missing for now
+            'keyword_integration': keyword_integration_list,
+            'company_values': company_values if company_values else None,
+            'industry_terminology': industry_terminology if industry_terminology else None,
+            'culture_alignment': culture_alignment if culture_alignment else None,
+            'critical_gaps': critical_gaps if critical_gaps else [],
+            'important_gaps': important_gaps if important_gaps else [],
+            'nice_to_have': nice_to_have if nice_to_have else [],
+            'match_score': current_ats_score,
+            'target_score': target_ats_score,
+            'raw_recommendation_content': None  # Not available in structured format
+        }
+    
+    @staticmethod
+    def _extract_job_title_from_objective(objective: str, company: str) -> str:
+        """Extract or infer job title from primary objective"""
+        if not objective:
+            return f'Position at {company.replace("_", " ")}'
+        
+        # Try to extract job title from objective
+        # Example: "Transition to Data Analyst role" -> "Data Analyst"
+        title_patterns = [
+            r'(?:to|as|for)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:role|position|job)',
+            r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:role|position|job)',
+        ]
+        
+        for pattern in title_patterns:
+            match = re.search(pattern, objective, re.IGNORECASE)
+            if match:
+                return match.group(1)
+        
+        # Fallback: infer from objective keywords
+        if 'data' in objective.lower() and 'analyst' in objective.lower():
+            return 'Data Analyst'
+        if 'senior' in objective.lower() or 'lead' in objective.lower():
+            if 'data' in objective.lower():
+                return 'Senior Data Analyst'
+        
+        return f'Position at {company.replace("_", " ")}'
     
     @staticmethod
     def _extract_ats_score(content: str) -> int:
@@ -899,3 +1217,196 @@ class RecommendationParser:
                 logger.info(f"  - Added {section} section")
         
         return converted_data
+    
+    @staticmethod
+    def debug_parse_recommendation_file(file_path: str) -> Dict[str, Any]:
+        """
+        Debug method to analyze recommendation file parsing
+        
+        Args:
+            file_path: Path to recommendation file
+            
+        Returns:
+            Debug information about parsing process
+        """
+        debug_info = {
+            'file_path': file_path,
+            'file_exists': False,
+            'format_detected': None,
+            'parsing_method_used': None,
+            'fields_extracted': {},
+            'warnings': [],
+            'errors': []
+        }
+        
+        try:
+            from pathlib import Path
+            path_obj = Path(file_path)
+            debug_info['file_exists'] = path_obj.exists()
+            
+            if not debug_info['file_exists']:
+                debug_info['errors'].append(f"File not found: {file_path}")
+                return debug_info
+            
+            # Load file
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Detect format
+            metadata = data.get('metadata', {})
+            format_version = metadata.get('format_version', '1.0')
+            has_actionable = bool(data.get('actionable_guidance'))
+            has_structured = metadata.get('has_structured_data', False)
+            has_markdown = bool(data.get('recommendation_content'))
+            
+            debug_info['format_detected'] = format_version
+            debug_info['has_actionable_guidance'] = has_actionable
+            debug_info['has_structured_recommendations'] = has_structured
+            debug_info['has_recommendation_content'] = has_markdown
+            
+            # Determine which parser would be used
+            if has_actionable and 'actionable_guidance' in data:
+                debug_info['parsing_method_used'] = 'parse_actionable_guidance'
+            elif has_structured and 'structured_recommendations' in data:
+                debug_info['parsing_method_used'] = 'parse_structured_recommendations'
+            else:
+                debug_info['parsing_method_used'] = 'parse_markdown_content'
+            
+            # Actually parse the file
+            parsed_data = RecommendationParser.parse_recommendation_file(file_path)
+            
+            # Analyze extracted fields
+            debug_info['fields_extracted'] = {
+                'has_company': bool(parsed_data.get('company')),
+                'has_job_title': bool(parsed_data.get('job_title')),
+                'missing_technical_skills_count': len(parsed_data.get('missing_technical_skills', [])),
+                'missing_soft_skills_count': len(parsed_data.get('missing_soft_skills', [])),
+                'missing_keywords_count': len(parsed_data.get('missing_keywords', [])),
+                'critical_gaps_count': len(parsed_data.get('critical_gaps', [])),
+                'has_tier1_keywords': bool(parsed_data.get('tier1_keywords')),
+                'has_tier2_keywords': bool(parsed_data.get('tier2_keywords')),
+                'has_tier3_avoid': bool(parsed_data.get('tier3_avoid')),
+                'has_strategic_positioning': bool(parsed_data.get('strategic_positioning')),
+                'has_experience_optimization': bool(parsed_data.get('experience_optimization')),
+                'has_achievements': bool(parsed_data.get('achievements')),
+                'has_implementation_plan': bool(parsed_data.get('implementation_plan')),
+                'has_messaging': bool(parsed_data.get('messaging')),
+                'match_score': parsed_data.get('match_score'),
+                'target_score': parsed_data.get('target_score'),
+                'format_version': parsed_data.get('format_version')
+            }
+            
+            # Check for tier information
+            if parsed_data.get('tier1_keywords'):
+                tier1 = parsed_data['tier1_keywords']
+                debug_info['tier1_details'] = {
+                    'technical_count': len(tier1.get('technical', [])),
+                    'soft_count': len(tier1.get('soft', [])),
+                    'domain_count': len(tier1.get('domain', []))
+                }
+            
+            if parsed_data.get('tier2_keywords'):
+                tier2 = parsed_data['tier2_keywords']
+                debug_info['tier2_details'] = {
+                    'technical_count': len(tier2.get('technical', [])),
+                    'soft_count': len(tier2.get('soft', [])),
+                    'domain_count': len(tier2.get('domain', []))
+                }
+            
+            if parsed_data.get('tier3_avoid'):
+                debug_info['tier3_avoid_count'] = len(parsed_data['tier3_avoid'])
+                debug_info['tier3_avoid_list'] = parsed_data['tier3_avoid'][:5]  # First 5
+            
+            # Validate tier3 keywords are not in missing_technical_skills
+            tier3_list = parsed_data.get('tier3_avoid', [])
+            missing_tech = parsed_data.get('missing_technical_skills', [])
+            conflicting = [kw for kw in tier3_list if kw in missing_tech]
+            if conflicting:
+                debug_info['warnings'].append(f"⚠️ Tier 3 keywords found in missing_technical_skills: {conflicting}")
+            
+            debug_info['success'] = True
+            
+        except Exception as e:
+            debug_info['errors'].append(str(e))
+            debug_info['success'] = False
+            logger.error(f"Debug parsing failed: {e}", exc_info=True)
+        
+        return debug_info
+    
+    @staticmethod
+    def validate_parsed_data(parsed_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate that parsed data has all required fields for RecommendationAnalysis
+        
+        Args:
+            parsed_data: Parsed recommendation data
+            
+        Returns:
+            Validation results with warnings and errors
+        """
+        validation = {
+            'is_valid': True,
+            'errors': [],
+            'warnings': [],
+            'missing_required_fields': [],
+            'missing_optional_fields': []
+        }
+        
+        # Required fields for RecommendationAnalysis
+        required_fields = [
+            'company', 'job_title', 'missing_technical_skills', 
+            'missing_soft_skills', 'missing_keywords', 'technical_enhancements',
+            'soft_skill_improvements', 'keyword_integration', 'critical_gaps',
+            'important_gaps', 'nice_to_have'
+        ]
+        
+        for field in required_fields:
+            if field not in parsed_data:
+                validation['missing_required_fields'].append(field)
+                validation['errors'].append(f"Missing required field: {field}")
+                validation['is_valid'] = False
+        
+        # Optional but valuable fields (v2.0+)
+        optional_fields = [
+            'tier1_keywords', 'tier2_keywords', 'tier3_avoid',
+            'strategic_positioning', 'experience_optimization',
+            'achievements', 'implementation_plan', 'messaging'
+        ]
+        
+        for field in optional_fields:
+            if field not in parsed_data:
+                validation['missing_optional_fields'].append(field)
+                validation['warnings'].append(f"Missing optional field (v2.0+): {field}")
+        
+        # Validate tier3_avoid doesn't conflict with missing keywords
+        tier3_avoid = parsed_data.get('tier3_avoid', [])
+        if tier3_avoid:
+            missing_tech = set(parsed_data.get('missing_technical_skills', []))
+            missing_soft = set(parsed_data.get('missing_soft_skills', []))
+            missing_keywords = set(parsed_data.get('missing_keywords', []))
+            
+            all_missing = missing_tech | missing_soft | missing_keywords
+            conflicts = [kw for kw in tier3_avoid if kw in all_missing]
+            
+            if conflicts:
+                validation['warnings'].append(
+                    f"⚠️ Tier 3 keywords ({conflicts}) found in missing keywords lists - should be removed!"
+                )
+        
+        # Validate tier1_keywords structure
+        tier1 = parsed_data.get('tier1_keywords')
+        if tier1:
+            if not isinstance(tier1, dict):
+                validation['errors'].append("tier1_keywords should be a dict with technical/soft/domain keys")
+                validation['is_valid'] = False
+            else:
+                for category in ['technical', 'soft', 'domain']:
+                    if category in tier1:
+                        for item in tier1[category]:
+                            if not isinstance(item, dict):
+                                validation['errors'].append(f"tier1_keywords.{category} items should be dicts")
+                                validation['is_valid'] = False
+                            elif 'keyword' not in item:
+                                validation['warnings'].append(f"tier1_keywords.{category} item missing 'keyword' field")
+        
+        return validation

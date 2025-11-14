@@ -257,11 +257,20 @@ class AIRecommendationGenerator:
             # Convert JSON to markdown for frontend display
             markdown_content = self._convert_json_to_markdown(json_data, company)
             
+            # Extract actionable guidance for CV generation
+            try:
+                actionable_guidance = self._extract_actionable_guidance(json_data)
+                logger.info(f"✅ [AI GENERATOR] Extracted actionable guidance for CV generation")
+            except Exception as e:
+                logger.warning(f"⚠️ [AI GENERATOR] Failed to extract actionable guidance: {e}")
+                actionable_guidance = {}  # Empty dict if extraction fails
+            
             return {
                 "company": company,
                 "generated_at": datetime.now().isoformat(),
                 "recommendation_content": markdown_content,  # Markdown for frontend display
                 "structured_recommendations": json_data,     # JSON for programmatic CV generation
+                "actionable_guidance": actionable_guidance,   # Flattened actionable guidance for CV generation
                 "ai_model_info": {
                     "provider": ai_response.provider,
                     "model": ai_response.model,
@@ -271,7 +280,8 @@ class AIRecommendationGenerator:
                 "metadata": {
                     "content_length": len(markdown_content),
                     "format_version": "2.0",  # Updated format with structured data
-                    "has_structured_data": True
+                    "has_structured_data": True,
+                    "has_actionable_guidance": bool(actionable_guidance)  # Indicates actionable_guidance is available
                 }
             }
             
@@ -336,6 +346,142 @@ class AIRecommendationGenerator:
         content = re.sub(r',(\s*[}\]])', r'\1', content)
         
         return content.strip()
+    
+    def _extract_actionable_guidance(self, json_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract and flatten actionable guidance from structured recommendations
+        
+        Args:
+            json_data: Structured recommendations JSON
+            
+        Returns:
+            Flattened actionable guidance for easy CV generation
+        """
+        keyword_integration = json_data.get('keyword_integration', {})
+        experience_reframing = json_data.get('experience_reframing', {})
+        warnings = json_data.get('strategic_warnings', {})
+        roadmap = json_data.get('implementation_roadmap', {})
+        tone_style = json_data.get('tone_and_style', {})
+        
+        # Extract Tier 1 keywords (add immediately)
+        tier1 = keyword_integration.get('tier1_integrate_immediately', {})
+        tier1_flattened = {
+            'technical': [
+                {
+                    'keyword': item.get('keyword'),
+                    'integration': item.get('integration'),
+                    'validation': item.get('validation')
+                }
+                for item in tier1.get('technical', [])
+            ],
+            'soft': [
+                {
+                    'keyword': item.get('keyword'),
+                    'integration': item.get('integration'),
+                    'validation': item.get('validation')
+                }
+                for item in tier1.get('soft', [])
+            ],
+            'domain': [
+                {
+                    'keyword': item.get('keyword'),
+                    'integration': item.get('integration'),
+                    'validation': item.get('validation')
+                }
+                for item in tier1.get('domain', [])
+            ]
+        }
+        
+        # Extract Tier 2 keywords (add with evidence)
+        tier2 = keyword_integration.get('tier2_add_with_evidence', {})
+        tier2_flattened = {
+            'technical': [
+                {
+                    'keyword': item.get('keyword'),
+                    'integration': item.get('integration'),
+                    'validation': item.get('validation'),
+                    'evidence_required': True
+                }
+                for item in tier2.get('technical', [])
+            ],
+            'soft': [
+                {
+                    'keyword': item.get('keyword'),
+                    'integration': item.get('integration'),
+                    'validation': item.get('validation'),
+                    'evidence_required': True
+                }
+                for item in tier2.get('soft', [])
+            ],
+            'domain': [
+                {
+                    'keyword': item.get('keyword'),
+                    'integration': item.get('integration'),
+                    'validation': item.get('validation'),
+                    'evidence_required': True
+                }
+                for item in tier2.get('domain', [])
+            ]
+        }
+        
+        # Extract Tier 3 keywords (never add)
+        tier3 = keyword_integration.get('tier3_never_add', {})
+        tier3_flat = []
+        for item in tier3.get('technical', []):
+            tier3_flat.append(item.get('keyword'))
+        for item in tier3.get('domain', []):
+            tier3_flat.append(item.get('keyword'))
+        for item in tier3.get('soft', []):
+            tier3_flat.append(item.get('keyword'))
+        
+        # Extract strategic positioning
+        industry_transition = experience_reframing.get('industry_transition', {})
+        
+        # Extract experience optimization
+        technical_showcase = experience_reframing.get('technical_showcase', {})
+        
+        # Extract warnings
+        dont_undersell = warnings.get('dont_undersell', {})
+        
+        return {
+            # Keyword tiers
+            "tier1_add_immediately": tier1_flattened,
+            "tier2_add_with_evidence": tier2_flattened,
+            "tier3_never_add": tier3_flat,
+            
+            # Strategic positioning
+            "strategic_positioning": {
+                "emphasis_areas": industry_transition.get('emphasis_areas', []),
+                "de_emphasize": industry_transition.get('de_emphasize', []),
+                "bridging_statements": industry_transition.get('bridging_statements', []),
+                "strategy": experience_reframing.get('seniority_positioning', {}).get('strategy', '')
+            },
+            
+            # Experience optimization
+            "experience_optimization": {
+                "strengths_to_highlight": technical_showcase.get('strengths_to_highlight', []),
+                "gaps_to_address": technical_showcase.get('gaps_to_address', [])
+            },
+            
+            # Achievements to emphasize
+            "achievements": {
+                "transferable_experience": dont_undersell.get('transferable_experience', []),
+                "core_competencies": dont_undersell.get('core_competencies', [])
+            },
+            
+            # Implementation roadmap
+            "implementation_plan": {
+                "phase1_quick_wins": roadmap.get('phase1_quick_wins', []),
+                "phase2_evidence_based": roadmap.get('phase2_evidence_based', []),
+                "phase3_positioning": roadmap.get('phase3_positioning', [])
+            },
+            
+            # Messaging guidance
+            "messaging": {
+                "key_messages": tone_style.get('key_messages', []),
+                "avoid_messages": tone_style.get('avoid_messages', [])
+            }
+        }
     
     def _convert_json_to_markdown(self, json_data: Dict[str, Any], company: str) -> str:
         """
