@@ -147,11 +147,29 @@ async def get_company_ai_recommendations(company: str, current_user: UserData = 
 
         # Standard format
         if "recommendation_content" in ai_data:
+            recommendation_content = ai_data.get("recommendation_content", "")
+            
+            # Check if content is raw JSON (starts with {) and convert to markdown
+            if recommendation_content.strip().startswith('{') and "structured_recommendations" not in ai_data:
+                try:
+                    # Try to parse as JSON and convert to markdown
+                    json_data = json.loads(recommendation_content)
+                    logger.info(f"🔄 [AI_RECOMMENDATIONS] Converting raw JSON to markdown for {company}")
+                    
+                    # Import the generator to use its conversion method
+                    from app.services.ai_recommendation_generator import AIRecommendationGenerator
+                    generator = AIRecommendationGenerator(user_email=current_user.email)
+                    recommendation_content = generator._convert_json_to_markdown(json_data, company)
+                    
+                    logger.info(f"✅ [AI_RECOMMENDATIONS] Successfully converted JSON to markdown")
+                except (json.JSONDecodeError, Exception) as e:
+                    logger.warning(f"⚠️ [AI_RECOMMENDATIONS] Failed to convert JSON to markdown: {e}, using original content")
+            
             content = {
                 "success": True,
                 "company": ai_data.get("company", company),
                 "generated_at": ai_data.get("generated_at"),
-                "recommendation_content": ai_data.get("recommendation_content"),
+                "recommendation_content": recommendation_content,
                 "ai_model_info": ai_data.get("ai_model_info"),
                 "file_path": str(ai_file_path)
             }

@@ -246,9 +246,12 @@ class AIRecommendationGenerator:
         Returns:
             Structured JSON data with both markdown (for display) and JSON (for CV generation)
         """
+        # Clean the response before parsing
+        cleaned_content = self._clean_json_response(ai_response.content)
+        
         try:
             # Try to parse response as JSON
-            json_data = json.loads(ai_response.content)
+            json_data = json.loads(cleaned_content)
             logger.info(f"✅ [AI GENERATOR] Successfully parsed AI response as JSON")
             
             # Convert JSON to markdown for frontend display
@@ -275,6 +278,7 @@ class AIRecommendationGenerator:
         except json.JSONDecodeError as e:
             # Fallback: If AI returns markdown instead of JSON
             logger.warning(f"⚠️ [AI GENERATOR] AI response is not valid JSON, treating as markdown: {e}")
+            logger.warning(f"⚠️ [AI GENERATOR] Response preview: {ai_response.content[:200]}...")
             return {
                 "company": company,
                 "generated_at": datetime.now().isoformat(),
@@ -291,6 +295,47 @@ class AIRecommendationGenerator:
                     "has_structured_data": False
                 }
             }
+    
+    def _clean_json_response(self, content: str) -> str:
+        """
+        Clean AI response to extract valid JSON
+        
+        Removes markdown code blocks, extra text, and fixes common JSON issues
+        
+        Args:
+            content: Raw AI response content
+            
+        Returns:
+            Cleaned JSON string ready for parsing
+        """
+        import re
+        
+        # Remove leading/trailing whitespace
+        content = content.strip()
+        
+        # Remove markdown code blocks (```json or ```)
+        content = re.sub(r'^```(?:json)?\s*', '', content, flags=re.MULTILINE)
+        content = re.sub(r'```\s*$', '', content, flags=re.MULTILINE)
+        content = content.strip()
+        
+        # Find the first { and last } to extract JSON object
+        # This handles cases where AI adds explanatory text before/after JSON
+        start_idx = content.find('{')
+        end_idx = content.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1 and start_idx < end_idx:
+            # Extract JSON portion
+            content = content[start_idx:end_idx + 1]
+        elif start_idx == -1 or end_idx == -1:
+            # No JSON found, return as-is (will fail parsing and fall back to markdown)
+            logger.warning(f"⚠️ [AI GENERATOR] No JSON object found in response")
+            return content
+        
+        # Fix common JSON issues
+        # Remove trailing commas before closing braces/brackets
+        content = re.sub(r',(\s*[}\]])', r'\1', content)
+        
+        return content.strip()
     
     def _convert_json_to_markdown(self, json_data: Dict[str, Any], company: str) -> str:
         """
