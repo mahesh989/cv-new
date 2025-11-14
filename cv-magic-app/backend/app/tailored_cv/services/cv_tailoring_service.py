@@ -777,6 +777,27 @@ LOCATION EXTRACTION RULES:
 - Example: "The Bitrates, Sydney, New South Wales, Australia" → company: "The Bitrates", location: "Sydney, New South Wales, Australia"
 - Always ensure location information is properly separated from company name"""
     
+    def _format_tier_keywords(self, tier_keywords: Optional[Dict[str, List[Dict[str, str]]]]) -> str:
+        """Format tier keywords for display in prompt"""
+        if not tier_keywords:
+            return '  - None'
+        
+        formatted = []
+        for category in ['technical', 'soft', 'domain']:
+            keywords = tier_keywords.get(category, [])
+            if keywords:
+                formatted.append(f'  {category.upper()}:')
+                for kw_obj in keywords[:10]:  # Limit to 10 per category
+                    if isinstance(kw_obj, dict):
+                        keyword = kw_obj.get('keyword', '')
+                        integration = kw_obj.get('integration', '')
+                        if keyword:
+                            formatted.append(f'    - {keyword}' + (f' ({integration[:50]}...)' if integration else ''))
+                    elif isinstance(kw_obj, str):
+                        formatted.append(f'    - {kw_obj}')
+        
+        return '\n'.join(formatted) if formatted else '  - None'
+    
     def _build_user_prompt(
         self,
         cv: OriginalCV,
@@ -843,12 +864,39 @@ YOUR TASK - TRANSFORM THIS CV:
    - Prefer ranges (3-5, 20-30%) over exact numbers when uncertain
    - Ensure numbers are consistent across all bullets
 
-2. ADD THESE MISSING KEYWORDS TO BULLETS:
-   Look at critical_gaps in recommendations. For EACH keyword listed:
-   - Find a relevant bullet point
-   - Add the keyword naturally
+2. KEYWORD INTEGRATION STRATEGY (TIER-BASED):
    
-   Example: If "Fundraising" is in critical_gaps:
+   **TIER 1 KEYWORDS (Add Immediately - Low Risk):**
+   These are generic, transferable keywords that can be safely added:
+""" + (self._format_tier_keywords(recommendations.tier1_keywords) if recommendations.tier1_keywords else '   - Use critical_gaps from recommendations if tier1_keywords not available') + """
+   
+   For EACH Tier 1 keyword:
+   - Add to skills section
+   - Integrate naturally into relevant experience bullets
+   - Use the integration guidance provided in recommendations
+   
+   **TIER 2 KEYWORDS (Add with Evidence - Medium Risk):**
+   These require semantic evidence from your CV:
+""" + (self._format_tier_keywords(recommendations.tier2_keywords) if recommendations.tier2_keywords else '   - Use important_gaps from recommendations if tier2_keywords not available') + """
+   
+   For EACH Tier 2 keyword:
+   - ONLY add if you can find semantic evidence in the original CV
+   - Look for related experiences, projects, or skills
+   - Use the validation guidance provided in recommendations
+   - If no evidence exists, DO NOT add the keyword
+   
+   **TIER 3 KEYWORDS (NEVER ADD - High Risk):**
+   These must NEVER be added to the CV:
+""" + (chr(10).join(f'   - {kw}' for kw in recommendations.tier3_avoid) if recommendations.tier3_avoid else '   - None specified') + """
+   
+   CRITICAL: Do NOT add any Tier 3 keywords, even if they appear in the job description.
+   
+   **FALLBACK (if tier-based keywords not available):**
+   If tier-based keywords are not available, use:
+   - critical_gaps: """ + (', '.join(recommendations.critical_gaps[:10]) if recommendations.critical_gaps else 'None') + """
+   - important_gaps: """ + (', '.join(recommendations.important_gaps[:10]) if recommendations.important_gaps else 'None') + """
+   
+   Example: If "Fundraising" is in Tier 1:
    Change: "Analyzed customer data to improve outcomes"
    To: "Analyzed customer data to improve fundraising campaign outcomes, increasing donations by 35%"
 

@@ -49,6 +49,40 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     soft_match = match_summary.get("by_category", {}).get("soft", {})
     domain_match = match_summary.get("by_category", {}).get("domain", {})
     
+    # CRITICAL FIX: Filter out keywords that appear in both matched and missing lists
+    # This handles case-sensitivity issues where the same keyword appears in both lists
+    def normalize_keyword(kw):
+        """Normalize keyword for comparison (lowercase, strip)"""
+        return str(kw).lower().strip()
+    
+    def filter_missing_keywords(missing_list, matched_list):
+        """Remove keywords from missing list that also appear in matched list (case-insensitive)"""
+        matched_normalized = {normalize_keyword(kw) for kw in matched_list}
+        filtered = []
+        for kw in missing_list:
+            if normalize_keyword(kw) not in matched_normalized:
+                filtered.append(kw)
+        return filtered
+    
+    # Filter missing keywords to exclude those already matched
+    if technical_match.get('missing') and technical_match.get('matched'):
+        technical_match['missing'] = filter_missing_keywords(
+            technical_match['missing'], 
+            technical_match['matched']
+        )
+    
+    if soft_match.get('missing') and soft_match.get('matched'):
+        soft_match['missing'] = filter_missing_keywords(
+            soft_match['missing'], 
+            soft_match['matched']
+        )
+    
+    if domain_match.get('missing') and domain_match.get('matched'):
+        domain_match['missing'] = filter_missing_keywords(
+            domain_match['missing'], 
+            domain_match['matched']
+        )
+    
     # Extract component scores
     technical_component = component_summary.get("technical", {})
     skills_component = component_summary.get("skills", {})
@@ -104,6 +138,33 @@ Skills Match (Overall: {overall_match_rate}%):
 - Soft: {soft_match.get('match_rate', 0)}% ({len(soft_match.get('matched', []))} matched, {len(soft_match.get('missing', []))} missing)
 - Domain: {domain_match.get('match_rate', 0)}% ({len(domain_match.get('matched', []))} matched, {len(domain_match.get('missing', []))} missing)
 
+🚨 CRITICAL: ALL MISSING KEYWORDS MUST BE CATEGORIZED
+The following keywords are MISSING from the CV (NOT present in CV, but present in JD) and MUST be categorized into Tier 1, Tier 2, or Tier 3:
+
+⚠️ CRITICAL: DO NOT categorize keywords that are ALREADY in the CV. 
+The following keywords are ALREADY in the CV (MATCHED) and MUST NOT be categorized:
+- Matched Technical: {', '.join(technical_match.get('matched', [])[:10]) if technical_match.get('matched', []) else 'None'}
+- Matched Soft: {', '.join(soft_match.get('matched', [])[:10]) if soft_match.get('matched', []) else 'None'}
+- Matched Domain: {', '.join(domain_match.get('matched', [])[:10]) if domain_match.get('matched', []) else 'None'}
+
+If a keyword appears in both the MATCHED list above AND the MISSING list below, it is ALREADY in the CV and MUST NOT be categorized.
+
+MISSING TECHNICAL KEYWORDS ({len(technical_match.get('missing', []))} total) - NOT in CV, but in JD:
+{chr(10).join(f'  - {kw}' for kw in technical_match.get('missing', [])) if technical_match.get('missing', []) else '  - None'}
+
+MISSING SOFT SKILLS ({len(soft_match.get('missing', []))} total) - NOT in CV, but in JD:
+{chr(10).join(f'  - {kw}' for kw in soft_match.get('missing', [])) if soft_match.get('missing', []) else '  - None'}
+
+MISSING DOMAIN KEYWORDS ({len(domain_match.get('missing', []))} total) - NOT in CV, but in JD:
+{chr(10).join(f'  - {kw}' for kw in domain_match.get('missing', [])) if domain_match.get('missing', []) else '  - None'}
+
+⚠️ STRICT REQUIREMENT: You MUST categorize EVERY SINGLE missing keyword listed above into exactly ONE tier:
+- Tier 1 (tier1_integrate_immediately): Generic, transferable keywords that can be safely added
+- Tier 2 (tier2_add_with_evidence): Keywords that require semantic evidence from CV
+- Tier 3 (tier3_never_add): Unverifiable or domain-specific keywords without evidence
+
+The total number of keywords in tier1 + tier2 + tier3 MUST equal the total missing keywords count above.
+
 Component Scores:
 - Technical: {technical_component.get('score', 0)}/100 (Core Match: {technical_component.get('core_match', 0)}%, Stack Fit: {technical_component.get('stack_fit', 0)}%)
 - Skills: {skills_component.get('score', 0)}/100 (Business Readiness: {skills_component.get('business_readiness', 0)}/100)
@@ -115,7 +176,11 @@ ATS Breakdown:
 - Category 1 (Keywords): {category1_score} points (Missing: {missing_counts.get('technical', 0)} technical, {missing_counts.get('soft', 0)} soft, {missing_counts.get('domain', 0)} domain)
 - Category 2 (AI Analysis): {category2_score} points
 
-Keyword Tiers:
+⚠️ NOTE: The "Keyword Tiers" section above shows PRE-CLASSIFIED keywords from previous analysis. 
+You MUST re-categorize ALL missing keywords listed in the "MISSING KEYWORDS" section below, 
+regardless of any pre-classification. ONLY use the missing keywords lists for categorization.
+
+Keyword Tiers (Reference Only - Use MISSING KEYWORDS lists below instead):
 - Tier 1 (Always Add): Technical: {', '.join(tier1_keywords.get('technical', [])) if tier1_keywords.get('technical') else 'None'} | Soft: {', '.join(tier1_keywords.get('soft', [])) if tier1_keywords.get('soft') else 'None'}
 - Tier 2 (Add with Evidence): Technical: {', '.join(tier2_keywords.get('technical', [])) if tier2_keywords.get('technical') else 'None'} | Soft: {', '.join(tier2_keywords.get('soft', [])) if tier2_keywords.get('soft') else 'None'}
 - Tier 3 (Never Add): Technical: {', '.join(tier3_keywords.get('technical', [])) if tier3_keywords.get('technical') else 'None'} | Domain: {', '.join(tier3_keywords.get('domain', [])) if tier3_keywords.get('domain') else 'None'}
@@ -301,6 +366,15 @@ Return ONLY this JSON structure (no preamble, no markdown formatting, no code bl
 5. Return ONLY valid JSON, no markdown formatting
 6. No preamble text before the JSON
 7. No code block markers (no ```json or ```)
+
+**🚨 CRITICAL KEYWORD CATEGORIZATION REQUIREMENT:**
+- You MUST categorize EVERY SINGLE missing keyword listed in the "MISSING KEYWORDS" section above
+- ⚠️ DO NOT categorize keywords that are ALREADY in the CV (matched keywords). ONLY categorize keywords from the MISSING lists.
+- Count verification: tier1_integrate_immediately (all categories) + tier2_add_with_evidence (all categories) + tier3_never_add (all categories) = Total missing keywords
+- Example: If there are 14 missing technical keywords, the sum of technical keywords in tier1 + tier2 + tier3 MUST equal 14
+- NO keyword should be omitted or left uncategorized
+- If a keyword appears in the missing list, it MUST appear in exactly ONE tier (tier1, tier2, or tier3)
+- If a keyword is ALREADY in the CV (matched), it MUST NOT appear in any tier (tier1, tier2, or tier3)
 
 **CRITICAL:** The output will be parsed programmatically. Invalid JSON will cause system failure. Ensure perfect JSON syntax.
 """

@@ -207,6 +207,28 @@ class RecommendationParser:
         # Extract technical enhancements from experience optimization
         technical_enhancements = experience.get('strengths_to_highlight', [])
         
+        # Convert tier1 objects to ensure all values are strings
+        tier1_processed = {}
+        for cat in ['technical', 'soft', 'domain']:
+            tier1_processed[cat] = [
+                {
+                    k: str(v) if not isinstance(v, str) else v
+                    for k, v in item.items()
+                }
+                for item in tier1.get(cat, [])
+            ]
+        
+        # Convert tier2 objects to ensure all values are strings (especially evidence_required boolean)
+        tier2_processed = {}
+        for cat in ['technical', 'soft', 'domain']:
+            tier2_processed[cat] = [
+                {
+                    k: str(v) if not isinstance(v, str) else v
+                    for k, v in item.items()
+                }
+                for item in tier2.get(cat, [])
+            ]
+        
         return {
             'company': company,
             'job_title': job_title,
@@ -224,17 +246,9 @@ class RecommendationParser:
             'match_score': current_ats_score,
             'target_score': target_ats_score,
             
-            # NEW: Tier-based fields with full metadata
-            'tier1_keywords': {
-                'technical': tier1.get('technical', []),  # Full objects with integration/validation
-                'soft': tier1.get('soft', []),
-                'domain': tier1.get('domain', [])
-            },
-            'tier2_keywords': {
-                'technical': tier2.get('technical', []),
-                'soft': tier2.get('soft', []),
-                'domain': tier2.get('domain', [])
-            },
+            # NEW: Tier-based fields with full metadata (all values converted to strings)
+            'tier1_keywords': tier1_processed,
+            'tier2_keywords': tier2_processed,
             'tier3_avoid': tier3_keywords,
             
             # NEW: Strategic guidance (ready to use!)
