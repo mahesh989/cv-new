@@ -126,29 +126,65 @@ class UnifiedLatestFileSelector:
             return self.get_latest_cv_across_all(company)
     
     def _get_original_cv_for_company(self, company: str) -> FileContext:
-        """Get original CV for a company"""
+        """
+        Get original CV for a company.
+        When a user selects a CV from dropdown, it overwrites original_cv.json and original_cv.txt.
+        For first-time JD usage, always use these base original_cv files.
+        """
         print(f"🔍 Searching for original CV for company: {company}")
         
+        # PRIORITY 1: Use base original_cv.json/txt from global folder (saved when CV is selected from dropdown)
+        base_json = self.original_path / "original_cv.json"
+        base_txt = self.original_path / "original_cv.txt"
+        
+        if base_json.exists():
+            print(f"✅ Found base original CV: {base_json}")
+            return FileContext(
+                json_path=base_json,
+                txt_path=base_txt if base_txt.exists() else None,
+                exists=True,
+                file_type="original",
+                timestamp=None,
+                company=company,
+            )
+        
+        # PRIORITY 2: Check company-specific original CV folder (legacy support)
+        if company:
+            company_original_path = self.base_path / "applied_companies" / company / "cvs" / "original"
+            company_base_json = company_original_path / "original_cv.json"
+            company_base_txt = company_original_path / "original_cv.txt"
+            
+            if company_base_json.exists():
+                print(f"✅ Found company-specific original CV: {company_base_json}")
+                return FileContext(
+                    json_path=company_base_json,
+                    txt_path=company_base_txt if company_base_txt.exists() else None,
+                    exists=True,
+                    file_type="original",
+                    timestamp=None,
+                    company=company,
+                )
+        
+        # PRIORITY 3: Fallback to any timestamped original CV files (if base files don't exist)
         candidates = self._find_original_cv_files(company)
-        print(f"📁 Found {len(candidates)} original CV candidates")
+        if candidates:
+            print(f"📁 Found {len(candidates)} timestamped original CV candidates, using latest")
+            # Sort by timestamp (newest first)
+            candidates.sort(key=lambda c: c[2], reverse=True)
+            json_path, txt_path, timestamp = candidates[0]
+            print(f"✅ Selected timestamped original CV: {json_path}")
+            return FileContext(
+                json_path=json_path,
+                txt_path=txt_path,
+                exists=True,
+                file_type="original",
+                timestamp=timestamp if timestamp != "00000000_000000" else None,
+                company=company,
+            )
         
-        if not candidates:
-            print("❌ No original CV candidates found")
-            raise FileNotFoundError(f"No original CV found for company: {company}")
-        
-        # Select the latest original CV
-        candidates.sort(key=lambda c: c[2], reverse=True)
-        json_path, txt_path, timestamp = candidates[0]
-        
-        print(f"✅ Selected original CV: {json_path}")
-        return FileContext(
-            json_path=json_path,
-            txt_path=txt_path,
-            exists=True,
-            file_type="original",
-            timestamp=timestamp if timestamp != "00000000_000000" else None,
-            company=company,
-        )
+        # No original CV found
+        print("❌ No original CV candidates found")
+        raise FileNotFoundError(f"No original CV found for company: {company}")
     
     def get_latest_tailored_cv_only(self, company: str) -> FileContext:
         """
