@@ -1002,7 +1002,8 @@ class AIRecommendationGenerator:
             
             cv_tailoring_service = CVTailoringService(user_email=self.user_email)
             
-            original_cv, recommendation = cv_tailoring_service.load_real_cv_and_recommendation(company)
+            # load_real_cv_and_recommendation returns (OriginalCV, RecommendationAnalysis, is_tailored_cv)
+            original_cv, recommendation, is_tailored_cv = cv_tailoring_service.load_real_cv_and_recommendation(company)
             
             from app.tailored_cv.models.cv_models import CVTailoringRequest
             
