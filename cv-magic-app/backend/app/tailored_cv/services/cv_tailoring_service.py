@@ -1474,13 +1474,32 @@ BULLETS NEEDING IMPROVEMENT:
         # Convert recommendations to dict format for enhanced validator
         recommendations_dict = {}
         if recommendations:
+            # PRIORITY: Use tier1_keywords from actionable_guidance if available
+            critical_keywords = []
+            if recommendations.tier1_keywords:
+                tier1 = recommendations.tier1_keywords
+                for category in ['technical', 'soft', 'domain']:
+                    for kw_obj in tier1.get(category, []):
+                        if isinstance(kw_obj, dict):
+                            keyword = kw_obj.get('keyword', '')
+                            if keyword:
+                                critical_keywords.append(keyword)
+                        elif isinstance(kw_obj, str):
+                            critical_keywords.append(kw_obj)
+            else:
+                # Fallback to legacy critical_gaps
+                critical_keywords = recommendations.critical_gaps or []
+            
             recommendations_dict = {
-                'critical_gaps': recommendations.critical_gaps or [],
+                'critical_gaps': critical_keywords,  # Now uses tier1_keywords if available
+                'tier1_keywords': recommendations.tier1_keywords,  # Add tier fields
+                'tier2_keywords': recommendations.tier2_keywords,
+                'tier3_avoid': recommendations.tier3_avoid,
                 'missing_keywords': recommendations.missing_keywords or [],
                 'technical_enhancements': recommendations.technical_enhancements or [],
                 'soft_skill_improvements': recommendations.soft_skill_improvements or []
             }
-            logger.info(f"📊 [{request_id}] [ENHANCED_VALIDATION] Using recommendations with {len(recommendations_dict.get('critical_gaps', []))} critical gaps")
+            logger.info(f"📊 [{request_id}] [ENHANCED_VALIDATION] Using recommendations with {len(critical_keywords)} critical keywords (from {'tier1_keywords' if recommendations.tier1_keywords else 'critical_gaps'})")
         else:
             logger.warning(f"⚠️ [{request_id}] [ENHANCED_VALIDATION] No recommendations provided for validation")
         
@@ -2538,15 +2557,59 @@ FIX: Output ONLY valid JSON!
             logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Multiple advanced degrees detected - consider overqualification risk")
     
     def _classify_tiered_keywords(self, recommendations: RecommendationAnalysis) -> Dict[str, List[str]]:
-        """Classify keywords into tiers based on framework rules"""
+        """Classify keywords into tiers based on actionable_guidance (v2.0+) or framework rules (fallback)"""
         logger.info("🔍 [FRAMEWORK_VALIDATION] Classifying keywords into tiers...")
-        
-        # Get missing keywords from recommendations
-        missing_keywords = recommendations.missing_keywords or []
         
         tier_1_keywords = []
         tier_2_keywords = []
         tier_3_keywords = []
+        
+        # PRIORITY 1: Use actionable_guidance fields if available (v2.0+)
+        if recommendations.tier1_keywords or recommendations.tier2_keywords or recommendations.tier3_avoid:
+            logger.info("✅ [FRAMEWORK_VALIDATION] Using actionable_guidance tier fields (v2.0+)")
+            
+            # Extract Tier 1 keywords from actionable_guidance
+            tier1 = recommendations.tier1_keywords or {}
+            for category in ['technical', 'soft', 'domain']:
+                for kw_obj in tier1.get(category, []):
+                    if isinstance(kw_obj, dict):
+                        keyword = kw_obj.get('keyword', '')
+                        if keyword:
+                            tier_1_keywords.append(keyword)
+                    elif isinstance(kw_obj, str):
+                        tier_1_keywords.append(kw_obj)
+            
+            # Extract Tier 2 keywords from actionable_guidance
+            tier2 = recommendations.tier2_keywords or {}
+            for category in ['technical', 'soft', 'domain']:
+                for kw_obj in tier2.get(category, []):
+                    if isinstance(kw_obj, dict):
+                        keyword = kw_obj.get('keyword', '')
+                        if keyword:
+                            tier_2_keywords.append(keyword)
+                    elif isinstance(kw_obj, str):
+                        tier_2_keywords.append(kw_obj)
+            
+            # Extract Tier 3 keywords from actionable_guidance
+            tier3 = recommendations.tier3_avoid or []
+            for keyword in tier3:
+                if isinstance(keyword, str):
+                    tier_3_keywords.append(keyword)
+            
+            logger.info(f"📊 [FRAMEWORK_VALIDATION] Keyword tier classification (from actionable_guidance):")
+            logger.info(f"   - Tier 1 (Always): {len(tier_1_keywords)} keywords")
+            logger.info(f"   - Tier 2 (If Evidence): {len(tier_2_keywords)} keywords")
+            logger.info(f"   - Tier 3 (Never): {len(tier_3_keywords)} keywords")
+            
+            return {
+                'tier_1': tier_1_keywords,
+                'tier_2': tier_2_keywords,
+                'tier_3': tier_3_keywords
+            }
+        
+        # PRIORITY 2: Fallback to pattern-based classification (legacy v1.0)
+        logger.info("⚠️ [FRAMEWORK_VALIDATION] Falling back to pattern-based classification (legacy)")
+        missing_keywords = recommendations.missing_keywords or []
         
         # Define tier classification rules
         tier_1_patterns = [
@@ -2578,7 +2641,7 @@ FIX: Output ONLY valid JSON!
                 # Default to tier 2 for unknown keywords
                 tier_2_keywords.append(keyword)
         
-        logger.info(f"📊 [FRAMEWORK_VALIDATION] Keyword tier classification:")
+        logger.info(f"📊 [FRAMEWORK_VALIDATION] Keyword tier classification (pattern-based):")
         logger.info(f"   - Tier 1 (Always): {len(tier_1_keywords)} keywords")
         logger.info(f"   - Tier 2 (If Evidence): {len(tier_2_keywords)} keywords")
         logger.info(f"   - Tier 3 (Never): {len(tier_3_keywords)} keywords")
@@ -2616,14 +2679,20 @@ FIX: Output ONLY valid JSON!
         
         # Check for Tier 1 keywords (should be present)
         tier_1_missing = []
+        tier_1_found = []
         for keyword in tier_1_keywords:
-            if keyword.lower() not in cv_text_lower:
+            keyword_lower = keyword.lower()
+            # Check for exact match or partial match (for variations like "data visualization" vs "visualizations")
+            if keyword_lower in cv_text_lower or any(keyword_lower in word or word in keyword_lower for word in cv_text_lower.split() if len(word) > 3):
+                tier_1_found.append(keyword)
+            else:
                 tier_1_missing.append(keyword)
         
         if tier_1_missing:
             logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Missing Tier 1 keywords: {tier_1_missing}")
+            logger.warning(f"⚠️ [{request_id}] [FRAMEWORK_VALIDATION] Tier 1 integration rate: {len(tier_1_found)}/{len(tier_1_keywords)} ({len(tier_1_found)/len(tier_1_keywords)*100:.1f}%)" if tier_1_keywords else "N/A")
         else:
-            logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] All Tier 1 keywords present")
+            logger.info(f"✅ [{request_id}] [FRAMEWORK_VALIDATION] All Tier 1 keywords present ({len(tier_1_found)}/{len(tier_1_keywords)})")
         
         # Check for Tier 2 keywords (optional, but log if present)
         tier_2_found = []

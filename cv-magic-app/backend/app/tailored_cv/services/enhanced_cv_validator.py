@@ -265,8 +265,25 @@ class EnhancedCVValidator:
         
         logger.debug(f"🔍 [{self.request_id}] [ENHANCED_VALIDATOR] Validating keyword quality...")
         
-        # Get critical keywords
-        critical_keywords = recommendations.get('critical_gaps', [])
+        # PRIORITY: Use tier1_keywords from actionable_guidance if available (v2.0+)
+        critical_keywords = []
+        if recommendations.get('tier1_keywords'):
+            logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Using tier1_keywords from actionable_guidance (v2.0+)")
+            tier1 = recommendations.get('tier1_keywords', {})
+            for category in ['technical', 'soft', 'domain']:
+                for kw_obj in tier1.get(category, []):
+                    if isinstance(kw_obj, dict):
+                        keyword = kw_obj.get('keyword', '')
+                        if keyword:
+                            critical_keywords.append(keyword)
+                    elif isinstance(kw_obj, str):
+                        critical_keywords.append(kw_obj)
+        else:
+            # Fallback to legacy critical_gaps
+            critical_keywords = recommendations.get('critical_gaps', [])
+            if critical_keywords:
+                logger.info(f"ℹ️ [{self.request_id}] [ENHANCED_VALIDATOR] Using legacy critical_gaps (v1.0)")
+        
         if not critical_keywords:
             logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] No critical keywords to validate")
             return score
@@ -274,7 +291,24 @@ class EnhancedCVValidator:
         logger.info(f"📊 [{self.request_id}] [ENHANCED_VALIDATOR] Validating {len(critical_keywords)} critical keywords")
         
         # Check for Tier 3 violations (should never happen)
-        tier3_found = self._detect_tier3_keywords(cv_data, original_cv)
+        # PRIORITY: Use tier3_avoid from actionable_guidance if available
+        tier3_keywords_to_check = []
+        if recommendations.get('tier3_avoid'):
+            tier3_keywords_to_check = recommendations.get('tier3_avoid', [])
+            logger.info(f"✅ [{self.request_id}] [ENHANCED_VALIDATOR] Using tier3_avoid from actionable_guidance ({len(tier3_keywords_to_check)} keywords)")
+        
+        # Also check with legacy detection method
+        tier3_found_legacy = self._detect_tier3_keywords(cv_data, original_cv)
+        
+        # Combine both sources
+        tier3_found = list(set(tier3_found_legacy))
+        if tier3_keywords_to_check:
+            cv_text_lower = self._extract_cv_text(cv_data).lower()
+            for kw in tier3_keywords_to_check:
+                if isinstance(kw, str) and kw.lower() in cv_text_lower:
+                    if kw not in tier3_found:
+                        tier3_found.append(kw)
+        
         if tier3_found:
             for kw in tier3_found:
                 issues.append(f"Unverifiable keyword added: {kw}")
