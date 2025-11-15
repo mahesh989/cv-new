@@ -387,6 +387,13 @@ class CVTailoringService:
         if is_tailored_cv_base:
             logger.info(f"[{request_id}] 🔄 [INCREMENTAL] Existing content will be PRESERVED and new recommendations will be MERGED")
             logger.info(f"[{request_id}] 🔄 [INCREMENTAL] All existing bullets, skills, and experience descriptions will be kept")
+            
+            # Extract existing keywords from tailored CV for preservation tracking
+            existing_keywords = self._extract_existing_keywords(original_cv)
+            logger.info(f"[{request_id}] 🔑 [INCREMENTAL] Found {len(existing_keywords)} existing keywords to preserve: {', '.join(existing_keywords[:10])}")
+            self._existing_keywords_to_preserve = existing_keywords
+        else:
+            self._existing_keywords_to_preserve = []
         
         # Log critical gaps
         if recommendations.critical_gaps:
@@ -829,43 +836,60 @@ LOCATION EXTRACTION RULES:
         # Build prompt without f-strings to avoid format specifier issues
         incremental_mode_instructions = ""
         if is_tailored_cv_base:
-            incremental_mode_instructions = """
+            # Get existing keywords to preserve
+            existing_keywords = getattr(self, '_existing_keywords_to_preserve', [])
+            existing_keywords_list = ', '.join(existing_keywords[:20]) if existing_keywords else "None listed (preserve all skills found in CV)"
+            
+            incremental_mode_instructions = f"""
 🚨 CRITICAL: INCREMENTAL MERGE MODE - PRESERVE EXISTING CONTENT
 
 The CV provided above is an EXISTING TAILORED CV. You MUST:
+
 1. PRESERVE ALL existing content:
    - ALL existing bullets in experience section (DO NOT remove or replace)
-   - ALL existing skills (DO NOT remove)
+   - ALL existing skills (DO NOT remove) - especially these keywords: {existing_keywords_list}
    - ALL existing experience descriptions and company names
    - ALL existing dates and education entries
    
-2. ONLY ADD new content from recommendations:
+2. EXISTING KEYWORDS TO PRESERVE (MUST KEEP ALL OF THESE):
+   The following keywords are ALREADY in the CV and MUST be preserved:
+   {existing_keywords_list if existing_keywords else "All keywords currently in the skills section"}
+   
+   - If a keyword is in the list above, it MUST remain in the final CV
+   - You can enhance how it's presented, but you CANNOT remove it
+   - Check the skills section and experience bullets - these keywords must still be present
+   
+3. ONLY ADD new content from recommendations:
    - Add NEW keywords that are NOT already in the CV
    - Integrate new keywords/phrases into EXISTING bullets where possible
    - Only add NEW bullets if absolutely necessary (max 1 per experience/project section)
+   - New keywords should be ADDED to existing keywords, not replace them
    
-3. Career Highlights / Role Highlights:
+4. Career Highlights / Role Highlights:
    - If already has 6-7 keywords in skills section, you can add 1-2 more if needed
    - Preserve existing value statement and accomplishments
    - Enhance with new keywords/phrases, don't replace
    
-4. Flexible Integration Rules:
+5. Flexible Integration Rules:
    - Keywords: Integrate into existing bullets first, add to skills section
    - Phrases/Concepts: Add to existing bullet points where semantically appropriate
    - New Bullets: ONLY if absolutely necessary and cannot be integrated into existing bullets
      - Maximum 1 new bullet per experience entry
      - Maximum 1 new bullet per project (if projects section exists)
    
-5. DO NOT:
+6. DO NOT:
    - Remove or replace existing bullets
-   - Remove existing keywords from skills
+   - Remove existing keywords from skills (especially those listed above)
    - Change existing experience descriptions
    - Modify existing company names or dates
+   - Remove any keyword that was in the original CV
    
-6. VALIDATION:
+7. VALIDATION CHECKLIST (verify before outputting):
    - Count existing bullets before and after (should be same or +1 per section max)
    - Count existing skills before and after (should be same or more)
+   - Verify all keywords from the preservation list are still present
    - All existing content must remain intact
+   - New keywords are ADDED, not replacing old ones
 
 """
         
@@ -1084,6 +1108,7 @@ Generate a tailored highlights section with three components:
    - Each bullet must include quantified impact
    - Focus on relevance to target role
    - 15-25 words per bullet
+   - **CRITICAL - NO DUPLICATION:** These accomplishments should be HIGH-LEVEL summaries that highlight your best achievements. DO NOT use the exact same sentences anywhere else in the CV (experience, projects, education sections). When the same achievement appears in other sections, use SYNONYMS, different wording, and emphasize BUSINESS IMPACT with more detailed context. Career highlights = high-level summaries; Other sections = detailed descriptions with varied language.
    - Example bullets:
      • Delivered 15+ interactive dashboards and analytical insights for Google's Autobot project by processing large-scale data from 300+ e-commerce and retail websites using Looker Studio, and Power BI
      • Recommended data-backed strategies by analysing and modelling sales and financial data, identifying performance gaps, and driving a 12% improvement in regional sales forecasting accuracy
@@ -1109,6 +1134,13 @@ CRITICAL REMINDERS:
 - Keep bullets concise (15-25 words)
 - Numbers should reflect actual role scope and company size
 - Never return whitespace-only or null values - use empty string '' instead
+- **CRITICAL - AVOID DUPLICATION ACROSS ALL SECTIONS:** The KEY ACCOMPLISHMENTS in career highlights should NOT be repeated verbatim in ANY other section (experience, projects, education, etc.). 
+  * Career highlights = HIGH-LEVEL summaries of top achievements
+  * Experience/Projects/Education sections = DETAILED descriptions with:
+    - SYNONYMS and varied wording (e.g., "delivered" → "developed", "improved" → "enhanced", "analyzed" → "evaluated")
+    - BUSINESS IMPACT focus (emphasize outcomes, ROI, stakeholder value, operational efficiency)
+    - More specific context (tools used, team size, timeline, challenges overcome)
+  * If an accomplishment appears in career highlights, rephrase it completely in other sections using different verbs, synonyms, and additional business impact details.
 
 REALISTIC METRICS EXAMPLES:
 - Team size: 2-8 people (not 50+)
@@ -2873,11 +2905,40 @@ FIX: Output ONLY valid JSON!
         else:
             logger.info(f"✅ [{request_id}] [INCREMENTAL_VALIDATION] Bullets preserved adequately ({preservation_rate:.1f}%)")
         
+        # Validate keyword preservation
+        existing_keywords = getattr(self, '_existing_keywords_to_preserve', [])
+        if existing_keywords:
+            # Extract keywords from tailored CV
+            tailored_cv_text = self._extract_cv_text(tailored_data).lower()
+            missing_keywords = []
+            for keyword in existing_keywords:
+                keyword_lower = keyword.lower()
+                # Check if keyword exists in tailored CV (exact match or as part of larger phrase)
+                if keyword_lower not in tailored_cv_text:
+                    # Also check for partial matches (e.g., "data analysis" vs "data analysis skills")
+                    found = False
+                    for word in keyword_lower.split():
+                        if len(word) > 3 and word in tailored_cv_text:
+                            found = True
+                            break
+                    if not found:
+                        missing_keywords.append(keyword)
+            
+            if missing_keywords:
+                issues.append(f"❌ Missing keywords that should be preserved: {', '.join(missing_keywords[:10])}")
+                logger.warning(f"⚠️ [{request_id}] [INCREMENTAL_VALIDATION] {len(missing_keywords)} keywords lost: {missing_keywords[:5]}")
+            else:
+                logger.info(f"✅ [{request_id}] [INCREMENTAL_VALIDATION] All {len(existing_keywords)} existing keywords preserved")
+        
         # Log results
         if issues:
             logger.warning(f"⚠️ [{request_id}] [INCREMENTAL_VALIDATION] Issues found:")
             for issue in issues:
                 logger.warning(f"   {issue}")
+            # FAIL validation if critical issues (content loss)
+            critical_issues = [i for i in issues if 'decreased' in i or 'Missing keywords' in i or 'Low bullet preservation' in i]
+            if critical_issues:
+                raise ValueError(f"Incremental merge validation FAILED: Content was lost. Issues: {', '.join(critical_issues[:3])}")
         else:
             logger.info(f"✅ [{request_id}] [INCREMENTAL_VALIDATION] Incremental merge validation passed")
         
@@ -2885,6 +2946,39 @@ FIX: Output ONLY valid JSON!
             logger.warning(f"⚠️ [{request_id}] [INCREMENTAL_VALIDATION] Warnings:")
             for warning in warnings:
                 logger.warning(f"   {warning}")
+    
+    def _extract_existing_keywords(self, cv: OriginalCV) -> List[str]:
+        """Extract existing keywords from a CV for preservation tracking"""
+        keywords = set()
+        
+        # Extract from skills
+        for skill_category in cv.skills:
+            for skill in skill_category.skills:
+                if skill and len(skill.strip()) > 0:
+                    keywords.add(skill.strip())
+        
+        # Extract from experience bullets (common keywords)
+        for exp in cv.experience:
+            for bullet in exp.bullets:
+                # Extract potential keywords (2-3 word phrases that look like skills)
+                words = bullet.split()
+                for i in range(len(words) - 1):
+                    # Check for 2-word phrases
+                    phrase = f"{words[i]} {words[i+1]}"
+                    if len(phrase) < 30 and phrase.lower() not in ['the', 'and', 'with', 'for', 'from']:
+                        keywords.add(phrase)
+        
+        # Extract from role highlights if available
+        if hasattr(cv, 'role_highlights') and cv.role_highlights:
+            highlights_text = str(cv.role_highlights).lower()
+            # Common skill keywords
+            common_skills = ['python', 'machine learning', 'data analysis', 'collaboration', 
+                           'leadership', 'problem solving', 'communication', 'adaptability']
+            for skill in common_skills:
+                if skill in highlights_text:
+                    keywords.add(skill)
+        
+        return sorted(list(keywords))
     
     def _extract_cv_text(self, data: Dict[str, Any]) -> str:
         """Extract all text content from CV data for keyword analysis"""
