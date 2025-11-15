@@ -221,8 +221,9 @@ async def tailor_cv_with_real_data(
         
         try:
             # Load real CV and recommendation data
-            original_cv, recommendation = cv_tailoring_service.load_real_cv_and_recommendation(company)
+            original_cv, recommendation, is_tailored_cv = cv_tailoring_service.load_real_cv_and_recommendation(company)
             logger.info(f"✅ Loaded real data for {company}")
+            logger.info(f"🔄 [INCREMENTAL] Using {'tailored CV' if is_tailored_cv else 'original CV'} as base")
             
             # Create tailoring request
             request = CVTailoringRequest(
@@ -538,7 +539,8 @@ async def tailor_cv_with_real_data(
         service = CVTailoringService(user_email=current_user.email)
         
         # Load real CV and recommendation data
-        original_cv, recommendations = service.load_real_cv_and_recommendation(company)
+        original_cv, recommendations, is_tailored_cv = service.load_real_cv_and_recommendation(company)
+        logger.info(f"🔄 [INCREMENTAL] Using {'tailored CV' if is_tailored_cv else 'original CV'} as base")
         
         # Create tailoring request
         request = CVTailoringRequest(
@@ -582,7 +584,8 @@ async def tailor_cv_with_real_data_test(
         logger.info(f"🎯 Real CV tailoring request for company: {company}")
         
         # Load real CV and recommendation data
-        original_cv, recommendations = cv_tailoring_service.load_real_cv_and_recommendation(company)
+        original_cv, recommendations, is_tailored_cv = cv_tailoring_service.load_real_cv_and_recommendation(company)
+        logger.info(f"🔄 [INCREMENTAL] Using {'tailored CV' if is_tailored_cv else 'original CV'} as base")
         
         # Create tailoring request
         request = CVTailoringRequest(

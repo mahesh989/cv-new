@@ -1,0 +1,367 @@
+{
+  "metadata": {
+    "company": "Climate_Friendly_Pty_Ltd",
+    "generated_at": "2025-11-14T10:38:16.771225",
+    "ats_score_current": 43.8,
+    "match_rate_current": 27.59
+  },
+  "skills_extraction": {
+    "cv": {
+      "technical": [
+        "A/B Testing",
+        "AI",
+        "AWS",
+        "Cloud Computing",
+        "Computer Vision",
+        "Data Engineering",
+        "Data Warehousing",
+        "Deep Learning",
+        "Docker",
+        "ETL",
+        "Flutter/Dart",
+        "Git/GitHub",
+        "Jupyter",
+        "Machine Learning",
+        "Matplotlib",
+        "MySQL",
+        "NLP",
+        "Optimization",
+        "Plotly",
+        "PostgreSQL",
+        "Power BI",
+        "Predictive Modeling",
+        "Python",
+        "PyTorch",
+        "REST APIs",
+        "scikit-learn",
+        "Seaborn",
+        "Snowflake",
+        "SQL",
+        "Statistical Analysis",
+        "Tableau",
+        "TensorFlow",
+        "Time Series",
+        "VS Code"
+      ],
+      "soft": [
+        "Collaboration",
+        "Team collaboration"
+      ],
+      "domain": [
+        "AI sectors",
+        "Cardiovascular risk prediction",
+        "Construction",
+        "Corrosion detection",
+        "Edge deployment",
+        "Forecasting",
+        "Property tech",
+        "Real-time ATS optimization"
+      ]
+    },
+    "jd": {
+      "technical": [
+        "Computer vision",
+        "Data cleaning",
+        "Data engineering",
+        "Data visualisations",
+        "Data workflows",
+        "Deep learning",
+        "Distributed processing",
+        "Lidar",
+        "Machine learning",
+        "MLops",
+        "Model calibration and validation",
+        "Python",
+        "Remote sensing",
+        "Risk assessment",
+        "Satellite imagery",
+        "Scenario analysis",
+        "Spatial analysis",
+        "Statistical models",
+        "Version control"
+      ],
+      "soft": [
+        "Adaptability",
+        "Collaboration"
+      ],
+      "domain": [
+        "Agricultural sector",
+        "Carbon abatement",
+        "Carbon farming",
+        "Climate change",
+        "Ecosystem monitoring",
+        "Land management",
+        "Natural capital",
+        "Nature repair"
+      ]
+    }
+  },
+  "preliminary_decision": {
+    "decision": "DONT_PROCEED",
+    "confidence": 90,
+    "match_score": 50,
+    "primary_reason": "The candidate lacks specific domain knowledge in environmental data and carbon farming, which is critical for the role.",
+    "critical_missing": [
+      "Understanding of the Australian carbon farming industry",
+      "familiarity with ERF or NRM method requirements"
+    ],
+    "implicit_likely": [],
+    "blocker_found": false
+  },
+  "match_summary": {
+    "overall_match_rate": 27.59,
+    "by_category": {
+      "technical": {
+        "matched": [
+          "Computer Vision",
+          "Data Engineering",
+          "Deep Learning",
+          "Machine Learning",
+          "Python"
+        ],
+        "missing": [
+          "Computer vision",
+          "Data engineering",
+          "Deep learning",
+          "Machine learning",
+          "Python",
+          "Data cleaning",
+          "Data visualisations",
+          "Data workflows",
+          "Distributed processing",
+          "Lidar",
+          "MLops",
+          "Model calibration and validation",
+          "Remote sensing",
+          "Risk assessment",
+          "Satellite imagery",
+          "Scenario analysis",
+          "Spatial analysis",
+          "Statistical models",
+          "Version control"
+        ],
+        "match_rate": 20.83
+      },
+      "soft": {
+        "matched": [
+          "Collaboration"
+        ],
+        "missing": [
+          "Collaboration",
+          "Adaptability"
+        ],
+        "match_rate": 33.33
+      },
+      "domain": {
+        "matched": [
+          "Cardiovascular risk prediction",
+          "Forecasting"
+        ],
+        "missing": [
+          "Risk assessment",
+          "Forecasting",
+          "Agricultural sector",
+          "Carbon abatement",
+          "Carbon farming",
+          "Climate change",
+          "Ecosystem monitoring",
+          "Land management"
+        ],
+        "match_rate": 20.0
+      }
+    },
+    "missing_keywords": {
+      "technical": [
+        "Computer vision",
+        "Data engineering",
+        "Deep learning",
+        "Machine learning",
+        "Python",
+        "Data cleaning",
+        "Data visualisations",
+        "Data workflows",
+        "Distributed processing",
+        "Lidar",
+        "MLops",
+        "Model calibration and validation",
+        "Remote sensing",
+        "Risk assessment",
+        "Satellite imagery",
+        "Scenario analysis",
+        "Spatial analysis",
+        "Statistical models",
+        "Version control"
+      ],
+      "soft": [
+        "Collaboration",
+        "Adaptability"
+      ],
+      "domain": [
+        "Risk assessment",
+        "Forecasting",
+        "Agricultural sector",
+        "Carbon abatement",
+        "Carbon farming",
+        "Climate change",
+        "Ecosystem monitoring",
+        "Land management"
+      ]
+    }
+  },
+  "keyword_integration_guidance": {
+    "tier1_always_add": {
+      "technical": [
+        "Data visualisations"
+      ],
+      "soft": [
+        "Collaboration",
+        "Adaptability"
+      ],
+      "domain": []
+    },
+    "tier2_add_if_evidence": {
+      "technical": [
+        "Computer vision",
+        "Data engineering",
+        "Deep learning",
+        "Machine learning",
+        "Python",
+        "Data cleaning",
+        "Data workflows",
+        "Distributed processing",
+        "Lidar",
+        "MLops",
+        "Model calibration and validation",
+        "Remote sensing",
+        "Risk assessment",
+        "Satellite imagery",
+        "Scenario analysis",
+        "Spatial analysis",
+        "Statistical models",
+        "Version control"
+      ],
+      "soft": [],
+      "domain": [
+        "Risk assessment",
+        "Forecasting",
+        "Agricultural sector",
+        "Carbon abatement",
+        "Carbon farming",
+        "Climate change",
+        "Ecosystem monitoring",
+        "Land management"
+      ]
+    },
+    "tier3_never_add": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    },
+    "integration_instructions": "Tier 1: Integrate ALL keywords into skills section and relevant bullets. Tier 2: Integrate ONLY if semantic evidence exists in CV experience. Tier 3: DO NOT add - domain-specific, unverifiable, or lacks evidence."
+  },
+  "component_summary": {
+    "technical": {
+      "score": 75.0,
+      "core_match": 60.0,
+      "stack_fit": 70.0,
+      "strengths": [
+        "Built CV Agent AI application serving 500+ users with multi-LLM orchestration, real-time ATS optimization, and full-stack development (Flutter/Dart, Python).",
+        "Optimized YOLOv8n deep learning model achieving 39.34% faster inference and 11.39% size reduction for edge deployment.",
+        "Automated ETL pipeline for property listing analysis with real-time processing capabilities."
+      ],
+      "gaps": [
+        "No specific mention of handling large-scale distributed systems.",
+        "Limited evidence of experience with satellite imagery or lidar data processing."
+      ]
+    },
+    "skills": {
+      "score": 80.0,
+      "business_readiness": 80.0,
+      "strengths": [
+        "Built CV Agent AI application serving 500+ users with multi-LLM orchestration, real-time ATS optimization, and full-stack development (Flutter/Dart, Python).",
+        "Optimized YOLOv8n deep learning model achieving 39.34% faster inference and 11.39% size reduction for edge deployment.",
+        "Automated ETL pipeline for property listing analysis with real-time processing capabilities."
+      ],
+      "critical_gaps": [
+        "Satellite imagery processing",
+        "Lidar data handling",
+        "Ecological data analysis"
+      ]
+    },
+    "experience": {
+      "years": "1.0",
+      "corporate_years": "1.0",
+      "alignment_score": 70.0,
+      "strengths": [
+        "Data Analyst & AI Engineer (Contract) at The Bitrates",
+        "Data Analyst at iBuild Building Solutions",
+        "Software Engineer and Analyst at Property Console"
+      ],
+      "gaps": [
+        "No direct team management experience",
+        "Limited evidence of stakeholder management at a senior level"
+      ]
+    },
+    "seniority": {
+      "score": 60.0,
+      "cv_level": "Entry",
+      "jd_level": "Mid",
+      "match": 60.0
+    },
+    "industry": {
+      "cv_industry": "Technology",
+      "jd_industry": "Environment and Sustainability",
+      "alignment_score": 50.0,
+      "transition_type": "Different industry, corporate background",
+      "transition_difficulty": "MEDIUM",
+      "adaptation_timeline": "6-12 months"
+    }
+  },
+  "tailoring_strategy": {
+    "primary_objective": "Transition from Technology to Environment and Sustainability",
+    "emphasis_areas": [
+      "Highlight transferable data analysis and technical skills",
+      "Emphasize stakeholder engagement and business impact",
+      "Frame achievements with quantified metrics and results"
+    ],
+    "de_emphasize": [
+      "Minimize AI engineering specifics (PyTorch, Edge AI, YOLOv8n)",
+      "Reduce focus on Flutter/Dart development details",
+      "De-emphasize hardware optimization and edge computing"
+    ],
+    "critical_additions": {
+      "technical": [
+        "Computer vision",
+        "Data engineering",
+        "Deep learning",
+        "Machine learning",
+        "Python"
+      ],
+      "soft": [
+        "Collaboration",
+        "Adaptability"
+      ],
+      "domain": []
+    },
+    "tone_guidance": "Technical and results-driven; emphasize innovation and scalability",
+    "industry_bridging": [
+      "Technology data analysis experience \u2192 Operational efficiency for Environment and Sustainability",
+      "Technical skills from Technology \u2192 Modern data practices for Environment and Sustainability",
+      "Cross-industry analytical mindset \u2192 Adaptable problem-solving approach"
+    ]
+  },
+  "ats_scoring": {
+    "final_score": 43.8,
+    "status": "Poor fit",
+    "target_score": 75.0,
+    "improvement_needed": 31.200000000000003,
+    "category1_keywords": 20.5,
+    "category2_ai_analysis": 23.3,
+    "missing_counts": {
+      "technical": 14,
+      "soft": 1,
+      "domain": 6
+    },
+    "scoring_version": "v2_65_35_split"
+  }
+}

@@ -367,7 +367,12 @@ class CVTailoringService:
         """Generate tailored CV using AI service"""
         import uuid
         request_id = str(uuid.uuid4())[:8]
+        
+        # Check if base CV is a tailored CV (incremental mode)
+        is_tailored_cv_base = getattr(self, '_is_tailored_cv_base', False)
+        
         logger.info(f"[{request_id}] 🎯 Starting CV tailoring for {recommendations.company} with strategy: {strategy.education_strategy}")
+        logger.info(f"[{request_id}] 🔄 [INCREMENTAL] Mode: {'INCREMENTAL MERGE' if is_tailored_cv_base else 'FRESH GENERATION'}")
         
         # Store original CV for seniority validation
         self._original_cv = original_cv
@@ -378,6 +383,10 @@ class CVTailoringService:
         logger.info(f"[{request_id}] - Total bullets: {sum(len(exp.bullets) for exp in original_cv.experience)}")
         logger.info(f"[{request_id}] - Skills categories: {len(original_cv.skills)}")
         logger.info(f"[{request_id}] - Total skills: {sum(len(cat.skills) for cat in original_cv.skills)}")
+        
+        if is_tailored_cv_base:
+            logger.info(f"[{request_id}] 🔄 [INCREMENTAL] Existing content will be PRESERVED and new recommendations will be MERGED")
+            logger.info(f"[{request_id}] 🔄 [INCREMENTAL] All existing bullets, skills, and experience descriptions will be kept")
         
         # Log critical gaps
         if recommendations.critical_gaps:
@@ -390,7 +399,8 @@ class CVTailoringService:
             original_cv, 
             recommendations, 
             strategy, 
-            custom_instructions
+            custom_instructions,
+            is_tailored_cv_base=is_tailored_cv_base
         )
         
         # Generate response using AI service with retry logic
@@ -471,6 +481,10 @@ class CVTailoringService:
                 assessment = self._validate_tailored_json(tailored_data, request_id=request_id, recommendations=recommendations)
                 self._validate_real_cv_data_used(tailored_data, original_cv)
                 self._validate_keyword_integration(tailored_data, recommendations, request_id=request_id)
+                
+                # Validate incremental merge (if using tailored CV as base)
+                if is_tailored_cv_base:
+                    self._validate_incremental_merge(tailored_data, original_cv, request_id)
                 
                 # If we get here, validation passed
                 logger.info(f"[{request_id}] ✅ AI generation successful on attempt {attempt + 1}")
@@ -803,7 +817,8 @@ LOCATION EXTRACTION RULES:
         cv: OriginalCV,
         recommendations: RecommendationAnalysis,
         strategy: OptimizationStrategy,
-        custom_instructions: Optional[str]
+        custom_instructions: Optional[str],
+        is_tailored_cv_base: bool = False
     ) -> str:
         """Build the user prompt with CV data and recommendations"""
         
@@ -812,7 +827,50 @@ LOCATION EXTRACTION RULES:
         strategy_json = strategy.model_dump_json(indent=2)
         
         # Build prompt without f-strings to avoid format specifier issues
+        incremental_mode_instructions = ""
+        if is_tailored_cv_base:
+            incremental_mode_instructions = """
+🚨 CRITICAL: INCREMENTAL MERGE MODE - PRESERVE EXISTING CONTENT
+
+The CV provided above is an EXISTING TAILORED CV. You MUST:
+1. PRESERVE ALL existing content:
+   - ALL existing bullets in experience section (DO NOT remove or replace)
+   - ALL existing skills (DO NOT remove)
+   - ALL existing experience descriptions and company names
+   - ALL existing dates and education entries
+   
+2. ONLY ADD new content from recommendations:
+   - Add NEW keywords that are NOT already in the CV
+   - Integrate new keywords/phrases into EXISTING bullets where possible
+   - Only add NEW bullets if absolutely necessary (max 1 per experience/project section)
+   
+3. Career Highlights / Role Highlights:
+   - If already has 6-7 keywords in skills section, you can add 1-2 more if needed
+   - Preserve existing value statement and accomplishments
+   - Enhance with new keywords/phrases, don't replace
+   
+4. Flexible Integration Rules:
+   - Keywords: Integrate into existing bullets first, add to skills section
+   - Phrases/Concepts: Add to existing bullet points where semantically appropriate
+   - New Bullets: ONLY if absolutely necessary and cannot be integrated into existing bullets
+     - Maximum 1 new bullet per experience entry
+     - Maximum 1 new bullet per project (if projects section exists)
+   
+5. DO NOT:
+   - Remove or replace existing bullets
+   - Remove existing keywords from skills
+   - Change existing experience descriptions
+   - Modify existing company names or dates
+   
+6. VALIDATION:
+   - Count existing bullets before and after (should be same or +1 per section max)
+   - Count existing skills before and after (should be same or more)
+   - All existing content must remain intact
+
+"""
+        
         prompt = """Please tailor the following CV for the target company and role using the optimization framework.
+""" + incremental_mode_instructions + """
 
 TARGET POSITION:
 Company: """ + recommendations.company + """
@@ -2169,7 +2227,7 @@ FIX: Output ONLY valid JSON!
             logger.error(f"❌ Failed to save tailored CV to analysis folder: {e}")
             raise
     
-    def load_real_cv_and_recommendation(self, company: str) -> Tuple[OriginalCV, RecommendationAnalysis]:
+    def load_real_cv_and_recommendation(self, company: str) -> Tuple[OriginalCV, RecommendationAnalysis, bool]:
         """
         Load the real CV and recommendation data for a company
         
@@ -2177,7 +2235,8 @@ FIX: Output ONLY valid JSON!
             company: Company name (e.g., "Australia_for_UNHCR", "Google", etc.)
             
         Returns:
-            Tuple of (OriginalCV, RecommendationAnalysis)
+            Tuple of (OriginalCV, RecommendationAnalysis, is_tailored_cv)
+            is_tailored_cv: True if the loaded CV is a tailored CV, False if original CV
         """
         try:
             # Paths
@@ -2187,12 +2246,17 @@ FIX: Output ONLY valid JSON!
             logger.info(f"Company folder: {company_folder}")
 
             # Use user-specific unified latest file selector to choose the latest CV across tailored+original
+            is_tailored_cv = False
             try:
                 from app.unified_latest_file_selector import get_selector_for_user
                 user_selector = get_selector_for_user(self.user_email)
                 cv_ctx = user_selector.get_latest_cv_across_all(company)
                 if not cv_ctx.exists:
                     raise FileNotFoundError("No CV file found via unified selector")
+                
+                # Detect if this is a tailored CV
+                is_tailored_cv = (cv_ctx.file_type == "tailored")
+                
                 # Prefer TXT file if JSON is empty, otherwise use JSON
                 if cv_ctx.json_path and cv_ctx.json_path.exists() and cv_ctx.json_path.stat().st_size > 1000:
                     selected_cv_path = str(cv_ctx.json_path)
@@ -2200,13 +2264,19 @@ FIX: Output ONLY valid JSON!
                     selected_cv_path = str(cv_ctx.txt_path)
                 else:
                     selected_cv_path = str(cv_ctx.json_path or cv_ctx.txt_path)
+                
                 logger.info(
                     f"📄 [TAILORING] Using latest CV via unified selector → type={cv_ctx.file_type}, ts={cv_ctx.timestamp}, path={selected_cv_path}"
+                )
+                logger.info(
+                    f"🔄 [INCREMENTAL] CV type detected: {'TAILORED CV' if is_tailored_cv else 'ORIGINAL CV'} - "
+                    f"{'Will preserve existing content and merge incrementally' if is_tailored_cv else 'Will generate fresh tailored CV'}"
                 )
             except Exception as sel_err:
                 # Fallback to original JSON path if selector fails
                 logger.warning(f"⚠️ [TAILORING] Unified selector failed: {sel_err}. Falling back to original CV path")
                 selected_cv_path = str(self.cv_analysis_path / "cvs" / "original" / "original_cv.json")
+                is_tailored_cv = False
 
             # Debug logging for CV loading
             try:
@@ -2300,6 +2370,17 @@ FIX: Output ONLY valid JSON!
             original_cv = OriginalCV(**cv_data)
             logger.info(f"- Final CV object attributes: {dir(original_cv)}")
             
+            # Store is_tailored_cv flag for later use
+            self._is_tailored_cv_base = is_tailored_cv
+            
+            # Log existing content if tailored CV
+            if is_tailored_cv:
+                logger.info(f"🔄 [INCREMENTAL] Preserving existing tailored CV content:")
+                logger.info(f"   - Experience entries: {len(original_cv.experience)}")
+                logger.info(f"   - Total bullets: {sum(len(exp.bullets) for exp in original_cv.experience)}")
+                logger.info(f"   - Skills categories: {len(original_cv.skills)}")
+                logger.info(f"   - Total skills: {sum(len(cat.skills) for cat in original_cv.skills)}")
+            
             # Load recommendation
             if not company_folder.exists():
                 raise FileNotFoundError(f"Company folder not found: {company_folder}. Available companies: {self.list_available_companies()}")
@@ -2307,7 +2388,7 @@ FIX: Output ONLY valid JSON!
             recommendation = self.load_recommendation_file(str(company_folder))
             
             logger.info(f"✅ Loaded real CV and recommendation for {company}")
-            return original_cv, recommendation
+            return original_cv, recommendation, is_tailored_cv
             
         except Exception as e:
             logger.error(f"❌ Failed to load real data for {company}: {e}")
@@ -2709,6 +2790,101 @@ FIX: Output ONLY valid JSON!
         logger.info(f"   - Tier 1 (Required): {len(tier_1_keywords) - len(tier_1_missing)}/{len(tier_1_keywords)} present")
         logger.info(f"   - Tier 2 (Optional): {len(tier_2_found)}/{len(tier_2_keywords)} present")
         logger.info(f"   - Tier 3 (Forbidden): {len(tier_3_found)}/{len(tier_3_keywords)} incorrectly added")
+    
+    def _validate_incremental_merge(self, tailored_data: Dict[str, Any], original_cv: OriginalCV, request_id: str = 'debug') -> None:
+        """Validate that incremental merge preserved existing content"""
+        logger.info(f"🔍 [{request_id}] [INCREMENTAL_VALIDATION] Validating incremental merge...")
+        
+        # Count original content
+        original_bullets = sum(len(exp.bullets) for exp in original_cv.experience)
+        original_skills = sum(len(cat.skills) for cat in original_cv.skills)
+        original_experience_count = len(original_cv.experience)
+        
+        # Count tailored content
+        tailored_bullets = sum(len(exp.get('bullets', [])) for exp in tailored_data.get('experience', []))
+        tailored_skills = sum(len(cat.get('skills', [])) for cat in tailored_data.get('skills', []))
+        tailored_experience_count = len(tailored_data.get('experience', []))
+        
+        logger.info(f"📊 [{request_id}] [INCREMENTAL_VALIDATION] Content comparison:")
+        logger.info(f"   - Experience entries: {original_experience_count} → {tailored_experience_count}")
+        logger.info(f"   - Bullets: {original_bullets} → {tailored_bullets}")
+        logger.info(f"   - Skills: {original_skills} → {tailored_skills}")
+        
+        # Validation rules
+        issues = []
+        warnings = []
+        
+        # Check experience entries count (should be same)
+        if tailored_experience_count < original_experience_count:
+            issues.append(f"❌ Experience entries decreased: {original_experience_count} → {tailored_experience_count}")
+        elif tailored_experience_count > original_experience_count:
+            warnings.append(f"⚠️ Experience entries increased: {original_experience_count} → {tailored_experience_count}")
+        
+        # Check bullets (should be same or +1 per entry max)
+        max_allowed_bullets = original_bullets + original_experience_count  # +1 per entry
+        if tailored_bullets < original_bullets:
+            issues.append(f"❌ Bullets decreased: {original_bullets} → {tailored_bullets} (should preserve all)")
+        elif tailored_bullets > max_allowed_bullets:
+            warnings.append(f"⚠️ Bullets increased significantly: {original_bullets} → {tailored_bullets} (max allowed: {max_allowed_bullets})")
+        else:
+            logger.info(f"✅ [{request_id}] [INCREMENTAL_VALIDATION] Bullets preserved/added appropriately: {original_bullets} → {tailored_bullets}")
+        
+        # Check skills (should be same or more)
+        if tailored_skills < original_skills:
+            issues.append(f"❌ Skills decreased: {original_skills} → {tailored_skills} (should preserve all)")
+        else:
+            logger.info(f"✅ [{request_id}] [INCREMENTAL_VALIDATION] Skills preserved/added: {original_skills} → {tailored_skills}")
+        
+        # Check if existing bullets are preserved (sample check)
+        original_bullet_texts = []
+        for exp in original_cv.experience:
+            for bullet in exp.bullets:
+                original_bullet_texts.append(bullet.lower())
+        
+        tailored_bullet_texts = []
+        for exp in tailored_data.get('experience', []):
+            for bullet in exp.get('bullets', []):
+                tailored_bullet_texts.append(bullet.lower())
+        
+        # Check if at least 80% of original bullets are preserved (allowing for minor modifications)
+        preserved_count = 0
+        for orig_bullet in original_bullet_texts:
+            # Check if similar bullet exists (exact match or contains key phrases)
+            found = False
+            for tailored_bullet in tailored_bullet_texts:
+                # Check for exact match or significant overlap
+                if orig_bullet in tailored_bullet or tailored_bullet in orig_bullet:
+                    found = True
+                    break
+                # Check for key phrase overlap (at least 3 words in common)
+                orig_words = set(orig_bullet.split())
+                tailored_words = set(tailored_bullet.split())
+                if len(orig_words.intersection(tailored_words)) >= 3:
+                    found = True
+                    break
+            if found:
+                preserved_count += 1
+        
+        preservation_rate = (preserved_count / len(original_bullet_texts) * 100) if original_bullet_texts else 100
+        logger.info(f"📊 [{request_id}] [INCREMENTAL_VALIDATION] Bullet preservation rate: {preserved_count}/{len(original_bullet_texts)} ({preservation_rate:.1f}%)")
+        
+        if preservation_rate < 80:
+            issues.append(f"❌ Low bullet preservation rate: {preservation_rate:.1f}% (target: 80%+)")
+        else:
+            logger.info(f"✅ [{request_id}] [INCREMENTAL_VALIDATION] Bullets preserved adequately ({preservation_rate:.1f}%)")
+        
+        # Log results
+        if issues:
+            logger.warning(f"⚠️ [{request_id}] [INCREMENTAL_VALIDATION] Issues found:")
+            for issue in issues:
+                logger.warning(f"   {issue}")
+        else:
+            logger.info(f"✅ [{request_id}] [INCREMENTAL_VALIDATION] Incremental merge validation passed")
+        
+        if warnings:
+            logger.warning(f"⚠️ [{request_id}] [INCREMENTAL_VALIDATION] Warnings:")
+            for warning in warnings:
+                logger.warning(f"   {warning}")
     
     def _extract_cv_text(self, data: Dict[str, Any]) -> str:
         """Extract all text content from CV data for keyword analysis"""
