@@ -16,6 +16,7 @@ enum ContextAwareAnalysisState {
 /// Controller for managing context-aware analysis operations and state
 class ContextAwareAnalysisController extends ChangeNotifier {
   ContextAwareAnalysisResult? _result;
+  InitialAnalysisResult? _initialResult; // New: initial analysis result
   CVContextResult? _cvContext;
   String? _currentJdUrl;
   String? _currentCompany;
@@ -28,6 +29,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   bool _showCVContext = false;
   bool _showAnalysisResults = false;
   bool _showTailoredCV = false;
+  bool _waitingForUserDecision = false; // New: flag for user decision
   Timer? _progressiveTimer;
 
   // Notification callbacks
@@ -36,12 +38,14 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   // Getters for state management
   ContextAwareAnalysisState get state => _state;
   ContextAwareAnalysisResult? get result => _result;
+  InitialAnalysisResult? get initialResult => _initialResult; // New
   CVContextResult? get cvContext => _cvContext;
   String? get errorMessage => _errorMessage;
   String? get currentJdUrl => _currentJdUrl;
   String? get currentCompany => _currentCompany;
   bool get isRerun => _isRerun;
   Duration get executionDuration => _executionDuration;
+  bool get waitingForUserDecision => _waitingForUserDecision; // New
 
   // Convenience getters for UI
   bool get isLoading => _state == ContextAwareAnalysisState.loading;
@@ -93,6 +97,11 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   String? get analyzeMatchRawAnalysis => analyzeMatch?.rawAnalysis;
   String? get analyzeMatchCompanyName => analyzeMatch?.companyName;
   bool get hasAnalyzeMatch => analyzeMatch != null && !analyzeMatch!.isEmpty;
+  
+  // New: Analyze Match Decision getters (from initial analysis)
+  AnalyzeMatchDecision? get analyzeMatchDecision => _initialResult?.analyzeMatchDecision;
+  bool get hasAnalyzeMatchDecision => analyzeMatchDecision != null;
+  bool get shouldProceedWithFullAnalysis => _initialResult?.shouldProceed ?? false;
 
   // Component Analysis getters
   ComponentAnalysisResult? get componentAnalysis =>
@@ -178,12 +187,76 @@ class ContextAwareAnalysisController extends ChangeNotifier {
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      // Perform the analysis
-      print('🔍 [CONTEXT_AWARE_CONTROLLER] Performing analysis...');
-      _result = await ContextAwareAnalysisService.performContextAwareAnalysis(
+      // Perform initial analysis (stops after analyze match)
+      print('🔍 [CONTEXT_AWARE_CONTROLLER] Performing initial analysis...');
+      _initialResult = await ContextAwareAnalysisService.performInitialAnalysis(
         jdUrl: jdUrl,
         company: company,
         isRerun: isRerun,
+      );
+
+      if (_initialResult!.success) {
+        // Check if user decision is required
+        if (_initialResult!.requiresUserDecision && _initialResult!.analyzeMatchDecision != null) {
+          _waitingForUserDecision = true;
+          _setCompleted(); // Set completed but waiting for decision
+          
+          // Show decision message
+          final decision = _initialResult!.analyzeMatchDecision!;
+          final decisionMessage = _buildDecisionMessage(decision);
+          _showNotification(decisionMessage);
+          
+          notifyListeners();
+          return; // Stop here, wait for user decision
+        } else {
+          // No decision required, continue automatically (fallback)
+          await _continueFullAnalysis(includeTailoring: includeTailoring);
+        }
+      } else {
+        String errorMessage = _initialResult!.errors.isNotEmpty
+            ? _initialResult!.errors.first
+            : 'Initial analysis failed';
+        _setError(errorMessage);
+        _showNotification(errorMessage, isError: true);
+      }
+    } catch (e) {
+      if (e is TailoredCVNotFoundException) {
+        String errorMessage =
+            'No tailored CV is available. Please create a tailored CV first.';
+        _setError(errorMessage);
+        _showNotification(errorMessage, isError: true);
+      } else {
+        _setError('Context-aware analysis failed: $e');
+        _showNotification('Context-aware analysis failed: $e', isError: true);
+      }
+      debugPrint('❌ [CONTEXT_AWARE_CONTROLLER] Error: $e');
+    }
+  }
+
+  /// Continue full analysis after user decision
+  Future<void> continueFullAnalysis({bool includeTailoring = true}) async {
+    if (_currentCompany == null) {
+      _setError('No company selected for continuation');
+      return;
+    }
+
+    if (!_waitingForUserDecision) {
+      _setError('Not waiting for user decision');
+      return;
+    }
+
+    await _continueFullAnalysis(includeTailoring: includeTailoring);
+  }
+
+  /// Internal method to continue full analysis
+  Future<void> _continueFullAnalysis({bool includeTailoring = true}) async {
+    try {
+      _setLoading();
+      _waitingForUserDecision = false;
+
+      print('🚀 [CONTEXT_AWARE_CONTROLLER] Continuing full analysis...');
+      _result = await ContextAwareAnalysisService.continueFullAnalysis(
+        company: _currentCompany!,
         includeTailoring: includeTailoring,
       );
 
@@ -200,21 +273,24 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       } else {
         String errorMessage = _result!.errors.isNotEmpty
             ? _result!.errors.first
-            : 'Analysis failed';
+            : 'Full analysis failed';
         _setError(errorMessage);
         _showNotification(errorMessage, isError: true);
       }
     } catch (e) {
-      if (e is TailoredCVNotFoundException) {
-        String errorMessage =
-            'No tailored CV is available. Please create a tailored CV first.';
-        _setError(errorMessage);
-        _showNotification(errorMessage, isError: true);
-      } else {
-        _setError('Context-aware analysis failed: $e');
-        _showNotification('Context-aware analysis failed: $e', isError: true);
-      }
-      debugPrint('❌ [CONTEXT_AWARE_CONTROLLER] Error: $e');
+      _setError('Failed to continue full analysis: $e');
+      _showNotification('Failed to continue full analysis: $e', isError: true);
+      debugPrint('❌ [CONTEXT_AWARE_CONTROLLER] Error continuing: $e');
+    }
+  }
+
+  /// Skip full analysis (user declined)
+  void skipFullAnalysis() {
+    if (_waitingForUserDecision) {
+      _waitingForUserDecision = false;
+      _setCompleted();
+      _showNotification('⏭️ Skipped full analysis. Initial results available.');
+      notifyListeners();
     }
   }
 
@@ -236,6 +312,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     _progressiveTimer = null;
 
     _result = null;
+    _initialResult = null; // New
     _cvContext = null;
     _currentJdUrl = null;
     _currentCompany = null;
@@ -247,6 +324,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     _showCVContext = false;
     _showAnalysisResults = false;
     _showTailoredCV = false;
+    _waitingForUserDecision = false; // New
 
     notifyListeners();
   }
@@ -343,6 +421,27 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       message += ' • 🆕 Fresh analysis';
     }
 
+    return message;
+  }
+
+  /// Build decision message for analyze match
+  String _buildDecisionMessage(AnalyzeMatchDecision decision) {
+    String message = '🔍 Analyze Match: ';
+    
+    if (decision.isProceed) {
+      message += '✅ Strong Match (${decision.matchScore}%) - Proceed recommended';
+    } else if (decision.isMaybe) {
+      message += '⚠️ Conditional Match (${decision.matchScore}%) - Consider proceeding';
+    } else if (decision.isDontProceed) {
+      message += '❌ Not Recommended (${decision.matchScore}%) - Consider skipping';
+    } else {
+      message += '❓ Unknown (${decision.matchScore}%)';
+    }
+    
+    if (decision.primaryReason.isNotEmpty) {
+      message += '\n${decision.primaryReason}';
+    }
+    
     return message;
   }
 

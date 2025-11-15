@@ -1,10 +1,173 @@
 import '../exceptions/cv_exceptions.dart';
-import '../models/skills_analysis_model.dart';
 import 'api_service.dart';
 
 /// Service for handling context-aware analysis operations
 class ContextAwareAnalysisService {
+  /// Perform initial analysis up to analyze match (cost-saving workflow)
+  /// Stops after analyze match and waits for user decision
+  static Future<InitialAnalysisResult> performInitialAnalysis({
+    required String jdUrl,
+    required String company,
+    required bool isRerun,
+  }) async {
+    print('=== INITIAL ANALYSIS SERVICE CALLED ===');
+    print('JD URL: $jdUrl');
+    print('Company: $company');
+    print('Is Rerun: $isRerun');
+
+    try {
+      print('🚀 [INITIAL_ANALYSIS_SERVICE] Starting initial analysis');
+
+      final stopwatch = Stopwatch()..start();
+
+      final result = await APIService.makeAuthenticatedCall(
+        endpoint: '/initial-analysis',
+        method: 'POST',
+        body: {
+          'jd_url': jdUrl,
+          'company': company,
+          'is_rerun': isRerun,
+        },
+      );
+
+      print('📡 [INITIAL_ANALYSIS_SERVICE] Received response from API');
+      print('📡 [INITIAL_ANALYSIS_SERVICE] Raw result keys: ${result.keys.toList()}');
+
+      stopwatch.stop();
+
+      print('📊 [INITIAL_ANALYSIS_SERVICE] About to parse InitialAnalysisResult from JSON');
+      final analysisResult = InitialAnalysisResult.fromJson(result);
+      print('📊 [INITIAL_ANALYSIS_SERVICE] Successfully parsed InitialAnalysisResult');
+
+      // Return with execution duration
+      final finalResult = InitialAnalysisResult(
+        success: analysisResult.success,
+        requiresUserDecision: analysisResult.requiresUserDecision,
+        analyzeMatchDecision: analysisResult.analyzeMatchDecision,
+        results: analysisResult.results,
+        warnings: analysisResult.warnings,
+        errors: analysisResult.errors,
+        processingTime: stopwatch.elapsed,
+      );
+
+      return finalResult;
+    } catch (e, stackTrace) {
+      print('❌ [INITIAL_ANALYSIS_SERVICE] Exception in performInitialAnalysis: $e');
+      print('❌ [INITIAL_ANALYSIS_SERVICE] Stack trace: $stackTrace');
+
+      // Enhanced error handling
+      if (e.toString().contains('404') || e.toString().contains('not found')) {
+        return InitialAnalysisResult.error(
+            'Analysis resources not found. Please check your inputs.');
+      } else if (e.toString().contains('401')) {
+        return InitialAnalysisResult.error(
+            'Authentication required. Please log in again.');
+      } else if (e.toString().contains('500')) {
+        return InitialAnalysisResult.error(
+            'Server error. Please try again later.');
+      } else {
+        String errorMsg = e.toString();
+        if (errorMsg.contains('{"error":"') && errorMsg.contains('"}')) {
+          final start = errorMsg.indexOf('{"error":"') + 10;
+          final end = errorMsg.indexOf('"}', start);
+          if (end > start) {
+            errorMsg = errorMsg.substring(start, end);
+            return InitialAnalysisResult.error(errorMsg);
+          }
+        }
+        return InitialAnalysisResult.error(
+            'Failed to perform initial analysis: $e');
+      }
+    }
+  }
+
+  /// Continue full analysis from analyze match point (expensive steps)
+  static Future<ContextAwareAnalysisResult> continueFullAnalysis({
+    required String company,
+    bool includeTailoring = true,
+  }) async {
+    print('=== CONTINUE FULL ANALYSIS SERVICE CALLED ===');
+    print('Company: $company');
+    print('Include Tailoring: $includeTailoring');
+
+    try {
+      print('🚀 [CONTINUE_FULL_ANALYSIS_SERVICE] Continuing full analysis');
+
+      final stopwatch = Stopwatch()..start();
+
+      final result = await APIService.makeAuthenticatedCall(
+        endpoint: '/continue-full-analysis/$company',
+        method: 'POST',
+        body: {
+          'include_tailoring': includeTailoring,
+        },
+      );
+
+      print('📡 [CONTINUE_FULL_ANALYSIS_SERVICE] Received response from API');
+      print('📡 [CONTINUE_FULL_ANALYSIS_SERVICE] Raw result keys: ${result.keys.toList()}');
+
+      stopwatch.stop();
+
+      // Convert to ContextAwareAnalysisResult format
+      final analysisResult = ContextAwareAnalysisResult.fromJson({
+        'success': result['success'] ?? false,
+        'analysis_context': {
+          'company': company,
+          'jd_url': '',
+          'is_rerun': false,
+          'cv_selection': {},
+          'jd_cache_status': {'cached': false},
+          'processing_time': result['processing_time'] ?? 0.0,
+          'steps_completed': result['steps_completed'] ?? [],
+          'steps_skipped': result['steps_skipped'] ?? [],
+        },
+        'results': result['results'] ?? {},
+        'warnings': result['warnings'] ?? [],
+        'errors': result['errors'] ?? [],
+      });
+
+      // Return with execution duration
+      final finalResult = ContextAwareAnalysisResult(
+        success: analysisResult.success,
+        analysisContext: analysisResult.analysisContext,
+        results: analysisResult.results,
+        warnings: analysisResult.warnings,
+        errors: analysisResult.errors,
+        processingTime: stopwatch.elapsed,
+      );
+
+      return finalResult;
+    } catch (e, stackTrace) {
+      print('❌ [CONTINUE_FULL_ANALYSIS_SERVICE] Exception: $e');
+      print('❌ [CONTINUE_FULL_ANALYSIS_SERVICE] Stack trace: $stackTrace');
+
+      if (e.toString().contains('404') || e.toString().contains('not found')) {
+        return ContextAwareAnalysisResult.error(
+            'Analysis resources not found. Please check your inputs.');
+      } else if (e.toString().contains('401')) {
+        return ContextAwareAnalysisResult.error(
+            'Authentication required. Please log in again.');
+      } else if (e.toString().contains('500')) {
+        return ContextAwareAnalysisResult.error(
+            'Server error. Please try again later.');
+      } else {
+        String errorMsg = e.toString();
+        if (errorMsg.contains('{"error":"') && errorMsg.contains('"}')) {
+          final start = errorMsg.indexOf('{"error":"') + 10;
+          final end = errorMsg.indexOf('"}', start);
+          if (end > start) {
+            errorMsg = errorMsg.substring(start, end);
+            return ContextAwareAnalysisResult.error(errorMsg);
+          }
+        }
+        return ContextAwareAnalysisResult.error(
+            'Failed to continue full analysis: $e');
+      }
+    }
+  }
+
   /// Perform context-aware analysis with intelligent CV selection and JD caching
+  /// (Legacy method - kept for backward compatibility)
   static Future<ContextAwareAnalysisResult> performContextAwareAnalysis({
     required String jdUrl,
     required String company,
@@ -525,6 +688,128 @@ class CVRecommendation {
       suggestedCv: json['suggested_cv'] ?? 'original',
       reason: json['reason'] ?? 'unknown',
       version: json['version'] ?? '1.0',
+    );
+  }
+}
+
+/// Result model for initial analysis (stops after analyze match)
+class InitialAnalysisResult {
+  final bool success;
+  final bool requiresUserDecision;
+  final AnalyzeMatchDecision? analyzeMatchDecision;
+  final InitialAnalysisResults? results;
+  final List<String> warnings;
+  final List<String> errors;
+  final Duration processingTime;
+
+  InitialAnalysisResult({
+    required this.success,
+    required this.requiresUserDecision,
+    this.analyzeMatchDecision,
+    this.results,
+    this.warnings = const [],
+    this.errors = const [],
+    this.processingTime = Duration.zero,
+  });
+
+  factory InitialAnalysisResult.fromJson(Map<String, dynamic> json) {
+    return InitialAnalysisResult(
+      success: json['success'] ?? false,
+      requiresUserDecision: json['requires_user_decision'] ?? false,
+      analyzeMatchDecision: json['analyze_match_decision'] != null
+          ? AnalyzeMatchDecision.fromJson(
+              json['analyze_match_decision'] as Map<String, dynamic>)
+          : null,
+      results: json['results'] != null
+          ? InitialAnalysisResults.fromJson(json['results'])
+          : null,
+      warnings: List<String>.from(json['warnings'] ?? []),
+      errors: List<String>.from(json['errors'] ?? []),
+    );
+  }
+
+  factory InitialAnalysisResult.error(String errorMessage) {
+    return InitialAnalysisResult(
+      success: false,
+      requiresUserDecision: false,
+      errors: [errorMessage],
+    );
+  }
+
+  bool get hasError => errors.isNotEmpty;
+  bool get hasWarnings => warnings.isNotEmpty;
+  bool get shouldProceed => analyzeMatchDecision?.shouldProceed ?? false;
+}
+
+/// Analyze match decision data
+class AnalyzeMatchDecision {
+  final String decision; // PROCEED, MAYBE, DONT_PROCEED, UNKNOWN
+  final int confidence;
+  final int matchScore;
+  final String primaryReason;
+  final List<String> criticalMissing;
+  final List<String> implicitLikely;
+  final List<String> learnableGaps;
+  final bool blockerFound;
+  final bool shouldProceed;
+  final String rawContent;
+
+  AnalyzeMatchDecision({
+    required this.decision,
+    required this.confidence,
+    required this.matchScore,
+    required this.primaryReason,
+    required this.criticalMissing,
+    required this.implicitLikely,
+    required this.learnableGaps,
+    required this.blockerFound,
+    required this.shouldProceed,
+    required this.rawContent,
+  });
+
+  factory AnalyzeMatchDecision.fromJson(Map<String, dynamic> json) {
+    return AnalyzeMatchDecision(
+      decision: json['decision'] ?? 'UNKNOWN',
+      confidence: json['confidence'] ?? 0,
+      matchScore: json['match_score'] ?? 0,
+      primaryReason: json['primary_reason'] ?? '',
+      criticalMissing: List<String>.from(json['critical_missing'] ?? []),
+      implicitLikely: List<String>.from(json['implicit_likely'] ?? []),
+      learnableGaps: List<String>.from(json['learnable_gaps'] ?? []),
+      blockerFound: json['blocker_found'] ?? false,
+      shouldProceed: json['should_proceed'] ?? false,
+      rawContent: json['raw_content'] ?? '',
+    );
+  }
+
+  bool get isProceed => decision == 'PROCEED';
+  bool get isMaybe => decision == 'MAYBE';
+  bool get isDontProceed => decision == 'DONT_PROCEED';
+}
+
+/// Initial analysis results (before expensive steps)
+class InitialAnalysisResults {
+  final Map<String, dynamic> cvSkills;
+  final Map<String, dynamic> jdSkills;
+  final Map<String, dynamic> jdAnalysis;
+  final Map<String, dynamic> jobInfo;
+  final Map<String, dynamic> cvJdMatching;
+
+  InitialAnalysisResults({
+    required this.cvSkills,
+    required this.jdSkills,
+    required this.jdAnalysis,
+    required this.jobInfo,
+    required this.cvJdMatching,
+  });
+
+  factory InitialAnalysisResults.fromJson(Map<String, dynamic> json) {
+    return InitialAnalysisResults(
+      cvSkills: Map<String, dynamic>.from(json['cv_skills'] ?? {}),
+      jdSkills: Map<String, dynamic>.from(json['jd_skills'] ?? {}),
+      jdAnalysis: Map<String, dynamic>.from(json['jd_analysis'] ?? {}),
+      jobInfo: Map<String, dynamic>.from(json['job_info'] ?? {}),
+      cvJdMatching: Map<String, dynamic>.from(json['cv_jd_matching'] ?? {}),
     );
   }
 }

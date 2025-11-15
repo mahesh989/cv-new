@@ -955,6 +955,225 @@ async def context_aware_analysis(
         )
 
 
+@router.post("/initial-analysis")
+async def initial_analysis(
+    request: Request,
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Run initial analysis up to analyze match, then stop for user decision
+    
+    This endpoint performs:
+    1. JD Analysis
+    2. CV Skills Extraction
+    3. CV-JD Matching
+    4. Analyze Match (decision point)
+    
+    After analyze match, the process stops and returns results with analyze_match_decision.
+    The frontend should display the decision and allow user to proceed or skip.
+    
+    Use /continue-full-analysis/{company} to continue with expensive steps.
+    """
+    try:
+        data = await request.json()
+        
+        # Extract parameters
+        jd_url = data.get("jd_url")
+        company = data.get("company")
+        is_rerun = data.get("is_rerun", False)
+        user_id = getattr(current_user, 'id', 1)
+        
+        # Validate required parameters
+        if not jd_url:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "jd_url is required"}
+            )
+        
+        if not company:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "company is required"}
+            )
+        
+        logger.info(f"🎯 Initial analysis request: Company={company}, JD={jd_url}, Rerun={is_rerun}")
+        
+        # Run initial analysis pipeline (stops after analyze match)
+        try:
+            pipeline = ContextAwareAnalysisPipeline(user_email=current_user.email)
+            results = await pipeline.run_initial_analysis(
+                jd_url=jd_url,
+                company=company,
+                is_rerun=is_rerun,
+                user_id=user_id
+            )
+        except Exception as e:
+            logger.error(f"❌ Initial analysis error: {e}")
+            import traceback
+            traceback.print_exc()
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": str(e),
+                    "error_type": type(e).__name__
+                }
+            )
+        
+        if results.success:
+            logger.info(f"✅ Initial analysis completed in {results.processing_time:.2f}s")
+            logger.info(f"📊 Analyze match decision: {results.analyze_match_decision}")
+            
+            # Prepare response
+            response_data = {
+                "success": True,
+                "requires_user_decision": results.requires_user_decision,
+                "analyze_match_decision": results.analyze_match_decision,
+                "processing_time": results.processing_time,
+                "steps_completed": results.steps_completed,
+                "steps_skipped": results.steps_skipped,
+                "results": {
+                    "cv_skills": results.cv_skills,
+                    "jd_skills": results.jd_skills,
+                    "jd_analysis": results.jd_analysis,
+                    "job_info": results.job_info,
+                    "cv_jd_matching": results.cv_jd_matching
+                },
+                "warnings": results.warnings,
+                "errors": results.errors
+            }
+            
+            return JSONResponse(content=response_data)
+        else:
+            logger.error(f"❌ Initial analysis failed: {results.errors}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "errors": results.errors,
+                    "warnings": results.warnings
+                }
+            )
+    
+    except Exception as e:
+        import traceback
+        error_msg = str(e) if str(e) else "Unknown error occurred"
+        error_type = type(e).__name__
+        traceback_info = traceback.format_exc()
+        
+        logger.error(f"❌ Initial analysis error ({error_type}): {error_msg}")
+        logger.error(f"Traceback: {traceback_info}")
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Initial analysis failed ({error_type}): {error_msg}",
+                "type": error_type
+            }
+        )
+
+
+@router.post("/continue-full-analysis/{company}")
+async def continue_full_analysis(
+    company: str,
+    request: Request,
+    current_user: UserData = Depends(get_current_user)
+):
+    """
+    Continue full analysis from analyze match point (expensive steps)
+    
+    This endpoint performs the expensive analysis steps that should only run
+    after user confirms they want to proceed:
+    1. Component Analysis
+    2. ATS Recommendations
+    3. AI Recommendations
+    4. CV Tailoring (if requested)
+    
+    Args:
+        company: Company name (from URL path)
+        
+    Request body (optional):
+        include_tailoring: bool (default: True) - Whether to include CV tailoring
+    """
+    try:
+        # Try to get request body, but handle empty body gracefully
+        try:
+            data = await request.json()
+        except Exception:
+            data = {}
+        include_tailoring = data.get("include_tailoring", True)
+        
+        logger.info(f"🚀 Continue full analysis request: Company={company}, IncludeTailoring={include_tailoring}")
+        
+        # Continue full analysis pipeline
+        try:
+            pipeline = ContextAwareAnalysisPipeline(user_email=current_user.email)
+            results = await pipeline.continue_from_analyze_match(
+                company=company,
+                include_tailoring=include_tailoring
+            )
+        except Exception as e:
+            logger.error(f"❌ Continue full analysis error: {e}")
+            import traceback
+            traceback.print_exc()
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": str(e),
+                    "error_type": type(e).__name__
+                }
+            )
+        
+        if results.success:
+            logger.info(f"✅ Full analysis continuation completed in {results.processing_time:.2f}s")
+            
+            # Prepare response
+            response_data = {
+                "success": True,
+                "processing_time": results.processing_time,
+                "steps_completed": results.steps_completed,
+                "steps_skipped": results.steps_skipped,
+                "results": {
+                    "component_analysis": results.component_analysis,
+                    "ats_recommendations": results.ats_recommendations,
+                    "ai_recommendations": results.ai_recommendations,
+                    "tailored_cv_path": results.tailored_cv_path
+                },
+                "warnings": results.warnings,
+                "errors": results.errors
+            }
+            
+            return JSONResponse(content=response_data)
+        else:
+            logger.error(f"❌ Full analysis continuation failed: {results.errors}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "errors": results.errors,
+                    "warnings": results.warnings
+                }
+            )
+    
+    except Exception as e:
+        import traceback
+        error_msg = str(e) if str(e) else "Unknown error occurred"
+        error_type = type(e).__name__
+        traceback_info = traceback.format_exc()
+        
+        logger.error(f"❌ Continue full analysis error ({error_type}): {error_msg}")
+        logger.error(f"Traceback: {traceback_info}")
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Continue full analysis failed ({error_type}): {error_msg}",
+                "type": error_type
+            }
+        )
+
+
 @router.post("/preliminary-analysis")
 async def preliminary_analysis(
     request: Request,
