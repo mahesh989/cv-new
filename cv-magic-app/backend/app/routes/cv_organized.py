@@ -114,12 +114,16 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
                 # Check if parsing was successful (no parsing_error field means success)
                 if not structured_cv.get('parsing_error'):
                     # Save the structured CV to the original folder
+                    # CRITICAL: Always overwrite when user selects CV from dropdown
                     json_filepath = original_folder / "original_cv.json"
                     import json
+                    # Ensure filename is stored in the structured CV for tracking
+                    if 'filename' not in structured_cv:
+                        structured_cv['filename'] = filename
                     with open(json_filepath, 'w', encoding='utf-8') as f:
                         json.dump(structured_cv, f, indent=2, ensure_ascii=False)
                     
-                    logger.info(f"✅ Background: CV saved as structured JSON: {json_filepath}")
+                    logger.info(f"✅ Background: CV saved as structured JSON (overwritten): {json_filepath} (filename: {filename})")
                 else:
                     error_msg = structured_cv.get('parsing_error', 'Unknown error')
                     logger.warning(f"⚠️ Background: Failed to save structured CV: {error_msg}")

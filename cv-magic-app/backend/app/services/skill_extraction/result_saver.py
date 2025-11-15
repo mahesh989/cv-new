@@ -88,7 +88,9 @@ class SkillExtractionResultSaver:
             from app.utils.user_path_utils import ensure_user_directories
             ensure_user_directories(self.user_email)
             
-            # Save original CV JSON in cvs/original directory if it doesn't exist or doesn't have structured data
+            # Save original CV JSON in cvs/original directory
+            # CRITICAL: If cv_filename is provided and different from existing CV, always overwrite
+            # This ensures that when user selects a new CV from dropdown, it replaces the old one
             if cv_data and cv_data.get('text'):
                 import json
                 from app.utils.user_path_utils import get_user_cv_paths
@@ -100,8 +102,17 @@ class SkillExtractionResultSaver:
                     try:
                         with open(cv_file_path, 'r', encoding='utf-8') as f:
                             existing_data = json.load(f)
-                        # If file has structured CV data (not just text), don't overwrite it
-                        if isinstance(existing_data, dict) and any(key in existing_data for key in ['personal_information', 'career_profile', 'skills', 'education', 'experience']):
+                        
+                        # Check if this is a NEW CV selection (different filename)
+                        existing_filename = existing_data.get('filename', '')
+                        is_new_cv_selection = cv_filename and cv_filename != existing_filename
+                        
+                        if is_new_cv_selection:
+                            # User selected a different CV - ALWAYS overwrite
+                            logger.info(f"🔄 New CV selected ({cv_filename} vs existing {existing_filename}), overwriting: {cv_file_path}")
+                            should_save = True
+                        elif isinstance(existing_data, dict) and any(key in existing_data for key in ['personal_information', 'career_profile', 'skills', 'education', 'experience']):
+                            # Same CV, structured data exists - preserve it
                             logger.info(f"💾 Structured CV already exists, preserving it: {cv_file_path}")
                             should_save = False
                         else:
