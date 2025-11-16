@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../controllers/skills_analysis_controller.dart';
@@ -117,9 +118,19 @@ class _ContextAwareAnalysisScreenState
               // Analyze Match Decision (waiting for user decision)
               Consumer<ContextAwareAnalysisController>(
                 builder: (context, controller, child) {
-                  if (controller.waitingForUserDecision && controller.hasAnalyzeMatchDecision) {
+                  debugPrint('🔍 [SCREEN] Checking decision widget:');
+                  debugPrint('   waitingForUserDecision: ${controller.waitingForUserDecision}');
+                  debugPrint('   hasAnalyzeMatchDecision: ${controller.hasAnalyzeMatchDecision}');
+                  debugPrint('   hasInitialResults: ${controller.hasInitialResults}');
+                  debugPrint('   state: ${controller.state}');
+                  
+                  // Show widget if waiting for decision OR if we have initial results with decision
+                  if (controller.waitingForUserDecision || 
+                      (controller.hasInitialResults && controller.hasAnalyzeMatchDecision)) {
+                    debugPrint('✅ [SCREEN] Showing decision widget');
                     return _buildAnalyzeMatchDecisionCard(controller);
                   }
+                  debugPrint('❌ [SCREEN] Not showing decision widget');
                   return const SizedBox.shrink();
                 },
               ),
@@ -453,7 +464,62 @@ class _ContextAwareAnalysisScreenState
   }
 
   Widget _buildAnalyzeMatchDecisionCard(ContextAwareAnalysisController controller) {
-    final decision = controller.analyzeMatchDecision!;
+    final decision = controller.analyzeMatchDecision;
+    
+    // Safety check - if no decision, show fallback UI
+    if (decision == null) {
+      debugPrint('⚠️ [SCREEN] Decision is null, showing fallback');
+      return Card(
+        margin: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              const Icon(Icons.info_outline, size: 48, color: Colors.orange),
+              const SizedBox(height: 16),
+              const Text(
+                'Initial Analysis Complete',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('Waiting for analyze match decision...'),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        controller.continueFullAnalysis(includeTailoring: _includeTailoring);
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Proceed with Full Analysis'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        controller.skipFullAnalysis();
+                      },
+                      icon: const Icon(Icons.skip_next),
+                      label: const Text('Skip Full Analysis'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     
     // Determine colors based on decision
     Color cardColor;

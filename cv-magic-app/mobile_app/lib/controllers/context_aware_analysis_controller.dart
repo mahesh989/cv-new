@@ -53,6 +53,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       _state == ContextAwareAnalysisState.completed && _result != null;
   bool get hasError => _state == ContextAwareAnalysisState.error;
   bool get isCancelled => _state == ContextAwareAnalysisState.cancelled;
+  bool get hasInitialResults => _initialResult != null && _initialResult!.success; // New
   bool get hasCVContext => _cvContext != null;
 
   // Progressive display getters
@@ -196,8 +197,14 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       );
 
       if (_initialResult!.success) {
+        debugPrint('✅ [CONTEXT_AWARE_CONTROLLER] Initial analysis successful');
+        debugPrint('   requiresUserDecision: ${_initialResult!.requiresUserDecision}');
+        debugPrint('   analyzeMatchDecision: ${_initialResult!.analyzeMatchDecision != null}');
+        
+        // ALWAYS stop after initial analysis - require user decision
         // Check if user decision is required
         if (_initialResult!.requiresUserDecision && _initialResult!.analyzeMatchDecision != null) {
+          debugPrint('⏸️ [CONTEXT_AWARE_CONTROLLER] Stopping for user decision');
           _waitingForUserDecision = true;
           _setCompleted(); // Set completed but waiting for decision
           
@@ -206,11 +213,19 @@ class ContextAwareAnalysisController extends ChangeNotifier {
           final decisionMessage = _buildDecisionMessage(decision);
           _showNotification(decisionMessage);
           
+          debugPrint('📊 [CONTEXT_AWARE_CONTROLLER] Decision: ${decision.decision}, Score: ${decision.matchScore}%');
+          debugPrint('   waitingForUserDecision: $_waitingForUserDecision');
+          debugPrint('   hasAnalyzeMatchDecision: ${hasAnalyzeMatchDecision}');
+          
           notifyListeners();
-          return; // Stop here, wait for user decision
+          return; // Stop here, wait for user decision - DO NOT CONTINUE AUTOMATICALLY
         } else {
-          // No decision required, continue automatically (fallback)
-          await _continueFullAnalysis(includeTailoring: includeTailoring);
+          // If no decision data, still show what we have and wait
+          debugPrint('⚠️ [CONTEXT_AWARE_CONTROLLER] No decision data, but stopping anyway');
+          _waitingForUserDecision = true;
+          _setCompleted();
+          notifyListeners();
+          return; // Stop here - don't continue automatically
         }
       } else {
         String errorMessage = _initialResult!.errors.isNotEmpty
