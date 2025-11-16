@@ -46,15 +46,24 @@ class ComponentAssembler:
         logger.info("[ASSEMBLER] Using v2 2-analyzer approach only (v1 removed)")
 
     def _read_cv_text(self, company_name: str = "Unknown", jd_url: str = "") -> str:
-        """Read CV text from the appropriate CV based on JD usage history."""
+        """
+        Read CV text from the appropriate CV.
+        For reruns/component analysis, always use the latest CV (preferring tailored if available).
+        """
         from app.unified_latest_file_selector import get_selector_for_user
         
-        logger.info("🔍 [COMPONENT_ASSEMBLER] Selecting appropriate CV based on JD usage")
+        logger.info("🔍 [COMPONENT_ASSEMBLER] Selecting CV for component analysis")
         user_selector = get_selector_for_user(self.user_email)
-        cv_context = user_selector.get_latest_cv_for_company(company_name, jd_url, "")
+        
+        # CRITICAL: For component analysis (which runs after tailored CV is generated),
+        # always use the latest CV across all (preferring tailored CV if it exists and is newer)
+        # This ensures reruns use the latest tailored CV with all improvements
+        cv_context = user_selector.get_latest_cv_across_all(company_name)
         
         if not cv_context.exists:
             raise FileNotFoundError(f"No CV found for company: {company_name}")
+        
+        logger.info(f"📄 [COMPONENT_ASSEMBLER] Using {cv_context.file_type} CV: {cv_context.json_path or cv_context.txt_path}")
         
         # Read content from the selected CV
         cv_file_path = cv_context.txt_path if cv_context.txt_path else cv_context.json_path
@@ -72,7 +81,7 @@ class ComponentAssembler:
             logger.error("❌ [COMPONENT_ASSEMBLER] No text content available in CV")
             raise ValueError("CV text content is empty")
         
-        logger.info(f"📄 [COMPONENT_ASSEMBLER] Selected CV content")
+        logger.info(f"📄 [COMPONENT_ASSEMBLER] Selected CV content ({cv_context.file_type})")
         logger.info(f"📊 [COMPONENT_ASSEMBLER] Content length: {len(cv_content)} chars")
         
         return cv_content
