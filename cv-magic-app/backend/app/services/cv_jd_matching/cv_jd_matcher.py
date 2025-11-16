@@ -319,10 +319,12 @@ class CVJDMatcher:
                 logger.info(f"🔍 [CV_JD_MATCHER] No explicit CV path provided, using unified selector for {company_name}")
                 
                 from app.unified_latest_file_selector import get_selector_for_user
-                # Get JD URL from analysis data if available
-                jd_url = jd_analysis_data.get('jd_url', '') if jd_analysis_data else ''
                 user_selector = get_selector_for_user(self.user_email)
-                cv_context = user_selector.get_latest_cv_for_company(company_name, jd_url, "")
+                
+                # CRITICAL: For CV-JD matching (especially during reruns), always use the latest CV across all
+                # This ensures that when a tailored CV is generated, reruns will use it for matching
+                # Preferring tailored CV if it exists and is newer than original CV
+                cv_context = user_selector.get_latest_cv_across_all(company_name)
                 
                 if not cv_context.exists:
                     raise FileNotFoundError(f"No CV found for company: {company_name}")
