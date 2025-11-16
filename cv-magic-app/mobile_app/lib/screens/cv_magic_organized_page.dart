@@ -15,7 +15,7 @@ import '../modules/cv/cv_selection_module.dart';
 import '../modules/cv/cv_preview_module.dart';
 import '../widgets/job_input.dart';
 import '../services/api_service.dart';
-import '../controllers/skills_analysis_controller.dart';
+import '../controllers/context_aware_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
 import '../services/results_clearing_service.dart';
 
@@ -47,8 +47,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   final TextEditingController jdController = TextEditingController();
   final TextEditingController jdUrlController = TextEditingController();
 
-  // Skills analysis controller
-  late final SkillsAnalysisController _skillsController;
+  // Context-aware analysis controller (supports analyze match pause)
+  late final ContextAwareAnalysisController _skillsController;
 
   // Timer for checking clear flag
   Timer? _clearCheckTimer;
@@ -56,7 +56,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   void initState() {
     super.initState();
-    _skillsController = SkillsAnalysisController();
+    _skillsController = ContextAwareAnalysisController();
 
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
@@ -206,6 +206,13 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                   () {}, // Not used anymore, analysis is handled in JobInput widget
             ),
             const SizedBox(height: 16),
+
+            // Analyze Match Decision Widget (appears after initial analysis)
+            if (_skillsController.waitingForUserDecision)
+              _buildAnalyzeMatchDecisionCard(),
+
+            if (_skillsController.waitingForUserDecision)
+              const SizedBox(height: 16),
 
             // Skills Analysis Section
             Card(
@@ -495,12 +502,35 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
       return;
     }
 
-    print('✅ [DEBUG] Starting skills analysis...');
+    print('✅ [DEBUG] Starting context-aware analysis...');
+    
+    // Extract company from JD URL
+    final jdUrl = jdUrlController.text.trim();
+    final company = _extractCompanyFromUrl(jdUrl);
+    
+    if (jdUrl.isEmpty) {
+      _showSnackBar('Please provide a job description URL', isError: true);
+      return;
+    }
+    
+    if (company.isEmpty) {
+      _showSnackBar('Could not extract company name from URL', isError: true);
+      return;
+    }
+    
     try {
-      await _skillsController.performAnalysis(
-        cvFilename: selectedCVFilename!,
-        jdText: jdController.text.trim(),
+      await _skillsController.performContextAwareAnalysis(
+        jdUrl: jdUrl,
+        company: company,
+        isRerun: false,  // TODO: Detect if this is a rerun
+        includeTailoring: true,
       );
+
+      // Check if waiting for user decision
+      if (_skillsController.waitingForUserDecision) {
+        print('⏸️ [DEBUG] Waiting for user decision after analyze match');
+        return;  // Stop here, widget will be shown
+      }
 
       if (_skillsController.hasResults) {
         _showSnackBar('Skills analysis completed successfully!');
@@ -795,6 +825,325 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
         backgroundColor: Colors.blue,
         duration: Duration(seconds: 3),
       ),
+    );
+  }
+
+  /// Extract company name from job URL
+  String _extractCompanyFromUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final host = uri.host;
+      
+      // Basic extraction logic - enhance as needed
+      if (host.contains('seek')) {
+        final segments = uri.pathSegments;
+        if (segments.length > 2) {
+          return segments[2].replaceAll('-', '_');
+        }
+      } else if (host.contains('linkedin')) {
+        // LinkedIn company extraction
+        final segments = uri.pathSegments;
+        if (segments.contains('company')) {
+          final companyIndex = segments.indexOf('company') + 1;
+          if (companyIndex < segments.length) {
+            return segments[companyIndex].replaceAll('-', '_');
+          }
+        }
+      }
+      
+      // Fallback: use host as company name
+      return host.replaceAll('.', '_').replaceAll('-', '_');
+    } catch (e) {
+      return 'unknown_company';
+    }
+  }
+
+  /// Build analyze match decision card
+  Widget _buildAnalyzeMatchDecisionCard() {
+    final decision = _skillsController.analyzeMatchDecision;
+    
+    // If no decision data, show fallback
+    if (decision == null) {
+      return Card(
+        margin: const EdgeInsets.symmetric(vertical: 16.0),
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              const Icon(Icons.info_outline, size: 48, color: Colors.orange),
+              const SizedBox(height: 16),
+              const Text(
+                'Initial Analysis Complete',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('Waiting for analyze match decision...'),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _skillsController.continueFullAnalysis(includeTailoring: true);
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Proceed with Full Analysis'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        _skillsController.skipFullAnalysis();
+                      },
+                      icon: const Icon(Icons.skip_next),
+                      label: const Text('Skip Full Analysis'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Determine colors based on decision
+    Color cardColor;
+    Color iconColor;
+    Color buttonColor;
+    IconData icon;
+    String title;
+    
+    if (decision.isProceed) {
+      cardColor = Colors.green.shade50;
+      iconColor = Colors.green.shade700;
+      buttonColor = Colors.green;
+      icon = Icons.check_circle;
+      title = 'Strong Match - Proceed Recommended';
+    } else if (decision.isMaybe) {
+      cardColor = Colors.orange.shade50;
+      iconColor = Colors.orange.shade700;
+      buttonColor = Colors.orange;
+      icon = Icons.warning;
+      title = 'Conditional Match - Consider Proceeding';
+    } else {
+      cardColor = Colors.red.shade50;
+      iconColor = Colors.red.shade700;
+      buttonColor = Colors.red;
+      icon = Icons.cancel;
+      title = 'Not Recommended - Consider Skipping';
+    }
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 16.0),
+      elevation: 4,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: cardColor,
+          border: Border.all(color: iconColor.withOpacity(0.3), width: 2),
+        ),
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: iconColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Analyze Match Decision',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: iconColor,
+                        ),
+                      ),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: iconColor.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            
+            // Match Score
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: iconColor.withOpacity(0.2)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildScoreItem('Match Score', '${decision.matchScore}%', iconColor),
+                  _buildScoreItem('Confidence', '${decision.confidence}%', iconColor),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Primary Reason
+            if (decision.primaryReason.isNotEmpty) ...[
+              Text(
+                'Primary Reason:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  decision.primaryReason,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
+            // Critical Missing (if any)
+            if (decision.criticalMissing.isNotEmpty) ...[
+              Text(
+                'Critical Missing Skills:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: decision.criticalMissing.map((skill) {
+                  return Chip(
+                    label: Text(skill),
+                    backgroundColor: Colors.red.shade100,
+                    labelStyle: TextStyle(color: Colors.red.shade900, fontSize: 12),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      _skillsController.continueFullAnalysis(includeTailoring: true);
+                    },
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Proceed with Full Analysis'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: buttonColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      _skillsController.skipFullAnalysis();
+                    },
+                    icon: const Icon(Icons.skip_next),
+                    label: const Text('Skip Full Analysis'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.grey.shade700,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide(color: Colors.grey.shade400),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            // Info text
+            const SizedBox(height: 12),
+            Text(
+              'Note: Full analysis includes component analysis, ATS optimization, AI recommendations, and CV tailoring. This consumes more AI credits.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScoreItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
     );
   }
 }
