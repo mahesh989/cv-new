@@ -50,37 +50,55 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     domain_match = match_summary.get("by_category", {}).get("domain", {})
     
     # CRITICAL FIX: Filter out keywords that appear in both matched and missing lists
-    # This handles case-sensitivity issues where the same keyword appears in both lists
+    # AND exclude keywords that are already in the CV (from previous tailoring runs)
     def normalize_keyword(kw):
         """Normalize keyword for comparison (lowercase, strip)"""
         return str(kw).lower().strip()
     
-    def filter_missing_keywords(missing_list, matched_list):
-        """Remove keywords from missing list that also appear in matched list (case-insensitive)"""
+    def filter_missing_keywords(missing_list, matched_list, already_in_cv_list):
+        """
+        Remove keywords from missing list that:
+        1. Already appear in matched list (case-insensitive)
+        2. Are in the already_in_cv_filtered list (from previous tailoring)
+        """
+        # Normalize matched keywords
         matched_normalized = {normalize_keyword(kw) for kw in matched_list}
+        # Normalize already-in-CV keywords (from tailored CV)
+        already_in_cv_normalized = {normalize_keyword(kw) for kw in already_in_cv_list}
+        
         filtered = []
         for kw in missing_list:
-            if normalize_keyword(kw) not in matched_normalized:
+            kw_normalized = normalize_keyword(kw)
+            # Skip if matched OR already in CV
+            if kw_normalized not in matched_normalized and kw_normalized not in already_in_cv_normalized:
                 filtered.append(kw)
         return filtered
     
-    # Filter missing keywords to exclude those already matched
-    if technical_match.get('missing') and technical_match.get('matched'):
+    # Get the already-in-CV filtered list from keyword guidance
+    already_in_cv_filtered = keyword_guidance.get("already_in_cv_filtered", [])
+    
+    # Filter missing keywords to exclude:
+    # 1. Those already matched in CV-JD analysis
+    # 2. Those already in CV from previous tailoring runs
+    if technical_match.get('missing'):
         technical_match['missing'] = filter_missing_keywords(
             technical_match['missing'], 
-            technical_match['matched']
+            technical_match.get('matched', []),
+            already_in_cv_filtered
         )
     
-    if soft_match.get('missing') and soft_match.get('matched'):
+    if soft_match.get('missing'):
         soft_match['missing'] = filter_missing_keywords(
             soft_match['missing'], 
-            soft_match['matched']
+            soft_match.get('matched', []),
+            already_in_cv_filtered
         )
     
-    if domain_match.get('missing') and domain_match.get('matched'):
+    if domain_match.get('missing'):
         domain_match['missing'] = filter_missing_keywords(
             domain_match['missing'], 
-            domain_match['matched']
+            domain_match.get('matched', []),
+            already_in_cv_filtered
         )
     
     # Extract component scores
@@ -142,12 +160,14 @@ Skills Match (Overall: {overall_match_rate}%):
 The following keywords are MISSING from the CV (NOT present in CV, but present in JD) and MUST be categorized into Tier 1, Tier 2, or Tier 3:
 
 ⚠️ CRITICAL: DO NOT categorize keywords that are ALREADY in the CV. 
-The following keywords are ALREADY in the CV (MATCHED) and MUST NOT be categorized:
+The following keywords are ALREADY in the CV (from CV-JD matching AND previous tailoring) and MUST NOT be categorized:
 - Matched Technical: {', '.join(technical_match.get('matched', [])[:10]) if technical_match.get('matched', []) else 'None'}
 - Matched Soft: {', '.join(soft_match.get('matched', [])[:10]) if soft_match.get('matched', []) else 'None'}
 - Matched Domain: {', '.join(domain_match.get('matched', [])[:10]) if domain_match.get('matched', []) else 'None'}
+- Already in CV (from previous tailoring): {', '.join(already_in_cv_filtered[:15]) if already_in_cv_filtered else 'None'}
 
-If a keyword appears in both the MATCHED list above AND the MISSING list below, it is ALREADY in the CV and MUST NOT be categorized.
+If a keyword appears in ANY of the lists above, it is ALREADY in the CV and MUST NOT be categorized.
+The MISSING keywords lists below have been pre-filtered to exclude all keywords already in the CV.
 
 MISSING TECHNICAL KEYWORDS ({len(technical_match.get('missing', []))} total) - NOT in CV, but in JD:
 {chr(10).join(f'  - {kw}' for kw in technical_match.get('missing', [])) if technical_match.get('missing', []) else '  - None'}
@@ -217,22 +237,25 @@ Return ONLY this JSON structure (no preamble, no markdown formatting, no code bl
   }},
   
   "priority_gaps": {{
-    "immediate_action": {{
-      "category1_missing": {{
+    "keyword_coverage_gaps": {{
+      "technical_gap_percentage": {100 - technical_match.get('match_rate', 0)},
+      "soft_gap_percentage": {100 - soft_match.get('match_rate', 0)},
+      "domain_gap_percentage": {100 - domain_match.get('match_rate', 0)},
+      "overall_keyword_gap": {100 - overall_match_rate}
+    }},
+    "component_gaps": {{
+      "technical_depth_gap": {100 - technical_component.get('score', 0)},
+      "experience_alignment_gap": {100 - experience_component.get('alignment_score', 0)},
+      "industry_fit_gap": {100 - industry_component.get('alignment_score', 0)},
+      "seniority_alignment_gap": {100 - seniority_component.get('score', 0)}
+    }},
+    "immediate_action_items": {{
+      "category1_missing_counts": {{
         "technical": {missing_counts.get('technical', 0)},
         "soft": {missing_counts.get('soft', 0)},
-        "domain": {missing_counts.get('domain', 0)}
-      }},
-      "match_rates": {{
-        "technical": {technical_match.get('match_rate', 0)},
-        "soft": {soft_match.get('match_rate', 0)},
-        "domain": {domain_match.get('match_rate', 0)}
+        "domain": {missing_counts.get('domain', 0)},
+        "total": {missing_counts.get('technical', 0) + missing_counts.get('soft', 0) + missing_counts.get('domain', 0)}
       }}
-    }},
-    "optimization_opportunities": {{
-      "technical_depth": {technical_component.get('score', 0)},
-      "experience_alignment": {experience_component.get('alignment_score', 0)},
-      "industry_fit": {industry_component.get('alignment_score', 0)}
     }}
   }},
   
