@@ -515,23 +515,34 @@ class AIRecommendationGenerator:
         if priority_gaps:
             lines.append("## Priority Gap Analysis\n")
             
-            immediate = priority_gaps.get("immediate_action", {})
-            if immediate:
-                lines.append("**Immediate Action Required (Critical Gaps):**")
-                category1 = immediate.get("category1_missing", {})
-                lines.append(f"- Category 1: {category1.get('technical', 0)} technical, {category1.get('soft', 0)} soft, {category1.get('domain', 0)} domain keywords missing")
-                
-                rates = immediate.get("match_rates", {})
-                lines.append(f"- Technical Match: {rates.get('technical', 0)}%")
-                lines.append(f"- Soft Skills Match: {rates.get('soft', 0)}%")
-                lines.append(f"- Domain Match: {rates.get('domain', 0)}%\n")
+            # Keyword coverage gaps
+            keyword_gaps = priority_gaps.get("keyword_coverage_gaps", {})
+            if keyword_gaps:
+                lines.append("**Keyword Coverage Gaps:**")
+                lines.append(f"- Technical Gap: {keyword_gaps.get('technical_gap_percentage', 0):.1f}%")
+                lines.append(f"- Soft Skills Gap: {keyword_gaps.get('soft_gap_percentage', 0):.1f}%")
+                lines.append(f"- Domain Gap: {keyword_gaps.get('domain_gap_percentage', 0):.1f}%")
+                lines.append(f"- Overall Keyword Gap: {keyword_gaps.get('overall_keyword_gap', 0):.1f}%\n")
             
-            opportunities = priority_gaps.get("optimization_opportunities", {})
-            if opportunities:
-                lines.append("**Optimization Opportunities:**")
-                lines.append(f"- Technical Depth: {opportunities.get('technical_depth', 0)}/100")
-                lines.append(f"- Experience Alignment: {opportunities.get('experience_alignment', 0)}/100")
-                lines.append(f"- Industry Fit: {opportunities.get('industry_fit', 0)}/100\n")
+            # Component gaps
+            component_gaps = priority_gaps.get("component_gaps", {})
+            if component_gaps:
+                lines.append("**Component Alignment Gaps:**")
+                lines.append(f"- Technical Depth Gap: {component_gaps.get('technical_depth_gap', 0):.1f}%")
+                lines.append(f"- Experience Alignment Gap: {component_gaps.get('experience_alignment_gap', 0):.1f}%")
+                lines.append(f"- Industry Fit Gap: {component_gaps.get('industry_fit_gap', 0):.1f}%")
+                lines.append(f"- Seniority Alignment Gap: {component_gaps.get('seniority_alignment_gap', 0):.1f}%\n")
+            
+            # Immediate action items
+            immediate = priority_gaps.get("immediate_action_items", {})
+            if immediate:
+                category1 = immediate.get("category1_missing_counts", {})
+                if category1:
+                    lines.append("**Immediate Action Required (Missing Keywords):**")
+                    lines.append(f"- Technical: {category1.get('technical', 0)}")
+                    lines.append(f"- Soft Skills: {category1.get('soft', 0)}")
+                    lines.append(f"- Domain: {category1.get('domain', 0)}")
+                    lines.append(f"- **Total Missing: {category1.get('total', 0)}**\n")
         
         # Keyword Integration
         keyword_integration = json_data.get("keyword_integration", {})
