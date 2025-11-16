@@ -493,14 +493,19 @@ class ComponentAssembler:
             try:
                 from app.services.ats_recommendation_service import ATSRecommendationService
                 recommendation_service = ATSRecommendationService(self.user_email)
-                recommendation_created = recommendation_service.create_recommendation_file(company)
                 
-                if recommendation_created:
-                    logger.info("[ASSEMBLER] Recommendation file created for %s", company)
+                # Extract and save optimized recommendation
+                recommendation_data = recommendation_service.extract_ats_recommendation_data(company)
+                if recommendation_data:
+                    saved_file = recommendation_service.save_optimized_recommendation(company, recommendation_data)
+                    if saved_file:
+                        logger.info("[ASSEMBLER] Recommendation file created for %s: %s", company, saved_file)
+                    else:
+                        logger.warning("[ASSEMBLER] Failed to save recommendation file for %s", company)
                 else:
-                    logger.warning("[ASSEMBLER] Failed to create recommendation file for %s", company)
+                    logger.warning("[ASSEMBLER] Failed to extract recommendation data for %s", company)
             except Exception as e:
-                logger.error("[ASSEMBLER] Error creating recommendation file for %s: %s", company, e)
+                logger.error("[ASSEMBLER] Error creating recommendation file for %s: %s", company, e, exc_info=True)
             
             return ats_result_dict
             

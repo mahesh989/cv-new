@@ -596,16 +596,22 @@ async def _run_pipeline(cname: str, token_data=None):
         logger.info(f"📋 [PIPELINE] Creating input recommendation file for {cname}")
         from app.services.ats_recommendation_service import ATSRecommendationService
         recommendation_service = ATSRecommendationService(user_email=user_email)
-        recommendation_created = recommendation_service.create_recommendation_file(cname)
         
-        if recommendation_created:
-            logger.info(f"✅ [PIPELINE] Input recommendation file created for {cname}")
-            pipeline_results["input_recommendation"] = True
+        # Extract and save optimized recommendation
+        recommendation_data = recommendation_service.extract_ats_recommendation_data(cname)
+        if recommendation_data:
+            saved_file = recommendation_service.save_optimized_recommendation(cname, recommendation_data)
+            if saved_file:
+                logger.info(f"✅ [PIPELINE] Input recommendation file created for {cname}: {saved_file}")
+                pipeline_results["input_recommendation"] = True
+            else:
+                logger.warning(f"⚠️ [PIPELINE] Failed to save input recommendation for {cname}")
+                pipeline_results["input_recommendation"] = False
         else:
-            logger.warning(f"⚠️ [PIPELINE] Failed to create input recommendation file for {cname}")
+            logger.warning(f"⚠️ [PIPELINE] Failed to extract recommendation data for {cname}")
             pipeline_results["input_recommendation"] = False
     except Exception as rec_error:
-        logger.error(f"❌ [PIPELINE] Input recommendation creation failed for {cname}: {rec_error}")
+        logger.error(f"❌ [PIPELINE] Input recommendation creation failed for {cname}: {rec_error}", exc_info=True)
         pipeline_results["input_recommendation"] = False
     
     # Step 5: AI Recommendation Generation (if input recommendation was successful)
