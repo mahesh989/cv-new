@@ -402,7 +402,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             // For now, we conditionally hide this widget when using context-aware analysis
             if (_skillsController.hasResults || _skillsController.hasError)
               SkillsDisplayWidget(
-                controller: _skillsController as dynamic, // Cast to dynamic to bypass type check
+                controller: _skillsController
+                    as dynamic, // Cast to dynamic to bypass type check
                 cvFilename: selectedCVFilename,
                 jobDescription: jdController.text.trim().isNotEmpty
                     ? jdController.text.trim()
@@ -505,33 +506,33 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     }
 
     print('✅ [DEBUG] Starting context-aware analysis...');
-    
+
     // Extract company from JD URL
     final jdUrl = jdUrlController.text.trim();
     final company = _extractCompanyFromUrl(jdUrl);
-    
+
     if (jdUrl.isEmpty) {
       _showSnackBar('Please provide a job description URL', isError: true);
       return;
     }
-    
+
     if (company.isEmpty) {
       _showSnackBar('Could not extract company name from URL', isError: true);
       return;
     }
-    
+
     try {
       await _skillsController.performContextAwareAnalysis(
         jdUrl: jdUrl,
         company: company,
-        isRerun: false,  // TODO: Detect if this is a rerun
+        isRerun: false, // TODO: Detect if this is a rerun
         includeTailoring: true,
       );
 
       // Check if waiting for user decision
       if (_skillsController.waitingForUserDecision) {
         print('⏸️ [DEBUG] Waiting for user decision after analyze match');
-        return;  // Stop here, widget will be shown
+        return; // Stop here, widget will be shown
       }
 
       if (_skillsController.hasResults) {
@@ -559,26 +560,26 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   /// Reset everything - CV, JD, and all analysis results
   void _resetEverything() {
     print('🗑️ [DEBUG] _resetEverything called');
-    
+
     // First, cancel any ongoing analysis to stop backend processing
     if (_skillsController.isLoading) {
       print('🛑 [DEBUG] Stopping ongoing analysis before reset');
       _skillsController.cancelAnalysis();
     }
-    
+
     // Clear all state
     setState(() {
       selectedCVFilename = null;
       jdController.clear();
       jdUrlController.clear();
     });
-    
+
     // Clear analysis results
     _skillsController.clearResults();
-    
+
     // Show confirmation message
     _showSnackBar('🗑️ Everything has been reset. Ready for a fresh start!');
-    
+
     print('🗑️ [DEBUG] Everything reset successfully');
   }
 
@@ -835,7 +836,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     try {
       final uri = Uri.parse(url);
       final host = uri.host;
-      
+
       // Basic extraction logic - enhance as needed
       if (host.contains('seek')) {
         final segments = uri.pathSegments;
@@ -852,7 +853,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
           }
         }
       }
-      
+
       // Fallback: use host as company name
       return host.replaceAll('.', '_').replaceAll('-', '_');
     } catch (e) {
@@ -863,7 +864,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   /// Build analyze match decision card
   Widget _buildAnalyzeMatchDecisionCard() {
     final decision = _skillsController.analyzeMatchDecision;
-    
+
     // If no decision data, show fallback
     if (decision == null) {
       return Card(
@@ -887,7 +888,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        _skillsController.continueFullAnalysis(includeTailoring: true);
+                        _skillsController.continueFullAnalysis(
+                            includeTailoring: true);
                       },
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Proceed with Full Analysis'),
@@ -918,14 +920,14 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
         ),
       );
     }
-    
+
     // Determine colors based on decision
     Color cardColor;
     Color iconColor;
     Color buttonColor;
     IconData icon;
     String title;
-    
+
     if (decision.isProceed) {
       cardColor = Colors.green.shade50;
       iconColor = Colors.green.shade700;
@@ -996,7 +998,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Match Score
             Container(
               padding: const EdgeInsets.all(16),
@@ -1008,13 +1010,15 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildScoreItem('Match Score', '${decision.matchScore}%', iconColor),
-                  _buildScoreItem('Confidence', '${decision.confidence}%', iconColor),
+                  _buildScoreItem(
+                      'Match Score', '${decision.matchScore}%', iconColor),
+                  _buildScoreItem(
+                      'Confidence', '${decision.confidence}%', iconColor),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Primary Reason
             if (decision.primaryReason.isNotEmpty) ...[
               Text(
@@ -1042,7 +1046,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
               ),
               const SizedBox(height: 16),
             ],
-            
+
             // Critical Missing (if any)
             if (decision.criticalMissing.isNotEmpty) ...[
               Text(
@@ -1061,20 +1065,22 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                   return Chip(
                     label: Text(skill),
                     backgroundColor: Colors.red.shade100,
-                    labelStyle: TextStyle(color: Colors.red.shade900, fontSize: 12),
+                    labelStyle:
+                        TextStyle(color: Colors.red.shade900, fontSize: 12),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 16),
             ],
-            
+
             // Action Buttons
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      _skillsController.continueFullAnalysis(includeTailoring: true);
+                      _skillsController.continueFullAnalysis(
+                          includeTailoring: true);
                     },
                     icon: const Icon(Icons.play_arrow),
                     label: const Text('Proceed with Full Analysis'),
@@ -1108,7 +1114,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                 ),
               ],
             ),
-            
+
             // Info text
             const SizedBox(height: 12),
             Text(
