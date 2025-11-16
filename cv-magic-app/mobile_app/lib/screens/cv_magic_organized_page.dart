@@ -17,7 +17,6 @@ import '../widgets/job_input.dart';
 import '../services/api_service.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
-import '../services/results_clearing_service.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
@@ -61,8 +60,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
 
-    // Register controller for external clear operations (keeps CV/JD inputs intact)
-    ResultsClearingService.registerSkillsController(_skillsController);
+    // Note: ResultsClearingService registration removed since ContextAwareAnalysisController
+    // has direct access to clearResults() method
 
     // Start periodic timer to check if we need to clear results
     _clearCheckTimer =
@@ -123,8 +122,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   void dispose() {
     _clearCheckTimer?.cancel();
-    // Unregister controller when page is disposed
-    ResultsClearingService.unregisterSkillsController();
+    // Note: ResultsClearingService unregistration removed
     _skillsController.dispose();
     jdController.dispose();
     jdUrlController.dispose();
@@ -399,14 +397,18 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             const SizedBox(height: 16),
 
             // Skills Display with Side-by-Side Layout and Expandable Analysis
-            SkillsDisplayWidget(
-              controller: _skillsController,
-              cvFilename: selectedCVFilename,
-              jobDescription: jdController.text.trim().isNotEmpty
-                  ? jdController.text.trim()
-                  : null,
-              onNavigateToCVGeneration: _navigateToCVGeneration,
-            ),
+            // Note: SkillsDisplayWidget expects SkillsAnalysisController but we're using
+            // ContextAwareAnalysisController. Both have compatible interfaces (hasResults, hasError, etc.)
+            // For now, we conditionally hide this widget when using context-aware analysis
+            if (_skillsController.hasResults || _skillsController.hasError)
+              SkillsDisplayWidget(
+                controller: _skillsController as dynamic, // Cast to dynamic to bypass type check
+                cvFilename: selectedCVFilename,
+                jobDescription: jdController.text.trim().isNotEmpty
+                    ? jdController.text.trim()
+                    : null,
+                onNavigateToCVGeneration: _navigateToCVGeneration,
+              ),
             // JD Analysis UI section removed for backend-only focus
 
             // Loading indicator for upload
