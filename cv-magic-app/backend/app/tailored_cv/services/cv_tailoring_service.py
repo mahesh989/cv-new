@@ -732,6 +732,10 @@ VERIFY BEFORE RESPONDING:
 ✓ Check names/dates - are they EXACTLY preserved?
 ✓ Valid JSON - proper format with no extra text?
 ✓ Sections preserved - no new sections introduced beyond the original
+✓ **At least ONE bullet per job/project is 20+ words**
+✓ **ALL bullets end with period (.)**
+✓ **Experience entries have 'keywords' field with 3-5 relevant technologies**
+✓ **Project entries have 'keywords' field with 3-5 key technologies**
 
 The exact JSON structure must be:
 {
@@ -760,7 +764,12 @@ The exact JSON structure must be:
       "location": "EXACT location from provided CV (if location field is empty, extract location from company field)",
       "start_date": "EXACT date from provided CV",
       "end_date": "EXACT date from provided CV",
-      "bullets": ["enhanced bullet with quantified impact based on original", ...]
+      "keywords": "3-5 most relevant technical keywords/skills used in this role (e.g., 'Python, SQL, Power BI, APIs')",
+      "bullets": [
+        "enhanced bullet with quantified impact based on original - MUST end with period (.)",
+        "at least ONE bullet must be 20+ words (provides depth and context)",
+        "all bullets end with period (.)"
+      ]
     }
   ],
   "skills": [
@@ -780,7 +789,12 @@ The exact JSON structure must be:
   "projects": [  // OPTIONAL - include only if original CV has projects
     {
       "name": "EXACT project name from provided CV",
-      "bullets": ["enhanced project bullet with quantified impact", ...]
+      "keywords": "3-5 key technologies used in project (e.g., 'Flutter, Python, Multi-LLM, APIs')",
+      "bullets": [
+        "enhanced project bullet with quantified impact - MUST end with period (.)",
+        "at least ONE bullet must be 20+ words (provides depth)",
+        "all bullets end with period (.)"
+      ]
     }
   ],
   "optimization_notes": {
@@ -1132,6 +1146,8 @@ CRITICAL REMINDERS:
 - Maintain consistency in scale across all quantification
 - Limit bullets to 2-3 per role (consolidate if more)
 - Keep bullets concise (15-25 words)
+- **MANDATORY: At least ONE bullet per job/project MUST be 20+ words** (provides depth and context)
+- **MANDATORY: ALL complete sentences MUST end with a period (.)**
 - Numbers should reflect actual role scope and company size
 - Never return whitespace-only or null values - use empty string '' instead
 - **CRITICAL - AVOID DUPLICATION ACROSS ALL SECTIONS:** The KEY ACCOMPLISHMENTS in career highlights should NOT be repeated verbatim in ANY other section (experience, projects, education, etc.). 

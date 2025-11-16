@@ -10,6 +10,8 @@ Example: "Led 5-person analytics team using Python/SQL to analyze 10M+ customer 
 ### **Bullet Point Rules**
 - **Count:** 2-3 bullets per experience/project
 - **Length:** Concise (~15-25 words) - avoid verbosity
+- **MANDATORY:** At least ONE bullet per job/project MUST be 20+ words (provides depth and context)
+- **Punctuation:** ALL complete sentences MUST end with a period (.)
 - **Consolidation (4+ bullets):** Merge related achievements by JD relevance, remove non-semantic content, preserve metrics
 
 ### **Quantification**
@@ -23,16 +25,24 @@ Include metrics: Financial ($X), Scale (X records/%), Performance (X% faster), G
 
 ## Education [or Experience - most relevant first]
 ## Experience  
-Company, Title, Location | Duration
-• [2-3 bullets per role]
+Company, Title | Key Skills/Technologies, Location | Duration
+• [2-3 bullets per role - at least one 20+ words]
+• All bullets end with period (.)
 
 ## Projects (if relevant)
-**Project Name** - Context
-• [2-3 bullets]
+**Project Name | Key Technologies** - Context
+• [2-3 bullets - at least one 20+ words]
+• All bullets end with period (.)
 
 ## Skills
 Category: tools | Category: tools [ATS-optimized]
 ```
+
+**EXPERIENCE & PROJECT KEYWORD FORMAT:**
+- **Experience:** Use format "Company, Title | Python, SQL, Power BI, Location | Duration"
+- **Projects:** Use format "**Project Name | Flutter, Python, APIs**" 
+- Include 3-5 most relevant technical keywords after title
+- Matches ATS keyword detection patterns
 
 ---
 
@@ -302,6 +312,10 @@ Use ONLY existing experiences - enhance and reframe, NEVER fabricate
 - ✅ **2-3 education entries (minimum 2, most relevant degrees)**
 - ✅ 0-3 projects (if relevant)
 - ✅ 2-3 bullets per entry (flexible, prefer concise)
+- ✅ **At least ONE bullet per job/project is 20+ words** (provides depth)
+- ✅ **ALL complete sentences end with period (.)**
+- ✅ **Experience titles include key technologies** (e.g., "Title | Python, SQL, Power BI")
+- ✅ **Project titles include key technologies** (e.g., "Project Name | Flutter, APIs")
 - ✅ **60%+ bullets have metrics (flexible quantification)**
 - ✅ **Only justifiable/transferable keywords integrated**
 - ✅ **No domain-specific/unverifiable keywords**
