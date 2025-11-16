@@ -2948,20 +2948,40 @@ FIX: Output ONLY valid JSON!
                 logger.warning(f"   {warning}")
     
     def _extract_existing_keywords(self, cv: OriginalCV) -> List[str]:
-        """Extract existing keywords from a CV for preservation tracking"""
+        """
+        Extract existing keywords from a CV for preservation tracking.
+        Ensures all returned values are strings (not dicts or objects).
+        """
         keywords = set()
         
-        # Extract from skills
+        # Extract from skills with defensive type checking
         for skill_category in cv.skills:
-            for skill in skill_category.skills:
-                if skill and len(skill.strip()) > 0:
-                    keywords.add(skill.strip())
+            # Handle both dict and SkillCategory object
+            skills_list = []
+            if isinstance(skill_category, dict):
+                skills_list = skill_category.get('skills', [])
+            elif hasattr(skill_category, 'skills'):
+                skills_list = skill_category.skills
+            
+            for skill in skills_list:
+                # Ensure skill is converted to string
+                skill_str = str(skill) if skill is not None else ""
+                if skill_str and len(skill_str.strip()) > 0:
+                    keywords.add(skill_str.strip())
         
         # Extract from experience bullets (common keywords)
         for exp in cv.experience:
-            for bullet in exp.bullets:
+            # Handle both dict and ExperienceEntry object
+            bullets_list = []
+            if isinstance(exp, dict):
+                bullets_list = exp.get('bullets', [])
+            elif hasattr(exp, 'bullets'):
+                bullets_list = exp.bullets
+            
+            for bullet in bullets_list:
+                bullet_str = str(bullet) if bullet is not None else ""
                 # Extract potential keywords (2-3 word phrases that look like skills)
-                words = bullet.split()
+                words = bullet_str.split()
                 for i in range(len(words) - 1):
                     # Check for 2-word phrases
                     phrase = f"{words[i]} {words[i+1]}"
@@ -2978,7 +2998,16 @@ FIX: Output ONLY valid JSON!
                 if skill in highlights_text:
                     keywords.add(skill)
         
-        return sorted(list(keywords))
+        # Ensure all keywords are strings (final safety check)
+        string_keywords = []
+        for kw in keywords:
+            if isinstance(kw, str):
+                string_keywords.append(kw)
+            else:
+                # Convert any non-string to string as fallback
+                string_keywords.append(str(kw))
+        
+        return sorted(string_keywords)
     
     def _extract_cv_text(self, data: Dict[str, Any]) -> str:
         """Extract all text content from CV data for keyword analysis"""
