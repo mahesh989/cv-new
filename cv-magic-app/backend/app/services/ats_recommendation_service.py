@@ -32,6 +32,9 @@ class ATSRecommendationService:
         """
         Extract and optimize recommendation data from skills analysis file
         
+        CRITICAL FIX: Now loads missing keywords from cv_jd_matching.json (source of truth)
+        instead of parsing from preextracted comparison text
+        
         Args:
             company: Company name
             
@@ -39,7 +42,9 @@ class ATSRecommendationService:
             Optimized dictionary for AI consumption or None if not found
         """
         try:
-            # Locate analysis file
+            logger.info(f"🔍 [PHASE6] Starting recommendation data extraction for: {company}")
+            
+            # STEP 1: Locate and load analysis file
             company_dir = self.base_dir / "applied_companies" / company
             analysis_file = TimestampUtils.find_latest_timestamped_file(
                 company_dir, f"{company}_skills_analysis", "json"
@@ -48,12 +53,39 @@ class ATSRecommendationService:
                 analysis_file = company_dir / f"{company}_skills_analysis.json"
             
             if not analysis_file.exists():
-                logger.error(f"Skills analysis file not found: {analysis_file}")
+                logger.error(f"❌ [PHASE6] Skills analysis file not found: {analysis_file}")
                 return None
             
             # Read analysis file
             with open(analysis_file, 'r', encoding='utf-8') as f:
                 analysis_data = json.load(f)
+            
+            logger.info(f"✅ [PHASE6] Loaded skills analysis from: {analysis_file.name}")
+            
+            # STEP 2: Load CV-JD matching file (SOURCE OF TRUTH for missing keywords)
+            matching_file = TimestampUtils.find_latest_timestamped_file(
+                company_dir, f"{company}_cv_jd_matching", "json"
+            )
+            if not matching_file:
+                matching_file = company_dir / f"{company}_cv_jd_matching.json"
+            
+            if not matching_file.exists():
+                logger.error(f"❌ [PHASE6] CV-JD matching file not found: {matching_file}")
+                return None
+            
+            with open(matching_file, 'r', encoding='utf-8') as f:
+                matching_data = json.load(f)
+            
+            logger.info(f"✅ [PHASE6] Loaded CV-JD matching from: {matching_file.name}")
+            
+            # STEP 3: Extract complete missing keywords list
+            missed_required = matching_data.get("missed_required_keywords", [])
+            missed_preferred = matching_data.get("missed_preferred_keywords", [])
+            all_missing_keywords = missed_required + missed_preferred
+            
+            logger.info(f"📊 [PHASE6] Total missing keywords: {len(all_missing_keywords)}")
+            logger.info(f"   - Required: {len(missed_required)} → {missed_required}")
+            logger.info(f"   - Preferred: {len(missed_preferred)} → {missed_preferred}")
             
             # Extract components
             cv_skills = analysis_data.get("cv_skills", {})
@@ -62,6 +94,17 @@ class ATSRecommendationService:
             preextracted_entries = analysis_data.get("preextracted_comparison_entries", [])
             component_entries = analysis_data.get("component_analysis_entries", [])
             ats_entries = analysis_data.get("ats_calculation_entries", [])
+            
+            # STEP 4: Categorize missing keywords by type (technical, soft, domain)
+            categorized_missing = self._categorize_missing_keywords(
+                all_missing_keywords,
+                jd_skills
+            )
+            
+            logger.info(f"📊 [PHASE6] Categorized missing keywords:")
+            logger.info(f"   - Technical: {len(categorized_missing.get('technical', []))} → {categorized_missing.get('technical', [])}")
+            logger.info(f"   - Soft: {len(categorized_missing.get('soft', []))} → {categorized_missing.get('soft', [])}")
+            logger.info(f"   - Domain: {len(categorized_missing.get('domain', []))} → {categorized_missing.get('domain', [])}")
             
             # Parse and simplify each component
             preliminary_decision = self._extract_preliminary_decision(match_entries)
@@ -98,9 +141,10 @@ class ATSRecommendationService:
                 # Clean match summary (no emoji, no verbose reasoning)
                 "match_summary": match_summary,
                 
-                # Keyword tier classification for CV framework
+                # CRITICAL FIX: Use categorized missing keywords from cv_jd_matching.json
+                # instead of parsing from preextracted_comparison_entries
                 "keyword_integration_guidance": self._classify_keywords(
-                    match_summary.get("missing_keywords", {}),
+                    categorized_missing,  # NOW using cv_jd_matching.json data!
                     cv_skills
                 ),
                 
@@ -111,10 +155,16 @@ class ATSRecommendationService:
                 "ats_scoring": ats_scoring
             }
             
+            logger.info(f"=" * 80)
+            logger.info(f"✅ [PHASE6] COMPLETE - Summary:")
+            logger.info(f"   Company: {company}")
+            logger.info(f"   Total missing keywords: {len(all_missing_keywords)}")
+            logger.info(f"=" * 80)
+            
             return recommendation_data
             
         except Exception as e:
-            logger.error(f"Error extracting ATS recommendation data: {e}", exc_info=True)
+            logger.error(f"❌ [PHASE6] Error extracting ATS recommendation data: {e}", exc_info=True)
             return None
     
     def save_optimized_recommendation(self, company: str, data: Dict[str, Any]) -> Optional[Path]:
@@ -148,6 +198,46 @@ class ATSRecommendationService:
         except Exception as e:
             logger.error(f"Error saving recommendation file: {e}", exc_info=True)
             return None
+    
+    def _categorize_missing_keywords(
+        self,
+        missing_keywords: List[str],
+        jd_skills: Dict[str, List[str]]
+    ) -> Dict[str, List[str]]:
+        """
+        Categorize missing keywords into technical, soft, domain
+        
+        Args:
+            missing_keywords: List of all missing keywords
+            jd_skills: JD skills from skills_analysis.json
+            
+        Returns:
+            Dictionary with categorized keywords
+        """
+        categorized = {
+            "technical": [],
+            "soft": [],
+            "domain": []
+        }
+        
+        # Get JD skill categories for reference
+        jd_technical = [s.lower() for s in jd_skills.get("technical_skills", [])]
+        jd_soft = [s.lower() for s in jd_skills.get("soft_skills", [])]
+        jd_domain = [s.lower() for s in jd_skills.get("domain_keywords", [])]
+        
+        for keyword in missing_keywords:
+            keyword_lower = keyword.lower()
+            
+            # Check which category it belongs to
+            if keyword_lower in jd_technical or any(keyword_lower in tech for tech in jd_technical):
+                categorized["technical"].append(keyword)
+            elif keyword_lower in jd_soft or any(keyword_lower in soft for soft in jd_soft):
+                categorized["soft"].append(keyword)
+            else:
+                # Default to domain if not clearly technical or soft
+                categorized["domain"].append(keyword)
+        
+        return categorized
     
     def _extract_preliminary_decision(self, match_entries: List[Dict]) -> Dict[str, Any]:
         """Extract simplified preliminary decision (no verbose analysis)"""
@@ -301,7 +391,7 @@ class ATSRecommendationService:
             "tech_stack_similarity": extracted_scores.get("tech_stack_similarity", 0),
             "business_readiness": extracted_scores.get("business_readiness", 0),
             "industry_transition_fit": extracted_scores.get("industry_transition_fit", 0)
-        }
+            }
     
     def _extract_ats_scoring(self, ats_entries: List[Dict]) -> Dict[str, Any]:
         """Extract clean ATS scoring (numbers only, no verbose explanation)"""
@@ -333,17 +423,23 @@ class ATSRecommendationService:
     def _classify_keywords(self, missing_keywords: Dict[str, List[str]], 
                           cv_skills: Dict[str, List[str]]) -> Dict[str, Any]:
         """
-        Classify missing keywords into tiers based on CV tailoring framework.
-        NOW WITH PRE-FILTERING: Removes keywords already present in the latest CV.
+        Classify missing keywords into tiers with AGGRESSIVE Tier 1 strategy
         
-        Tier 1: Always add (generic/transferable)
+        CRITICAL FIX: Expanded Tier 1 patterns to include ALL generic/transferable skills
+        All soft skills → Tier 1 by default (unless domain-specific)
+        
+        Tier 1: Always add (generic/transferable) - EXPANDED
         Tier 2: Add if semantic evidence exists
         Tier 3: Never add (domain-specific/unverifiable)
         """
-        # STEP 1: Extract existing keywords from latest CV (including tailored CV if it exists)
-        existing_keywords_lower = self._extract_existing_cv_keywords()
+        logger.info(f"🔍 [PHASE6-CLASSIFY] Starting keyword classification")
+        logger.info(f"   Input missing keywords: {sum(len(v) for v in missing_keywords.values())}")
         
-        # STEP 2: Filter missing keywords to exclude those already in CV
+        # STEP 1: Extract existing keywords from latest CV
+        existing_keywords = self._extract_existing_cv_keywords()
+        logger.info(f"   Existing CV keywords: {len(existing_keywords)}")
+        
+        # STEP 2: Filter out keywords already in CV
         filtered_missing = {}
         already_present = {}
         
@@ -352,104 +448,158 @@ class ATSRecommendationService:
             already_present[category] = []
             
             for keyword in keywords:
-                keyword_lower = keyword.lower()
-                # Check if keyword or any variation exists in CV
-                if self._keyword_exists_in_cv(keyword_lower, existing_keywords_lower):
+                if self._keyword_exists_in_cv(keyword, existing_keywords):
                     already_present[category].append(keyword)
-                    logger.info(f"🔍 [KEYWORD_FILTER] Skipping '{keyword}' - already in CV")
+                    logger.info(f"   ⏭️ Filtered: '{keyword}' (already in CV)")
                 else:
                     filtered_missing[category].append(keyword)
         
-        # Log filtering results
-        total_original = sum(len(keywords) for keywords in missing_keywords.values())
-        total_filtered = sum(len(keywords) for keywords in filtered_missing.values())
-        total_already_present = sum(len(keywords) for keywords in already_present.values())
+        total_filtered = sum(len(v) for v in filtered_missing.values())
+        total_already_present = sum(len(v) for v in already_present.values())
         
-        logger.info(f"🔍 [KEYWORD_FILTER] Original missing keywords: {total_original}")
-        logger.info(f"✅ [KEYWORD_FILTER] Actually new keywords: {total_filtered}")
-        logger.info(f"⏭️  [KEYWORD_FILTER] Already in CV (filtered): {total_already_present}")
+        logger.info(f"✅ [PHASE6-CLASSIFY] Filtering complete:")
+        logger.info(f"   - Still missing: {total_filtered}")
+        logger.info(f"   - Already in CV: {total_already_present}")
         
-        if total_already_present > 0:
-            for category, keywords in already_present.items():
-                if keywords:
-                    logger.info(f"   - {category}: {', '.join(keywords[:5])}")
+        # STEP 3: AGGRESSIVE Tier 1 classification
         
-        # STEP 3: Now classify the FILTERED keywords (only genuinely missing ones)
-        # Tier 1 patterns (generic soft skills and transferable competencies)
-        tier1_patterns = {
-            "soft": [
-                "leadership", "communication", "teamwork", "problem solving", "problem-solving",
-                "collaboration", "time management", "adaptability", "attention to detail",
-                "analytical thinking", "critical thinking", "interpersonal", "presentation",
-                "organizational", "numeracy", "proactive"
+        # EXPANDED Tier 1 patterns - ALL generic/transferable skills
+        tier1_keywords = {
+            "soft_skills": [
+                # Communication
+                "communication", "verbal communication", "written communication",
+                "presentation", "public speaking", "stakeholder communication",
+                
+                # Collaboration
+                "teamwork", "collaboration", "team collaboration", "cross-functional",
+                "interpersonal", "relationship building",
+                
+                # Leadership
+                "leadership", "team leadership", "mentoring", "coaching",
+                "people management", "talent development",
+                
+                # Problem Solving
+                "problem solving", "problem-solving", "critical thinking",
+                "analytical thinking", "decision making", "strategic thinking",
+                
+                # Work Skills
+                "time management", "project management", "organizational",
+                "planning", "prioritization", "multitasking",
+                
+                # Adaptability
+                "adaptability", "flexibility", "learning agility", "continuous learning",
+                "innovation", "creativity", "curiosity",
+                
+                # Quality
+                "attention to detail", "quality assurance", "accuracy",
+                "thoroughness", "diligence"
             ],
-            "technical": [
-                "data analysis", "project management", "stakeholder management",
-                "business intelligence", "reporting", "data visualization", "visualisation"
+            
+            "transferable_technical": [
+                # Data & Analysis (generic)
+                "data analysis", "analytical skills", "data-driven",
+                "reporting", "documentation", "research",
+                
+                # Business
+                "business analysis", "process improvement", "business processes",
+                "requirements gathering", "stakeholder management",
+                
+                # Project
+                "project coordination", "project delivery", "agile", "scrum",
+                
+                # Tools (very common)
+                "microsoft office", "ms office", "email", "calendar management"
             ]
         }
         
-        # Tier 3 patterns (domain-specific terms - NEVER add)
-        tier3_patterns = {
-            "domain": [
-                "refugee", "humanitarian", "fundraising", "donor", "charity", "nfp",
-                "not for profit", "community engagement", "social impact", "food relief",
-                "school breakfast", "food bank", "volunteer", "non-profit"
-            ],
-            "certifications": [
-                "pmp", "scrum master", "aws certified", "azure certified", "google cloud",
-                "comptia", "cissp", "cisa", "prince2"
-            ]
-        }
+        # Tier 3 patterns - Domain-specific (NEVER add)
+        tier3_keywords = [
+            # Charity/NFP specific
+            "refugee", "humanitarian", "poverty", "food relief", "food bank",
+            "fundraising", "donor", "charity", "volunteer", "community engagement",
+            "social impact", "nfp", "not for profit", "non-profit",
+            
+            # Company-specific
+            "annual impact report", "growing careers", "education program",
+            
+            # Certifications (specific)
+            "pmp", "scrum master", "aws certified", "azure certified",
+            "comptia", "cissp", "cisa", "prince2",
+            
+            # Industry jargon
+            "blockchain", "cryptocurrency", "metaverse"
+        ]
         
         classified = {
             "tier1_always_add": {"technical": [], "soft": [], "domain": []},
             "tier2_add_if_evidence": {"technical": [], "soft": [], "domain": []},
             "tier3_never_add": {"technical": [], "soft": [], "domain": []},
-            "already_in_cv_filtered": list(set([kw for keywords in already_present.values() for kw in keywords])),
-            "integration_instructions": (
-                "Tier 1: Integrate ALL keywords into skills section and relevant bullets. "
-                "Tier 2: Integrate ONLY if semantic evidence exists in CV experience. "
-                "Tier 3: DO NOT add - domain-specific, unverifiable, or lacks evidence. "
-                "Already in CV: These keywords were filtered out as they already exist in the CV."
-            )
+            "already_in_cv_filtered": []
         }
         
-        cv_technical = [s.lower() for s in cv_skills.get("technical_skills", [])]
+        # Flatten already_present for the filter list
+        for category_keywords in already_present.values():
+            classified["already_in_cv_filtered"].extend(category_keywords)
         
+        # Classify each filtered keyword
         for category in ["technical", "soft", "domain"]:
             for keyword in filtered_missing.get(category, []):
                 keyword_lower = keyword.lower()
                 
-                # Check Tier 1 (generic/transferable)
-                is_tier1 = any(
-                    pattern in keyword_lower 
-                    for pattern in tier1_patterns.get(category, [])
+                # Check Tier 3 first (domain-specific - NEVER add)
+                is_tier3 = any(
+                    tier3_pattern in keyword_lower 
+                    for tier3_pattern in tier3_keywords
                 )
+                
+                if is_tier3:
+                    classified["tier3_never_add"][category].append(keyword)
+                    logger.info(f"   🚫 Tier 3: '{keyword}' (domain-specific)")
+                    continue
+                
+                # Check Tier 1 (generic/transferable - AGGRESSIVE)
+                is_tier1 = False
+                
+                # All soft skills → Tier 1 by default
+                if category == "soft":
+                    is_tier1 = True
+                
+                # Check against Tier 1 patterns
+                for tier1_list in tier1_keywords.values():
+                    if any(tier1_pattern in keyword_lower for tier1_pattern in tier1_list):
+                        is_tier1 = True
+                        break
                 
                 if is_tier1:
                     classified["tier1_always_add"][category].append(keyword)
-                    continue
-                
-                # Check Tier 3 (domain-specific/unverifiable)
-                is_tier3_domain = any(
-                    pattern in keyword_lower 
-                    for pattern in tier3_patterns.get("domain", [])
-                )
-                
-                is_tier3_cert = any(
-                    pattern in keyword_lower 
-                    for pattern in tier3_patterns.get("certifications", [])
-                )
-                
-                is_specific_variant = self._is_specific_tool_variant(keyword_lower, cv_technical)
-                
-                if is_tier3_domain or is_tier3_cert or is_specific_variant:
-                    classified["tier3_never_add"][category].append(keyword)
-                    continue
-                
-                # Default to Tier 2
-                classified["tier2_add_if_evidence"][category].append(keyword)
+                    logger.info(f"   ✅ Tier 1: '{keyword}' (generic/transferable)")
+                else:
+                    # Default to Tier 2 (needs evidence)
+                    classified["tier2_add_if_evidence"][category].append(keyword)
+                    logger.info(f"   ⚠️ Tier 2: '{keyword}' (needs evidence)")
+        
+        # VALIDATION: Ensure ALL missing keywords are classified
+        total_classified = (
+            sum(len(v) for v in classified["tier1_always_add"].values()) +
+            sum(len(v) for v in classified["tier2_add_if_evidence"].values()) +
+            sum(len(v) for v in classified["tier3_never_add"].values())
+        )
+        
+        logger.info(f"📊 [PHASE6-CLASSIFY] Classification complete:")
+        logger.info(f"   - Tier 1: {sum(len(v) for v in classified['tier1_always_add'].values())}")
+        for cat, kws in classified['tier1_always_add'].items():
+            if kws:
+                logger.info(f"      {cat}: {kws}")
+        logger.info(f"   - Tier 2: {sum(len(v) for v in classified['tier2_add_if_evidence'].values())}")
+        logger.info(f"   - Tier 3: {sum(len(v) for v in classified['tier3_never_add'].values())}")
+        logger.info(f"   - Already in CV: {len(classified['already_in_cv_filtered'])}")
+        
+        if total_classified != total_filtered:
+            logger.error(f"❌ [PHASE6-CLASSIFY] VALIDATION FAILED!")
+            logger.error(f"   Expected: {total_filtered}, Got: {total_classified}")
+            logger.error(f"   Some keywords were lost during classification!")
+        else:
+            logger.info(f"✅ [PHASE6-CLASSIFY] VALIDATION PASSED - All keywords classified")
         
         return classified
     
@@ -492,78 +642,149 @@ class ATSRecommendationService:
             logger.warning(f"⚠️ [KEYWORD_FILTER] Could not extract existing CV keywords: {e}")
             return set()
     
-    def _extract_keywords_from_cv_file(self, cv_file: Path) -> set:
-        """Extract keywords from a CV JSON file"""
+    def _extract_keywords_from_cv_file(self, cv_file_path: Path) -> set:
+        """
+        Extract keywords from CV JSON file with comprehensive phrase extraction
+        Extracts: individual words, 2-word phrases, 3-word phrases, full sentences
+        """
         keywords = set()
         
         try:
-            import json
-            with open(cv_file, 'r', encoding='utf-8') as f:
+            with open(cv_file_path, 'r', encoding='utf-8') as f:
                 cv_data = json.load(f)
             
-            # Extract from skills
+            # 1. Extract from skills section (exact phrases)
             for skill_cat in cv_data.get('skills', []):
                 if isinstance(skill_cat, dict):
                     for skill in skill_cat.get('skills', []):
                         if skill:
-                            keywords.add(str(skill).lower())
+                            skill_str = str(skill).strip().lower()
+                            if skill_str:
+                                keywords.add(skill_str)
             
-            # Extract from experience bullets (2-3 word phrases)
+            # 2. Extract from experience bullets (phrases + words)
             for exp in cv_data.get('experience', []):
                 if isinstance(exp, dict):
                     for bullet in exp.get('bullets', []):
                         if bullet:
-                            # Extract 2-word and 3-word phrases
-                            words = str(bullet).lower().split()
+                            bullet_str = str(bullet).lower()
+                            
+                            # Add full bullet (for phrase matching)
+                            keywords.add(bullet_str)
+                            
+                            # Extract 2-word phrases
+                            words = bullet_str.split()
                             for i in range(len(words) - 1):
-                                keywords.add(f"{words[i]} {words[i+1]}")
+                                phrase = f"{words[i]} {words[i+1]}"
+                                if len(phrase) > 5:  # Skip very short phrases
+                                    keywords.add(phrase.strip('.,;:()[]{}'))
+                            
+                            # Extract 3-word phrases
                             for i in range(len(words) - 2):
-                                keywords.add(f"{words[i]} {words[i+1]} {words[i+2]}")
+                                phrase = f"{words[i]} {words[i+1]} {words[i+2]}"
+                                if len(phrase) > 8:
+                                    keywords.add(phrase.strip('.,;:()[]{}'))
+                            
+                            # Extract individual words
+                            for word in words:
+                                clean_word = word.strip('.,;:()[]{}')
+                                if len(clean_word) > 3:
+                                    keywords.add(clean_word)
             
-            # Extract from role highlights
-            role_highlights = cv_data.get('role_highlights', '')
-            if role_highlights:
-                words = str(role_highlights).lower().split()
+            # 3. Extract from projects
+            for project in cv_data.get('projects', []):
+                if isinstance(project, dict):
+                    # Project name
+                    if project.get('name'):
+                        keywords.add(str(project['name']).lower())
+                    
+                    # Project description bullets
+                    for bullet in project.get('bullets', []):
+                        if bullet:
+                            bullet_str = str(bullet).lower()
+                            keywords.add(bullet_str)
+                            
+                            # Extract phrases and words (same as experience)
+                            words = bullet_str.split()
+                            for i in range(len(words) - 1):
+                                keywords.add(f"{words[i]} {words[i+1]}".strip('.,;:()[]{}'))
+                            for word in words:
+                                if len(word.strip('.,;:()[]{}')) > 3:
+                                    keywords.add(word.strip('.,;:()[]{}'))
+            
+            # 4. Extract from summary/role highlights
+            if cv_data.get('summary'):
+                summary_text = str(cv_data['summary']).lower()
+                keywords.add(summary_text)
+                words = summary_text.split()
                 for i in range(len(words) - 1):
-                    keywords.add(f"{words[i]} {words[i+1]}")
+                    keywords.add(f"{words[i]} {words[i+1]}".strip('.,;:()[]{}'))
+            
+            if cv_data.get('role_highlights'):
+                role_text = str(cv_data['role_highlights']).lower()
+                keywords.add(role_text)
+                words = role_text.split()
+                for i in range(len(words) - 1):
+                    keywords.add(f"{words[i]} {words[i+1]}".strip('.,;:()[]{}'))
+            
+            logger.info(f"🔍 [KEYWORD-EXTRACT] Extracted {len(keywords)} keywords from {cv_file_path.name}")
             
         except Exception as e:
-            logger.warning(f"⚠️ [KEYWORD_FILTER] Error extracting keywords from {cv_file}: {e}")
+            logger.error(f"❌ [KEYWORD-EXTRACT] Error: {e}")
         
         return keywords
     
     def _keyword_exists_in_cv(self, keyword: str, cv_keywords: set) -> bool:
         """
-        Check if a keyword exists in CV keywords (with fuzzy matching).
-        Handles variations like "python" vs "python programming", "sql" vs "structured query language".
+        Check if keyword exists in CV with comprehensive fuzzy matching
+        Handles: variations, partial matches, multi-word keywords, synonyms
         """
-        keyword_lower = keyword.lower()
+        keyword_lower = keyword.lower().strip()
         
-        # Direct match
+        # 1. Exact match
         if keyword_lower in cv_keywords:
             return True
         
-        # Check if keyword is part of any CV keyword (e.g., "python" in "python programming")
+        # 2. Partial match (keyword in CV phrase or vice versa)
         for cv_kw in cv_keywords:
-            if keyword_lower in cv_kw or cv_kw in keyword_lower:
-                # Only match if significant overlap (not just "a" in "data")
-                if len(keyword_lower) > 3 or len(cv_kw) > 3:
-                    return True
+            # Keyword is part of CV phrase
+            if keyword_lower in cv_kw and len(keyword_lower) > 3:
+                return True
+            
+            # CV phrase is part of keyword
+            if cv_kw in keyword_lower and len(cv_kw) > 3:
+                return True
         
-        # Check common variations
+        # 3. Word-by-word match for multi-word keywords
+        keyword_words = set(keyword_lower.split())
+        if len(keyword_words) > 1:
+            # Check if all words of the keyword exist in CV
+            matches = sum(1 for word in keyword_words if any(word in cv_kw for cv_kw in cv_keywords))
+            if matches == len(keyword_words):
+                return True
+        
+        # 4. Common variations and synonyms
         variations = {
-            'python': ['python programming', 'python development', 'py'],
-            'sql': ['structured query language', 'mysql', 'postgresql', 'sql server'],
-            'javascript': ['js', 'javascript programming', 'node', 'nodejs'],
-            'data analysis': ['data analytics', 'analyzing data', 'analytical'],
-            'machine learning': ['ml', 'ai', 'artificial intelligence'],
-            'project management': ['pm', 'project coordination', 'managed projects'],
+            "communication": ["communicate", "communicating", "communicated", "communications"],
+            "analysis": ["analyze", "analyzing", "analyzed", "analytical", "analyst"],
+            "management": ["manage", "managing", "managed", "manager"],
+            "leadership": ["lead", "leading", "leader", "led"],
+            "python": ["python programming", "python development", "py"],
+            "sql": ["mysql", "postgresql", "sql server", "t-sql", "structured query language"],
+            "excel": ["microsoft excel", "ms excel", "spreadsheet", "spreadsheets"],
+            "power bi": ["powerbi", "power-bi", "power bi dashboard"],
+            "data analysis": ["data analytics", "analyzing data", "data analyst"],
+            "business processes": ["business process", "process improvement", "process optimization"],
+            "problem solving": ["problem-solving", "solving problems", "troubleshooting"],
+            "teamwork": ["team collaboration", "collaborative", "team player"],
+            "analytical skills": ["analytical", "analysis", "analyzing"],
         }
         
         for base, vars in variations.items():
-            if keyword_lower == base or keyword_lower in vars:
-                if base in cv_keywords or any(v in cv_keywords for v in vars):
-                    return True
+            if base in keyword_lower:
+                for var in vars:
+                    if any(var in cv_kw for cv_kw in cv_keywords):
+                        return True
         
         return False
     

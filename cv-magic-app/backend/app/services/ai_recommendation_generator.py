@@ -265,6 +265,9 @@ class AIRecommendationGenerator:
                 logger.warning(f"⚠️ [AI GENERATOR] Failed to extract actionable guidance: {e}")
                 actionable_guidance = {}  # Empty dict if extraction fails
             
+            # CRITICAL FIX: VALIDATE ALL KEYWORDS ARE CLASSIFIED
+            validation_result = self._validate_keyword_classification(json_data, company)
+            
             return {
                 "company": company,
                 "generated_at": datetime.now().isoformat(),
@@ -277,6 +280,7 @@ class AIRecommendationGenerator:
                     "cost": ai_response.cost,
                     "tokens_used": ai_response.tokens_used
                 },
+                "validation": validation_result,  # VALIDATION RESULTS
                 "metadata": {
                     "content_length": len(markdown_content),
                     "format_version": "2.0",  # Updated format with structured data
@@ -304,6 +308,98 @@ class AIRecommendationGenerator:
                     "format_version": "1.0",  # Legacy markdown format
                     "has_structured_data": False
                 }
+            }
+    
+    def _validate_keyword_classification(self, json_data: Dict[str, Any], company: str) -> Dict[str, Any]:
+        """
+        Validate that ALL keywords from input are classified by AI
+        
+        CRITICAL FIX: Ensures no keywords are lost during AI classification
+        
+        Args:
+            json_data: Structured recommendations from AI
+            company: Company name
+            
+        Returns:
+            Validation result dictionary
+        """
+        try:
+            # Extract tier classifications from AI response
+            structured_recs = json_data.get("structured_recommendations", {})
+            keyword_integration = structured_recs.get("keyword_integration", {})
+            
+            tier1 = keyword_integration.get("tier1_integrate_immediately", {})
+            tier2 = keyword_integration.get("tier2_add_with_evidence", {})
+            tier3 = keyword_integration.get("tier3_never_add", {})
+            
+            # Count total classified keywords
+            total_tier1 = sum(len(v) for v in tier1.values() if isinstance(v, list))
+            total_tier2 = sum(len(v) for v in tier2.values() if isinstance(v, list))
+            total_tier3 = sum(len(v) for v in tier3.values() if isinstance(v, list))
+            total_classified = total_tier1 + total_tier2 + total_tier3
+            
+            logger.info(f"📊 [PHASE7-VALIDATE] AI Classification results:")
+            logger.info(f"   - Tier 1: {total_tier1}")
+            logger.info(f"   - Tier 2: {total_tier2}")
+            logger.info(f"   - Tier 3: {total_tier3}")
+            logger.info(f"   - Total: {total_classified}")
+            
+            # Load input recommendation to get expected count
+            try:
+                input_file = self._get_input_recommendation_file_path(company)
+                with open(input_file, 'r', encoding='utf-8') as f:
+                    input_data = json.load(f)
+                
+                # Get original keyword guidance from input
+                input_guidance = input_data.get("keyword_integration_guidance", {})
+                tier1_input = input_guidance.get("tier1_always_add", {})
+                tier2_input = input_guidance.get("tier2_add_if_evidence", {})
+                tier3_input = input_guidance.get("tier3_never_add", {})
+                
+                expected_total = (
+                    sum(len(v) for v in tier1_input.values() if isinstance(v, list)) +
+                    sum(len(v) for v in tier2_input.values() if isinstance(v, list)) +
+                    sum(len(v) for v in tier3_input.values() if isinstance(v, list))
+                )
+                
+                logger.info(f"   - Expected: {expected_total}")
+                
+                all_keywords_classified = total_classified >= expected_total
+                
+                if not all_keywords_classified:
+                    logger.warning(f"⚠️ [PHASE7-VALIDATE] Some keywords may be missing!")
+                    logger.warning(f"   AI classified {total_classified} but expected {expected_total}")
+                else:
+                    logger.info(f"✅ [PHASE7-VALIDATE] All keywords classified")
+                
+                return {
+                    "total_classified": total_classified,
+                    "expected_total": expected_total,
+                    "tier1_count": total_tier1,
+                    "tier2_count": total_tier2,
+                    "tier3_count": total_tier3,
+                    "all_keywords_classified": all_keywords_classified,
+                    "validation_passed": all_keywords_classified
+                }
+                
+            except Exception as e:
+                logger.warning(f"⚠️ [PHASE7-VALIDATE] Could not load input recommendation: {e}")
+                return {
+                    "total_classified": total_classified,
+                    "expected_total": None,
+                    "tier1_count": total_tier1,
+                    "tier2_count": total_tier2,
+                    "tier3_count": total_tier3,
+                    "all_keywords_classified": None,
+                    "validation_passed": False,
+                    "error": str(e)
+                }
+        
+        except Exception as e:
+            logger.error(f"❌ [PHASE7-VALIDATE] Validation error: {e}")
+            return {
+                "validation_passed": False,
+                "error": str(e)
             }
     
     def _clean_json_response(self, content: str) -> str:
