@@ -445,6 +445,11 @@ class JDAnalyzer:
                 is_active=True
             )
             
+            # Initialize AI service for this user to load their API keys and providers
+            logger.info(f"🔧 [JD_ANALYZER] Initializing AI service for user: {current_user.email}")
+            self.ai_service.initialize_for_user(current_user)
+            logger.info(f"✅ [JD_ANALYZER] AI service initialized with providers: {list(self.ai_service._providers.keys())}")
+            
             response = await self.ai_service.generate_response(
                 prompt=user_prompt,
                 user=current_user,
