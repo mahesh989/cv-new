@@ -477,7 +477,7 @@ deploy_quick() {
     fi
     echo ""
 
-    ssh -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
+     -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
         cd $VPS_PATH
         echo "📥 Pulling latest changes..."
         git pull origin $BRANCH
