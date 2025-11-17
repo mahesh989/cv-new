@@ -712,21 +712,37 @@ class ContextAwareAnalysisPipeline:
                 return None
             
             # Get analyze match prompt
-            from app.services.skill_extraction.prompts.skill_prompt_loader import get_skill_prompt
+            from app.services.skill_extraction.prompt_templates import get_prompt
             from datetime import datetime
             current_date = datetime.now().strftime('%Y-%m-%d')
-            analyze_match_prompt = get_skill_prompt('analyze_match', cv_text=cv_content, job_text=jd_text, current_date=current_date)
+            analyze_match_prompt = get_prompt('analyze_match', cv_text=cv_content, job_text=jd_text, current_date=current_date)
             
             # Generate AI response for analyze match
             from app.models.auth import UserData
+            from app.models.user import User
+            from app.database import get_database
             from datetime import timezone
+            
+            # Query database for real user record
+            user_record = None
+            for db in get_database():
+                user_record = db.query(User).filter(User.email == self.user_email).first()
+                break
+            
+            if not user_record:
+                raise ValueError(f"User {self.user_email} not found in database")
+            
+            # Create UserData with real user ID
             current_user = UserData(
-                id="pipeline_user",
-                email=self.user_email,
-                name=self.user_email.split("@")[0] if self.user_email else "user",
-                created_at=datetime.now(timezone.utc),
-                is_active=True
+                id=str(user_record.id),
+                email=user_record.email,
+                name=user_record.full_name or user_record.username or "User",
+                created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
+                is_active=user_record.is_active
             )
+            
+            # Initialize AI service for this user
+            ai_service.initialize_for_user(current_user)
             
             analyze_match_response = await ai_service.generate_response(
                 prompt=analyze_match_prompt,
