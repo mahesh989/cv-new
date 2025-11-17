@@ -875,9 +875,14 @@ async def context_aware_analysis(
         
         logger.info(f"🎯 Context-aware analysis request: Company={company}, JD={jd_url}, Rerun={is_rerun}")
         
-        # Get CV selection context for user feedback
-        cv_context = enhanced_dynamic_cv_selector.get_cv_for_analysis(company, is_rerun)
-        logger.info(f"📄 Using {cv_context.cv_type} CV v{cv_context.version} (Source: {cv_context.source})")
+        # Get CV selection context for user feedback using unified selector
+        try:
+            user_selector = get_selector_for_user(current_user.email)
+            cv_context = user_selector.get_latest_cv_for_company(company, jd_url)
+            logger.info(f"📄 Using {cv_context.file_type} CV (timestamp: {cv_context.timestamp or 'base'})")
+        except Exception as cv_err:
+            logger.warning(f"⚠️ Could not get CV context: {cv_err}")
+            cv_context = None
         
         # Get JD cache status for user feedback
         jd_cached = jd_cache_manager.should_reuse_jd_analysis(jd_url, company)
@@ -1535,28 +1540,39 @@ async def get_cached_preliminary_analysis(request: Request):
 
 
 @router.get("/cv-context/{company}")
-async def get_cv_context(company: str, is_rerun: bool = False):
-    """Get CV selection context for UI feedback"""
+async def get_cv_context(
+    company: str, 
+    is_rerun: bool = False,
+    jd_url: str = "",
+    current_user: UserData = Depends(get_current_user)
+):
+    """Get CV selection context for UI feedback using unified selector"""
     try:
-        # Get CV selection context
-        cv_context = enhanced_dynamic_cv_selector.get_cv_for_analysis(company, is_rerun)
-        
-        # Get available CV versions
-        available_versions = enhanced_dynamic_cv_selector.list_available_cv_versions(company)
+        # Get CV selection context using unified selector
+        user_selector = get_selector_for_user(current_user.email)
+        cv_context = user_selector.get_latest_cv_for_company(company, jd_url)
         
         # Get JD cache status
         cache_stats = jd_cache_manager.get_cache_stats(company)
         
+        # Build response with unified selector data
+        cv_info = {
+            "file_type": cv_context.file_type if cv_context else "unknown",
+            "timestamp": cv_context.timestamp if cv_context else None,
+            "exists": cv_context.exists if cv_context else False,
+            "json_path": str(cv_context.json_path) if cv_context and cv_context.json_path else None,
+            "txt_path": str(cv_context.txt_path) if cv_context and cv_context.txt_path else None
+        }
+        
         return JSONResponse(content={
             "success": True,
             "company": company,
-            "cv_context": cv_context.to_dict(),
-            "available_cv_versions": available_versions,
+            "cv_context": cv_info,
             "jd_cache_status": cache_stats,
             "recommendation": {
-                "suggested_cv": cv_context.cv_type,
-                "reason": cv_context.source,
-                "version": cv_context.version
+                "suggested_cv": cv_context.file_type if cv_context else "original",
+                "reason": "First-time JD usage" if cv_context and cv_context.file_type == "original" else "Using latest tailored CV",
+                "timestamp": cv_context.timestamp if cv_context else None
             }
         })
         
@@ -1633,11 +1649,12 @@ async def trigger_component_analysis(company: str, current_user: UserData = Depe
         logger.info(f"🔧 [MANUAL] Triggering component analysis for company: {company}")
         
         from app.services.ats.modular_ats_orchestrator import get_modular_ats_orchestrator
-        from app.services.dynamic_cv_selector import dynamic_cv_selector
         
-        # Use dynamic CV selection for the latest CV file
-        latest_cv_paths = dynamic_cv_selector.get_latest_cv_paths_for_services()
-        logger.info(f"🔧 [MANUAL] Using dynamic CV: {latest_cv_paths['json_source']} folder")
+        # Use unified selector to get the latest CV file
+        user_selector = get_selector_for_user(current_user.email)
+        cv_context = user_selector.get_latest_cv_across_all(company)
+        
+        logger.info(f"🔧 [MANUAL] Using unified CV selector: {cv_context.file_type} (timestamp: {cv_context.timestamp or 'base'})")
         
         # Check if required files exist
         from app.utils.user_path_utils import get_user_base_path
@@ -1659,7 +1676,7 @@ async def trigger_component_analysis(company: str, current_user: UserData = Depe
             match_file = company_dir / "cv_jd_match_results.json"
         
         required_files = {
-            "cv_file": Path(latest_cv_paths['json_path']) if latest_cv_paths['json_path'] else None,
+            "cv_file": cv_context.json_path if cv_context and cv_context.json_path else None,
             "jd_file": jd_file, 
             "match_file": match_file
         }

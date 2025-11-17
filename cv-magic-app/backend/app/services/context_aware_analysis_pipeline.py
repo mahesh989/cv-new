@@ -385,7 +385,19 @@ class ContextAwareAnalysisPipeline:
                     from app.utils.timestamp_utils import TimestampUtils
                     
                     company_dir = self.base_dir / "applied_companies" / context.company
+                    logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Checking for JD file in: {company_dir}")
+                    logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Base dir exists: {self.base_dir.exists()}, Company dir exists: {company_dir.exists()}")
+                    
+                    # Ensure company directory exists before checking for files
+                    try:
+                        company_dir.mkdir(parents=True, exist_ok=True)
+                        logger.info(f"📁 [CONTEXT_AWARE_PIPELINE] Ensured company directory exists: {company_dir}")
+                    except Exception as dir_err:
+                        logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] Failed to create company directory: {dir_err}")
+                        raise
+                    
                     jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+                    logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] JD file lookup result: {jd_file}")
                     
                     if jd_file and jd_file.exists():
                         logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Found existing JD file: {jd_file}")
