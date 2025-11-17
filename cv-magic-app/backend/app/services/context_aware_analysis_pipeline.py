@@ -409,8 +409,68 @@ class ContextAwareAnalysisPipeline:
                         results.steps_completed.append("jd_analysis_from_existing")
                         
                     else:
-                        logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] No JD file found for company: {context.company}")
-                        return None
+                        # No JD file exists - fetch from URL
+                        logger.info(f"🔄 [CONTEXT_AWARE_PIPELINE] No JD file found, fetching from URL: {context.jd_url}")
+                        try:
+                            # First, fetch JD text from URL
+                            from app.services.job_scraper import scrape_job_description_async
+                            import json
+                            
+                            logger.info(f"🌐 [CONTEXT_AWARE_PIPELINE] Fetching JD from URL: {context.jd_url}")
+                            jd_text = await scrape_job_description_async(context.jd_url)
+                            
+                            if not jd_text or jd_text.startswith("Error:") or len(jd_text.strip()) < 10:
+                                raise Exception(f"Failed to fetch JD from URL: {jd_text if jd_text else 'Empty response'}")
+                            
+                            logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Fetched JD text: {len(jd_text)} characters")
+                            
+                            # Save JD file before analysis
+                            company_dir = self.base_dir / "applied_companies" / context.company
+                            company_dir.mkdir(parents=True, exist_ok=True)
+                            timestamp = TimestampUtils.get_timestamp()
+                            jd_file = company_dir / f"jd_original_{timestamp}.json"
+                            
+                            with open(jd_file, 'w', encoding='utf-8') as f:
+                                json.dump({
+                                    "text": jd_text,
+                                    "jd_url": context.jd_url,
+                                    "saved_at": datetime.now().isoformat()
+                                }, f, ensure_ascii=False, indent=2)
+                            
+                            logger.info(f"💾 [CONTEXT_AWARE_PIPELINE] Saved JD file: {jd_file}")
+                            
+                            # Now analyze the JD
+                            jd_analysis_result = await self.jd_analyzer.analyze_and_save_company_jd(
+                                context.company,
+                                force_refresh=True,
+                                base_path=str(self.base_dir)
+                            )
+                            
+                            if jd_analysis_result and jd_analysis_result.all_keywords:
+                                results.jd_analysis = jd_analysis_result.to_dict()
+                                results.steps_completed.append("jd_analysis_fetched")
+                                
+                                # Try to get job info from newly created files
+                                company_dir = self.base_dir / "applied_companies" / context.company
+                                job_info_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"job_info_{context.company.replace(' ', '_')}", "json")
+                                if job_info_file and job_info_file.exists():
+                                    import json
+                                    with open(job_info_file, 'r', encoding='utf-8') as f:
+                                        results.job_info = json.load(f)
+                                    results.steps_completed.append("job_info_fetched")
+                                else:
+                                    # Create minimal job info
+                                    results.job_info = {
+                                        "company_name": context.company,
+                                        "job_title": "Unknown",
+                                        "success": True
+                                    }
+                                    results.steps_completed.append("job_info_minimal")
+                            else:
+                                raise Exception("Failed to fetch JD from URL")
+                        except Exception as fetch_error:
+                            logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] Failed to fetch JD from URL: {fetch_error}")
+                            return None
                 
                 # Cache the results for future use
                 jd_data_to_cache = {
