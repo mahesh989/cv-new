@@ -167,6 +167,40 @@ class ATSRecommendationService:
             logger.error(f"❌ [PHASE6] Error extracting ATS recommendation data: {e}", exc_info=True)
             return None
     
+    def create_recommendation_file(self, company: str) -> bool:
+        """
+        Create recommendation file by extracting data and saving it
+        
+        Combines extract_ats_recommendation_data() and save_optimized_recommendation()
+        
+        Args:
+            company: Company name
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            logger.info(f"🎯 [ATS_RECOMMENDER] Creating recommendation file for: {company}")
+            
+            # Extract recommendation data
+            data = self.extract_ats_recommendation_data(company)
+            if not data:
+                logger.error(f"❌ [ATS_RECOMMENDER] Failed to extract recommendation data for {company}")
+                return False
+            
+            # Save to file
+            output_file = self.save_optimized_recommendation(company, data)
+            if not output_file:
+                logger.error(f"❌ [ATS_RECOMMENDER] Failed to save recommendation file for {company}")
+                return False
+            
+            logger.info(f"✅ [ATS_RECOMMENDER] Successfully created recommendation file: {output_file.name}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ [ATS_RECOMMENDER] Error creating recommendation file for {company}: {e}", exc_info=True)
+            return False
+    
     def save_optimized_recommendation(self, company: str, data: Dict[str, Any]) -> Optional[Path]:
         """
         Save optimized recommendation data to file
