@@ -275,9 +275,36 @@ class ContextAwareAnalysisPipeline:
             }}
             """
             
+            # Create user object for AI service (need real user from database for API key lookup)
+            from app.models.auth import UserData
+            from app.models.user import User
+            from app.database import get_database
+            from datetime import datetime, timezone
+            
+            # Query database for user record
+            user_record = None
+            for db in get_database():
+                user_record = db.query(User).filter(User.email == self.user_email).first()
+                break
+            
+            if not user_record:
+                raise ValueError(f"User {self.user_email} not found in database. Cannot retrieve API keys.")
+            
+            # Create UserData with real user ID
+            current_user = UserData(
+                id=str(user_record.id),
+                email=user_record.email,
+                name=user_record.full_name or user_record.username or "User",
+                created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
+                is_active=user_record.is_active
+            )
+            
+            # Initialize AI service for this user
+            ai_service.initialize_for_user(current_user)
+            
             cv_response = await ai_service.generate_response(
                 prompt=cv_prompt,
-                user=user,
+                user=current_user,
                 temperature=0.0,
                 max_tokens=1000
             )
