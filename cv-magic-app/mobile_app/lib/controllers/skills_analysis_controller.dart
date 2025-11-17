@@ -5,6 +5,7 @@ import '../services/skills_analysis_service.dart';
 import '../services/skills_analysis_handler.dart';
 import '../services/job_parser.dart';
 import '../services/jobs_state_manager.dart';
+import '../services/context_aware_analysis_service.dart';
 
 /// States for skills analysis
 enum SkillsAnalysisState { idle, loading, completed, error, cancelled }
@@ -27,6 +28,13 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool _showAIRecommendationLoading = false;
   bool _showAIRecommendationResults = false;
   Timer? _progressiveTimer;
+
+  // Two-step workflow state (for context-aware analysis)
+  bool _waitingForUserDecision = false;
+  InitialAnalysisResult? _initialAnalysisResult;
+  String? _currentCompany;
+  String? _currentJdUrl; // ignore: unused_field
+  bool _currentIsRerun = false; // ignore: unused_field
 
   // Notification callbacks
   Function(String message, {bool isError})? _onNotification;
@@ -54,6 +62,11 @@ class SkillsAnalysisController extends ChangeNotifier {
   bool get showATSResults => _showATSResults;
   bool get showAIRecommendationLoading => _showAIRecommendationLoading;
   bool get showAIRecommendationResults => _showAIRecommendationResults;
+
+  // Two-step workflow getters
+  bool get waitingForUserDecision => _waitingForUserDecision;
+  AnalyzeMatchDecision? get analyzeMatchDecision => _initialAnalysisResult?.analyzeMatchDecision;
+  bool get hasAnalyzeMatchDecision => analyzeMatchDecision != null;
 
   // CV Skills getters
   SkillsData? get cvSkills => _result?.cvSkills;
@@ -239,7 +252,9 @@ class SkillsAnalysisController extends ChangeNotifier {
     }
   }
 
-  /// Perform context-aware analysis with intelligent CV selection
+  /// Perform context-aware analysis with intelligent CV selection (TWO-STEP WORKFLOW)
+  /// Step 1: Initial analysis (returns analyze match decision)
+  /// Step 2: User decides to proceed or skip (handled by continueFullAnalysis/skipFullAnalysis)
   Future<void> performContextAwareAnalysis({
     required String jdUrl,
     required String company,
@@ -262,9 +277,13 @@ class SkillsAnalysisController extends ChangeNotifier {
     _setState(SkillsAnalysisState.loading);
     _currentJdText = jdUrl; // Store for compatibility
     _currentCvFilename = company; // Store for compatibility
+    _currentCompany = company; // Store for two-step workflow
+    _currentJdUrl = jdUrl; // Store for two-step workflow
+    _currentIsRerun = isRerun; // Store for two-step workflow
+    _waitingForUserDecision = false; // Reset state
 
     try {
-      print('🚀 [SKILLS_ANALYSIS_CONTROLLER] Starting context-aware analysis');
+      print('🚀 [SKILLS_ANALYSIS_CONTROLLER] Starting initial context-aware analysis');
 
       // First, parse the job description and save job details
       try {
@@ -289,63 +308,110 @@ class SkillsAnalysisController extends ChangeNotifier {
       print('   Company: $company');
       print('   Is Rerun: $isRerun');
 
-      _result = await SkillsAnalysisService.performContextAwareAnalysis(
+      // STEP 1: Perform initial analysis (up to analyze match)
+      _initialAnalysisResult = await ContextAwareAnalysisService.performInitialAnalysis(
         jdUrl: jdUrl,
         company: company,
         isRerun: isRerun,
-        includeTailoring: includeTailoring,
       );
 
-      if (_result!.isSuccess) {
-        _setState(SkillsAnalysisState.completed);
-        _showNotification('Context-aware analysis completed successfully!');
-
-        // Surface backend warnings (e.g., cv_minimal) as snackbars
-        try {
-          final warnings = _result!.warnings ?? [];
-          if (warnings.isNotEmpty) {
-            // If cv_minimal present, show a focused message
-            final hasCvMinimal = warnings.any(
-              (w) =>
-                  (w is Map && (w['type'] == 'cv_minimal')) ||
-                  (w is String && w.contains('cv_minimal')),
-            );
-            if (hasCvMinimal) {
-              _showNotification(
-                'Your CV appears minimal. We continued the analysis and generated enrichment suggestions.',
-                isError: false,
-              );
-            } else {
-              _showNotification(
-                'Analysis completed with warnings.',
-                isError: false,
-              );
-            }
+      if (_initialAnalysisResult!.success) {
+        print('✅ [SKILLS_ANALYSIS_CONTROLLER] Initial analysis successful');
+        
+        // Check if we need to wait for user decision
+        if (_initialAnalysisResult!.requiresUserDecision && 
+            _initialAnalysisResult!.analyzeMatchDecision != null) {
+          print('⏸️ [SKILLS_ANALYSIS_CONTROLLER] Stopping for user decision');
+          _waitingForUserDecision = true;
+          _setState(SkillsAnalysisState.completed);
+          
+          // Show decision notification
+          final decision = _initialAnalysisResult!.analyzeMatchDecision!;
+          String decisionMessage = '🔍 Initial Analysis Complete\n';
+          if (decision.isProceed) {
+            decisionMessage += '✅ Strong Match (${decision.matchScore}%) - Proceed recommended';
+          } else if (decision.isMaybe) {
+            decisionMessage += '⚠️ Conditional Match (${decision.matchScore}%) - Consider proceeding';
+          } else {
+            decisionMessage += '❌ Weak Match (${decision.matchScore}%) - Consider skipping';
           }
-        } catch (_) {}
-
-        // Save job details if analysis was successful
-        await SkillsAnalysisHandler.handleAnalysisResult(
-          jdText: jdUrl,
-          result: _result!,
-        );
-
-        _startProgressiveDisplay();
-
-        // Always display latest AI recommendation for this company (no fallback logic)
-        // Fetch immediately and surface if available, independent of other steps
-        unawaited(_tryShowLatestAIRecommendation(company));
+          _showNotification(decisionMessage);
+          
+          print('📊 [SKILLS_ANALYSIS_CONTROLLER] Decision: ${decision.decision}, Score: ${decision.matchScore}%');
+          print('   waitingForUserDecision: $_waitingForUserDecision');
+          
+          notifyListeners();
+          return; // STOP HERE - wait for user to click Proceed or Skip
+        } else {
+          // No user decision required, continue automatically (shouldn't happen but handle it)
+          print('ℹ️ [SKILLS_ANALYSIS_CONTROLLER] No user decision required, continuing automatically');
+          await continueFullAnalysis(includeTailoring: includeTailoring);
+        }
       } else {
-        _setError(_result!.errorMessage ?? 'Context-aware analysis failed');
+        _setError(_initialAnalysisResult!.errors.first);
         _showNotification(
-          _result!.errorMessage ?? 'Context-aware analysis failed',
+          _initialAnalysisResult!.errors.first,
           isError: true,
         );
       }
     } catch (e) {
-      _setError('Context-aware analysis failed: $e');
-      _showNotification('Context-aware analysis failed: $e', isError: true);
+      _setError('Initial analysis failed: $e');
+      _showNotification('Initial analysis failed: $e', isError: true);
       debugPrint('❌ [SKILLS_ANALYSIS_CONTROLLER] Error: $e');
+    }
+  }
+
+  /// STEP 2: Continue full analysis after user approves
+  Future<void> continueFullAnalysis({bool includeTailoring = true}) async {
+    if (!_waitingForUserDecision || _currentCompany == null) {
+      print('⚠️ [SKILLS_ANALYSIS_CONTROLLER] Cannot continue - not waiting for decision or no company');
+      return;
+    }
+
+    try {
+      _setState(SkillsAnalysisState.loading);
+      _waitingForUserDecision = false;
+      
+      print('🚀 [SKILLS_ANALYSIS_CONTROLLER] Continuing full analysis for: $_currentCompany');
+      
+      final continueResult = await ContextAwareAnalysisService.continueFullAnalysis(
+        company: _currentCompany!,
+        includeTailoring: includeTailoring,
+      );
+      
+      if (continueResult.success) {
+        print('✅ [SKILLS_ANALYSIS_CONTROLLER] Full analysis completed successfully');
+        _setState(SkillsAnalysisState.completed);
+        _showNotification('Full analysis completed successfully!');
+        
+        // Convert ContextAwareAnalysisResult to SkillsAnalysisResult format
+        // Since the full results are in the backend format, we need to handle them accordingly
+        // For now, just show success and let the user view the results on the backend/reports page
+        notifyListeners();
+        
+        // Try to fetch AI recommendations
+        if (_currentCompany != null) {
+          unawaited(_tryShowLatestAIRecommendation(_currentCompany!));
+        }
+      } else {
+        _setError(continueResult.errors.first);
+        _showNotification(continueResult.errors.first, isError: true);
+      }
+    } catch (e) {
+      _setError('Failed to continue full analysis: $e');
+      _showNotification('Failed to continue full analysis: $e', isError: true);
+      debugPrint('❌ [SKILLS_ANALYSIS_CONTROLLER] Error continuing: $e');
+    }
+  }
+
+  /// Skip full analysis (user declined)
+  void skipFullAnalysis() {
+    if (_waitingForUserDecision) {
+      print('⏭️ [SKILLS_ANALYSIS_CONTROLLER] User skipped full analysis');
+      _waitingForUserDecision = false;
+      _setState(SkillsAnalysisState.completed);
+      _showNotification('⏭️ Skipped full analysis. Initial results available.');
+      notifyListeners();
     }
   }
 
