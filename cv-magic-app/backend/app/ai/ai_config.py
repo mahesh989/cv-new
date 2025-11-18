@@ -102,6 +102,24 @@ class AIConfig:
                     max_tokens=200000,
                     input_cost_per_1k=0.00005,
                     output_cost_per_1k=0.0002
+                ),
+                "gpt-5.1": ModelConfig(
+                    provider="openai",
+                    model="gpt-5.1",
+                    name="GPT-5.1",
+                    description="Advanced model with adaptive reasoning for everyday coding tasks",
+                    max_tokens=200000,
+                    input_cost_per_1k=0.002,
+                    output_cost_per_1k=0.008
+                ),
+                "gpt-5.1-flex": ModelConfig(
+                    provider="openai",
+                    model="gpt-5.1-flex",
+                    name="GPT-5.1 Flex",
+                    description="Flexible service tier with extended prompt caching for fast, cost-efficient tasks",
+                    max_tokens=200000,
+                    input_cost_per_1k=0.001,
+                    output_cost_per_1k=0.004
                 )
             },
             "anthropic": {

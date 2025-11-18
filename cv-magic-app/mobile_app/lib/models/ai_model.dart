@@ -169,6 +169,30 @@ class AIModelsConfig {
       isRecommended: true,
       capabilities: ['Text', 'Code', 'Analysis', 'Fast Processing', 'Flexible'],
     ),
+    'gpt-5.1': AIModel(
+      id: 'gpt-5.1',
+      name: 'GPT-5.1',
+      provider: 'OpenAI',
+      description: 'Advanced model with adaptive reasoning for everyday coding',
+      speed: 'Fast',
+      cost: 'Medium',
+      color: AppTheme.primaryCosmic,
+      icon: Icons.auto_fix_high_rounded,
+      isRecommended: true,
+      capabilities: ['Text', 'Code', 'Analysis', 'Adaptive Reasoning', 'Coding'],
+    ),
+    'gpt-5.1-flex': AIModel(
+      id: 'gpt-5.1-flex',
+      name: 'GPT-5.1 Flex',
+      provider: 'OpenAI',
+      description: 'Flexible service tier with extended prompt caching',
+      speed: 'Very Fast',
+      cost: 'Low',
+      color: AppTheme.primaryNeon,
+      icon: Icons.flash_auto_rounded,
+      isRecommended: true,
+      capabilities: ['Text', 'Code', 'Fast Processing', 'Prompt Caching', 'Cost Efficient'],
+    ),
   };
 
   // Default model

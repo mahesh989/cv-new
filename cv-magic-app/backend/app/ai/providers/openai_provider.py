@@ -17,8 +17,8 @@ class OpenAIProvider(BaseAIProvider):
     
     def __init__(self, api_key: str, model_name: str = "gpt-4o-mini"):
         super().__init__(api_key, model_name)
-        # Increase timeout for nano models (GPT-5-nano) that may take longer to respond
-        timeout = 900.0 if model_name in ["gpt-5-nano"] or model_name.startswith("o3") else 60.0
+        # Increase timeout for nano/reasoning models (GPT-5-nano, GPT-5.1, O3) that may take longer to respond
+        timeout = 900.0 if model_name in ["gpt-5-nano", "gpt-5.1", "gpt-5.1-flex"] or model_name.startswith("o3") else 60.0
         self.client = openai.OpenAI(api_key=api_key, timeout=timeout)
     
     def _get_provider_name(self) -> str:
@@ -77,9 +77,13 @@ class OpenAIProvider(BaseAIProvider):
                 "temperature": temperature,
             }
             
-            # Add service_tier for nano models (GPT-5-nano and O3 models)
-            if self.model_name in ["gpt-5-nano"] or self.model_name.startswith("o3"):
+            # Add service_tier for nano models and flex models (GPT-5-nano, GPT-5.1-flex, and O3 models)
+            if self.model_name in ["gpt-5-nano", "gpt-5.1-flex"] or self.model_name.startswith("o3"):
                 request_params["service_tier"] = "flex"
+            
+            # Add reasoning_effort = 'none' for GPT-5.1 models (default for latency-sensitive tasks)
+            if self.model_name.startswith("gpt-5.1"):
+                request_params["reasoning_effort"] = kwargs.get("reasoning_effort", "none")
             
             if max_tokens:
                 request_params["max_tokens"] = max_tokens
@@ -121,7 +125,9 @@ class OpenAIProvider(BaseAIProvider):
             "gpt-4o-mini", 
             "gpt-4-turbo",
             "gpt-3.5-turbo",
-            "gpt-5-nano"
+            "gpt-5-nano",
+            "gpt-5.1",
+            "gpt-5.1-flex"
         ]
     
     def get_model_info(self, model_name: str) -> Dict[str, Any]:
@@ -161,6 +167,20 @@ class OpenAIProvider(BaseAIProvider):
                 "max_tokens": 200000,
                 "input_cost_per_1k": 5e-05,
                 "output_cost_per_1k": 0.0002
+            },
+            "gpt-5.1": {
+                "name": "GPT-5.1",
+                "description": "Advanced model with adaptive reasoning for everyday coding tasks",
+                "max_tokens": 200000,
+                "input_cost_per_1k": 0.002,
+                "output_cost_per_1k": 0.008
+            },
+            "gpt-5.1-flex": {
+                "name": "GPT-5.1 Flex",
+                "description": "Flexible service tier with extended prompt caching for fast, cost-efficient tasks",
+                "max_tokens": 200000,
+                "input_cost_per_1k": 0.001,
+                "output_cost_per_1k": 0.004
             }
         }
         
