@@ -363,30 +363,51 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   /// STEP 2: Continue full analysis after user approves
   Future<void> continueFullAnalysis({bool includeTailoring = true}) async {
+    print('');
+    print('════════════════════════════════════════════════════════════');
+    print('🎯 [DEBUG] continueFullAnalysis() CALLED');
+    print('   _waitingForUserDecision: $_waitingForUserDecision');
+    print('   _currentCompany: $_currentCompany');
+    print('   includeTailoring: $includeTailoring');
+    print('════════════════════════════════════════════════════════════');
+    
     if (!_waitingForUserDecision || _currentCompany == null) {
-      print('⚠️ [SKILLS_ANALYSIS_CONTROLLER] Cannot continue - not waiting for decision or no company');
+      print('❌ [DEBUG] EARLY RETURN - Cannot continue!');
+      print('   _waitingForUserDecision: $_waitingForUserDecision');
+      print('   _currentCompany: $_currentCompany');
       return;
     }
 
     try {
+      print('✅ [DEBUG] Passed validation, setting loading state...');
       _setState(SkillsAnalysisState.loading);
       _waitingForUserDecision = false;
       
       print('🚀 [SKILLS_ANALYSIS_CONTROLLER] Continuing full analysis for: $_currentCompany');
+      print('   Making API call to /api/continue-full-analysis/$_currentCompany');
       
       final continueResult = await ContextAwareAnalysisService.continueFullAnalysis(
         company: _currentCompany!,
         includeTailoring: includeTailoring,
       );
       
+      print('📥 [DEBUG] API Response received');
+      print('   success: ${continueResult.success}');
+      print('   errors: ${continueResult.errors}');
+      
       if (continueResult.success) {
         print('✅ [SKILLS_ANALYSIS_CONTROLLER] Full analysis completed successfully');
+        print('   Processing results and converting to UI format...');
         
         // Convert ContextAwareAnalysisResult to SkillsAnalysisResult format
         // Merge initial analysis results with full analysis results
         try {
           final results = continueResult.results as Map<String, dynamic>? ?? {};
           final initialResults = _initialAnalysisResult?.results;
+          
+          print('🔍 [DEBUG] Converting results:');
+          print('   continueResult.results keys: ${results.keys.toList()}');
+          print('   initialResults available: ${initialResults != null}');
           
           // Build complete SkillsAnalysisResult from both initial and full results
           _fullResult = SkillsAnalysisResult(
@@ -424,12 +445,24 @@ class SkillsAnalysisController extends ChangeNotifier {
           print('   CV Skills: ${_fullResult!.cvSkills.totalSkillsCount}');
           print('   JD Skills: ${_fullResult!.jdSkills.totalSkillsCount}');
           print('   Has Component Analysis: ${_fullResult!.componentAnalysis != null}');
+          print('   _fullResult != null: ${_fullResult != null}');
           
+          print('');
+          print('🎨 [DEBUG] Setting state to completed...');
           _setState(SkillsAnalysisState.completed);
+          print('   State is now: $_state');
+          
           _showNotification('Full analysis completed successfully!');
           
+          print('');
+          print('🚀 [DEBUG] Calling _startProgressiveDisplay()...');
           // Start progressive display to show results
           _startProgressiveDisplay();
+          print('✅ [DEBUG] _startProgressiveDisplay() completed');
+          print('   _showAnalyzeMatch: $_showAnalyzeMatch');
+          print('   _showPreextractedComparison: $_showPreextractedComparison');
+          print('   _result != null: ${_result != null}');
+          print('════════════════════════════════════════════════════════════');
           
           // Try to fetch AI recommendations
           if (_currentCompany != null) {
@@ -705,7 +738,20 @@ class SkillsAnalysisController extends ChangeNotifier {
 
   /// Start progressive display of results
   void _startProgressiveDisplay() {
-    if (_fullResult == null) return;
+    print('');
+    print('════════════════════════════════════════════════════════════');
+    print('🎨 [DEBUG] _startProgressiveDisplay() CALLED');
+    print('   _fullResult == null: ${_fullResult == null}');
+    print('════════════════════════════════════════════════════════════');
+    
+    if (_fullResult == null) {
+      print('❌ [DEBUG] _fullResult is null - EARLY RETURN');
+      return;
+    }
+
+    print('✅ [DEBUG] _fullResult is available, proceeding...');
+    print('   CV Skills count: ${_fullResult!.cvSkills.totalSkillsCount}');
+    print('   JD Skills count: ${_fullResult!.jdSkills.totalSkillsCount}');
 
     // Reset progressive state (but keep ATS states as they're managed by polling)
     _showAnalyzeMatch = false;
@@ -714,6 +760,8 @@ class SkillsAnalysisController extends ChangeNotifier {
     _showAIRecommendationResults = false;
     // Don't reset ATS loading states here - they're managed by the polling process
 
+    print('');
+    print('📝 [DEBUG] Creating _result from _fullResult...');
     // Step 1: Show skills immediately (side-by-side display)
     _result = SkillsAnalysisResult(
       cvSkills: _fullResult!.cvSkills,
@@ -729,8 +777,15 @@ class SkillsAnalysisController extends ChangeNotifier {
       preextractedRawOutput: null,
       preextractedCompanyName: null,
     );
+    print('✅ [DEBUG] _result created successfully');
+    print('   _result != null: ${_result != null}');
+    print('   _result.isSuccess: ${_result!.isSuccess}');
 
+    print('');
+    print('🎨 [DEBUG] Setting state to completed...');
     _setState(SkillsAnalysisState.completed);
+    print('   State is now: $_state');
+    
     _showNotification(
       '✅ Skills extracted! Found ${_fullResult!.cvSkills.totalSkillsCount} CV skills and ${_fullResult!.jdSkills.totalSkillsCount} JD skills.',
     );
