@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../exceptions/cv_exceptions.dart';
 import '../models/skills_analysis_model.dart';
 import '../services/context_aware_analysis_service.dart';
+import '../services/skills_analysis_service.dart';
 
 /// States for context-aware analysis
 enum ContextAwareAnalysisState {
@@ -30,6 +31,13 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   bool _showAnalysisResults = false;
   bool _showTailoredCV = false;
   bool _waitingForUserDecision = false; // New: flag for user decision
+  SkillsAnalysisResult? _displayResult;
+  bool _showAnalyzeMatchDisplay = false;
+  bool _showPreextractedComparisonDisplay = false;
+  bool _showATSLoading = false;
+  bool _showATSResults = false;
+  bool _showAIRecommendationLoading = false;
+  bool _showAIRecommendationResults = false;
   Timer? _progressiveTimer;
 
   // Notification callbacks
@@ -37,7 +45,8 @@ class ContextAwareAnalysisController extends ChangeNotifier {
 
   // Getters for state management
   ContextAwareAnalysisState get state => _state;
-  ContextAwareAnalysisResult? get result => _result;
+  ContextAwareAnalysisResult? get contextResult => _result;
+  SkillsAnalysisResult? get result => _displayResult;
   InitialAnalysisResult? get initialResult => _initialResult; // New
   CVContextResult? get cvContext => _cvContext;
   String? get errorMessage => _errorMessage;
@@ -50,7 +59,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   // Convenience getters for UI
   bool get isLoading => _state == ContextAwareAnalysisState.loading;
   bool get hasResults =>
-      _state == ContextAwareAnalysisState.completed && _result != null;
+      _state == ContextAwareAnalysisState.completed && _displayResult != null;
   bool get hasError => _state == ContextAwareAnalysisState.error;
   bool get isCancelled => _state == ContextAwareAnalysisState.cancelled;
   bool get hasInitialResults => _initialResult != null && _initialResult!.success; // New
@@ -60,6 +69,12 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   bool get showCVContext => _showCVContext;
   bool get showAnalysisResults => _showAnalysisResults;
   bool get showTailoredCV => _showTailoredCV;
+  bool get showAnalyzeMatch => _showAnalyzeMatchDisplay;
+  bool get showPreextractedComparison => _showPreextractedComparisonDisplay;
+  bool get showATSLoading => _showATSLoading;
+  bool get showATSResults => _showATSResults;
+  bool get showAIRecommendationLoading => _showAIRecommendationLoading;
+  bool get showAIRecommendationResults => _showAIRecommendationResults;
 
   // CV Context getters
   String get cvDisplayName => _cvContext?.cvContext.displayName ?? 'Unknown CV';
@@ -83,17 +98,23 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   List<String> get warnings => _result?.warnings ?? [];
 
   // Results getters (compatible with existing UI)
-  SkillsData? get cvSkills => _extractSkillsData(_result?.results?.cvSkills);
-  SkillsData? get jdSkills => _extractSkillsData(_result?.results?.jdSkills);
+  SkillsData? get cvSkills =>
+      _displayResult?.cvSkills ?? _extractSkillsData(_result?.results?.cvSkills);
+  SkillsData? get jdSkills =>
+      _displayResult?.jdSkills ?? _extractSkillsData(_result?.results?.jdSkills);
   String? get cvComprehensiveAnalysis =>
+      _displayResult?.cvComprehensiveAnalysis ??
       _result?.results?.cvSkills['comprehensive_analysis'];
   String? get jdComprehensiveAnalysis =>
+      _displayResult?.jdComprehensiveAnalysis ??
       _result?.results?.jdSkills['comprehensive_analysis'];
   List<String> get extractedKeywords =>
+      _displayResult?.extractedKeywords ??
       List<String>.from(_result?.results?.cvSkills['extracted_keywords'] ?? []);
 
   // Analyze Match getters (if available in results)
   AnalyzeMatchResult? get analyzeMatch =>
+      _displayResult?.analyzeMatch ??
       _extractAnalyzeMatch(_result?.results?.cvJdMatching);
   String? get analyzeMatchRawAnalysis => analyzeMatch?.rawAnalysis;
   String? get analyzeMatchCompanyName => analyzeMatch?.companyName;
@@ -106,6 +127,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
 
   // Component Analysis getters
   ComponentAnalysisResult? get componentAnalysis =>
+      _displayResult?.componentAnalysis ??
       _extractComponentAnalysis(_result?.results?.componentAnalysis);
   bool get hasComponentAnalysis => componentAnalysis != null;
   double get skillsRelevanceScore =>
@@ -118,6 +140,11 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       componentAnalysis?.extractedScores['role_seniority'] ?? 0.0;
   double get technicalDepthScore =>
       componentAnalysis?.extractedScores['technical_depth'] ?? 0.0;
+
+  ATSResult? get atsResult => _displayResult?.atsResult;
+  bool get hasATSResult => atsResult != null;
+  AIRecommendationResult? get aiRecommendation =>
+      _displayResult?.aiRecommendation;
 
   // Tailored CV getters
   String? get tailoredCvPath => _result?.results?.tailoredCvPath;
@@ -279,6 +306,9 @@ class ContextAwareAnalysisController extends ChangeNotifier {
         _setCompleted();
         _showAnalysisResults = true;
 
+        // Build display-friendly result
+        _initializeDisplayResult();
+
         // Show completion message
         final completionMessage = _buildCompletionMessage();
         _showNotification(completionMessage);
@@ -327,6 +357,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     _progressiveTimer = null;
 
     _result = null;
+    _displayResult = null;
     _initialResult = null; // New
     _cvContext = null;
     _currentJdUrl = null;
@@ -340,6 +371,12 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     _showAnalysisResults = false;
     _showTailoredCV = false;
     _waitingForUserDecision = false; // New
+    _showAnalyzeMatchDisplay = false;
+    _showPreextractedComparisonDisplay = false;
+    _showATSLoading = false;
+    _showATSResults = false;
+    _showAIRecommendationLoading = false;
+    _showAIRecommendationResults = false;
 
     notifyListeners();
   }
@@ -413,6 +450,115 @@ class ContextAwareAnalysisController extends ChangeNotifier {
         _showTailoredCV = true;
         notifyListeners();
       });
+    }
+  }
+
+  void _initializeDisplayResult() {
+    final results = _result?.results;
+    if (results == null) {
+      _displayResult = null;
+      return;
+    }
+
+    final baseJson = <String, dynamic>{
+      'cv_skills': results.cvSkills,
+      'jd_skills': results.jdSkills,
+      'cv_comprehensive_analysis':
+          results.cvSkills['comprehensive_analysis'],
+      'jd_comprehensive_analysis':
+          results.jdSkills['comprehensive_analysis'],
+      'analyze_match': results.cvJdMatching,
+      'company': _currentCompany,
+      'warnings': _result?.warnings,
+      'suggestions': results.jobInfo['suggestions'],
+    };
+
+    if (results.aiRecommendations.isNotEmpty) {
+      baseJson['ai_recommendation'] = results.aiRecommendations;
+    }
+    if (results.componentAnalysis.isNotEmpty) {
+      baseJson['component_analysis'] = results.componentAnalysis;
+    }
+    if (results.jobInfo['preextracted_skills_comparison'] != null) {
+      baseJson['preextracted_skills_comparison'] =
+          results.jobInfo['preextracted_skills_comparison'];
+    }
+
+    _displayResult = SkillsAnalysisResult.fromJson(baseJson);
+    _updateDisplayFlags();
+
+    // Begin polling for complete ATS/component results
+    _showATSLoading = true;
+    if (_displayResult?.aiRecommendation == null) {
+      _showAIRecommendationLoading = true;
+    }
+    notifyListeners();
+    unawaited(_pollForCompleteResults());
+  }
+
+  Future<void> _pollForCompleteResults() async {
+    if (_currentCompany == null) {
+      return;
+    }
+
+    final completeResults =
+        await SkillsAnalysisService.waitForCompleteResults(
+      _currentCompany!,
+      maxWaitTimeSeconds: 120,
+    );
+
+    if (completeResults == null) {
+      _showATSLoading = false;
+      _showAIRecommendationLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final preextracted =
+        completeResults['preextracted_skills_comparison'] as Map<String, dynamic>?;
+
+    _displayResult = (_displayResult ??
+            SkillsAnalysisResult.fromJson({
+              'cv_skills': _result?.results?.cvSkills ?? {},
+              'jd_skills': _result?.results?.jdSkills ?? {},
+            }))
+        .copyWith(
+      componentAnalysis: completeResults['component_analysis'] != null
+          ? ComponentAnalysisResult.fromJson(
+              completeResults['component_analysis'])
+          : _displayResult?.componentAnalysis,
+      atsResult: completeResults['ats_score'] != null
+          ? ATSResult.fromJson(completeResults['ats_score'])
+          : _displayResult?.atsResult,
+      aiRecommendation: completeResults['ai_recommendation'] != null
+          ? AIRecommendationResult.fromJson(
+              completeResults['ai_recommendation'])
+          : _displayResult?.aiRecommendation,
+      preextractedRawOutput:
+          preextracted?['raw_output'] ?? _displayResult?.preextractedRawOutput,
+      preextractedCompanyName: preextracted?['company_name'] ??
+          completeResults['company'] ??
+          _displayResult?.preextractedCompanyName,
+      company: completeResults['company'] ?? _displayResult?.company,
+    );
+
+    _showATSLoading = false;
+    _updateDisplayFlags();
+    notifyListeners();
+  }
+
+  void _updateDisplayFlags() {
+    _showAnalyzeMatchDisplay = _displayResult?.analyzeMatch != null;
+    _showPreextractedComparisonDisplay =
+        _displayResult?.hasPreextractedComparison ?? false;
+    final hasATS = _displayResult?.atsResult != null;
+    if (hasATS) {
+      _showATSResults = true;
+    }
+    final hasAI = _displayResult?.aiRecommendation?.hasContent ?? false;
+    if (hasAI) {
+      _showAIRecommendationLoading = false;
+      _showAIRecommendationResults = true;
     }
   }
 
