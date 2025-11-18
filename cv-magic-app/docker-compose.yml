@@ -31,8 +31,14 @@ services:
         condition: service_started
     volumes:
       - user_data:/app/user
+      - ./logs:/app/logs
     expose:
       - "8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
   postgres:
     image: postgres:15-alpine
@@ -67,6 +73,12 @@ services:
     volumes:
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./logs:/var/log/nginx_custom
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 volumes:
   pg_data:
   redis_data:

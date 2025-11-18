@@ -198,6 +198,12 @@ deploy_full() {
         echo "🔍 Checking current directory and git status..."
         cd $VPS_PATH
         
+        echo "🧹 Clearing log files..."
+        mkdir -p logs
+        > logs/backend_logs.txt
+        > logs/frontend_logs.txt
+        echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
+        
         echo "📥 Pulling latest changes from $BRANCH branch..."
         git fetch origin
         git checkout $BRANCH
@@ -250,6 +256,14 @@ deploy_full() {
         
         echo "🌐 Testing backend connectivity..."
         curl -f http://localhost:8000/health || echo "Health check failed, but deployment might still be successful"
+        
+        echo "📝 Starting log collection..."
+        # Start logging in background
+        nohup docker compose logs -f backend >> logs/backend_logs.txt 2>&1 &
+        nohup docker compose logs -f nginx >> logs/frontend_logs.txt 2>&1 &
+        echo "  ✅ Logs are being saved to:"
+        echo "     - logs/backend_logs.txt"
+        echo "     - logs/frontend_logs.txt"
         
         echo "✅ Full deployment completed!"
 EOF
