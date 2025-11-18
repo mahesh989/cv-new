@@ -605,9 +605,6 @@ async def _run_pipeline(cname: str, token_data=None):
                 logger.info(f"✅ [PIPELINE] Input recommendation file created for {cname}: {saved_file}")
             pipeline_results["input_recommendation"] = True
         else:
-                logger.warning(f"⚠️ [PIPELINE] Failed to save input recommendation for {cname}")
-                pipeline_results["input_recommendation"] = False
-        else:
             logger.warning(f"⚠️ [PIPELINE] Failed to extract recommendation data for {cname}")
             pipeline_results["input_recommendation"] = False
     except Exception as rec_error:
