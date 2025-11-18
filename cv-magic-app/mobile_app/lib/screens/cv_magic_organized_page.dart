@@ -206,21 +206,11 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             const SizedBox(height: 16),
 
             // Analyze Match Decision Widget (appears after initial analysis)
-            // Wrapped in AnimatedBuilder to listen to controller changes
-            AnimatedBuilder(
-              animation: _skillsController,
-              builder: (context, child) {
-                if (_skillsController.waitingForUserDecision) {
-                  return Column(
-                    children: [
-                      _buildAnalyzeMatchDecisionCard(),
-                      const SizedBox(height: 16),
-                    ],
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+            if (_skillsController.waitingForUserDecision)
+              _buildAnalyzeMatchDecisionCard(),
+
+            if (_skillsController.waitingForUserDecision)
+              const SizedBox(height: 16),
 
             // Skills Analysis Section
             Card(

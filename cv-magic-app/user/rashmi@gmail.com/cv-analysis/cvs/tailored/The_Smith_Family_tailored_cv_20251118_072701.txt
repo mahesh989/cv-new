@@ -1,0 +1,61 @@
+Maheshwor Tiwari  | +61 414 032 507  | maheshtwari99@gmail.com  | LinkedIn  | Hurstville, NSW 2220, Australia
+
+CAREER HIGHLIGHTS
+--------------------
+Data Analyst with 2 years' experience in data analysis and AI engineering, delivering insights and automation solutions using Python, SQL, and Power BI for tech and construction industries.
+
+• Improved forecasting accuracy by 25% through database analysis and Power BI dashboards for The Bitrates.
+• Developed AI-powered CV Agent serving 500+ users, enhancing resume optimization and ATS scoring.
+• Automated data extraction processes, increasing accuracy by 20% and reducing reporting time by 30%.
+
+Skills: Python | SQL | Power BI | Data Analysis | AI Model Evaluation | Dashboard Creation
+
+SKILLS
+  Technical Skills:
+  • Power BI, Python, SQL
+  Soft Skills:
+  • Communication, Problem Solving, Teamwork
+  Other Skills:
+  • Flutter, Data Analysis, Report Generation, Dashboard Creation, Time Management
+
+EXPERIENCE
+Data Analyst & AI Engineer         July 2024 – Present
+The Bitrates, Hurstville, NSW, Australia
+
+• Analyzed client website databases using PostgreSQL and Power BI, improving forecasting accuracy by 25%.
+• Built CV Agent with Flutter/Dart frontend and Python backend, serving 500+ users with multi-LLM orchestration.
+• Implemented real-time ATS optimization algorithms, enhancing keyword analysis and readability for 500+ resumes.
+
+AI Data Trainer & Evaluator         July 2024 – Present
+Outlier.ai, Remote
+
+• Evaluated and improved AI model responses for accuracy and quality, enhancing system reliability.
+• Developed training prompts to identify AI performance gaps, improving model capabilities by 15%.
+• Provided detailed feedback on AI training projects, contributing to reliable AI systems.
+
+Data Analyst         Mar. 2024 – June 2024
+iBuild Building Solutions, Victoria, Australia
+
+• Automated data extraction for population datasets using Python, improving accuracy by 20%.
+• Built Power BI dashboards reducing client reporting time by 30% and improving decision-making.
+• Optimized customer support response times through data analysis, achieving 15% efficiency gain.
+
+EDUCATION
+Master of Data Science
+Charles Darwin University, Sydney, Australia, GPA GPA: 6.35/7, 2023 – 2024
+
+Bachelor of Science in Information Technology
+Tribhuvan University, Kathmandu, Nepal, GPA GPA: 83%, July 2014 – Aug. 2018
+
+PROJECTS
+CV Agent – AI-Powered Resume Builder
+Technologies: Flutter, Python, Multi-LLM, APIs
+• Developed full-stack AI application with 500+ active users; real-time ATS scoring and optimization.
+• Implemented multi-model fallback system ensuring 99% uptime and reliable content generation.
+• Created role-specific templates with quantified achievement suggestions and skills gap analysis.
+
+YOLOv8n Corrosion Detection Optimization
+Technologies: PyTorch, Computer Vision, Edge AI
+• Optimized YOLOv8n model for real-time corrosion detection on drones and edge devices.
+• Achieved 11.39% model size reduction through L1-norm structured pruning.
+• Improved inference speed by 39.34%, making model deployable on resource-constrained devices.

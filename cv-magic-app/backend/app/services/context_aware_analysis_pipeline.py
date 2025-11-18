@@ -275,36 +275,9 @@ class ContextAwareAnalysisPipeline:
             }}
             """
             
-            # Create user object for AI service (need real user from database for API key lookup)
-            from app.models.auth import UserData
-            from app.models.user import User
-            from app.database import get_database
-            from datetime import datetime, timezone
-            
-            # Query database for user record
-            user_record = None
-            for db in get_database():
-                user_record = db.query(User).filter(User.email == self.user_email).first()
-                break
-            
-            if not user_record:
-                raise ValueError(f"User {self.user_email} not found in database. Cannot retrieve API keys.")
-            
-            # Create UserData with real user ID
-            current_user = UserData(
-                id=str(user_record.id),
-                email=user_record.email,
-                name=user_record.full_name or user_record.username or "User",
-                created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
-                is_active=user_record.is_active
-            )
-            
-            # Initialize AI service for this user
-            ai_service.initialize_for_user(current_user)
-            
             cv_response = await ai_service.generate_response(
                 prompt=cv_prompt,
-                user=current_user,
+                user=user,
                 temperature=0.0,
                 max_tokens=1000
             )
@@ -412,19 +385,7 @@ class ContextAwareAnalysisPipeline:
                     from app.utils.timestamp_utils import TimestampUtils
                     
                     company_dir = self.base_dir / "applied_companies" / context.company
-                    logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Checking for JD file in: {company_dir}")
-                    logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Base dir exists: {self.base_dir.exists()}, Company dir exists: {company_dir.exists()}")
-                    
-                    # Ensure company directory exists before checking for files
-                    try:
-                        company_dir.mkdir(parents=True, exist_ok=True)
-                        logger.info(f"📁 [CONTEXT_AWARE_PIPELINE] Ensured company directory exists: {company_dir}")
-                    except Exception as dir_err:
-                        logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] Failed to create company directory: {dir_err}")
-                        raise
-                    
                     jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
-                    logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] JD file lookup result: {jd_file}")
                     
                     if jd_file and jd_file.exists():
                         logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Found existing JD file: {jd_file}")
@@ -448,68 +409,8 @@ class ContextAwareAnalysisPipeline:
                         results.steps_completed.append("jd_analysis_from_existing")
                         
                     else:
-                        # No JD file exists - fetch from URL
-                        logger.info(f"🔄 [CONTEXT_AWARE_PIPELINE] No JD file found, fetching from URL: {context.jd_url}")
-                        try:
-                            # First, fetch JD text from URL
-                            from app.services.job_scraper import scrape_job_description_async
-                            import json
-                            
-                            logger.info(f"🌐 [CONTEXT_AWARE_PIPELINE] Fetching JD from URL: {context.jd_url}")
-                            jd_text = await scrape_job_description_async(context.jd_url)
-                            
-                            if not jd_text or jd_text.startswith("Error:") or len(jd_text.strip()) < 10:
-                                raise Exception(f"Failed to fetch JD from URL: {jd_text if jd_text else 'Empty response'}")
-                            
-                            logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Fetched JD text: {len(jd_text)} characters")
-                            
-                            # Save JD file before analysis
-                            company_dir = self.base_dir / "applied_companies" / context.company
-                            company_dir.mkdir(parents=True, exist_ok=True)
-                            timestamp = TimestampUtils.get_timestamp()
-                            jd_file = company_dir / f"jd_original_{timestamp}.json"
-                            
-                            with open(jd_file, 'w', encoding='utf-8') as f:
-                                json.dump({
-                                    "text": jd_text,
-                                    "jd_url": context.jd_url,
-                                    "saved_at": datetime.now().isoformat()
-                                }, f, ensure_ascii=False, indent=2)
-                            
-                            logger.info(f"💾 [CONTEXT_AWARE_PIPELINE] Saved JD file: {jd_file}")
-                            
-                            # Now analyze the JD
-                            jd_analysis_result = await self.jd_analyzer.analyze_and_save_company_jd(
-                                context.company,
-                                force_refresh=True,
-                                base_path=str(self.base_dir)
-                            )
-                            
-                            if jd_analysis_result and jd_analysis_result.all_keywords:
-                                results.jd_analysis = jd_analysis_result.to_dict()
-                                results.steps_completed.append("jd_analysis_fetched")
-                                
-                                # Try to get job info from newly created files
-                                company_dir = self.base_dir / "applied_companies" / context.company
-                                job_info_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"job_info_{context.company.replace(' ', '_')}", "json")
-                                if job_info_file and job_info_file.exists():
-                                    import json
-                                    with open(job_info_file, 'r', encoding='utf-8') as f:
-                                        results.job_info = json.load(f)
-                                    results.steps_completed.append("job_info_fetched")
-                                else:
-                                    # Create minimal job info
-                                    results.job_info = {
-                                        "company_name": context.company,
-                                        "job_title": "Unknown",
-                                        "success": True
-                                    }
-                                    results.steps_completed.append("job_info_minimal")
-                            else:
-                                raise Exception("Failed to fetch JD from URL")
-                        except Exception as fetch_error:
-                            logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] Failed to fetch JD from URL: {fetch_error}")
-                            return None
+                        logger.error(f"❌ [CONTEXT_AWARE_PIPELINE] No JD file found for company: {context.company}")
+                        return None
                 
                 # Cache the results for future use
                 jd_data_to_cache = {
@@ -585,13 +486,6 @@ class ContextAwareAnalysisPipeline:
                 cv_file_path=cv_file_path,
                 jd_analysis_data=jd_data.get('jd_analysis', {})
             )
-            
-            # Save matching results to file for later use by ATS recommendation service
-            try:
-                saved_path = self.cv_jd_matcher._save_match_result(matching_result, context.company)
-                logger.info(f"💾 [CONTEXT_AWARE_PIPELINE] CV-JD matching results saved to: {saved_path}")
-            except Exception as save_error:
-                logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to save CV-JD matching results: {save_error}")
             
             results.cv_jd_matching = matching_result.to_dict()
             results.steps_completed.append("cv_jd_matching")
@@ -719,37 +613,21 @@ class ContextAwareAnalysisPipeline:
                 return None
             
             # Get analyze match prompt
-            from app.services.skill_extraction.prompt_templates import get_prompt
+            from app.services.skill_extraction.prompts.skill_prompt_loader import get_skill_prompt
             from datetime import datetime
             current_date = datetime.now().strftime('%Y-%m-%d')
-            analyze_match_prompt = get_prompt('analyze_match', cv_text=cv_content, job_text=jd_text, current_date=current_date)
+            analyze_match_prompt = get_skill_prompt('analyze_match', cv_text=cv_content, job_text=jd_text, current_date=current_date)
             
             # Generate AI response for analyze match
             from app.models.auth import UserData
-            from app.models.user import User
-            from app.database import get_database
             from datetime import timezone
-            
-            # Query database for real user record
-            user_record = None
-            for db in get_database():
-                user_record = db.query(User).filter(User.email == self.user_email).first()
-                break
-            
-            if not user_record:
-                raise ValueError(f"User {self.user_email} not found in database")
-            
-            # Create UserData with real user ID
             current_user = UserData(
-                id=str(user_record.id),
-                email=user_record.email,
-                name=user_record.full_name or user_record.username or "User",
-                created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
-                is_active=user_record.is_active
+                id="pipeline_user",
+                email=self.user_email,
+                name=self.user_email.split("@")[0] if self.user_email else "user",
+                created_at=datetime.now(timezone.utc),
+                is_active=True
             )
-            
-            # Initialize AI service for this user
-            ai_service.initialize_for_user(current_user)
             
             analyze_match_response = await ai_service.generate_response(
                 prompt=analyze_match_prompt,

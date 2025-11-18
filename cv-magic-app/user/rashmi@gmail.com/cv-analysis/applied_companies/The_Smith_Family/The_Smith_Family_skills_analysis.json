@@ -1,0 +1,242 @@
+{
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-11-18T07:26:08.342",
+      "component_analyses": {
+        "technical": {
+          "technical_analysis": {
+            "technical_depth_score": 75.0,
+            "core_skills_match_percentage": 80.0,
+            "technical_stack_fit_percentage": 85.0,
+            "complexity_readiness_score": 70.0,
+            "learning_agility_score": 85.0,
+            "jd_problem_complexity": 5,
+            "technical_strengths": [
+              "Built CV Agent AI application serving 500+ users with multi-LLM orchestration, real-time ATS optimization, and full-stack development (Flutter/Dart, Python).",
+              "Optimized YOLOv8n deep learning model achieving 39.34% faster inference and 11.39% size reduction for edge deployment.",
+              "Automated ETL pipeline for property listing analysis with real-time processing capabilities."
+            ],
+            "technical_gaps": [
+              "No specific mention of large-scale distributed systems or high availability architecture.",
+              "Limited evidence of experience with large-scale data systems or complex cloud infrastructure."
+            ],
+            "cv_sophistication_level": "Derived from analysis",
+            "cv_primary_domain": "Extracted from CV",
+            "jd_required_sophistication": "Extracted from JD",
+            "overqualification_risk": "LOW"
+          }
+        },
+        "skills": {
+          "overall_skills_score": 80.0,
+          "business_readiness_score": 80.0,
+          "skills_analysis": [
+            {
+              "skill": "Consolidated skills analysis",
+              "relevance_score": 80.0,
+              "context": "Python used in corporate production (100%), SQL in corporate (100%), Power BI in corporate (100%), Machine Learning in commercial projects (70%)",
+              "business_application": "Python used in corporate production (100%), SQL in corporate (100%), Power BI in corporate (100%), Machine Learning in commercial projects (70%)"
+            }
+          ],
+          "corporate_skills_strength": "Python used in corporate production (100%), SQL in corporate (100%), Power BI in corporate (100%), Machine Learning in commercial projects (70%)",
+          "academic_skills_discount": "Applied in scoring",
+          "strength_areas": [
+            "Built CV Agent AI application serving 500+ users with multi-LLM orchestration, real-time ATS optimization, and full-stack development (Flutter/Dart, Python).",
+            "Optimized YOLOv8n deep learning model achieving 39.34% faster inference and 11.39% size reduction for edge deployment.",
+            "Automated ETL pipeline for property listing analysis with real-time processing capabilities."
+          ],
+          "critical_gaps": [
+            "Advanced Excel",
+            "Specific NFP experience",
+            "Stakeholder Management"
+          ],
+          "immediate_value_skills": [
+            "Built CV Agent AI application serving 500+ users with multi-LLM orchestration, real-time ATS optimization, and full-stack development (Flutter/Dart, Python).",
+            "Optimized YOLOv8n deep learning model achieving 39.34% faster inference and 11.39% size reduction for edge deployment.",
+            "Automated ETL pipeline for property listing analysis with real-time processing capabilities."
+          ],
+          "training_investment_needed": [
+            "Advanced Excel",
+            "Specific NFP experience",
+            "Stakeholder Management"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "1.0",
+            "cv_corporate_years": "1.0",
+            "cv_academic_years": "0.0",
+            "cv_role_level": "Entry",
+            "jd_required_years": "1.0",
+            "jd_role_level": "Entry",
+            "alignment_score": 70.0,
+            "experience_gaps": [
+              "No direct team management experience",
+              "Limited evidence of stakeholder management at a senior level"
+            ],
+            "experience_strengths": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "Data Analyst at iBuild Building Solutions",
+              "Software Engineer and Analyst at Property Console"
+            ],
+            "overqualification_risk": "MEDIUM",
+            "cv_progression": [
+              "Derived from analysis"
+            ],
+            "quantified_achievements": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "Data Analyst at iBuild Building Solutions",
+              "Software Engineer and Analyst at Property Console"
+            ]
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "1.0",
+            "cv_academic_years": "0.0",
+            "seniority_score": 60.0,
+            "corporate_seniority_match": 60.0,
+            "leadership_readiness_score": 70.0,
+            "experience_match_percentage": 70.0,
+            "responsibility_fit_percentage": 60.0,
+            "growth_trajectory_score": 85.0,
+            "cv_responsibility_scope": "Entry",
+            "cv_leadership_indicators": "5",
+            "jd_required_seniority": "Entry",
+            "overqualification_risk": "MEDIUM",
+            "seniority_strengths": [
+              "Data Analyst & AI Engineer (Contract) at The Bitrates",
+              "Data Analyst at iBuild Building Solutions",
+              "Software Engineer and Analyst at Property Console"
+            ],
+            "seniority_gaps": [
+              "No direct team management experience",
+              "Limited evidence of stakeholder management at a senior level"
+            ],
+            "readiness_assessment": "Score: 60.0"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Property Tech/Construction",
+            "jd_target_industry": "Not For Profit (NFP)",
+            "industry_alignment_score": 65.0,
+            "transition_type": "Different industry, corporate background",
+            "success_probability": "MEDIUM",
+            "hiring_risk_assessment": "MEDIUM RISK",
+            "industry_strengths": [
+              "The candidate's experience in property tech and construction involves data analysis and AI, which are transferable skills. However, transitioning to the NFP sector may require adaptation to different organizational goals and stakeholder expectations. The candidate's technical skills are applicable, but understanding the NFP context will be crucial."
+            ],
+            "critical_industry_gaps": [],
+            "corporate_background_bonus": "15",
+            "domain_overlap_percentage": 65.0,
+            "data_familiarity_score": 70.0,
+            "stakeholder_fit_score": 70.0,
+            "business_cycle_alignment": 65.0,
+            "direct_industry_match": "PARTIAL",
+            "cultural_adaptation_difficulty": "MEDIUM",
+            "adaptation_timeline": "3-6 months"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 9,
+            "total_preferred_keywords": 2,
+            "matched_required_count": 6,
+            "matched_preferred_count": 1,
+            "missing_required": 3,
+            "missing_preferred": 1
+          },
+          "bonus_breakdown": {
+            "required_bonus": 3.0,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.2,
+            "preferred_penalty": -0.15,
+            "total_bonus": 1.55
+          },
+          "coverage_metrics": {
+            "required_coverage": 66.67,
+            "preferred_coverage": 50.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 80.0,
+        "experience_alignment": 70.0,
+        "industry_fit": 65.0,
+        "domain_overlap_percentage": 65.0,
+        "data_familiarity_score": 70.0,
+        "stakeholder_fit_score": 70.0,
+        "business_cycle_alignment": 65.0,
+        "industry_transition_fit": 65.0,
+        "role_seniority": 60.0,
+        "experience_match_percentage": 70.0,
+        "role_similarity": 70.0,
+        "responsibility_fit_percentage": 60.0,
+        "leadership_readiness_score": 70.0,
+        "growth_trajectory_score": 85.0,
+        "seniority_match": 60.0,
+        "technical_depth": 75.0,
+        "core_skills_match_percentage": 80.0,
+        "required_skills_coverage": 80.0,
+        "technical_stack_fit_percentage": 85.0,
+        "tech_stack_similarity": 85.0,
+        "complexity_readiness_score": 70.0,
+        "learning_agility_score": 85.0,
+        "jd_problem_complexity": 5.0,
+        "business_readiness": 80.0,
+        "requirement_bonus": 1.55,
+        "total_bonus": 1.55,
+        "required_bonus": 3.0,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.2,
+        "preferred_penalty": -0.15,
+        "required_coverage": 66.67,
+        "preferred_coverage": 50.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-11-18T07:26:08.344",
+      "final_ats_score": 27.8,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally not recommended - Significant gaps",
+      "breakdown": {
+        "category1": {
+          "score": 0.0,
+          "max_points": 65,
+          "technical_skills_match_rate": 0.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 0.0,
+          "technical_points": 0.0,
+          "domain_points": 0.0,
+          "soft_points": 0.0,
+          "missing_counts": {
+            "technical": 0,
+            "soft": 0,
+            "domain": 0
+          }
+        },
+        "category2": {
+          "score": 26.2,
+          "max_points": 35,
+          "technical_skills_component": {
+            "score": 17.6,
+            "max_points": 22,
+            "average": 80.0
+          },
+          "experience_fit_component": {
+            "score": 8.6,
+            "max_points": 13,
+            "average": 66.2
+          }
+        },
+        "base_score": 26.2,
+        "bonus_points": 1.6,
+        "boost_applied": 0.0
+      },
+      "scoring_version": "v2_65_35_split"
+    }
+  ]
+}

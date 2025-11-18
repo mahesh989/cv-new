@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "company": "The_Smith_Family",
+    "generated_at": "2025-11-18T07:26:08.344998",
+    "ats_score_current": 27.8,
+    "match_rate_current": 0
+  },
+  "skills_extraction": {
+    "cv": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    },
+    "jd": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    }
+  },
+  "preliminary_decision": {
+    "decision": "UNKNOWN",
+    "match_score": 0,
+    "confidence": 0,
+    "should_proceed": true,
+    "critical_missing": [],
+    "implicit_likely": [],
+    "learnable_gaps": []
+  },
+  "match_summary": {
+    "overall_match_rate": 0,
+    "by_category": {},
+    "missing_keywords": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    }
+  },
+  "keyword_integration_guidance": {
+    "tier1_always_add": {
+      "technical": [],
+      "soft": [],
+      "domain": [
+        "problem-solving",
+        "stakeholder management",
+        "business processes",
+        "curiosity"
+      ]
+    },
+    "tier2_add_if_evidence": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    },
+    "tier3_never_add": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    },
+    "already_in_cv_filtered": []
+  },
+  "component_summary": {
+    "skills_relevance": 80.0,
+    "experience_alignment": 70.0,
+    "role_similarity": 70.0,
+    "seniority_match": 60.0,
+    "industry_fit": 65.0,
+    "required_skills_coverage": 80.0,
+    "tech_stack_similarity": 85.0,
+    "business_readiness": 80.0,
+    "industry_transition_fit": 65.0
+  },
+  "ats_scoring": {
+    "final_score": 27.8,
+    "category1_score": 0.0,
+    "category2_score": 26.2,
+    "category3_score": 0,
+    "improvement_needed": 47.2,
+    "category1_keywords": 0.0,
+    "category2_ai_analysis": 26.2,
+    "missing_counts": {
+      "technical": 0,
+      "soft": 0,
+      "domain": 0
+    },
+    "scoring_version": "v2_65_35_split"
+  }
+}
