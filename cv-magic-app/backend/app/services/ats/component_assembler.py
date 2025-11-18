@@ -212,7 +212,8 @@ class ComponentAssembler:
 
     def _get_match_rates_for_company(self, company: str) -> Dict[str, Any]:
         """
-        Extract match rates and missing counts from latest preextracted comparison entry for ATS v2.
+        Extract match rates and missing counts from skills_analysis file (SOURCE OF TRUTH).
+        Uses the cv_skills and jd_skills data to calculate accurate match rates.
         """
         try:
             company_dir = self.base_dir / "applied_companies" / company
@@ -229,10 +230,16 @@ class ComponentAssembler:
                     "soft_missing_count": 0,
                     "domain_missing_count": 0
                 }
+            
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            preextracted_entries = data.get("preextracted_comparison_entries", [])
-            if not preextracted_entries:
+            
+            # Extract CV and JD skills from the analysis file (SOURCE OF TRUTH)
+            cv_skills = data.get("cv_skills", {})
+            jd_skills = data.get("jd_skills", {})
+            
+            if not cv_skills or not jd_skills:
+                logger.warning("[ASSEMBLER] CV or JD skills not found in analysis file")
                 return {
                     "technical_skills_match_rate": 0.0,
                     "domain_keywords_match_rate": 0.0,
@@ -241,9 +248,89 @@ class ComponentAssembler:
                     "soft_missing_count": 0,
                     "domain_missing_count": 0
                 }
-            latest_preextracted = preextracted_entries[-1]
-            preextracted_data = {"content": latest_preextracted.get("content", "")}
-            tech_rate, domain_rate, soft_rate, tech_missing, soft_missing, domain_missing = self.ats_calculator._calculate_match_rates(preextracted_data)
+            
+            # Calculate match rates for each category with semantic matching
+            def calculate_category_match_rate(cv_list, jd_list, category_name):
+                cv_lower = [s.lower().strip() for s in cv_list]
+                jd_lower = [s.lower().strip() for s in jd_list]
+                
+                if not jd_lower:
+                    logger.info(f"[ASSEMBLER] No JD {category_name} found, match rate = 0%")
+                    return 0.0, 0
+                
+                # Enhanced matching: exact + partial + semantic equivalence
+                matched_count = 0
+                matched_jd_skills = []
+                
+                for jd_skill in jd_lower:
+                    is_matched = False
+                    
+                    # 1. Exact match
+                    if jd_skill in cv_lower:
+                        is_matched = True
+                    
+                    # 2. Partial match (JD skill is substring of CV skill or vice versa)
+                    if not is_matched:
+                        for cv_skill in cv_lower:
+                            if jd_skill in cv_skill or cv_skill in jd_skill:
+                                # Require at least 3 characters for partial match to avoid false positives
+                                if len(jd_skill) >= 3 and len(cv_skill) >= 3:
+                                    is_matched = True
+                                    break
+                    
+                    # 3. Semantic equivalence patterns
+                    if not is_matched:
+                        equivalence_map = {
+                            "data analysis": ["data analytics", "analyzing data", "data analyst"],
+                            "python": ["python programming", "python development"],
+                            "sql": ["mysql", "postgresql", "sql server", "t-sql"],
+                            "excel": ["microsoft excel", "ms excel", "advanced excel"],
+                            "power bi": ["powerbi", "power-bi", "microsoft power bi"],
+                            "problem solving": ["problem-solving", "solving problems"],
+                            "communication": ["communicate", "communicating", "communications"],
+                            "teamwork": ["team collaboration", "collaborative", "team player"],
+                            "leadership": ["lead", "leading", "leader"],
+                            "management": ["manage", "managing", "manager"],
+                        }
+                        
+                        for base_skill, variations in equivalence_map.items():
+                            if base_skill in jd_skill or jd_skill in base_skill:
+                                for variation in variations:
+                                    if any(variation in cv_skill for cv_skill in cv_lower):
+                                        is_matched = True
+                                        break
+                            if is_matched:
+                                break
+                    
+                    if is_matched:
+                        matched_count += 1
+                        matched_jd_skills.append(jd_skill)
+                
+                missing_count = len(jd_lower) - matched_count
+                match_rate = (matched_count / len(jd_lower)) * 100.0 if jd_lower else 0.0
+                
+                logger.info(f"[ASSEMBLER] {category_name}: {matched_count}/{len(jd_lower)} matched ({match_rate:.1f}%), {missing_count} missing")
+                if matched_jd_skills[:5]:  # Log first 5 matched skills
+                    logger.info(f"[ASSEMBLER]   Matched: {matched_jd_skills[:5]}")
+                return match_rate, missing_count
+            
+            # Technical Skills
+            cv_technical = cv_skills.get("technical_skills", [])
+            jd_technical = jd_skills.get("technical_skills", [])
+            tech_rate, tech_missing = calculate_category_match_rate(cv_technical, jd_technical, "Technical")
+            
+            # Soft Skills
+            cv_soft = cv_skills.get("soft_skills", [])
+            jd_soft = jd_skills.get("soft_skills", [])
+            soft_rate, soft_missing = calculate_category_match_rate(cv_soft, jd_soft, "Soft Skills")
+            
+            # Domain Keywords
+            cv_domain = cv_skills.get("domain_keywords", [])
+            jd_domain = jd_skills.get("domain_keywords", [])
+            domain_rate, domain_missing = calculate_category_match_rate(cv_domain, jd_domain, "Domain")
+            
+            logger.info(f"[ASSEMBLER] ✅ Match rates calculated - Tech: {tech_rate:.1f}%, Soft: {soft_rate:.1f}%, Domain: {domain_rate:.1f}%")
+            
             return {
                 "technical_skills_match_rate": tech_rate,
                 "domain_keywords_match_rate": domain_rate,
@@ -253,7 +340,7 @@ class ComponentAssembler:
                 "domain_missing_count": domain_missing
             }
         except Exception as e:
-            logger.error("[ASSEMBLER] Failed to extract match rates for v2: %s", e)
+            logger.error("[ASSEMBLER] Failed to extract match rates for v2: %s", e, exc_info=True)
             return {
                 "technical_skills_match_rate": 0.0,
                 "domain_keywords_match_rate": 0.0,
