@@ -200,6 +200,9 @@ deploy_full() {
         
         echo "🧹 Clearing log files..."
         mkdir -p logs
+        chown $VPS_USER:$VPS_USER logs || true
+        touch logs/backend_logs.txt logs/frontend_logs.txt
+        chmod 664 logs/backend_logs.txt logs/frontend_logs.txt || true
         > logs/backend_logs.txt
         > logs/frontend_logs.txt
         echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
