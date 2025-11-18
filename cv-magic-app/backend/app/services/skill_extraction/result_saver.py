@@ -79,6 +79,13 @@ class SkillExtractionResultSaver:
                     logger.info(f"🏢 Using company name from JD data: {jd_data['company_name']} -> {company_slug}")
                 else:
                     company_slug = asyncio.run(self._extract_company_name_v2(jd_skills, jd_url, jd_data))
+
+            # If we still have a slug derived from URL/AI, try to replace it with the canonical
+            # company slug saved in saved_jobs (which preserves the real company name)
+            company_slug = self._resolve_company_slug_from_saved_jobs(
+                proposed_slug=company_slug,
+                jd_url=jd_url
+            )
             
             # Create company folder under applied_companies subfolder
             company_folder = self.base_dir / "applied_companies" / company_slug
@@ -175,6 +182,49 @@ class SkillExtractionResultSaver:
         except Exception as e:
             logger.error(f"❌ Failed to save analysis results: {str(e)}")
             raise Exception(f"Result saving error: {str(e)}")
+
+    def _resolve_company_slug_from_saved_jobs(self, proposed_slug: str, jd_url: Optional[str] = None) -> str:
+        """
+        Try to replace a URL-derived slug with the canonical slug from saved jobs (real company name)
+        """
+        try:
+            from app.utils.user_path_utils import get_user_saved_jobs_path
+            import json
+
+            saved_jobs_file = get_user_saved_jobs_path(self.user_email)
+            if not saved_jobs_file.exists():
+                return proposed_slug
+
+            with open(saved_jobs_file, "r", encoding="utf-8") as f:
+                saved_jobs_data = json.load(f)
+
+            jobs = saved_jobs_data.get("jobs", [])
+            # 1) Exact match by job_url if provided
+            if jd_url:
+                for job in jobs:
+                    if job.get("job_url") == jd_url and job.get("company_name"):
+                        slug = self._create_company_slug(job["company_name"])
+                        logger.info(
+                            f"🏢 [SAVED_JOBS] Matched job_url -> using company slug {slug} for {job['company_name']}"
+                        )
+                        return slug
+
+            # 2) Match by existing slug
+            proposed_slug_lower = proposed_slug.lower()
+            for job in jobs:
+                company_name = job.get("company_name")
+                if not company_name:
+                    continue
+                slug = self._create_company_slug(company_name)
+                if slug.lower() == proposed_slug_lower:
+                    logger.info(
+                        f"🏢 [SAVED_JOBS] Matched slug -> using company slug {slug} for {company_name}"
+                    )
+                    return slug
+        except Exception as e:
+            logger.warning(f"⚠️ [SAVED_JOBS] Failed to resolve company slug from saved jobs: {e}")
+
+        return proposed_slug
     
     def _extract_company_name(self, jd_skills: Dict, jd_url: str, jd_data: Optional[Dict] = None) -> str:
         """
