@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 # Configuration
 # Try hostname first, fallback to IP if needed
 VPS_HOST="${VPS_HOST:-cvagent.duckdns.org}"
-VPS_HOST_IP="13.210.217.204"  # Backup IP if hostname doesn't work
+VPS_HOST_IP=""  # Backup IP if hostname doesn't work
 VPS_USER="ubuntu"
 VPS_PATH="~/cv-new/cv-magic-app"
 BRANCH="enhanced-vps-ghs"
@@ -199,10 +199,7 @@ deploy_full() {
         cd $VPS_PATH
         
         echo "🧹 Clearing log files..."
-        sudo mkdir -p logs
-        sudo chown -R $VPS_USER:$VPS_USER logs || true
-        sudo touch logs/backend_logs.txt logs/frontend_logs.txt
-        sudo chmod 664 logs/backend_logs.txt logs/frontend_logs.txt || true
+        mkdir -p logs
         > logs/backend_logs.txt
         > logs/frontend_logs.txt
         echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
