@@ -381,17 +381,70 @@ class SkillsAnalysisController extends ChangeNotifier {
       
       if (continueResult.success) {
         print('✅ [SKILLS_ANALYSIS_CONTROLLER] Full analysis completed successfully');
-        _setState(SkillsAnalysisState.completed);
-        _showNotification('Full analysis completed successfully!');
         
         // Convert ContextAwareAnalysisResult to SkillsAnalysisResult format
-        // Since the full results are in the backend format, we need to handle them accordingly
-        // For now, just show success and let the user view the results on the backend/reports page
-        notifyListeners();
-        
-        // Try to fetch AI recommendations
-        if (_currentCompany != null) {
-          unawaited(_tryShowLatestAIRecommendation(_currentCompany!));
+        // Merge initial analysis results with full analysis results
+        try {
+          final results = continueResult.results as Map<String, dynamic>? ?? {};
+          final initialResults = _initialAnalysisResult?.results;
+          
+          // Build complete SkillsAnalysisResult from both initial and full results
+          _fullResult = SkillsAnalysisResult(
+            cvSkills: initialResults?.cvSkills != null 
+                ? SkillsData.fromJson(initialResults!.cvSkills)
+                : SkillsData(
+                    technicalSkills: [],
+                    softSkills: [],
+                    domainKeywords: [],
+                  ),
+            jdSkills: initialResults?.jdSkills != null
+                ? SkillsData.fromJson(initialResults!.jdSkills)
+                : SkillsData(
+                    technicalSkills: [],
+                    softSkills: [],
+                    domainKeywords: [],
+                  ),
+            cvComprehensiveAnalysis: '',
+            jdComprehensiveAnalysis: '',
+            expandableAnalysis: null,
+            extractedKeywords: [],
+            executionDuration: continueResult.processingTime,
+            isSuccess: true,
+            analyzeMatch: null, // Already shown in initial phase
+            preextractedRawOutput: null,
+            preextractedCompanyName: _currentCompany,
+            componentAnalysis: results['component_analysis'] != null
+                ? ComponentAnalysisResult.fromJson(results['component_analysis'] as Map<String, dynamic>)
+                : null,
+            aiRecommendation: null, // Will be fetched separately
+            warnings: continueResult.warnings,
+          );
+          
+          print('📊 [SKILLS_ANALYSIS_CONTROLLER] Converted results to SkillsAnalysisResult');
+          print('   CV Skills: ${_fullResult!.cvSkills.totalSkillsCount}');
+          print('   JD Skills: ${_fullResult!.jdSkills.totalSkillsCount}');
+          print('   Has Component Analysis: ${_fullResult!.componentAnalysis != null}');
+          
+          _setState(SkillsAnalysisState.completed);
+          _showNotification('Full analysis completed successfully!');
+          
+          // Start progressive display to show results
+          _startProgressiveDisplay();
+          
+          // Try to fetch AI recommendations
+          if (_currentCompany != null) {
+            unawaited(_tryShowLatestAIRecommendation(_currentCompany!));
+          }
+        } catch (e) {
+          print('❌ [SKILLS_ANALYSIS_CONTROLLER] Error converting results: $e');
+          _setState(SkillsAnalysisState.completed);
+          _showNotification('Full analysis completed! View results in the dashboard.');
+          notifyListeners();
+          
+          // Still try to fetch AI recommendations
+          if (_currentCompany != null) {
+            unawaited(_tryShowLatestAIRecommendation(_currentCompany!));
+          }
         }
       } else {
         _setError(continueResult.errors.first);
