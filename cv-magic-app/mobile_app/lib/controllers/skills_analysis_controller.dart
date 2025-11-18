@@ -810,22 +810,28 @@ class SkillsAnalysisController extends ChangeNotifier {
 
         // Step 4: Start polling for component analysis and ATS results immediately
         _startPollingForCompleteResults();
-      }
-    } else {
-      // No analyze match, go directly to preextracted comparison
-      if (_fullResult?.preextractedRawOutput != null) {
-        _showPreextractedComparison = true;
-        _result = _result!.copyWith(
-          preextractedRawOutput: _fullResult!.preextractedRawOutput,
-          preextractedCompanyName: _fullResult!.preextractedCompanyName,
-        );
-        notifyListeners();
-        _showNotification('📊 Skills comparison analysis completed!');
-
-        // Step 4: Start polling for component analysis and ATS results immediately
-        _startPollingForCompleteResults();
+        return;
       }
     }
+
+    // No analyze match, go directly to preextracted comparison when available
+    if (_fullResult?.preextractedRawOutput != null) {
+      _showPreextractedComparison = true;
+      _result = _result!.copyWith(
+        preextractedRawOutput: _fullResult!.preextractedRawOutput,
+        preextractedCompanyName: _fullResult!.preextractedCompanyName,
+      );
+      notifyListeners();
+      _showNotification('📊 Skills comparison analysis completed!');
+
+      // Step 4: Start polling for component analysis and ATS results immediately
+      _startPollingForCompleteResults();
+      return;
+    }
+
+    // Fallback: ensure we still kick off polling so ATS/component results surface
+    print('ℹ️ [DEBUG] No analyze match or comparison data, starting polling anyway');
+    _startPollingForCompleteResults();
   }
 
   /// Start polling for component analysis and ATS calculation results
