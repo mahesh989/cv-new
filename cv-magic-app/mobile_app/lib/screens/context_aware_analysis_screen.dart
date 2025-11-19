@@ -6,6 +6,7 @@ import '../controllers/skills_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
 import '../core/theme/app_theme.dart';
 import '../services/context_aware_analysis_service.dart';
+import '../models/skills_analysis_model.dart';
 
 /// Screen for performing context-aware analysis with intelligent CV selection
 class ContextAwareAnalysisScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class ContextAwareAnalysisScreen extends StatefulWidget {
 class _ContextAwareAnalysisScreenState
     extends State<ContextAwareAnalysisScreen> {
   late ContextAwareAnalysisController _controller;
+  _ContextAwareSkillsAdapter? _adapterController;
   final TextEditingController _jdUrlController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
   bool _isRerun = false;
@@ -46,6 +48,7 @@ class _ContextAwareAnalysisScreenState
 
   @override
   void dispose() {
+    _adapterController?.dispose();
     _controller.dispose();
     _jdUrlController.dispose();
     _companyController.dispose();
@@ -820,10 +823,142 @@ class _ContextAwareAnalysisScreenState
   /// This is a temporary adapter until we fully migrate the UI
   SkillsAnalysisController _createCompatibleController(
       ContextAwareAnalysisController contextController) {
-    // This would need to be implemented to bridge the gap between
-    // the old SkillsAnalysisController interface and the new ContextAwareAnalysisController
-    // For now, we'll return a basic implementation
-    throw UnimplementedError(
-        'Compatible controller adapter not yet implemented');
+    if (_adapterController == null || _adapterController!.source != contextController) {
+      _adapterController?.dispose();
+      _adapterController = _ContextAwareSkillsAdapter(contextController);
+    }
+    return _adapterController!;
   }
+}
+
+class _ContextAwareSkillsAdapter extends SkillsAnalysisController {
+  final ContextAwareAnalysisController _source;
+  late final VoidCallback _relay;
+
+  _ContextAwareSkillsAdapter(this._source) {
+    _relay = () => notifyListeners();
+    _source.addListener(_relay);
+  }
+
+  ContextAwareAnalysisController get source => _source;
+
+  SkillsAnalysisState _mapState(ContextAwareAnalysisState state) {
+    switch (state) {
+      case ContextAwareAnalysisState.loading:
+        return SkillsAnalysisState.loading;
+      case ContextAwareAnalysisState.completed:
+        return SkillsAnalysisState.completed;
+      case ContextAwareAnalysisState.error:
+        return SkillsAnalysisState.error;
+      case ContextAwareAnalysisState.cancelled:
+        return SkillsAnalysisState.cancelled;
+      case ContextAwareAnalysisState.idle:
+        return SkillsAnalysisState.idle;
+    }
+  }
+
+  @override
+  void dispose() {
+    _source.removeListener(_relay);
+    super.dispose();
+  }
+
+  // State + status mapping
+  @override
+  SkillsAnalysisState get state => _mapState(_source.state);
+
+  @override
+  bool get hasResults => _source.hasResults;
+
+  @override
+  bool get hasError => _source.hasError;
+
+  @override
+  bool get isLoading => _source.isLoading;
+
+  @override
+  bool get isCancelled => _source.isCancelled;
+
+  @override
+  String? get errorMessage => _source.errorMessage;
+
+  @override
+  Duration get executionDuration => _source.executionDuration;
+
+  // Result + skills mapping
+  @override
+  SkillsAnalysisResult? get result => _source.result;
+
+  @override
+  int get cvTotalSkills => _source.cvTotalSkills;
+
+  @override
+  int get jdTotalSkills => _source.jdTotalSkills;
+
+  @override
+  List<String> get cvTechnicalSkills =>
+      _source.cvSkills?.technicalSkills ?? const [];
+
+  @override
+  List<String> get cvSoftSkills =>
+      _source.cvSkills?.softSkills ?? const [];
+
+  @override
+  List<String> get cvDomainKeywords =>
+      _source.cvSkills?.domainKeywords ?? const [];
+
+  @override
+  List<String> get jdTechnicalSkills =>
+      _source.jdSkills?.technicalSkills ?? const [];
+
+  @override
+  List<String> get jdSoftSkills =>
+      _source.jdSkills?.softSkills ?? const [];
+
+  @override
+  List<String> get jdDomainKeywords =>
+      _source.jdSkills?.domainKeywords ?? const [];
+
+  @override
+  String? get cvComprehensiveAnalysis => _source.cvComprehensiveAnalysis;
+
+  @override
+  String? get jdComprehensiveAnalysis => _source.jdComprehensiveAnalysis;
+
+  @override
+  List<String> get extractedKeywords => _source.extractedKeywords;
+
+  // Progressive display flags
+  @override
+  bool get showAnalyzeMatch => _source.showAnalyzeMatch;
+
+  @override
+  bool get showPreextractedComparison => _source.showPreextractedComparison;
+
+  @override
+  bool get showATSLoading => _source.showATSLoading;
+
+  @override
+  bool get showATSResults => _source.showATSResults;
+
+  @override
+  bool get showAIRecommendationLoading =>
+      _source.showAIRecommendationLoading;
+
+  @override
+  bool get showAIRecommendationResults =>
+      _source.showAIRecommendationResults;
+
+  // Analyze match / ATS / AI data
+  @override
+  bool get hasAnalyzeMatch => _source.hasAnalyzeMatch;
+
+  @override
+  AnalyzeMatchResult? get analyzeMatch => _source.analyzeMatch;
+
+  @override
+  bool get hasATSResult => _source.hasATSResult;
+
+  @override
+  ATSResult? get atsResult => _source.atsResult;
 }

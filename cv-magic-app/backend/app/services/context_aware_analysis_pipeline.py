@@ -10,6 +10,7 @@ This service orchestrates the entire analysis pipeline with awareness of:
 
 import logging
 import asyncio
+import json
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from pathlib import Path
@@ -824,6 +825,9 @@ class ContextAwareAnalysisPipeline:
                 results.errors.append(f"No CV found for company: {company}")
                 return results
             
+            # Hydrate previously extracted skills/matching so UI has baseline data
+            self._hydrate_previous_results(company, results)
+            
             # Step 1: Component Analysis
             component_analysis = await self._run_component_analysis(context, results)
             
@@ -853,6 +857,65 @@ class ContextAwareAnalysisPipeline:
             results.errors.append(str(e))
             results.processing_time = (datetime.now() - start_time).total_seconds()
             return results
+
+    def _hydrate_previous_results(self, company: str, results: AnalysisResults) -> None:
+        """Load previously saved skills/matching data so continuation responses stay complete."""
+        try:
+            from app.utils.timestamp_utils import TimestampUtils
+            company_dir = self.base_dir / "applied_companies" / company
+            if not company_dir.exists():
+                logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] No company folder found while hydrating continuation results: {company_dir}")
+                return
+
+            # Load latest skills analysis snapshot
+            skills_prefix = f"{company}_skills_analysis"
+            skills_file = TimestampUtils.find_latest_timestamped_file(company_dir, skills_prefix, "json")
+            if not skills_file:
+                # Fallback to generic prefix in case company slug changed case
+                skills_file = TimestampUtils.find_latest_timestamped_file(company_dir, "skills_analysis", "json")
+
+            if skills_file and skills_file.exists():
+                with open(skills_file, 'r', encoding='utf-8') as f:
+                    saved_skills = json.load(f)
+                results.cv_skills = saved_skills.get("cv_skills", {})
+                results.jd_skills = saved_skills.get("jd_skills", {})
+                # Some historical files may include comprehensive analysis fields or job info
+                if saved_skills.get("job_info"):
+                    results.job_info = saved_skills.get("job_info", {})
+                if saved_skills.get("cv_jd_matching"):
+                    results.cv_jd_matching = saved_skills.get("cv_jd_matching", {})
+                logger.info(f"💾 [CONTEXT_AWARE_PIPELINE] Loaded saved skills snapshot: {skills_file.name}")
+            else:
+                logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] No skills snapshot found for {company}")
+
+            # Load latest CV-JD matching results (needed for ATS bonus calc + UI)
+            match_file = TimestampUtils.find_latest_timestamped_file(company_dir, "cv_jd_match_results", "json")
+            if not match_file:
+                legacy_match = company_dir / "cv_jd_match_results.json"
+                if legacy_match.exists():
+                    match_file = legacy_match
+            if match_file and match_file.exists():
+                with open(match_file, 'r', encoding='utf-8') as f:
+                    results.cv_jd_matching = json.load(f)
+                logger.info(f"💾 [CONTEXT_AWARE_PIPELINE] Loaded CV-JD matching file: {match_file.name}")
+            else:
+                logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] No CV-JD match results found for {company}")
+
+            # Load latest job_info as best-effort
+            if not results.job_info:
+                job_info_prefix = f"job_info_{company}"
+                job_info_file = TimestampUtils.find_latest_timestamped_file(company_dir, job_info_prefix, "json")
+                if not job_info_file:
+                    legacy_job_info = company_dir / "job_info.json"
+                    if legacy_job_info.exists():
+                        job_info_file = legacy_job_info
+                if job_info_file and job_info_file.exists():
+                    with open(job_info_file, 'r', encoding='utf-8') as f:
+                        results.job_info = json.load(f)
+                    logger.info(f"💾 [CONTEXT_AWARE_PIPELINE] Loaded job info file: {job_info_file.name}")
+
+        except Exception as exc:
+            logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to hydrate previous results for {company}: {exc}")
 
 
 # Global instance removed - service now requires user_email parameter

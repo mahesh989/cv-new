@@ -1410,6 +1410,11 @@ async def continue_full_analysis(
                 "steps_completed": results.steps_completed,
                 "steps_skipped": results.steps_skipped,
                 "results": {
+                    "cv_skills": results.cv_skills,
+                    "jd_skills": results.jd_skills,
+                    "jd_analysis": results.jd_analysis,
+                    "job_info": results.job_info,
+                    "cv_jd_matching": results.cv_jd_matching,
                     "component_analysis": results.component_analysis,
                     "ats_recommendations": results.ats_recommendations,
                     "ai_recommendations": results.ai_recommendations,

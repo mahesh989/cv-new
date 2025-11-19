@@ -224,6 +224,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       );
 
       if (_initialResult!.success) {
+        _executionDuration = _initialResult!.processingTime;
         debugPrint('✅ [CONTEXT_AWARE_CONTROLLER] Initial analysis successful');
         debugPrint('   requiresUserDecision: ${_initialResult!.requiresUserDecision}');
         debugPrint('   analyzeMatchDecision: ${_initialResult!.analyzeMatchDecision != null}');
@@ -303,6 +304,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       );
 
       if (_result!.success) {
+        _executionDuration = _result!.processingTime;
         _setCompleted();
         _showAnalysisResults = true;
 
