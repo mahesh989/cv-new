@@ -171,7 +171,7 @@ async def frontend_request_logging_middleware(request: Request, call_next):
             response.headers["Access-Control-Allow-Origin"] = origin
         else:
             # Default to GitHub Pages if origin not found or not allowed
-            response.headers["Access-Control-Allow-Origin"] = "https://mahesh989.github.io"
+        response.headers["Access-Control-Allow-Origin"] = "https://mahesh989.github.io"
         
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         response.headers["Access-Control-Allow-Headers"] = "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, X-Requested-With, X-Current-Model"

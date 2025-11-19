@@ -159,8 +159,8 @@ async def save_cv_for_analysis(
                     # Update minimal JSON with error status
                     try:
                         minimal_json['processing_status'] = f"failed: {processing_result.get('error', 'Unknown error')}"
-                        with open(json_filepath, 'w', encoding='utf-8') as f:
-                            json.dump(minimal_json, f, indent=2, ensure_ascii=False)
+                    with open(json_filepath, 'w', encoding='utf-8') as f:
+                        json.dump(minimal_json, f, indent=2, ensure_ascii=False)
                         logger.info(f"✅ [BACKGROUND] Updated minimal JSON with error status: {json_filepath}")
                     except Exception as save_error:
                         logger.error(f"❌ [BACKGROUND] Failed to update JSON file: {save_error}")
