@@ -204,6 +204,8 @@ class ContextAwareAnalysisPipeline:
             if not cv_jd_matching:
                 results.errors.append("CV-JD matching failed")
                 return results
+            else:
+                self._persist_cv_jd_match_results(context.company, cv_jd_matching)
             
             # Step 5.5: Analyze Match (new step for cost-saving workflow)
             analyze_match_decision = await self._perform_analyze_match(context, results)
@@ -1155,6 +1157,19 @@ class ContextAwareAnalysisPipeline:
             logger.info("📄 [CONTEXT_AWARE_PIPELINE] Pre-extracted comparison appended for %s", context.company)
         except Exception as comparison_error:
             logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Pre-extracted comparison failed: {comparison_error}")
+
+    def _persist_cv_jd_match_results(self, company: str, match_data: Dict[str, Any]) -> None:
+        """Persist CV-JD match results with timestamped filename for reuse."""
+        try:
+            company_dir = self.base_dir / "applied_companies" / company
+            company_dir.mkdir(parents=True, exist_ok=True)
+            timestamp = TimestampUtils.get_timestamp()
+            file_path = company_dir / f"{company}_cv_jd_matching_{timestamp}.json"
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(match_data, f, indent=2, ensure_ascii=False)
+            logger.info("💾 [CONTEXT_AWARE_PIPELINE] CV-JD match results saved to %s", file_path.name)
+        except Exception as match_error:
+            logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to persist CV-JD match results: {match_error}")
 
     def _build_jd_summary(self, jd_analysis: Optional[Dict[str, Any]]) -> Optional[str]:
         """Create a short textual summary of JD requirements."""
