@@ -115,25 +115,6 @@ class UserAPIKeyManager:
                 ).first()
                 
                 if user_key:
-                    # Safety check: Verify the API key was created after the user account
-                    # This prevents new users from inheriting API keys from deleted users with the same ID
-                    if hasattr(user, 'created_at') and user.created_at:
-                        from datetime import timezone
-                        user_created = user.created_at
-                        if user_created.tzinfo is None:
-                            user_created = user_created.replace(tzinfo=timezone.utc)
-                        
-                        key_created = user_key.created_at
-                        if key_created.tzinfo is None:
-                            key_created = key_created.replace(tzinfo=timezone.utc)
-                        
-                        # If API key was created before user account, it's orphaned - don't return it
-                        if key_created < user_created:
-                            logger.warning(f"⚠️ [API_KEY] Orphaned API key detected for user {user.email} (ID: {user_id}), provider {provider}. Key created {key_created}, user created {user_created}. Removing orphaned key.")
-                            db.delete(user_key)
-                            db.commit()
-                            return None
-                    
                     return user_key.get_api_key()
                 return None
                 
