@@ -84,6 +84,13 @@ class SkillExtractionResultSaver:
             company_folder = self.base_dir / "applied_companies" / company_slug
             company_folder.mkdir(parents=True, exist_ok=True)
             
+            # Verify folder was created successfully
+            if company_folder.exists() and company_folder.is_dir():
+                logger.info(f"✅ [RESULT_SAVER] Company folder created/verified: {company_folder}")
+            else:
+                logger.error(f"❌ [RESULT_SAVER] Failed to create company folder: {company_folder}")
+                raise Exception(f"Company folder creation failed: {company_folder}")
+            
             # Ensure all required directories exist
             from app.utils.user_path_utils import ensure_user_directories
             ensure_user_directories(self.user_email)

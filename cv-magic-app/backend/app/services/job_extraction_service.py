@@ -552,10 +552,19 @@ TEXT TO ANALYZE:
             
             # Create company slug for folder name
             company_slug = self._create_company_slug(job_info["company_name"])
+            logger.info(f"🏢 [JD_ANALYSIS] Creating folder for company: {job_info['company_name']} -> {company_slug}")
             
             # Create company-specific directory under applied_companies subfolder
             company_dir = self.cv_analysis_dir / "applied_companies" / company_slug
             company_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Verify folder was created successfully
+            if company_dir.exists() and company_dir.is_dir():
+                logger.info(f"✅ [JD_ANALYSIS] Company folder created successfully: {company_dir}")
+                logger.info(f"   📁 Full path: {company_dir.absolute()}")
+            else:
+                logger.error(f"❌ [JD_ANALYSIS] Failed to create company folder: {company_dir}")
+                raise Exception(f"Company folder creation failed: {company_dir}")
             
             # Save job_info JSON file with timestamp
             timestamp = TimestampUtils.get_timestamp()
