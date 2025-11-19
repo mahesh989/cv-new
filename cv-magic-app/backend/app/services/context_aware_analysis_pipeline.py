@@ -246,15 +246,34 @@ class ContextAwareAnalysisPipeline:
             from pathlib import Path
             
             # Read CV content from file
+            # Convert to absolute path if it's relative
             cv_file = Path(cv_path)
+            if not cv_file.is_absolute():
+                # Try resolving relative to base_dir first, then current working directory
+                if hasattr(self, 'base_dir') and self.base_dir:
+                    cv_file = self.base_dir.parent.parent / cv_path
+                else:
+                    cv_file = Path(cv_path).resolve()
+            
             if not cv_file.exists():
-                return {"error": f"CV file not found: {cv_path}"}
+                return {"error": f"CV file not found: {cv_path} (resolved to: {cv_file})"}
             
             with open(cv_file, 'r', encoding='utf-8') as f:
                 cv_text = f.read()
             
             if not cv_text.strip():
                 return {"error": "CV file is empty"}
+            
+            # Create user object from user_email for AI service
+            from app.models.auth import UserData
+            from datetime import datetime, timezone
+            current_user = UserData(
+                id="pipeline_user",  # Use a placeholder ID for pipeline operations
+                email=self.user_email,
+                name=self.user_email.split("@")[0] if self.user_email else "user",
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
             
             # Use AI service to extract skills from CV text
             cv_prompt = f"""
@@ -277,7 +296,7 @@ class ContextAwareAnalysisPipeline:
             
             cv_response = await ai_service.generate_response(
                 prompt=cv_prompt,
-                user=user,
+                user=current_user,
                 temperature=0.0,
                 max_tokens=1000
             )
