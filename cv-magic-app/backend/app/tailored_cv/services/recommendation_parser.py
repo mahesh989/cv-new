@@ -816,12 +816,33 @@ class RecommendationParser:
                     raise
 
             elif 'text' in data:
-                # Raw text format - parse it
-                logger.info("📝 Detected raw text format")
+                # Raw text format - could be plain text or JSON string
+                logger.info("📝 Detected 'text' field in CV")
                 cv_text = data.get('text', '')
                 logger.info(f"  - Text length: {len(cv_text)} characters")
                 if not cv_text.strip():
                     raise ValueError("Original CV JSON 'text' field is empty")
+                
+                # CRITICAL FIX: Check if 'text' field contains JSON string
+                # This happens when CV is stored as {"text": "{...escaped JSON...}"}
+                try:
+                    # Try to parse as JSON first
+                    text_as_json = json.loads(cv_text)
+                    if isinstance(text_as_json, dict) and ('personal_information' in text_as_json or 'contact' in text_as_json):
+                        logger.info("✅ Detected JSON string inside 'text' field - parsing as structured CV")
+                        # Recursively call with the parsed JSON
+                        if 'personal_information' in text_as_json:
+                            return RecommendationParser._convert_structured_to_model_format(text_as_json)
+                        elif all(key in text_as_json for key in ['contact', 'experience', 'skills']):
+                            # Already in the right format
+                            logger.info("✅ Successfully parsed nested JSON from 'text' field")
+                            return text_as_json
+                except (json.JSONDecodeError, ValueError):
+                    # Not JSON, treat as plain text
+                    pass
+                
+                # Fall back to text parsing
+                logger.info("📝 Treating 'text' field as plain text")
                 structured_cv = RecommendationParser._parse_cv_text(cv_text)
                 logger.info("✅ Successfully parsed raw text CV")
                 return structured_cv
