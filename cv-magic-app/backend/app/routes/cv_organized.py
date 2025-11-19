@@ -140,51 +140,33 @@ async def save_cv_for_analysis(
             raise
         
         # Start structured processing in background (non-blocking)
-        # This will enhance the JSON file with structured data after AI call
+        # Use the same method that was working before: process_existing_cv()
         async def background_structured_processing():
-            """Background task to enhance JSON with structured CV data after AI parsing"""
+            """Background task to process CV into structured format using the working method"""
             try:
-                logger.info(f"🔄 [BACKGROUND] Starting structured processing for {filename}...")
-                
+                logger.info(f"🔄 [BACKGROUND] Processing {filename} for structured CV format (background)...")
                 from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
                 user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
                 
-                # Process the content directly instead of looking for the file in upload folder
-                cv_content = cv_content_result['content']
-                structured_cv = await user_enhanced_cv_upload_service._parse_to_structured_format(
-                    text_content=cv_content,
-                    filename=filename,
-                    user=current_user
-                )
+                # Use the same method that was working before
+                processing_result = await user_enhanced_cv_upload_service.process_existing_cv(filename=filename)
                 
-                # Check if parsing was successful (no parsing_error field means success)
-                if not structured_cv.get('parsing_error'):
-                    # Save the structured CV to the original folder
-                    # CRITICAL: Always overwrite when user selects CV from dropdown
-                    # Ensure filename is stored in the structured CV for tracking
-                    if 'filename' not in structured_cv:
-                        structured_cv['filename'] = filename
-                    if 'saved_at' not in structured_cv:
-                        structured_cv['saved_at'] = datetime.now().isoformat()
-                    structured_cv['content_type'] = "structured"
-                    structured_cv['processing_status'] = "completed"
-                    
-                    with open(json_filepath, 'w', encoding='utf-8') as f:
-                        json.dump(structured_cv, f, indent=2, ensure_ascii=False)
-                    
-                    logger.info(f"✅ [BACKGROUND] CV enhanced with structured JSON: {json_filepath} (filename: {filename})")
-                    logger.info(f"✅ [BACKGROUND] JSON file size: {json_filepath.stat().st_size if json_filepath.exists() else 0} bytes")
+                if processing_result.get('success', False):
+                    logger.info(f"✅ [BACKGROUND] CV saved as structured JSON: {processing_result.get('structured_cv_path')}")
+                    logger.info(f"✅ [BACKGROUND] Processing result: {processing_result.get('sections_found', 'N/A')} sections found")
                 else:
-                    error_msg = structured_cv.get('parsing_error', 'Unknown error')
-                    logger.warning(f"⚠️ [BACKGROUND] Failed to enhance structured CV: {error_msg}")
-                    # Update status but keep the file with minimal format
-                    minimal_json['processing_status'] = f"failed: {error_msg}"
-                    with open(json_filepath, 'w', encoding='utf-8') as f:
-                        json.dump(minimal_json, f, indent=2, ensure_ascii=False)
-                    logger.info(f"✅ [BACKGROUND] Updated minimal JSON with error status: {json_filepath}")
+                    logger.warning(f"⚠️ [BACKGROUND] Failed to save structured CV: {processing_result.get('error', 'Unknown error')}")
+                    # Update minimal JSON with error status
+                    try:
+                        minimal_json['processing_status'] = f"failed: {processing_result.get('error', 'Unknown error')}"
+                        with open(json_filepath, 'w', encoding='utf-8') as f:
+                            json.dump(minimal_json, f, indent=2, ensure_ascii=False)
+                        logger.info(f"✅ [BACKGROUND] Updated minimal JSON with error status: {json_filepath}")
+                    except Exception as save_error:
+                        logger.error(f"❌ [BACKGROUND] Failed to update JSON file: {save_error}")
                     
             except Exception as e:
-                logger.error(f"❌ [BACKGROUND] Error enhancing structured CV: {str(e)}")
+                logger.error(f"❌ [BACKGROUND] Error processing structured CV: {str(e)}")
                 import traceback
                 logger.error(f"❌ [BACKGROUND] Traceback: {traceback.format_exc()}")
                 # Update status but keep the file
