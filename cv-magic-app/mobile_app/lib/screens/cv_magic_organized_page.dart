@@ -236,10 +236,19 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             AnimatedBuilder(
               animation: _skillsController,
               builder: (context, _) {
+                // Debug logging
+                debugPrint('🔍 [SKILLS_CARD] AnimatedBuilder called');
+                debugPrint('   hasInitialResults: ${_skillsController.hasInitialResults}');
+                debugPrint('   initialResult != null: ${_skillsController.initialResult != null}');
+                debugPrint('   initialResult?.results != null: ${_skillsController.initialResult?.results != null}');
+                
                 // Show skills comparison if we have initial analysis results
                 if (_skillsController.hasInitialResults && 
                     _skillsController.initialResult?.results != null) {
+                  debugPrint('✅ [SKILLS_CARD] Showing SkillsComparisonCard');
                   final results = _skillsController.initialResult!.results!;
+                  debugPrint('   cvSkills: ${results.cvSkills}');
+                  debugPrint('   jdSkills: ${results.jdSkills}');
                   
                   return Column(
                     children: [
@@ -251,6 +260,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                     ],
                   );
                 }
+                debugPrint('❌ [SKILLS_CARD] Not showing (conditions not met)');
                 return const SizedBox.shrink();
               },
             ),
