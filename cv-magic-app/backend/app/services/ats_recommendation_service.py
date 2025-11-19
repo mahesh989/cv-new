@@ -149,6 +149,40 @@ class ATSRecommendationService:
             logger.error(f"Error saving recommendation file: {e}", exc_info=True)
             return None
     
+    def create_recommendation_file(self, company: str) -> bool:
+        """
+        Create ATS recommendation file for the company (convenience method for pipeline)
+        
+        Args:
+            company: Company name
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            logger.info(f"📊 [ATS_RECOMMENDATION] Creating recommendation file for {company}")
+            
+            # Extract recommendation data
+            recommendation_data = self.extract_ats_recommendation_data(company)
+            
+            if not recommendation_data:
+                logger.warning(f"⚠️ [ATS_RECOMMENDATION] No data extracted for {company}")
+                return False
+            
+            # Save the recommendation file
+            output_file = self.save_optimized_recommendation(company, recommendation_data)
+            
+            if output_file:
+                logger.info(f"✅ [ATS_RECOMMENDATION] Successfully created recommendation file for {company}")
+                return True
+            else:
+                logger.error(f"❌ [ATS_RECOMMENDATION] Failed to save recommendation file for {company}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ [ATS_RECOMMENDATION] Error creating recommendation file for {company}: {e}")
+            return False
+    
     def _extract_preliminary_decision(self, match_entries: List[Dict]) -> Dict[str, Any]:
         """Extract simplified preliminary decision (no verbose analysis)"""
         if not match_entries:

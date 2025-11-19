@@ -540,6 +540,13 @@ class ContextAwareAnalysisPipeline:
                 jd_analysis_data=jd_data.get('jd_analysis', {})
             )
             
+            # CRITICAL FIX: Save the matching result to file so it can be used by bonus calculation
+            try:
+                self.cv_jd_matcher._save_match_result(matching_result, context.company)
+                logger.info(f"💾 [CONTEXT_AWARE_PIPELINE] CV-JD matching results saved for {context.company}")
+            except Exception as save_error:
+                logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to save CV-JD matching results: {save_error}")
+            
             results.cv_jd_matching = matching_result.to_dict()
             results.steps_completed.append("cv_jd_matching")
             
