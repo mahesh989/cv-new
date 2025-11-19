@@ -26,6 +26,7 @@ from app.services.ats.component_assembler import ComponentAssembler
 from app.services.ats_recommendation_service import ATSRecommendationService
 from app.services.ai_recommendation_generator import AIRecommendationGenerator
 from app.utils.timestamp_utils import TimestampUtils
+from app.services.skill_extraction.preextracted_comparator import execute_skills_semantic_comparison
 
 logger = logging.getLogger(__name__)
 
@@ -803,7 +804,9 @@ class ContextAwareAnalysisPipeline:
             logger.info(f"📊 [CONTEXT_AWARE_PIPELINE] Steps completed: {len(results.steps_completed)}")
             
             # Persist snapshot so continuation + UI have baseline skills data
-            self._persist_initial_skills_snapshot(context, results, jd_data, analyze_match_decision)
+            saved_snapshot = self._persist_initial_skills_snapshot(context, results, jd_data, analyze_match_decision)
+            if saved_snapshot:
+                await self._run_preextracted_comparison(context, results, saved_snapshot)
             
             return results
             
@@ -1071,6 +1074,87 @@ class ContextAwareAnalysisPipeline:
         except Exception as snapshot_error:
             logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to persist skills snapshot: {snapshot_error}")
             return None
+
+    async def _run_preextracted_comparison(
+        self,
+        context: AnalysisContext,
+        results: AnalysisResults,
+        saved_file_path: str
+    ) -> None:
+        """Generate pre-extracted comparison text and append to analysis file."""
+        try:
+            cv_skills = results.cv_skills or {}
+            jd_skills = results.jd_skills or {}
+            if not any(cv_skills.get(key) for key in ("technical_skills", "soft_skills", "domain_keywords")):
+                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No CV skills available for pre-extracted comparison")
+                return
+            if not any(jd_skills.get(key) for key in ("technical_skills", "soft_skills", "domain_keywords")):
+                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No JD skills available for pre-extracted comparison")
+                return
+            
+            def _list(values):
+                cleaned = []
+                seen = set()
+                for value in values or []:
+                    if not isinstance(value, str):
+                        continue
+                    trimmed = value.strip()
+                    if not trimmed:
+                        continue
+                    lowered = trimmed.lower()
+                    if lowered not in seen:
+                        cleaned.append(trimmed)
+                        seen.add(lowered)
+                return cleaned
+            
+            payload_cv = {
+                "technical_skills": _list(cv_skills.get("technical_skills")),
+                "soft_skills": _list(cv_skills.get("soft_skills")),
+                "domain_keywords": _list(cv_skills.get("domain_keywords"))
+            }
+            payload_jd = {
+                "technical_skills": _list(jd_skills.get("technical_skills")),
+                "soft_skills": _list(jd_skills.get("soft_skills")),
+                "domain_keywords": _list(jd_skills.get("domain_keywords"))
+            }
+            
+            if not any(payload_cv.values()) or not any(payload_jd.values()):
+                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] Sanitized skills empty, skipping comparison")
+                return
+            
+            from app.models.auth import UserData
+            from datetime import timezone
+            current_user = UserData(
+                id="pipeline_user",
+                email=self.user_email,
+                name=self.user_email.split("@")[0] if self.user_email else "user",
+                created_at=datetime.now(timezone.utc),
+                is_active=True
+            )
+            
+            comparison_output = await execute_skills_semantic_comparison(
+                ai_service,
+                cv_skills=payload_cv,
+                jd_skills=payload_jd,
+                user=current_user,
+                temperature=0.0,
+                max_tokens=2000
+            )
+            
+            if not comparison_output:
+                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] Pre-extracted comparison returned empty output")
+                return
+            
+            from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
+            result_saver = SkillExtractionResultSaver(user_email=self.user_email)
+            result_saver.append_preextracted_comparison(
+                comparison_output,
+                context.company,
+                saved_file_path
+            )
+            logger.info("📄 [CONTEXT_AWARE_PIPELINE] Pre-extracted comparison appended for %s", context.company)
+        except Exception as comparison_error:
+            logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Pre-extracted comparison failed: {comparison_error}")
 
     def _build_jd_summary(self, jd_analysis: Optional[Dict[str, Any]]) -> Optional[str]:
         """Create a short textual summary of JD requirements."""
