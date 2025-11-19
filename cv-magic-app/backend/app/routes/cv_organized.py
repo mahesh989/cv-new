@@ -83,23 +83,39 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
         original_folder = analysis_base / "cvs" / "original"
         original_folder.mkdir(parents=True, exist_ok=True)
         txt_filepath = original_folder / "original_cv.txt"
+        json_filepath = original_folder / "original_cv.json"
         
+        # CRITICAL: Always overwrite both files when user selects CV from dropdown
+        # Save original_cv.txt immediately
         with open(txt_filepath, 'w', encoding='utf-8') as f:
             f.write(cv_content_result['content'])
         
-        logger.info(f"CV saved as text: {txt_filepath}")
+        logger.info(f"✅ CV saved as text (overwritten): {txt_filepath}")
+        
+        # CRITICAL: Create minimal original_cv.json immediately so it exists
+        # This ensures the file exists even if background processing fails
+        import json
+        from datetime import datetime
+        minimal_json = {
+            "filename": filename,
+            "text": cv_content_result['content'],
+            "saved_at": datetime.now().isoformat(),
+            "content_type": "text",  # Will be updated to "structured" after background processing
+            "processing_status": "pending_structured_parsing"
+        }
+        
+        with open(json_filepath, 'w', encoding='utf-8') as f:
+            json.dump(minimal_json, f, indent=2, ensure_ascii=False)
+        
+        logger.info(f"✅ CV saved as minimal JSON (overwritten): {json_filepath}")
         
         # Start structured processing in background (non-blocking)
-        structured_success = True
-        structured_path = str(analysis_base / "cvs" / "original" / "original_cv.json") + " (processing in background)"
-        
-        # Trigger background structured processing without blocking response
+        # This will enhance the JSON file with structured data
         import asyncio
-        from concurrent.futures import ThreadPoolExecutor
         
         async def background_structured_processing():
             try:
-                logger.info(f"Processing {filename} for structured CV format (background)...")
+                logger.info(f"🔄 Processing {filename} for structured CV format (background)...")
                 from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
                 user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
                 
@@ -115,24 +131,38 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
                 if not structured_cv.get('parsing_error'):
                     # Save the structured CV to the original folder
                     # CRITICAL: Always overwrite when user selects CV from dropdown
-                    json_filepath = original_folder / "original_cv.json"
-                    import json
                     # Ensure filename is stored in the structured CV for tracking
                     if 'filename' not in structured_cv:
                         structured_cv['filename'] = filename
+                    if 'saved_at' not in structured_cv:
+                        structured_cv['saved_at'] = datetime.now().isoformat()
+                    structured_cv['content_type'] = "structured"
+                    structured_cv['processing_status'] = "completed"
+                    
                     with open(json_filepath, 'w', encoding='utf-8') as f:
                         json.dump(structured_cv, f, indent=2, ensure_ascii=False)
                     
-                    logger.info(f"✅ Background: CV saved as structured JSON (overwritten): {json_filepath} (filename: {filename})")
+                    logger.info(f"✅ Background: CV enhanced with structured JSON (overwritten): {json_filepath} (filename: {filename})")
                 else:
                     error_msg = structured_cv.get('parsing_error', 'Unknown error')
-                    logger.warning(f"⚠️ Background: Failed to save structured CV: {error_msg}")
-                    logger.warning(f"⚠️ Background: Structured CV data: {structured_cv}")
+                    logger.warning(f"⚠️ Background: Failed to enhance structured CV: {error_msg}")
+                    logger.warning(f"⚠️ Background: Keeping minimal JSON format. Structured CV data: {structured_cv}")
+                    # Update status but keep the file
+                    minimal_json['processing_status'] = f"failed: {error_msg}"
+                    with open(json_filepath, 'w', encoding='utf-8') as f:
+                        json.dump(minimal_json, f, indent=2, ensure_ascii=False)
                     
             except Exception as e:
-                logger.error(f"❌ Background: Error saving structured CV: {str(e)}")
+                logger.error(f"❌ Background: Error enhancing structured CV: {str(e)}")
                 import traceback
                 logger.error(f"❌ Background: Traceback: {traceback.format_exc()}")
+                # Update status but keep the file
+                try:
+                    minimal_json['processing_status'] = f"error: {str(e)}"
+                    with open(json_filepath, 'w', encoding='utf-8') as f:
+                        json.dump(minimal_json, f, indent=2, ensure_ascii=False)
+                except:
+                    pass
         
         # Start background task (fire and forget)
         asyncio.create_task(background_structured_processing())
@@ -141,10 +171,10 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
             "message": "CV saved for analysis successfully",
             "filename": filename,
             "txt_path": str(txt_filepath),
-            "structured_path": str(original_folder / "original_cv.json"),
-            "structured_success": "processing_in_background",
+            "json_path": str(json_filepath),
+            "structured_success": "minimal_json_created_immediately_enhancement_in_background",
             "content_length": len(cv_content_result['content']),
-            "note": "original_cv.txt saved immediately, original_cv.json being processed in background"
+            "note": "Both original_cv.txt and original_cv.json created immediately. JSON will be enhanced with structured data in background."
         })
         
     except Exception as e:

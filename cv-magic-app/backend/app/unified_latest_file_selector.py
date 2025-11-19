@@ -137,10 +137,11 @@ class UnifiedLatestFileSelector:
         base_json = self.original_path / "original_cv.json"
         base_txt = self.original_path / "original_cv.txt"
         
-        if base_json.exists():
-            print(f"✅ Found base original CV: {base_json}")
+        # Accept JSON OR TXT file (JSON is preferred but TXT is acceptable)
+        if base_json.exists() or base_txt.exists():
+            print(f"✅ Found base original CV: JSON={base_json.exists()}, TXT={base_txt.exists()}")
             return FileContext(
-                json_path=base_json,
+                json_path=base_json if base_json.exists() else None,
                 txt_path=base_txt if base_txt.exists() else None,
                 exists=True,
                 file_type="original",
@@ -154,10 +155,11 @@ class UnifiedLatestFileSelector:
             company_base_json = company_original_path / "original_cv.json"
             company_base_txt = company_original_path / "original_cv.txt"
             
-            if company_base_json.exists():
-                print(f"✅ Found company-specific original CV: {company_base_json}")
+            # Accept JSON OR TXT file (JSON is preferred but TXT is acceptable)
+            if company_base_json.exists() or company_base_txt.exists():
+                print(f"✅ Found company-specific original CV: JSON={company_base_json.exists()}, TXT={company_base_txt.exists()}")
                 return FileContext(
-                    json_path=company_base_json,
+                    json_path=company_base_json if company_base_json.exists() else None,
                     txt_path=company_base_txt if company_base_txt.exists() else None,
                     exists=True,
                     file_type="original",
