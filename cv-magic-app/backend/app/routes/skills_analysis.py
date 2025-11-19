@@ -181,9 +181,12 @@ async def get_company_from_saved_job_info(jd_url: str, user_email: str) -> Optio
                     with open(job_info_file, 'r', encoding='utf-8') as f:
                         job_info = json.load(f)
                         
-                    # Check if JD URL matches
+                    # Check if JD URL matches (check multiple possible fields)
                     extracted_info = job_info.get('extracted_info', {})
-                    saved_jd_url = job_info.get('jd_url') or extracted_info.get('jd_url')
+                    saved_jd_url = (job_info.get('jd_url') or 
+                                   job_info.get('job_url') or 
+                                   extracted_info.get('jd_url') or 
+                                   extracted_info.get('job_url'))
                     
                     if saved_jd_url and saved_jd_url.strip() == jd_url.strip():
                         # Found matching job_info - return company name and slug
