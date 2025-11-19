@@ -76,6 +76,11 @@ async def get_ai_status(current_user: UserData = Depends(get_current_user)):
     """
     logger.info(f"🔵 [AI_STATUS] Getting AI status for user: {current_user.email}")
     try:
+        # Initialize AI service for this user to ensure correct provider state
+        # This prevents new users from seeing another user's provider configuration
+        ai_service.initialize_for_user(current_user)
+        logger.info(f"✅ [AI_STATUS] AI service initialized for user {current_user.email}")
+        
         current_status = ai_service.get_current_status()
         provider_status = ai_service.get_provider_status()
         available_models = ai_service.get_all_available_models()

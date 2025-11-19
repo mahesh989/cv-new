@@ -66,14 +66,30 @@ class AIServiceManager:
         logger.info(f"- Current providers: {list(self._providers.keys())}")
         logger.info(f"- Current provider name: {self.config.get_current_provider()}")
         
-        # Auto-select first available provider if none is current
-        if self._providers and not self.config.get_current_provider():
-            logger.warning("⚠️ [AI_SERVICE] No current provider set, attempting auto-selection")
-            first_provider = list(self._providers.keys())[0]
-            if self.switch_provider(first_provider):
-                logger.info(f"✅ [AI_SERVICE] Auto-selected provider: {first_provider}")
-            else:
-                logger.error(f"❌ [AI_SERVICE] Failed to auto-select provider: {first_provider}")
+        # Clear global provider/model state if user has no API keys configured
+        # This prevents new users from seeing another user's provider configuration
+        if not self._providers:
+            logger.info(f"🧹 [AI_SERVICE] User {user_email} has no API keys - clearing global provider/model state")
+            self.config._current_provider = None
+            self.config._current_model = None
+            logger.info(f"✅ [AI_SERVICE] Cleared global provider/model state for user with no API keys")
+        else:
+            # Auto-select first available provider if none is current
+            current_provider = self.config.get_current_provider()
+            if current_provider and current_provider not in self._providers:
+                # User's saved provider is not available (no API key for that provider)
+                logger.warning(f"⚠️ [AI_SERVICE] User's saved provider '{current_provider}' not available - clearing it")
+                self.config._current_provider = None
+                self.config._current_model = None
+            
+            # Auto-select first available provider if none is current
+            if not self.config.get_current_provider():
+                logger.warning("⚠️ [AI_SERVICE] No current provider set, attempting auto-selection")
+                first_provider = list(self._providers.keys())[0]
+                if self.switch_provider(first_provider):
+                    logger.info(f"✅ [AI_SERVICE] Auto-selected provider: {first_provider}")
+                else:
+                    logger.error(f"❌ [AI_SERVICE] Failed to auto-select provider: {first_provider}")
     
     def refresh_providers(self, user: Optional[Any] = None):
         """Refresh all providers after API keys have been updated"""

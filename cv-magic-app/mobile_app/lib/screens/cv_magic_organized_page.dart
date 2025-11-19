@@ -97,7 +97,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
           savedCompanySlug = null;
           savedJobTitle = null;
         });
-        print('🧹 Cleared saved company info (JD URL changed)');
+        print('🧹 Cleared saved company (URL changed)');
       }
     });
   }
@@ -225,7 +225,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                   savedCompanySlug = jobData['company_slug'];
                   savedJobTitle = jobData['job_title'];
                 });
-                print('✅ Saved company info: $savedCompanySlug ($savedCompanyName)');
+                print('✅ Saved: $savedCompanySlug ($savedCompanyName)');
               },
             ),
             const SizedBox(height: 16),
@@ -536,13 +536,14 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     final jdUrl = jdUrlController.text.trim();
     String company;
 
-    if (savedCompanySlug != null && savedCompanySlug!.isNotEmpty) {
+    if (savedCompanySlug?.isNotEmpty ?? false) {
+      // Primary: Use saved company from state
       company = savedCompanySlug!;
-      print('✅ Using saved company: $company ($savedCompanyName)');
+      print('✅ [PRIMARY] Using saved company: $company');
     } else {
-      // Fallback: extract from URL (for backward compatibility)
+      // Fallback: Extract from URL (backend will correct if needed)
       company = _extractCompanyFromUrl(jdUrl);
-      print('⚠️ No saved company found, extracted from URL: $company');
+      print('⚠️ [FALLBACK] Extracted from URL: $company (backend will lookup)');
     }
 
     if (jdUrl.isEmpty) {
