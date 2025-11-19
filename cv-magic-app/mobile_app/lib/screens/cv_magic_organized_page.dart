@@ -17,6 +17,7 @@ import '../widgets/job_input.dart';
 import '../services/api_service.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
+import '../widgets/skills_comparison_card.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
@@ -230,33 +231,21 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             ),
             const SizedBox(height: 16),
 
-            // Skills Display (shown BEFORE analyze match decision for better UX)
-            // Show skills comparison as soon as we have initial results
+            // Skills Comparison Card (shown BEFORE analyze match decision)
+            // Simple side-by-side display of CV vs JD skills from initial analysis
             AnimatedBuilder(
               animation: _skillsController,
               builder: (context, _) {
-                // Debug logging
-                print('🔍 [CV_MAGIC] Skills Display Check:');
-                print('   hasResults: ${_skillsController.hasResults}');
-                print('   hasInitialResults: ${_skillsController.hasInitialResults}');
-                print('   hasError: ${_skillsController.hasError}');
-                print('   cvTotalSkills: ${_skillsController.cvTotalSkills}');
-                print('   jdTotalSkills: ${_skillsController.jdTotalSkills}');
-                
-                // Show if we have initial results OR full results
-                if (_skillsController.hasResults || 
-                    _skillsController.hasInitialResults ||
-                    _skillsController.hasError) {
+                // Show skills comparison if we have initial analysis results
+                if (_skillsController.hasInitialResults && 
+                    _skillsController.initialResult?.results != null) {
+                  final results = _skillsController.initialResult!.results!;
+                  
                   return Column(
                     children: [
-                      SkillsDisplayWidget(
-                        controller: _skillsController
-                            as dynamic, // Cast to dynamic to bypass type check
-                        cvFilename: selectedCVFilename,
-                        jobDescription: jdController.text.trim().isNotEmpty
-                            ? jdController.text.trim()
-                            : null,
-                        onNavigateToCVGeneration: _navigateToCVGeneration,
+                      SkillsComparisonCard(
+                        cvSkills: results.cvSkills,
+                        jdSkills: results.jdSkills,
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -267,7 +256,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             ),
 
             // Analyze Match Decision Widget (appears after initial analysis)
-            // Now shown AFTER skills display so user can see comparison before deciding
+            // Now shown AFTER skills comparison so user can see comparison before deciding
             AnimatedBuilder(
               animation: _skillsController,
               builder: (context, _) {
