@@ -538,20 +538,24 @@ Remember: Extract the ACTUAL HIRING ORGANIZATION with its COMPLETE OFFICIAL NAME
             
             # Look for common patterns in text - ordered by priority
             patterns = [
+                # Pattern for "Australia for UNHCR" or similar NGO names (HIGHEST PRIORITY)
+                r'(?:^|\n)\s*([A-Z][a-zA-Z\s&().-]{5,30}?)\s+for\s+([A-Z]{2,10})\s*(?:\n|$)',
+                r'(?:^|\n)\s*([A-Z][a-zA-Z\s&().-]{5,30}?)\s+for\s+([A-Z][a-zA-Z\s&().-]{3,30})\s*(?:\n|$)',
                 # Direct company name after job title (most common pattern)
                 r'^[A-Z][a-zA-Z\s-]+\s*\n\s*([A-Z][a-zA-Z\s&().-]{10,80}?)\s*\n',
                 # Company name in job summary section
                 r'Job Summary\s*\n\s*([A-Z][a-zA-Z\s&().-]{10,80}?)\s*\n',
+                # "About [Company]" pattern
+                r'About\s+([A-Z][a-zA-Z\s&().-]{5,80}?)(?:\s+is|\s+we|\n|$)',
                 # Organization patterns with specific context
                 r'([A-Z][a-zA-Z\s&().-]{10,80}?)\s+works\s+in\s+partnership',
                 r'([A-Z][a-zA-Z\s&().-]{10,80}?)\s+plays\s+a\s+critical\s+role',
-                # About company patterns
-                r'About\s+([A-Z][a-zA-Z\s&().-]{10,80}?)\s+is',
+                # Company is seeking/hiring
                 r'([A-Z][a-zA-Z\s&().-]{10,80}?)\s+is\s+(?:looking|seeking|hiring)',
                 # Direct company labels
                 r'Company:\s*([^\n\r]+)',
                 r'Employer:\s*([^\n\r]+)',
-                # Email domains
+                # Email domains (last resort)
                 r'@([a-zA-Z0-9.-]+)\.(?:com|org|au|net)',
             ]
             
