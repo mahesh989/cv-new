@@ -473,17 +473,23 @@ Remember: Extract the ACTUAL HIRING ORGANIZATION with its COMPLETE OFFICIAL NAME
             if domain.startswith("www."):
                 domain = domain[4:]
             
-            # Known job boards (extract from text instead)
+            # Known job boards (extract from text instead, NEVER use domain)
             job_boards = [
                 "seek.com.au", "indeed.com", "linkedin.com", "glassdoor.com",
                 "ziprecruiter.com", "monster.com", "careerbuilder.com",
-                "ethicaljobs.com.au", "jora.com.au", "adzuna.com.au"
+                "ethicaljobs.com.au", "jora.com.au", "adzuna.com.au",
+                "ethicaljobs.com", "www.ethicaljobs.com.au"
             ]
             
             if any(board in domain for board in job_boards):
-                # For job boards, try to extract from text
-                print(f"🔍 Detected job board: {domain}, extracting from text...")
-                return self._extract_from_text_fallback(jd_text)
+                # For job boards, ALWAYS extract from text, NEVER use domain
+                print(f"🔍 Detected job board: {domain}, extracting from text (NOT domain)...")
+                if jd_text and len(jd_text.strip()) > 50:
+                    return self._extract_from_text_fallback(jd_text)
+                else:
+                    # If no text, return Unknown instead of domain
+                    print(f"⚠️ No JD text available, returning Unknown (not domain)")
+                    return {"company": "Unknown", "confidence": "low", "is_agency": False}
             
             # Extract company from domain
             # careers.company.com → company
@@ -550,12 +556,21 @@ Remember: Extract the ACTUAL HIRING ORGANIZATION with its COMPLETE OFFICIAL NAME
             ]
             
             for pattern in patterns:
-                match = re.search(pattern, jd_text, re.IGNORECASE)
+                match = re.search(pattern, jd_text, re.IGNORECASE | re.MULTILINE)
                 if match:
-                    company_name = match.group(1).strip()
+                    # Handle patterns with multiple groups (e.g., "Australia for UNHCR")
+                    if len(match.groups()) >= 2:
+                        # Combine groups for patterns like "X for Y"
+                        company_name = f"{match.group(1).strip()} for {match.group(2).strip()}"
+                    else:
+                        company_name = match.group(1).strip()
+                    
+                    # Clean up the name
+                    company_name = company_name.strip()
                     
                     # Validate the extracted name
                     if self._is_valid_company_name(company_name):
+                        print(f"✅ Extracted company from text: {company_name}")
                         return {
                             "company": company_name,
                             "confidence": "low",
