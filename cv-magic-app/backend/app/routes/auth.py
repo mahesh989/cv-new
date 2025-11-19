@@ -4,7 +4,7 @@ Authentication routes
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from datetime import datetime
+from datetime import datetime, timezone
 from app.models.auth import LoginRequest, TokenResponse, UserData, RegisterRequest, RegisterResponse
 from app.core.auth import authenticate_user, create_access_token, create_refresh_token
 from app.core.dependencies import get_current_user
@@ -102,6 +102,29 @@ async def register(payload: RegisterRequest, db: Session = Depends(get_database)
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Failed to create user account: {str(db_error)}"
             )
+
+        # Clean up any orphaned API keys for this user ID (in case user was deleted and recreated)
+        try:
+            logger.info(f"🔵 [REGISTER] Cleaning up orphaned API keys for user ID: {user.id}")
+            from app.services.user_api_key_manager import user_api_key_manager
+            from app.models.auth import UserData
+            # Create temporary UserData to check for existing keys
+            temp_user = UserData(
+                id=str(user.id),
+                email=user.email,
+                name=user.full_name or user.username,
+                created_at=user.created_at.replace(tzinfo=timezone.utc) if user.created_at.tzinfo is None else user.created_at,
+                is_active=user.is_active
+            )
+            # Check if there are any API keys for this user ID
+            for provider in ['openai', 'anthropic', 'deepseek']:
+                if user_api_key_manager.has_api_key(temp_user, provider):
+                    logger.warning(f"⚠️ [REGISTER] Found existing API key for provider {provider} - removing orphaned key")
+                    user_api_key_manager.remove_api_key(temp_user, provider)
+            logger.info(f"✅ [REGISTER] Cleaned up orphaned API keys for user ID: {user.id}")
+        except Exception as cleanup_error:
+            # Log error but don't fail registration
+            logger.warning(f"⚠️ [REGISTER] Failed to clean up orphaned API keys: {str(cleanup_error)}")
 
         # Ensure user-specific directories exist
         try:
