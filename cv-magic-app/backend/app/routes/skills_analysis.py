@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from fastapi.responses import JSONResponse
 from app.utils.path_debug import path_debug
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 
 from fastapi import APIRouter, Request, Depends, HTTPException
 from app.exceptions import TailoredCVNotFoundError
@@ -1358,6 +1358,28 @@ async def preliminary_analysis(
         print(f"Extracted company: {company_result.name} (confidence: {company_result.confidence.value})")
         logger.info(f"🏢 Extracted company name: {company_name}")
         
+        # CRITICAL: Create company folder IMMEDIATELY after company name extraction
+        # This ensures folder exists before any analysis files are saved
+        from app.utils.user_path_utils import get_user_base_path
+        try:
+            base_dir = get_user_base_path(user_email)
+            company_dir = base_dir / "applied_companies" / company_name
+            
+            # Create folder with explicit logging
+            company_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Verify folder was created successfully
+            if company_dir.exists() and company_dir.is_dir():
+                logger.info(f"✅ [FOLDER] Company folder created/verified: {company_dir}")
+                logger.info(f"   📁 Full path: {company_dir.absolute()}")
+            else:
+                logger.error(f"❌ [FOLDER] Failed to create company folder: {company_dir}")
+                raise Exception(f"Company folder creation failed: {company_dir}")
+        except Exception as e:
+            logger.error(f"❌ [FOLDER] Error creating company folder for '{company_name}': {e}")
+            logger.error(f"   Base dir: {base_dir if 'base_dir' in locals() else 'unknown'}")
+            raise Exception(f"Failed to create company folder: {str(e)}")
+        
         # Validate required files exist before proceeding (non-blocking for preliminary flow)
         # In preliminary analysis, we can proceed even if JD hasn't been analyzed yet;
         # the route will save JD content and metadata shortly after.
@@ -1464,11 +1486,18 @@ async def preliminary_analysis(
                     raise ValueError("User authentication required for pipeline operations")
                 base_dir = get_user_base_path(user_email)
                 company_dir = base_dir / "applied_companies" / company_name
+                
+                # Ensure folder exists with explicit logging
                 try:
                     company_dir.mkdir(parents=True, exist_ok=True)
-                except Exception:
-                    # best-effort; continue
-                    pass
+                    if company_dir.exists() and company_dir.is_dir():
+                        logger.info(f"✅ [FOLDER] Pipeline: Company folder verified: {company_dir}")
+                    else:
+                        logger.error(f"❌ [FOLDER] Pipeline: Company folder verification failed: {company_dir}")
+                except Exception as e:
+                    logger.error(f"❌ [FOLDER] Pipeline: Error creating company folder: {e}")
+                    # Don't silently continue - this is critical for pipeline
+                    raise Exception(f"Failed to create company folder for pipeline: {str(e)}")
 
             # Save JD content and job info to files
             try:
