@@ -47225,7 +47225,7 @@ return A.u($async$qu,r)},
 ahw(a){var s=this
 s.J(new A.art(s,a))
 if(a.length!==0)A.a2D(a).bq(new A.aru(s,a),t.a).AW(new A.arv(s))},
-yo(){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g
+yo(){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g,f
 var $async$yo=A.q(function(a,b){if(a===1){o=b
 s=p}while(true)switch(s){case 0:A.O("\ud83d\udd0d [DEBUG] _analyzeSkills called")
 A.O("\ud83d\udd0d [DEBUG] selectedCVFilename: "+A.c(n.d))
@@ -47244,10 +47244,11 @@ break}A.O("\u2705 [DEBUG] Starting context-aware analysis...")
 m=B.c.a7(n.w.a.a)
 l=null
 j=n.y
-if(j!=null&&j.length!==0){j.toString
+h=j==null?null:j.length!==0
+if(h===!0){j.toString
 l=j
-A.O("\u2705 Using saved company: "+A.c(l)+" ("+A.c(n.x)+")")}else{l=n.abu(m)
-A.O("\u26a0\ufe0f No saved company found, extracted from URL: "+A.c(l))}if(J.aW(m)===0){n.mz("Please provide a job description URL",!0)
+A.O("\u2705 [PRIMARY] Using saved company: "+A.c(l))}else{l=n.abu(m)
+A.O("\u26a0\ufe0f [FALLBACK] Extracted from URL: "+A.c(l)+" (backend will lookup)")}if(J.aW(m)===0){n.mz("Please provide a job description URL",!0)
 s=1
 break}if(J.aW(l)===0){n.mz("Could not determine company name",!0)
 s=1
@@ -47264,8 +47265,8 @@ p=2
 s=6
 break
 case 4:p=3
-g=o
-k=A.V(g)
+f=o
+k=A.V(f)
 A.O("\u274c [DEBUG] Error in _analyzeSkills: "+A.c(k))
 n.mz("Error performing skills analysis: "+A.c(k),!0)
 s=6
@@ -47389,7 +47390,7 @@ $S:0}
 A.arM.prototype={
 $0(){var s=this.a
 if(s.c!=null&&s.y!=null){s.J(new A.arI(s))
-A.O("\ud83e\uddf9 Cleared saved company info (JD URL changed)")}},
+A.O("\ud83e\uddf9 Cleared saved company (URL changed)")}},
 $S:0}
 A.arI.prototype={
 $0(){var s=this.a
@@ -47401,7 +47402,7 @@ $S:0}
 A.arF.prototype={
 $1(a){var s=this.a
 s.J(new A.arD(s,a))
-A.O("\u2705 Saved company info: "+A.c(s.y)+" ("+A.c(s.x)+")")},
+A.O("\u2705 Saved: "+A.c(s.y)+" ("+A.c(s.x)+")")},
 $S:464}
 A.arD.prototype={
 $0(){var s=this.a,r=this.b
