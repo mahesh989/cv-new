@@ -170,17 +170,17 @@ class UnifiedLatestFileSelector:
         if candidates:
             print(f"📁 Found {len(candidates)} timestamped original CV candidates, using latest")
             # Sort by timestamp (newest first)
-        candidates.sort(key=lambda c: c[2], reverse=True)
-        json_path, txt_path, timestamp = candidates[0]
+            candidates.sort(key=lambda c: c[2], reverse=True)
+            json_path, txt_path, timestamp = candidates[0]
             print(f"✅ Selected timestamped original CV: {json_path}")
-        return FileContext(
-            json_path=json_path,
-            txt_path=txt_path,
-            exists=True,
-            file_type="original",
-            timestamp=timestamp if timestamp != "00000000_000000" else None,
-            company=company,
-        )
+            return FileContext(
+                json_path=json_path,
+                txt_path=txt_path,
+                exists=True,
+                file_type="original",
+                timestamp=timestamp if timestamp != "00000000_000000" else None,
+                company=company,
+            )
         
         # No original CV found
         print("❌ No original CV candidates found")
