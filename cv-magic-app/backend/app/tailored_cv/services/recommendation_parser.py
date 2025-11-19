@@ -816,7 +816,7 @@ class RecommendationParser:
                     raise
 
             elif 'text' in data:
-                # Raw text format - could be plain text or JSON string
+                # Raw text format - could be plain text or JSON string (possibly nested multiple times)
                 logger.info("📝 Detected 'text' field in CV")
                 cv_text = data.get('text', '')
                 logger.info(f"  - Text length: {len(cv_text)} characters")
@@ -825,20 +825,43 @@ class RecommendationParser:
                 
                 # CRITICAL FIX: Check if 'text' field contains JSON string
                 # This happens when CV is stored as {"text": "{...escaped JSON...}"}
+                # Sometimes it's nested multiple times!
                 try:
                     # Try to parse as JSON first
                     text_as_json = json.loads(cv_text)
-                    if isinstance(text_as_json, dict) and ('personal_information' in text_as_json or 'contact' in text_as_json):
-                        logger.info("✅ Detected JSON string inside 'text' field - parsing as structured CV")
-                        # Recursively call with the parsed JSON
-                        if 'personal_information' in text_as_json:
-                            return RecommendationParser._convert_structured_to_model_format(text_as_json)
-                        elif all(key in text_as_json for key in ['contact', 'experience', 'skills']):
-                            # Already in the right format
-                            logger.info("✅ Successfully parsed nested JSON from 'text' field")
-                            return text_as_json
-                except (json.JSONDecodeError, ValueError):
+                    logger.info(f"✅ First JSON parse successful - type: {type(text_as_json)}")
+                    
+                    if isinstance(text_as_json, dict):
+                        # Check if this level has the CV data
+                        if 'personal_information' in text_as_json or 'contact' in text_as_json:
+                            logger.info("✅ Detected JSON string inside 'text' field - parsing as structured CV")
+                            if 'personal_information' in text_as_json:
+                                return RecommendationParser._convert_structured_to_model_format(text_as_json)
+                            elif all(key in text_as_json for key in ['contact', 'experience', 'skills']):
+                                logger.info("✅ Successfully parsed nested JSON from 'text' field")
+                                return text_as_json
+                        
+                        # Check if there's another 'text' field (nested again!)
+                        elif 'text' in text_as_json:
+                            logger.info("🔄 Detected nested 'text' field - parsing recursively")
+                            inner_text = text_as_json.get('text', '')
+                            try:
+                                inner_json = json.loads(inner_text)
+                                logger.info(f"✅ Second JSON parse successful - type: {type(inner_json)}")
+                                if isinstance(inner_json, dict):
+                                    if 'personal_information' in inner_json:
+                                        logger.info("✅ Found personal_information in nested JSON - converting")
+                                        return RecommendationParser._convert_structured_to_model_format(inner_json)
+                                    elif all(key in inner_json for key in ['contact', 'experience', 'skills']):
+                                        logger.info("✅ Found structured CV in nested JSON")
+                                        return inner_json
+                            except (json.JSONDecodeError, ValueError) as e:
+                                logger.warning(f"⚠️  Failed to parse nested text field as JSON: {e}")
+                                # Fall through to text parsing
+                                pass
+                except (json.JSONDecodeError, ValueError) as e:
                     # Not JSON, treat as plain text
+                    logger.info(f"📝 JSON parsing failed: {e} - treating as plain text")
                     pass
                 
                 # Fall back to text parsing
