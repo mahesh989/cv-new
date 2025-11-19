@@ -97,7 +97,11 @@ class APIKeyService {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          return data['providers'] ?? {};
+          // Return full response including has_api_keys
+          return {
+            'providers': data['providers'] ?? {},
+            'has_api_keys': data['has_api_keys'] ?? false,
+          };
         }
       }
 
@@ -111,13 +115,16 @@ class APIKeyService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['providers'] ?? {};
+        return {
+          'providers': data['providers'] ?? {},
+          'has_api_keys': data['has_api_keys'] ?? false,
+        };
       }
 
-      return {};
+      return {'providers': {}, 'has_api_keys': false};
     } catch (e) {
       print('Error getting providers status: $e');
-      return {};
+      return {'providers': {}, 'has_api_keys': false};
     }
   }
 

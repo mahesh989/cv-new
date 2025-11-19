@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../core/theme/app_theme.dart';
 import '../models/ai_model.dart';
 import '../services/ai_model_service.dart';
+import '../services/api_key_service.dart';
 import 'api_key_input_dialog.dart';
 
 class AIModelSelector extends StatefulWidget {
@@ -155,81 +156,228 @@ class _AIModelSelectorState extends State<AIModelSelector>
         final filteredRecommendedModels =
             _getFilteredModels(allRecommendedModels);
 
-        // If no model is selected, show selection prompt
-        if (currentModel == null) {
-          return AppTheme.createCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.smart_toy_rounded,
-                    size: 48,
-                    color: AppTheme.neutralGray400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '🤖 AI Model Configuration',
-                    style: AppTheme.headingSmall.copyWith(
-                      color: AppTheme.primaryCosmic,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Please select a provider and configure your API key to use AI features',
-                    style: AppTheme.bodySmall.copyWith(
-                      color: AppTheme.neutralGray600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildProviderDropdown(),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: AppTheme.createCard(
-                child: Column(
-                  children: [
-                    _buildHeader(currentModel),
-                    if (_isExpanded) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          children: [
-                            const Divider(color: AppTheme.neutralGray200),
-                            const SizedBox(height: 16),
-                            _buildCurrentModelDisplay(currentModel),
-                            const SizedBox(height: 16),
-                            _buildProviderDropdown(),
-                            const SizedBox(height: 16),
-                            _buildModelDropdown(
-                                filteredModels, currentModel.id),
-                            const SizedBox(height: 16),
-                            _buildRecommendedModels(
-                                filteredRecommendedModels, currentModel.id),
-                            const SizedBox(height: 16),
-                            _buildModelInfo(),
-                            const SizedBox(height: 16),
-                          ],
+        // Check if user has API keys configured
+        return FutureBuilder<Map<String, dynamic>?>(
+          future: _checkAPIKeyStatus(),
+          builder: (context, snapshot) {
+            final hasApiKeys = snapshot.data?['has_api_keys'] == true;
+            
+            // If no model is selected AND no API keys configured, show first-time setup UI
+            if (currentModel == null && !hasApiKeys) {
+              return _buildFirstTimeSetupUI();
+            }
+            
+            // If no model is selected but API keys exist, show regular selection prompt
+            if (currentModel == null) {
+              return AppTheme.createCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.smart_toy_rounded,
+                        size: 48,
+                        color: AppTheme.neutralGray400,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '🤖 AI Model Configuration',
+                        style: AppTheme.headingSmall.copyWith(
+                          color: AppTheme.primaryCosmic,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Please select a provider and configure your API key to use AI features',
+                        style: AppTheme.bodySmall.copyWith(
+                          color: AppTheme.neutralGray600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildProviderDropdown(),
                     ],
-                  ],
+                  ),
                 ),
-              ),
+              );
+            }
+
+            return AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: AppTheme.createCard(
+                    child: Column(
+                      children: [
+                        _buildHeader(currentModel),
+                        if (_isExpanded) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              children: [
+                                const Divider(color: AppTheme.neutralGray200),
+                                const SizedBox(height: 16),
+                                _buildCurrentModelDisplay(currentModel),
+                                const SizedBox(height: 16),
+                                _buildProviderDropdown(),
+                                const SizedBox(height: 16),
+                                _buildModelDropdown(
+                                    filteredModels, currentModel.id),
+                                const SizedBox(height: 16),
+                                _buildRecommendedModels(
+                                    filteredRecommendedModels, currentModel.id),
+                                const SizedBox(height: 16),
+                                _buildModelInfo(),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
       },
+    );
+  }
+
+  Future<Map<String, dynamic>?> _checkAPIKeyStatus() async {
+    try {
+      final apiKeyService = APIKeyService();
+      final status = await apiKeyService.getProvidersStatus();
+      
+      // The status now includes has_api_keys directly from backend
+      final hasApiKeys = status['has_api_keys'] == true;
+      
+      return {'has_api_keys': hasApiKeys};
+    } catch (e) {
+      print('Error checking API key status: $e');
+      return {'has_api_keys': false};
+    }
+  }
+
+  Widget _buildFirstTimeSetupUI() {
+    return AppTheme.createCard(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppTheme.primaryCosmic.withOpacity(0.1),
+              AppTheme.primaryTeal.withOpacity(0.1),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            // Large icon
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: AppTheme.cosmicGradient,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.rocket_launch,
+                color: Colors.white,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Title
+            Text(
+              '🚀 Welcome to CV Magic!',
+              style: AppTheme.headingMedium.copyWith(
+                color: AppTheme.primaryCosmic,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            // Description
+            Text(
+              'To get started, you need to configure your AI provider API key. This will enable all AI-powered features.',
+              style: AppTheme.bodyMedium.copyWith(
+                color: AppTheme.neutralGray600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            // Provider selection with prominent CTA
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.primaryTeal.withOpacity(0.3),
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.key,
+                        color: AppTheme.primaryTeal,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Select AI Provider',
+                        style: AppTheme.labelLarge.copyWith(
+                          color: AppTheme.primaryCosmic,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildProviderDropdown(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Help text
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryTeal.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppTheme.primaryTeal,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Don\'t have an API key? Click "Configure" to learn how to get one.',
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppTheme.primaryTeal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
