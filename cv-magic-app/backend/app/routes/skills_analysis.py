@@ -214,22 +214,38 @@ async def get_company_from_saved_job_info(jd_url: str, user_email: str) -> Optio
 def is_url_extracted_company(company: str) -> bool:
     """
     Check if company name looks like it was extracted from URL (e.g., 'www_ethicaljobs_com_au')
+    
+    Detection criteria:
+    - Must contain 'www' AND ('com' or 'org' or 'net') AND have multiple underscores
+    - OR contains domain patterns like 'com_au', 'org_uk', etc.
     """
     if not company:
         return False
     
-    # Patterns that indicate URL extraction:
-    # - Contains multiple underscores
-    # - Contains 'www', 'com', 'org', 'net', etc.
-    # - All lowercase with underscores
     company_lower = company.lower()
     
-    # Check for URL-like patterns
-    url_indicators = ['www', 'com', 'org', 'net', 'co', 'io', 'au', 'uk', 'us']
-    has_url_indicators = any(indicator in company_lower for indicator in url_indicators)
-    has_multiple_underscores = company.count('_') >= 2
+    # Must have multiple underscores to be URL-like
+    if company.count('_') < 2:
+        return False
     
-    return has_url_indicators and has_multiple_underscores
+    # Strong indicators: www + domain extension
+    has_www = 'www' in company_lower
+    has_domain = any(ext in company_lower for ext in ['_com', '_org', '_net', '_co', '_io'])
+    
+    # Pattern: www_something_com_au or something_com_au
+    if has_www and has_domain:
+        return True
+    
+    # Pattern: domain_country (e.g., com_au, org_uk)
+    domain_country_patterns = ['_com_', '_org_', '_net_', '_co_', '_io_']
+    if any(pattern in company_lower for pattern in domain_country_patterns):
+        return True
+    
+    # Pattern: ends with _com, _org, etc. (but not just one underscore)
+    if company_lower.endswith(('_com', '_org', '_net', '_co', '_io')):
+        return True
+    
+    return False
 
 # Helper functions for file validation
 
