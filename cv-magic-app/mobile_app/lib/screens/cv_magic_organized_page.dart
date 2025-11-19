@@ -231,22 +231,40 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             const SizedBox(height: 16),
 
             // Skills Display (shown BEFORE analyze match decision for better UX)
-            // Show skills comparison as soon as we have results (including initial analysis)
-            if (_skillsController.hasResults || _skillsController.hasError)
-              Column(
-                children: [
-                  SkillsDisplayWidget(
-                    controller: _skillsController
-                        as dynamic, // Cast to dynamic to bypass type check
-                    cvFilename: selectedCVFilename,
-                    jobDescription: jdController.text.trim().isNotEmpty
-                        ? jdController.text.trim()
-                        : null,
-                    onNavigateToCVGeneration: _navigateToCVGeneration,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
+            // Show skills comparison as soon as we have initial results
+            AnimatedBuilder(
+              animation: _skillsController,
+              builder: (context, _) {
+                // Debug logging
+                print('🔍 [CV_MAGIC] Skills Display Check:');
+                print('   hasResults: ${_skillsController.hasResults}');
+                print('   hasInitialResults: ${_skillsController.hasInitialResults}');
+                print('   hasError: ${_skillsController.hasError}');
+                print('   cvTotalSkills: ${_skillsController.cvTotalSkills}');
+                print('   jdTotalSkills: ${_skillsController.jdTotalSkills}');
+                
+                // Show if we have initial results OR full results
+                if (_skillsController.hasResults || 
+                    _skillsController.hasInitialResults ||
+                    _skillsController.hasError) {
+                  return Column(
+                    children: [
+                      SkillsDisplayWidget(
+                        controller: _skillsController
+                            as dynamic, // Cast to dynamic to bypass type check
+                        cvFilename: selectedCVFilename,
+                        jobDescription: jdController.text.trim().isNotEmpty
+                            ? jdController.text.trim()
+                            : null,
+                        onNavigateToCVGeneration: _navigateToCVGeneration,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
 
             // Analyze Match Decision Widget (appears after initial analysis)
             // Now shown AFTER skills display so user can see comparison before deciding

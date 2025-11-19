@@ -249,6 +249,10 @@ class ContextAwareAnalysisController extends ChangeNotifier {
           debugPrint('✅ [CONTEXT_AWARE_CONTROLLER] Created _displayResult with initial skills');
           debugPrint('   CV Skills count: ${_displayResult!.cvSkills.totalSkillsCount}');
           debugPrint('   JD Skills count: ${_displayResult!.jdSkills.totalSkillsCount}');
+          debugPrint('   CV Technical: ${_displayResult!.cvSkills.technicalSkills}');
+          debugPrint('   CV Soft: ${_displayResult!.cvSkills.softSkills}');
+          debugPrint('   JD Technical: ${_displayResult!.jdSkills.technicalSkills}');
+          debugPrint('   JD Soft: ${_displayResult!.jdSkills.softSkills}');
         }
         
         // ALWAYS stop after initial analysis - require user decision
@@ -257,6 +261,10 @@ class ContextAwareAnalysisController extends ChangeNotifier {
           debugPrint('⏸️ [CONTEXT_AWARE_CONTROLLER] Stopping for user decision');
           _waitingForUserDecision = true;
           _setCompleted(); // Set completed but waiting for decision
+          debugPrint('   State after setCompleted: $_state');
+          debugPrint('   _displayResult != null: ${_displayResult != null}');
+          debugPrint('   hasResults getter will return: ${_state == ContextAwareAnalysisState.completed && _displayResult != null}');
+          debugPrint('   About to call notifyListeners()');
           
           // Show decision message
           final decision = _initialResult!.analyzeMatchDecision!;
