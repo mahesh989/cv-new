@@ -144,6 +144,90 @@ def list_available_cv_versions(user_email: str, company: str) -> List[Dict[str, 
     versions.sort(key=lambda v: v.get("timestamp") or "", reverse=True)
     return versions
 
+# Helper function to get company name from saved job_info files by JD URL
+async def get_company_from_saved_job_info(jd_url: str, user_email: str) -> Optional[Dict[str, str]]:
+    """
+    Look up company name and slug from saved job_info files by matching JD URL.
+    This ensures we use the same company name that was extracted during 'Analyze & Save Job'.
+    
+    Args:
+        jd_url: Job description URL to match
+        user_email: User's email for path lookup
+        
+    Returns:
+        Dict with 'company_name' and 'company_slug' if found, None otherwise
+    """
+    try:
+        from app.utils.user_path_utils import get_user_base_path
+        from app.utils.timestamp_utils import TimestampUtils
+        import json
+        
+        base_path = get_user_base_path(user_email)
+        applied_companies_path = base_path / "applied_companies"
+        
+        if not applied_companies_path.exists():
+            return None
+        
+        # Search through all company folders
+        for company_folder in applied_companies_path.iterdir():
+            if not company_folder.is_dir():
+                continue
+            
+            # Look for job_info files in this company folder
+            job_info_files = list(company_folder.glob("job_info_*.json"))
+            
+            for job_info_file in job_info_files:
+                try:
+                    with open(job_info_file, 'r', encoding='utf-8') as f:
+                        job_info = json.load(f)
+                        
+                    # Check if JD URL matches
+                    extracted_info = job_info.get('extracted_info', {})
+                    saved_jd_url = job_info.get('jd_url') or extracted_info.get('jd_url')
+                    
+                    if saved_jd_url and saved_jd_url.strip() == jd_url.strip():
+                        # Found matching job_info - return company name and slug
+                        company_name = job_info.get('company_name') or extracted_info.get('company_name')
+                        company_slug = job_info.get('company_slug') or company_folder.name
+                        
+                        if company_name:
+                            logger.info(f"✅ Found saved company for JD URL: {company_name} (slug: {company_slug})")
+                            return {
+                                'company_name': company_name,
+                                'company_slug': company_slug
+                            }
+                except Exception as e:
+                    logger.debug(f"Error reading job_info file {job_info_file}: {e}")
+                    continue
+        
+        logger.info(f"⚠️ No saved job_info found for JD URL: {jd_url}")
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error looking up company from saved job_info: {e}")
+        return None
+
+# Helper function to normalize company name (check if it looks like URL-extracted)
+def is_url_extracted_company(company: str) -> bool:
+    """
+    Check if company name looks like it was extracted from URL (e.g., 'www_ethicaljobs_com_au')
+    """
+    if not company:
+        return False
+    
+    # Patterns that indicate URL extraction:
+    # - Contains multiple underscores
+    # - Contains 'www', 'com', 'org', 'net', etc.
+    # - All lowercase with underscores
+    company_lower = company.lower()
+    
+    # Check for URL-like patterns
+    url_indicators = ['www', 'com', 'org', 'net', 'co', 'io', 'au', 'uk', 'us']
+    has_url_indicators = any(indicator in company_lower for indicator in url_indicators)
+    has_multiple_underscores = company.count('_') >= 2
+    
+    return has_url_indicators and has_multiple_underscores
+
 # Helper functions for file validation
 
 # ============================================================================
@@ -959,6 +1043,7 @@ async def context_aware_analysis(
         is_rerun = data.get("is_rerun", False)  # New parameter for context awareness
         include_tailoring = data.get("include_tailoring", True)
         user_id = getattr(token_data, 'user_id', 1)
+        user_email = token_data.email
         
         # Validate required parameters
         if not jd_url:
@@ -973,10 +1058,19 @@ async def context_aware_analysis(
                 content={"error": "company is required"}
             )
         
+        # CRITICAL: If company looks like it was extracted from URL, look up the actual company from saved job_info
+        if is_url_extracted_company(company) and jd_url:
+            logger.info(f"🔍 Company '{company}' looks URL-extracted, looking up from saved job_info...")
+            saved_company = await get_company_from_saved_job_info(jd_url, user_email)
+            if saved_company:
+                company = saved_company['company_slug']  # Use the slug for folder name
+                logger.info(f"✅ Using saved company: {saved_company['company_name']} (slug: {company})")
+            else:
+                logger.warning(f"⚠️ Could not find saved company for JD URL, using provided: {company}")
+        
         logger.info(f"🎯 Context-aware analysis request: Company={company}, JD={jd_url}, Rerun={is_rerun}")
         
         # Get CV selection context for user feedback using unified selector
-        user_email = token_data.email
         cv_context = get_cv_context_for_analysis(user_email, company, is_rerun)
         logger.info(f"📄 Using {cv_context.cv_type} CV v{cv_context.version} (Source: {cv_context.source})")
         
@@ -988,7 +1082,7 @@ async def context_aware_analysis(
         # Run the context-aware analysis pipeline
         try:
             # Create user-specific pipeline instance
-            pipeline = ContextAwareAnalysisPipeline(user_email=current_user.email)
+            pipeline = ContextAwareAnalysisPipeline(user_email=user_email)
             results = await pipeline.run_full_analysis(
                 jd_url=jd_url,
                 company=company,
@@ -1089,6 +1183,7 @@ async def initial_analysis(
         company = data.get("company")
         is_rerun = data.get("is_rerun", False)
         user_id = getattr(current_user, 'id', 1)
+        user_email = current_user.email
         
         # Validate required parameters
         if not jd_url:
@@ -1102,6 +1197,16 @@ async def initial_analysis(
                 status_code=400,
                 content={"error": "company is required"}
             )
+        
+        # CRITICAL: If company looks like it was extracted from URL, look up the actual company from saved job_info
+        if is_url_extracted_company(company) and jd_url:
+            logger.info(f"🔍 Company '{company}' looks URL-extracted, looking up from saved job_info...")
+            saved_company = await get_company_from_saved_job_info(jd_url, user_email)
+            if saved_company:
+                company = saved_company['company_slug']  # Use the slug for folder name
+                logger.info(f"✅ Using saved company: {saved_company['company_name']} (slug: {company})")
+            else:
+                logger.warning(f"⚠️ Could not find saved company for JD URL, using provided: {company}")
         
         logger.info(f"🎯 Initial analysis request: Company={company}, JD={jd_url}, Rerun={is_rerun}")
         
