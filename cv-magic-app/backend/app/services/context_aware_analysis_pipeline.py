@@ -735,6 +735,12 @@ class ContextAwareAnalysisPipeline:
                 results.errors.append("JD analysis failed")
                 return results
             
+            # Summarize JD skills for downstream consumers
+            if not results.jd_skills and results.jd_analysis:
+                results.jd_skills = self._summarize_jd_skills(results.jd_analysis)
+            elif isinstance(jd_data, dict) and jd_data.get('jd_skills'):
+                results.jd_skills = jd_data.get('jd_skills', {})
+            
             # Step 4: CV Skills Extraction
             cv_skills = await self._extract_cv_skills(context, results)
             if not cv_skills:
@@ -767,6 +773,9 @@ class ContextAwareAnalysisPipeline:
             
             logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Initial analysis completed in {results.processing_time:.2f}s")
             logger.info(f"📊 [CONTEXT_AWARE_PIPELINE] Steps completed: {len(results.steps_completed)}")
+            
+            # Persist snapshot so continuation + UI have baseline skills data
+            self._persist_initial_skills_snapshot(context, results, jd_data)
             
             return results
             
@@ -916,6 +925,94 @@ class ContextAwareAnalysisPipeline:
 
         except Exception as exc:
             logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to hydrate previous results for {company}: {exc}")
+
+    def _summarize_jd_skills(self, jd_analysis: Optional[Dict[str, Any]]) -> Dict[str, List[str]]:
+        """Compile JD skill keywords into legacy structure."""
+        summary = {
+            "technical_skills": [],
+            "soft_skills": [],
+            "domain_keywords": []
+        }
+        if not jd_analysis:
+            return summary
+        
+        def _add(key: str, values: Optional[List[str]]):
+            if not values:
+                return
+            for value in values:
+                if isinstance(value, str):
+                    cleaned = value.strip()
+                    if cleaned:
+                        summary[key].append(cleaned)
+        
+        for section in ("required_skills", "preferred_skills"):
+            section_data = jd_analysis.get(section, {})
+            _add("technical_skills", section_data.get("technical"))
+            _add("soft_skills", section_data.get("soft_skills"))
+            _add("domain_keywords", section_data.get("domain_knowledge"))
+        
+        _add("domain_keywords", jd_analysis.get("all_keywords"))
+        _add("domain_keywords", jd_analysis.get("required_keywords"))
+        _add("domain_keywords", jd_analysis.get("preferred_keywords"))
+        
+        for key in summary:
+            summary[key] = sorted({item for item in summary[key] if item})
+        return summary
+    
+    def _persist_initial_skills_snapshot(
+        self,
+        context: AnalysisContext,
+        results: AnalysisResults,
+        jd_data: Optional[Dict[str, Any]]
+    ) -> None:
+        """Save CV/JD skills snapshot so continuation + UI can reuse it."""
+        try:
+            if not (results.cv_skills or results.jd_skills):
+                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No skills data to persist for snapshot")
+                return
+            
+            from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
+            result_saver = SkillExtractionResultSaver(user_email=self.user_email)
+            
+            cv_filename = "selected_cv.txt"
+            cv_data = None
+            cv_path = None
+            if context.cv_context:
+                cv_path = context.cv_context.json_path or context.cv_context.txt_path
+            if cv_path and cv_path.exists():
+                cv_filename = cv_path.name
+                try:
+                    cv_text = cv_path.read_text(encoding="utf-8")
+                    cv_data = {"text": cv_text}
+                except Exception as read_error:
+                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to read CV text: {read_error}")
+            
+            jd_snapshot = None
+            if isinstance(jd_data, dict) and jd_data.get("jd_original"):
+                jd_snapshot = jd_data.get("jd_original")
+            elif context.company:
+                from app.utils.timestamp_utils import TimestampUtils
+                company_dir = self.base_dir / "applied_companies" / context.company
+                jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+                if jd_file and jd_file.exists():
+                    try:
+                        jd_snapshot = json.loads(jd_file.read_text(encoding="utf-8"))
+                    except Exception as jd_error:
+                        logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to load JD snapshot: {jd_error}")
+            
+            result_saver.save_analysis_results(
+                cv_skills=results.cv_skills or {},
+                jd_skills=results.jd_skills or {},
+                jd_url=context.jd_url or "preliminary_analysis",
+                cv_filename=cv_filename,
+                user_id=context.user_id,
+                cv_data=cv_data,
+                jd_data=jd_snapshot,
+                company_name=context.company
+            )
+            logger.info("💾 [CONTEXT_AWARE_PIPELINE] Saved skills snapshot for %s", context.company)
+        except Exception as snapshot_error:
+            logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to persist skills snapshot: {snapshot_error}")
 
 
 # Global instance removed - service now requires user_email parameter
