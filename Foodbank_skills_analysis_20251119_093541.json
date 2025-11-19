@@ -1,0 +1,270 @@
+{
+  "generated": "2025-11-19T09:35:41.985",
+  "cv_filename": "original_cv.json",
+  "jd_url": "https://www.ethicaljobs.com.au/members/cause/data-analytics-officer-foodbank-remote-work-from-home",
+  "user_id": "6",
+  "company": "Foodbank",
+  "model_used": "unknown",
+  "cv_skills": {
+    "technical_skills": [],
+    "soft_skills": [],
+    "experience_years": 0,
+    "education": [],
+    "certifications": [],
+    "languages": [],
+    "summary": "CV analysis completed"
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Excel",
+      "MSSQL",
+      "Power BI",
+      "SQL"
+    ],
+    "soft_skills": [
+      "analytical thinking",
+      "communication",
+      "interpersonal skills",
+      "presentation skills",
+      "problem-solving"
+    ],
+    "domain_keywords": [
+      "Excel",
+      "MSSQL",
+      "Power BI",
+      "SQL",
+      "analytical thinking",
+      "communication",
+      "data cleaning",
+      "data transformation",
+      "data warehousing",
+      "data-led insights",
+      "interpersonal skills",
+      "presentation skills",
+      "problem-solving"
+    ]
+  },
+  "cv_comprehensive_analysis": null,
+  "jd_comprehensive_analysis": null,
+  "analyze_match_entries": [],
+  "preextracted_comparison_entries": [],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-11-19T09:36:30.601",
+      "component_analyses": {
+        "technical": {
+          "technical_analysis": {
+            "technical_depth_score": 70.0,
+            "core_skills_match_percentage": 60.0,
+            "technical_stack_fit_percentage": 85.0,
+            "complexity_readiness_score": 55.0,
+            "learning_agility_score": 70.0,
+            "jd_problem_complexity": 4,
+            "technical_strengths": [
+              "Developed 5 machine learning models in Python for predictive analytics",
+              "Automated repetitive tasks using AI techniques, reducing manual effort by 40%",
+              "Built 10 dynamic dashboards using Python libraries"
+            ],
+            "technical_gaps": [
+              "No mention of SQL experience, which is required in the JD",
+              "Limited evidence of large-scale system handling or distributed systems"
+            ],
+            "cv_sophistication_level": "Derived from analysis",
+            "cv_primary_domain": "Extracted from CV",
+            "jd_required_sophistication": "Extracted from JD",
+            "overqualification_risk": "LOW"
+          }
+        },
+        "skills": {
+          "overall_skills_score": 80.0,
+          "business_readiness_score": 80.0,
+          "skills_analysis": [
+            {
+              "skill": "Consolidated skills analysis",
+              "relevance_score": 80.0,
+              "context": "Python used in corporate production (100%), Power BI in corporate (100%), Tableau in corporate (100%), Machine Learning in corporate (100%)",
+              "business_application": "Python used in corporate production (100%), Power BI in corporate (100%), Tableau in corporate (100%), Machine Learning in corporate (100%)"
+            }
+          ],
+          "corporate_skills_strength": "Python used in corporate production (100%), Power BI in corporate (100%), Tableau in corporate (100%), Machine Learning in corporate (100%)",
+          "academic_skills_discount": "Applied in scoring",
+          "strength_areas": [
+            "Developed 5 machine learning models in Python for predictive analytics",
+            "Automated repetitive tasks using AI techniques, reducing manual effort by 40%",
+            "Built 10 dynamic dashboards using Python libraries"
+          ],
+          "critical_gaps": [
+            "SQL",
+            "Statistical methods",
+            "Data mining techniques"
+          ],
+          "immediate_value_skills": [
+            "Developed 5 machine learning models in Python for predictive analytics",
+            "Automated repetitive tasks using AI techniques, reducing manual effort by 40%",
+            "Built 10 dynamic dashboards using Python libraries"
+          ],
+          "training_investment_needed": [
+            "SQL",
+            "Statistical methods",
+            "Data mining techniques"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "5.0",
+            "cv_corporate_years": "1.0",
+            "cv_academic_years": "4.0",
+            "cv_role_level": "Mid",
+            "jd_required_years": "0.0",
+            "jd_role_level": "Entry",
+            "alignment_score": 75.0,
+            "experience_gaps": [
+              "No direct team management experience",
+              "Limited evidence of stakeholder management at a leadership level"
+            ],
+            "experience_strengths": [
+              "Developed 5 machine learning models in Python for predictive analytics",
+              "Automated repetitive tasks using AI techniques",
+              "Built 10 dynamic dashboards using Python libraries"
+            ],
+            "overqualification_risk": "LOW",
+            "cv_progression": [
+              "Derived from analysis"
+            ],
+            "quantified_achievements": [
+              "Developed 5 machine learning models in Python for predictive analytics",
+              "Automated repetitive tasks using AI techniques",
+              "Built 10 dynamic dashboards using Python libraries"
+            ]
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "1.0",
+            "cv_academic_years": "4.0",
+            "seniority_score": 90.0,
+            "corporate_seniority_match": 90.0,
+            "leadership_readiness_score": 70.0,
+            "experience_match_percentage": 70.0,
+            "responsibility_fit_percentage": 90.0,
+            "growth_trajectory_score": 70.0,
+            "cv_responsibility_scope": "Mid",
+            "cv_leadership_indicators": "5",
+            "jd_required_seniority": "Entry",
+            "overqualification_risk": "LOW",
+            "seniority_strengths": [
+              "Developed 5 machine learning models in Python for predictive analytics",
+              "Automated repetitive tasks using AI techniques",
+              "Built 10 dynamic dashboards using Python libraries"
+            ],
+            "seniority_gaps": [
+              "No direct team management experience",
+              "Limited evidence of stakeholder management at a leadership level"
+            ],
+            "readiness_assessment": "Score: 90.0"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Tech and Construction",
+            "jd_target_industry": "Not For Profit",
+            "industry_alignment_score": 60.0,
+            "transition_type": "Different industry, corporate background",
+            "success_probability": "MEDIUM",
+            "hiring_risk_assessment": "MEDIUM RISK",
+            "industry_strengths": [
+              "The candidate is transitioning from tech and construction to a not-for-profit sector. While the data analysis skills are transferable, the industry change involves adapting to a different organizational culture and possibly different data priorities. The candidate's technical skills are strong, but they may need support in understanding the NFP sector's specific needs."
+            ],
+            "critical_industry_gaps": [],
+            "corporate_background_bonus": "5",
+            "domain_overlap_percentage": 60.0,
+            "data_familiarity_score": 55.0,
+            "stakeholder_fit_score": 70.0,
+            "business_cycle_alignment": 60.0,
+            "direct_industry_match": "PARTIAL",
+            "cultural_adaptation_difficulty": "MEDIUM",
+            "adaptation_timeline": "6-12 months"
+          }
+        },
+        "requirement_bonus": {
+          "total_bonus": 0,
+          "bonus_breakdown": {
+            "total_bonus": 0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 80.0,
+        "experience_alignment": 75.0,
+        "industry_fit": 60.0,
+        "domain_overlap_percentage": 60.0,
+        "data_familiarity_score": 55.0,
+        "stakeholder_fit_score": 70.0,
+        "business_cycle_alignment": 60.0,
+        "industry_transition_fit": 60.0,
+        "role_seniority": 90.0,
+        "experience_match_percentage": 70.0,
+        "role_similarity": 70.0,
+        "responsibility_fit_percentage": 90.0,
+        "leadership_readiness_score": 70.0,
+        "growth_trajectory_score": 70.0,
+        "seniority_match": 90.0,
+        "technical_depth": 70.0,
+        "core_skills_match_percentage": 60.0,
+        "required_skills_coverage": 60.0,
+        "technical_stack_fit_percentage": 85.0,
+        "tech_stack_similarity": 85.0,
+        "complexity_readiness_score": 55.0,
+        "learning_agility_score": 70.0,
+        "jd_problem_complexity": 4.0,
+        "business_readiness": 80.0,
+        "requirement_bonus": 0.0,
+        "total_bonus": 0.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-11-19T09:36:30.603",
+      "final_ats_score": 25.8,
+      "category_status": "❌ Poor fit",
+      "recommendation": "Generally not recommended - Significant gaps",
+      "breakdown": {
+        "category1": {
+          "score": 0.0,
+          "max_points": 65,
+          "technical_skills_match_rate": 0.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 0.0,
+          "technical_points": 0.0,
+          "domain_points": 0.0,
+          "soft_points": 0.0,
+          "missing_counts": {
+            "technical": 0,
+            "soft": 0,
+            "domain": 0
+          }
+        },
+        "category2": {
+          "score": 25.8,
+          "max_points": 35,
+          "technical_skills_component": {
+            "score": 16.2,
+            "max_points": 22,
+            "average": 73.8
+          },
+          "experience_fit_component": {
+            "score": 9.6,
+            "max_points": 13,
+            "average": 73.8
+          }
+        },
+        "base_score": 25.8,
+        "bonus_points": 0.0,
+        "boost_applied": 0.0
+      },
+      "scoring_version": "v2_65_35_split"
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "personal_information": {
+    "name": "Maheshwor Tiwari",
+    "phone": "0414032507",
+    "email": "maheshwortiwari.com.np@gamil.com",
+    "location": "Sydney, NSW, Australia",
+    "linkedin": "LinkedIn",
+    "github": "GitHub",
+    "portfolio_links": {
+      "blogs": "",
+      "dashboard_portfolio": "",
+      "website": "Portfolio"
+    },
+    "residency_status": "",
+    "open_to": ""
+  },
+  "career_profile": {
+    "summary": "Senior Data Analyst with 5 years' experience in data analytics and change management, delivering insights and strategic solutions for tech and construction industries.  Developed 5 machine learning models in Python, enhancing strategic planning by 25% and improving community engagement  Automated data extraction processes, improving data accuracy by 30% and supporting program development  Built 10 dynamic dashboards using Python libraries, improving stakeholder engagement and data-driven decision-making Skills: Python | Power BI | Tableau | Excel | Data Modelling | Change Management"
+  },
+  "skills": {
+    "technical_skills": [
+      " Technical Skills: Python, Power BI, Tableau, Excel"
+    ],
+    "key_skills": [],
+    "soft_skills": [
+      " Soft Skills: Analytical Thinking, Communication, Problem Solving, Teamwork"
+    ],
+    "domain_expertise": [
+      "Data Modelling",
+      "Report Generation",
+      "Dashboard Creation"
+    ]
+  },
+  "education": [
+    {
+      "degree": "Master of Data Science",
+      "institution": "Charles Darwin University",
+      "year": "Mar 2023 - Nov 2024",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Sydney, Australia"
+    },
+    {
+      "degree": "PhD in Physics",
+      "institution": "CY Cergy Paris University",
+      "year": "Oct 2018 - Sep 2022",
+      "gpa": "",
+      "relevant_courses": [],
+      "honors": [],
+      "location": "Cergy, France"
+    }
+  ],
+  "experience": [
+    {
+      "title": "Data Analyst",
+      "company": "The Bitrates",
+      "duration": "Jul 2024 - Present",
+      "location": "Sydney, New South Wales, Australia",
+      "responsibilities": [
+        " Developed 5 machine learning models in Python for predictive analytics, enhancing strategic planning by 25% and improving community engagement",
+        " Automated repetitive tasks using AI techniques, reducing manual effort by 40% and improving operational efficiency",
+        " Built 10 dynamic dashboards using Python libraries, improving stakeholder engagement and data-driven decision-making"
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Data Analyst",
+      "company": "iBuild Building Solutions",
+      "duration": "Mar 2024 - Jun 2024",
+      "location": "Victoria, Australia",
+      "responsibilities": [
+        " Automated data extraction processes, improving data accuracy by 30% and supporting program development",
+        " Analyzed customer support data to optimize response times, enhancing operational efficiency by 20%",
+        " Developed Python-based solutions for strategic decision-making, meeting deadlines and improving analytical capabilities"
+      ],
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "title": "Software Engineer and Analyst",
+      "company": "Property Console",
+      "duration": "Jun 2023 - Nov 2023",
+      "location": "Sydney, Australia",
+      "responsibilities": [
+        " Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity",
+        " Enhanced analytics capabilities, improving data processing speed by 25% using Python",
+        " Produced Tableau dashboards that improved decision-making and stakeholder communication"
+      ],
+      "achievements": [],
+      "technologies": []
+    }
+  ],
+  "projects": [],
+  "certifications": [],
+  "languages": [],
+  "awards": [],
+  "publications": [],
+  "volunteer_work": [],
+  "professional_memberships": [],
+  "unknown_sections": {},
+  "original_sections": {
+    "section_headers_found": [
+      "CAREER HIGHLIGHTS",
+      "EDUCATION",
+      "SKILLS",
+      "PROFESSIONAL EXPERIENCE"
+    ],
+    "parsing_approach": "content_preserving"
+  },
+  "saved_at": "2025-11-19T05:55:05.528934",
+  "metadata": {
+    "source_filename": "McGrath_Foundation_tailored_resum.pdf",
+    "processed_at": "2025-11-19T05:55:05.529331",
+    "processing_version": "2.0",
+    "content_type": "structured_cv"
+  }
+}

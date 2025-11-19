@@ -1,0 +1,56 @@
+Maheshwor Tiwari
+ Sydney, NSW, Australia | 0414032507 | maheshwortiwari.com.np@gamil.com | LinkedIn | GitHub | Portfolio
+CAREER HIGHLIGHTS
+Senior Data Analyst with 5 years' experience in data analytics and change management, delivering insights
+and strategic solutions for tech and construction industries.  Developed 5 machine learning models in
+Python, enhancing strategic planning by 25% and improving community engagement  Automated data
+extraction processes, improving data accuracy by 30% and supporting program development  Built 10
+dynamic dashboards using Python libraries, improving stakeholder engagement and data-driven
+decision-making Skills: Python | Power BI | Tableau | Excel | Data Modelling | Change Management
+PROFESSIONAL EXPERIENCE
+Data Analyst
+Jul 2024 - Present
+ The Bitrates | Sydney, New South Wales, Australia
+
+Developed 5 machine learning models in Python for predictive analytics, enhancing strategic planning
+by 25% and improving community engagement
+
+Automated repetitive tasks using AI techniques, reducing manual effort by 40% and improving
+operational efficiency
+
+Built 10 dynamic dashboards using Python libraries, improving stakeholder engagement and data-driven
+decision-making
+Data Analyst
+Mar 2024 - Jun 2024
+ iBuild Building Solutions | Victoria, Australia
+
+Automated data extraction processes, improving data accuracy by 30% and supporting program
+development
+
+Analyzed customer support data to optimize response times, enhancing operational efficiency by 20%
+
+Developed Python-based solutions for strategic decision-making, meeting deadlines and improving
+analytical capabilities
+Software Engineer and Analyst
+Jun 2023 - Nov 2023
+ Property Console | Sydney, Australia
+
+Built Python scripts to track key metrics, ensuring 99% data accuracy and improving data integrity
+
+Enhanced analytics capabilities, improving data processing speed by 25% using Python
+
+Produced Tableau dashboards that improved decision-making and stakeholder communication
+EDUCATION
+Master of Data Science
+Mar 2023 - Nov 2024
+ Charles Darwin University, Sydney, Australia
+PhD in Physics
+Oct 2018 - Sep 2022
+ CY Cergy Paris University, Cergy, France
+SKILLS
+
+Technical Skills: Python, Power BI, Tableau, Excel
+
+Soft Skills: Analytical Thinking, Communication, Problem Solving, Teamwork
+
+Other Skills: Data Modelling, Report Generation, Dashboard Creation

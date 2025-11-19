@@ -229,6 +229,28 @@ class ContextAwareAnalysisController extends ChangeNotifier {
         debugPrint('   requiresUserDecision: ${_initialResult!.requiresUserDecision}');
         debugPrint('   analyzeMatchDecision: ${_initialResult!.analyzeMatchDecision != null}');
         
+        // Convert initial results to SkillsAnalysisResult for UI display
+        // This allows showing CV vs JD skills BEFORE analyze match decision
+        if (_initialResult!.results != null) {
+          final initialResults = _initialResult!.results!;
+          _displayResult = SkillsAnalysisResult(
+            cvSkills: SkillsData.fromJson(initialResults.cvSkills),
+            jdSkills: SkillsData.fromJson(initialResults.jdSkills),
+            cvComprehensiveAnalysis: '',
+            jdComprehensiveAnalysis: '',
+            expandableAnalysis: null,
+            extractedKeywords: [],
+            executionDuration: _initialResult!.processingTime,
+            isSuccess: true,
+            analyzeMatch: null, // Will be shown in decision card
+            preextractedRawOutput: null,
+            preextractedCompanyName: _currentCompany,
+          );
+          debugPrint('✅ [CONTEXT_AWARE_CONTROLLER] Created _displayResult with initial skills');
+          debugPrint('   CV Skills count: ${_displayResult!.cvSkills.totalSkillsCount}');
+          debugPrint('   JD Skills count: ${_displayResult!.jdSkills.totalSkillsCount}');
+        }
+        
         // ALWAYS stop after initial analysis - require user decision
         // Check if user decision is required
         if (_initialResult!.requiresUserDecision && _initialResult!.analyzeMatchDecision != null) {
@@ -244,6 +266,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
           debugPrint('📊 [CONTEXT_AWARE_CONTROLLER] Decision: ${decision.decision}, Score: ${decision.matchScore}%');
           debugPrint('   waitingForUserDecision: $_waitingForUserDecision');
           debugPrint('   hasAnalyzeMatchDecision: ${hasAnalyzeMatchDecision}');
+          debugPrint('   hasResults (for UI): $hasResults');
           
           notifyListeners();
           return; // Stop here, wait for user decision - DO NOT CONTINUE AUTOMATICALLY
