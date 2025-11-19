@@ -44,10 +44,16 @@ class APIKeyNotFoundError(APIKeyError):
     def __init__(self, provider: str, user_email: str = None):
         self.provider = provider
         self.user_email = user_email
-        if user_email:
-            self.message = f"No API key configured for {provider}. Please configure your API key in settings."
+        if provider == "any":
+            if user_email:
+                self.message = "No API key configured. Please configure your API key in settings to use AI features."
+            else:
+                self.message = "No API key configured. Please configure your API key to use AI features."
         else:
-            self.message = f"No API key configured for {provider}. Please configure your API key."
+            if user_email:
+                self.message = f"No API key configured for {provider}. Please configure your API key in settings."
+            else:
+                self.message = f"No API key configured for {provider}. Please configure your API key."
         super().__init__(self.message)
 
 

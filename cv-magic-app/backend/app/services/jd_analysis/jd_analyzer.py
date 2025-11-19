@@ -465,6 +465,19 @@ class JDAnalyzer:
             self.ai_service.initialize_for_user(current_user)
             logger.info(f"✅ [JD_ANALYZER] AI service initialized with providers: {list(self.ai_service._providers.keys())}")
             
+            # Check if user has any API keys configured
+            if not self.ai_service._providers:
+                from app.exceptions.cv_exceptions import APIKeyNotFoundError
+                logger.error(f"❌ [JD_ANALYZER] No API keys configured for user {current_user.email}")
+                raise APIKeyNotFoundError("any", current_user.email)
+            
+            # Check if current provider is available
+            current_provider = self.ai_service.get_current_provider()
+            if not current_provider:
+                from app.exceptions.cv_exceptions import APIKeyNotFoundError
+                logger.error(f"❌ [JD_ANALYZER] No provider selected for user {current_user.email}")
+                raise APIKeyNotFoundError("any", current_user.email)
+            
             response = await self.ai_service.generate_response(
                 prompt=user_prompt,
                 user=current_user,
@@ -482,6 +495,10 @@ class JDAnalyzer:
             
         except Exception as e:
             logger.error(f"JD analysis failed: {e}")
+            # Check if it's an API key error and preserve the original message
+            from app.exceptions.cv_exceptions import APIKeyNotFoundError, APIKeyError
+            if isinstance(e, (APIKeyNotFoundError, APIKeyError)):
+                raise
             raise Exception(f"Failed to analyze job description: {e}")
     
     async def analyze_jd_file(self, file_path: Union[str, Path], temperature: float = 0.0) -> JDAnalysisResult:
