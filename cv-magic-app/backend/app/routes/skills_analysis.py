@@ -1789,11 +1789,42 @@ async def get_cached_preliminary_analysis(request: Request):
 
 
 @router.get("/cv-context/{company}")
-async def get_cv_context(company: str, is_rerun: bool = False, current_user: UserData = Depends(get_current_user)):
+async def get_cv_context(
+    company: str, 
+    is_rerun: bool = False, 
+    jd_url: Optional[str] = None,
+    current_user: UserData = Depends(get_current_user)
+):
     """Get CV selection context for UI feedback"""
     try:
-        # Get CV selection context using unified selector
         user_email = current_user.email
+        original_company = company  # Save original for logging
+        
+        # CRITICAL: If company looks like it was extracted from URL, look up the actual company from saved job_info
+        if is_url_extracted_company(company):
+            if jd_url:
+                # Try to find by JD URL first (most accurate)
+                logger.info(f"🔍 [CV_CONTEXT] Company '{company}' looks URL-extracted, looking up from saved job_info by JD URL...")
+                saved_company = await get_company_from_saved_job_info(jd_url, user_email)
+                if saved_company:
+                    company = saved_company['company_slug']  # Use the slug for folder name
+                    logger.info(f"✅ [CV_CONTEXT] Using saved company: {saved_company['company_name']} (slug: {company})")
+                else:
+                    logger.warning(f"⚠️ [CV_CONTEXT] Could not find saved company for JD URL, trying fallback...")
+                    # Fallback: use most recent company folder
+                    recent_company = await _get_most_recent_company_folder(user_email)
+                    if recent_company:
+                        company = recent_company
+                        logger.info(f"✅ [CV_CONTEXT] Using most recent company folder: {company}")
+            else:
+                # No JD URL provided - use most recent company folder as fallback
+                logger.info(f"🔍 [CV_CONTEXT] Company '{company}' looks URL-extracted but no JD URL, using most recent company folder...")
+                recent_company = await _get_most_recent_company_folder(user_email)
+                if recent_company:
+                    company = recent_company
+                    logger.info(f"✅ [CV_CONTEXT] Using most recent company folder: {company}")
+        
+        # Get CV selection context using unified selector
         cv_context = get_cv_context_for_analysis(user_email, company, is_rerun)
         
         # Get available CV versions using unified selector
