@@ -246,17 +246,19 @@ class ContextAwareAnalysisPipeline:
             from pathlib import Path
             
             # Read CV content from file
-            # Convert to absolute path if it's relative
+            # Paths from unified selector are relative to app root
             cv_file = Path(cv_path)
             if not cv_file.is_absolute():
-                # Try resolving relative to base_dir first, then current working directory
-                if hasattr(self, 'base_dir') and self.base_dir:
-                    cv_file = self.base_dir.parent.parent / cv_path
-                else:
-                    cv_file = Path(cv_path).resolve()
+                # Resolve relative to current working directory (app root in container)
+                cv_file = Path(cv_path).resolve()
+                # If still doesn't exist, try relative to base_dir
+                if not cv_file.exists() and hasattr(self, 'base_dir') and self.base_dir:
+                    # base_dir is user/{email}/cv-analysis, so go up to app root
+                    app_root = self.base_dir.parent.parent
+                    cv_file = app_root / cv_path
             
             if not cv_file.exists():
-                return {"error": f"CV file not found: {cv_path} (resolved to: {cv_file})"}
+                return {"error": f"CV file not found: {cv_path} (resolved to: {cv_file}, cwd: {Path.cwd()})"}
             
             with open(cv_file, 'r', encoding='utf-8') as f:
                 cv_text = f.read()
