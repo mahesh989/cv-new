@@ -11,8 +11,9 @@ from datetime import datetime
 
 # Configuration
 BASE_URL = "https://cvagent.duckdns.org/api"
-# You'll need to get a valid token from the app
-AUTH_TOKEN = "YOUR_TOKEN_HERE"  # Replace with actual token
+# Test user credentials
+TEST_EMAIL = "rashmi@gmail.com"
+TEST_PASSWORD = "rashmi"
 
 # Job Description from the URL
 JD_URL = "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst"
@@ -65,14 +66,54 @@ An advanced understanding of how data is used for communication purposes, the pr
 An appreciation of data issues and their solutions, particularly de-duplication and the importance of maintaining clean data.
 """
 
-def test_preliminary_analysis():
+def get_auth_token():
+    """Get authentication token by logging in"""
+    print("\n" + "="*80)
+    print("STEP 0: Getting Authentication Token")
+    print("="*80)
+    
+    login_url = f"{BASE_URL}/auth/login"
+    payload = {
+        "email": TEST_EMAIL,
+        "password": TEST_PASSWORD
+    }
+    
+    print(f"\n📤 Logging in as: {TEST_EMAIL}")
+    
+    try:
+        response = requests.post(
+            login_url,
+            json=payload,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            token = result.get("access_token")
+            if token:
+                print(f"✅ Login successful!")
+                print(f"   Token: {token[:50]}...")
+                return token
+            else:
+                print(f"❌ No token in response: {result}")
+                return None
+        else:
+            print(f"❌ Login failed: {response.status_code}")
+            print(f"   Response: {response.text[:500]}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Exception during login: {e}")
+        return None
+
+def test_preliminary_analysis(auth_token):
     """Test preliminary analysis endpoint"""
     print("\n" + "="*80)
     print("TEST 1: Preliminary Analysis (Company Folder Creation)")
     print("="*80)
     
     headers = {
-        "Authorization": f"Bearer {AUTH_TOKEN}",
+        "Authorization": f"Bearer {auth_token}",
         "Content-Type": "application/json"
     }
     
@@ -195,13 +236,14 @@ if __name__ == "__main__":
     print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"JD URL: {JD_URL}")
     
-    if AUTH_TOKEN == "YOUR_TOKEN_HERE":
-        print("\n⚠️ WARNING: Please set AUTH_TOKEN in the script!")
-        print("   You can get a token from the mobile app or API login endpoint.")
+    # Get auth token first
+    token = get_auth_token()
+    if not token:
+        print("\n❌ Failed to get authentication token. Exiting.")
         exit(1)
     
     # Run tests
-    success = test_preliminary_analysis()
+    success = test_preliminary_analysis(token)
     
     # Wait a bit for logs to be written
     print("\n⏳ Waiting 5 seconds for logs to be written...")
