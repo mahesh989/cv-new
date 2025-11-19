@@ -297,7 +297,7 @@ class APIService {
   static Future<Map<String, dynamic>> saveCVForAnalysis(String filename) async {
     print('🔍 [API] saveCVForAnalysis called with filename: $filename');
     print('🔍 [API] Endpoint: /cv/save-for-analysis/$filename');
-    
+
     try {
       final response = await makeAuthenticatedCall(
         endpoint: '/cv/save-for-analysis/$filename',

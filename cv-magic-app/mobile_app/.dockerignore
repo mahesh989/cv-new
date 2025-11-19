@@ -14,3 +14,4 @@ __pycache__
 **/mobile_app/build/
 **/node_modules/
 **/.DS_Store
+*.md
