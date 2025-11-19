@@ -825,48 +825,52 @@ class RecommendationParser:
                 
                 # CRITICAL FIX: Check if 'text' field contains JSON string
                 # This happens when CV is stored as {"text": "{...escaped JSON...}"}
-                # Sometimes it's nested multiple times!
-                try:
-                    # Try to parse as JSON first
-                    text_as_json = json.loads(cv_text)
-                    logger.info(f"✅ First JSON parse successful - type: {type(text_as_json)}")
-                    
-                    if isinstance(text_as_json, dict):
-                        # Check if this level has the CV data
-                        if 'personal_information' in text_as_json or 'contact' in text_as_json:
-                            logger.info("✅ Detected JSON string inside 'text' field - parsing as structured CV")
-                            if 'personal_information' in text_as_json:
-                                return RecommendationParser._convert_structured_to_model_format(text_as_json)
-                            elif all(key in text_as_json for key in ['contact', 'experience', 'skills']):
-                                logger.info("✅ Successfully parsed nested JSON from 'text' field")
-                                return text_as_json
-                        
-                        # Check if there's another 'text' field (nested again!)
-                        elif 'text' in text_as_json:
-                            logger.info("🔄 Detected nested 'text' field - parsing recursively")
-                            inner_text = text_as_json.get('text', '')
-                            try:
-                                inner_json = json.loads(inner_text)
-                                logger.info(f"✅ Second JSON parse successful - type: {type(inner_json)}")
-                                if isinstance(inner_json, dict):
-                                    if 'personal_information' in inner_json:
-                                        logger.info("✅ Found personal_information in nested JSON - converting")
-                                        return RecommendationParser._convert_structured_to_model_format(inner_json)
-                                    elif all(key in inner_json for key in ['contact', 'experience', 'skills']):
-                                        logger.info("✅ Found structured CV in nested JSON")
-                                        return inner_json
-                            except (json.JSONDecodeError, ValueError) as e:
-                                logger.warning(f"⚠️  Failed to parse nested text field as JSON: {e}")
-                                # Fall through to text parsing
-                                pass
-                except (json.JSONDecodeError, ValueError) as e:
-                    # Not JSON, treat as plain text
-                    logger.info(f"📝 JSON parsing failed: {e} - treating as plain text")
-                    pass
+                # Sometimes it's nested multiple times (up to 4-5 levels!)
+                # Use a loop to keep parsing until we find the actual CV data or plain text
+                current_data = cv_text
+                max_depth = 10  # Safety limit
+                depth = 0
                 
-                # Fall back to text parsing
-                logger.info("📝 Treating 'text' field as plain text")
-                structured_cv = RecommendationParser._parse_cv_text(cv_text)
+                while depth < max_depth:
+                    depth += 1
+                    try:
+                        # Try to parse as JSON
+                        parsed_json = json.loads(current_data)
+                        logger.info(f"✅ JSON parse successful at depth {depth} - type: {type(parsed_json)}")
+                        
+                        if isinstance(parsed_json, dict):
+                            # Check if this level has the actual CV data
+                            if 'personal_information' in parsed_json:
+                                logger.info(f"✅ Found personal_information at depth {depth} - converting")
+                                return RecommendationParser._convert_structured_to_model_format(parsed_json)
+                            elif all(key in parsed_json for key in ['contact', 'experience', 'skills']):
+                                logger.info(f"✅ Found structured CV at depth {depth}")
+                                return parsed_json
+                            
+                            # Check if there's another 'text' field (nested deeper)
+                            elif 'text' in parsed_json:
+                                logger.info(f"🔄 Found another 'text' field at depth {depth} - going deeper")
+                                current_data = parsed_json.get('text', '')
+                                if not current_data or not isinstance(current_data, str):
+                                    # No more text to parse
+                                    break
+                                # Continue loop to parse next level
+                            else:
+                                # This level doesn't have CV data or nested text
+                                logger.info(f"⚠️  Level {depth} has unexpected keys: {list(parsed_json.keys())[:10]}")
+                                break
+                        else:
+                            # Not a dict, can't process further
+                            break
+                            
+                    except (json.JSONDecodeError, ValueError) as e:
+                        # Not JSON at this level - treat as plain text
+                        logger.info(f"📝 JSON parsing failed at depth {depth}: {e} - treating as plain text")
+                        break
+                
+                # If we got here, treat current_data as plain text
+                logger.info("📝 Treating final 'text' field as plain text")
+                structured_cv = RecommendationParser._parse_cv_text(current_data)
                 logger.info("✅ Successfully parsed raw text CV")
                 return structured_cv
             else:
