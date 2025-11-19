@@ -46,6 +46,11 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   final TextEditingController jdController = TextEditingController();
   final TextEditingController jdUrlController = TextEditingController();
 
+  // Job metadata from "Analyze & Save Job"
+  String? savedCompanyName;
+  String? savedCompanySlug;
+  String? savedJobTitle;
+
   // Context-aware analysis controller (supports analyze match pause)
   late final ContextAwareAnalysisController _skillsController;
 
@@ -81,6 +86,18 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
         setState(() {
           // This rebuild will update the AnimatedBuilder and button state
         });
+      }
+    });
+
+    // Clear saved company info when JD URL changes (user working on different job)
+    jdUrlController.addListener(() {
+      if (mounted && savedCompanySlug != null) {
+        setState(() {
+          savedCompanyName = null;
+          savedCompanySlug = null;
+          savedJobTitle = null;
+        });
+        print('🧹 Cleared saved company info (JD URL changed)');
       }
     });
   }
@@ -202,6 +219,14 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
               jdUrlController: jdUrlController,
               onExtract:
                   () {}, // Not used anymore, analysis is handled in JobInput widget
+              onJobSaved: (jobData) {
+                setState(() {
+                  savedCompanyName = jobData['company_name'];
+                  savedCompanySlug = jobData['company_slug'];
+                  savedJobTitle = jobData['job_title'];
+                });
+                print('✅ Saved company info: $savedCompanySlug ($savedCompanyName)');
+              },
             ),
             const SizedBox(height: 16),
 
@@ -507,9 +532,18 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
     print('✅ [DEBUG] Starting context-aware analysis...');
 
-    // Extract company from JD URL
+    // Use saved company info if available (from "Analyze & Save Job")
     final jdUrl = jdUrlController.text.trim();
-    final company = _extractCompanyFromUrl(jdUrl);
+    String company;
+
+    if (savedCompanySlug != null && savedCompanySlug!.isNotEmpty) {
+      company = savedCompanySlug!;
+      print('✅ Using saved company: $company ($savedCompanyName)');
+    } else {
+      // Fallback: extract from URL (for backward compatibility)
+      company = _extractCompanyFromUrl(jdUrl);
+      print('⚠️ No saved company found, extracted from URL: $company');
+    }
 
     if (jdUrl.isEmpty) {
       _showSnackBar('Please provide a job description URL', isError: true);
@@ -517,7 +551,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     }
 
     if (company.isEmpty) {
-      _showSnackBar('Could not extract company name from URL', isError: true);
+      _showSnackBar('Could not determine company name', isError: true);
       return;
     }
 

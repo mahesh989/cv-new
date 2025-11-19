@@ -6,12 +6,14 @@ class JobInput extends StatefulWidget {
   final TextEditingController jdController;
   final TextEditingController jdUrlController;
   final VoidCallback onExtract;
+  final Function(Map<String, dynamic>)? onJobSaved;
 
   const JobInput({
     super.key,
     required this.jdController,
     required this.jdUrlController,
     required this.onExtract,
+    this.onJobSaved,
   });
 
   @override
@@ -137,6 +139,15 @@ class _JobInputState extends State<JobInput> with TickerProviderStateMixin {
         _showSnackBar(
           'Job analyzed successfully! Company: ${result['company_name']}, Title: ${result['job_title']}',
         );
+        
+        // Pass company info back to parent
+        if (widget.onJobSaved != null) {
+          widget.onJobSaved!({
+            'company_name': result['company_name'],
+            'company_slug': result['company_slug'],
+            'job_title': result['job_title'],
+          });
+        }
       } else {
         _showSnackBar('Job analysis failed: ${result['error']}', isError: true);
       }
