@@ -603,8 +603,8 @@ async def _run_pipeline(cname: str, token_data=None):
             saved_file = recommendation_service.save_optimized_recommendation(cname, recommendation_data)
             if saved_file:
                 logger.info(f"✅ [PIPELINE] Input recommendation file created for {cname}: {saved_file}")
-            pipeline_results["input_recommendation"] = True
-        else:
+                pipeline_results["input_recommendation"] = True
+            else:
                 logger.warning(f"⚠️ [PIPELINE] Failed to save input recommendation for {cname}")
                 pipeline_results["input_recommendation"] = False
         else:
