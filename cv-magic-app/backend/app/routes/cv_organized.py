@@ -141,82 +141,62 @@ async def save_cv_for_analysis(
         
         # Start structured processing in background (non-blocking)
         # This will enhance the JSON file with structured data after AI call
-        def background_structured_processing():
+        async def background_structured_processing():
             """Background task to enhance JSON with structured CV data after AI parsing"""
             try:
-                import asyncio
                 logger.info(f"🔄 [BACKGROUND] Starting structured processing for {filename}...")
                 
-                # Run async function in background
-                async def process_structured():
-                    try:
-                        from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
-                        user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
-                        
-                        # Process the content directly instead of looking for the file in upload folder
-                        cv_content = cv_content_result['content']
-                        structured_cv = await user_enhanced_cv_upload_service._parse_to_structured_format(
-                            text_content=cv_content,
-                            filename=filename,
-                            user=current_user
-                        )
-                        
-                        # Check if parsing was successful (no parsing_error field means success)
-                        if not structured_cv.get('parsing_error'):
-                            # Save the structured CV to the original folder
-                            # CRITICAL: Always overwrite when user selects CV from dropdown
-                            # Ensure filename is stored in the structured CV for tracking
-                            if 'filename' not in structured_cv:
-                                structured_cv['filename'] = filename
-                            if 'saved_at' not in structured_cv:
-                                structured_cv['saved_at'] = datetime.now().isoformat()
-                            structured_cv['content_type'] = "structured"
-                            structured_cv['processing_status'] = "completed"
-                            
-                            with open(json_filepath, 'w', encoding='utf-8') as f:
-                                json.dump(structured_cv, f, indent=2, ensure_ascii=False)
-                            
-                            logger.info(f"✅ [BACKGROUND] CV enhanced with structured JSON: {json_filepath} (filename: {filename})")
-                            logger.info(f"✅ [BACKGROUND] JSON file size: {json_filepath.stat().st_size if json_filepath.exists() else 0} bytes")
-                        else:
-                            error_msg = structured_cv.get('parsing_error', 'Unknown error')
-                            logger.warning(f"⚠️ [BACKGROUND] Failed to enhance structured CV: {error_msg}")
-                            # Update status but keep the file with minimal format
-                            minimal_json['processing_status'] = f"failed: {error_msg}"
-                            with open(json_filepath, 'w', encoding='utf-8') as f:
-                                json.dump(minimal_json, f, indent=2, ensure_ascii=False)
-                            logger.info(f"✅ [BACKGROUND] Updated minimal JSON with error status: {json_filepath}")
-                            
-                    except Exception as e:
-                        logger.error(f"❌ [BACKGROUND] Error in async processing: {str(e)}")
-                        import traceback
-                        logger.error(f"❌ [BACKGROUND] Traceback: {traceback.format_exc()}")
-                        # Update status but keep the file
-                        try:
-                            minimal_json['processing_status'] = f"error: {str(e)}"
-                            with open(json_filepath, 'w', encoding='utf-8') as f:
-                                json.dump(minimal_json, f, indent=2, ensure_ascii=False)
-                            logger.info(f"✅ [BACKGROUND] Updated JSON with error status: {json_filepath}")
-                        except Exception as save_error:
-                            logger.error(f"❌ [BACKGROUND] Failed to update JSON file: {save_error}")
+                from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
+                user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
                 
-                # Run the async function
-                asyncio.run(process_structured())
+                # Process the content directly instead of looking for the file in upload folder
+                cv_content = cv_content_result['content']
+                structured_cv = await user_enhanced_cv_upload_service._parse_to_structured_format(
+                    text_content=cv_content,
+                    filename=filename,
+                    user=current_user
+                )
                 
+                # Check if parsing was successful (no parsing_error field means success)
+                if not structured_cv.get('parsing_error'):
+                    # Save the structured CV to the original folder
+                    # CRITICAL: Always overwrite when user selects CV from dropdown
+                    # Ensure filename is stored in the structured CV for tracking
+                    if 'filename' not in structured_cv:
+                        structured_cv['filename'] = filename
+                    if 'saved_at' not in structured_cv:
+                        structured_cv['saved_at'] = datetime.now().isoformat()
+                    structured_cv['content_type'] = "structured"
+                    structured_cv['processing_status'] = "completed"
+                    
+                    with open(json_filepath, 'w', encoding='utf-8') as f:
+                        json.dump(structured_cv, f, indent=2, ensure_ascii=False)
+                    
+                    logger.info(f"✅ [BACKGROUND] CV enhanced with structured JSON: {json_filepath} (filename: {filename})")
+                    logger.info(f"✅ [BACKGROUND] JSON file size: {json_filepath.stat().st_size if json_filepath.exists() else 0} bytes")
+                else:
+                    error_msg = structured_cv.get('parsing_error', 'Unknown error')
+                    logger.warning(f"⚠️ [BACKGROUND] Failed to enhance structured CV: {error_msg}")
+                    # Update status but keep the file with minimal format
+                    minimal_json['processing_status'] = f"failed: {error_msg}"
+                    with open(json_filepath, 'w', encoding='utf-8') as f:
+                        json.dump(minimal_json, f, indent=2, ensure_ascii=False)
+                    logger.info(f"✅ [BACKGROUND] Updated minimal JSON with error status: {json_filepath}")
+                    
             except Exception as e:
-                logger.error(f"❌ [BACKGROUND] Error in background task: {str(e)}")
+                logger.error(f"❌ [BACKGROUND] Error enhancing structured CV: {str(e)}")
                 import traceback
                 logger.error(f"❌ [BACKGROUND] Traceback: {traceback.format_exc()}")
-                # Ensure JSON file still exists even if background task fails
+                # Update status but keep the file
                 try:
-                    if not json_filepath.exists():
-                        with open(json_filepath, 'w', encoding='utf-8') as f:
-                            json.dump(minimal_json, f, indent=2, ensure_ascii=False)
-                        logger.info(f"✅ [BACKGROUND] Created JSON file as fallback: {json_filepath}")
-                except Exception as fallback_error:
-                    logger.error(f"❌ [BACKGROUND] Failed to create fallback JSON: {fallback_error}")
+                    minimal_json['processing_status'] = f"error: {str(e)}"
+                    with open(json_filepath, 'w', encoding='utf-8') as f:
+                        json.dump(minimal_json, f, indent=2, ensure_ascii=False)
+                    logger.info(f"✅ [BACKGROUND] Updated JSON with error status: {json_filepath}")
+                except Exception as save_error:
+                    logger.error(f"❌ [BACKGROUND] Failed to update JSON file: {save_error}")
         
-        # Add background task using FastAPI's BackgroundTasks
+        # Add background task using FastAPI's BackgroundTasks (supports async functions)
         background_tasks.add_task(background_structured_processing)
         logger.info(f"✅ [SAVE_CV] Background task scheduled for structured processing")
         
