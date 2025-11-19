@@ -144,6 +144,50 @@ def list_available_cv_versions(user_email: str, company: str) -> List[Dict[str, 
     versions.sort(key=lambda v: v.get("timestamp") or "", reverse=True)
     return versions
 
+# Helper function to get most recent company folder
+async def _get_most_recent_company_folder(user_email: str) -> Optional[str]:
+    """
+    Get the most recently created company folder (by job_info file timestamp).
+    This is a fallback when JD URL is not available.
+    """
+    try:
+        from app.utils.user_path_utils import get_user_base_path
+        
+        base_path = get_user_base_path(user_email)
+        applied_companies_path = base_path / "applied_companies"
+        
+        if not applied_companies_path.exists():
+            return None
+        
+        most_recent_company = None
+        most_recent_time = 0
+        
+        # Search through all company folders
+        for company_folder in applied_companies_path.iterdir():
+            if not company_folder.is_dir():
+                continue
+            
+            # Look for job_info files in this company folder
+            job_info_files = list(company_folder.glob("job_info_*.json"))
+            
+            for job_info_file in job_info_files:
+                try:
+                    mtime = job_info_file.stat().st_mtime
+                    if mtime > most_recent_time:
+                        most_recent_time = mtime
+                        most_recent_company = company_folder.name
+                except Exception:
+                    continue
+        
+        if most_recent_company:
+            logger.info(f"✅ [CV_CONTEXT] Found most recent company folder: {most_recent_company}")
+        
+        return most_recent_company
+        
+    except Exception as e:
+        logger.error(f"Error getting most recent company folder: {e}")
+        return None
+
 # Helper function to get company name from saved job_info files by JD URL
 async def get_company_from_saved_job_info(jd_url: str, user_email: str) -> Optional[Dict[str, str]]:
     """
