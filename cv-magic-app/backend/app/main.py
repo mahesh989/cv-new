@@ -167,8 +167,10 @@ async def frontend_request_logging_middleware(request: Request, call_next):
                 origin_allowed = True
         
         # Set the origin header (use the request origin if allowed, otherwise use the default GitHub Pages origin)
-        allowed_origin = origin if (origin_allowed and origin) else "https://mahesh989.github.io"
-        response.headers["Access-Control-Allow-Origin"] = allowed_origin
+        if origin_allowed and origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+        else:
+            response.headers["Access-Control-Allow-Origin"] = "https://mahesh989.github.io"
         
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         response.headers["Access-Control-Allow-Headers"] = "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, X-Requested-With, X-Current-Model"
