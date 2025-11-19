@@ -27,7 +27,7 @@ from app.ai.ai_service import ai_service
 from app.services.jd_analysis import analyze_and_save_company_jd
 from app.services.cv_jd_matching import match_and_save_cv_jd
 from app.services.context_aware_analysis_pipeline import ContextAwareAnalysisPipeline
-from app.unified_latest_file_selector import get_selector_for_user
+from app.unified_latest_file_selector import get_selector_for_user, FileContext
 from app.services.jd_cache_manager import jd_cache_manager
 from pathlib import Path
 import asyncio
@@ -43,6 +43,106 @@ router = APIRouter(prefix="/api", tags=["Skills Analysis"])
 class CVSkillsEmptyError(Exception):
     """Raised when CV skills extraction results in zero skills across all categories."""
     pass
+
+# Helper class to convert FileContext to legacy format for compatibility
+class CVContextAdapter:
+    """Adapter to convert FileContext to legacy cv_context format"""
+    
+    def __init__(self, file_context: FileContext):
+        self.file_context = file_context
+        self.cv_type = file_context.file_type or "original"
+        self.version = file_context.timestamp or "latest"
+        self.source = self._determine_source()
+    
+    def _determine_source(self) -> str:
+        """Determine source based on file type"""
+        if self.file_context.file_type == "tailored":
+            return "tailored_cv"
+        elif self.file_context.file_type == "original":
+            return "original_cv"
+        else:
+            return "latest_cv"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary format expected by legacy code"""
+        return {
+            "cv_type": self.cv_type,
+            "version": self.version,
+            "source": self.source,
+            "json_path": str(self.file_context.json_path) if self.file_context.json_path else None,
+            "txt_path": str(self.file_context.txt_path) if self.file_context.txt_path else None,
+            "exists": self.file_context.exists,
+            "file_type": self.file_context.file_type,
+            "timestamp": self.file_context.timestamp,
+            "company": self.file_context.company,
+        }
+
+# Helper function to get CV context using unified selector
+def get_cv_context_for_analysis(user_email: str, company: str, is_rerun: bool = False) -> CVContextAdapter:
+    """Get CV context for analysis using unified file selector"""
+    selector = get_selector_for_user(user_email)
+    if is_rerun:
+        # For reruns, use latest CV across all types
+        file_context = selector.get_latest_cv_across_all(company)
+    else:
+        # For fresh analysis, use the standard selection logic
+        file_context = selector.get_latest_cv_for_company(company)
+    return CVContextAdapter(file_context)
+
+# Helper function to list available CV versions
+def list_available_cv_versions(user_email: str, company: str) -> List[Dict[str, Any]]:
+    """List available CV versions for a company using unified selector"""
+    selector = get_selector_for_user(user_email)
+    versions = []
+    
+    # Get tailored CVs
+    tailored_path = selector.tailored_path
+    if tailored_path and tailored_path.exists():
+        tailored_files = list(tailored_path.glob(f"{company}_tailored_cv_*.txt"))
+        for txt_file in tailored_files:
+            json_file = txt_file.with_suffix('.json')
+            timestamp_match = re.search(r'_(\d{8}_\d{6})', txt_file.stem)
+            timestamp = timestamp_match.group(1) if timestamp_match else None
+            versions.append({
+                "type": "tailored",
+                "version": timestamp or "unknown",
+                "txt_path": str(txt_file),
+                "json_path": str(json_file) if json_file.exists() else None,
+                "timestamp": timestamp,
+            })
+    
+    # Get original CVs
+    original_path = selector.original_path
+    if original_path and original_path.exists():
+        # Check for base original CV
+        base_json = original_path / "original_cv.json"
+        if base_json.exists():
+            base_txt = original_path / "original_cv.txt"
+            versions.append({
+                "type": "original",
+                "version": "base",
+                "txt_path": str(base_txt) if base_txt.exists() else None,
+                "json_path": str(base_json),
+                "timestamp": None,
+            })
+        
+        # Check for timestamped original CVs
+        original_files = list(original_path.glob(f"{company}_original_cv_*.txt"))
+        for txt_file in original_files:
+            json_file = txt_file.with_suffix('.json')
+            timestamp_match = re.search(r'_(\d{8}_\d{6})', txt_file.stem)
+            timestamp = timestamp_match.group(1) if timestamp_match else None
+            versions.append({
+                "type": "original",
+                "version": timestamp or "unknown",
+                "txt_path": str(txt_file),
+                "json_path": str(json_file) if json_file.exists() else None,
+                "timestamp": timestamp,
+            })
+    
+    # Sort by timestamp (newest first)
+    versions.sort(key=lambda v: v.get("timestamp") or "", reverse=True)
+    return versions
 
 # Helper functions for file validation
 
@@ -875,8 +975,9 @@ async def context_aware_analysis(
         
         logger.info(f"🎯 Context-aware analysis request: Company={company}, JD={jd_url}, Rerun={is_rerun}")
         
-        # Get CV selection context for user feedback
-        cv_context = enhanced_dynamic_cv_selector.get_cv_for_analysis(company, is_rerun)
+        # Get CV selection context for user feedback using unified selector
+        user_email = token_data.email
+        cv_context = get_cv_context_for_analysis(user_email, company, is_rerun)
         logger.info(f"📄 Using {cv_context.cv_type} CV v{cv_context.version} (Source: {cv_context.source})")
         
         # Get JD cache status for user feedback
@@ -1535,14 +1636,15 @@ async def get_cached_preliminary_analysis(request: Request):
 
 
 @router.get("/cv-context/{company}")
-async def get_cv_context(company: str, is_rerun: bool = False):
+async def get_cv_context(company: str, is_rerun: bool = False, current_user: UserData = Depends(get_current_user)):
     """Get CV selection context for UI feedback"""
     try:
-        # Get CV selection context
-        cv_context = enhanced_dynamic_cv_selector.get_cv_for_analysis(company, is_rerun)
+        # Get CV selection context using unified selector
+        user_email = current_user.email
+        cv_context = get_cv_context_for_analysis(user_email, company, is_rerun)
         
-        # Get available CV versions
-        available_versions = enhanced_dynamic_cv_selector.list_available_cv_versions(company)
+        # Get available CV versions using unified selector
+        available_versions = list_available_cv_versions(user_email, company)
         
         # Get JD cache status
         cache_stats = jd_cache_manager.get_cache_stats(company)
