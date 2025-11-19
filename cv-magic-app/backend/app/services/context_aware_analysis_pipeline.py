@@ -634,10 +634,10 @@ class ContextAwareAnalysisPipeline:
                 return None
             
             # Get analyze match prompt
-            from app.services.skill_extraction.prompts.skill_prompt_loader import get_skill_prompt
+            from app.services.skill_extraction.prompt_templates import get_prompt
             from datetime import datetime
             current_date = datetime.now().strftime('%Y-%m-%d')
-            analyze_match_prompt = get_skill_prompt('analyze_match', cv_text=cv_content, job_text=jd_text, current_date=current_date)
+            analyze_match_prompt = get_prompt('analyze_match', cv_text=cv_content, job_text=jd_text, current_date=current_date)
             
             # Generate AI response for analyze match
             from app.models.auth import UserData
