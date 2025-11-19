@@ -66,36 +66,58 @@ async def get_cv_preview(filename: str, max_length: int = 500, current_user: Use
 @router.post("/save-for-analysis/{filename}")
 async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(get_current_user)):
     """Save selected CV as both original_cv.txt and original_cv.json in cv-analysis folder"""
+    logger.info(f"🔍 [SAVE_CV] Received request to save CV: {filename} for user: {current_user.email}")
+    
     try:
         # Get CV content using user-specific service instance
+        logger.info(f"🔍 [SAVE_CV] Getting CV content for: {filename}")
         from app.modules.cv.preview import CVPreviewService
         user_cv_preview_service = CVPreviewService(user_email=current_user.email)
         cv_content_result = user_cv_preview_service.get_cv_content(filename)
         
+        logger.info(f"🔍 [SAVE_CV] CV content result keys: {list(cv_content_result.keys())}")
+        logger.info(f"🔍 [SAVE_CV] CV content length: {len(cv_content_result.get('content', ''))}")
+        
         if not cv_content_result.get('content'):
+            logger.error(f"❌ [SAVE_CV] CV content not found for: {filename}")
             raise HTTPException(status_code=404, detail=f"CV content not found for: {filename}")
         
         # Create user-scoped cv-analysis directory if it doesn't exist
         analysis_base: Path = get_user_base_path(current_user.email)
+        logger.info(f"🔍 [SAVE_CV] Analysis base path: {analysis_base}")
         analysis_base.mkdir(parents=True, exist_ok=True)
+        logger.info(f"✅ [SAVE_CV] Analysis base directory created/verified: {analysis_base.exists()}")
         
         # Save as original_cv.txt in the user-scoped cvs/original folder
         original_folder = analysis_base / "cvs" / "original"
+        logger.info(f"🔍 [SAVE_CV] Original folder path: {original_folder}")
         original_folder.mkdir(parents=True, exist_ok=True)
+        logger.info(f"✅ [SAVE_CV] Original folder created/verified: {original_folder.exists()}")
+        
         txt_filepath = original_folder / "original_cv.txt"
         json_filepath = original_folder / "original_cv.json"
         
+        logger.info(f"🔍 [SAVE_CV] TXT file path: {txt_filepath}")
+        logger.info(f"🔍 [SAVE_CV] JSON file path: {json_filepath}")
+        
         # CRITICAL: Always overwrite both files when user selects CV from dropdown
         # Save original_cv.txt immediately
-        with open(txt_filepath, 'w', encoding='utf-8') as f:
-            f.write(cv_content_result['content'])
-        
-        logger.info(f"✅ CV saved as text (overwritten): {txt_filepath}")
+        logger.info(f"💾 [SAVE_CV] Writing TXT file: {txt_filepath}")
+        try:
+            with open(txt_filepath, 'w', encoding='utf-8') as f:
+                f.write(cv_content_result['content'])
+            logger.info(f"✅ [SAVE_CV] CV saved as text (overwritten): {txt_filepath}")
+            logger.info(f"✅ [SAVE_CV] TXT file exists: {txt_filepath.exists()}, size: {txt_filepath.stat().st_size if txt_filepath.exists() else 0} bytes")
+        except Exception as txt_error:
+            logger.error(f"❌ [SAVE_CV] Failed to write TXT file: {txt_error}")
+            raise
         
         # CRITICAL: Create minimal original_cv.json immediately so it exists
         # This ensures the file exists even if background processing fails
         import json
         from datetime import datetime
+        logger.info(f"💾 [SAVE_CV] Creating minimal JSON file: {json_filepath}")
+        
         minimal_json = {
             "filename": filename,
             "text": cv_content_result['content'],
@@ -104,10 +126,14 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
             "processing_status": "pending_structured_parsing"
         }
         
-        with open(json_filepath, 'w', encoding='utf-8') as f:
-            json.dump(minimal_json, f, indent=2, ensure_ascii=False)
-        
-        logger.info(f"✅ CV saved as minimal JSON (overwritten): {json_filepath}")
+        try:
+            with open(json_filepath, 'w', encoding='utf-8') as f:
+                json.dump(minimal_json, f, indent=2, ensure_ascii=False)
+            logger.info(f"✅ [SAVE_CV] CV saved as minimal JSON (overwritten): {json_filepath}")
+            logger.info(f"✅ [SAVE_CV] JSON file exists: {json_filepath.exists()}, size: {json_filepath.stat().st_size if json_filepath.exists() else 0} bytes")
+        except Exception as json_error:
+            logger.error(f"❌ [SAVE_CV] Failed to write JSON file: {json_error}")
+            raise
         
         # Start structured processing in background (non-blocking)
         # This will enhance the JSON file with structured data
@@ -177,5 +203,11 @@ async def save_cv_for_analysis(filename: str, current_user: UserData = Depends(g
             "note": "Both original_cv.txt and original_cv.json created immediately. JSON will be enhanced with structured data in background."
         })
         
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
+        logger.error(f"❌ [SAVE_CV] Exception in save_cv_for_analysis: {str(e)}")
+        import traceback
+        logger.error(f"❌ [SAVE_CV] Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Failed to save CV for analysis: {str(e)}")

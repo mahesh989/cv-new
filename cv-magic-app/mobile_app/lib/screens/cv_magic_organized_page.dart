@@ -494,16 +494,26 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   }
 
   void _onCVSelected(String? filename) {
+    print('🔍 [DEBUG] _onCVSelected called with: $filename');
+    
     setState(() {
       selectedCVFilename = filename;
     });
+    
     // Persist selection by saving original CV artifacts
     if (filename != null && filename.isNotEmpty) {
-      APIService.saveCVForAnalysis(filename).then((_) {
+      print('🔍 [DEBUG] Calling APIService.saveCVForAnalysis for: $filename');
+      APIService.saveCVForAnalysis(filename).then((response) {
+        print('✅ [DEBUG] API call succeeded. Response: $response');
         _showSnackBar('Saved original CV files for "$filename"');
       }).catchError((e) {
+        print('❌ [DEBUG] API call failed: $e');
+        print('❌ [DEBUG] Error type: ${e.runtimeType}');
+        print('❌ [DEBUG] Error details: ${e.toString()}');
         _showSnackBar('Failed to save original CV: $e', isError: true);
       });
+    } else {
+      print('⚠️ [DEBUG] filename is null or empty, skipping save');
     }
   }
 

@@ -6,19 +6,46 @@ When a new user signs up and logs in for the first time, they see an API key alr
 
 ## Root Cause Analysis
 
-The issue was caused by **global state sharing** in the AI configuration system:
+The issue had **two main causes**:
 
-1. **Global Provider/Model State**: The `ai_config` object maintains `_current_provider` and `_current_model` as instance variables that are **shared across all users**. This is a singleton pattern issue.
+### 1. Global State Sharing
+The `ai_config` object maintains `_current_provider` and `_current_model` as instance variables that are **shared across all users**:
+- When User A configures an API key, global state is set
+- When User B (new user) logs in, these global values persist from User A's session
+- Missing initialization in status endpoint returned stale provider information
 
-2. **State Persistence**: When User A configures an API key and sets a provider, the global `ai_config._current_provider` and `ai_config._current_model` are set. When User B (a new user with no API keys) logs in, these global values are still set from User A's session.
+### 2. **Orphaned API Keys from User ID Reuse** (PRIMARY ISSUE)
+**This was the actual root cause:**
+- When users are deleted, their API keys remain in the database (no CASCADE DELETE)
+- When new users register, they can get the same user ID (auto-increment reuse)
+- New users inherit API keys from deleted users with the same ID
+- Example: User ID 3 (jasmine@gmail.com) created today but has API key from 2025-10-25
 
-3. **Missing Initialization**: The AI status endpoint (`/api/ai/status`) was not initializing the AI service for the current user before returning status, so it could return stale provider information.
-
-4. **No State Clearing**: When a user with no API keys initialized the AI service, the global provider/model state was not cleared, leading to the appearance that a provider was configured.
+**Evidence from logs:**
+- User jasmine@gmail.com (ID: 3) created on 2025-11-19
+- But has API key created on 2025-10-25 (before user existed!)
+- Multiple orphaned API keys found for deleted users (IDs 4, 5, 7, 8, 9, 10)
 
 ## Solution Implemented
 
-### 1. Clear Global State for Users Without API Keys
+### 1. Clean Up Orphaned API Keys During Registration
+
+**File**: `cv-magic-app/backend/app/routes/auth.py`
+
+Added cleanup logic in `register()` endpoint to:
+- Remove any orphaned API keys for the new user ID
+- Prevents new users from inheriting API keys from deleted users with the same ID
+
+### 2. Validate API Key Ownership During Retrieval
+
+**File**: `cv-magic-app/backend/app/services/user_api_key_manager.py`
+
+Added safety check in `get_api_key()` method to:
+- Verify API key was created **after** the user account was created
+- If API key is older than user account, it's orphaned - remove it automatically
+- Prevents returning API keys from previous users with the same ID
+
+### 3. Clear Global State for Users Without API Keys
 
 **File**: `cv-magic-app/backend/app/ai/ai_service.py`
 
@@ -35,7 +62,7 @@ if not self._providers:
     self.config._current_model = None
 ```
 
-### 2. Initialize Service Before Status Check
+### 4. Initialize Service Before Status Check
 
 **File**: `cv-magic-app/backend/app/routes/ai.py`
 
@@ -89,12 +116,18 @@ ai_service.initialize_for_user(current_user)
 
 ## Files Modified
 
-1. `cv-magic-app/backend/app/ai/ai_service.py` - Added logic to clear global state for users without API keys
-2. `cv-magic-app/backend/app/routes/ai.py` - Added user initialization before status check
+1. `cv-magic-app/backend/app/routes/auth.py` - Added orphaned API key cleanup during registration
+2. `cv-magic-app/backend/app/services/user_api_key_manager.py` - Added validation to prevent returning orphaned API keys
+3. `cv-magic-app/backend/app/ai/ai_service.py` - Added logic to clear global state for users without API keys
+4. `cv-magic-app/backend/app/routes/ai.py` - Added user initialization before status check
 
 ## Notes
 
 - The fix maintains backward compatibility - existing users with API keys will continue to work as before
 - The global state clearing only happens when a user has no API keys, preventing any disruption to normal operations
 - All provider initialization is still user-specific (using user-specific API keys from the database)
+- **Orphaned API keys are automatically cleaned up** when:
+  - A new user registers with a reused user ID
+  - An API key is retrieved that was created before the user account
+- **Future Improvement**: Consider adding a CASCADE DELETE foreign key constraint to automatically delete API keys when users are deleted
 

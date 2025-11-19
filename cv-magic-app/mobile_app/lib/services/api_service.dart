@@ -294,11 +294,23 @@ class APIService {
   }
 
   // Save selected CV for analysis: creates original_cv.txt and original_cv.json
-  static Future<void> saveCVForAnalysis(String filename) async {
-    await makeAuthenticatedCall(
-      endpoint: '/cv/save-for-analysis/$filename',
-      method: 'POST',
-    );
+  static Future<Map<String, dynamic>> saveCVForAnalysis(String filename) async {
+    print('🔍 [API] saveCVForAnalysis called with filename: $filename');
+    print('🔍 [API] Endpoint: /cv/save-for-analysis/$filename');
+    
+    try {
+      final response = await makeAuthenticatedCall(
+        endpoint: '/cv/save-for-analysis/$filename',
+        method: 'POST',
+      );
+      print('✅ [API] saveCVForAnalysis response: $response');
+      return response;
+    } catch (e) {
+      print('❌ [API] saveCVForAnalysis error: $e');
+      print('❌ [API] Error type: ${e.runtimeType}');
+      print('❌ [API] Error stack: ${e.toString()}');
+      rethrow;
+    }
   }
 
   // Job Description functionality
