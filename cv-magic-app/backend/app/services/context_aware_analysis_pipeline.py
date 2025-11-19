@@ -304,24 +304,46 @@ class ContextAwareAnalysisPipeline:
                 max_tokens=1000
             )
             
-            # Parse CV skills response
-            try:
-                import json
-                cv_skills = json.loads(cv_response.content)
-            except json.JSONDecodeError:
-                # Fallback parsing
-                cv_skills = {
-                    "technical_skills": [],
-                    "soft_skills": [],
-                    "experience_years": 0,
-                    "education": [],
-                    "certifications": [],
-                    "languages": [],
-                    "summary": "CV analysis completed"
-                }
+            parsed_payload = self._parse_ai_structured_response(cv_response.content)
+            if not parsed_payload:
+                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] Failed to parse CV skills JSON, using fallback")
+                parsed_payload = {}
+            
+            def _sanitize_list(values):
+                cleaned = []
+                seen = set()
+                for value in values or []:
+                    if not isinstance(value, str):
+                        continue
+                    trimmed = value.strip()
+                    if not trimmed:
+                        continue
+                    lowered = trimmed.lower()
+                    if lowered not in seen:
+                        cleaned.append(trimmed)
+                        seen.add(lowered)
+                return cleaned
+            
+            tech_skills = _sanitize_list(parsed_payload.get("technical_skills"))
+            soft_skills = _sanitize_list(parsed_payload.get("soft_skills"))
+            domain_keywords = _sanitize_list(
+                [kw for kw in parsed_payload.get("domain_keywords", []) if kw.lower() not in {s.lower() for s in tech_skills + soft_skills}]
+            )
+            
+            cv_skills = {
+                "technical_skills": tech_skills,
+                "soft_skills": soft_skills,
+                "domain_keywords": domain_keywords,
+                "experience_years": parsed_payload.get("experience_years", 0),
+                "education": parsed_payload.get("education", []),
+                "certifications": parsed_payload.get("certifications", []),
+                "languages": parsed_payload.get("languages", []),
+                "summary": parsed_payload.get("summary") or "CV analysis completed"
+            }
             
             return {
                 "cv_skills": cv_skills,
+                "summary": cv_skills.get("summary"),
                 "success": True
             }
             
@@ -480,6 +502,12 @@ class ContextAwareAnalysisPipeline:
             )
             
             results.cv_skills = skill_results.get('cv_skills', {})
+            if isinstance(results.cv_skills, dict):
+                results.cv_skills.setdefault("technical_skills", [])
+                results.cv_skills.setdefault("soft_skills", [])
+                results.cv_skills.setdefault("domain_keywords", [])
+                if "summary" not in results.cv_skills and skill_results.get("summary"):
+                    results.cv_skills["summary"] = skill_results["summary"]
             results.steps_completed.append("cv_skills_extraction")
             
             return results.cv_skills
@@ -775,7 +803,7 @@ class ContextAwareAnalysisPipeline:
             logger.info(f"📊 [CONTEXT_AWARE_PIPELINE] Steps completed: {len(results.steps_completed)}")
             
             # Persist snapshot so continuation + UI have baseline skills data
-            self._persist_initial_skills_snapshot(context, results, jd_data)
+            self._persist_initial_skills_snapshot(context, results, jd_data, analyze_match_decision)
             
             return results
             
@@ -936,40 +964,51 @@ class ContextAwareAnalysisPipeline:
         if not jd_analysis:
             return summary
         
-        def _add(key: str, values: Optional[List[str]]):
+        assigned = {
+            "technical_skills": set(),
+            "soft_skills": set(),
+            "domain_keywords": set()
+        }
+        
+        def _add(key: str, values: Optional[List[str]], avoid_overlap: bool = False):
             if not values:
                 return
             for value in values:
-                if isinstance(value, str):
-                    cleaned = value.strip()
-                    if cleaned:
-                        summary[key].append(cleaned)
+                if not isinstance(value, str):
+                    continue
+                cleaned = value.strip()
+                if not cleaned:
+                    continue
+                lowered = cleaned.lower()
+                if avoid_overlap:
+                    if lowered in assigned["technical_skills"] or lowered in assigned["soft_skills"]:
+                        continue
+                if lowered not in assigned[key]:
+                    summary[key].append(cleaned)
+                    assigned[key].add(lowered)
         
         for section in ("required_skills", "preferred_skills"):
             section_data = jd_analysis.get(section, {})
             _add("technical_skills", section_data.get("technical"))
             _add("soft_skills", section_data.get("soft_skills"))
-            _add("domain_keywords", section_data.get("domain_knowledge"))
-        
-        _add("domain_keywords", jd_analysis.get("all_keywords"))
-        _add("domain_keywords", jd_analysis.get("required_keywords"))
-        _add("domain_keywords", jd_analysis.get("preferred_keywords"))
+            _add("domain_keywords", section_data.get("domain_knowledge"), avoid_overlap=True)
         
         for key in summary:
-            summary[key] = sorted({item for item in summary[key] if item})
+            summary[key] = sorted(summary[key], key=lambda s: s.lower())
         return summary
     
     def _persist_initial_skills_snapshot(
         self,
         context: AnalysisContext,
         results: AnalysisResults,
-        jd_data: Optional[Dict[str, Any]]
-    ) -> None:
+        jd_data: Optional[Dict[str, Any]],
+        analyze_match_decision: Optional[Dict[str, Any]]
+    ) -> Optional[str]:
         """Save CV/JD skills snapshot so continuation + UI can reuse it."""
         try:
             if not (results.cv_skills or results.jd_skills):
                 logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No skills data to persist for snapshot")
-                return
+                return None
             
             from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
             result_saver = SkillExtractionResultSaver(user_email=self.user_email)
@@ -1000,7 +1039,12 @@ class ContextAwareAnalysisPipeline:
                     except Exception as jd_error:
                         logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to load JD snapshot: {jd_error}")
             
-            result_saver.save_analysis_results(
+            cv_summary = None
+            if isinstance(results.cv_skills, dict):
+                cv_summary = results.cv_skills.get("summary")
+            jd_summary = self._build_jd_summary(results.jd_analysis)
+            
+            saved_file_path = result_saver.save_analysis_results(
                 cv_skills=results.cv_skills or {},
                 jd_skills=results.jd_skills or {},
                 jd_url=context.jd_url or "preliminary_analysis",
@@ -1008,11 +1052,88 @@ class ContextAwareAnalysisPipeline:
                 user_id=context.user_id,
                 cv_data=cv_data,
                 jd_data=jd_snapshot,
-                company_name=context.company
+                company_name=context.company,
+                cv_comprehensive_analysis=cv_summary,
+                jd_comprehensive_analysis=jd_summary
             )
             logger.info("💾 [CONTEXT_AWARE_PIPELINE] Saved skills snapshot for %s", context.company)
+
+            if analyze_match_decision and analyze_match_decision.get("raw_content"):
+                try:
+                    result_saver.append_analyze_match(
+                        analyze_match_decision["raw_content"],
+                        context.company
+                    )
+                except Exception as append_error:
+                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to append analyze match entry: {append_error}")
+
+            return saved_file_path
         except Exception as snapshot_error:
             logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to persist skills snapshot: {snapshot_error}")
+            return None
+
+    def _build_jd_summary(self, jd_analysis: Optional[Dict[str, Any]]) -> Optional[str]:
+        """Create a short textual summary of JD requirements."""
+        if not jd_analysis:
+            return None
+        parts = []
+        required = jd_analysis.get("required_skills", {})
+        preferred = jd_analysis.get("preferred_skills", {})
+        
+        def _format(label: str, values: List[str], limit: int = 6) -> Optional[str]:
+            if not values:
+                return None
+            trimmed = [v.strip() for v in values if isinstance(v, str) and v.strip()]
+            if not trimmed:
+                return None
+            return f"{label}: {', '.join(trimmed[:limit])}"
+        
+        tech_required = _format("Must-have technical", required.get("technical", []))
+        tech_pref = _format("Optional technical", preferred.get("technical", []))
+        soft_required = _format("Soft skills", required.get("soft_skills", []))
+        domain_required = _format("Domain knowledge", required.get("domain_knowledge", []))
+        experience_req = _format("Experience", required.get("experience", []))
+        
+        for section in (tech_required, tech_pref, soft_required, domain_required, experience_req):
+            if section:
+                parts.append(section)
+        
+        years = jd_analysis.get("experience_years")
+        if isinstance(years, (int, float)):
+            parts.append(f"Experience years: {years}+")
+        
+        return " | ".join(parts) if parts else None
+
+    def _parse_ai_structured_response(self, raw_content: str) -> Optional[Dict[str, Any]]:
+        """Best-effort JSON extraction from AI responses that may include extra text/code fences."""
+        if not raw_content:
+            return None
+        raw_content = raw_content.strip()
+        try:
+            return json.loads(raw_content)
+        except json.JSONDecodeError:
+            pass
+        
+        # Remove code fences if present
+        if raw_content.startswith("```"):
+            fence_end = raw_content.find("```", 3)
+            if fence_end != -1:
+                candidate = raw_content[3:fence_end].strip()
+                try:
+                    return json.loads(candidate)
+                except json.JSONDecodeError:
+                    raw_content = candidate
+        
+        # Extract substring between first { and last }
+        start = raw_content.find("{")
+        end = raw_content.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            snippet = raw_content[start:end + 1]
+            try:
+                return json.loads(snippet)
+            except json.JSONDecodeError:
+                pass
+        return None
 
 
 # Global instance removed - service now requires user_email parameter
