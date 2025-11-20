@@ -180,67 +180,9 @@ class AnalyzeMatchCard extends StatelessWidget {
   }
 
   Widget _buildFormattedAnalysis(String analysis) {
-    // Use TextFormatter utility to format the analysis text
-    final formatted = TextFormatter.formatAnalysisText(analysis);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: formatted.map((block) {
-        if (block.type == TextBlockType.heading) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
-            child: Text(
-              block.content,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepOrange.shade800,
-              ),
-            ),
-          );
-        } else if (block.type == TextBlockType.bullet) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 6.0, left: 12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '• ',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.deepOrange.shade700,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    block.content,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade800,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        } else {
-          // Regular paragraph
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
-            child: Text(
-              block.content,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade800,
-                height: 1.6,
-              ),
-            ),
-          );
-        }
-      }).toList(),
-    );
+    // Use AnalyzeMatchFormattedText widget from TextFormatter
+    // This handles all the formatting automatically
+    return AnalyzeMatchFormattedText(text: analysis);
   }
 
   Widget _buildEmptyState() {

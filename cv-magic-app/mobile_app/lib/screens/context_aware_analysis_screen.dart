@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../controllers/skills_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
+import '../widgets/skills_comparison_card.dart';
 import '../core/theme/app_theme.dart';
 import '../services/context_aware_analysis_service.dart';
 import '../models/skills_analysis_model.dart';
@@ -118,7 +119,40 @@ class _ContextAwareAnalysisScreenState
                 },
               ),
 
-              // Analyze Match Decision (waiting for user decision)
+              // Skills Comparison Card (shown BEFORE analyze match decision)
+              // Simple side-by-side display of CV vs JD skills from initial analysis
+              Consumer<ContextAwareAnalysisController>(
+                builder: (context, controller, child) {
+                  debugPrint('🔍 [SCREEN] Checking skills comparison:');
+                  debugPrint('   hasInitialResults: ${controller.hasInitialResults}');
+                  debugPrint('   initialResult != null: ${controller.initialResult != null}');
+                  debugPrint('   initialResult?.results != null: ${controller.initialResult?.results != null}');
+                  
+                  // Show skills comparison if we have initial analysis results
+                  if (controller.hasInitialResults && 
+                      controller.initialResult?.results != null) {
+                    debugPrint('✅ [SCREEN] Showing SkillsComparisonCard');
+                    final results = controller.initialResult!.results!;
+                    
+                    return Column(
+                      children: [
+                        SkillsComparisonCard(
+                          cvSkills: results.cvSkills,
+                          jdSkills: results.jdSkills,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+                  debugPrint('❌ [SCREEN] Not showing skills comparison');
+                  return const SizedBox.shrink();
+                },
+              ),
+
+              // Analyze Match Decision
+              // Shows decision widget when:
+              // 1. Waiting for user decision, OR
+              // 2. Has initial results with decision (persists after clicking proceed)
               Consumer<ContextAwareAnalysisController>(
                 builder: (context, controller, child) {
                   debugPrint('🔍 [SCREEN] Checking decision widget:');
@@ -127,11 +161,16 @@ class _ContextAwareAnalysisScreenState
                   debugPrint('   hasInitialResults: ${controller.hasInitialResults}');
                   debugPrint('   state: ${controller.state}');
                   
-                  // Show widget if waiting for decision OR if we have initial results with decision
-                  if (controller.waitingForUserDecision || 
-                      (controller.hasInitialResults && controller.hasAnalyzeMatchDecision)) {
+                  // Show widget if we have initial results with decision
+                  // This persists even after clicking proceed
+                  if (controller.hasInitialResults && controller.hasAnalyzeMatchDecision) {
                     debugPrint('✅ [SCREEN] Showing decision widget');
-                    return _buildAnalyzeMatchDecisionCard(controller);
+                    return Column(
+                      children: [
+                        _buildAnalyzeMatchDecisionCard(controller),
+                        const SizedBox(height: 16),
+                      ],
+                    );
                   }
                   debugPrint('❌ [SCREEN] Not showing decision widget');
                   return const SizedBox.shrink();
@@ -673,59 +712,96 @@ class _ContextAwareAnalysisScreenState
               const SizedBox(height: 16),
             ],
             
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      controller.continueFullAnalysis(includeTailoring: _includeTailoring);
-                    },
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Proceed with Full Analysis'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: buttonColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+            // Action Buttons - only show when waiting for decision
+            if (controller.waitingForUserDecision) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        controller.continueFullAnalysis(includeTailoring: _includeTailoring);
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Proceed with Full Analysis'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: buttonColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      controller.skipFullAnalysis();
-                    },
-                    icon: const Icon(Icons.skip_next),
-                    label: const Text('Skip Full Analysis'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.grey.shade700,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(color: Colors.grey.shade400),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        controller.skipFullAnalysis();
+                      },
+                      icon: const Icon(Icons.skip_next),
+                      label: const Text('Skip Full Analysis'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.grey.shade700,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Colors.grey.shade400),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            
-            // Info text
-            const SizedBox(height: 12),
-            Text(
-              decision.isDontProceed
-                  ? '⚠️ Full analysis is not recommended. You can still proceed if you want, but it may not be cost-effective.'
-                  : '💡 Full analysis includes Component Analysis, ATS Recommendations, AI Recommendations, and CV Tailoring.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-                fontStyle: FontStyle.italic,
+                ],
               ),
-            ),
+              
+              // Info text
+              const SizedBox(height: 12),
+              Text(
+                decision.isDontProceed
+                    ? '⚠️ Full analysis is not recommended. You can still proceed if you want, but it may not be cost-effective.'
+                    : '💡 Full analysis includes Component Analysis, ATS Recommendations, AI Recommendations, and CV Tailoring.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ] else ...[
+              // Status indicator when decision has been made
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      controller.showAnalysisResults 
+                        ? Icons.check_circle 
+                        : Icons.hourglass_empty,
+                      color: controller.showAnalysisResults 
+                        ? Colors.green.shade600 
+                        : Colors.orange.shade600,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        controller.showAnalysisResults
+                          ? '✅ Full analysis completed'
+                          : '⏳ Full analysis in progress...',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
