@@ -150,12 +150,19 @@ class SkillsAnalysisResult {
     // Parse pre-extracted comparison
     String? preextractedRaw;
     String? preextractedCompany;
-    if (json['preextracted_skills_comparison'] != null) {
-      final m = json['preextracted_skills_comparison'] as Map<String, dynamic>;
-      preextractedRaw = m['raw_output'] as String?;
-      preextractedCompany = m['company_name'] as String?;
+    // Support both field name variations
+    final preextractedData = json['preextracted_skills_comparison'] as Map<String, dynamic>? ??
+        json['preextracted_comparison'] as Map<String, dynamic>?;
+    if (preextractedData != null) {
+      // Support both 'raw_output' and 'raw_content' field names
+      preextractedRaw = preextractedData['raw_output'] as String? ??
+          preextractedData['raw_content'] as String?;
+      preextractedCompany = preextractedData['company_name'] as String?;
       debugPrint(
-        '   preextracted_skills_comparison raw length: ${preextractedRaw?.length ?? 0}',
+        '   preextracted comparison raw length: ${preextractedRaw?.length ?? 0}',
+      );
+      debugPrint(
+        '   preextracted company: ${preextractedCompany ?? "null"}',
       );
     }
     // If backend attached company at top-level, use it as canonical company for polling

@@ -570,8 +570,9 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       return;
     }
 
-    final preextracted =
-        completeResults['preextracted_skills_comparison'] as Map<String, dynamic>?;
+    // Support both field name variations
+    final preextracted = (completeResults['preextracted_skills_comparison'] ??
+        completeResults['preextracted_comparison']) as Map<String, dynamic>?;
 
     _displayResult = (_displayResult ??
             SkillsAnalysisResult.fromJson({
@@ -590,8 +591,11 @@ class ContextAwareAnalysisController extends ChangeNotifier {
           ? AIRecommendationResult.fromJson(
               completeResults['ai_recommendation'])
           : _displayResult?.aiRecommendation,
+      // Support both 'raw_output' and 'raw_content' field names
       preextractedRawOutput:
-          preextracted?['raw_output'] ?? _displayResult?.preextractedRawOutput,
+          preextracted?['raw_output'] ??
+          preextracted?['raw_content'] ??
+          _displayResult?.preextractedRawOutput,
       preextractedCompanyName: preextracted?['company_name'] ??
           completeResults['company'] ??
           _displayResult?.preextractedCompanyName,
@@ -604,22 +608,33 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   }
 
   void _updateDisplayFlags() {
+    debugPrint('🔔 [CONTROLLER] _updateDisplayFlags called');
+    debugPrint('   _displayResult: ${_displayResult != null}');
+    
     _showAnalyzeMatchDisplay = _displayResult?.analyzeMatch != null;
     _showPreextractedComparisonDisplay =
         _displayResult?.hasPreextractedComparison ?? false;
+    
+    debugPrint('   hasPreextractedComparison: ${_displayResult?.hasPreextractedComparison}');
+    debugPrint('   Setting _showPreextractedComparisonDisplay: $_showPreextractedComparisonDisplay');
+    
     final hasATS = _displayResult?.atsResult != null;
     if (hasATS) {
       _showATSResults = true;
+      debugPrint('   Setting _showATSResults: true');
     }
+    
     final hasAI = _displayResult?.aiRecommendation?.hasContent ?? false;
     if (hasAI) {
       _showAIRecommendationLoading = false;
       _showAIRecommendationResults = true;
+      debugPrint('   Setting _showAIRecommendationResults: true');
     }
     
+    // ✅ CRITICAL FIX - ADD THIS LINE
     notifyListeners();
     
-    debugPrint('🔔 [CONTROLLER] Display flags updated:');
+    debugPrint('🔔 [CONTROLLER] Display flags updated and notified:');
     debugPrint('   showPreextractedComparison: $_showPreextractedComparisonDisplay');
     debugPrint('   showATSResults: $_showATSResults');
     debugPrint('   showAIRecommendationResults: $_showAIRecommendationResults');

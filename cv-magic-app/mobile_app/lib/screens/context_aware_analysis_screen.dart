@@ -124,16 +124,19 @@ class _ContextAwareAnalysisScreenState
               Consumer<ContextAwareAnalysisController>(
                 builder: (context, controller, child) {
                   debugPrint('🔍 [SCREEN] Checking skills comparison:');
-                  debugPrint('   hasInitialResults: ${controller.hasInitialResults}');
-                  debugPrint('   initialResult != null: ${controller.initialResult != null}');
-                  debugPrint('   initialResult?.results != null: ${controller.initialResult?.results != null}');
-                  
+                  debugPrint(
+                      '   hasInitialResults: ${controller.hasInitialResults}');
+                  debugPrint(
+                      '   initialResult != null: ${controller.initialResult != null}');
+                  debugPrint(
+                      '   initialResult?.results != null: ${controller.initialResult?.results != null}');
+
                   // Show skills comparison if we have initial analysis results
-                  if (controller.hasInitialResults && 
+                  if (controller.hasInitialResults &&
                       controller.initialResult?.results != null) {
                     debugPrint('✅ [SCREEN] Showing SkillsComparisonCard');
                     final results = controller.initialResult!.results!;
-                    
+
                     return Column(
                       children: [
                         SkillsComparisonCard(
@@ -156,14 +159,18 @@ class _ContextAwareAnalysisScreenState
               Consumer<ContextAwareAnalysisController>(
                 builder: (context, controller, child) {
                   debugPrint('🔍 [SCREEN] Checking decision widget:');
-                  debugPrint('   waitingForUserDecision: ${controller.waitingForUserDecision}');
-                  debugPrint('   hasAnalyzeMatchDecision: ${controller.hasAnalyzeMatchDecision}');
-                  debugPrint('   hasInitialResults: ${controller.hasInitialResults}');
+                  debugPrint(
+                      '   waitingForUserDecision: ${controller.waitingForUserDecision}');
+                  debugPrint(
+                      '   hasAnalyzeMatchDecision: ${controller.hasAnalyzeMatchDecision}');
+                  debugPrint(
+                      '   hasInitialResults: ${controller.hasInitialResults}');
                   debugPrint('   state: ${controller.state}');
-                  
+
                   // Show widget if we have initial results with decision
                   // This persists even after clicking proceed
-                  if (controller.hasInitialResults && controller.hasAnalyzeMatchDecision) {
+                  if (controller.hasInitialResults &&
+                      controller.hasAnalyzeMatchDecision) {
                     debugPrint('✅ [SCREEN] Showing decision widget');
                     return Column(
                       children: [
@@ -505,9 +512,10 @@ class _ContextAwareAnalysisScreenState
     );
   }
 
-  Widget _buildAnalyzeMatchDecisionCard(ContextAwareAnalysisController controller) {
+  Widget _buildAnalyzeMatchDecisionCard(
+      ContextAwareAnalysisController controller) {
     final decision = controller.analyzeMatchDecision;
-    
+
     // Safety check - if no decision, show fallback UI
     if (decision == null) {
       debugPrint('⚠️ [SCREEN] Decision is null, showing fallback');
@@ -531,7 +539,8 @@ class _ContextAwareAnalysisScreenState
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        controller.continueFullAnalysis(includeTailoring: _includeTailoring);
+                        controller.continueFullAnalysis(
+                            includeTailoring: _includeTailoring);
                       },
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Proceed with Full Analysis'),
@@ -562,14 +571,14 @@ class _ContextAwareAnalysisScreenState
         ),
       );
     }
-    
+
     // Determine colors based on decision
     Color cardColor;
     Color iconColor;
     Color buttonColor;
     IconData icon;
     String title;
-    
+
     if (decision.isProceed) {
       cardColor = Colors.green.shade50;
       iconColor = Colors.green.shade700;
@@ -640,7 +649,7 @@ class _ContextAwareAnalysisScreenState
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Match Score
             Container(
               padding: const EdgeInsets.all(16),
@@ -652,13 +661,15 @@ class _ContextAwareAnalysisScreenState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildScoreItem('Match Score', '${decision.matchScore}%', iconColor),
-                  _buildScoreItem('Confidence', '${decision.confidence}%', iconColor),
+                  _buildScoreItem(
+                      'Match Score', '${decision.matchScore}%', iconColor),
+                  _buildScoreItem(
+                      'Confidence', '${decision.confidence}%', iconColor),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Primary Reason
             if (decision.primaryReason.isNotEmpty) ...[
               Text(
@@ -686,7 +697,7 @@ class _ContextAwareAnalysisScreenState
               ),
               const SizedBox(height: 16),
             ],
-            
+
             // Critical Missing (if any)
             if (decision.criticalMissing.isNotEmpty) ...[
               Text(
@@ -705,13 +716,14 @@ class _ContextAwareAnalysisScreenState
                   return Chip(
                     label: Text(skill),
                     backgroundColor: Colors.red.shade100,
-                    labelStyle: TextStyle(color: Colors.red.shade900, fontSize: 12),
+                    labelStyle:
+                        TextStyle(color: Colors.red.shade900, fontSize: 12),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 16),
             ],
-            
+
             // Action Buttons - only show when waiting for decision
             if (controller.waitingForUserDecision) ...[
               Row(
@@ -719,7 +731,8 @@ class _ContextAwareAnalysisScreenState
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        controller.continueFullAnalysis(includeTailoring: _includeTailoring);
+                        controller.continueFullAnalysis(
+                            includeTailoring: _includeTailoring);
                       },
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Proceed with Full Analysis'),
@@ -753,7 +766,7 @@ class _ContextAwareAnalysisScreenState
                   ),
                 ],
               ),
-              
+
               // Info text
               const SizedBox(height: 12),
               Text(
@@ -777,20 +790,20 @@ class _ContextAwareAnalysisScreenState
                 child: Row(
                   children: [
                     Icon(
-                      controller.showAnalysisResults 
-                        ? Icons.check_circle 
-                        : Icons.hourglass_empty,
-                      color: controller.showAnalysisResults 
-                        ? Colors.green.shade600 
-                        : Colors.orange.shade600,
+                      controller.showAnalysisResults
+                          ? Icons.check_circle
+                          : Icons.hourglass_empty,
+                      color: controller.showAnalysisResults
+                          ? Colors.green.shade600
+                          : Colors.orange.shade600,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         controller.showAnalysisResults
-                          ? '✅ Full analysis completed'
-                          : '⏳ Full analysis in progress...',
+                            ? '✅ Full analysis completed'
+                            : '⏳ Full analysis in progress...',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -899,7 +912,8 @@ class _ContextAwareAnalysisScreenState
   /// This is a temporary adapter until we fully migrate the UI
   SkillsAnalysisController _createCompatibleController(
       ContextAwareAnalysisController contextController) {
-    if (_adapterController == null || _adapterController!.source != contextController) {
+    if (_adapterController == null ||
+        _adapterController!.source != contextController) {
       _adapterController?.dispose();
       _adapterController = _ContextAwareSkillsAdapter(contextController);
     }
@@ -976,8 +990,7 @@ class _ContextAwareSkillsAdapter extends SkillsAnalysisController {
       _source.cvSkills?.technicalSkills ?? const [];
 
   @override
-  List<String> get cvSoftSkills =>
-      _source.cvSkills?.softSkills ?? const [];
+  List<String> get cvSoftSkills => _source.cvSkills?.softSkills ?? const [];
 
   @override
   List<String> get cvDomainKeywords =>
@@ -988,8 +1001,7 @@ class _ContextAwareSkillsAdapter extends SkillsAnalysisController {
       _source.jdSkills?.technicalSkills ?? const [];
 
   @override
-  List<String> get jdSoftSkills =>
-      _source.jdSkills?.softSkills ?? const [];
+  List<String> get jdSoftSkills => _source.jdSkills?.softSkills ?? const [];
 
   @override
   List<String> get jdDomainKeywords =>
@@ -1009,21 +1021,32 @@ class _ContextAwareSkillsAdapter extends SkillsAnalysisController {
   bool get showAnalyzeMatch => _source.showAnalyzeMatch;
 
   @override
-  bool get showPreextractedComparison => _source.showPreextractedComparison;
+  bool get showPreextractedComparison {
+    final value = _source.showPreextractedComparison;
+    debugPrint(
+        '🔄 [ADAPTER] showPreextractedComparison: $value (from source: ${_source.showPreextractedComparison})');
+    return value;
+  }
 
   @override
   bool get showATSLoading => _source.showATSLoading;
 
   @override
-  bool get showATSResults => _source.showATSResults;
+  bool get showATSResults {
+    final value = _source.showATSResults;
+    debugPrint('🔄 [ADAPTER] showATSResults: $value');
+    return value;
+  }
 
   @override
-  bool get showAIRecommendationLoading =>
-      _source.showAIRecommendationLoading;
+  bool get showAIRecommendationLoading => _source.showAIRecommendationLoading;
 
   @override
-  bool get showAIRecommendationResults =>
-      _source.showAIRecommendationResults;
+  bool get showAIRecommendationResults {
+    final value = _source.showAIRecommendationResults;
+    debugPrint('🔄 [ADAPTER] showAIRecommendationResults: $value');
+    return value;
+  }
 
   // Analyze match / ATS / AI data
   @override
@@ -1036,5 +1059,10 @@ class _ContextAwareSkillsAdapter extends SkillsAnalysisController {
   bool get hasATSResult => _source.hasATSResult;
 
   @override
-  ATSResult? get atsResult => _source.atsResult;
+  ATSResult? get atsResult {
+    final value = _source.atsResult;
+    debugPrint(
+        '🔄 [ADAPTER] atsResult: ${value != null} (score: ${value?.finalATSScore})');
+    return value;
+  }
 }
