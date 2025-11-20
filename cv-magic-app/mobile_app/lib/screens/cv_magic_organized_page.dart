@@ -18,7 +18,7 @@ import '../services/api_service.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../widgets/skills_comparison_card.dart';
 import '../widgets/analyze_match_card.dart';
-import '../widgets/skills_analysis/ai_powered_skills_analysis.dart';
+import '../widgets/preextracted_skills_comparison_card.dart';
 import '../utils/preextracted_parser.dart';
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
@@ -372,7 +372,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                 
                 // Show when we have preextracted comparison data
                 if (result != null && result.hasPreextractedComparison) {
-                  debugPrint('✅ [PREEXTRACTED_COMPARISON] Showing AIPoweredSkillsAnalysis');
+                  debugPrint('✅ [PREEXTRACTED_COMPARISON] Showing PreextractedSkillsComparisonCard');
                   
                   try {
                     // Parse the raw text output into structured data
@@ -382,26 +382,9 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                     
                     return Column(
                       children: [
-                        Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          elevation: 4,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.purple.shade50,
-                                  Colors.purple.shade100,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: AIPoweredSkillsAnalysis(data: parsedData),
-                            ),
-                          ),
+                        PreextractedSkillsComparisonCard(
+                          data: parsedData,
+                          companyName: _skillsController.currentCompany,
                         ),
                         const SizedBox(height: 16),
                       ],
