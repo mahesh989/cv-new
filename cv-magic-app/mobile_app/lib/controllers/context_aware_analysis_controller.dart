@@ -616,6 +616,13 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       _showAIRecommendationLoading = false;
       _showAIRecommendationResults = true;
     }
+    
+    notifyListeners();
+    
+    debugPrint('🔔 [CONTROLLER] Display flags updated:');
+    debugPrint('   showPreextractedComparison: $_showPreextractedComparisonDisplay');
+    debugPrint('   showATSResults: $_showATSResults');
+    debugPrint('   showAIRecommendationResults: $_showAIRecommendationResults');
   }
 
   /// Build context message for user feedback

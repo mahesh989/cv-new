@@ -35,11 +35,9 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
   bool _showAppliedJobs = false; // Toggle for showing applied jobs only
   final Map<String, bool> _appliedStatus =
       {}; // Track applied status for each job
-  DateTime? _lastLoadTime; // Track when we last loaded data
+  // _lastLoadTime removed - no longer needed for auto-refresh
 
-  // Auto-refresh timer
-  Timer? _autoRefreshTimer;
-  bool _isAutoRefreshing = false;
+  // Auto-refresh timer removed - manual refresh only
 
   /// Public method to trigger refresh from external sources
   void refreshJobs() {
@@ -51,31 +49,9 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
       return;
     }
 
-    // If we have existing data, always show it immediately and refresh silently
-    if (_jobs.isNotEmpty) {
-      debugPrint(
-          '📋 [JOB_TRACKING] Showing existing data (${_jobs.length} jobs) and refreshing silently');
-      // Show existing data immediately, just make sure applied status is loaded
-      _loadAppliedStatus();
-
-      // Check if we need to refresh based on age
-      if (_lastLoadTime != null) {
-        final timeSinceLastLoad = DateTime.now().difference(_lastLoadTime!);
-        if (timeSinceLastLoad.inSeconds < 10) {
-          debugPrint(
-              '📋 [JOB_TRACKING] Data is recent (${timeSinceLastLoad.inSeconds}s ago), no refresh needed');
-          return;
-        }
-      }
-
-      // Data is older than 10s or no timestamp, refresh silently in background
-      debugPrint('🔄 [JOB_TRACKING] Refreshing data silently in background...');
-      _silentRefresh();
-    } else {
-      // No existing data, do a full load with loading indicator
-      debugPrint('🔄 [JOB_TRACKING] No existing data, loading jobs...');
-      _loadJobs();
-    }
+    // Always do a full load with loading indicator
+    debugPrint('🔄 [JOB_TRACKING] Loading jobs...');
+    _loadJobs();
   }
 
   @override
@@ -84,12 +60,12 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
     _verifyAssets();
     _preloadAppliedStatus(); // Preload applied status before loading jobs
     _loadJobs();
-    _startAutoRefresh(); // Start auto-refresh timer
+    // Auto-refresh timer removed - only load on demand
   }
 
   @override
   void dispose() {
-    _stopAutoRefresh(); // Stop auto-refresh timer
+    // Auto-refresh timer removed - no need to stop
     super.dispose();
   }
 
@@ -220,7 +196,7 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
       setState(() {
         _jobs = jobs;
         _isLoading = false;
-        _lastLoadTime = DateTime.now(); // Track when we loaded data
+        // _lastLoadTime = DateTime.now(); // Track when we loaded data
       });
       // Load applied status after jobs are loaded
       await _loadAppliedStatus();
@@ -249,25 +225,25 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
   }
 
   /// Silent refresh - updates data in background without showing loading spinner
-  Future<void> _silentRefresh() async {
-    try {
-      debugPrint('🔄 [JOB_TRACKING] Silent refresh in progress...');
-      final jobs = await SavedJobsService.loadSavedJobs();
-      debugPrint(
-          '✅ [JOB_TRACKING] Silent refresh successful - ${jobs.length} jobs');
-      setState(() {
-        _jobs = jobs;
-        _lastLoadTime = DateTime.now(); // Track when we loaded data
-        _error = null; // Clear any previous errors
-      });
-      // Load applied status after jobs are loaded
-      await _loadAppliedStatus();
-    } catch (e) {
-      debugPrint('❌ [JOB_TRACKING] Silent refresh failed: $e');
-      // Don't update UI state on error - keep existing data visible
-      // Silently fail and keep using cached data
-    }
-  }
+  // Future<void> _silentRefresh() async {
+  //   try {
+  //     debugPrint('🔄 [JOB_TRACKING] Silent refresh in progress...');
+  //     final jobs = await SavedJobsService.loadSavedJobs();
+  //     debugPrint(
+  //         '✅ [JOB_TRACKING] Silent refresh successful - ${jobs.length} jobs');
+  //     setState(() {
+  //       _jobs = jobs;
+  //       _lastLoadTime = DateTime.now(); // Track when we loaded data
+  //       _error = null; // Clear any previous errors
+  //     });
+  //     // Load applied status after jobs are loaded
+  //     await _loadAppliedStatus();
+  //   } catch (e) {
+  //     debugPrint('❌ [JOB_TRACKING] Silent refresh failed: $e');
+  //     // Don't update UI state on error - keep existing data visible
+  //     // Silently fail and keep using cached data
+  //   }
+  // }
 
   Future<void> _loadAppliedStatus() async {
     try {
@@ -318,82 +294,82 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
   }
 
   /// Start auto-refresh timer
-  void _startAutoRefresh() {
-    debugPrint('🔄 [JOB_TRACKING] Starting auto-refresh timer (30 seconds)');
-    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      _performAutoRefresh();
-    });
-  }
+  // void _startAutoRefresh() {
+  //   debugPrint('🔄 [JOB_TRACKING] Starting auto-refresh timer (30 seconds)');
+  //   _autoRefreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+  //     _performAutoRefresh();
+  //   });
+  // }
 
   /// Stop auto-refresh timer
-  void _stopAutoRefresh() {
-    debugPrint('⏹️ [JOB_TRACKING] Stopping auto-refresh timer');
-    _autoRefreshTimer?.cancel();
-    _autoRefreshTimer = null;
-  }
+  // void _stopAutoRefresh() {
+  //   debugPrint('⏹️ [JOB_TRACKING] Stopping auto-refresh timer');
+  //   _autoRefreshTimer?.cancel();
+  //   _autoRefreshTimer = null;
+  // }
 
   /// Perform auto-refresh in background
-  Future<void> _performAutoRefresh() async {
-    // Don't refresh if already refreshing or if no data exists
-    if (_isAutoRefreshing || _jobs.isEmpty) {
-      return;
-    }
+  // Future<void> _performAutoRefresh() async {
+  //   // Don't refresh if already refreshing or if no data exists
+  //   if (_isAutoRefreshing || _jobs.isEmpty) {
+  //     return;
+  //   }
 
-    _isAutoRefreshing = true;
-    debugPrint('🔄 [JOB_TRACKING] Auto-refreshing data in background...');
+  //   _isAutoRefreshing = true;
+  //   debugPrint('🔄 [JOB_TRACKING] Auto-refreshing data in background...');
 
-    try {
-      // Load fresh data silently
-      final freshJobs = await SavedJobsService.loadSavedJobs();
+  //   try {
+  //     // Load fresh data silently
+  //     final freshJobs = await SavedJobsService.loadSavedJobs();
 
-      // Check if data has changed
-      bool hasChanges = false;
-      if (freshJobs.length != _jobs.length) {
-        hasChanges = true;
-        debugPrint(
-            '📊 [JOB_TRACKING] Job count changed: ${_jobs.length} → ${freshJobs.length}');
-      } else {
-        // Check for content changes
-        for (int i = 0; i < freshJobs.length; i++) {
-          if (i < _jobs.length) {
-            final oldJob = _jobs[i];
-            final newJob = freshJobs[i];
+  //     // Check if data has changed
+  //     bool hasChanges = false;
+  //     if (freshJobs.length != _jobs.length) {
+  //       hasChanges = true;
+  //       debugPrint(
+  //           '📊 [JOB_TRACKING] Job count changed: ${_jobs.length} → ${freshJobs.length}');
+  //     } else {
+  //       // Check for content changes
+  //       for (int i = 0; i < freshJobs.length; i++) {
+  //         if (i < _jobs.length) {
+  //           final oldJob = _jobs[i];
+  //           final newJob = freshJobs[i];
 
-            // Compare key fields for changes
-            if (oldJob['company_name'] != newJob['company_name'] ||
-                oldJob['job_title'] != newJob['job_title'] ||
-                oldJob['location'] != newJob['location'] ||
-                oldJob['extracted_at'] != newJob['extracted_at']) {
-              hasChanges = true;
-              debugPrint(
-                  '📊 [JOB_TRACKING] Job data changed for ${newJob['company_name']}');
-              break;
-            }
-          }
-        }
-      }
+  //           // Compare key fields for changes
+  //           if (oldJob['company_name'] != newJob['company_name'] ||
+  //               oldJob['job_title'] != newJob['job_title'] ||
+  //               oldJob['location'] != newJob['location'] ||
+  //               oldJob['extracted_at'] != newJob['extracted_at']) {
+  //             hasChanges = true;
+  //             debugPrint(
+  //                 '📊 [JOB_TRACKING] Job data changed for ${newJob['company_name']}');
+  //             break;
+  //           }
+  //         }
+  //       }
+  //     }
 
-      if (hasChanges) {
-        debugPrint('✅ [JOB_TRACKING] Auto-refresh found changes, updating UI');
-        setState(() {
-          _jobs = freshJobs;
-          _lastLoadTime = DateTime.now();
-        });
+  //     if (hasChanges) {
+  //       debugPrint('✅ [JOB_TRACKING] Auto-refresh found changes, updating UI');
+  //       setState(() {
+  //         _jobs = freshJobs;
+  //         _lastLoadTime = DateTime.now();
+  //       });
 
-        // Reload applied status for new jobs
-        await _loadAppliedStatus();
-      } else {
-        debugPrint('📋 [JOB_TRACKING] Auto-refresh: No changes detected');
-        // Update timestamp even if no changes
-        _lastLoadTime = DateTime.now();
-      }
-    } catch (e) {
-      debugPrint('❌ [JOB_TRACKING] Auto-refresh failed: $e');
-      // Don't show error to user, just log it
-    } finally {
-      _isAutoRefreshing = false;
-    }
-  }
+  //       // Reload applied status for new jobs
+  //       await _loadAppliedStatus();
+  //     } else {
+  //       debugPrint('📋 [JOB_TRACKING] Auto-refresh: No changes detected');
+  //       // Update timestamp even if no changes
+  //       _lastLoadTime = DateTime.now();
+  //     }
+  //   } catch (e) {
+  //     debugPrint('❌ [JOB_TRACKING] Auto-refresh failed: $e');
+  //     // Don't show error to user, just log it
+  //   } finally {
+  //     _isAutoRefreshing = false;
+  //   }
+  // }
 
   @override
   bool get wantKeepAlive => true;
@@ -404,10 +380,13 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
     return Scaffold(
       backgroundColor: AppTheme.neutralGray50,
       body: SafeArea(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          child: _buildContent(),
+        child: RefreshIndicator(
+          onRefresh: _loadJobs,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            child: _buildContent(),
+          ),
         ),
       ),
     );
@@ -464,18 +443,18 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
             ),
             const Spacer(),
             // Auto-refresh indicator
-            if (_isAutoRefreshing) ...[
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
+            // if (_isAutoRefreshing) ...[
+            //   const SizedBox(
+            //     width: 16,
+            //     height: 16,
+            //     child: CircularProgressIndicator(
+            //       strokeWidth: 2,
+            //       valueColor:
+            //           AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
+            //     ),
+            //   ),
+            //   const SizedBox(width: 8),
+            // ],
             // Debug button to clear all applied statuses (only visible in debug mode)
             if (kDebugMode) ...[
               IconButton(
@@ -502,12 +481,7 @@ class JobTrackingScreenState extends State<JobTrackingScreen>
             IconButton(
               onPressed: () {
                 debugPrint('🔄 [JOB_TRACKING] Manual refresh triggered');
-                // If we have data, use silent refresh, otherwise full load
-                if (_jobs.isNotEmpty) {
-                  _silentRefresh();
-                } else {
-                  _loadJobs();
-                }
+                _loadJobs();
               },
               icon: const Icon(Icons.refresh),
               tooltip: 'Reload',
