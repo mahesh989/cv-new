@@ -265,13 +265,13 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             ),
 
             // Analyze Match Decision Widget (appears after initial analysis)
-            // Now shown AFTER skills comparison so user can see comparison before deciding
+            // Stays visible after user makes decision, only buttons change
             AnimatedBuilder(
               animation: _skillsController,
               builder: (context, _) {
-                final showDecision =
-                    _skillsController.waitingForUserDecision;
-                if (!showDecision) return const SizedBox.shrink();
+                // Show if we have analyze match decision from initial analysis
+                final hasDecision = _skillsController.hasAnalyzeMatchDecision;
+                if (!hasDecision) return const SizedBox.shrink();
 
                 return Column(
                   children: [
@@ -1217,47 +1217,94 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
               const SizedBox(height: 16),
             ],
 
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      _skillsController.continueFullAnalysis(
-                          includeTailoring: true);
-                    },
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Proceed with Full Analysis'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: buttonColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+            // Action Buttons (conditionally shown based on state)
+            if (_skillsController.waitingForUserDecision) ...[
+              // Show Proceed/Skip buttons when waiting for decision
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _skillsController.continueFullAnalysis(
+                            includeTailoring: true);
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Proceed with Full Analysis'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: buttonColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      _skillsController.skipFullAnalysis();
-                    },
-                    icon: const Icon(Icons.skip_next),
-                    label: const Text('Skip Full Analysis'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.grey.shade700,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(color: Colors.grey.shade400),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        _skillsController.skipFullAnalysis();
+                      },
+                      icon: const Icon(Icons.skip_next),
+                      label: const Text('Skip Full Analysis'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.grey.shade700,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Colors.grey.shade400),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
+                ],
+              ),
+            ] else if (_skillsController.isCancelled) ...[
+              // Show "Analyze Another Job" button if user skipped
+              ElevatedButton.icon(
+                onPressed: () {
+                  // Clear current results but keep CV/JD
+                  clearAnalysisResults();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Analyze Another Job'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ] else ...[
+              // User proceeded - no buttons shown, just the analysis result
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.blue.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Full analysis in progress...',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             // Info text
             const SizedBox(height: 12),
