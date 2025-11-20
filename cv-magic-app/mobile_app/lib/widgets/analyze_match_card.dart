@@ -1,24 +1,39 @@
 import 'package:flutter/material.dart';
-import '../utils/text_formatter.dart';
 
-/// Analyze Match Card - Displays CV-JD matching analysis
-/// Shows AFTER Detailed Skills Display when analyze match data is ready
+/// Analyze Match Card - Displays CV-JD matching analysis in table format
+/// Shows CV vs JD keyword comparison with match status
 class AnalyzeMatchCard extends StatelessWidget {
-  final String rawAnalysis;
+  final Map<String, dynamic> matchData;
   final String? companyName;
 
   const AnalyzeMatchCard({
     super.key,
-    required this.rawAnalysis,
+    required this.matchData,
     this.companyName,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Check if we have valid analysis
-    if (rawAnalysis.trim().isEmpty) {
+    // Check if we have valid match data
+    if (matchData.isEmpty) {
       return _buildEmptyState();
     }
+
+    // Extract data
+    final matchedRequired = List<String>.from(matchData['matched_required_keywords'] ?? []);
+    final matchedPreferred = List<String>.from(matchData['matched_preferred_keywords'] ?? []);
+    final missedRequired = List<String>.from(matchData['missed_required_keywords'] ?? []);
+    final missedPreferred = List<String>.from(matchData['missed_preferred_keywords'] ?? []);
+    final matchCounts = matchData['match_counts'] as Map<String, dynamic>? ?? {};
+    
+    final totalRequired = matchCounts['total_required_keywords'] ?? 0;
+    final totalPreferred = matchCounts['total_preferred_keywords'] ?? 0;
+    final matchedRequiredCount = matchCounts['matched_required_count'] ?? 0;
+    final matchedPreferredCount = matchCounts['matched_preferred_count'] ?? 0;
+    
+    // Calculate percentages
+    final requiredPercent = totalRequired > 0 ? (matchedRequiredCount / totalRequired * 100).round() : 0;
+    final preferredPercent = totalPreferred > 0 ? (matchedPreferredCount / totalPreferred * 100).round() : 0;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -118,27 +133,28 @@ class AnalyzeMatchCard extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Analysis Content
+              // Match Statistics
               Container(
-                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.deepOrange.shade200,
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.deepOrange.shade100,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
+                  border: Border.all(color: Colors.deepOrange.shade200, width: 2),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatColumn('Required', matchedRequiredCount, totalRequired, requiredPercent, Colors.red),
+                    _buildStatColumn('Preferred', matchedPreferredCount, totalPreferred, preferredPercent, Colors.orange),
                   ],
                 ),
-                child: _buildFormattedAnalysis(rawAnalysis),
               ),
+              const SizedBox(height: 16),
+
+              // Keyword Matching Tables
+              _buildMatchingTable('Required Keywords', matchedRequired, missedRequired, Colors.red),
+              const SizedBox(height: 12),
+              _buildMatchingTable('Preferred Keywords', matchedPreferred, missedPreferred, Colors.orange),
 
               // Info footer
               const SizedBox(height: 12),
@@ -179,10 +195,167 @@ class AnalyzeMatchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFormattedAnalysis(String analysis) {
-    // Use AnalyzeMatchFormattedText widget from TextFormatter
-    // This handles all the formatting automatically
-    return AnalyzeMatchFormattedText(text: analysis);
+  Widget _buildStatColumn(String label, int matched, int total, int percent, MaterialColor color) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: color.shade800,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '$matched / $total',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: color.shade700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.shade100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '$percent%',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: color.shade900,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMatchingTable(String title, List<String> matched, List<String> missed, MaterialColor color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.shade200, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Table Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.shade100,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+            ),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color.shade900,
+              ),
+            ),
+          ),
+          
+          // Table Content
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Matched Keywords Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 100,
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green.shade600, size: 18),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Matched',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: matched.isEmpty
+                          ? Text('None', style: TextStyle(fontSize: 12, color: Colors.grey.shade600))
+                          : Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: matched.map((keyword) => Chip(
+                                label: Text(keyword, style: const TextStyle(fontSize: 11)),
+                                backgroundColor: Colors.green.shade100,
+                                padding: const EdgeInsets.all(4),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              )).toList(),
+                            ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Missed Keywords Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 100,
+                      child: Row(
+                        children: [
+                          Icon(Icons.cancel, color: Colors.red.shade600, size: 18),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Missed',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.red.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: missed.isEmpty
+                          ? Text('None', style: TextStyle(fontSize: 12, color: Colors.grey.shade600))
+                          : Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: missed.map((keyword) => Chip(
+                                label: Text(keyword, style: const TextStyle(fontSize: 11)),
+                                backgroundColor: Colors.red.shade100,
+                                padding: const EdgeInsets.all(4),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              )).toList(),
+                            ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildEmptyState() {

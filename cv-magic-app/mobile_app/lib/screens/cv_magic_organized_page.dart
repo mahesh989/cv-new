@@ -302,10 +302,15 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                     _skillsController.analyzeMatch != null) {
                   
                   debugPrint('✅ [ANALYZE_MATCH_CARD] Showing AnalyzeMatchCard');
+                  
+                  // Get full cv_jd_matching data from result
+                  final matchData = _skillsController.result?.toJson()['analyze_match'] as Map<String, dynamic>? ?? {};
+                  debugPrint('   matchData keys: ${matchData.keys.toList()}');
+                  
                   return Column(
                     children: [
                       AnalyzeMatchCard(
-                        rawAnalysis: _skillsController.analyzeMatchRawAnalysis ?? '',
+                        matchData: matchData,
                         companyName: _skillsController.analyzeMatchCompanyName,
                       ),
                       const SizedBox(height: 16),
