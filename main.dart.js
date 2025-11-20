@@ -7943,8 +7943,8 @@ if(r==null)r=0
 h=A.f6(h.h(j,b6))
 if(h==null)h=b1
 if(h==null)h=35
-a2=A.aI0(a4)
-a3=A.aI0(a5)
+a2=A.aI0(a4,22)
+a3=A.aI0(a5,13)
 A.w().$1("\u2705 [CATEGORY2] Parsed: score="+A.c(r)+"/"+A.c(h)+", tech="+A.c(a2.a)+"/22, exp="+A.c(a3.a)+"/13")
 a6=A.f6(p.h(q,b2))
 if(a6==null)a6=b1
@@ -7960,18 +7960,19 @@ s=A.bD(s.h(c1,b0))
 if(s==null)s="v2_65_35_split"
 A.w().$1("\u2705 [ATS_RESULT] Parsed: score="+A.c(n)+", version="+s)
 return new A.a2N(o,n,m,l,new A.a2J(new A.a2K(f,e,d,c,b,a,a0,i,a1),new A.a2L(r,h,a2,a3),a6,a7,p),s)},
-aI0(a){var s,r,q,p="max_points"
+aI0(a,b){var s,r,q,p="max_points"
 A.w().$1("\ud83d\udd0d [CATEGORY2_COMPONENT] Parsing component")
 s=J.a8(a)
 A.w().$1("   score: "+A.c(s.h(a,"score")))
 A.w().$1("   max_points: "+A.c(s.h(a,p)))
 A.w().$1("   average: "+A.c(s.h(a,"average")))
+A.w().$1("   defaultMaxPoints: "+b)
 r=A.f6(s.h(a,"score"))
 if(r==null)r=null
 if(r==null)r=0
 q=A.f6(s.h(a,p))
 if(q==null)q=null
-if(q==null)q=0
+if(q==null)q=b
 s=A.f6(s.h(a,"average"))
 if(s==null)s=null
 if(s==null)s=0
@@ -45873,30 +45874,33 @@ p.Vs()
 p.Y()
 case 1:return A.r(q,r)}})
 return A.t($async$zl,r)},
-Vs(){var s,r,q,p=this,o=null
+Vs(){var s,r,q,p,o=this,n=null
 A.w().$1("\ud83d\udd14 [CONTROLLER] _updateDisplayFlags called")
-A.w().$1("   _displayResult: "+(p.at!=null))
-s=p.at
+A.w().$1("   _displayResult: "+(o.at!=null))
+s=o.at
 r=s==null
-p.ax=(r?o:s.r)!=null
-if(r)q=o
+o.ax=(r?n:s.r)!=null
+if(r)q=n
 else{q=s.z
-q=q!=null&&q.length!==0}p.ay=q===!0
-if(r)s=o
+q=q!=null&&q.length!==0}o.ay=q===!0
+if(r)s=n
 else{s=s.z
 s=s!=null&&s.length!==0}A.w().$1("   hasPreextractedComparison: "+A.c(s))
-A.w().$1("   Setting _showPreextractedComparisonDisplay: "+p.ay)
-s=p.at
-if((s==null?o:s.ax)!=null){p.CW=!0
-A.w().$1("   Setting _showATSResults: true")}s=p.at
-if(s==null)s=o
+A.w().$1("   Setting _showPreextractedComparisonDisplay: "+o.ay)
+s=o.at
+p=(s==null?n:s.ax)!=null
+A.w().$1("   hasATS: "+p)
+if(p){A.w().$1("   atsResult.finalATSScore: "+A.c(o.at.ax.b))
+o.CW=!0
+A.w().$1("   \u2705 Setting _showATSResults = true")}s=o.at
+if(s==null)s=n
 else{s=s.ay
-s=s==null?o:B.c.a6(s.a).length!==0}if(s===!0){p.cy=!0
-A.w().$1("   Setting _showAIRecommendationResults: true")}p.Y()
+s=s==null?n:B.c.a6(s.a).length!==0}if(s===!0){o.cy=!0
+A.w().$1("   Setting _showAIRecommendationResults: true")}o.Y()
 A.w().$1("\ud83d\udd14 [CONTROLLER] Display flags updated and notified:")
-A.w().$1("   showPreextractedComparison: "+p.ay)
-A.w().$1("   showATSResults: "+p.CW)
-A.w().$1("   showAIRecommendationResults: "+p.cy)},
+A.w().$1("   showPreextractedComparison: "+o.ay)
+A.w().$1("   showATSResults: "+o.CW)
+A.w().$1("   showAIRecommendationResults: "+o.cy)},
 a82(){var s,r,q=this.c
 if(q==null)return""
 s=q.c
