@@ -332,6 +332,8 @@ class ContextAwareAnalysisController extends ChangeNotifier {
 
   /// Internal method to continue full analysis
   Future<void> _continueFullAnalysis({bool includeTailoring = true}) async {
+    debugPrint('🚀 [CONTROLLER] continueFullAnalysis starting');
+    
     try {
       // Don't call _setLoading() to keep initial results visible
       // Just update the state to indicate we're processing
@@ -340,11 +342,15 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       // Keep _showCVContext true so initial results remain visible
       notifyListeners();
 
-      print('🚀 [CONTEXT_AWARE_CONTROLLER] Continuing full analysis...');
+      debugPrint('🚀 [CONTROLLER] Calling backend continueFullAnalysis...');
       _result = await ContextAwareAnalysisService.continueFullAnalysis(
         company: _currentCompany!,
         includeTailoring: includeTailoring,
       );
+
+      debugPrint('📥 [CONTROLLER] Got response from backend');
+      debugPrint('   success: ${_result!.success}');
+      debugPrint('   errors: ${_result!.errors}');
 
       if (_result!.success) {
         _executionDuration = _result!.processingTime;
@@ -352,7 +358,9 @@ class ContextAwareAnalysisController extends ChangeNotifier {
         _showAnalysisResults = true;
 
         // Build display-friendly result
+        debugPrint('🔧 [CONTROLLER] Initializing display result...');
         _initializeDisplayResult();
+        debugPrint('✅ [CONTROLLER] Display result initialized');
 
         // Show completion message
         final completionMessage = _buildCompletionMessage();
@@ -513,9 +521,11 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     final results = _result?.results;
     if (results == null) {
       _displayResult = null;
+      debugPrint('❌ [CONTROLLER] _initializeDisplayResult: results is null');
       return;
     }
 
+    debugPrint('🔧 [CONTROLLER] Building baseJson from results...');
     final baseJson = <String, dynamic>{
       'cv_skills': results.cvSkills,
       'jd_skills': results.jdSkills,
@@ -540,8 +550,16 @@ class ContextAwareAnalysisController extends ChangeNotifier {
           results.jobInfo['preextracted_skills_comparison'];
     }
 
+    debugPrint('✅ [CONTROLLER] Parsing displayResult from JSON...');
     _displayResult = SkillsAnalysisResult.fromJson(baseJson);
+    debugPrint('✅ [CONTROLLER] Parsed displayResult');
+    debugPrint('   hasATSResult: ${_displayResult?.atsResult != null}');
+    debugPrint('   hasPreextracted: ${_displayResult?.hasPreextractedComparison}');
+    debugPrint('   hasAIRecommendation: ${_displayResult?.aiRecommendation != null}');
+    
+    // ✅ CRITICAL: Update display flags
     _updateDisplayFlags();
+    debugPrint('✅ [CONTROLLER] Called _updateDisplayFlags()');
 
     // Begin polling for complete ATS/component results
     _showATSLoading = true;
@@ -549,14 +567,17 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       _showAIRecommendationLoading = true;
     }
     notifyListeners();
+    debugPrint('✅ [CONTROLLER] Set state to loading and notified listeners');
     unawaited(_pollForCompleteResults());
   }
 
   Future<void> _pollForCompleteResults() async {
     if (_currentCompany == null) {
+      debugPrint('❌ [CONTROLLER] _pollForCompleteResults: _currentCompany is null');
       return;
     }
 
+    debugPrint('🔄 [CONTROLLER] Polling for complete results...');
     final completeResults =
         await SkillsAnalysisService.waitForCompleteResults(
       _currentCompany!,
@@ -564,16 +585,24 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     );
 
     if (completeResults == null) {
+      debugPrint('⚠️ [CONTROLLER] Polling timed out or returned null');
       _showATSLoading = false;
       _showAIRecommendationLoading = false;
       notifyListeners();
       return;
     }
 
+    debugPrint('📥 [CONTROLLER] Got complete results from polling');
+    debugPrint('   Keys: ${completeResults.keys.toList()}');
+    debugPrint('   has ats_score: ${completeResults['ats_score'] != null}');
+    debugPrint('   has component_analysis: ${completeResults['component_analysis'] != null}');
+    debugPrint('   has ai_recommendation: ${completeResults['ai_recommendation'] != null}');
+
     // Support both field name variations
     final preextracted = (completeResults['preextracted_skills_comparison'] ??
         completeResults['preextracted_comparison']) as Map<String, dynamic>?;
 
+    debugPrint('🔧 [CONTROLLER] Updating _displayResult with complete results...');
     _displayResult = (_displayResult ??
             SkillsAnalysisResult.fromJson({
               'cv_skills': _result?.results?.cvSkills ?? {},
@@ -602,44 +631,68 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       company: completeResults['company'] ?? _displayResult?.company,
     );
 
+    debugPrint('✅ [CONTROLLER] Updated _displayResult');
+    debugPrint('   hasATSResult: ${_displayResult?.atsResult != null}');
+    if (_displayResult?.atsResult != null) {
+      debugPrint('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
+    }
+    debugPrint('   hasPreextracted: ${_displayResult?.hasPreextractedComparison}');
+    debugPrint('   hasAIRecommendation: ${_displayResult?.aiRecommendation != null}');
+
     _showATSLoading = false;
     _updateDisplayFlags();
-    notifyListeners();
+    debugPrint('✅ [CONTROLLER] Called _updateDisplayFlags() and notifyListeners()');
   }
 
   void _updateDisplayFlags() {
-    debugPrint('🔔 [CONTROLLER] _updateDisplayFlags called');
+    debugPrint('🔔 [CONTROLLER] _updateDisplayFlags START');
     debugPrint('   _displayResult: ${_displayResult != null}');
     
-    _showAnalyzeMatchDisplay = _displayResult?.analyzeMatch != null;
-    _showPreextractedComparisonDisplay =
-        _displayResult?.hasPreextractedComparison ?? false;
-    
-    debugPrint('   hasPreextractedComparison: ${_displayResult?.hasPreextractedComparison}');
-    debugPrint('   Setting _showPreextractedComparisonDisplay: $_showPreextractedComparisonDisplay');
-    
-    final hasATS = _displayResult?.atsResult != null;
-    debugPrint('   hasATS: $hasATS');
-    if (hasATS) {
-      debugPrint('   atsResult.finalATSScore: ${_displayResult!.atsResult!.finalATSScore}');
-      _showATSResults = true;
-      debugPrint('   ✅ Setting _showATSResults = true');
+    if (_displayResult == null) {
+      debugPrint('   ❌ _displayResult is null, returning');
+      return;
     }
     
-    final hasAI = _displayResult?.aiRecommendation?.hasContent ?? false;
+    // Analyze Match
+    _showAnalyzeMatchDisplay = _displayResult!.analyzeMatch != null;
+    debugPrint('   showAnalyzeMatch: $_showAnalyzeMatchDisplay');
+    
+    // Preextracted Comparison
+    _showPreextractedComparisonDisplay =
+        _displayResult!.hasPreextractedComparison;
+    debugPrint('   showPreextractedComparison: $_showPreextractedComparisonDisplay');
+    
+    // ATS Results
+    final hasATS = _displayResult!.atsResult != null;
+    debugPrint('   hasATS: $hasATS');
+    if (hasATS) {
+      _showATSResults = true;
+      debugPrint('   ✅ Set _showATSResults = true');
+      debugPrint('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
+    } else {
+      _showATSResults = false;
+      debugPrint('   ❌ No ATS result, _showATSResults = false');
+    }
+    
+    // AI Recommendations
+    final hasAI = _displayResult!.aiRecommendation?.hasContent ?? false;
+    debugPrint('   hasAI: $hasAI');
     if (hasAI) {
       _showAIRecommendationLoading = false;
       _showAIRecommendationResults = true;
-      debugPrint('   Setting _showAIRecommendationResults: true');
+      debugPrint('   ✅ Set _showAIRecommendationResults = true');
+    } else {
+      _showAIRecommendationResults = false;
+      debugPrint('   ❌ No AI recommendation, _showAIRecommendationResults = false');
     }
     
-    // ✅ CRITICAL FIX - ADD THIS LINE
+    // ✅ CRITICAL: Notify listeners
     notifyListeners();
-    
-    debugPrint('🔔 [CONTROLLER] Display flags updated and notified:');
-    debugPrint('   showPreextractedComparison: $_showPreextractedComparisonDisplay');
-    debugPrint('   showATSResults: $_showATSResults');
-    debugPrint('   showAIRecommendationResults: $_showAIRecommendationResults');
+    debugPrint('🔔 [CONTROLLER] _updateDisplayFlags END - notifyListeners() called');
+    debugPrint('   Final flags:');
+    debugPrint('     showATSResults: $_showATSResults');
+    debugPrint('     showPreextractedComparison: $_showPreextractedComparisonDisplay');
+    debugPrint('     showAIRecommendationResults: $_showAIRecommendationResults');
   }
 
   /// Build context message for user feedback

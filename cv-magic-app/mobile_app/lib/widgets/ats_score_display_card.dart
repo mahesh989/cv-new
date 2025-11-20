@@ -176,6 +176,7 @@ class ATSScoreDisplayCard extends StatelessWidget {
     final breakdown = atsResult!.breakdown;
     final baseScore = breakdown.baseScore;
     final bonusPoints = breakdown.bonusPoints;
+    final boostApplied = breakdown.boostApplied;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -229,13 +230,17 @@ class ATSScoreDisplayCard extends StatelessWidget {
             color: Colors.grey.shade300,
           ),
 
-          // Base Score & Bonus
+          // Base Score, Bonus & Boost
           Expanded(
             child: Column(
               children: [
                 _buildScorePill('Base', baseScore, Colors.blue),
                 const SizedBox(height: 8),
                 _buildScorePill('Bonus', bonusPoints, Colors.green),
+                if (boostApplied > 0) ...[
+                  const SizedBox(height: 8),
+                  _buildBoostPill(boostApplied),
+                ],
               ],
             ),
           ),
@@ -268,6 +273,43 @@ class ATSScoreDisplayCard extends StatelessWidget {
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBoostPill(double boostValue) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.bolt,
+          size: 16,
+          color: Colors.purple.shade700,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          'Boost: ',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.purple.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.purple.shade200),
+          ),
+          child: Text(
+            '+${boostValue.toStringAsFixed(1)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple.shade700,
             ),
           ),
         ),
