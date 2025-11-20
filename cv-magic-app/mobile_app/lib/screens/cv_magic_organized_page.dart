@@ -18,6 +18,8 @@ import '../services/api_service.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../widgets/skills_comparison_card.dart';
 import '../widgets/analyze_match_card.dart';
+import '../widgets/skills_analysis/ai_powered_skills_analysis.dart';
+import '../utils/preextracted_parser.dart';
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
   final bool Function()? shouldClearResults;
@@ -351,6 +353,79 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                 }
                 
                 debugPrint('❌ [ANALYZE_MATCH_CARD] Not showing (conditions not met)');
+                return const SizedBox.shrink();
+              },
+            ),
+
+            // Pre-extracted Skills Comparison (AI-Powered Summary Table)
+            AnimatedBuilder(
+              animation: _skillsController,
+              builder: (context, _) {
+                debugPrint('🔍 [PREEXTRACTED_COMPARISON] AnimatedBuilder called');
+                final result = _skillsController.result;
+                debugPrint('   result != null: ${result != null}');
+                debugPrint('   hasPreextractedComparison: ${result?.hasPreextractedComparison ?? false}');
+                debugPrint('   preextractedRawOutput != null: ${result?.preextractedRawOutput != null}');
+                if (result?.preextractedRawOutput != null) {
+                  debugPrint('   preextractedRawOutput length: ${result!.preextractedRawOutput!.length}');
+                }
+                
+                // Show when we have preextracted comparison data
+                if (result != null && result.hasPreextractedComparison) {
+                  debugPrint('✅ [PREEXTRACTED_COMPARISON] Showing AIPoweredSkillsAnalysis');
+                  
+                  try {
+                    // Parse the raw text output into structured data
+                    final parsedData = PreextractedParser.parse(result.preextractedRawOutput!);
+                    debugPrint('   Parsed categories: ${parsedData.categories.length}');
+                    debugPrint('   Overall match rate: ${parsedData.overall.matchRatePercent}%');
+                    
+                    return Column(
+                      children: [
+                        Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          elevation: 4,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.purple.shade50,
+                                  Colors.purple.shade100,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: AIPoweredSkillsAnalysis(data: parsedData),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  } catch (e) {
+                    debugPrint('❌ [PREEXTRACTED_COMPARISON] Parse error: $e');
+                    return Column(
+                      children: [
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              'Error parsing skills comparison: $e',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+                }
+                
+                debugPrint('❌ [PREEXTRACTED_COMPARISON] Not showing (no data)');
                 return const SizedBox.shrink();
               },
             ),
