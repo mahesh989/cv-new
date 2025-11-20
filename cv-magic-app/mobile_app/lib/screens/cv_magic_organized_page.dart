@@ -16,11 +16,8 @@ import '../modules/cv/cv_preview_module.dart';
 import '../widgets/job_input.dart';
 import '../services/api_service.dart';
 import '../controllers/context_aware_analysis_controller.dart';
-import '../widgets/skills_display_widget.dart';
 import '../widgets/skills_comparison_card.dart';
-import '../widgets/detailed_skills_display_card.dart';
 import '../widgets/analyze_match_card.dart';
-
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
   final bool Function()? shouldClearResults;
@@ -285,41 +282,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
               },
             ),
 
-            // Detailed Skills Display (shown AFTER user clicks "Proceed")
-            AnimatedBuilder(
-              animation: _skillsController,
-              builder: (context, _) {
-                debugPrint('🔍 [DETAILED_SKILLS] AnimatedBuilder called');
-                debugPrint('   hasResults: ${_skillsController.hasResults}');
-                debugPrint('   waitingForUserDecision: ${_skillsController.waitingForUserDecision}');
-                debugPrint('   cvSkills != null: ${_skillsController.cvSkills != null}');
-                debugPrint('   jdSkills != null: ${_skillsController.jdSkills != null}');
-                
-                // Show when full analysis has started (user clicked Proceed) and we have skills data
-                if (_skillsController.hasResults && 
-                    !_skillsController.waitingForUserDecision &&
-                    _skillsController.cvSkills != null &&
-                    _skillsController.jdSkills != null) {
-                  
-                  debugPrint('✅ [DETAILED_SKILLS] Showing DetailedSkillsDisplayCard');
-                  return Column(
-                    children: [
-                      DetailedSkillsDisplayCard(
-                        cvSkills: _skillsController.cvSkills!.toJson(),
-                        jdSkills: _skillsController.jdSkills!.toJson(),
-                        cvComprehensiveAnalysis: _skillsController.cvComprehensiveAnalysis,
-                        jdComprehensiveAnalysis: _skillsController.jdComprehensiveAnalysis,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  );
-                }
-                debugPrint('❌ [DETAILED_SKILLS] Not showing (conditions not met)');
-                return const SizedBox.shrink();
-              },
-            ),
-
-            // Analyze Match Card (shown AFTER Detailed Skills when data is ready)
+            // Analyze Match Card (shown AFTER user clicks Proceed when data is ready)
             AnimatedBuilder(
               animation: _skillsController,
               builder: (context, _) {
@@ -327,6 +290,12 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                 debugPrint('   hasAnalyzeMatch: ${_skillsController.hasAnalyzeMatch}');
                 debugPrint('   analyzeMatch != null: ${_skillsController.analyzeMatch != null}');
                 debugPrint('   showAnalyzeMatch: ${_skillsController.showAnalyzeMatch}');
+                debugPrint('   analyzeMatchRawAnalysis != null: ${_skillsController.analyzeMatchRawAnalysis != null}');
+                debugPrint('   analyzeMatchRawAnalysis length: ${_skillsController.analyzeMatchRawAnalysis?.length ?? 0}');
+                if (_skillsController.analyzeMatch != null) {
+                  debugPrint('   analyzeMatch.rawAnalysis length: ${_skillsController.analyzeMatch!.rawAnalysis.length}');
+                  debugPrint('   analyzeMatch.isEmpty: ${_skillsController.analyzeMatch!.isEmpty}');
+                }
                 
                 // Show when we have analyze match data
                 if (_skillsController.hasAnalyzeMatch &&
