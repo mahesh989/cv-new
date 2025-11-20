@@ -1260,8 +1260,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                   ),
                 ],
               ),
-            ] else if (_skillsController.isCancelled) ...[
-              // Show "Analyze Another Job" button if user skipped
+            ] else if (!_skillsController.hasResults) ...[
+              // Show "Analyze Another Job" button if user skipped (has initial but no full results)
               ElevatedButton.icon(
                 onPressed: () {
                   // Clear current results but keep CV/JD
@@ -1279,7 +1279,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                 ),
               ),
             ] else ...[
-              // User proceeded - no buttons shown, just the analysis result
+              // User proceeded - no buttons shown, analysis complete or in progress
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(

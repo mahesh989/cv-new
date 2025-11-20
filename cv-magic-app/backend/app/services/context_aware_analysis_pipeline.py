@@ -879,6 +879,31 @@ class ContextAwareAnalysisPipeline:
             # Hydrate previously extracted skills/matching so UI has baseline data
             self._hydrate_previous_results(company, results)
             
+            # CRITICAL: Perform CV-JD matching if not already present
+            # This is needed because initial analysis stops before this step
+            if not results.cv_jd_matching or not results.cv_jd_matching.get('raw_analysis'):
+                logger.info("🎯 [CONTEXT_AWARE_PIPELINE] Performing CV-JD matching (not found in saved files)")
+                # Load JD data for matching
+                jd_file = self.base_dir / "applied_companies" / company / "jd_original.json"
+                if jd_file.exists():
+                    with open(jd_file, 'r', encoding='utf-8') as f:
+                        jd_data = json.load(f)
+                    
+                    # Perform matching
+                    cv_jd_matching = await self._perform_cv_jd_matching(
+                        context, 
+                        results.cv_skills or {}, 
+                        {'jd_analysis': jd_data},
+                        results
+                    )
+                    if cv_jd_matching:
+                        self._persist_cv_jd_match_results(company, cv_jd_matching)
+                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] CV-JD matching completed and saved")
+                else:
+                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] No JD file found: {jd_file}")
+            else:
+                logger.info("✅ [CONTEXT_AWARE_PIPELINE] Using existing CV-JD matching from files")
+            
             # Step 1: Component Analysis
             component_analysis = await self._run_component_analysis(context, results)
             
