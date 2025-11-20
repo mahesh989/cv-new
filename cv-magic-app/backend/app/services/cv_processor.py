@@ -13,18 +13,30 @@ class CVProcessor:
     
     def extract_text_from_file(self, file_path: Path) -> Dict[str, Any]:
         """Extract text from a CV file"""
+        print("\n" + "="*80)
+        print("🔧 [CV_PROCESSOR] extract_text_from_file() CALLED")
+        print("="*80)
+        print(f"📁 File path: {file_path}")
+        print(f"📄 File exists: {file_path.exists()}")
+        print(f"📊 File suffix: {file_path.suffix}")
+        print("="*80 + "\n")
+        
         try:
             logger.info(f"[CV_PROCESSOR] Processing file: {file_path} (suffix: {file_path.suffix})")
             if file_path.suffix.lower() == '.pdf':
+                print("📝 [CV_PROCESSOR] Detected PDF file - using PDF extraction")
                 logger.info(f"[CV_PROCESSOR] Using PDF extraction for: {file_path}")
                 return self._extract_from_pdf(file_path)
             elif file_path.suffix.lower() == '.docx':
+                print("📝 [CV_PROCESSOR] Detected DOCX file - using DOCX extraction")
                 logger.info(f"[CV_PROCESSOR] Using DOCX extraction for: {file_path}")
                 return self._extract_from_docx(file_path)
             elif file_path.suffix.lower() == '.txt':
+                print("📝 [CV_PROCESSOR] Detected TXT file - using TXT extraction")
                 logger.info(f"[CV_PROCESSOR] Using TXT extraction for: {file_path}")
                 return self._extract_from_txt(file_path)
             else:
+                print(f"❌ [CV_PROCESSOR] Unsupported file type: {file_path.suffix}")
                 logger.warning(f"[CV_PROCESSOR] Unsupported file type: {file_path.suffix}")
                 return {
                     'success': False,
@@ -43,14 +55,21 @@ class CVProcessor:
     
     def _extract_from_pdf(self, file_path: Path) -> Dict[str, Any]:
         """Extract text from PDF file"""
+        print("📝 [CV_PROCESSOR] _extract_from_pdf() called")
         try:
             import PyPDF2
+            print("✅ [CV_PROCESSOR] PyPDF2 imported successfully")
             with open(file_path, 'rb') as file:
                 reader = PyPDF2.PdfReader(file)
+                page_count = len(reader.pages)
+                print(f"📊 [CV_PROCESSOR] PDF has {page_count} pages")
                 text = ""
-                for page in reader.pages:
-                    text += page.extract_text() + "\n"
+                for i, page in enumerate(reader.pages):
+                    page_text = page.extract_text()
+                    text += page_text + "\n"
+                    print(f"📝 [CV_PROCESSOR] Extracted page {i+1}/{page_count}: {len(page_text)} chars")
                 
+                print(f"✅ [CV_PROCESSOR] PDF extraction complete: {len(text)} total characters\n")
                 return {
                     'success': True,
                     'text': text.strip(),
@@ -67,9 +86,13 @@ class CVProcessor:
     
     def _extract_from_docx(self, file_path: Path) -> Dict[str, Any]:
         """Extract text from DOCX file with bullet point preservation"""
+        print("📝 [CV_PROCESSOR] _extract_from_docx() called")
         try:
             from docx import Document
+            print("✅ [CV_PROCESSOR] python-docx imported successfully")
             doc = Document(file_path)
+            para_count = len(doc.paragraphs)
+            print(f"📊 [CV_PROCESSOR] DOCX has {para_count} paragraphs")
             text = ""
             bullet_count = 0
             
@@ -152,6 +175,7 @@ class CVProcessor:
                     text += para_text + "\n"
             
             logger.info(f"[DOCX_PROCESSING] Completed: {bullet_count} bullets detected")
+            print(f"✅ [CV_PROCESSOR] DOCX extraction complete: {len(text)} chars, {bullet_count} bullets\n")
             
             return {
                 'success': True,
@@ -169,10 +193,12 @@ class CVProcessor:
     
     def _extract_from_txt(self, file_path: Path) -> Dict[str, Any]:
         """Extract text from TXT file"""
+        print("📝 [CV_PROCESSOR] _extract_from_txt() called")
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
                 text = file.read()
             
+            print(f"✅ [CV_PROCESSOR] TXT extraction complete: {len(text)} characters\n")
             return {
                 'success': True,
                 'text': text.strip(),

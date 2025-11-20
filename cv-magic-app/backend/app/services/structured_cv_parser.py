@@ -88,28 +88,49 @@ class LLMStructuredCVParser:
         Returns:
             Structured CV dictionary with all sections
         """
+        print("\n" + "="*80)
+        print("🔍 [STRUCTURED_CV_PARSER] parse_cv_content() CALLED")
+        print("="*80)
+        print(f"📊 Input type: {type(cv_data)}")
+        print(f"📊 Input length: {len(str(cv_data))} characters")
+        print(f"👤 User provided: {user is not None}")
+        if user:
+            print(f"👤 User email: {getattr(user, 'email', 'N/A')}")
+        print("="*80 + "\n")
+        
         try:
             # If input is already a dictionary, validate and return
             if isinstance(cv_data, dict) and "personal_information" in cv_data:
+                print("✅ [STRUCTURED_CV_PARSER] CV data is already in structured format - returning as-is")
                 logger.info("CV data is already in structured format")
                 return cv_data
             
             # Convert to string if needed
             cv_text = str(cv_data)
+            print(f"📝 [STRUCTURED_CV_PARSER] Converting to text, length: {len(cv_text)}")
             
             # Use LLM to parse the CV content
+            print("🤖 [STRUCTURED_CV_PARSER] Calling _parse_with_llm()...")
             structured_cv = await self._parse_with_llm(cv_text, user)
+            print("✅ [STRUCTURED_CV_PARSER] _parse_with_llm() completed successfully")
             
             # Add original content preservation (without raw text)
+            print("📋 [STRUCTURED_CV_PARSER] Extracting section headers...")
             structured_cv["original_sections"]["section_headers_found"] = self._extract_section_headers(cv_text)
+            print(f"📋 [STRUCTURED_CV_PARSER] Section headers found: {structured_cv['original_sections']['section_headers_found']}")
             
             # Add metadata
+            print("📊 [STRUCTURED_CV_PARSER] Adding metadata...")
             structured_cv["saved_at"] = datetime.now().isoformat()
             structured_cv["metadata"]["processed_at"] = datetime.now().isoformat()
             structured_cv["metadata"]["content_hash"] = self._generate_content_hash(cv_text)
             structured_cv["metadata"]["quality_score"] = self._calculate_quality_score(structured_cv)
             structured_cv["metadata"]["completeness_score"] = self._calculate_completeness_score(structured_cv)
             structured_cv["metadata"]["parsing_notes"].append("Content-preserving parser used - maintains original formatting")
+            
+            print(f"📊 [STRUCTURED_CV_PARSER] Quality score: {structured_cv['metadata']['quality_score']}")
+            print(f"📊 [STRUCTURED_CV_PARSER] Completeness score: {structured_cv['metadata']['completeness_score']}")
+            print("✅ [STRUCTURED_CV_PARSER] parse_cv_content() completed successfully\n")
             
             return structured_cv
             
@@ -123,15 +144,26 @@ class LLMStructuredCVParser:
 
     async def _parse_with_llm(self, cv_text: str, user: Any = None) -> Dict[str, Any]:
         """Use LLM to parse CV text into structured format"""
+        print("\n" + "="*80)
+        print("🤖 [STRUCTURED_CV_PARSER] _parse_with_llm() CALLED")
+        print("="*80)
+        print(f"📝 CV text length: {len(cv_text)}")
+        print(f"👤 User provided: {user is not None}")
+        print("="*80 + "\n")
+        
         try:
             # Create the parsing prompt
+            print("📝 [STRUCTURED_CV_PARSER] Creating parsing prompt...")
             parsing_prompt = self._create_parsing_prompt(cv_text)
+            print(f"📝 [STRUCTURED_CV_PARSER] Prompt created, length: {len(parsing_prompt)}")
             
             # Get response from AI service
             if not user:
+                print("❌ [STRUCTURED_CV_PARSER] No user provided for AI service call")
                 logger.error("❌ [STRUCTURED_CV_PARSER] No user provided for AI service call")
                 raise ValueError("User context is required for AI operations")
                 
+            print("🤖 [STRUCTURED_CV_PARSER] Calling AI service generate_response()...")
             ai_response = await ai_service.generate_response(
                 prompt=parsing_prompt,
                 user=user,
@@ -139,15 +171,20 @@ class LLMStructuredCVParser:
                 max_tokens=4000,
                 temperature=0.0
             )
+            print(f"✅ [STRUCTURED_CV_PARSER] AI response received, length: {len(ai_response.content)}")
             
             # Parse the JSON response
             try:
+                print("📊 [STRUCTURED_CV_PARSER] Parsing AI response as JSON...")
                 parsed_data = json.loads(ai_response.content.strip())
+                print("✅ [STRUCTURED_CV_PARSER] JSON parsing successful")
                 
                 # Validate and merge with default structure
+                print("🔧 [STRUCTURED_CV_PARSER] Merging with default structure...")
                 structured_cv = self._merge_with_default_structure(parsed_data)
                 structured_cv["metadata"]["ai_model_used"] = ai_service.current_model
                 
+                print(f"✅ [STRUCTURED_CV_PARSER] Successfully parsed CV using {ai_service.current_model}")
                 logger.info(f"Successfully parsed CV using {ai_service.current_model}")
                 return structured_cv
                 
@@ -415,14 +452,26 @@ Return ONLY the JSON object with preserved original content.
 
     def save_structured_cv(self, cv_data: Dict[str, Any], file_path: str) -> bool:
         """Save structured CV to JSON file"""
+        print("\n" + "="*80)
+        print("💾 [STRUCTURED_CV_PARSER] save_structured_cv() CALLED")
+        print("="*80)
+        print(f"📁 Target file path: {file_path}")
+        print(f"📊 Data keys: {list(cv_data.keys())}")
+        print("="*80 + "\n")
+        
         try:
             # Ensure directory exists
+            print(f"📁 [STRUCTURED_CV_PARSER] Creating directory: {Path(file_path).parent}")
             Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             
             # Save to file
+            print(f"💾 [STRUCTURED_CV_PARSER] Writing JSON to: {file_path}")
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(cv_data, f, indent=2, ensure_ascii=False)
             
+            file_size = Path(file_path).stat().st_size
+            print(f"✅ [STRUCTURED_CV_PARSER] Successfully saved structured CV")
+            print(f"📊 [STRUCTURED_CV_PARSER] File size: {file_size} bytes")
             logger.info(f"Successfully saved structured CV to {file_path}")
             return True
             

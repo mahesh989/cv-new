@@ -26,6 +26,11 @@ router = APIRouter(prefix="/api", tags=["Flutter Compatible"])
 @router.post("/upload-cv")
 async def upload_cv_flutter(file: UploadFile = File(...)):
     """Upload CV endpoint compatible with Flutter app"""
+    print("\n" + "="*80)
+    print("🚀 [FLUTTER_COMPAT] /api/upload-cv ENDPOINT CALLED")
+    print("="*80)
+    print(f"📄 Filename: {file.filename}")
+    print("="*80 + "\n")
     
     if not file.filename:
         return JSONResponse(

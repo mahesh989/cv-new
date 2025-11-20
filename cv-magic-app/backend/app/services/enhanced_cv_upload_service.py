@@ -60,21 +60,35 @@ class EnhancedCVUploadService:
         Returns:
             Dict containing upload results only
         """
+        print("\n" + "="*80)
+        print("📎 [CV_UPLOAD_SERVICE] upload_cv_only() CALLED")
+        print("="*80)
+        print(f"📄 Filename: {cv_file.filename}")
+        print(f"👤 User email: {self.user_email}")
+        print("="*80 + "\n")
         
         # Validate file
+        print("🔍 [CV_UPLOAD_SERVICE] Validating file...")
         validation_result = await self._validate_cv_file(cv_file)
         if not validation_result["valid"]:
+            print(f"❌ [CV_UPLOAD_SERVICE] Validation failed: {validation_result['error']}")
             raise HTTPException(status_code=400, detail=validation_result["error"])
+        print("✅ [CV_UPLOAD_SERVICE] File validation passed")
         
         try:
             # Read file content
+            print("📝 [CV_UPLOAD_SERVICE] Reading file content...")
             file_content = await cv_file.read()
             file_path = self.upload_dir / cv_file.filename
+            print(f"📊 [CV_UPLOAD_SERVICE] File size: {len(file_content)} bytes")
+            print(f"📁 [CV_UPLOAD_SERVICE] Target path: {file_path}")
             
             # Save original file
+            print("💾 [CV_UPLOAD_SERVICE] Saving original file...")
             with open(file_path, "wb") as buffer:
                 buffer.write(file_content)
             
+            print(f"✅ [CV_UPLOAD_SERVICE] CV file uploaded successfully")
             logger.info(f"CV file uploaded: {cv_file.filename} ({len(file_content)} bytes)")
             
             return {
@@ -116,29 +130,51 @@ class EnhancedCVUploadService:
         Note:
             Always saves as original_cv.json (replaces existing file)
         """
+        print("\n" + "="*80)
+        print("🚀 [CV_UPLOAD_SERVICE] upload_and_process_cv() CALLED")
+        print("="*80)
+        print(f"📄 Filename: {cv_file.filename}")
+        print(f"👤 User email: {self.user_email}")
+        print(f"🎯 User provided: {user is not None}")
+        print(f"🎯 User ID: {user_id}")
+        print(f"🎯 Title: {title}")
+        print(f"🎯 Description: {description}")
+        print("="*80 + "\n")
         
         # Validate file
+        print("🔍 [CV_UPLOAD_SERVICE] Validating file...")
         validation_result = await self._validate_cv_file(cv_file)
         if not validation_result["valid"]:
+            print(f"❌ [CV_UPLOAD_SERVICE] Validation failed: {validation_result['error']}")
             raise HTTPException(status_code=400, detail=validation_result["error"])
+        print("✅ [CV_UPLOAD_SERVICE] File validation passed")
         
         try:
             # Read file content
+            print("📝 [CV_UPLOAD_SERVICE] Reading file content...")
             file_content = await cv_file.read()
             file_path = self.upload_dir / cv_file.filename
+            print(f"📊 [CV_UPLOAD_SERVICE] File size: {len(file_content)} bytes")
+            print(f"📁 [CV_UPLOAD_SERVICE] Upload path: {file_path}")
             
             # Save original file
+            print("💾 [CV_UPLOAD_SERVICE] Saving uploaded file...")
             with open(file_path, "wb") as buffer:
                 buffer.write(file_content)
+            print(f"✅ [CV_UPLOAD_SERVICE] File saved to: {file_path}")
             
             logger.info(f"CV file saved: {cv_file.filename} ({len(file_content)} bytes)")
             
             # Extract text content
+            print("🔍 [CV_UPLOAD_SERVICE] Extracting text content...")
             extraction_result = self._extract_text_content(file_path)
             if not extraction_result["success"]:
+                print(f"❌ [CV_UPLOAD_SERVICE] Text extraction failed: {extraction_result['error']}")
                 raise HTTPException(status_code=500, detail=f"Text extraction failed: {extraction_result['error']}")
+            print(f"✅ [CV_UPLOAD_SERVICE] Text extracted: {len(extraction_result['text'])} characters")
             
             # Parse into structured format
+            print("🔧 [CV_UPLOAD_SERVICE] Parsing to structured format...")
             structured_cv = await self._parse_to_structured_format(
                 extraction_result["text"],
                 cv_file.filename,
@@ -147,13 +183,19 @@ class EnhancedCVUploadService:
                 user_id,
                 user
             )
+            print("✅ [CV_UPLOAD_SERVICE] Structured parsing completed")
             
             # Validate structured CV
+            print("🔍 [CV_UPLOAD_SERVICE] Validating structured CV...")
             validation_report = self.structured_parser.validate_cv_structure(structured_cv)
+            print(f"✅ [CV_UPLOAD_SERVICE] Validation complete - Quality: {validation_report['quality_score']}, Completeness: {validation_report['completeness_score']}")
             
             # Save structured CV as original_cv.json (always replaces existing)
+            print("💾 [CV_UPLOAD_SERVICE] Saving structured CV...")
             save_result = self._save_structured_cv(structured_cv, True, cv_file.filename)
             
+            print(f"✅ [CV_UPLOAD_SERVICE] CV processed successfully: {cv_file.filename}")
+            print(f"📁 [CV_UPLOAD_SERVICE] Saved to: {save_result['file_path']}\n")
             logger.info(f"CV processed successfully: {cv_file.filename}")
             
             return {
@@ -356,10 +398,22 @@ class EnhancedCVUploadService:
 
     def _extract_text_content(self, file_path: Path) -> Dict[str, Any]:
         """Extract text content from CV file"""
+        print("\n" + "="*80)
+        print("📝 [CV_UPLOAD_SERVICE] _extract_text_content() CALLED")
+        print("="*80)
+        print(f"📁 File path: {file_path}")
+        print(f"📄 File exists: {file_path.exists()}")
+        print(f"📊 File extension: {file_path.suffix}")
+        print("="*80 + "\n")
+        
         try:
+            print("🔧 [CV_UPLOAD_SERVICE] Calling cv_processor.extract_text_from_file()...")
             result = self.cv_processor.extract_text_from_file(file_path)
             
             if result['success']:
+                print(f"✅ [CV_UPLOAD_SERVICE] Text extraction successful")
+                print(f"📊 [CV_UPLOAD_SERVICE] Extracted {len(result['text'])} characters")
+                print(f"📊 [CV_UPLOAD_SERVICE] Method: {result.get('file_type', 'unknown')}\n")
                 logger.info(f"Text extracted successfully: {len(result['text'])} characters")
                 return {
                     "success": True,
@@ -368,6 +422,7 @@ class EnhancedCVUploadService:
                     "method": result.get('file_type', 'unknown')
                 }
             else:
+                print(f"❌ [CV_UPLOAD_SERVICE] Text extraction failed: {result.get('error', 'Unknown error')}\n")
                 return {"success": False, "error": result.get('error', 'Unknown extraction error')}
                 
         except Exception as e:
@@ -384,44 +439,72 @@ class EnhancedCVUploadService:
         user: Any = None
     ) -> Dict[str, Any]:
         """Parse text content into structured CV format"""
-        print(f"🔍 [DEBUG] _parse_to_structured_format called with user: {user is not None}")
+        print("\n" + "="*80)
+        print("🔧 [CV_UPLOAD_SERVICE] _parse_to_structured_format() CALLED")
+        print("="*80)
+        print(f"📄 Filename: {filename}")
+        print(f"📊 Text length: {len(text_content)} characters")
+        print(f"👤 User provided: {user is not None}")
+        if user:
+            print(f"👤 User email: {getattr(user, 'email', 'N/A')}")
+        print(f"🎯 Title: {title}")
+        print(f"🎯 Description: {description}")
+        print(f"🎯 User ID: {user_id}")
+        print("="*80 + "\n")
+        
         try:
             # Initialize AI service for this user if not already done
+            print("🤖 [CV_UPLOAD_SERVICE] Checking AI service initialization...")
             logger.info(f"🔍 [CV_UPLOAD] Checking user parameter: {user is not None}")
             if user:
+                print(f"👤 [CV_UPLOAD_SERVICE] User email: {user.email}")
                 logger.info(f"🔍 [CV_UPLOAD] User email: {user.email}")
                 from app.ai.ai_service import ai_service
+                print("🔧 [CV_UPLOAD_SERVICE] Initializing AI service...")
                 logger.info(f"🔍 [CV_UPLOAD] About to initialize AI service...")
                 ai_service.initialize_for_user(user)
+                print(f"✅ [CV_UPLOAD_SERVICE] AI service initialized for user {user.email}")
                 logger.info(f"🔄 [CV_UPLOAD] Initialized AI service for user {user.email}")
                 
                 # Auto-select the first available provider if none is set
+                print("🔍 [CV_UPLOAD_SERVICE] Checking AI provider...")
                 if ai_service._providers and not ai_service.config.get_current_provider():
                     first_provider = list(ai_service._providers.keys())[0]
+                    print(f"🔄 [CV_UPLOAD_SERVICE] Auto-selecting provider: {first_provider}")
                     success = ai_service.switch_provider(first_provider, "gpt-3.5-turbo")
                     if success:
+                        print(f"✅ [CV_UPLOAD_SERVICE] Provider selected: {first_provider}")
                         logger.info(f"✅ [CV_UPLOAD] Auto-selected provider: {first_provider}")
                     else:
+                        print(f"⚠️ [CV_UPLOAD_SERVICE] Failed to select provider: {first_provider}")
                         logger.warning(f"⚠️ [CV_UPLOAD] Failed to auto-select provider: {first_provider}")
+                else:
+                    print(f"📊 [CV_UPLOAD_SERVICE] Current provider: {ai_service.config.get_current_provider()}")
             else:
+                print("⚠️ [CV_UPLOAD_SERVICE] No user provided for AI service initialization")
                 logger.warning(f"⚠️ [CV_UPLOAD] No user provided for AI service initialization")
             # Check if text content is already structured JSON
+            print("🔍 [CV_UPLOAD_SERVICE] Checking if content is already structured JSON...")
             try:
                 existing_data = json.loads(text_content)
                 if isinstance(existing_data, dict) and "personal_information" in existing_data:
                     # Already structured, just validate and clean
+                    print("✅ [CV_UPLOAD_SERVICE] Content is already in structured format")
                     structured_cv = await self.structured_parser.parse_cv_content(existing_data, user)
                     logger.info("CV was already in structured format")
                 else:
                     # JSON but not our structure, parse as text
+                    print("🔧 [CV_UPLOAD_SERVICE] Content is JSON but not structured format - parsing...")
                     structured_cv = await self.structured_parser.parse_cv_content(text_content, user)
                     logger.info("CV parsed from JSON content")
             except json.JSONDecodeError:
                 # Regular text content, parse it
+                print("📝 [CV_UPLOAD_SERVICE] Content is raw text - parsing with LLM...")
                 structured_cv = await self.structured_parser.parse_cv_content(text_content, user)
                 logger.info("CV parsed from raw text content")
             
             # Add metadata
+            print("📊 [CV_UPLOAD_SERVICE] Adding metadata to structured CV...")
             structured_cv["metadata"] = {
                 "source_filename": filename,
                 "processed_at": datetime.now().isoformat(),
@@ -431,6 +514,7 @@ class EnhancedCVUploadService:
                 "user_id": user_id or ""
             }
             
+            print("✅ [CV_UPLOAD_SERVICE] _parse_to_structured_format() completed successfully\n")
             return structured_cv
             
         except Exception as e:
@@ -448,11 +532,21 @@ class EnhancedCVUploadService:
         filename: str
     ) -> Dict[str, Any]:
         """Save structured CV to file - always as original_cv.json (replaces if exists)"""
+        print("\n" + "="*80)
+        print("💾 [CV_UPLOAD_SERVICE] _save_structured_cv() CALLED")
+        print("="*80)
+        print(f"📄 Source filename: {filename}")
+        print(f"🎯 Save as original: {save_as_original}")
+        print(f"📁 Target path (original_cv.json): {self.original_cv_json_path}")
+        print("="*80 + "\n")
+        
         try:
             # Always save as original_cv.json (same logic as original_cv.txt)
             file_path = self.original_cv_json_path
+            print(f"📁 [CV_UPLOAD_SERVICE] Using file path: {file_path}")
             
             # Add metadata similar to the txt format (modify a copy to avoid changing original)
+            print("📊 [CV_UPLOAD_SERVICE] Adding metadata...")
             cv_with_metadata = structured_cv.copy()
             cv_with_metadata["metadata"] = {
                 "source_filename": filename,
@@ -462,7 +556,9 @@ class EnhancedCVUploadService:
             }
             
             # Save structured CV (replaces existing file)
+            print(f"💾 [CV_UPLOAD_SERVICE] Calling structured_parser.save_structured_cv()...")
             self.structured_parser.save_structured_cv(cv_with_metadata, str(file_path))
+            print(f"✅ [CV_UPLOAD_SERVICE] Structured CV saved as original_cv.json: {file_path}")
             logger.info(f"Structured CV saved as original_cv.json: {file_path} (replaced existing)")
             
             return {

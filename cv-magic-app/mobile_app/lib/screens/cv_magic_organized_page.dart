@@ -18,6 +18,8 @@ import '../services/api_service.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
 import '../widgets/skills_comparison_card.dart';
+import '../widgets/detailed_skills_display_card.dart';
+import '../widgets/analyze_match_card.dart';
 
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
@@ -280,6 +282,102 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                     const SizedBox(height: 16),
                   ],
                 );
+              },
+            ),
+
+            // Detailed Skills Display (shown AFTER user clicks "Proceed")
+            AnimatedBuilder(
+              animation: _skillsController,
+              builder: (context, _) {
+                debugPrint('🔍 [DETAILED_SKILLS] AnimatedBuilder called');
+                debugPrint('   hasResults: ${_skillsController.hasResults}');
+                debugPrint('   waitingForUserDecision: ${_skillsController.waitingForUserDecision}');
+                debugPrint('   cvSkills != null: ${_skillsController.cvSkills != null}');
+                debugPrint('   jdSkills != null: ${_skillsController.jdSkills != null}');
+                
+                // Show when full analysis has started (user clicked Proceed) and we have skills data
+                if (_skillsController.hasResults && 
+                    !_skillsController.waitingForUserDecision &&
+                    _skillsController.cvSkills != null &&
+                    _skillsController.jdSkills != null) {
+                  
+                  debugPrint('✅ [DETAILED_SKILLS] Showing DetailedSkillsDisplayCard');
+                  return Column(
+                    children: [
+                      DetailedSkillsDisplayCard(
+                        cvSkills: _skillsController.cvSkills!.toJson(),
+                        jdSkills: _skillsController.jdSkills!.toJson(),
+                        cvComprehensiveAnalysis: _skillsController.cvComprehensiveAnalysis,
+                        jdComprehensiveAnalysis: _skillsController.jdComprehensiveAnalysis,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }
+                debugPrint('❌ [DETAILED_SKILLS] Not showing (conditions not met)');
+                return const SizedBox.shrink();
+              },
+            ),
+
+            // Analyze Match Card (shown AFTER Detailed Skills when data is ready)
+            AnimatedBuilder(
+              animation: _skillsController,
+              builder: (context, _) {
+                debugPrint('🔍 [ANALYZE_MATCH_CARD] AnimatedBuilder called');
+                debugPrint('   hasAnalyzeMatch: ${_skillsController.hasAnalyzeMatch}');
+                debugPrint('   analyzeMatch != null: ${_skillsController.analyzeMatch != null}');
+                debugPrint('   showAnalyzeMatch: ${_skillsController.showAnalyzeMatch}');
+                
+                // Show when we have analyze match data
+                if (_skillsController.hasAnalyzeMatch &&
+                    _skillsController.analyzeMatch != null) {
+                  
+                  debugPrint('✅ [ANALYZE_MATCH_CARD] Showing AnalyzeMatchCard');
+                  return Column(
+                    children: [
+                      AnalyzeMatchCard(
+                        rawAnalysis: _skillsController.analyzeMatchRawAnalysis ?? '',
+                        companyName: _skillsController.analyzeMatchCompanyName,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }
+                
+                // Show loading state if showAnalyzeMatch flag is true but data not ready yet
+                if (_skillsController.showAnalyzeMatch && !_skillsController.hasAnalyzeMatch) {
+                  debugPrint('⏳ [ANALYZE_MATCH_CARD] Showing loading state');
+                  return Column(
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Generating analyze match results...',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }
+                
+                debugPrint('❌ [ANALYZE_MATCH_CARD] Not showing (conditions not met)');
+                return const SizedBox.shrink();
               },
             ),
 

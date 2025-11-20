@@ -51,6 +51,13 @@ async def upload_cv(
     description: Optional[str] = Form(None)
 ):
     """Upload CV file and extract text content"""
+    print("\n" + "="*80)
+    print("🚀 [CV_ENHANCED] /cv-enhanced/upload ENDPOINT CALLED")
+    print("="*80)
+    print(f"📄 Filename: {cv_file.filename}")
+    print(f"🎯 Title: {title}")
+    print(f"🎯 Description: {description}")
+    print("="*80 + "\n")
     
     # Validate file type
     allowed_extensions = {'.pdf', '.docx', '.txt'}

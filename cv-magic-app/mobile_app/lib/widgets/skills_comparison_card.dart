@@ -14,14 +14,20 @@ class SkillsComparisonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Extract skills lists
-    final cvTechnical = List<String>.from(cvSkills['technical_skills'] ?? []);
-    final cvSoft = List<String>.from(cvSkills['soft_skills'] ?? []);
-    final cvDomain = List<String>.from(cvSkills['domain_keywords'] ?? []);
+    // Extract skills lists and sort alphabetically (case-insensitive)
+    final cvTechnical = List<String>.from(cvSkills['technical_skills'] ?? [])
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final cvSoft = List<String>.from(cvSkills['soft_skills'] ?? [])
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final cvDomain = List<String>.from(cvSkills['domain_keywords'] ?? [])
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     
-    final jdTechnical = List<String>.from(jdSkills['technical_skills'] ?? []);
-    final jdSoft = List<String>.from(jdSkills['soft_skills'] ?? []);
-    final jdDomain = List<String>.from(jdSkills['domain_keywords'] ?? []);
+    final jdTechnical = List<String>.from(jdSkills['technical_skills'] ?? [])
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final jdSoft = List<String>.from(jdSkills['soft_skills'] ?? [])
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final jdDomain = List<String>.from(jdSkills['domain_keywords'] ?? [])
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
     final cvTotal = cvTechnical.length + cvSoft.length + cvDomain.length;
     final jdTotal = jdTechnical.length + jdSoft.length + jdDomain.length;

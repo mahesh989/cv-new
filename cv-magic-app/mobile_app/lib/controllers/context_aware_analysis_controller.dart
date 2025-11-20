@@ -325,8 +325,12 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   /// Internal method to continue full analysis
   Future<void> _continueFullAnalysis({bool includeTailoring = true}) async {
     try {
-      _setLoading();
+      // Don't call _setLoading() to keep initial results visible
+      // Just update the state to indicate we're processing
+      _state = ContextAwareAnalysisState.loading;
       _waitingForUserDecision = false;
+      // Keep _showCVContext true so initial results remain visible
+      notifyListeners();
 
       print('🚀 [CONTEXT_AWARE_CONTROLLER] Continuing full analysis...');
       _result = await ContextAwareAnalysisService.continueFullAnalysis(
