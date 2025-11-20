@@ -353,16 +353,27 @@ class ContextAwareAnalysisController extends ChangeNotifier {
         // Start progressive display
         _startProgressiveDisplay();
       } else {
+        // STOP processing on error - don't continue or poll
         String errorMessage = _result!.errors.isNotEmpty
             ? _result!.errors.first
             : 'Full analysis failed';
         _setError(errorMessage);
         _showNotification(errorMessage, isError: true);
+        debugPrint('❌ [CONTEXT_AWARE_CONTROLLER] Analysis failed, stopping all processing');
+        // Cancel any timers to prevent further attempts
+        _progressiveTimer?.cancel();
+        _progressiveTimer = null;
+        return; // STOP here, don't continue
       }
     } catch (e) {
+      // STOP processing on exception
       _setError('Failed to continue full analysis: $e');
       _showNotification('Failed to continue full analysis: $e', isError: true);
       debugPrint('❌ [CONTEXT_AWARE_CONTROLLER] Error continuing: $e');
+      // Cancel any timers
+      _progressiveTimer?.cancel();
+      _progressiveTimer = null;
+      return; // STOP here, don't continue
     }
   }
 
