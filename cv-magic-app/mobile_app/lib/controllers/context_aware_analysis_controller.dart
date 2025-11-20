@@ -225,7 +225,15 @@ class ContextAwareAnalysisController extends ChangeNotifier {
 
       if (_initialResult!.success) {
         _executionDuration = _initialResult!.processingTime;
+        
+        // CRITICAL: Use corrected company name from backend if provided
+        if (_initialResult!.company != null && _initialResult!.company!.isNotEmpty) {
+          debugPrint('✅ [CONTEXT_AWARE_CONTROLLER] Using corrected company name: ${_initialResult!.company}');
+          _currentCompany = _initialResult!.company!;
+        }
+        
         debugPrint('✅ [CONTEXT_AWARE_CONTROLLER] Initial analysis successful');
+        debugPrint('   Company (final): $_currentCompany');
         debugPrint('   requiresUserDecision: ${_initialResult!.requiresUserDecision}');
         debugPrint('   analyzeMatchDecision: ${_initialResult!.analyzeMatchDecision != null}');
         

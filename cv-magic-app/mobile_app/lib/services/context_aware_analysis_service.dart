@@ -695,6 +695,7 @@ class CVRecommendation {
 /// Result model for initial analysis (stops after analyze match)
 class InitialAnalysisResult {
   final bool success;
+  final String? company;  // Corrected company name from backend
   final bool requiresUserDecision;
   final AnalyzeMatchDecision? analyzeMatchDecision;
   final InitialAnalysisResults? results;
@@ -704,6 +705,7 @@ class InitialAnalysisResult {
 
   InitialAnalysisResult({
     required this.success,
+    this.company,
     required this.requiresUserDecision,
     this.analyzeMatchDecision,
     this.results,
@@ -715,6 +717,7 @@ class InitialAnalysisResult {
   factory InitialAnalysisResult.fromJson(Map<String, dynamic> json) {
     return InitialAnalysisResult(
       success: json['success'] ?? false,
+      company: json['company'],  // Get corrected company name
       requiresUserDecision: json['requires_user_decision'] ?? false,
       analyzeMatchDecision: json['analyze_match_decision'] != null
           ? AnalyzeMatchDecision.fromJson(

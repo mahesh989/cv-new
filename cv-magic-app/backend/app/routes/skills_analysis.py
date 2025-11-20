@@ -1302,6 +1302,7 @@ async def initial_analysis(
             # Prepare response
             response_data = {
                 "success": True,
+                "company": company,  # CRITICAL: Return the corrected company name to frontend
                 "requires_user_decision": results.requires_user_decision,
                 "analyze_match_decision": results.analyze_match_decision,
                 "processing_time": results.processing_time,
@@ -1377,12 +1378,26 @@ async def continue_full_analysis(
         except Exception:
             data = {}
         include_tailoring = data.get("include_tailoring", True)
+        jd_url = data.get("jd_url", "")
+        user_email = current_user.email
         
         logger.info(f"🚀 Continue full analysis request: Company={company}, IncludeTailoring={include_tailoring}")
         
+        # CRITICAL: Resolve company name if it looks URL-extracted
+        # This ensures we find files saved under the actual company name
+        if is_url_extracted_company(company) and jd_url:
+            logger.info(f"🔍 Company '{company}' looks URL-extracted, resolving to actual company name...")
+            saved_company = await get_company_from_saved_job_info(jd_url, user_email)
+            if saved_company:
+                original_company = company
+                company = saved_company['company_slug']
+                logger.info(f"✅ Resolved {original_company} -> {company} ({saved_company['company_name']})")
+            else:
+                logger.warning(f"⚠️ Could not resolve company name, trying with provided: {company}")
+        
         # Continue full analysis pipeline
         try:
-            pipeline = ContextAwareAnalysisPipeline(user_email=current_user.email)
+            pipeline = ContextAwareAnalysisPipeline(user_email=user_email)
             results = await pipeline.continue_from_analyze_match(
                 company=company,
                 include_tailoring=include_tailoring
