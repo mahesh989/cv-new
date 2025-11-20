@@ -635,8 +635,8 @@ class ATSCategory2 {
     final result = ATSCategory2(
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
       maxPoints: (json['max_points'] as num?)?.toDouble() ?? 35.0,
-      technicalSkillsComponent: ATSCategory2Component.fromJson(techSkillsJson),
-      experienceFitComponent: ATSCategory2Component.fromJson(expFitJson),
+      technicalSkillsComponent: ATSCategory2Component.fromJson(techSkillsJson, defaultMaxPoints: 22.0),
+      experienceFitComponent: ATSCategory2Component.fromJson(expFitJson, defaultMaxPoints: 13.0),
     );
     
     debugPrint('✅ [CATEGORY2] Parsed: score=${result.score}/${result.maxPoints}, tech=${result.technicalSkillsComponent.score}/22, exp=${result.experienceFitComponent.score}/13');
@@ -665,15 +665,19 @@ class ATSCategory2Component {
     required this.average,
   });
 
-  factory ATSCategory2Component.fromJson(Map<String, dynamic> json) {
+  factory ATSCategory2Component.fromJson(
+    Map<String, dynamic> json, {
+    double? defaultMaxPoints,
+  }) {
     debugPrint('🔍 [CATEGORY2_COMPONENT] Parsing component');
     debugPrint('   score: ${json['score']}');
     debugPrint('   max_points: ${json['max_points']}');
     debugPrint('   average: ${json['average']}');
+    debugPrint('   defaultMaxPoints: $defaultMaxPoints');
     
     final result = ATSCategory2Component(
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
-      maxPoints: (json['max_points'] as num?)?.toDouble() ?? 0.0,
+      maxPoints: (json['max_points'] as num?)?.toDouble() ?? defaultMaxPoints ?? 0.0,
       average: (json['average'] as num?)?.toDouble() ?? 0.0,
     );
     

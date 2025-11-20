@@ -780,40 +780,63 @@ class _ContextAwareAnalysisScreenState
                 ),
               ),
             ] else ...[
-              // Status indicator when decision has been made
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      controller.showAnalysisResults
-                          ? Icons.check_circle
-                          : Icons.hourglass_empty,
-                      color: controller.showAnalysisResults
-                          ? Colors.green.shade600
-                          : Colors.orange.shade600,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        controller.showAnalysisResults
-                            ? '✅ Full analysis completed'
-                            : '⏳ Full analysis in progress...',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade800,
-                        ),
+              // Show "Analyze Another Job" button if user skipped (no full analysis results)
+              // Show status indicator if user proceeded (full analysis in progress or completed)
+              if (!controller.showAnalysisResults) ...[
+                // User skipped - show "Analyze Another Job" button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      controller.clearResults();
+                      _jdUrlController.clear();
+                      _companyController.clear();
+                      setState(() {
+                        _isRerun = false;
+                      });
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Analyze Another Job'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ] else ...[
+                // User proceeded - show status indicator
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green.shade600,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '✅ Full analysis completed',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ],
         ),

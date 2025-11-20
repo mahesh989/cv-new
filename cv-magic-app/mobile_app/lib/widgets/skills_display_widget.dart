@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
-import 'ats_score_widget_with_progress_bars.dart';
+import 'ats_score_display_card.dart';
 import 'ai_recommendations_widget.dart';
 import '../utils/preextracted_parser.dart';
 
@@ -291,93 +291,52 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // Enhanced ATS Score Widget with Pie Chart and Progress Bars - Show with progressive loading (moved before AI-Powered Skills Analysis)
+          // Enhanced ATS Score Widget - Show with progressive loading
           if (controller.showATSLoading || controller.showATSResults) ...[
             Builder(
               builder: (context) {
-                debugPrint(
-                  '🔍 [SKILLS_DISPLAY] ===== ATS SECTION BUILD =====',
-                );
+                debugPrint('🔍 [SKILLS_DISPLAY] ===== ATS SECTION BUILD =====');
                 debugPrint('   showATSLoading: ${controller.showATSLoading}');
                 debugPrint('   showATSResults: ${controller.showATSResults}');
                 debugPrint('   hasATSResult: ${controller.hasATSResult}');
-                debugPrint(
-                    '   controller.result is null: ${controller.result == null}');
-                debugPrint(
-                    '   controller.result?.atsResult is null: ${controller.result?.atsResult == null}');
-                debugPrint(
-                    '   controller.atsResult is null: ${controller.atsResult == null}');
+                debugPrint('   atsResult: ${controller.atsResult != null}');
                 if (controller.atsResult != null) {
                   debugPrint(
-                      '   ATS Score: ${controller.atsResult!.finalATSScore}');
+                      '   finalATSScore: ${controller.atsResult!.finalATSScore}');
+                  debugPrint(
+                      '   categoryStatus: ${controller.atsResult!.categoryStatus}');
+                  debugPrint(
+                      '   breakdown baseScore: ${controller.atsResult!.breakdown.baseScore}');
+                  debugPrint(
+                      '   breakdown bonusPoints: ${controller.atsResult!.breakdown.bonusPoints}');
                 }
-                debugPrint(
-                    '   Condition check: showATSLoading || showATSResults = ${controller.showATSLoading || controller.showATSResults}');
-                debugPrint(
-                    '   Condition check: showATSResults && hasATSResult = ${controller.showATSResults && controller.hasATSResult}');
 
-                // Show loading state if ATS should show but results aren't available yet
+                // Show loading state
                 if (controller.showATSLoading && !controller.showATSResults) {
                   debugPrint('   → Showing ATS loading state');
                   return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.orange.shade600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Generating enhanced ATS analysis...',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: const ATSScoreDisplayCard(isLoading: true),
+                  );
+                }
+
+                // Show actual ATS results
+                if (controller.showATSResults && controller.hasATSResult) {
+                  debugPrint('   → ✅ RENDERING ATSScoreDisplayCard');
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: ATSScoreDisplayCard(
+                      atsResult: controller.atsResult,
+                      isLoading: false,
                     ),
                   );
                 }
 
-                // Show actual ATS results when available
-                if (controller.showATSResults && controller.hasATSResult) {
-                  debugPrint('   → ✅ RENDERING ATSScoreWidgetWithProgressBars');
-                  debugPrint(
-                      '      showATSResults: ${controller.showATSResults}');
-                  debugPrint('      hasATSResult: ${controller.hasATSResult}');
-                  debugPrint(
-                      '      atsResult: ${controller.atsResult != null}');
-                  if (controller.atsResult != null) {
-                    debugPrint(
-                        '      Final Score: ${controller.atsResult!.finalATSScore}');
-                  }
-                  return ATSScoreWidgetWithProgressBars(controller: controller);
-                } else {
-                  debugPrint(
-                      '   → ❌ NOT RENDERING ATS Widget - conditions not met:');
-                  debugPrint(
-                      '      showATSResults: ${controller.showATSResults}');
-                  debugPrint('      hasATSResult: ${controller.hasATSResult}');
-                  debugPrint('      Both must be true to render widget');
-                }
-
+                debugPrint(
+                    '   → ❌ NOT RENDERING ATS Widget - conditions not met');
+                debugPrint(
+                    '      showATSResults: ${controller.showATSResults}');
+                debugPrint('      hasATSResult: ${controller.hasATSResult}');
                 return const SizedBox.shrink();
               },
             ),

@@ -619,9 +619,11 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     debugPrint('   Setting _showPreextractedComparisonDisplay: $_showPreextractedComparisonDisplay');
     
     final hasATS = _displayResult?.atsResult != null;
+    debugPrint('   hasATS: $hasATS');
     if (hasATS) {
+      debugPrint('   atsResult.finalATSScore: ${_displayResult!.atsResult!.finalATSScore}');
       _showATSResults = true;
-      debugPrint('   Setting _showATSResults: true');
+      debugPrint('   ✅ Setting _showATSResults = true');
     }
     
     final hasAI = _displayResult?.aiRecommendation?.hasContent ?? false;
