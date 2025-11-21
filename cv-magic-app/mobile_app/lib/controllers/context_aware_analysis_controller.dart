@@ -832,7 +832,16 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     }
     
     // AI Recommendations
-    final hasAI = _displayResult!.aiRecommendation?.hasContent ?? false;
+    final aiRec = _displayResult!.aiRecommendation;
+    final hasAI = aiRec?.hasContent ?? false;
+    print('   🔍 [AI_DEBUG] Checking AI recommendation:');
+    print('      aiRecommendation != null: ${aiRec != null}');
+    if (aiRec != null) {
+      print('      content length: ${aiRec.content.length}');
+      print('      content trimmed length: ${aiRec.content.trim().length}');
+      print('      hasContent: ${aiRec.hasContent}');
+      print('      isEmpty: ${aiRec.isEmpty}');
+    }
     print('   hasAI: $hasAI');
     if (hasAI) {
       _showAIRecommendationLoading = false;
