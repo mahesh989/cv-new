@@ -406,30 +406,101 @@ class ATSRecommendationService:
         return match_summary
     
     def _extract_component_summary(self, component_entries: List[Dict]) -> Dict[str, Any]:
-        """Extract clean component summary (no redundant analysis text)"""
+        """Extract structured component summary aligned with prompt expectations"""
+        
+        def _to_float(value: Any) -> float:
+            try:
+                if value is None:
+                    return 0.0
+                return float(value)
+            except (ValueError, TypeError):
+                return 0.0
+        
         if not component_entries:
             return {
-                "skills_relevance": 0,
-                "experience_alignment": 0,
-                "role_similarity": 0,
-                "seniority_match": 0,
-                "industry_fit": 0
+                "technical": {"score": 0.0, "core_match": 0.0, "stack_fit": 0.0, "strengths": [], "gaps": []},
+                "skills": {"score": 0.0, "business_readiness": 0.0, "strengths": [], "gaps": []},
+                "experience": {
+                    "alignment_score": 0.0,
+                    "years": 0.0,
+                    "corporate_years": 0.0,
+                    "jd_required_years": 0.0,
+                    "cv_role_level": "Unknown",
+                    "jd_role_level": "Unknown",
+                    "strengths": [],
+                    "gaps": []
+                },
+                "seniority": {
+                    "score": 0.0,
+                    "cv_level": "Unknown",
+                    "jd_level": "Unknown",
+                    "experience_match_percentage": 0.0,
+                    "responsibility_fit": 0.0
+                },
+                "industry": {
+                    "alignment_score": 0.0,
+                    "cv_industry": "Unknown",
+                    "jd_industry": "Unknown",
+                    "transition_difficulty": "UNKNOWN",
+                    "domain_overlap_percentage": 0.0,
+                    "stakeholder_fit_score": 0.0
+                },
+                "raw_scores": {}
             }
         
         latest_entry = component_entries[-1]
+        component_analyses = latest_entry.get("component_analyses", {})
         extracted_scores = latest_entry.get("extracted_scores", {})
         
-        return {
-            "skills_relevance": extracted_scores.get("skills_relevance", 0),
-            "experience_alignment": extracted_scores.get("experience_alignment", 0),
-            "role_similarity": extracted_scores.get("role_similarity", 0),
-            "seniority_match": extracted_scores.get("seniority_match", 0),
-            "industry_fit": extracted_scores.get("industry_fit", 0),
-            "required_skills_coverage": extracted_scores.get("required_skills_coverage", 0),
-            "tech_stack_similarity": extracted_scores.get("tech_stack_similarity", 0),
-            "business_readiness": extracted_scores.get("business_readiness", 0),
-            "industry_transition_fit": extracted_scores.get("industry_transition_fit", 0)
-            }
+        technical_analysis = component_analyses.get("technical", {}).get("technical_analysis", {})
+        skills_analysis = component_analyses.get("skills", {})
+        experience_analysis = component_analyses.get("experience", {}).get("experience_analysis", {})
+        seniority_analysis = component_analyses.get("seniority", {}).get("seniority_analysis", {})
+        industry_analysis = component_analyses.get("industry", {}).get("industry_analysis", {})
+        
+        summary = {
+            "technical": {
+                "score": _to_float(technical_analysis.get("technical_depth_score", extracted_scores.get("technical_depth"))),
+                "core_match": _to_float(technical_analysis.get("core_skills_match_percentage", extracted_scores.get("core_skills_match_percentage"))),
+                "stack_fit": _to_float(technical_analysis.get("technical_stack_fit_percentage", extracted_scores.get("technical_stack_fit_percentage"))),
+                "strengths": technical_analysis.get("technical_strengths", []),
+                "gaps": technical_analysis.get("technical_gaps", [])
+            },
+            "skills": {
+                "score": _to_float(skills_analysis.get("overall_skills_score", extracted_scores.get("skills_relevance"))),
+                "business_readiness": _to_float(skills_analysis.get("business_readiness_score", extracted_scores.get("business_readiness"))),
+                "strengths": skills_analysis.get("strength_areas", []),
+                "gaps": skills_analysis.get("critical_gaps", [])
+            },
+            "experience": {
+                "alignment_score": _to_float(experience_analysis.get("alignment_score", extracted_scores.get("experience_alignment"))),
+                "years": _to_float(experience_analysis.get("cv_experience_years", 0)),
+                "corporate_years": _to_float(experience_analysis.get("cv_corporate_years", 0)),
+                "jd_required_years": _to_float(experience_analysis.get("jd_required_years", 0)),
+                "cv_role_level": experience_analysis.get("cv_role_level", "Unknown"),
+                "jd_role_level": experience_analysis.get("jd_role_level", "Unknown"),
+                "strengths": experience_analysis.get("experience_strengths", []),
+                "gaps": experience_analysis.get("experience_gaps", [])
+            },
+            "seniority": {
+                "score": _to_float(seniority_analysis.get("seniority_score", extracted_scores.get("seniority_match"))),
+                "cv_level": seniority_analysis.get("cv_responsibility_scope", "Unknown"),
+                "jd_level": seniority_analysis.get("jd_required_seniority", "Unknown"),
+                "experience_match_percentage": _to_float(seniority_analysis.get("experience_match_percentage", extracted_scores.get("experience_match_percentage"))),
+                "responsibility_fit": _to_float(seniority_analysis.get("responsibility_fit_percentage", extracted_scores.get("responsibility_fit_percentage")))
+            },
+            "industry": {
+                "alignment_score": _to_float(industry_analysis.get("industry_alignment_score", extracted_scores.get("industry_fit"))),
+                "cv_industry": industry_analysis.get("cv_primary_industry", "Unknown"),
+                "jd_industry": industry_analysis.get("jd_target_industry", "Unknown"),
+                "transition_difficulty": industry_analysis.get("transition_type", industry_analysis.get("hiring_risk_assessment", "UNKNOWN")),
+                "domain_overlap_percentage": _to_float(industry_analysis.get("domain_overlap_percentage", extracted_scores.get("domain_overlap_percentage"))),
+                "stakeholder_fit_score": _to_float(industry_analysis.get("stakeholder_fit_score", extracted_scores.get("stakeholder_fit_score")))
+            },
+            "raw_scores": extracted_scores
+        }
+        
+        return summary
     
     def _extract_ats_scoring(self, ats_entries: List[Dict]) -> Dict[str, Any]:
         """Extract clean ATS scoring (numbers only, no verbose explanation)"""

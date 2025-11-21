@@ -522,17 +522,6 @@ class AIRecommendationGenerator:
         # Title
         lines.append(f"# CV Tailoring Strategy Report for {company}\n")
         
-        # Executive Summary
-        exec_summary = json_data.get("executive_summary", {})
-        if exec_summary:
-            lines.append("## Executive Summary\n")
-            lines.append(f"- **Current ATS Score:** {exec_summary.get('current_ats_score', 'N/A')}/100")
-            lines.append(f"- **Target Score:** {exec_summary.get('target_score', 75)}/100")
-            lines.append(f"- **Improvement Needed:** {exec_summary.get('improvement_needed', 'N/A')} points")
-            lines.append(f"- **Overall Match Rate:** {exec_summary.get('overall_match_rate', 'N/A')}%")
-            lines.append(f"- **Primary Objective:** {exec_summary.get('primary_objective', 'N/A')}")
-            lines.append(f"- **Key Challenge:** {exec_summary.get('key_challenge', 'N/A')}\n")
-        
         # Priority Gaps
         priority_gaps = json_data.get("priority_gaps", {})
         if priority_gaps:
