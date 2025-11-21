@@ -295,25 +295,33 @@ class SkillsDisplayWidget extends StatelessWidget {
           if (controller.showATSLoading || controller.showATSResults) ...[
             Builder(
               builder: (context) {
-                debugPrint('🔍 [SKILLS_DISPLAY] ===== ATS SECTION BUILD =====');
-                debugPrint('   showATSLoading: ${controller.showATSLoading}');
-                debugPrint('   showATSResults: ${controller.showATSResults}');
-                debugPrint('   hasATSResult: ${controller.hasATSResult}');
-                debugPrint('   atsResult: ${controller.atsResult != null}');
+                print('🔍 [ATS_DEBUG] ===== ATS SECTION BUILD (Widget) =====');
+                print('   Condition check: showATSLoading || showATSResults');
+                print('   showATSLoading: ${controller.showATSLoading}');
+                print('   showATSResults: ${controller.showATSResults}');
+                print('   hasATSResult: ${controller.hasATSResult}');
+                print('   atsResult getter: ${controller.atsResult != null}');
+
                 if (controller.atsResult != null) {
-                  debugPrint(
+                  print('   ✅ [ATS_DEBUG] ATS_RESULT EXISTS IN CONTROLLER!');
+                  print(
                       '   finalATSScore: ${controller.atsResult!.finalATSScore}');
-                  debugPrint(
+                  print(
                       '   categoryStatus: ${controller.atsResult!.categoryStatus}');
-                  debugPrint(
+                  print(
                       '   breakdown baseScore: ${controller.atsResult!.breakdown.baseScore}');
-                  debugPrint(
+                  print(
                       '   breakdown bonusPoints: ${controller.atsResult!.breakdown.bonusPoints}');
+                  print(
+                      '   breakdown boostApplied: ${controller.atsResult!.breakdown.boostApplied}');
+                } else {
+                  print('   ❌ [ATS_DEBUG] ATS_RESULT IS NULL IN CONTROLLER!');
                 }
 
                 // Show loading state
                 if (controller.showATSLoading && !controller.showATSResults) {
-                  debugPrint('   → Showing ATS loading state');
+                  print('   → [ATS_DEBUG] Showing ATS loading state');
+                  print('   → showATSLoading: true, showATSResults: false');
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                     child: const ATSScoreDisplayCard(isLoading: true),
@@ -321,8 +329,15 @@ class SkillsDisplayWidget extends StatelessWidget {
                 }
 
                 // Show actual ATS results
+                print('   → [ATS_DEBUG] Checking render conditions...');
+                print('      showATSResults: ${controller.showATSResults}');
+                print('      hasATSResult: ${controller.hasATSResult}');
+                print(
+                    '      atsResult != null: ${controller.atsResult != null}');
+
                 if (controller.showATSResults && controller.hasATSResult) {
-                  debugPrint('   → ✅ RENDERING ATSScoreDisplayCard');
+                  print('   → ✅ [ATS_DEBUG] RENDERING ATSScoreDisplayCard!');
+                  print('      All conditions met - widget will render');
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                     child: ATSScoreDisplayCard(
@@ -332,11 +347,24 @@ class SkillsDisplayWidget extends StatelessWidget {
                   );
                 }
 
-                debugPrint(
-                    '   → ❌ NOT RENDERING ATS Widget - conditions not met');
-                debugPrint(
-                    '      showATSResults: ${controller.showATSResults}');
-                debugPrint('      hasATSResult: ${controller.hasATSResult}');
+                print(
+                    '   → ❌ [ATS_DEBUG] NOT RENDERING ATS Widget - conditions not met');
+                print('      showATSResults: ${controller.showATSResults}');
+                print('      hasATSResult: ${controller.hasATSResult}');
+                print('      atsResult: ${controller.atsResult != null}');
+                print(
+                    '🔍 [ATS_DEBUG] ===== ATS SECTION BUILD END (NOT RENDERING) =====');
+                return const SizedBox.shrink();
+              },
+            ),
+          ] else ...[
+            Builder(
+              builder: (context) {
+                print('🔍 [ATS_DEBUG] ATS SECTION NOT IN BUILD TREE');
+                print('   showATSLoading: ${controller.showATSLoading}');
+                print('   showATSResults: ${controller.showATSResults}');
+                print(
+                    '   Condition (showATSLoading || showATSResults): ${controller.showATSLoading || controller.showATSResults}');
                 return const SizedBox.shrink();
               },
             ),

@@ -14,21 +14,39 @@ class ATSScoreDisplayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('🎨 [ATS_CARD] Building ATSScoreDisplayCard');
-    debugPrint('   isLoading: $isLoading');
-    debugPrint('   atsResult: ${atsResult != null}');
+    print('🔍 [ATS_DEBUG] ===== ATSScoreDisplayCard.build() START =====');
+    print('   isLoading: $isLoading');
+    print('   atsResult parameter: ${atsResult != null}');
+    
     if (atsResult != null) {
-      debugPrint('   finalATSScore: ${atsResult!.finalATSScore}');
+      print('   ✅ [ATS_DEBUG] ATS_RESULT PROVIDED TO WIDGET!');
+      print('   finalATSScore: ${atsResult!.finalATSScore}');
+      print('   categoryStatus: ${atsResult!.categoryStatus}');
+      print('   recommendation: ${atsResult!.recommendation}');
+      print('   breakdown: ${atsResult!.breakdown != null}');
+      if (atsResult!.breakdown != null) {
+        print('   breakdown.baseScore: ${atsResult!.breakdown.baseScore}');
+        print('   breakdown.bonusPoints: ${atsResult!.breakdown.bonusPoints}');
+        print('   breakdown.boostApplied: ${atsResult!.breakdown.boostApplied}');
+      }
+    } else {
+      print('   ❌ [ATS_DEBUG] ATS_RESULT IS NULL IN WIDGET!');
     }
 
     if (isLoading) {
+      print('   → [ATS_DEBUG] Showing loading state');
+      print('🔍 [ATS_DEBUG] ===== ATSScoreDisplayCard.build() END (LOADING) =====');
       return _buildLoadingState();
     }
 
     if (atsResult == null) {
-      debugPrint('   → Returning empty (no atsResult)');
+      print('   → [ATS_DEBUG] Returning empty - no atsResult');
+      print('🔍 [ATS_DEBUG] ===== ATSScoreDisplayCard.build() END (NO RESULT) =====');
       return const SizedBox.shrink();
     }
+    
+    print('   → [ATS_DEBUG] Rendering ATS score card with data');
+    print('🔍 [ATS_DEBUG] ===== ATSScoreDisplayCard.build() END (RENDERING) =====');
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),

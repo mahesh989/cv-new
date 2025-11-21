@@ -572,12 +572,17 @@ class ContextAwareAnalysisController extends ChangeNotifier {
   }
 
   Future<void> _pollForCompleteResults() async {
+    print('🔍 [ATS_DEBUG] ===== _pollForCompleteResults START =====');
+    
     if (_currentCompany == null) {
-      debugPrint('❌ [CONTROLLER] _pollForCompleteResults: _currentCompany is null');
+      print('❌ [ATS_DEBUG] _currentCompany is null - cannot poll');
       return;
     }
 
-    debugPrint('🔄 [CONTROLLER] Polling for complete results...');
+    print('🔄 [ATS_DEBUG] Starting polling for complete results...');
+    print('   Company: $_currentCompany');
+    print('   Max wait: 120 seconds');
+    
     final completeResults =
         await SkillsAnalysisService.waitForCompleteResults(
       _currentCompany!,
@@ -585,49 +590,83 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     );
 
     if (completeResults == null) {
-      debugPrint('⚠️ [CONTROLLER] Polling timed out or returned null');
+      print('⚠️ [ATS_DEBUG] Polling returned null or timed out');
+      print('   Setting loading flags to false');
       _showATSLoading = false;
       _showAIRecommendationLoading = false;
       notifyListeners();
+      print('🔍 [ATS_DEBUG] ===== _pollForCompleteResults END (NULL) =====');
       return;
     }
 
-    debugPrint('📥 [CONTROLLER] Got complete results from polling');
-    debugPrint('   Keys: ${completeResults.keys.toList()}');
-    debugPrint('   has ats_score: ${completeResults['ats_score'] != null}');
-    debugPrint('   has component_analysis: ${completeResults['component_analysis'] != null}');
-    debugPrint('   has ai_recommendation: ${completeResults['ai_recommendation'] != null}');
+    print('📥 [ATS_DEBUG] Got complete results from polling!');
+    print('   Result is not null: true');
+    print('   Keys: ${completeResults.keys.toList()}');
+    print('   has ats_score: ${completeResults['ats_score'] != null}');
+    print('   has component_analysis: ${completeResults['component_analysis'] != null}');
+    print('   has ai_recommendation: ${completeResults['ai_recommendation'] != null}');
+    
+    if (completeResults['ats_score'] != null) {
+      print('✅ [ATS_DEBUG] ATS_SCORE IS PRESENT IN POLLING RESULTS!');
+      final ats = completeResults['ats_score'] as Map<String, dynamic>;
+      print('   final_ats_score: ${ats['final_ats_score']}');
+      print('   category_status: ${ats['category_status']}');
+    } else {
+      print('❌ [ATS_DEBUG] ATS_SCORE IS MISSING IN POLLING RESULTS!');
+    }
 
     // Process the polling response
+    print('🔍 [ATS_DEBUG] Calling _handlePollingResponse...');
     await _handlePollingResponse(completeResults);
+    print('🔍 [ATS_DEBUG] ===== _pollForCompleteResults END =====');
   }
 
   /// Handle polling response from /api/analysis-results/
   Future<void> _handlePollingResponse(Map<String, dynamic> completeResults) async {
-    debugPrint('📥 [CONTROLLER] _handlePollingResponse called');
-    debugPrint('   completeResults keys: ${completeResults.keys.toList()}');
+    print('🔍 [ATS_DEBUG] ===== _handlePollingResponse START =====');
+    print('   completeResults keys: ${completeResults.keys.toList()}');
+    print('   completeResults type: ${completeResults.runtimeType}');
 
     try {
       // Support both field name variations
       final preextracted = (completeResults['preextracted_skills_comparison'] ??
           completeResults['preextracted_comparison']) as Map<String, dynamic>?;
 
-      debugPrint('🔧 [CONTROLLER] Updating _displayResult with complete results...');
-      debugPrint('   ats_score present: ${completeResults['ats_score'] != null}');
-      debugPrint('   component_analysis present: ${completeResults['component_analysis'] != null}');
-      debugPrint('   ai_recommendation present: ${completeResults['ai_recommendation'] != null}');
+      print('🔧 [ATS_DEBUG] Updating _displayResult with complete results...');
+      print('   ats_score present: ${completeResults['ats_score'] != null}');
+      print('   component_analysis present: ${completeResults['component_analysis'] != null}');
+      print('   ai_recommendation present: ${completeResults['ai_recommendation'] != null}');
+      print('   Current _displayResult: ${_displayResult != null}');
 
       // Parse ATS result if present
       ATSResult? parsedATS;
       if (completeResults['ats_score'] != null) {
+        print('✅ [ATS_DEBUG] ATS_SCORE IS PRESENT - Starting parsing...');
         try {
-          debugPrint('🔧 [CONTROLLER] Parsing ATS result...');
-          parsedATS = ATSResult.fromJson(completeResults['ats_score'] as Map<String, dynamic>);
-          debugPrint('✅ [CONTROLLER] Parsed ATS result - score: ${parsedATS.finalATSScore}');
+          final atsData = completeResults['ats_score'] as Map<String, dynamic>;
+          print('   ats_score data type: ${atsData.runtimeType}');
+          print('   ats_score data keys: ${atsData.keys.toList()}');
+          print('   final_ats_score value: ${atsData['final_ats_score']}');
+          
+          print('🔧 [ATS_DEBUG] Calling ATSResult.fromJson...');
+          parsedATS = ATSResult.fromJson(atsData);
+          print('✅ [ATS_DEBUG] ATSResult parsed successfully!');
+          print('   Parsed finalATSScore: ${parsedATS.finalATSScore}');
+          print('   Parsed categoryStatus: ${parsedATS.categoryStatus}');
+          print('   Parsed breakdown: ${parsedATS.breakdown != null}');
+          if (parsedATS.breakdown != null) {
+            print('   Breakdown baseScore: ${parsedATS.breakdown.baseScore}');
+            print('   Breakdown bonusPoints: ${parsedATS.breakdown.bonusPoints}');
+            print('   Breakdown boostApplied: ${parsedATS.breakdown.boostApplied}');
+          }
         } catch (e, stackTrace) {
-          debugPrint('❌ [CONTROLLER] Error parsing ATS result: $e');
-          debugPrint('   Stack: $stackTrace');
+          print('❌ [ATS_DEBUG] ERROR PARSING ATS RESULT!');
+          print('   Error: $e');
+          print('   Error type: ${e.runtimeType}');
+          print('   Stack trace: $stackTrace');
         }
+      } else {
+        print('❌ [ATS_DEBUG] ats_score is null in completeResults');
       }
 
       // Parse component analysis if present
@@ -657,7 +696,12 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       }
 
       // Update _displayResult with parsed data
-    _displayResult = (_displayResult ??
+      print('🔧 [ATS_DEBUG] Updating _displayResult with copyWith...');
+      print('   parsedATS: ${parsedATS != null}');
+      print('   parsedComponent: ${parsedComponent != null}');
+      print('   parsedAI: ${parsedAI != null}');
+      
+      _displayResult = (_displayResult ??
             SkillsAnalysisResult.fromJson({
               'cv_skills': _result?.results?.cvSkills ?? {},
               'jd_skills': _result?.results?.jdSkills ?? {},
@@ -677,82 +721,109 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       company: completeResults['company'] ?? _displayResult?.company,
     );
 
-      debugPrint('✅ [CONTROLLER] Updated _displayResult');
-      debugPrint('   hasATSResult: ${_displayResult?.atsResult != null}');
+      print('✅ [ATS_DEBUG] _displayResult updated');
+      print('   _displayResult is null: ${_displayResult == null}');
+      print('   hasATSResult: ${_displayResult?.atsResult != null}');
       if (_displayResult?.atsResult != null) {
-        debugPrint('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
+        print('   ✅ ATS_RESULT IS SET IN _displayResult!');
+        print('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
+        print('   Category Status: ${_displayResult!.atsResult!.categoryStatus}');
+        print('   Breakdown: ${_displayResult!.atsResult!.breakdown != null}');
+      } else {
+        print('   ❌ ATS_RESULT IS NULL IN _displayResult!');
       }
-      debugPrint('   hasPreextracted: ${_displayResult?.hasPreextractedComparison}');
-      debugPrint('   hasAIRecommendation: ${_displayResult?.aiRecommendation != null}');
-      debugPrint('   hasComponentAnalysis: ${_displayResult?.componentAnalysis != null}');
+      print('   hasPreextracted: ${_displayResult?.hasPreextractedComparison}');
+      print('   hasAIRecommendation: ${_displayResult?.aiRecommendation != null}');
+      print('   hasComponentAnalysis: ${_displayResult?.componentAnalysis != null}');
 
       // Stop loading indicators
+      print('🔧 [ATS_DEBUG] Stopping loading indicators...');
     _showATSLoading = false;
       _showAIRecommendationLoading = false;
+      print('   _showATSLoading: $_showATSLoading');
+      print('   _showAIRecommendationLoading: $_showAIRecommendationLoading');
 
       // ✅ CRITICAL: Update display flags and notify listeners
+      print('🔧 [ATS_DEBUG] Calling _updateDisplayFlags()...');
     _updateDisplayFlags();
-      debugPrint('✅ [CONTROLLER] Called _updateDisplayFlags() after polling response');
+      print('✅ [ATS_DEBUG] _updateDisplayFlags() completed');
+      print('🔍 [ATS_DEBUG] ===== _handlePollingResponse END (SUCCESS) =====');
 
     } catch (e, stackTrace) {
-      debugPrint('❌ [CONTROLLER] Error handling polling response: $e');
-      debugPrint('   Stack: $stackTrace');
+      print('❌ [ATS_DEBUG] ERROR in _handlePollingResponse!');
+      print('   Error: $e');
+      print('   Error type: ${e.runtimeType}');
+      print('   Stack trace: $stackTrace');
       // Still stop loading indicators on error
       _showATSLoading = false;
       _showAIRecommendationLoading = false;
+      print('🔍 [ATS_DEBUG] ===== _handlePollingResponse END (ERROR) =====');
     notifyListeners();
     }
   }
 
   void _updateDisplayFlags() {
-    debugPrint('🔔 [CONTROLLER] _updateDisplayFlags START');
-    debugPrint('   _displayResult: ${_displayResult != null}');
+    print('🔍 [ATS_DEBUG] ===== _updateDisplayFlags START =====');
+    print('   _displayResult: ${_displayResult != null}');
     
     if (_displayResult == null) {
-      debugPrint('   ❌ _displayResult is null, returning');
+      print('   ❌ [ATS_DEBUG] _displayResult is null, returning early');
+      print('🔍 [ATS_DEBUG] ===== _updateDisplayFlags END (NULL) =====');
       return;
     }
     
     // Analyze Match
     _showAnalyzeMatchDisplay = _displayResult!.analyzeMatch != null;
-    debugPrint('   showAnalyzeMatch: $_showAnalyzeMatchDisplay');
+    print('   showAnalyzeMatch: $_showAnalyzeMatchDisplay');
     
     // Preextracted Comparison
     _showPreextractedComparisonDisplay =
         _displayResult!.hasPreextractedComparison;
-    debugPrint('   showPreextractedComparison: $_showPreextractedComparisonDisplay');
+    print('   showPreextractedComparison: $_showPreextractedComparisonDisplay');
     
-    // ATS Results
+    // ATS Results - CRITICAL SECTION
+    print('🔍 [ATS_DEBUG] Checking ATS result...');
     final hasATS = _displayResult!.atsResult != null;
-    debugPrint('   hasATS: $hasATS');
+    print('   hasATS: $hasATS');
+    print('   _displayResult!.atsResult: ${_displayResult!.atsResult}');
+    
     if (hasATS) {
+      print('   ✅ [ATS_DEBUG] ATS RESULT EXISTS!');
+      print('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
+      print('   Category Status: ${_displayResult!.atsResult!.categoryStatus}');
+      print('   Setting _showATSResults = true');
       _showATSResults = true;
-      debugPrint('   ✅ Set _showATSResults = true');
-      debugPrint('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
+      print('   ✅ [ATS_DEBUG] _showATSResults set to: $_showATSResults');
     } else {
+      print('   ❌ [ATS_DEBUG] NO ATS RESULT FOUND!');
+      print('   Setting _showATSResults = false');
       _showATSResults = false;
-      debugPrint('   ❌ No ATS result, _showATSResults = false');
+      print('   ❌ [ATS_DEBUG] _showATSResults set to: $_showATSResults');
     }
     
     // AI Recommendations
     final hasAI = _displayResult!.aiRecommendation?.hasContent ?? false;
-    debugPrint('   hasAI: $hasAI');
+    print('   hasAI: $hasAI');
     if (hasAI) {
       _showAIRecommendationLoading = false;
       _showAIRecommendationResults = true;
-      debugPrint('   ✅ Set _showAIRecommendationResults = true');
+      print('   ✅ Set _showAIRecommendationResults = true');
     } else {
       _showAIRecommendationResults = false;
-      debugPrint('   ❌ No AI recommendation, _showAIRecommendationResults = false');
+      print('   ❌ No AI recommendation, _showAIRecommendationResults = false');
     }
     
     // ✅ CRITICAL: Notify listeners
+    print('🔧 [ATS_DEBUG] Calling notifyListeners()...');
     notifyListeners();
-    debugPrint('🔔 [CONTROLLER] _updateDisplayFlags END - notifyListeners() called');
-    debugPrint('   Final flags:');
-    debugPrint('     showATSResults: $_showATSResults');
-    debugPrint('     showPreextractedComparison: $_showPreextractedComparisonDisplay');
-    debugPrint('     showAIRecommendationResults: $_showAIRecommendationResults');
+    print('✅ [ATS_DEBUG] notifyListeners() called');
+    print('🔍 [ATS_DEBUG] Final display flags:');
+    print('     showATSResults: $_showATSResults');
+    print('     showATSLoading: $_showATSLoading');
+    print('     hasATSResult (getter): $hasATSResult');
+    print('     showPreextractedComparison: $_showPreextractedComparisonDisplay');
+    print('     showAIRecommendationResults: $_showAIRecommendationResults');
+    print('🔍 [ATS_DEBUG] ===== _updateDisplayFlags END =====');
   }
 
   /// Build context message for user feedback

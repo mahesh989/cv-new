@@ -397,25 +397,59 @@ class SkillsAnalysisService {
         print(
             '📊 [POLLING] Component analysis present: ${data['component_analysis'] != null}');
         print('📊 [POLLING] ATS score present: ${data['ats_score'] != null}');
+        print('🔍 [ATS_DEBUG] Checking data contents...');
         print(
-            '📊 [POLLING] AI recommendation present: ${data['ai_recommendation'] != null}');
+            '   Component analysis present: ${data['component_analysis'] != null}');
         print(
-            '📊 [POLLING] Tailored CV present: ${data['tailored_cv'] != null}');
+            '   AI recommendation present: ${data['ai_recommendation'] != null}');
+        print('   Tailored CV present: ${data['tailored_cv'] != null}');
+
+        // Detailed ATS score inspection
         try {
           final ats = data['ats_score'] as Map<String, dynamic>?;
           if (ats != null) {
-            print('🧩 [POLLING] ats_score keys: ${ats.keys.toList()}');
-            print('🧩 [POLLING] final_ats_score: ${ats['final_ats_score']}');
+            print('✅ [ATS_DEBUG] ATS_SCORE FOUND IN DATA!');
+            print('   ats_score type: ${ats.runtimeType}');
+            print('   ats_score keys: ${ats.keys.toList()}');
+            print('   final_ats_score: ${ats['final_ats_score']}');
+            print('   category_status: ${ats['category_status']}');
+            print('   recommendation: ${ats['recommendation']}');
+
             final breakdown = ats['breakdown'] as Map<String, dynamic>?;
-            print('🧩 [POLLING] breakdown present: ${breakdown != null}');
+            if (breakdown != null) {
+              print('   breakdown present: true');
+              print('   breakdown keys: ${breakdown.keys.toList()}');
+              print('   base_score: ${breakdown['base_score']}');
+              print('   bonus_points: ${breakdown['bonus_points']}');
+              print('   boost_applied: ${breakdown['boost_applied']}');
+
+              final category1 = breakdown['category1'] as Map<String, dynamic>?;
+              if (category1 != null) {
+                print('   category1 present: true');
+                print('   category1 keys: ${category1.keys.toList()}');
+              }
+
+              final category2 = breakdown['category2'] as Map<String, dynamic>?;
+              if (category2 != null) {
+                print('   category2 present: true');
+                print('   category2 keys: ${category2.keys.toList()}');
+              }
+            } else {
+              print('   ❌ breakdown is null');
+            }
+          } else {
+            print('❌ [ATS_DEBUG] ats_score is null in data');
           }
+
           final ai = data['ai_recommendation'] as Map<String, dynamic>?;
           if (ai != null) {
-            print('🤖 [POLLING] ai_recommendation keys: ${ai.keys.toList()}');
+            print('🤖 [ATS_DEBUG] ai_recommendation keys: ${ai.keys.toList()}');
             print(
-                '🤖 [POLLING] content length: ${(ai['content'] as String?)?.length ?? 0}');
+                '   content length: ${(ai['content'] as String?)?.length ?? 0}');
           }
-        } catch (_) {}
+        } catch (e) {
+          print('❌ [ATS_DEBUG] Error inspecting data: $e');
+        }
 
         // For v2, we specifically need ats_score to be present
         // Don't return partial results - wait for ATS score
@@ -423,34 +457,46 @@ class SkillsAnalysisService {
         final hasComponent = data['component_analysis'] != null;
 
         if (hasATS) {
-          print('✅ [POLLING] ATS score available - returning results');
+          print('✅ [ATS_DEBUG] ATS score available - returning results');
           print('   Component analysis present: $hasComponent');
+          print(
+              '🔍 [ATS_DEBUG] ===== getCompleteAnalysisResults END (SUCCESS) =====');
           return data;
         }
 
         if (hasComponent) {
           print(
-              '⏳ [POLLING] Component analysis available but waiting for ATS score...');
+              '⏳ [ATS_DEBUG] Component analysis available but waiting for ATS score...');
         } else {
           print(
-              '⏳ [POLLING] Still waiting for results (no component_analysis or ats_score yet)...');
+              '⏳ [ATS_DEBUG] Still waiting for results (no component_analysis or ats_score yet)...');
         }
+        print(
+            '🔍 [ATS_DEBUG] ===== getCompleteAnalysisResults END (NO ATS YET) =====');
         return null;
       }
 
+      print('❌ [ATS_DEBUG] Response success is false or not a Map');
+      print(
+          '🔍 [ATS_DEBUG] ===== getCompleteAnalysisResults END (FAILED) =====');
       return null;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ [ATS_DEBUG] Exception in getCompleteAnalysisResults: $e');
+      print('   Stack trace: $stackTrace');
+
       final errorString = e.toString();
       // Check if this is a 404 (file not found) - stop polling immediately
       if (errorString.contains('404') ||
           errorString.contains('Not Found') ||
           errorString.contains('not found')) {
         print(
-            '🛑 [POLLING] Analysis file not found (404) - stopping polling early');
+            '🛑 [ATS_DEBUG] Analysis file not found (404) - stopping polling early');
         // Throw a special exception to signal 404
         throw _PollingStopException('Analysis file not found');
       }
-      print('❌ [POLLING] Error getting complete results: $e');
+      print('❌ [ATS_DEBUG] Error getting complete results: $e');
+      print(
+          '🔍 [ATS_DEBUG] ===== getCompleteAnalysisResults END (ERROR) =====');
       return null;
     }
   }
@@ -458,39 +504,55 @@ class SkillsAnalysisService {
   /// Wait for complete analysis results with polling
   static Future<Map<String, dynamic>?> waitForCompleteResults(String company,
       {int maxWaitTimeSeconds = 30}) async {
-    print('🔄 [POLLING] Starting polling for complete results...');
+    print('🔄 [ATS_DEBUG] ===== waitForCompleteResults START =====');
+    print('   Company: $company');
+    print('   Max wait time: $maxWaitTimeSeconds seconds');
 
     const pollInterval = Duration(seconds: 2);
     final maxAttempts = maxWaitTimeSeconds ~/ 2;
+    print('   Max attempts: $maxAttempts');
+    print('   Poll interval: ${pollInterval.inSeconds} seconds');
 
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-      print('🔄 [POLLING] Attempt $attempt/$maxAttempts');
+      print('🔄 [ATS_DEBUG] Polling attempt $attempt/$maxAttempts');
 
       try {
         final completeResults = await getCompleteAnalysisResults(company);
         if (completeResults != null) {
           print(
-              '✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
+              '✅ [ATS_DEBUG] Complete results obtained after ${attempt * 2} seconds');
+          print('   Result keys: ${completeResults.keys.toList()}');
+          print('   Has ATS: ${completeResults.containsKey('ats_score')}');
+          print(
+              '🔄 [ATS_DEBUG] ===== waitForCompleteResults END (SUCCESS) =====');
           return completeResults;
+        } else {
+          print(
+              '⏳ [ATS_DEBUG] Attempt $attempt returned null - no results yet');
         }
       } catch (e) {
         // If we get a _PollingStopException (404), stop polling immediately
         if (e is _PollingStopException) {
-          print('🛑 [POLLING] Stopping polling due to: ${e.message}');
+          print('🛑 [ATS_DEBUG] Stopping polling due to: ${e.message}');
+          print(
+              '🔄 [ATS_DEBUG] ===== waitForCompleteResults END (STOPPED) =====');
           return null;
         }
         // For other errors, continue polling
-        print('⚠️ [POLLING] Error in attempt $attempt, continuing...');
+        print('⚠️ [ATS_DEBUG] Error in attempt $attempt: $e');
+        print('   Continuing to next attempt...');
       }
 
       if (attempt < maxAttempts) {
         print(
-            '⏳ [POLLING] Waiting ${pollInterval.inSeconds}s before next attempt...');
+            '⏳ [ATS_DEBUG] Waiting ${pollInterval.inSeconds}s before next attempt...');
         await Future.delayed(pollInterval);
       }
     }
 
-    print('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
+    print('⚠️ [ATS_DEBUG] Polling timed out after $maxWaitTimeSeconds seconds');
+    print('   Total attempts made: $maxAttempts');
+    print('🔄 [ATS_DEBUG] ===== waitForCompleteResults END (TIMEOUT) =====');
     return null;
   }
 
