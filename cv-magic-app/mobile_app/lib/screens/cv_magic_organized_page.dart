@@ -113,22 +113,15 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
   /// Check if we need to clear results and do so if needed
   void _checkAndClearResults() {
-    debugPrint('🧹 [CV_MAGIC] _checkAndClearResults called');
     final shouldClear = widget.shouldClearResults?.call();
-    debugPrint('🧹 [CV_MAGIC] shouldClearResults returned: $shouldClear');
 
     if (shouldClear == true) {
       debugPrint('🧹 [CV_MAGIC] Clearing results due to Run ATS Again');
-      debugPrint('🧹 [CV_MAGIC] About to call clearAnalysisResults()');
       clearAnalysisResults();
-      debugPrint(
-          '🧹 [CV_MAGIC] clearAnalysisResults() completed, calling onResultsCleared');
       widget.onResultsCleared?.call();
-      debugPrint('🧹 [CV_MAGIC] onResultsCleared callback completed');
-    } else {
-      debugPrint(
-          '🧹 [CV_MAGIC] shouldClearResults returned false, no clearing needed');
+      debugPrint('🧹 [CV_MAGIC] Results cleared successfully');
     }
+    // No logging when shouldClear is false to avoid console spam
   }
 
   /// Public method to trigger clear check when needed (called from parent)
