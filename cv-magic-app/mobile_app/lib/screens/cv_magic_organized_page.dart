@@ -21,6 +21,7 @@ import '../widgets/analyze_match_card.dart';
 import '../widgets/preextracted_skills_comparison_card.dart';
 import '../utils/preextracted_parser.dart';
 import '../widgets/ats_score_display_card.dart';
+import '../widgets/ai_recommendation_display_card.dart';
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
   final bool Function()? shouldClearResults;
@@ -464,6 +465,66 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                 }
                 
                 debugPrint('❌ [ATS_SECTION] Not showing (no data or conditions not met)');
+                return const SizedBox.shrink();
+              },
+            ),
+
+            // AI Recommendations Display
+            AnimatedBuilder(
+              animation: _skillsController,
+              builder: (context, _) {
+                debugPrint('🔍 [AI_SECTION] AnimatedBuilder called');
+                final showAILoading = _skillsController.showAIRecommendationLoading;
+                final showAIResults = _skillsController.showAIRecommendationResults;
+                final aiRecommendation = _skillsController.aiRecommendation;
+                
+                debugPrint('   showAIRecommendationLoading: $showAILoading');
+                debugPrint('   showAIRecommendationResults: $showAIResults');
+                debugPrint('   aiRecommendation != null: ${aiRecommendation != null}');
+                
+                if (aiRecommendation != null) {
+                  debugPrint('   ✅ AI Recommendation content length: ${aiRecommendation.content.length}');
+                  debugPrint('   ✅ hasContent: ${aiRecommendation.hasContent}');
+                  debugPrint('   ✅ isEmpty: ${aiRecommendation.isEmpty}');
+                }
+                
+                // Show AI section if loading or results are available
+                if (showAILoading || showAIResults) {
+                  debugPrint('✅ [AI_SECTION] Showing AI recommendations section');
+                  
+                  // Show loading state
+                  if (showAILoading && !showAIResults) {
+                    debugPrint('   → Rendering AI loading state');
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: const AIRecommendationDisplayCard(isLoading: true),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+                  
+                  // Show actual AI recommendations
+                  if (showAIResults && aiRecommendation != null && aiRecommendation.hasContent) {
+                    debugPrint('   ✅ Rendering AI recommendation card with content length: ${aiRecommendation.content.length}');
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: AIRecommendationDisplayCard(
+                            aiRecommendation: aiRecommendation,
+                            isLoading: false,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+                }
+                
+                debugPrint('❌ [AI_SECTION] Not showing (no data or conditions not met)');
                 return const SizedBox.shrink();
               },
             ),

@@ -3,7 +3,7 @@ import '../controllers/skills_analysis_controller.dart';
 import 'analyze_match_widget.dart';
 import 'skills_analysis/ai_powered_skills_analysis.dart';
 import 'ats_score_display_card.dart';
-import 'ai_recommendations_widget.dart';
+import 'ai_recommendation_display_card.dart';
 import '../utils/preextracted_parser.dart';
 
 /// Widget for displaying side-by-side CV and JD skills comparison
@@ -533,90 +533,91 @@ class SkillsDisplayWidget extends StatelessWidget {
             ),
           ],
 
-          // AI Recommendations - Strict rendering (no fallback)
+          // AI Recommendations - Enhanced with modular widget
+          // ✅ CRITICAL: Diagnostic logging - this should ALWAYS execute
+          Builder(
+            builder: (context) {
+              final showAI =
+                  controller.showAIRecommendationLoading ||
+                  controller.showAIRecommendationResults;
+              
+              // ✅ UNMISSABLE LOGS - These MUST appear in console
+              debugPrint('🚨🚨🚨 [AI_DIAGNOSTIC] ===== AI CONDITION CHECK ===== 🚨🚨🚨');
+              debugPrint('🚨🚨🚨 THIS BUILDER IS EXECUTING - CHECK CONSOLE FILTER! 🚨🚨🚨');
+              print('🚨🚨🚨 [AI_DIAGNOSTIC] ===== AI CONDITION CHECK ===== 🚨🚨🚨');
+              print('   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
+              print('   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
+              print('   Condition (showAIRecommendationLoading || showAIRecommendationResults): $showAI');
+              print('   hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
+              print('   aiRecommendation != null: ${controller.result?.aiRecommendation != null}');
+              if (controller.result?.aiRecommendation != null) {
+                print('   ✅ aiRecommendation.content length: ${controller.result!.aiRecommendation!.content.length}');
+                print('   ✅ aiRecommendation.hasContent: ${controller.result!.aiRecommendation!.hasContent}');
+                print('   ✅ aiRecommendation.isEmpty: ${controller.result!.aiRecommendation!.isEmpty}');
+              }
+              print('🚨🚨🚨 [AI_DIAGNOSTIC] ===== END CHECK ===== 🚨🚨🚨');
+              
+              // Also use debugPrint for redundancy
+              debugPrint('   [AI_DIAGNOSTIC] showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
+              debugPrint('   [AI_DIAGNOSTIC] showAIRecommendationResults: ${controller.showAIRecommendationResults}');
+              debugPrint('   [AI_DIAGNOSTIC] hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
+              
+              return const SizedBox.shrink();
+            },
+          ),
+          // ✅ AI Recommendations Section - This should render if condition is true
           if (controller.showAIRecommendationLoading ||
               controller.showAIRecommendationResults) ...[
             Builder(
               builder: (context) {
-                debugPrint(
-                    '🔍 [SKILLS_DISPLAY] ===== AI RECOMMENDATIONS SECTION =====');
-                debugPrint(
-                    '   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
-                debugPrint(
-                    '   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
-                debugPrint(
-                    '   hasAIRecommendation: ${controller.result?.aiRecommendation != null}');
-                debugPrint(
-                    '   AI Recommendation content length: ${controller.result?.aiRecommendation?.content.length ?? 0}');
-                debugPrint(
-                    '   AI Recommendation isEmpty: ${controller.result?.aiRecommendation?.isEmpty ?? true}');
+                print('🚨 [AI_DIAGNOSTIC] AI SECTION CONDITION IS TRUE - ENTERING SECTION');
+                return const SizedBox.shrink();
+              },
+            ),
+            Builder(
+              builder: (context) {
+                // ✅ CRITICAL: This log should appear if AI section is in widget tree
+                print('🚨🚨🚨 [AI_SECTION] AI SECTION BUILDER CALLED! 🚨🚨🚨');
+                print('🎨 [AI_SECTION] Building AI recommendations section');
+                print('   showAIRecommendationLoading: ${controller.showAIRecommendationLoading}');
+                print('   showAIRecommendationResults: ${controller.showAIRecommendationResults}');
+                print('   aiRecommendation != null: ${controller.result?.aiRecommendation != null}');
 
-                if (controller.showAIRecommendationLoading) {
-                  debugPrint('🎯 [SKILLS_DISPLAY] Showing AI loading state');
+                if (controller.result?.aiRecommendation != null) {
+                  print('   ✅ [AI_DEBUG] AI_RECOMMENDATION EXISTS IN CONTROLLER!');
+                  print('   content length: ${controller.result!.aiRecommendation!.content.length}');
+                  print('   hasContent: ${controller.result!.aiRecommendation!.hasContent}');
+                  print('   isEmpty: ${controller.result!.aiRecommendation!.isEmpty}');
+                  print('   generatedAt: ${controller.result!.aiRecommendation!.generatedAt}');
+                } else {
+                  print('   ❌ [AI_DEBUG] AI_RECOMMENDATION IS NULL IN CONTROLLER!');
+                }
+
+                // Show loading state
+                if (controller.showAIRecommendationLoading &&
+                    !controller.showAIRecommendationResults) {
+                  print('   → Rendering loading state');
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Loading AI recommendations...',
-                            style: TextStyle(
-                                color: Colors.grey[600], fontSize: 14),
-                          ),
-                        ],
-                      ),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: const AIRecommendationDisplayCard(isLoading: true),
+                  );
+                }
+
+                // Show actual AI recommendations
+                if (controller.showAIRecommendationResults &&
+                    controller.result?.aiRecommendation != null &&
+                    controller.result!.aiRecommendation!.hasContent) {
+                  print('   ✅ Rendering AI recommendation card with content length: ${controller.result!.aiRecommendation!.content.length}');
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: AIRecommendationDisplayCard(
+                      aiRecommendation: controller.result!.aiRecommendation,
+                      isLoading: false,
                     ),
                   );
                 }
 
-                if (controller.showAIRecommendationResults) {
-                  final ai = controller.result?.aiRecommendation;
-                  if (ai == null) {
-                    debugPrint(
-                        '❌ [SKILLS_DISPLAY] AI recommendation is null but results flag is true');
-                    // Error state when controller says results should show but model missing
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.red.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.error_outline,
-                                color: Colors.red.shade700),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Text(
-                                'AI recommendation file not found. Please run analysis again.',
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  // ignore: avoid_print
-                  print(
-                      '🎨 [AI_WIDGET] Building with isLoading: false, hasRecommendation: true, isEmpty: ${ai.isEmpty}');
-                  debugPrint(
-                      '✅ [SKILLS_DISPLAY] Building AIRecommendationsWidget with content length: ${ai.content.length}');
-                  return AIRecommendationsWidget(
-                    aiRecommendation: ai,
-                    isLoading: false,
-                    onGenerateCV: onNavigateToCVGeneration,
-                  );
-                }
-
-                debugPrint(
-                    '❌ [SKILLS_DISPLAY] No AI state matched - returning empty');
+                print('   ❌ Neither loading nor results - returning empty');
                 return const SizedBox.shrink();
               },
             ),
