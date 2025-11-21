@@ -187,11 +187,22 @@ class _ContextAwareAnalysisScreenState
               // Analysis Results
               Consumer<ContextAwareAnalysisController>(
                 builder: (context, controller, child) {
+                  // ✅ Screen-level gate debug logging
+                  print('🚨 [SCREEN] Screen-level gate check:');
+                  print(
+                      '   showAnalysisResults: ${controller.showAnalysisResults}');
+                  print('   hasResults: ${controller.hasResults}');
+                  print(
+                      '   GATE OPEN: ${controller.showAnalysisResults && controller.hasResults}');
+
                   if (controller.showAnalysisResults && controller.hasResults) {
+                    print('   ✅ Rendering SkillsDisplayWidget');
                     return SkillsDisplayWidget(
                       controller: _createCompatibleController(controller),
                     );
                   }
+                  print(
+                      '   ❌ NOT rendering SkillsDisplayWidget - GATE CLOSED!');
                   return const SizedBox.shrink();
                 },
               ),

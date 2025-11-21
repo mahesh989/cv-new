@@ -58,8 +58,16 @@ class ContextAwareAnalysisController extends ChangeNotifier {
 
   // Convenience getters for UI
   bool get isLoading => _state == ContextAwareAnalysisState.loading;
-  bool get hasResults =>
-      _state == ContextAwareAnalysisState.completed && _displayResult != null;
+  bool get hasResults {
+    if (_displayResult == null) return false;
+    
+    // Return true when ANY result type is available (including ATS)
+    return _displayResult!.analyzeMatch != null ||
+           _displayResult!.hasPreextractedComparison ||
+           _displayResult!.componentAnalysis != null ||
+           _displayResult!.atsResult != null ||           // ✅ CRITICAL: Add ATS check
+           _displayResult!.aiRecommendation != null;
+  }
   bool get hasError => _state == ContextAwareAnalysisState.error;
   bool get isCancelled => _state == ContextAwareAnalysisState.cancelled;
   bool get hasInitialResults => _initialResult != null && _initialResult!.success; // New
@@ -67,7 +75,13 @@ class ContextAwareAnalysisController extends ChangeNotifier {
 
   // Progressive display getters
   bool get showCVContext => _showCVContext;
-  bool get showAnalysisResults => _showAnalysisResults;
+  bool get showAnalysisResults {
+    // Return true when any section should be shown (including ATS)
+    return _showAnalyzeMatchDisplay ||
+           _showPreextractedComparisonDisplay ||
+           _showATSResults ||                       // ✅ CRITICAL: Add ATS flag
+           _showAIRecommendationResults;
+  }
   bool get showTailoredCV => _showTailoredCV;
   bool get showAnalyzeMatch => _showAnalyzeMatchDisplay;
   bool get showPreextractedComparison => _showPreextractedComparisonDisplay;
@@ -823,6 +837,15 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     print('     hasATSResult (getter): $hasATSResult');
     print('     showPreextractedComparison: $_showPreextractedComparisonDisplay');
     print('     showAIRecommendationResults: $_showAIRecommendationResults');
+    
+    // ✅ Diagnostic logging for screen-level gate
+    print('🔍 [CONTROLLER] Display flags updated:');
+    print('   hasResults: $hasResults');
+    print('   showAnalysisResults: $showAnalysisResults');
+    print('   _showATSResults: $_showATSResults');
+    print('   hasATSResult: ${_displayResult?.atsResult != null}');
+    print('   Screen gate open: ${showAnalysisResults && hasResults}');
+    
     print('🔍 [ATS_DEBUG] ===== _updateDisplayFlags END =====');
   }
 
