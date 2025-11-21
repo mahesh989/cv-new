@@ -26,6 +26,8 @@ class SkillsDisplayWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
+        // ✅ CRITICAL: These logs MUST appear in Chrome DevTools
+        // If you don't see these, check console filter settings!
         print('🔄 [WIDGET] ===== SKILLS_DISPLAY REBUILD =====');
         print('   controller.hasError: ${controller.hasError}');
         print('   controller.hasResults: ${controller.hasResults}');
@@ -34,6 +36,10 @@ class SkillsDisplayWidget extends StatelessWidget {
         print('   showATSResults: ${controller.showATSResults}');
         print('   showATSLoading: ${controller.showATSLoading}');
         print('   hasATSResult: ${controller.hasATSResult}');
+        
+        // ✅ UNMISSABLE LOG - This should ALWAYS appear
+        debugPrint('🚨🚨🚨 SKILLS_DISPLAY_WIDGET BUILD METHOD EXECUTED 🚨🚨🚨');
+        debugPrint('🚨🚨🚨 If you see this, the widget IS building 🚨🚨🚨');
 
         // Main content based on state
         if (controller.hasError) {
@@ -129,6 +135,9 @@ class SkillsDisplayWidget extends StatelessWidget {
 
   Widget _buildResultsContent() {
     // ✅ CRITICAL: This log MUST appear if method is called
+    // ✅ UNMISSABLE - If you don't see this, the method is NOT being called!
+    debugPrint('🚨🚨🚨 [WIDGET] _buildResultsContent CALLED! 🚨🚨🚨');
+    debugPrint('🚨🚨🚨 IF YOU SEE THIS, _buildResultsContent() IS EXECUTING! 🚨🚨🚨');
     print('🚨🚨🚨 [WIDGET] _buildResultsContent CALLED! 🚨🚨🚨');
     print('🏗️ [WIDGET] _buildResultsContent called');
     print('   controller.hasResults: ${controller.hasResults}');
@@ -310,8 +319,11 @@ class SkillsDisplayWidget extends StatelessWidget {
             builder: (context) {
               final showATS =
                   controller.showATSLoading || controller.showATSResults;
-              print(
-                  '🚨🚨🚨 [ATS_DIAGNOSTIC] ===== ATS CONDITION CHECK ===== 🚨🚨🚨');
+              
+              // ✅ UNMISSABLE LOGS - These MUST appear in console
+              debugPrint('🚨🚨🚨 [ATS_DIAGNOSTIC] ===== ATS CONDITION CHECK ===== 🚨🚨🚨');
+              debugPrint('🚨🚨🚨 THIS BUILDER IS EXECUTING - CHECK CONSOLE FILTER! 🚨🚨🚨');
+              print('🚨🚨🚨 [ATS_DIAGNOSTIC] ===== ATS CONDITION CHECK ===== 🚨🚨🚨');
               print('   showATSLoading: ${controller.showATSLoading}');
               print('   showATSResults: ${controller.showATSResults}');
               print(
@@ -323,6 +335,12 @@ class SkillsDisplayWidget extends StatelessWidget {
                     '   ✅ atsResult.finalATSScore: ${controller.atsResult!.finalATSScore}');
               }
               print('🚨🚨🚨 [ATS_DIAGNOSTIC] ===== END CHECK ===== 🚨🚨🚨');
+              
+              // Also use debugPrint for redundancy
+              debugPrint('   [ATS_DIAGNOSTIC] showATSLoading: ${controller.showATSLoading}');
+              debugPrint('   [ATS_DIAGNOSTIC] showATSResults: ${controller.showATSResults}');
+              debugPrint('   [ATS_DIAGNOSTIC] hasATSResult: ${controller.hasATSResult}');
+              
               return const SizedBox.shrink();
             },
           ),
