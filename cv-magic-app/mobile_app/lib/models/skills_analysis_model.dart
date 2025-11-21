@@ -139,12 +139,20 @@ class SkillsAnalysisResult {
       }
     }
 
-    // Parse analyze match
+    // Parse analyze match - only create if it has actual content
     AnalyzeMatchResult? analyzeMatch;
     if (json['analyze_match'] != null) {
-      analyzeMatch = AnalyzeMatchResult.fromJson(
-        json['analyze_match'] as Map<String, dynamic>,
-      );
+      final analyzeMatchJson = json['analyze_match'] as Map<String, dynamic>;
+      // Check if analyze_match has actual content (not just an empty object)
+      final rawAnalysis = analyzeMatchJson['raw_analysis'] as String?;
+      if (rawAnalysis != null && rawAnalysis.trim().isNotEmpty) {
+        analyzeMatch = AnalyzeMatchResult.fromJson(analyzeMatchJson);
+        debugPrint('   ✅ analyze_match parsed with content (length: ${rawAnalysis.length})');
+      } else {
+        debugPrint('   ⚠️ analyze_match present but empty or missing raw_analysis');
+        debugPrint('      Keys in analyze_match: ${analyzeMatchJson.keys.toList()}');
+        analyzeMatch = null; // Don't create empty analyze match
+      }
     }
 
     // Parse pre-extracted comparison

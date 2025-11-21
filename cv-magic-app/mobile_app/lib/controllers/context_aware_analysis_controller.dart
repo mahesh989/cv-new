@@ -62,7 +62,8 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     if (_displayResult == null) return false;
     
     // Return true when ANY result type is available (including ATS)
-    return _displayResult!.analyzeMatch != null ||
+    // Check analyzeMatch has content, not just exists
+    return (_displayResult!.analyzeMatch != null && !_displayResult!.analyzeMatch!.isEmpty) ||
            _displayResult!.hasPreextractedComparison ||
            _displayResult!.componentAnalysis != null ||
            _displayResult!.atsResult != null ||           // ✅ CRITICAL: Add ATS check
@@ -547,11 +548,21 @@ class ContextAwareAnalysisController extends ChangeNotifier {
           results.cvSkills['comprehensive_analysis'],
       'jd_comprehensive_analysis':
           results.jdSkills['comprehensive_analysis'],
-      'analyze_match': results.cvJdMatching,
       'company': _currentCompany,
       'warnings': _result?.warnings,
       'suggestions': results.jobInfo['suggestions'],
     };
+    
+    // Only include analyze_match if it has actual content
+    if (results.cvJdMatching != null) {
+      final rawAnalysis = results.cvJdMatching['raw_analysis'] as String?;
+      if (rawAnalysis != null && rawAnalysis.trim().isNotEmpty) {
+        baseJson['analyze_match'] = results.cvJdMatching;
+        debugPrint('   ✅ analyze_match included (length: ${rawAnalysis.length})');
+      } else {
+        debugPrint('   ⚠️ analyze_match present but empty - skipping');
+      }
+    }
 
     if (results.aiRecommendations.isNotEmpty) {
       baseJson['ai_recommendation'] = results.aiRecommendations;
@@ -786,9 +797,14 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       return;
     }
     
-    // Analyze Match
-    _showAnalyzeMatchDisplay = _displayResult!.analyzeMatch != null;
+    // Analyze Match - check both that it exists AND has content
+    _showAnalyzeMatchDisplay = _displayResult!.analyzeMatch != null && 
+                               !_displayResult!.analyzeMatch!.isEmpty;
     print('   showAnalyzeMatch: $_showAnalyzeMatchDisplay');
+    if (_displayResult!.analyzeMatch != null) {
+      print('   analyzeMatch.isEmpty: ${_displayResult!.analyzeMatch!.isEmpty}');
+      print('   analyzeMatch.rawAnalysis length: ${_displayResult!.analyzeMatch!.rawAnalysis.length}');
+    }
     
     // Preextracted Comparison
     _showPreextractedComparisonDisplay =
