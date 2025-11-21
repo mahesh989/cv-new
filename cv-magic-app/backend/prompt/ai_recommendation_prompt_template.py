@@ -19,6 +19,9 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     Returns:
         Formatted prompt string for AI recommendation generation
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"🔍 [AI_PROMPT] Generating prompt for {company}")
     
     # Extract optimized data structures
     metadata = analysis_data.get("metadata", {})
@@ -100,6 +103,19 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
             domain_match.get('matched', []),
             already_in_cv_filtered
         )
+    
+    # Debug: Log missing keywords after filtering
+    logger.info(f"📊 [AI_PROMPT] Missing Keywords (after filtering):")
+    logger.info(f"   - Technical: {len(technical_match.get('missing', []))} keywords")
+    logger.info(f"   - Soft: {len(soft_match.get('missing', []))} keywords")
+    logger.info(f"   - Domain: {len(domain_match.get('missing', []))} keywords")
+    logger.info(f"   - Already in CV (excluded): {len(already_in_cv_filtered)} keywords")
+    
+    # Log first few missing keywords
+    if technical_match.get('missing'):
+        logger.info(f"   - Technical missing (first 5): {technical_match.get('missing', [])[:5]}")
+    if soft_match.get('missing'):
+        logger.info(f"   - Soft missing (first 5): {soft_match.get('missing', [])[:5]}")
     
     # Extract component scores
     technical_component = component_summary.get("technical", {})
@@ -402,6 +418,12 @@ Return ONLY this JSON structure (no preamble, no markdown formatting, no code bl
 **CRITICAL:** The output will be parsed programmatically. Invalid JSON will cause system failure. Ensure perfect JSON syntax.
 """
 
+    # Debug: Log prompt generation
+    logger.info(f"✅ [AI_PROMPT] Generated prompt ({len(prompt)} characters)")
+    logger.info(f"   - Contains {len(technical_match.get('missing', []))} technical missing keywords")
+    logger.info(f"   - Contains {len(soft_match.get('missing', []))} soft missing keywords")
+    logger.info(f"   - Contains {len(domain_match.get('missing', []))} domain missing keywords")
+    
     return prompt
 
 

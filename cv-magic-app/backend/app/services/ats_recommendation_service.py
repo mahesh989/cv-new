@@ -39,6 +39,7 @@ class ATSRecommendationService:
             Optimized dictionary for AI consumption or None if not found
         """
         try:
+            logger.info(f"🔍 [INPUT_RECOMMENDATION] Starting extraction for {company}")
             # Locate analysis file
             company_dir = self.base_dir / "applied_companies" / company
             analysis_file = TimestampUtils.find_latest_timestamped_file(
@@ -68,6 +69,16 @@ class ATSRecommendationService:
             match_summary = self._extract_match_summary(preextracted_entries)
             component_summary = self._extract_component_summary(component_entries)
             ats_scoring = self._extract_ats_scoring(ats_entries)
+            
+            # Debug: Log match summary
+            technical_match = match_summary.get("by_category", {}).get("technical", {})
+            soft_match = match_summary.get("by_category", {}).get("soft", {})
+            domain_match = match_summary.get("by_category", {}).get("domain", {})
+            logger.info(f"📊 [INPUT_RECOMMENDATION] Match Summary:")
+            logger.info(f"   - Overall match rate: {match_summary.get('overall_match_rate', 0)}%")
+            logger.info(f"   - Technical: {len(technical_match.get('matched', []))} matched, {len(technical_match.get('missing', []))} missing")
+            logger.info(f"   - Soft: {len(soft_match.get('matched', []))} matched, {len(soft_match.get('missing', []))} missing")
+            logger.info(f"   - Domain: {len(domain_match.get('matched', []))} matched, {len(domain_match.get('missing', []))} missing")
             
             # Generate optimized recommendation data
             recommendation_data = {
@@ -110,6 +121,20 @@ class ATSRecommendationService:
                 # Clean ATS scoring (numbers only)
                 "ats_scoring": ats_scoring
             }
+            
+            # Debug: Log keyword classification
+            keyword_guidance = recommendation_data.get("keyword_integration_guidance", {})
+            logger.info(f"🔍 [INPUT_RECOMMENDATION] Keyword Classification:")
+            logger.info(f"   - Tier 1 (always add): Technical={len(keyword_guidance.get('tier1_always_add', {}).get('technical', []))}, Soft={len(keyword_guidance.get('tier1_always_add', {}).get('soft', []))}")
+            logger.info(f"   - Tier 2 (with evidence): Technical={len(keyword_guidance.get('tier2_add_if_evidence', {}).get('technical', []))}, Soft={len(keyword_guidance.get('tier2_add_if_evidence', {}).get('soft', []))}")
+            logger.info(f"   - Tier 3 (never add): Technical={len(keyword_guidance.get('tier3_never_add', {}).get('technical', []))}, Domain={len(keyword_guidance.get('tier3_never_add', {}).get('domain', []))}")
+            logger.info(f"   - Already in CV (filtered): {len(keyword_guidance.get('already_in_cv_filtered', []))}")
+            
+            # Debug: Log final recommendation data summary
+            missing_counts = ats_scoring.get("missing_counts", {})
+            logger.info(f"✅ [INPUT_RECOMMENDATION] Created recommendation data:")
+            logger.info(f"   - ATS Score: {ats_scoring.get('final_score', 0)}")
+            logger.info(f"   - Missing counts: Technical={missing_counts.get('technical', 0)}, Soft={missing_counts.get('soft', 0)}, Domain={missing_counts.get('domain', 0)}")
             
             return recommendation_data
             

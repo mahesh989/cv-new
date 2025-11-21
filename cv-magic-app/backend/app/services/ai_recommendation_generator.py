@@ -246,13 +246,31 @@ class AIRecommendationGenerator:
         Returns:
             Structured JSON data with both markdown (for display) and JSON (for CV generation)
         """
+        logger.info(f"🔍 [AI_RESPONSE] Parsing AI response for {company}")
+        
         # Clean the response before parsing
         cleaned_content = self._clean_json_response(ai_response.content)
         
         try:
             # Try to parse response as JSON
             json_data = json.loads(cleaned_content)
-            logger.info(f"✅ [AI GENERATOR] Successfully parsed AI response as JSON")
+            logger.info(f"✅ [AI_RESPONSE] Successfully parsed JSON")
+            
+            # Check keyword categorization
+            keyword_integration = json_data.get('keyword_integration', {})
+            tier1 = keyword_integration.get('tier1_integrate_immediately', {})
+            tier2 = keyword_integration.get('tier2_add_with_evidence', {})
+            tier3 = keyword_integration.get('tier3_never_add', {})
+            
+            tier1_count = len(tier1.get('technical', [])) + len(tier1.get('soft', [])) + len(tier1.get('domain', []))
+            tier2_count = len(tier2.get('technical', [])) + len(tier2.get('soft', [])) + len(tier2.get('domain', []))
+            tier3_count = len(tier3.get('technical', [])) + len(tier3.get('soft', [])) + len(tier3.get('domain', []))
+            
+            logger.info(f"📊 [AI_RESPONSE] Keyword Categorization:")
+            logger.info(f"   - Tier 1: {tier1_count} keywords (Technical: {len(tier1.get('technical', []))}, Soft: {len(tier1.get('soft', []))}, Domain: {len(tier1.get('domain', []))})")
+            logger.info(f"   - Tier 2: {tier2_count} keywords (Technical: {len(tier2.get('technical', []))}, Soft: {len(tier2.get('soft', []))}, Domain: {len(tier2.get('domain', []))})")
+            logger.info(f"   - Tier 3: {tier3_count} keywords (Technical: {len(tier3.get('technical', []))}, Soft: {len(tier3.get('soft', []))}, Domain: {len(tier3.get('domain', []))})")
+            logger.info(f"   - Total categorized: {tier1_count + tier2_count + tier3_count}")
             
             # Convert JSON to markdown for frontend display
             markdown_content = self._convert_json_to_markdown(json_data, company)
@@ -260,9 +278,14 @@ class AIRecommendationGenerator:
             # Extract actionable guidance for CV generation
             try:
                 actionable_guidance = self._extract_actionable_guidance(json_data)
-                logger.info(f"✅ [AI GENERATOR] Extracted actionable guidance for CV generation")
+                logger.info(f"✅ [AI_RESPONSE] Extracted actionable guidance:")
+                tier1_act = actionable_guidance.get('tier1_add_immediately', {})
+                tier2_act = actionable_guidance.get('tier2_add_with_evidence', {})
+                logger.info(f"   - Tier 1: {len(tier1_act.get('technical', []))} technical, {len(tier1_act.get('soft', []))} soft")
+                logger.info(f"   - Tier 2: {len(tier2_act.get('technical', []))} technical, {len(tier2_act.get('soft', []))} soft")
+                logger.info(f"   - Tier 3 avoid: {len(actionable_guidance.get('tier3_never_add', []))} keywords")
             except Exception as e:
-                logger.warning(f"⚠️ [AI GENERATOR] Failed to extract actionable guidance: {e}")
+                logger.warning(f"⚠️ [AI_RESPONSE] Failed to extract actionable guidance: {e}")
                 actionable_guidance = {}  # Empty dict if extraction fails
             
             return {

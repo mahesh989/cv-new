@@ -2192,9 +2192,12 @@ FIX: Output ONLY valid JSON!
             RecommendationAnalysis object
         """
         try:
+            logger.info(f"🔍 [CV_TAILORING] Loading recommendation for {company_folder}")
+            
             # Strict selection: require a timestamped AI recommendation file for the company
             company_dir = Path(company_folder)
             from app.utils.timestamp_utils import TimestampUtils
+            from datetime import datetime
             latest_file = TimestampUtils.find_latest_timestamped_file(
                 company_dir, f"{company_dir.name}_ai_recommendation", "json"
             )
@@ -2204,8 +2207,22 @@ FIX: Output ONLY valid JSON!
                     f"No timestamped AI recommendation found for {company_dir.name} in {company_folder}"
                 )
             
+            # Debug: Log file info
+            logger.info(f"📄 [CV_TAILORING] Found recommendation file: {latest_file}")
+            logger.info(f"   - File size: {latest_file.stat().st_size / 1024:.1f} KB")
+            logger.info(f"   - Modified: {datetime.fromtimestamp(latest_file.stat().st_mtime)}")
+            
             # Parse the recommendation file using our parser
             parsed_data = RecommendationParser.parse_recommendation_file(str(latest_file))
+            
+            # Debug: Log parsed data
+            logger.info(f"✅ [CV_TAILORING] Parsed recommendation:")
+            logger.info(f"   - Company: {parsed_data.get('company')}")
+            logger.info(f"   - Missing technical: {len(parsed_data.get('missing_technical_skills', []))}")
+            logger.info(f"   - Missing soft: {len(parsed_data.get('missing_soft_skills', []))}")
+            logger.info(f"   - Has tier1_keywords: {bool(parsed_data.get('tier1_keywords'))}")
+            logger.info(f"   - Has tier2_keywords: {bool(parsed_data.get('tier2_keywords'))}")
+            logger.info(f"   - Has tier3_avoid: {bool(parsed_data.get('tier3_avoid'))}")
             
             return RecommendationAnalysis(**parsed_data)
             

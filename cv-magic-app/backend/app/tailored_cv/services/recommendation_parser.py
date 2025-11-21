@@ -32,6 +32,8 @@ class RecommendationParser:
             Structured recommendation data compatible with RecommendationAnalysis model
         """
         try:
+            logger.info(f"🔍 [RECOMMENDATION_PARSER] Parsing {file_path}")
+            
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
@@ -41,36 +43,61 @@ class RecommendationParser:
             has_actionable = bool(data.get('actionable_guidance'))
             has_structured = metadata.get('has_structured_data', False)
             
+            # Debug: Log format detection
+            logger.info(f"📊 [RECOMMENDATION_PARSER] Format detected:")
+            logger.info(f"   - Version: {format_version}")
+            logger.info(f"   - Has actionable_guidance: {has_actionable}")
+            logger.info(f"   - Has structured_recommendations: {has_structured}")
+            logger.info(f"   - Has recommendation_content: {bool(data.get('recommendation_content'))}")
+            
             # PRIORITY 1: Use actionable_guidance if available (v2.0+ - preferred method)
             if has_actionable and 'actionable_guidance' in data:
-                logger.info(f"✅ [PARSER] Using actionable_guidance (v{format_version}) for {company}")
+                logger.info(f"✅ [RECOMMENDATION_PARSER] Using actionable_guidance (v{format_version}) for {company}")
                 parsed_data = RecommendationParser.parse_actionable_guidance(
                     data['actionable_guidance'], 
                     data.get('structured_recommendations', {}),
                     company
                 )
+                parsing_method_used = 'parse_actionable_guidance'
             
             # PRIORITY 2: Use structured_recommendations (v2.0)
             elif has_structured and 'structured_recommendations' in data:
-                logger.info(f"✅ [PARSER] Using structured_recommendations (v{format_version}) for {company}")
+                logger.info(f"✅ [RECOMMENDATION_PARSER] Using structured_recommendations (v{format_version}) for {company}")
                 parsed_data = RecommendationParser.parse_structured_recommendations(
                     data['structured_recommendations'], company
                 )
+                parsing_method_used = 'parse_structured_recommendations'
             
             # PRIORITY 3: Fallback to markdown parsing (v1.0)
             else:
-                logger.info(f"⚠️ [PARSER] Falling back to markdown parsing (v{format_version}) for {company}")
+                logger.info(f"⚠️ [RECOMMENDATION_PARSER] Falling back to markdown parsing (v{format_version}) for {company}")
                 recommendation_content = data.get('recommendation_content', '')
                 parsed_data = RecommendationParser.parse_markdown_content(
                     recommendation_content, company
                 )
+                parsing_method_used = 'parse_markdown_content'
+            
+            logger.info(f"   - Using parser: {parsing_method_used}")
             
             # Add metadata (common to all formats)
             parsed_data['generated_at'] = data.get('generated_at')
             parsed_data['ai_model_info'] = data.get('ai_model_info', {})
             parsed_data['format_version'] = format_version
             
-            logger.info(f"✅ Parsed recommendation for {company} (format: {format_version})")
+            # Debug: Log parsed data summary
+            logger.info(f"✅ [RECOMMENDATION_PARSER] Parsed recommendation for {company}:")
+            logger.info(f"   - Missing technical: {len(parsed_data.get('missing_technical_skills', []))}")
+            logger.info(f"   - Missing soft: {len(parsed_data.get('missing_soft_skills', []))}")
+            logger.info(f"   - Has tier1_keywords: {bool(parsed_data.get('tier1_keywords'))}")
+            logger.info(f"   - Has tier2_keywords: {bool(parsed_data.get('tier2_keywords'))}")
+            logger.info(f"   - Has tier3_avoid: {bool(parsed_data.get('tier3_avoid'))}")
+            if parsed_data.get('tier1_keywords'):
+                tier1 = parsed_data['tier1_keywords']
+                logger.info(f"   - Tier 1: Technical={len(tier1.get('technical', []))}, Soft={len(tier1.get('soft', []))}")
+            if parsed_data.get('tier2_keywords'):
+                tier2 = parsed_data['tier2_keywords']
+                logger.info(f"   - Tier 2: Technical={len(tier2.get('technical', []))}, Soft={len(tier2.get('soft', []))}")
+            
             return parsed_data
             
         except Exception as e:
