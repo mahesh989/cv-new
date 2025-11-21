@@ -26,29 +26,30 @@ class SkillsDisplayWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        debugPrint('🔄 [WIDGET] ===== SKILLS_DISPLAY REBUILD =====');
-        debugPrint('   controller.hasError: ${controller.hasError}');
-        debugPrint('   controller.hasResults: ${controller.hasResults}');
-        debugPrint('   controller.isLoading: ${controller.isLoading}');
-        debugPrint('   controller.state: ${controller.state}');
-        debugPrint('   showATSResults: ${controller.showATSResults}');
-        debugPrint('   showATSLoading: ${controller.showATSLoading}');
-        debugPrint('   hasATSResult: ${controller.hasATSResult}');
+        print('🔄 [WIDGET] ===== SKILLS_DISPLAY REBUILD =====');
+        print('   controller.hasError: ${controller.hasError}');
+        print('   controller.hasResults: ${controller.hasResults}');
+        print('   controller.isLoading: ${controller.isLoading}');
+        print('   controller.state: ${controller.state}');
+        print('   showATSResults: ${controller.showATSResults}');
+        print('   showATSLoading: ${controller.showATSLoading}');
+        print('   hasATSResult: ${controller.hasATSResult}');
 
         // Main content based on state
         if (controller.hasError) {
-          debugPrint('🔍 [SKILLS_DISPLAY] Building error state');
+          print('🔍 [SKILLS_DISPLAY] Building error state');
           return _buildErrorState();
         } else if (controller.isCancelled) {
-          debugPrint('🔍 [SKILLS_DISPLAY] Building cancelled state');
+          print('🔍 [SKILLS_DISPLAY] Building cancelled state');
           return _buildCancelledState();
         } else if (!controller.hasResults && !controller.isLoading) {
-          debugPrint(
+          print(
             '🔍 [SKILLS_DISPLAY] Building empty state (no results, not loading)',
           );
           return const SizedBox.shrink(); // Remove placeholder - show nothing
         } else {
-          debugPrint('🔍 [SKILLS_DISPLAY] Building results content');
+          print('🔍 [SKILLS_DISPLAY] Building results content');
+          print('   ✅ About to call _buildResultsContent()');
           return _buildResultsContent();
         }
       },
@@ -127,7 +128,8 @@ class SkillsDisplayWidget extends StatelessWidget {
   }
 
   Widget _buildResultsContent() {
-    // Debug logging
+    // ✅ CRITICAL: This log MUST appear if method is called
+    print('🚨🚨🚨 [WIDGET] _buildResultsContent CALLED! 🚨🚨🚨');
     print('🏗️ [WIDGET] _buildResultsContent called');
     print('   controller.hasResults: ${controller.hasResults}');
     print('   controller.isLoading: ${controller.isLoading}');
@@ -308,14 +310,19 @@ class SkillsDisplayWidget extends StatelessWidget {
             builder: (context) {
               final showATS =
                   controller.showATSLoading || controller.showATSResults;
-              print('🚨 [ATS_DIAGNOSTIC] ===== ATS CONDITION CHECK =====');
+              print(
+                  '🚨🚨🚨 [ATS_DIAGNOSTIC] ===== ATS CONDITION CHECK ===== 🚨🚨🚨');
               print('   showATSLoading: ${controller.showATSLoading}');
               print('   showATSResults: ${controller.showATSResults}');
               print(
                   '   Condition (showATSLoading || showATSResults): $showATS');
               print('   hasATSResult: ${controller.hasATSResult}');
               print('   atsResult != null: ${controller.atsResult != null}');
-              print('🚨 [ATS_DIAGNOSTIC] ===== END CHECK =====');
+              if (controller.atsResult != null) {
+                print(
+                    '   ✅ atsResult.finalATSScore: ${controller.atsResult!.finalATSScore}');
+              }
+              print('🚨🚨🚨 [ATS_DIAGNOSTIC] ===== END CHECK ===== 🚨🚨🚨');
               return const SizedBox.shrink();
             },
           ),
