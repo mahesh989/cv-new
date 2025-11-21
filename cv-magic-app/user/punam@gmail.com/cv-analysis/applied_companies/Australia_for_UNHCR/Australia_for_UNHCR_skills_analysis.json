@@ -1,0 +1,313 @@
+{
+  "generated": "2025-11-21T05:30:49.442",
+  "cv_filename": "original_cv.json",
+  "jd_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst",
+  "user_id": "6",
+  "company": "Australia_for_UNHCR",
+  "model_used": "unknown",
+  "cv_skills": {
+    "technical_skills": [
+      "Python",
+      "Power BI",
+      "Tableau",
+      "Excel",
+      "Data Modelling",
+      "Report Generation",
+      "Dashboard Creation"
+    ],
+    "soft_skills": [
+      "Analytical Thinking",
+      "Communication",
+      "Problem Solving",
+      "Teamwork"
+    ],
+    "domain_keywords": [],
+    "experience_years": 5,
+    "education": [
+      "Master of Data Science from Charles Darwin University",
+      "PhD in Physics from CY Cergy Paris University"
+    ],
+    "certifications": [],
+    "languages": [],
+    "summary": "Senior Data Analyst with 5 years' experience in data analytics and change management, delivering insights and strategic solutions for tech and construction industries. Developed machine learning models and automated data processes to enhance strategic planning and operational efficiency."
+  },
+  "jd_skills": {
+    "technical_skills": [
+      "Excel",
+      "Power BI",
+      "SQL",
+      "Tableau",
+      "VBA"
+    ],
+    "soft_skills": [
+      "communication",
+      "customer service",
+      "project management",
+      "stakeholder management"
+    ],
+    "domain_keywords": [
+      "clean data",
+      "data issues",
+      "data models",
+      "data warehouse",
+      "de-duplication",
+      "marketing campaigns"
+    ]
+  },
+  "cv_comprehensive_analysis": "Senior Data Analyst with 5 years' experience in data analytics and change management, delivering insights and strategic solutions for tech and construction industries. Developed machine learning models and automated data processes to enhance strategic planning and operational efficiency.",
+  "jd_comprehensive_analysis": "Must-have technical: SQL, Power BI, Excel, VBA | Optional technical: Tableau | Soft skills: project management, stakeholder management, communication, customer service | Domain knowledge: data warehouse, marketing campaigns, data models | Experience years: 2+",
+  "analyze_match_entries": [
+    {
+      "timestamp": "2025-11-21T05:30:49.443",
+      "model_used": "unknown",
+      "content": "DECISION: DONT_PROCEED  \nCONFIDENCE: 100  \nMATCH_SCORE: 50  \n\nPRIMARY_REASON: The job posting is over 30 days old, likely filled.  \n\nCRITICAL_MISSING: None  \nIMPLICIT_LIKELY: Excel, SQL  \nLEARNABLE_GAPS: None  \n\nBLOCKER_FOUND: Yes (Job expiry)  \n\n---  \nDETAILED_ANALYSIS:  \n1. The job was posted on March 14, 2025, and today's date is November 21, 2025, which is well over 30 days. This suggests the position is likely filled or no longer accepting applications.  \n2. The candidate's skills and experience align well with the job requirements, but the job's age is a critical blocker, making it unnecessary to proceed with tailoring the CV for this position."
+    }
+  ],
+  "preextracted_comparison_entries": [
+    {
+      "timestamp": "2025-11-21T05:30:59.534",
+      "model_used": "unknown",
+      "content": "🎯 OVERALL SUMMARY\n----------------------------------------\nTotal Requirements: 15\nMatched: 6\nMissing: 9\nMatch Rate: 40.0%\n\n📊 SUMMARY TABLE\n--------------------------------------------------------------------------------\nCategory              CV Total  JD Total   Matched   Missing  Match Rate (%)\nTechnical Skills             7          5         3         2            60.0\nSoft Skills                   4          4         3         1            75.0\nDomain Keywords              0          6         0         6             0.0\n\n🧠 DETAILED AI ANALYSIS\n--------------------------------------------------------------------------------\n\n🔹 TECHNICAL SKILLS\n  ✅ MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'Excel'\n       → Found in CV: 'Excel'\n       💡 brief reasoning: Exact match; both refer to the same software tool.\n    2. JD Required: 'Power BI'\n       → Found in CV: 'Power BI'\n       💡 brief reasoning: Exact match; both refer to the same business intelligence tool.\n    3. JD Required: 'Tableau'\n       → Found in CV: 'Tableau'\n       💡 brief reasoning: Exact match; both refer to the same data visualization tool.\n  ❌ MISSING FROM CV (2 items):\n    1. JD Requires: 'SQL'\n       💡 brief reason why not found: No direct match; SQL is not listed in the CV.\n    2. JD Requires: 'VBA'\n       💡 brief reason why not found: No direct match; VBA is not listed in the CV.\n\n🔹 SOFT SKILLS\n  ✅ MATCHED JD REQUIREMENTS (3 items):\n    1. JD Required: 'communication'\n       → Found in CV: 'Communication'\n       💡 brief reasoning: Exact match; both refer to the same skill.\n    2. JD Required: 'project management'\n       → Found in CV: 'Analytical Thinking'\n       💡 brief reasoning: Analytical thinking is a component of effective project management.\n    3. JD Required: 'stakeholder management'\n       → Found in CV: 'Teamwork'\n       💡 brief reasoning: Teamwork involves managing relationships with stakeholders.\n  ❌ MISSING FROM CV (1 item):\n    1. JD Requires: 'customer service'\n       💡 brief reason why not found: No direct match; customer service is not listed in the CV.\n\n🔹 DOMAIN KEYWORDS\n  ✅ MATCHED JD REQUIREMENTS (0 items):\n    [No matches found]\n  ❌ MISSING FROM CV (6 items):\n    1. JD Requires: 'clean data'\n       💡 brief reason why not found: No direct match; not listed in the CV.\n    2. JD Requires: 'data issues'\n       💡 brief reason why not found: No direct match; not listed in the CV.\n    3. JD Requires: 'data models'\n       💡 brief reason why not found: No direct match; not listed in the CV.\n    4. JD Requires: 'data warehouse'\n       💡 brief reason why not found: No direct match; not listed in the CV.\n    5. JD Requires: 'de-duplication'\n       💡 brief reason why not found: No direct match; not listed in the CV.\n    6. JD Requires: 'marketing campaigns'\n       💡 brief reason why not found: No direct match; not listed in the CV.\n\n📚 INPUT SUMMARY (normalized, truncated if long)\nCV\n- Technical: ['Python', 'Power BI', 'Tableau', 'Excel', 'Data Modelling', 'Report Generation', 'Dashboard Creation']\n- Soft: ['Analytical Thinking', 'Communication', 'Problem Solving', 'Teamwork']\n- Domain: []\n\nJD\n- Technical: ['Excel', 'Power BI', 'SQL', 'Tableau', 'VBA']\n- Soft: ['communication', 'customer service', 'project management', 'stakeholder management']\n- Domain: ['clean data', 'data issues', 'data models', 'data warehouse', 'de-duplication', 'marketing campaigns']"
+    }
+  ],
+  "component_analysis_entries": [
+    {
+      "timestamp": "2025-11-21T05:31:31.796",
+      "component_analyses": {
+        "technical": {
+          "technical_analysis": {
+            "technical_depth_score": 70.0,
+            "core_skills_match_percentage": 80.0,
+            "technical_stack_fit_percentage": 85.0,
+            "complexity_readiness_score": 65.0,
+            "learning_agility_score": 75.0,
+            "jd_problem_complexity": 5,
+            "technical_strengths": [
+              "Developed 5 machine learning models in Python for predictive analytics, enhancing strategic planning by 25%",
+              "Built 10 dynamic dashboards using Python libraries, improving stakeholder engagement and data-driven decision-making",
+              "Automated repetitive tasks using AI techniques, reducing manual effort by 40% and improving operational efficiency"
+            ],
+            "technical_gaps": [
+              "No mention of experience with large-scale distributed systems",
+              "Limited evidence of handling high availability or large-scale data processing"
+            ],
+            "cv_sophistication_level": "Derived from analysis",
+            "cv_primary_domain": "Extracted from CV",
+            "jd_required_sophistication": "Extracted from JD",
+            "overqualification_risk": "LOW"
+          }
+        },
+        "skills": {
+          "overall_skills_score": 90.0,
+          "business_readiness_score": 90.0,
+          "skills_analysis": [
+            {
+              "skill": "Consolidated skills analysis",
+              "relevance_score": 90.0,
+              "context": "Python used in corporate production (100%), Power BI in corporate (100%), Tableau in corporate (100%), Data Modelling in corporate (100%)",
+              "business_application": "Python used in corporate production (100%), Power BI in corporate (100%), Tableau in corporate (100%), Data Modelling in corporate (100%)"
+            }
+          ],
+          "corporate_skills_strength": "Python used in corporate production (100%), Power BI in corporate (100%), Tableau in corporate (100%), Data Modelling in corporate (100%)",
+          "academic_skills_discount": "Applied in scoring",
+          "strength_areas": [
+            "Developed 5 machine learning models in Python for predictive analytics, enhancing strategic planning by 25%",
+            "Built 10 dynamic dashboards using Python libraries, improving stakeholder engagement and data-driven decision-making",
+            "Automated repetitive tasks using AI techniques, reducing manual effort by 40% and improving operational efficiency"
+          ],
+          "critical_gaps": [
+            "Donor-centric data segmentation strategies",
+            "Experience with multi-channel communication strategies",
+            "Specific BI report authoring in Power BI"
+          ],
+          "immediate_value_skills": [
+            "Developed 5 machine learning models in Python for predictive analytics, enhancing strategic planning by 25%",
+            "Built 10 dynamic dashboards using Python libraries, improving stakeholder engagement and data-driven decision-making",
+            "Automated repetitive tasks using AI techniques, reducing manual effort by 40% and improving operational efficiency"
+          ],
+          "training_investment_needed": [
+            "Donor-centric data segmentation strategies",
+            "Experience with multi-channel communication strategies",
+            "Specific BI report authoring in Power BI"
+          ]
+        },
+        "experience": {
+          "experience_analysis": {
+            "cv_experience_years": "6.0",
+            "cv_corporate_years": "2.0",
+            "cv_academic_years": "4.0",
+            "cv_role_level": "Mid",
+            "jd_required_years": "5.0",
+            "jd_role_level": "Mid",
+            "alignment_score": 75.0,
+            "experience_gaps": [
+              "No evidence of team management or mentoring",
+              "No mention of leading cross-functional initiatives or managing stakeholders at a senior level"
+            ],
+            "experience_strengths": [
+              "Developed machine learning models and automated processes at The Bitrates",
+              "Built dashboards and improved data processing at Property Console",
+              "Analyzed customer support data and developed solutions at iBuild Building Solutions"
+            ],
+            "overqualification_risk": "LOW",
+            "cv_progression": [
+              "Derived from analysis"
+            ],
+            "quantified_achievements": [
+              "Developed machine learning models and automated processes at The Bitrates",
+              "Built dashboards and improved data processing at Property Console",
+              "Analyzed customer support data and developed solutions at iBuild Building Solutions"
+            ]
+          }
+        },
+        "seniority": {
+          "seniority_analysis": {
+            "cv_corporate_years": "2.0",
+            "cv_academic_years": "4.0",
+            "seniority_score": 60.0,
+            "corporate_seniority_match": 60.0,
+            "leadership_readiness_score": 40.0,
+            "experience_match_percentage": 70.0,
+            "responsibility_fit_percentage": 60.0,
+            "growth_trajectory_score": 75.0,
+            "cv_responsibility_scope": "Mid",
+            "cv_leadership_indicators": "5",
+            "jd_required_seniority": "Mid",
+            "overqualification_risk": "MEDIUM",
+            "seniority_strengths": [
+              "Developed machine learning models and automated processes at The Bitrates",
+              "Built dashboards and improved data processing at Property Console",
+              "Analyzed customer support data and developed solutions at iBuild Building Solutions"
+            ],
+            "seniority_gaps": [
+              "No evidence of team management or mentoring",
+              "No mention of leading cross-functional initiatives or managing stakeholders at a senior level"
+            ],
+            "readiness_assessment": "Score: 60.0"
+          }
+        },
+        "industry": {
+          "industry_analysis": {
+            "cv_primary_industry": "Tech and Construction",
+            "jd_target_industry": "International Aid and Development",
+            "industry_alignment_score": 50.0,
+            "transition_type": "Different industry, corporate background",
+            "success_probability": "MEDIUM",
+            "hiring_risk_assessment": "HIGH RISK",
+            "industry_strengths": [
+              "The candidate's experience in tech and construction does not directly align with the international aid and development sector. While data analysis skills are transferable, the context and specific challenges of the NFP sector, such as donor management and fundraising analytics, are not evident in the CV. This transition poses a significant adaptation challenge."
+            ],
+            "critical_industry_gaps": [],
+            "corporate_background_bonus": "5",
+            "domain_overlap_percentage": 50.0,
+            "data_familiarity_score": 65.0,
+            "stakeholder_fit_score": 40.0,
+            "business_cycle_alignment": 50.0,
+            "direct_industry_match": "PARTIAL",
+            "cultural_adaptation_difficulty": "MEDIUM",
+            "adaptation_timeline": "6-12 months"
+          }
+        },
+        "requirement_bonus": {
+          "match_counts": {
+            "total_required_keywords": 11,
+            "total_preferred_keywords": 4,
+            "matched_required_count": 7,
+            "matched_preferred_count": 1,
+            "missing_required": 4,
+            "missing_preferred": 3
+          },
+          "bonus_breakdown": {
+            "required_bonus": 3.0,
+            "required_penalty": -1.5,
+            "preferred_bonus": 0.2,
+            "preferred_penalty": -0.45,
+            "total_bonus": 1.25
+          },
+          "coverage_metrics": {
+            "required_coverage": 63.64,
+            "preferred_coverage": 25.0
+          }
+        }
+      },
+      "extracted_scores": {
+        "skills_relevance": 90.0,
+        "experience_alignment": 75.0,
+        "industry_fit": 50.0,
+        "domain_overlap_percentage": 50.0,
+        "data_familiarity_score": 65.0,
+        "stakeholder_fit_score": 40.0,
+        "business_cycle_alignment": 50.0,
+        "industry_transition_fit": 50.0,
+        "role_seniority": 60.0,
+        "experience_match_percentage": 70.0,
+        "role_similarity": 70.0,
+        "responsibility_fit_percentage": 60.0,
+        "leadership_readiness_score": 40.0,
+        "growth_trajectory_score": 75.0,
+        "seniority_match": 60.0,
+        "technical_depth": 70.0,
+        "core_skills_match_percentage": 80.0,
+        "required_skills_coverage": 80.0,
+        "technical_stack_fit_percentage": 85.0,
+        "tech_stack_similarity": 85.0,
+        "complexity_readiness_score": 65.0,
+        "learning_agility_score": 75.0,
+        "jd_problem_complexity": 5.0,
+        "business_readiness": 90.0,
+        "requirement_bonus": 1.25,
+        "total_bonus": 1.25,
+        "required_bonus": 3.0,
+        "required_penalty": -1.5,
+        "preferred_bonus": 0.2,
+        "preferred_penalty": -0.45,
+        "required_coverage": 63.64,
+        "preferred_coverage": 25.0
+      },
+      "analysis_type": "modular_component_analysis"
+    }
+  ],
+  "ats_calculation_entries": [
+    {
+      "timestamp": "2025-11-21T05:31:31.801",
+      "final_ats_score": 62.7,
+      "category_status": "⚠️ Moderate fit",
+      "recommendation": "Consider if other factors are strong",
+      "breakdown": {
+        "category1": {
+          "score": 35.2,
+          "max_points": 65,
+          "technical_skills_match_rate": 60.0,
+          "domain_keywords_match_rate": 0.0,
+          "soft_skills_match_rate": 75.0,
+          "technical_points": 24.0,
+          "domain_points": 0.0,
+          "soft_points": 11.2,
+          "missing_counts": {
+            "technical": 2,
+            "soft": 1,
+            "domain": 6
+          }
+        },
+        "category2": {
+          "score": 26.2,
+          "max_points": 35,
+          "technical_skills_component": {
+            "score": 17.9,
+            "max_points": 22,
+            "average": 81.2
+          },
+          "experience_fit_component": {
+            "score": 8.3,
+            "max_points": 13,
+            "average": 63.8
+          }
+        },
+        "base_score": 61.4,
+        "bonus_points": 1.2,
+        "boost_applied": 0.0
+      },
+      "scoring_version": "v2_65_35_split"
+    }
+  ]
+}

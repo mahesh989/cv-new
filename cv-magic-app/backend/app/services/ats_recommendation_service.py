@@ -265,17 +265,30 @@ class ATSRecommendationService:
         }
     
     def _extract_match_summary(self, preextracted_entries: List[Dict]) -> Dict[str, Any]:
-        """Extract clean match summary (no verbose reasoning)"""
+        """
+        Extract clean match summary from preextracted comparison entries
+        
+        FIXED: Now handles both "→ Found in CV:" and legacy "CV Has:" formats
+        """
         if not preextracted_entries:
             return {
                 "overall_match_rate": 0,
-                "by_category": {},
-                "missing_keywords": {"technical": [], "soft": [], "domain": []}
+                "by_category": {
+                    "technical": {"matched": [], "missing": [], "match_rate": 0},
+                    "soft": {"matched": [], "missing": [], "match_rate": 0},
+                    "domain": {"matched": [], "missing": [], "match_rate": 0}
+                },
+                "missing_keywords": {
+                    "technical": [],
+                    "soft": [],
+                    "domain": []
+                }
             }
         
         latest_entry = preextracted_entries[-1]
         content = latest_entry.get("content", "")
         
+        # Initialize structure
         match_summary = {
             "overall_match_rate": 0,
             "by_category": {
@@ -283,56 +296,112 @@ class ATSRecommendationService:
                 "soft": {"matched": [], "missing": [], "match_rate": 0},
                 "domain": {"matched": [], "missing": [], "match_rate": 0}
             },
-            "missing_keywords": {"technical": [], "soft": [], "domain": []}
+            "missing_keywords": {
+                "technical": [],
+                "soft": [],
+                "domain": []
+            }
         }
         
         # Extract overall match rate
-        match_rate_pattern = r"Match Rate:\s*([\d.]+)%"
-        match = re.search(match_rate_pattern, content)
-        if match:
-            match_summary["overall_match_rate"] = float(match.group(1))
-        
-        # Extract per-category data
-        current_category = None
         for line in content.split("\n"):
-            # Detect category sections
-            if "Technical Skills" in line:
+            if "Match Rate:" in line:
+                try:
+                    rate_str = line.split("Match Rate:")[1].strip().replace("%", "")
+                    match_summary["overall_match_rate"] = float(rate_str)
+                    break
+                except (IndexError, ValueError):
+                    pass
+        
+        # Parse by category
+        current_category = None
+        lines = content.split("\n")
+        
+        for i, line in enumerate(lines):
+            line_upper = line.upper()
+            
+            # Detect category sections (case-insensitive with emoji support)
+            if "TECHNICAL SKILLS" in line_upper or "TECHNICAL SKILL" in line_upper:
                 current_category = "technical"
-            elif "Soft Skills" in line:
+                logger.info(f"📊 [MATCH_SUMMARY] Detected technical section")
+                continue
+            elif "SOFT SKILLS" in line_upper or "SOFT SKILL" in line_upper:
                 current_category = "soft"
-            elif "Domain Keywords" in line:
+                logger.info(f"📊 [MATCH_SUMMARY] Detected soft section")
+                continue
+            elif "DOMAIN KEYWORDS" in line_upper or "DOMAIN KEYWORD" in line_upper:
                 current_category = "domain"
+                logger.info(f"📊 [MATCH_SUMMARY] Detected domain section")
+                continue
             
-            # Extract match rate for category
-            if current_category:
-                cat_match_rate = re.search(r"Match Rate:\s*([\d.]+)%", line)
-                if cat_match_rate:
-                    match_summary["by_category"][current_category]["match_rate"] = float(cat_match_rate.group(1))
+            if not current_category:
+                continue
             
-            # Extract matched skills (look for "CV Has: 'skill'")
-            if ("CV Has:" in line or "CV has:" in line) and current_category:
+            # ✅ FIX: Extract matched skills - handle BOTH formats
+            # Format 1 (current): "→ Found in CV: 'skill'"
+            # Format 2 (legacy): "CV Has: 'skill'"
+            if ("→ Found in CV:" in line or 
+                "Found in CV:" in line or 
+                "CV Has:" in line or 
+                "CV has:" in line):
                 try:
-                    skill = line.split("'")[1]
-                    match_summary["by_category"][current_category]["matched"].append(skill)
-                except:
-                    pass
+                    # Extract skill from quotes
+                    if "'" in line:
+                        parts = line.split("'")
+                        if len(parts) >= 2:
+                            skill = parts[1].strip()
+                            if skill and skill not in match_summary["by_category"][current_category]["matched"]:
+                                match_summary["by_category"][current_category]["matched"].append(skill)
+                                logger.info(f"   ✅ Matched {current_category}: {skill}")
+                except Exception as e:
+                    logger.warning(f"   ⚠️ Error extracting matched skill: {e}")
             
-            # Extract missing skills (look for "JD Requires: 'skill'")
-            if ("JD Required:" in line or "JD Requires:" in line) and current_category:
+            # Extract missing skills - handle both formats
+            # "JD Required:" appears in matched section
+            # "JD Requires:" appears in missing section
+            if ("JD Requires:" in line or "JD Required:" in line):
                 try:
-                    skill = line.split("'")[1]
-                    match_summary["by_category"][current_category]["missing"].append(skill)
-                    match_summary["missing_keywords"][current_category].append(skill)
-                except:
-                    pass
+                    # Extract skill from quotes
+                    if "'" in line:
+                        parts = line.split("'")
+                        if len(parts) >= 2:
+                            skill = parts[1].strip()
+                            
+                            # Only add to missing if it's NOT in the matched section
+                            # Check if this is in a "MISSING FROM CV" section
+                            # Look back a few lines to see if we're in missing section
+                            in_missing_section = False
+                            for j in range(max(0, i-5), i):
+                                if "MISSING FROM CV" in lines[j].upper() or "❌" in lines[j]:
+                                    in_missing_section = True
+                                    break
+                            
+                            # If we're in missing section OR skill not in matched, add to missing
+                            if in_missing_section or skill not in match_summary["by_category"][current_category]["matched"]:
+                                if skill and skill not in match_summary["by_category"][current_category]["missing"]:
+                                    match_summary["by_category"][current_category]["missing"].append(skill)
+                                    logger.info(f"   ❌ Missing {current_category}: {skill}")
+                except Exception as e:
+                    logger.warning(f"   ⚠️ Error extracting missing skill: {e}")
         
         # Calculate match rates per category
         for category in ["technical", "soft", "domain"]:
             matched_count = len(match_summary["by_category"][category]["matched"])
             missing_count = len(match_summary["by_category"][category]["missing"])
             total = matched_count + missing_count
+            
             if total > 0:
-                match_summary["by_category"][category]["match_rate"] = (matched_count / total) * 100
+                match_rate = (matched_count / total) * 100
+                match_summary["by_category"][category]["match_rate"] = round(match_rate, 2)
+            
+            # Add to missing_keywords summary
+            match_summary["missing_keywords"][category] = match_summary["by_category"][category]["missing"].copy()
+            
+            # Debug logging
+            logger.info(f"📊 [MATCH_SUMMARY] {category.capitalize()} summary:")
+            logger.info(f"   Matched: {matched_count} skills")
+            logger.info(f"   Missing: {missing_count} skills")
+            logger.info(f"   Match rate: {match_summary['by_category'][category]['match_rate']}%")
         
         return match_summary
     

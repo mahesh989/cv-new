@@ -1,0 +1,361 @@
+{
+  "company": "Australia_for_UNHCR",
+  "generated_at": "2025-11-21T04:24:49.739413",
+  "recommendation_content": "# CV Tailoring Strategy Report for Australia_for_UNHCR\n\n## Executive Summary\n\n- **Current ATS Score:** 56.8/100\n- **Target Score:** 75.0/100\n- **Improvement Needed:** 18.200000000000003 points\n- **Overall Match Rate:** 31.58%\n- **Primary Objective:** Optimize CV for target role\n- **Key Challenge:** UNKNOWN industry transition from Unknown to Unknown\n\n## Priority Gap Analysis\n\n**Keyword Coverage Gaps:**\n- Technical Gap: 100.0%\n- Soft Skills Gap: 100.0%\n- Domain Gap: 100.0%\n- Overall Keyword Gap: 68.4%\n\n**Component Alignment Gaps:**\n- Technical Depth Gap: 100.0%\n- Experience Alignment Gap: 100.0%\n- Industry Fit Gap: 100.0%\n- Seniority Alignment Gap: 100.0%\n\n**Immediate Action Required (Missing Keywords):**\n- Technical: 2\n- Soft Skills: 3\n- Domain: 8\n- **Total Missing: 13**\n\n## Keyword Integration Strategy\n\n### TIER 1 - INTEGRATE IMMEDIATELY (Low Risk)\n\n### TIER 2 - ADD WITH EVIDENCE (Medium Risk)\n**Technical Keywords (If Evidence Exists):**\n- **SQL**\n  - **Basis:** If any experience with databases or data manipulation\n  - **Integration:** Mention in skills section and relevant project bullet points\n  - **Validation:** Describe specific instances of using SQL\n  - **Risk:** medium\n- **VBA**\n  - **Basis:** If any experience with Excel macros or automation\n  - **Integration:** Include in skills section and relevant project descriptions\n  - **Validation:** Provide examples of VBA usage in past roles\n  - **Risk:** medium\n\n### TIER 3 - DO NOT ADD (High Risk)\n**Keywords to Avoid:**\n\n## Experience Reframing Strategy\n\n### Industry Transition Focus\n**Objective:** Optimize CV for target role\n\n**Emphasis Areas:**\n- Focus on transferable skills and achievements\n\n### Seniority Positioning\n**Current:** Unknown\n**Target:** Unknown\n**Strategy:** Highlight leadership potential through project ownership and initiative-taking in current roles\n\n### Technical Depth Showcase\n## Strategic Warnings\n\n### Don't Oversell (Avoid These Claims)\n- **Tier 3 Keywords:** Never add without direct evidence\n\n### Don't Undersell (Emphasize These Strengths)\n\n## Implementation Roadmap\n\n### Phase 1: High-Impact Quick Wins\nAdd ALL Tier 1 keywords to skills section\nEmphasize matched technical skills in experience bullets\nReframe experience using industry bridging statements\n\n### Phase 2: Evidence-Based Additions\nReview Tier 2 keywords for semantic evidence\nAdd only keywords with concrete validation\nDocument defense strategy for each addition\n\n### Phase 3: Strategic Positioning\nAdjust tone per guidance: Professional and results-oriented\nDe-emphasize non-relevant skills\nOptimize for target seniority level\n\n## Section Completeness Notes\n- **Overall Tone:** Professional and results-oriented\n- **Key Messages:** Transferable skills, Business impact, Quantified results",
+  "structured_recommendations": {
+    "executive_summary": {
+      "current_ats_score": 56.8,
+      "target_score": 75.0,
+      "improvement_needed": 18.200000000000003,
+      "overall_match_rate": 31.58,
+      "primary_objective": "Optimize CV for target role",
+      "key_challenge": "UNKNOWN industry transition from Unknown to Unknown"
+    },
+    "priority_gaps": {
+      "keyword_coverage_gaps": {
+        "technical_gap_percentage": 100,
+        "soft_gap_percentage": 100,
+        "domain_gap_percentage": 100.0,
+        "overall_keyword_gap": 68.42
+      },
+      "component_gaps": {
+        "technical_depth_gap": 100,
+        "experience_alignment_gap": 100,
+        "industry_fit_gap": 100,
+        "seniority_alignment_gap": 100
+      },
+      "immediate_action_items": {
+        "category1_missing_counts": {
+          "technical": 2,
+          "soft": 3,
+          "domain": 8,
+          "total": 13
+        }
+      }
+    },
+    "keyword_integration": {
+      "tier1_integrate_immediately": {
+        "technical": [],
+        "soft": [],
+        "domain": [
+          {
+            "keyword": "analytical skills",
+            "basis": "Generic and transferable skill",
+            "integration": "Add to skills section and highlight in relevant project descriptions",
+            "validation": "Provide examples of data analysis in past roles",
+            "risk": "low"
+          },
+          {
+            "keyword": "problem-solving",
+            "basis": "Generic and transferable skill",
+            "integration": "Include in skills section and describe in context of overcoming challenges",
+            "validation": "Discuss specific problems solved in previous roles",
+            "risk": "low"
+          },
+          {
+            "keyword": "customer service",
+            "basis": "Generic and transferable skill",
+            "integration": "Mention in skills section and in bullets related to client interactions",
+            "validation": "Provide examples of customer interactions and outcomes",
+            "risk": "low"
+          }
+        ]
+      },
+      "tier2_add_with_evidence": {
+        "technical": [
+          {
+            "keyword": "SQL",
+            "basis": "If any experience with databases or data manipulation",
+            "integration": "Mention in skills section and relevant project bullet points",
+            "validation": "Describe specific instances of using SQL",
+            "risk": "medium"
+          },
+          {
+            "keyword": "VBA",
+            "basis": "If any experience with Excel macros or automation",
+            "integration": "Include in skills section and relevant project descriptions",
+            "validation": "Provide examples of VBA usage in past roles",
+            "risk": "medium"
+          }
+        ],
+        "soft": [],
+        "domain": [
+          {
+            "keyword": "project management",
+            "basis": "If involved in managing or coordinating projects",
+            "integration": "Highlight in skills section and in bullets related to project coordination",
+            "validation": "Provide examples of project management experience",
+            "risk": "medium"
+          },
+          {
+            "keyword": "stakeholder management",
+            "basis": "If involved in stakeholder interactions",
+            "integration": "Mention in skills section and in bullets related to stakeholder engagement",
+            "validation": "Provide examples of managing stakeholder relationships",
+            "risk": "medium"
+          },
+          {
+            "keyword": "clean data",
+            "basis": "If involved in data cleaning processes",
+            "integration": "Include in skills section and relevant project descriptions",
+            "validation": "Describe specific data cleaning tasks",
+            "risk": "medium"
+          },
+          {
+            "keyword": "data mining",
+            "basis": "If involved in extracting insights from data",
+            "integration": "Mention in skills section and relevant project bullet points",
+            "validation": "Provide examples of data mining activities",
+            "risk": "medium"
+          },
+          {
+            "keyword": "data models",
+            "basis": "If involved in creating or using data models",
+            "integration": "Include in skills section and relevant project descriptions",
+            "validation": "Describe specific data modeling tasks",
+            "risk": "medium"
+          },
+          {
+            "keyword": "data warehouse",
+            "basis": "If involved in data warehousing activities",
+            "integration": "Mention in skills section and relevant project bullet points",
+            "validation": "Provide examples of data warehouse usage",
+            "risk": "medium"
+          },
+          {
+            "keyword": "de-duplication",
+            "basis": "If involved in data de-duplication processes",
+            "integration": "Include in skills section and relevant project descriptions",
+            "validation": "Describe specific de-duplication tasks",
+            "risk": "medium"
+          },
+          {
+            "keyword": "marketing campaigns",
+            "basis": "If involved in marketing activities",
+            "integration": "Mention in skills section and relevant project bullet points",
+            "validation": "Provide examples of marketing campaign involvement",
+            "risk": "medium"
+          },
+          {
+            "keyword": "segmentation strategies",
+            "basis": "If involved in market segmentation",
+            "integration": "Include in skills section and relevant project descriptions",
+            "validation": "Describe specific segmentation strategies used",
+            "risk": "medium"
+          }
+        ]
+      },
+      "tier3_never_add": {
+        "technical": [],
+        "domain": []
+      }
+    },
+    "experience_reframing": {
+      "industry_transition": {
+        "objective": "Optimize CV for target role",
+        "emphasis_areas": [
+          "Focus on transferable skills and achievements"
+        ],
+        "de_emphasize": [],
+        "bridging_statements": []
+      },
+      "seniority_positioning": {
+        "current_level": "Unknown",
+        "target_level": "Unknown",
+        "strategy": "Highlight leadership potential through project ownership and initiative-taking in current roles"
+      },
+      "technical_showcase": {
+        "strengths_to_highlight": [],
+        "gaps_to_address": []
+      }
+    },
+    "strategic_warnings": {
+      "dont_oversell": {
+        "tier3_keywords": "Never add without direct evidence",
+        "domain_specific": [],
+        "unverifiable_skills": []
+      },
+      "dont_undersell": {
+        "matched_skills": [],
+        "transferable_experience": [],
+        "core_competencies": []
+      }
+    },
+    "implementation_roadmap": {
+      "phase1_quick_wins": [
+        "Add ALL Tier 1 keywords to skills section",
+        "Emphasize matched technical skills in experience bullets",
+        "Reframe experience using industry bridging statements"
+      ],
+      "phase2_evidence_based": [
+        "Review Tier 2 keywords for semantic evidence",
+        "Add only keywords with concrete validation",
+        "Document defense strategy for each addition"
+      ],
+      "phase3_positioning": [
+        "Adjust tone per guidance: Professional and results-oriented",
+        "De-emphasize non-relevant skills",
+        "Optimize for target seniority level"
+      ]
+    },
+    "tone_and_style": {
+      "overall_tone": "Professional and results-oriented",
+      "key_messages": [
+        "Transferable skills",
+        "Business impact",
+        "Quantified results"
+      ],
+      "avoid_messages": []
+    }
+  },
+  "actionable_guidance": {
+    "tier1_add_immediately": {
+      "technical": [],
+      "soft": [],
+      "domain": [
+        {
+          "keyword": "analytical skills",
+          "integration": "Add to skills section and highlight in relevant project descriptions",
+          "validation": "Provide examples of data analysis in past roles"
+        },
+        {
+          "keyword": "problem-solving",
+          "integration": "Include in skills section and describe in context of overcoming challenges",
+          "validation": "Discuss specific problems solved in previous roles"
+        },
+        {
+          "keyword": "customer service",
+          "integration": "Mention in skills section and in bullets related to client interactions",
+          "validation": "Provide examples of customer interactions and outcomes"
+        }
+      ]
+    },
+    "tier2_add_with_evidence": {
+      "technical": [
+        {
+          "keyword": "SQL",
+          "integration": "Mention in skills section and relevant project bullet points",
+          "validation": "Describe specific instances of using SQL",
+          "evidence_required": true
+        },
+        {
+          "keyword": "VBA",
+          "integration": "Include in skills section and relevant project descriptions",
+          "validation": "Provide examples of VBA usage in past roles",
+          "evidence_required": true
+        }
+      ],
+      "soft": [],
+      "domain": [
+        {
+          "keyword": "project management",
+          "integration": "Highlight in skills section and in bullets related to project coordination",
+          "validation": "Provide examples of project management experience",
+          "evidence_required": true
+        },
+        {
+          "keyword": "stakeholder management",
+          "integration": "Mention in skills section and in bullets related to stakeholder engagement",
+          "validation": "Provide examples of managing stakeholder relationships",
+          "evidence_required": true
+        },
+        {
+          "keyword": "clean data",
+          "integration": "Include in skills section and relevant project descriptions",
+          "validation": "Describe specific data cleaning tasks",
+          "evidence_required": true
+        },
+        {
+          "keyword": "data mining",
+          "integration": "Mention in skills section and relevant project bullet points",
+          "validation": "Provide examples of data mining activities",
+          "evidence_required": true
+        },
+        {
+          "keyword": "data models",
+          "integration": "Include in skills section and relevant project descriptions",
+          "validation": "Describe specific data modeling tasks",
+          "evidence_required": true
+        },
+        {
+          "keyword": "data warehouse",
+          "integration": "Mention in skills section and relevant project bullet points",
+          "validation": "Provide examples of data warehouse usage",
+          "evidence_required": true
+        },
+        {
+          "keyword": "de-duplication",
+          "integration": "Include in skills section and relevant project descriptions",
+          "validation": "Describe specific de-duplication tasks",
+          "evidence_required": true
+        },
+        {
+          "keyword": "marketing campaigns",
+          "integration": "Mention in skills section and relevant project bullet points",
+          "validation": "Provide examples of marketing campaign involvement",
+          "evidence_required": true
+        },
+        {
+          "keyword": "segmentation strategies",
+          "integration": "Include in skills section and relevant project descriptions",
+          "validation": "Describe specific segmentation strategies used",
+          "evidence_required": true
+        }
+      ]
+    },
+    "tier3_never_add": [],
+    "strategic_positioning": {
+      "emphasis_areas": [
+        "Focus on transferable skills and achievements"
+      ],
+      "de_emphasize": [],
+      "bridging_statements": [],
+      "strategy": "Highlight leadership potential through project ownership and initiative-taking in current roles"
+    },
+    "experience_optimization": {
+      "strengths_to_highlight": [],
+      "gaps_to_address": []
+    },
+    "achievements": {
+      "transferable_experience": [],
+      "core_competencies": []
+    },
+    "implementation_plan": {
+      "phase1_quick_wins": [
+        "Add ALL Tier 1 keywords to skills section",
+        "Emphasize matched technical skills in experience bullets",
+        "Reframe experience using industry bridging statements"
+      ],
+      "phase2_evidence_based": [
+        "Review Tier 2 keywords for semantic evidence",
+        "Add only keywords with concrete validation",
+        "Document defense strategy for each addition"
+      ],
+      "phase3_positioning": [
+        "Adjust tone per guidance: Professional and results-oriented",
+        "De-emphasize non-relevant skills",
+        "Optimize for target seniority level"
+      ]
+    },
+    "messaging": {
+      "key_messages": [
+        "Transferable skills",
+        "Business impact",
+        "Quantified results"
+      ],
+      "avoid_messages": []
+    }
+  },
+  "ai_model_info": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "cost": 0.0324,
+    "tokens_used": 4051
+  },
+  "metadata": {
+    "content_length": 2765,
+    "format_version": "2.0",
+    "has_structured_data": true,
+    "has_actionable_guidance": true
+  }
+}

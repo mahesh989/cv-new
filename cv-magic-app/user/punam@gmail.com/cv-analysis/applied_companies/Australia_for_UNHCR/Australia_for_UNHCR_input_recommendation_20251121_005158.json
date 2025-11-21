@@ -1,0 +1,186 @@
+{
+  "metadata": {
+    "company": "Australia_for_UNHCR",
+    "generated_at": "2025-11-21T00:51:58.456679",
+    "ats_score_current": 63.5,
+    "match_rate_current": 25.0
+  },
+  "skills_extraction": {
+    "cv": {
+      "technical": [
+        "Python",
+        "Power BI",
+        "Tableau",
+        "Excel",
+        "Data Modelling"
+      ],
+      "soft": [
+        "Analytical Thinking",
+        "Communication",
+        "Problem Solving",
+        "Teamwork"
+      ],
+      "domain": []
+    },
+    "jd": {
+      "technical": [
+        "Excel",
+        "Power BI",
+        "SQL",
+        "Tableau",
+        "VBA"
+      ],
+      "soft": [
+        "communication",
+        "customer service",
+        "project management",
+        "stakeholder management"
+      ],
+      "domain": [
+        "clean data",
+        "data issues",
+        "data mining",
+        "data models",
+        "data warehouse",
+        "de-duplication",
+        "marketing campaigns"
+      ]
+    }
+  },
+  "preliminary_decision": {
+    "decision": "PROCEED",
+    "match_score": 90,
+    "confidence": 85,
+    "should_proceed": true,
+    "critical_missing": [],
+    "implicit_likely": [
+      "Excel",
+      "SQL",
+      "Power BI",
+      "Tableau"
+    ],
+    "learnable_gaps": []
+  },
+  "match_summary": {
+    "overall_match_rate": 25.0,
+    "by_category": {
+      "technical": {
+        "matched": [],
+        "missing": [],
+        "match_rate": 0
+      },
+      "soft": {
+        "matched": [],
+        "missing": [],
+        "match_rate": 0
+      },
+      "domain": {
+        "matched": [],
+        "missing": [
+          "Excel",
+          "Power BI",
+          "Tableau",
+          "SQL",
+          "VBA",
+          "communication",
+          "customer service",
+          "project management",
+          "stakeholder management",
+          "clean data",
+          "data issues",
+          "data mining",
+          "data models",
+          "data warehouse",
+          "de-duplication",
+          "marketing campaigns"
+        ],
+        "match_rate": 0.0
+      }
+    },
+    "missing_keywords": {
+      "technical": [],
+      "soft": [],
+      "domain": [
+        "Excel",
+        "Power BI",
+        "Tableau",
+        "SQL",
+        "VBA",
+        "communication",
+        "customer service",
+        "project management",
+        "stakeholder management",
+        "clean data",
+        "data issues",
+        "data mining",
+        "data models",
+        "data warehouse",
+        "de-duplication",
+        "marketing campaigns"
+      ]
+    }
+  },
+  "keyword_integration_guidance": {
+    "tier1_always_add": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    },
+    "tier2_add_if_evidence": {
+      "technical": [],
+      "soft": [],
+      "domain": [
+        "VBA",
+        "customer service",
+        "data mining",
+        "data models",
+        "data warehouse",
+        "marketing campaigns"
+      ]
+    },
+    "tier3_never_add": {
+      "technical": [],
+      "soft": [],
+      "domain": []
+    },
+    "already_in_cv_filtered": [
+      "Excel",
+      "Power BI",
+      "project management",
+      "SQL",
+      "clean data",
+      "Tableau",
+      "stakeholder management",
+      "de-duplication",
+      "communication",
+      "data issues"
+    ],
+    "integration_instructions": "Tier 1: Integrate ALL keywords into skills section and relevant bullets. Tier 2: Integrate ONLY if semantic evidence exists in CV experience. Tier 3: DO NOT add - domain-specific, unverifiable, or lacks evidence. Already in CV: These keywords were filtered out as they already exist in the CV."
+  },
+  "component_summary": {
+    "skills_relevance": 80.0,
+    "experience_alignment": 85.0,
+    "role_similarity": 70.0,
+    "seniority_match": 90.0,
+    "industry_fit": 65.0,
+    "required_skills_coverage": 75.0,
+    "tech_stack_similarity": 70.0,
+    "business_readiness": 80.0,
+    "industry_transition_fit": 65.0
+  },
+  "ats_scoring": {
+    "final_score": 63.5,
+    "category1_score": 32.0,
+    "category2_score": 27.1,
+    "category3_score": 0,
+    "improvement_needed": 11.5,
+    "category1_keywords": 32.0,
+    "category2_ai_analysis": 27.1,
+    "missing_counts": {
+      "technical": 1,
+      "soft": 4,
+      "domain": 7
+    },
+    "scoring_version": "v2_65_35_split"
+  }
+}
