@@ -598,50 +598,110 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     debugPrint('   has component_analysis: ${completeResults['component_analysis'] != null}');
     debugPrint('   has ai_recommendation: ${completeResults['ai_recommendation'] != null}');
 
-    // Support both field name variations
-    final preextracted = (completeResults['preextracted_skills_comparison'] ??
-        completeResults['preextracted_comparison']) as Map<String, dynamic>?;
+    // Process the polling response
+    await _handlePollingResponse(completeResults);
+  }
 
-    debugPrint('🔧 [CONTROLLER] Updating _displayResult with complete results...');
+  /// Handle polling response from /api/analysis-results/
+  Future<void> _handlePollingResponse(Map<String, dynamic> completeResults) async {
+    debugPrint('📥 [CONTROLLER] _handlePollingResponse called');
+    debugPrint('   completeResults keys: ${completeResults.keys.toList()}');
+
+    try {
+      // Support both field name variations
+      final preextracted = (completeResults['preextracted_skills_comparison'] ??
+          completeResults['preextracted_comparison']) as Map<String, dynamic>?;
+
+      debugPrint('🔧 [CONTROLLER] Updating _displayResult with complete results...');
+      debugPrint('   ats_score present: ${completeResults['ats_score'] != null}');
+      debugPrint('   component_analysis present: ${completeResults['component_analysis'] != null}');
+      debugPrint('   ai_recommendation present: ${completeResults['ai_recommendation'] != null}');
+
+      // Parse ATS result if present
+      ATSResult? parsedATS;
+      if (completeResults['ats_score'] != null) {
+        try {
+          debugPrint('🔧 [CONTROLLER] Parsing ATS result...');
+          parsedATS = ATSResult.fromJson(completeResults['ats_score'] as Map<String, dynamic>);
+          debugPrint('✅ [CONTROLLER] Parsed ATS result - score: ${parsedATS.finalATSScore}');
+        } catch (e, stackTrace) {
+          debugPrint('❌ [CONTROLLER] Error parsing ATS result: $e');
+          debugPrint('   Stack: $stackTrace');
+        }
+      }
+
+      // Parse component analysis if present
+      ComponentAnalysisResult? parsedComponent;
+      if (completeResults['component_analysis'] != null) {
+        try {
+          debugPrint('🔧 [CONTROLLER] Parsing component analysis...');
+          parsedComponent = ComponentAnalysisResult.fromJson(
+              completeResults['component_analysis'] as Map<String, dynamic>);
+          debugPrint('✅ [CONTROLLER] Parsed component analysis');
+        } catch (e) {
+          debugPrint('❌ [CONTROLLER] Error parsing component analysis: $e');
+        }
+      }
+
+      // Parse AI recommendation if present
+      AIRecommendationResult? parsedAI;
+      if (completeResults['ai_recommendation'] != null) {
+        try {
+          debugPrint('🔧 [CONTROLLER] Parsing AI recommendation...');
+          parsedAI = AIRecommendationResult.fromJson(
+              completeResults['ai_recommendation'] as Map<String, dynamic>);
+          debugPrint('✅ [CONTROLLER] Parsed AI recommendation - content length: ${parsedAI.content.length}');
+        } catch (e) {
+          debugPrint('❌ [CONTROLLER] Error parsing AI recommendation: $e');
+        }
+      }
+
+      // Update _displayResult with parsed data
     _displayResult = (_displayResult ??
             SkillsAnalysisResult.fromJson({
               'cv_skills': _result?.results?.cvSkills ?? {},
               'jd_skills': _result?.results?.jdSkills ?? {},
             }))
         .copyWith(
-      componentAnalysis: completeResults['component_analysis'] != null
-          ? ComponentAnalysisResult.fromJson(
-              completeResults['component_analysis'])
-          : _displayResult?.componentAnalysis,
-      atsResult: completeResults['ats_score'] != null
-          ? ATSResult.fromJson(completeResults['ats_score'])
-          : _displayResult?.atsResult,
-      aiRecommendation: completeResults['ai_recommendation'] != null
-          ? AIRecommendationResult.fromJson(
-              completeResults['ai_recommendation'])
-          : _displayResult?.aiRecommendation,
-      // Support both 'raw_output' and 'raw_content' field names
+        componentAnalysis: parsedComponent ?? _displayResult?.componentAnalysis,
+        atsResult: parsedATS ?? _displayResult?.atsResult,
+        aiRecommendation: parsedAI ?? _displayResult?.aiRecommendation,
+        // Support both 'raw_output' and 'raw_content' field names
       preextractedRawOutput:
-          preextracted?['raw_output'] ??
-          preextracted?['raw_content'] ??
-          _displayResult?.preextractedRawOutput,
+            preextracted?['raw_output'] ??
+            preextracted?['raw_content'] ??
+            _displayResult?.preextractedRawOutput,
       preextractedCompanyName: preextracted?['company_name'] ??
           completeResults['company'] ??
           _displayResult?.preextractedCompanyName,
       company: completeResults['company'] ?? _displayResult?.company,
     );
 
-    debugPrint('✅ [CONTROLLER] Updated _displayResult');
-    debugPrint('   hasATSResult: ${_displayResult?.atsResult != null}');
-    if (_displayResult?.atsResult != null) {
-      debugPrint('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
-    }
-    debugPrint('   hasPreextracted: ${_displayResult?.hasPreextractedComparison}');
-    debugPrint('   hasAIRecommendation: ${_displayResult?.aiRecommendation != null}');
+      debugPrint('✅ [CONTROLLER] Updated _displayResult');
+      debugPrint('   hasATSResult: ${_displayResult?.atsResult != null}');
+      if (_displayResult?.atsResult != null) {
+        debugPrint('   ATS Score: ${_displayResult!.atsResult!.finalATSScore}');
+      }
+      debugPrint('   hasPreextracted: ${_displayResult?.hasPreextractedComparison}');
+      debugPrint('   hasAIRecommendation: ${_displayResult?.aiRecommendation != null}');
+      debugPrint('   hasComponentAnalysis: ${_displayResult?.componentAnalysis != null}');
 
+      // Stop loading indicators
     _showATSLoading = false;
+      _showAIRecommendationLoading = false;
+
+      // ✅ CRITICAL: Update display flags and notify listeners
     _updateDisplayFlags();
-    debugPrint('✅ [CONTROLLER] Called _updateDisplayFlags() and notifyListeners()');
+      debugPrint('✅ [CONTROLLER] Called _updateDisplayFlags() after polling response');
+
+    } catch (e, stackTrace) {
+      debugPrint('❌ [CONTROLLER] Error handling polling response: $e');
+      debugPrint('   Stack: $stackTrace');
+      // Still stop loading indicators on error
+      _showATSLoading = false;
+      _showAIRecommendationLoading = false;
+    notifyListeners();
+    }
   }
 
   void _updateDisplayFlags() {
