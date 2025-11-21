@@ -1,6 +1,14 @@
 import '../models/skills_analysis_model.dart';
 import 'api_service.dart';
 
+/// Exception to signal polling should stop (e.g., 404 file not found)
+class _PollingStopException implements Exception {
+  final String message;
+  _PollingStopException(this.message);
+  @override
+  String toString() => message;
+}
+
 /// Service for handling skills analysis (preliminary analysis) operations
 class SkillsAnalysisService {
   /// Perform context-aware analysis with intelligent CV selection and JD caching
@@ -413,7 +421,7 @@ class SkillsAnalysisService {
         // Don't return partial results - wait for ATS score
         final hasATS = data['ats_score'] != null;
         final hasComponent = data['component_analysis'] != null;
-        
+
         if (hasATS) {
           print('✅ [POLLING] ATS score available - returning results');
           print('   Component analysis present: $hasComponent');
@@ -421,15 +429,27 @@ class SkillsAnalysisService {
         }
 
         if (hasComponent) {
-          print('⏳ [POLLING] Component analysis available but waiting for ATS score...');
+          print(
+              '⏳ [POLLING] Component analysis available but waiting for ATS score...');
         } else {
-          print('⏳ [POLLING] Still waiting for results (no component_analysis or ats_score yet)...');
+          print(
+              '⏳ [POLLING] Still waiting for results (no component_analysis or ats_score yet)...');
         }
         return null;
       }
 
       return null;
     } catch (e) {
+      final errorString = e.toString();
+      // Check if this is a 404 (file not found) - stop polling immediately
+      if (errorString.contains('404') ||
+          errorString.contains('Not Found') ||
+          errorString.contains('not found')) {
+        print(
+            '🛑 [POLLING] Analysis file not found (404) - stopping polling early');
+        // Throw a special exception to signal 404
+        throw _PollingStopException('Analysis file not found');
+      }
       print('❌ [POLLING] Error getting complete results: $e');
       return null;
     }
@@ -446,11 +466,21 @@ class SkillsAnalysisService {
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       print('🔄 [POLLING] Attempt $attempt/$maxAttempts');
 
-      final completeResults = await getCompleteAnalysisResults(company);
-      if (completeResults != null) {
-        print(
-            '✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
-        return completeResults;
+      try {
+        final completeResults = await getCompleteAnalysisResults(company);
+        if (completeResults != null) {
+          print(
+              '✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
+          return completeResults;
+        }
+      } catch (e) {
+        // If we get a _PollingStopException (404), stop polling immediately
+        if (e is _PollingStopException) {
+          print('🛑 [POLLING] Stopping polling due to: ${e.message}');
+          return null;
+        }
+        // For other errors, continue polling
+        print('⚠️ [POLLING] Error in attempt $attempt, continuing...');
       }
 
       if (attempt < maxAttempts) {
