@@ -6,11 +6,13 @@ import '../models/skills_analysis_model.dart';
 class AIRecommendationDisplayCard extends StatelessWidget {
   final AIRecommendationResult? aiRecommendation;
   final bool isLoading;
+  final VoidCallback? onGenerateCV;
 
   const AIRecommendationDisplayCard({
     super.key,
     this.aiRecommendation,
     this.isLoading = false,
+    this.onGenerateCV,
   });
 
   @override
@@ -73,6 +75,10 @@ class AIRecommendationDisplayCard extends StatelessWidget {
 
           // Recommendation Content (Markdown)
           _buildMarkdownContent(),
+
+          // Generate Tailored CV Button
+          const Divider(height: 1),
+          _buildGenerateCVButton(),
 
           // Footer with generation info
           if (aiRecommendation!.generatedAt != null ||
@@ -250,6 +256,37 @@ class AIRecommendationDisplayCard extends StatelessWidget {
           ),
         ),
         selectable: true,
+      ),
+    );
+  }
+
+  Widget _buildGenerateCVButton() {
+    const aiColor = Color(0xFF667EEA);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: onGenerateCV,
+          icon: const Icon(Icons.rocket_launch, color: Colors.white),
+          label: const Text(
+            'Generate Tailored CV',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: aiColor,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
+          ),
+        ),
       ),
     );
   }

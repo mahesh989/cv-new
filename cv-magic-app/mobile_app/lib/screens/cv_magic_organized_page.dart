@@ -516,6 +516,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                           child: AIRecommendationDisplayCard(
                             aiRecommendation: aiRecommendation,
                             isLoading: false,
+                            onGenerateCV: _navigateToCVGeneration,
                           ),
                         ),
                         const SizedBox(height: 16),
