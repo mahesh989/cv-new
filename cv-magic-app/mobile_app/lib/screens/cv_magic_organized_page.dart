@@ -20,6 +20,7 @@ import '../widgets/skills_comparison_card.dart';
 import '../widgets/analyze_match_card.dart';
 import '../widgets/preextracted_skills_comparison_card.dart';
 import '../utils/preextracted_parser.dart';
+import '../widgets/ats_score_display_card.dart';
 class CVMagicOrganizedPage extends StatefulWidget {
   final VoidCallback? onNavigateToCVGeneration;
   final bool Function()? shouldClearResults;
@@ -402,6 +403,67 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                 }
                 
                 debugPrint('❌ [PREEXTRACTED_COMPARISON] Not showing (no data)');
+                return const SizedBox.shrink();
+              },
+            ),
+
+            // ATS Score Display
+            AnimatedBuilder(
+              animation: _skillsController,
+              builder: (context, _) {
+                debugPrint('🔍 [ATS_SECTION] AnimatedBuilder called');
+                final showATSLoading = _skillsController.showATSLoading;
+                final showATSResults = _skillsController.showATSResults;
+                final hasATSResult = _skillsController.hasATSResult;
+                final atsResult = _skillsController.atsResult;
+                
+                debugPrint('   showATSLoading: $showATSLoading');
+                debugPrint('   showATSResults: $showATSResults');
+                debugPrint('   hasATSResult: $hasATSResult');
+                debugPrint('   atsResult != null: ${atsResult != null}');
+                
+                if (atsResult != null) {
+                  debugPrint('   ✅ ATS Score: ${atsResult.finalATSScore}');
+                  debugPrint('   ✅ Category Status: ${atsResult.categoryStatus}');
+                }
+                
+                // Show ATS section if loading or results are available
+                if (showATSLoading || showATSResults) {
+                  debugPrint('✅ [ATS_SECTION] Showing ATS section');
+                  
+                  // Show loading state
+                  if (showATSLoading && !showATSResults) {
+                    debugPrint('   → Rendering ATS loading state');
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: const ATSScoreDisplayCard(isLoading: true),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+                  
+                  // Show actual ATS results
+                  if (showATSResults && hasATSResult && atsResult != null) {
+                    debugPrint('   ✅ Rendering ATS card with score: ${atsResult.finalATSScore}');
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: ATSScoreDisplayCard(
+                            atsResult: atsResult,
+                            isLoading: false,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+                }
+                
+                debugPrint('❌ [ATS_SECTION] Not showing (no data or conditions not met)');
                 return const SizedBox.shrink();
               },
             ),
