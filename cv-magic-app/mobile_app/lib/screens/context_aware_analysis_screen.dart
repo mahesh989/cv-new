@@ -1063,7 +1063,11 @@ class _ContextAwareSkillsAdapter extends SkillsAnalysisController {
   }
 
   @override
-  bool get showATSLoading => _source.showATSLoading;
+  bool get showATSLoading {
+    final value = _source.showATSLoading;
+    debugPrint('🔄 [ADAPTER] showATSLoading: $value');
+    return value;
+  }
 
   @override
   bool get showATSResults {
@@ -1090,7 +1094,12 @@ class _ContextAwareSkillsAdapter extends SkillsAnalysisController {
   AnalyzeMatchResult? get analyzeMatch => _source.analyzeMatch;
 
   @override
-  bool get hasATSResult => _source.hasATSResult;
+  bool get hasATSResult {
+    final value = _source.hasATSResult;
+    debugPrint(
+        '🔄 [ADAPTER] hasATSResult: $value (from source: ${_source.hasATSResult})');
+    return value;
+  }
 
   @override
   ATSResult? get atsResult {

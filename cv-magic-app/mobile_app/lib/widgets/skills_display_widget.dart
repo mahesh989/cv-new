@@ -128,10 +128,13 @@ class SkillsDisplayWidget extends StatelessWidget {
 
   Widget _buildResultsContent() {
     // Debug logging
-    debugPrint('🔍 [SKILLS_DISPLAY] _buildResultsContent called');
-    debugPrint('   controller.hasResults: ${controller.hasResults}');
-    debugPrint('   controller.isLoading: ${controller.isLoading}');
-    debugPrint('   controller.result: ${controller.result != null}');
+    print('🏗️ [WIDGET] _buildResultsContent called');
+    print('   controller.hasResults: ${controller.hasResults}');
+    print('   controller.isLoading: ${controller.isLoading}');
+    print('   controller.result: ${controller.result != null}');
+    print('   controller.showATSResults: ${controller.showATSResults}');
+    print('   controller.showATSLoading: ${controller.showATSLoading}');
+    print('   controller.hasATSResult: ${controller.hasATSResult}');
     if (controller.result != null) {
       debugPrint(
         '   CV comprehensive analysis length: ${controller.cvComprehensiveAnalysis?.length ?? 0}',
@@ -292,15 +295,28 @@ class SkillsDisplayWidget extends StatelessWidget {
           ],
 
           // Enhanced ATS Score Widget - Show with progressive loading
+          // ✅ Diagnostic logging before ATS section
+          Builder(
+            builder: (context) {
+              print('🔍 [WIDGET] About to check ATS condition');
+              print(
+                  '   controller.showATSLoading: ${controller.showATSLoading}');
+              print(
+                  '   controller.showATSResults: ${controller.showATSResults}');
+              print(
+                  '   Condition result: ${controller.showATSLoading || controller.showATSResults}');
+              return const SizedBox.shrink();
+            },
+          ),
           if (controller.showATSLoading || controller.showATSResults) ...[
             Builder(
               builder: (context) {
-                print('🔍 [ATS_DEBUG] ===== ATS SECTION BUILD (Widget) =====');
-                print('   Condition check: showATSLoading || showATSResults');
+                // ✅ Enhanced debug logging
+                print('🎨 [ATS_SECTION] Building ATS section');
                 print('   showATSLoading: ${controller.showATSLoading}');
                 print('   showATSResults: ${controller.showATSResults}');
                 print('   hasATSResult: ${controller.hasATSResult}');
-                print('   atsResult getter: ${controller.atsResult != null}');
+                print('   atsResult != null: ${controller.atsResult != null}');
 
                 if (controller.atsResult != null) {
                   print('   ✅ [ATS_DEBUG] ATS_RESULT EXISTS IN CONTROLLER!');
@@ -320,8 +336,7 @@ class SkillsDisplayWidget extends StatelessWidget {
 
                 // Show loading state
                 if (controller.showATSLoading && !controller.showATSResults) {
-                  print('   → [ATS_DEBUG] Showing ATS loading state');
-                  print('   → showATSLoading: true, showATSResults: false');
+                  print('   → Rendering loading state');
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                     child: const ATSScoreDisplayCard(isLoading: true),
@@ -329,15 +344,9 @@ class SkillsDisplayWidget extends StatelessWidget {
                 }
 
                 // Show actual ATS results
-                print('   → [ATS_DEBUG] Checking render conditions...');
-                print('      showATSResults: ${controller.showATSResults}');
-                print('      hasATSResult: ${controller.hasATSResult}');
-                print(
-                    '      atsResult != null: ${controller.atsResult != null}');
-
                 if (controller.showATSResults && controller.hasATSResult) {
-                  print('   → ✅ [ATS_DEBUG] RENDERING ATSScoreDisplayCard!');
-                  print('      All conditions met - widget will render');
+                  print(
+                      '   ✅ Rendering ATS card with score: ${controller.atsResult?.finalATSScore}');
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                     child: ATSScoreDisplayCard(
@@ -347,13 +356,10 @@ class SkillsDisplayWidget extends StatelessWidget {
                   );
                 }
 
-                print(
-                    '   → ❌ [ATS_DEBUG] NOT RENDERING ATS Widget - conditions not met');
+                print('   ❌ Neither loading nor results - returning empty');
                 print('      showATSResults: ${controller.showATSResults}');
                 print('      hasATSResult: ${controller.hasATSResult}');
                 print('      atsResult: ${controller.atsResult != null}');
-                print(
-                    '🔍 [ATS_DEBUG] ===== ATS SECTION BUILD END (NOT RENDERING) =====');
                 return const SizedBox.shrink();
               },
             ),
