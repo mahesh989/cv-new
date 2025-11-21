@@ -160,6 +160,14 @@ class SkillsDisplayWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ✅ CRITICAL: Verify Column children list is being built
+          Builder(
+            builder: (context) {
+              print('🏗️ [WIDGET] Column children list is being built');
+              print('   Total children will be evaluated now');
+              return const SizedBox.shrink();
+            },
+          ),
           // Inline minimal CV warning with actionable suggestions
           if (controller.result?.warnings != null &&
               (controller.result!.warnings!.any(
@@ -295,23 +303,36 @@ class SkillsDisplayWidget extends StatelessWidget {
           ],
 
           // Enhanced ATS Score Widget - Show with progressive loading
-          // ✅ Diagnostic logging before ATS section
+          // ✅ CRITICAL: Diagnostic logging - this should ALWAYS execute
           Builder(
             builder: (context) {
-              print('🔍 [WIDGET] About to check ATS condition');
+              final showATS =
+                  controller.showATSLoading || controller.showATSResults;
+              print('🚨 [ATS_DIAGNOSTIC] ===== ATS CONDITION CHECK =====');
+              print('   showATSLoading: ${controller.showATSLoading}');
+              print('   showATSResults: ${controller.showATSResults}');
               print(
-                  '   controller.showATSLoading: ${controller.showATSLoading}');
-              print(
-                  '   controller.showATSResults: ${controller.showATSResults}');
-              print(
-                  '   Condition result: ${controller.showATSLoading || controller.showATSResults}');
+                  '   Condition (showATSLoading || showATSResults): $showATS');
+              print('   hasATSResult: ${controller.hasATSResult}');
+              print('   atsResult != null: ${controller.atsResult != null}');
+              print('🚨 [ATS_DIAGNOSTIC] ===== END CHECK =====');
               return const SizedBox.shrink();
             },
           ),
+          // ✅ ATS Section - This should render if condition is true
           if (controller.showATSLoading || controller.showATSResults) ...[
             Builder(
               builder: (context) {
-                // ✅ Enhanced debug logging
+                print(
+                    '🚨 [ATS_DIAGNOSTIC] ATS SECTION CONDITION IS TRUE - ENTERING SECTION');
+                return const SizedBox.shrink();
+              },
+            ),
+            Builder(
+              builder: (context) {
+                // ✅ CRITICAL: This log should appear if ATS section is in widget tree
+                print(
+                    '🚨🚨🚨 [ATS_SECTION] ATS SECTION BUILDER CALLED! 🚨🚨🚨');
                 print('🎨 [ATS_SECTION] Building ATS section');
                 print('   showATSLoading: ${controller.showATSLoading}');
                 print('   showATSResults: ${controller.showATSResults}');
