@@ -15,6 +15,7 @@ import '../modules/cv/cv_selection_module.dart';
 import '../modules/cv/cv_preview_module.dart';
 import '../widgets/job_input.dart';
 import '../services/api_service.dart';
+import '../services/results_clearing_service.dart';
 import '../controllers/context_aware_analysis_controller.dart';
 import '../widgets/skills_comparison_card.dart';
 import '../widgets/analyze_match_card.dart';
@@ -69,8 +70,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
     // Set notification callback for real-time progress updates
     _skillsController.setNotificationCallback(_showSnackBar);
 
-    // Note: ResultsClearingService registration removed since ContextAwareAnalysisController
-    // has direct access to clearResults() method
+    // Register controller with ResultsClearingService so it can be cleared from other screens
+    ResultsClearingService.registerContextAwareController(_skillsController);
 
     // Start periodic timer to check if we need to clear results
     _clearCheckTimer =
@@ -136,7 +137,8 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
   @override
   void dispose() {
     _clearCheckTimer?.cancel();
-    // Note: ResultsClearingService unregistration removed
+    // Unregister controller from ResultsClearingService
+    ResultsClearingService.unregisterContextAwareController();
     _skillsController.dispose();
     jdController.dispose();
     jdUrlController.dispose();
