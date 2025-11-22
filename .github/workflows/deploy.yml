@@ -31,9 +31,9 @@ jobs:
 
   deploy-backend:
     runs-on: ubuntu-latest
-    needs: build-and-deploy-frontend  # Optional: run after frontend
+    needs: build-and-deploy-frontend  # Run after frontend deployment
     steps:
-      - name: Deploy Backend to VPS
+      - name: Deploy Backend to VPS (Full Deployment)
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -41,13 +41,60 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
+            set -e
+            echo "🔍 Checking current directory and git status..."
             cd ~/cv-new/cv-magic-app
+            
+            echo "🧹 Clearing log files..."
+            mkdir -p logs
+            > logs/backend_logs.txt || true
+            > logs/frontend_logs.txt || true
+            echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
+            
+            echo "📥 Pulling latest changes from enhanced-vps-ghs branch..."
             git fetch origin
             git checkout enhanced-vps-ghs
             git pull origin enhanced-vps-ghs
+            
+            echo "🛑 Stopping existing containers..."
+            echo "  - Preserving database and user data volumes..."
             docker compose down --remove-orphans || true
+            
+            echo "🧹 Performing Docker cleanup..."
+            echo "  - Removing unused containers..."
+            docker container prune -f || true
+            
+            echo "  - Removing unused images..."
+            docker image prune -f || true
+            
+            echo "  - Removing unused networks..."
+            docker network prune -f || true
+            
+            echo "  - Removing dangling images..."
+            docker image prune -f --filter "dangling=true" || true
+            
+            echo "🔨 Building new containers..."
             docker compose build --no-cache
+            
+            echo "🚀 Starting containers..."
             docker compose up -d
+            
+            echo "⏳ Waiting for services to start..."
             sleep 10
+            
+            echo "🔍 Checking container status..."
             docker compose ps
-            curl -f http://localhost:8000/health || echo "Health check failed, but deployment might still be successful"
+            
+            echo "📋 Checking logs for any errors..."
+            docker compose logs --tail=20
+            
+            echo "🌐 Testing backend connectivity..."
+            curl -f http://localhost:8000/health || echo "⚠️ Health check failed, but deployment might still be successful"
+            
+            echo "📝 Starting log collection..."
+            # Start logging in background (if not already running)
+            nohup docker compose logs -f backend >> logs/backend_logs.txt 2>&1 &
+            nohup docker compose logs -f nginx >> logs/frontend_logs.txt 2>&1 &
+            echo "  ✅ Logs are being saved to logs/backend_logs.txt and logs/frontend_logs.txt"
+            
+            echo "✅ Full deployment completed!"
