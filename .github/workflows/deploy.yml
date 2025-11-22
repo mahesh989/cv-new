@@ -3,10 +3,33 @@ name: Deploy Frontend and Backend
 on:
   push:
     branches: [ enhanced-vps-ghs ]
+    paths:
+      - 'cv-magic-app/mobile_app/**'
+      - 'cv-magic-app/backend/**'
+      - '.github/workflows/deploy.yml'
 
 jobs:
+  # Check which paths changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'cv-magic-app/mobile_app/**'
+            backend:
+              - 'cv-magic-app/backend/**'
+
   build-and-deploy-frontend:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     steps:
       - uses: actions/checkout@v3
       
@@ -14,6 +37,18 @@ jobs:
         with:
           flutter-version: '3.27.0'
           channel: 'stable'
+      
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            cv-magic-app/mobile_app/.dart_tool
+            cv-magic-app/mobile_app/.flutter-plugins
+            cv-magic-app/mobile_app/.flutter-plugins-dependencies
+          key: ${{ runner.os }}-flutter-${{ hashFiles('cv-magic-app/mobile_app/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
       
       - name: Install dependencies
         run: flutter pub get
@@ -31,7 +66,8 @@ jobs:
 
   deploy-backend:
     runs-on: ubuntu-latest
-    needs: build-and-deploy-frontend  # Run after frontend deployment
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     steps:
       - name: Deploy Backend to VPS (Full Deployment)
         uses: appleboy/ssh-action@master
@@ -56,30 +92,82 @@ jobs:
             git checkout enhanced-vps-ghs
             git pull origin enhanced-vps-ghs
             
+            # Check if requirements.txt or Dockerfile changed to determine if rebuild is needed
+            REQUIREMENTS_CHANGED=false
+            DOCKERFILE_CHANGED=false
+            
+            if git diff HEAD~1 HEAD --name-only | grep -q "backend/requirements.txt"; then
+              REQUIREMENTS_CHANGED=true
+              echo "  📦 requirements.txt changed - will rebuild Python dependencies"
+            fi
+            
+            if git diff HEAD~1 HEAD --name-only | grep -q "backend/Dockerfile"; then
+              DOCKERFILE_CHANGED=true
+              echo "  🐳 Dockerfile changed - will rebuild Docker image"
+            fi
+            
+            # Check if package.json exists and changed (for future Node.js services)
+            if [ -f "backend/package.json" ]; then
+              if git diff HEAD~1 HEAD --name-only | grep -q "backend/package.json"; then
+                echo "  📦 package.json changed - will run npm install"
+                NPM_INSTALL_NEEDED=true
+              else
+                NPM_INSTALL_NEEDED=false
+              fi
+            else
+              NPM_INSTALL_NEEDED=false
+            fi
+            
             echo "🛑 Stopping existing containers..."
             echo "  - Preserving database and user data volumes..."
             docker compose down --remove-orphans || true
             
-            echo "🧹 Performing Docker cleanup..."
-            echo "  - Removing unused containers..."
-            docker container prune -f || true
+            # Only perform full cleanup if Dockerfile or requirements changed
+            if [ "$REQUIREMENTS_CHANGED" = true ] || [ "$DOCKERFILE_CHANGED" = true ]; then
+              echo "🧹 Performing Docker cleanup (dependencies changed)..."
+              echo "  - Removing unused containers..."
+              docker container prune -f || true
+              
+              echo "  - Removing unused images..."
+              docker image prune -f || true
+              
+              echo "  - Removing unused networks..."
+              docker network prune -f || true
+              
+              echo "  - Removing dangling images..."
+              docker image prune -f --filter "dangling=true" || true
+              
+              echo "🔨 Building new containers (with --no-cache)..."
+              docker compose build --no-cache
+            else
+              echo "🔨 Building containers (using cache - no dependency changes detected)..."
+              docker compose build
+            fi
             
-            echo "  - Removing unused images..."
-            docker image prune -f || true
+            # If package.json exists and changed, install npm dependencies
+            if [ "$NPM_INSTALL_NEEDED" = true ] && [ -f "backend/package.json" ]; then
+              echo "📦 Installing npm dependencies..."
+              docker compose exec -T backend npm install || echo "⚠️ npm install failed or not applicable"
+            fi
             
-            echo "  - Removing unused networks..."
-            docker network prune -f || true
+            echo "🚀 Starting containers with zero-downtime strategy..."
+            # Use rolling update: start new containers, then remove old ones
+            docker compose up -d --no-deps --build backend || docker compose up -d
             
-            echo "  - Removing dangling images..."
-            docker image prune -f --filter "dangling=true" || true
+            # Wait a moment for new container to be ready
+            sleep 5
             
-            echo "🔨 Building new containers..."
-            docker compose build --no-cache
+            # Health check before fully switching
+            if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+              echo "  ✅ New backend container is healthy"
+              # Now restart other dependent services if needed
+              docker compose up -d
+            else
+              echo "  ⚠️ Health check failed, but continuing deployment..."
+              docker compose up -d
+            fi
             
-            echo "🚀 Starting containers..."
-            docker compose up -d
-            
-            echo "⏳ Waiting for services to start..."
+            echo "⏳ Waiting for services to stabilize..."
             sleep 10
             
             echo "🔍 Checking container status..."

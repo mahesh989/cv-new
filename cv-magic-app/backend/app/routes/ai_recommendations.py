@@ -145,8 +145,34 @@ async def get_company_ai_recommendations(company: str, current_user: UserData = 
         with open(ai_file_path, 'r', encoding='utf-8') as f:
             ai_data = json.load(f)
 
-        # Standard format
-        if "recommendation_content" in ai_data:
+        # Standard format - check if structured_recommendations exists (new format without recommendation_content)
+        if "structured_recommendations" in ai_data:
+            # Generate markdown from structured_recommendations
+            try:
+                from app.services.ai_recommendation_generator import AIRecommendationGenerator
+                generator = AIRecommendationGenerator(user_email=current_user.email)
+                recommendation_content = generator._convert_json_to_markdown(
+                    ai_data["structured_recommendations"], 
+                    company
+                )
+                logger.info(f"✅ [AI_RECOMMENDATIONS] Generated markdown from structured_recommendations")
+            except Exception as e:
+                logger.warning(f"⚠️ [AI_RECOMMENDATIONS] Failed to generate markdown from structured_recommendations: {e}")
+                recommendation_content = ""  # Fallback to empty content
+            
+            content = {
+                "success": True,
+                "company": ai_data.get("company", company),
+                "generated_at": ai_data.get("generated_at"),
+                "recommendation_content": recommendation_content,
+                "structured_recommendations": ai_data.get("structured_recommendations"),
+                "actionable_guidance": ai_data.get("actionable_guidance"),
+                "ai_model_info": ai_data.get("ai_model_info"),
+                "metadata": ai_data.get("metadata"),
+                "file_path": str(ai_file_path)
+            }
+        elif "recommendation_content" in ai_data:
+            # Legacy format with recommendation_content
             recommendation_content = ai_data.get("recommendation_content", "")
             
             # Check if content is raw JSON (starts with {) and convert to markdown
@@ -170,7 +196,10 @@ async def get_company_ai_recommendations(company: str, current_user: UserData = 
                 "company": ai_data.get("company", company),
                 "generated_at": ai_data.get("generated_at"),
                 "recommendation_content": recommendation_content,
+                "structured_recommendations": ai_data.get("structured_recommendations"),
+                "actionable_guidance": ai_data.get("actionable_guidance"),
                 "ai_model_info": ai_data.get("ai_model_info"),
+                "metadata": ai_data.get("metadata"),
                 "file_path": str(ai_file_path)
             }
         else:
