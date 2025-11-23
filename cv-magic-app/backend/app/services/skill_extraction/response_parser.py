@@ -8,6 +8,7 @@ import re
 import ast
 import logging
 from typing import Dict, List, Optional
+from .skill_normalizer import normalize_skills_dict, get_base_skills, get_full_skills
 
 logger = logging.getLogger(__name__)
 
@@ -68,21 +69,49 @@ class SkillExtractionParser:
             technical_skills = SkillExtractionParser._validate_and_clean_skills(technical_skills, "technical_skills", document_type)
             domain_keywords = SkillExtractionParser._validate_and_clean_skills(domain_keywords, "domain_keywords", document_type)
             
+            # NEW: Normalize skills for improved matching
+            # This extracts base skills from parentheticals (e.g., "SQL (PostgreSQL, MySQL)" → "SQL")
+            skills_dict = {
+                "technical_skills": technical_skills,
+                "soft_skills": soft_skills,
+                "domain_keywords": domain_keywords
+            }
+            normalized_skills = normalize_skills_dict(skills_dict)
+            
+            # Extract base skills for matching (normalized versions)
+            # Keep full skills for display (original versions)
+            base_technical = normalized_skills["technical_skills"]["base"]
+            base_soft = normalized_skills["soft_skills"]["base"]
+            base_domain = normalized_skills["domain_keywords"]["base"]
+            
+            # Log normalization results
+            logger.info(f"🔧 [{document_type.upper()}] Normalization completed:")
+            logger.info(f"   Technical: {len(technical_skills)} original → {len(base_technical)} normalized")
+            logger.info(f"   Soft: {len(soft_skills)} original → {len(base_soft)} normalized")
+            logger.info(f"   Domain: {len(domain_keywords)} original → {len(base_domain)} normalized")
+            
             # Log parsing results
             logger.info(f"📊 [{document_type.upper()}] Parsing completed:")
-            logger.info(f"   Soft Skills ({len(soft_skills)}): {soft_skills[:3]}{'...' if len(soft_skills) > 3 else ''}")
-            logger.info(f"   Technical Skills ({len(technical_skills)}): {technical_skills[:3]}{'...' if len(technical_skills) > 3 else ''}")
-            logger.info(f"   Domain Keywords ({len(domain_keywords)}): {domain_keywords[:3]}{'...' if len(domain_keywords) > 3 else ''}")
+            logger.info(f"   Soft Skills ({len(base_soft)}): {base_soft[:3]}{'...' if len(base_soft) > 3 else ''}")
+            logger.info(f"   Technical Skills ({len(base_technical)}): {base_technical[:3]}{'...' if len(base_technical) > 3 else ''}")
+            logger.info(f"   Domain Keywords ({len(base_domain)}): {base_domain[:3]}{'...' if len(base_domain) > 3 else ''}")
             
             # Validate results
-            if not soft_skills and not technical_skills and not domain_keywords:
+            if not base_soft and not base_technical and not base_domain:
                 logger.error(f"❌ [{document_type.upper()}] No skills extracted - parsing failed")
                 raise ValueError(f"Failed to extract any skills from {document_type} response")
             
             return {
-                "soft_skills": soft_skills,
-                "technical_skills": technical_skills, 
-                "domain_keywords": domain_keywords,
+                # Return normalized base skills for matching (backward compatible - still lists of strings)
+                "soft_skills": base_soft,
+                "technical_skills": base_technical, 
+                "domain_keywords": base_domain,
+                # Store full original skills for display/reference
+                "full_soft_skills": normalized_skills["soft_skills"]["full"],
+                "full_technical_skills": normalized_skills["technical_skills"]["full"],
+                "full_domain_keywords": normalized_skills["domain_keywords"]["full"],
+                # Store normalized data structure for advanced use
+                "normalized_skills": normalized_skills,
                 "raw_response": response_text,
                 "parsing_success": True
             }

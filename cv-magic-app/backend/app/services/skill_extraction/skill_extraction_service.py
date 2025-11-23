@@ -253,6 +253,8 @@ class SkillExtractionService:
         )
         
         # Parse response
+        # NOTE: Parser now normalizes skills automatically (e.g., "SQL (PostgreSQL, MySQL)" → "SQL")
+        # This improves matching accuracy by extracting base skills from parentheticals
         parsed_skills = self.parser.parse_response(ai_response.content, "CV")
         
         if not parsed_skills["parsing_success"]:
@@ -308,6 +310,8 @@ class SkillExtractionService:
         )
         
         # Parse response
+        # NOTE: Parser now normalizes skills automatically (e.g., "SQL (PostgreSQL, MySQL)" → "SQL")
+        # This improves matching accuracy by extracting base skills from parentheticals
         parsed_skills = self.parser.parse_response(ai_response.content, "JD")
         
         if not parsed_skills["parsing_success"]:

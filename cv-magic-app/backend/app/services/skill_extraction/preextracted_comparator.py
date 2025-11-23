@@ -22,6 +22,7 @@ import re
 import time
 import statistics
 from functools import wraps
+from .skill_normalizer import normalize_skill
 
 logger = logging.getLogger(__name__)
 
@@ -512,9 +513,12 @@ Domain ({jd_domain_count} items): {jd_deduplicated.get('domain_keywords', [])}
 **CRITICAL CATEGORIZATION RULES:**
 - ✅ MATCHED section: ONLY list JD requirements that have a corresponding skill in the CV
 - ❌ MISSING section: ONLY list JD requirements that have NO corresponding skill in the CV
-- NEVER list the same JD requirement in both sections
-- If a JD requirement has a match in CV → goes in MATCHED section
-- If a JD requirement has no match in CV → goes in MISSING section
+- 🚨 **ABSOLUTELY CRITICAL**: NEVER list the same JD requirement in both sections
+- 🚨 **VERIFICATION REQUIRED**: Before listing a keyword in MISSING, check if it's already in MATCHED
+- 🚨 **COUNT VERIFICATION**: Matched + Missing MUST equal total JD requirements (no duplicates, no omissions)
+- If a JD requirement has a match in CV → goes in MATCHED section ONLY
+- If a JD requirement has no match in CV → goes in MISSING section ONLY
+- Each JD keyword appears in EXACTLY ONE place: matched OR missing, never both
 
 **OUTPUT FORMAT (TEXT ONLY):**
 🎯 OVERALL SUMMARY
@@ -713,7 +717,9 @@ CRITICAL CONSTRAINTS:
 - JD requirements: {counts['jd_technical']} tech, {counts['jd_soft']} soft, {counts['jd_domain']} domain  
 - Never exceed CV skill limits
 - Each CV skill matches only once
-- Total matched + missing must equal JD count per category
+- 🚨 **CRITICAL**: Each JD keyword appears in EXACTLY ONE place: matched OR missing, NEVER both
+- 🚨 **VERIFICATION**: Before adding to missing, verify it's NOT already in matched
+- Total matched + missing must equal JD count per category (no duplicates, no omissions)
 
 INPUTS:
 CV: {cv}
@@ -843,7 +849,14 @@ def _sort_section(section: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _identify_exact_matches(cv_skills: Dict[str, list], jd_skills: Dict[str, list]) -> Dict[str, List[Dict[str, str]]]:
-    """Identify exact matches between CV and JD skills before AI processing."""
+    """
+    Identify exact matches between CV and JD skills with base skill normalization.
+    
+    Now handles:
+    - Exact matches: "SQL" == "SQL"
+    - Base matches: "SQL" matches base of "SQL (PostgreSQL, MySQL)"
+    - Substring matches: "SQL" in "SQL (PostgreSQL, MySQL)"
+    """
     exact_matches = {
         "technical_skills": [],
         "soft_skills": [],
@@ -851,23 +864,56 @@ def _identify_exact_matches(cv_skills: Dict[str, list], jd_skills: Dict[str, lis
     }
     
     for category in ["technical_skills", "soft_skills", "domain_keywords"]:
-        cv_list = [skill.lower().strip() for skill in cv_skills.get(category, [])]
+        cv_list = cv_skills.get(category, [])
         jd_list = jd_skills.get(category, [])
         
         for jd_skill in jd_list:
             jd_normalized = jd_skill.lower().strip()
-            if jd_normalized in cv_list:
-                # Find the original CV skill (preserve case)
-                cv_skill = next((skill for skill in cv_skills.get(category, []) 
-                               if skill.lower().strip() == jd_normalized), jd_skill)
+            jd_base, _ = normalize_skill(jd_skill)
+            jd_base_normalized = jd_base.lower().strip()
+            
+            # Check both exact and base match against all CV skills
+            matched = False
+            for cv_skill in cv_list:
+                cv_normalized = cv_skill.lower().strip()
+                cv_base, _ = normalize_skill(cv_skill)
+                cv_base_normalized = cv_base.lower().strip()
                 
-                exact_matches[category].append({
-                    "jd_skill": jd_skill,
-                    "cv_skill": cv_skill,
-                    "match_type": "exact",
-                    "confidence": 1.0,
-                    "reasoning": "Exact match - identical skills"
-                })
+                # Match if:
+                # 1. Exact match: "sql" == "sql"
+                # 2. Base match: "sql" == base of "sql (postgresql, mysql)"
+                # 3. Substring: "sql" in "sql (postgresql, mysql)" or vice versa
+                if (jd_normalized == cv_normalized or 
+                    jd_base_normalized == cv_base_normalized or
+                    jd_base_normalized in cv_normalized or
+                    cv_base_normalized in jd_normalized):
+                    
+                    # Determine match type for logging
+                    if jd_normalized == cv_normalized:
+                        match_type = "exact"
+                        reasoning = "Exact match - identical skills"
+                    elif jd_base_normalized == cv_base_normalized:
+                        match_type = "base_match"
+                        reasoning = f"Base match - '{jd_base}' matches base of '{cv_skill}'"
+                    else:
+                        match_type = "substring_match"
+                        reasoning = f"Substring match - '{jd_base}' found in '{cv_skill}'"
+                    
+                    exact_matches[category].append({
+                        "jd_skill": jd_skill,
+                        "cv_skill": cv_skill,
+                        "match_type": match_type,
+                        "confidence": 1.0,
+                        "reasoning": reasoning
+                    })
+                    matched = True
+                    break  # Stop after first match to avoid duplicates
+            
+            if matched:
+                logger.debug(f"✅ [EXACT_MATCH] {category}: '{jd_skill}' → '{exact_matches[category][-1]['cv_skill']}' ({exact_matches[category][-1]['match_type']})")
+    
+    total_matches = sum(len(matches) for matches in exact_matches.values())
+    logger.info(f"🔍 [EXACT_MATCHES] Found {total_matches} exact/base matches across all categories")
     
     return exact_matches
 

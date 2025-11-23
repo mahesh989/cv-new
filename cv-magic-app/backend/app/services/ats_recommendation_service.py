@@ -17,6 +17,22 @@ from pathlib import Path
 from datetime import datetime
 from app.utils.timestamp_utils import TimestampUtils
 
+# Try to import NLTK for stemming (optional - graceful fallback if not available)
+try:
+    from nltk.stem import PorterStemmer
+    # Download NLTK data if needed (only required once)
+    try:
+        import nltk
+        nltk.download('punkt', quiet=True)
+    except Exception:
+        pass  # Data might already be downloaded
+    NLTK_AVAILABLE = True
+    stemmer = PorterStemmer()
+except ImportError:
+    NLTK_AVAILABLE = False
+    stemmer = None
+    logging.warning("⚠️ [ATS_RECOMMENDATION] NLTK not available - stemming disabled. Install with: pip install nltk")
+
 logger = logging.getLogger(__name__)
 
 
@@ -384,6 +400,33 @@ class ATSRecommendationService:
                 except Exception as e:
                     logger.warning(f"   ⚠️ Error extracting missing skill: {e}")
         
+        # FIXED: Deduplicate - remove keywords from missing if they're already in matched
+        # This prevents duplicates like "Power BI" appearing in both matched and missing
+        for category in ["technical", "soft", "domain"]:
+            matched_list = match_summary["by_category"][category]["matched"]
+            missing_list = match_summary["by_category"][category]["missing"]
+            
+            # Normalize for case-insensitive comparison
+            matched_normalized = {skill.lower().strip() for skill in matched_list}
+            
+            # Track duplicates before removal for logging
+            duplicates_found = [
+                skill for skill in missing_list 
+                if skill.lower().strip() in matched_normalized
+            ]
+            
+            # Remove duplicates from missing list
+            original_missing_count = len(missing_list)
+            missing_list[:] = [
+                skill for skill in missing_list 
+                if skill.lower().strip() not in matched_normalized
+            ]
+            
+            duplicates_removed = original_missing_count - len(missing_list)
+            if duplicates_removed > 0:
+                logger.warning(f"⚠️ [MATCH_SUMMARY] Removed {duplicates_removed} duplicate(s) from {category} missing list (already in matched)")
+                logger.warning(f"   Duplicates removed: {duplicates_found}")
+        
         # Calculate match rates per category
         for category in ["technical", "soft", "domain"]:
             matched_count = len(match_summary["by_category"][category]["matched"])
@@ -400,7 +443,7 @@ class ATSRecommendationService:
             # Debug logging
             logger.info(f"📊 [MATCH_SUMMARY] {category.capitalize()} summary:")
             logger.info(f"   Matched: {matched_count} skills")
-            logger.info(f"   Missing: {missing_count} skills")
+            logger.info(f"   Missing: {missing_count} skills (after deduplication)")
             logger.info(f"   Match rate: {match_summary['by_category'][category]['match_rate']}%")
         
         return match_summary
@@ -731,10 +774,37 @@ class ATSRecommendationService:
         
         return keywords
     
+    def _stem_keyword(self, keyword: str) -> str:
+        """
+        Stem a keyword using NLTK's PorterStemmer.
+        
+        Examples:
+        - "Data Warehousing" → "data warehous"
+        - "Data Warehouse" → "data warehous"
+        - "analyzing" → "analyz"
+        
+        Returns:
+            Stemmed keyword, or original keyword if NLTK unavailable
+        """
+        if not NLTK_AVAILABLE or not stemmer:
+            return keyword.lower()
+        
+        try:
+            words = keyword.lower().split()
+            stemmed_words = [stemmer.stem(word) for word in words]
+            return ' '.join(stemmed_words)
+        except Exception as e:
+            logger.warning(f"⚠️ [KEYWORD_FILTER] Stemming failed for '{keyword}': {e}")
+            return keyword.lower()
+    
     def _keyword_exists_in_cv(self, keyword: str, cv_keywords: set) -> bool:
         """
         Check if a keyword exists in CV keywords (with fuzzy matching).
         Handles variations like "python" vs "python programming", "sql" vs "structured query language".
+        
+        FIXED:
+        - Now handles 3-character keywords like "SQL" by using >= instead of >.
+        - Added stemming support for pluralization (e.g., "Data Warehouse" vs "Data Warehousing").
         """
         keyword_lower = keyword.lower()
         
@@ -742,17 +812,32 @@ class ATSRecommendationService:
         if keyword_lower in cv_keywords:
             return True
         
+        # NEW: Stemming-based matching for pluralization
+        # Example: "Data Warehousing" (stemmed: "data warehous") matches "Data Warehouse" (stemmed: "data warehous")
+        if NLTK_AVAILABLE:
+            keyword_stemmed = self._stem_keyword(keyword)
+            for cv_kw in cv_keywords:
+                cv_kw_stemmed = self._stem_keyword(cv_kw)
+                if keyword_stemmed == cv_kw_stemmed:
+                    logger.debug(f"🔍 [KEYWORD_FILTER] Found '{keyword}' via stemming: '{cv_kw}' (stemmed: '{cv_kw_stemmed}' == '{keyword_stemmed}')")
+                    return True
+        
         # Check if keyword is part of any CV keyword (e.g., "python" in "python programming")
+        # FIXED: Changed > to >= to allow 3-character keywords like "SQL"
         for cv_kw in cv_keywords:
             if keyword_lower in cv_kw or cv_kw in keyword_lower:
                 # Only match if significant overlap (not just "a" in "data")
-                if len(keyword_lower) > 3 or len(cv_kw) > 3:
+                # Now includes 3-char keywords like "SQL", "ETL", "AWS", "GCP"
+                if len(keyword_lower) >= 3 or len(cv_kw) >= 3:
                     return True
         
-        # Check common variations
+        # Enhanced variations dict with parenthetical patterns
         variations = {
             'python': ['python programming', 'python development', 'py'],
-            'sql': ['structured query language', 'mysql', 'postgresql', 'sql server'],
+            'sql': ['structured query language', 'mysql', 'postgresql', 'sql server', 'sql ('],
+            'etl': ['extract transform load', 'data pipeline', 'etl pipeline'],
+            'aws': ['amazon web services', 'amazon aws'],
+            'gcp': ['google cloud platform', 'google cloud'],
             'javascript': ['js', 'javascript programming', 'node', 'nodejs'],
             'data analysis': ['data analytics', 'analyzing data', 'analytical'],
             'machine learning': ['ml', 'ai', 'artificial intelligence'],
@@ -763,6 +848,13 @@ class ATSRecommendationService:
             if keyword_lower == base or keyword_lower in vars:
                 if base in cv_keywords or any(v in cv_keywords for v in vars):
                     return True
+                
+                # NEW: Check if any CV keyword starts with base + space or parenthesis
+                # This catches "SQL (PostgreSQL, MySQL)" when looking for "SQL"
+                for cv_kw in cv_keywords:
+                    if cv_kw.startswith(base + ' ') or cv_kw.startswith(base + '('):
+                        logger.debug(f"🔍 [KEYWORD_FILTER] Found '{keyword}' via base pattern: '{cv_kw}' starts with '{base}'")
+                        return True
         
         return False
     
