@@ -589,6 +589,23 @@ TEXT TO ANALYZE:
                     "text": job_description
                 }, f, ensure_ascii=False, indent=2)
             
+            # ⭐ Process JD if not already processed (non-blocking)
+            try:
+                from app.services.jd_processing_service import get_jd_processing_service
+                if user:
+                    jd_service = get_jd_processing_service(self.user_email)
+                    await jd_service.process_jd_if_needed(
+                        company_name=company_slug,
+                        jd_text=job_description,
+                        job_title=job_info.get('job_title'),
+                        job_url=job_url,
+                        user=user
+                    )
+                    logger.info(f"🔄 [JD_PROCESSING] JD processing triggered for {company_slug}")
+            except Exception as proc_err:
+                logger.warning(f"⚠️ [JD_PROCESSING] Failed to process JD for {company_slug}: {proc_err}")
+                # Don't fail the request - processing is optional
+            
             # Save to shared saved_jobs.json file
             try:
                 from app.utils.user_path_utils import get_user_saved_jobs_path

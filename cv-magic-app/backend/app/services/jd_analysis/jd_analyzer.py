@@ -243,13 +243,16 @@ class JDAnalyzer:
     
     def _read_jd_file(self, file_path: Union[str, Path]) -> str:
         """
-        Read job description from file
+        Read job description from file - NOW WITH PROCESSED JD SUPPORT
+        
+        Tries processed JD first (if available), falls back to original JD file.
+        This ensures better AI analysis results while maintaining backward compatibility.
         
         Args:
             file_path: Path to the job description file
             
         Returns:
-            Job description text
+            Job description text (processed if available, otherwise original)
             
         Raises:
             FileNotFoundError: If file doesn't exist
@@ -257,6 +260,39 @@ class JDAnalyzer:
         """
         path = Path(file_path)
         
+        # ⭐ NEW: Try processed JD first (with fallback)
+        try:
+            # Extract company name from file path
+            # Path format: .../applied_companies/{company_name}/jd_original_{timestamp}.json
+            company_name = None
+            path_parts = path.parts
+            if 'applied_companies' in path_parts:
+                idx = path_parts.index('applied_companies')
+                if idx + 1 < len(path_parts):
+                    company_name = path_parts[idx + 1]
+            
+            if company_name and self.user_email:
+                logger.debug(f"🔍 [JD_ANALYZER] Attempting to use processed JD for {company_name}")
+                from app.services.jd_processing_service import get_jd_processing_service
+                jd_service = get_jd_processing_service(self.user_email)
+                processed_text = jd_service.get_jd_text_for_ai(company_name, prefer_processed=True)
+                if processed_text:
+                    logger.info(f"✅ [JD_ANALYZER] Using PROCESSED JD for {company_name} | "
+                               f"Source: jd_processing_service | Length: {len(processed_text)} chars")
+                    return processed_text
+                else:
+                    logger.info(f"📄 [JD_ANALYZER] Processed JD not available for {company_name}, "
+                               f"falling back to LEGACY file: {path.name}")
+            else:
+                if not company_name:
+                    logger.debug(f"📄 [JD_ANALYZER] Could not extract company name from path, using LEGACY file")
+                if not self.user_email:
+                    logger.debug(f"📄 [JD_ANALYZER] No user_email available, using LEGACY file")
+        except Exception as e:
+            logger.warning(f"⚠️ [JD_ANALYZER] Error attempting processed JD, falling back to LEGACY file: {e}")
+            # Continue with original file reading
+        
+        # ✅ FALLBACK: Original legacy behavior (unchanged)
         if not path.exists():
             raise FileNotFoundError(f"Job description file not found: {path}")
         
@@ -272,6 +308,9 @@ class JDAnalyzer:
                     content = file.read().strip()
             if not content:
                 raise ValueError(f"Job description file is empty: {path}")
+            logger.info(f"📄 [JD_ANALYZER] Using LEGACY (original) JD file | "
+                       f"Path: {path.name} | Length: {len(content)} chars | "
+                       f"Reason: Processed JD not available or error occurred")
             return content
             
         except Exception as e:

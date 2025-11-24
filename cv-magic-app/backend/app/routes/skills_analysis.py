@@ -1630,7 +1630,8 @@ async def preliminary_analysis(
             config_name=config_name,
             user_id=user_id,
             user_email=user_email,
-            current_user=current_user
+            current_user=current_user,
+            company_name=company_name  # Pass company name for processed JD lookup
         )
         # Attach resolved company to result so frontend can poll consistently (no extra calls)
         try:
@@ -1707,12 +1708,61 @@ async def preliminary_analysis(
                     
                     # Extract and save job metadata
                     job_metadata = await extract_job_metadata(jd_text)
+                    job_title = job_metadata.get('job_title') if job_metadata else None
                     if job_metadata:
                         # Save with timestamped, company-specific filename
                         job_info_file = company_dir / f"job_info_{company_name}_{timestamp}.json"
                         with open(job_info_file, 'w', encoding='utf-8') as f:
                             json.dump(job_metadata, f, indent=2, ensure_ascii=False)
                         logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
+                    
+                    # ⭐ Process JD if not already processed (non-blocking)
+                    try:
+                        from app.services.jd_processing_service import get_jd_processing_service
+                        from app.core.dependencies import get_current_user
+                        
+                        # Get user object for processing
+                        try:
+                            auth_header = request.headers.get("authorization")
+                            if auth_header and auth_header.startswith("Bearer "):
+                                token = auth_header.replace("Bearer ", "")
+                                token_data = verify_token(token)
+                                if token_data:
+                                    # Get user from database
+                                    from app.models.user import User
+                                    from app.database import get_database
+                                    from app.models.auth import UserData
+                                    from datetime import timezone
+                                    
+                                    user_record = None
+                                    for db in get_database():
+                                        user_record = db.query(User).filter(User.email == token_data.email).first()
+                                        break
+                                    
+                                    if user_record:
+                                        user = UserData(
+                                            id=str(user_record.id),
+                                            email=user_record.email,
+                                            name=user_record.full_name or user_record.username or "User",
+                                            created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
+                                            is_active=user_record.is_active
+                                        )
+                                        
+                                        jd_service = get_jd_processing_service(user.email)
+                                        await jd_service.process_jd_if_needed(
+                                            company_name=company_name,
+                                            jd_text=jd_text or "",
+                                            job_title=job_title,
+                                            job_url=jd_url,
+                                            user=user
+                                        )
+                                        logger.info(f"🔄 [JD_PROCESSING] JD processing triggered for {company_name}")
+                        except Exception as proc_err:
+                            logger.warning(f"⚠️ [JD_PROCESSING] Failed to process JD for {company_name}: {proc_err}")
+                            # Don't fail the request - processing is optional
+                    except Exception as e:
+                        logger.warning(f"⚠️ [JD_PROCESSING] JD processing setup failed: {e}")
+                        # Continue without processing - fallback to original JD will work
                 else:
                     logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
                 
@@ -3058,10 +3108,42 @@ async def perform_preliminary_skills_analysis(
     config_name: Optional[str] = None,
     user_id: int = 1,
     user_email: str = None,
-    current_user: Any = None
+    current_user: Any = None,
+    company_name: Optional[str] = None  # NEW: Optional company name for processed JD lookup
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
+        # ⭐ NEW: Try to use processed JD if company_name is available
+        jd_source = "original (provided)"  # Track JD source for logging
+        if company_name and user_email:
+            try:
+                logger.debug(f"🔍 [SKILLS_ANALYSIS] Attempting to use processed JD for {company_name}")
+                from app.services.jd_processing_service import get_jd_processing_service
+                jd_service = get_jd_processing_service(user_email)
+                processed_jd_text = jd_service.get_jd_text_for_ai(company_name, prefer_processed=True)
+                if processed_jd_text:
+                    original_length = len(jd_text)
+                    jd_text = processed_jd_text  # Use processed JD instead
+                    jd_source = "processed"
+                    logger.info(f"✅ [SKILLS_ANALYSIS] Using PROCESSED JD for {company_name} | "
+                               f"Original: {original_length} chars → Processed: {len(jd_text)} chars | "
+                               f"Reduction: {original_length - len(jd_text)} chars")
+                else:
+                    jd_source = "legacy (original)"
+                    logger.info(f"📄 [SKILLS_ANALYSIS] Using LEGACY (original) JD for {company_name} | "
+                               f"Length: {len(jd_text)} chars | "
+                               f"Reason: Processed JD not available")
+            except Exception as e:
+                jd_source = "legacy (original, error)"
+                logger.warning(f"⚠️ [SKILLS_ANALYSIS] Error getting processed JD for {company_name}, "
+                               f"using LEGACY (original) JD: {e} | Length: {len(jd_text)} chars")
+                # Continue with original jd_text
+        else:
+            if not company_name:
+                logger.debug(f"📄 [SKILLS_ANALYSIS] No company_name provided, using original JD")
+            if not user_email:
+                logger.debug(f"📄 [SKILLS_ANALYSIS] No user_email provided, using original JD")
+        
         # Get configuration
         config = skills_analysis_config_service.get_config(config_name)
         ai_params = skills_analysis_config_service.get_ai_parameters(config_name)
@@ -3070,7 +3152,7 @@ async def perform_preliminary_skills_analysis(
         if logging_params["enable_detailed_logging"]:
             logger.info(f"🔍 [SKILLS_ANALYSIS] Starting AI-powered skills analysis for {cv_filename}")
             logger.info(f"🔍 [SKILLS_ANALYSIS] CV content length: {len(cv_content)} chars")
-            logger.info(f"🔍 [SKILLS_ANALYSIS] JD content length: {len(jd_text)} chars")
+            logger.info(f"🔍 [SKILLS_ANALYSIS] JD content length: {len(jd_text)} chars | Source: {jd_source}")
             logger.info(f"🔍 [SKILLS_ANALYSIS] Using config: {config_name or 'default'}")
             # Lightweight CV content preview to aid debugging
             try:
