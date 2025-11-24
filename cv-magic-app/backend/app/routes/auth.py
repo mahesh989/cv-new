@@ -320,7 +320,7 @@ async def refresh_token(request: Request, db: Session = Depends(get_database)):
             )
         
         # Get user from database
-        user = get_user_by_id(db, token_data.user_id)
+        user = get_user_by_id(db, int(token_data.user_id))
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -337,7 +337,13 @@ async def refresh_token(request: Request, db: Session = Depends(get_database)):
             refresh_token=new_refresh_token,
             token_type="bearer",
             expires_in=settings.JWT_EXPIRATION_MINUTES * 60,
-            user=UserData(id=str(user.id), email=user.email, username=user.username)
+            user=UserData(
+                id=str(user.id), 
+                email=user.email, 
+                name=user.full_name or user.username,
+                created_at=user.created_at.replace(tzinfo=timezone.utc) if user.created_at.tzinfo is None else user.created_at,
+                is_active=user.is_active
+            )
         )
         
     except HTTPException:

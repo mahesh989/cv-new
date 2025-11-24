@@ -24,18 +24,13 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     logger.info(f"🔍 [AI_PROMPT] Generating prompt for {company}")
     
     # Extract optimized data structures
-    metadata = analysis_data.get("metadata", {})
-    skills_extraction = analysis_data.get("skills_extraction", {})
     preliminary_decision = analysis_data.get("preliminary_decision", {})
     match_summary = analysis_data.get("match_summary", {})
     keyword_guidance = analysis_data.get("keyword_integration_guidance", {})
     component_summary = analysis_data.get("component_summary", {})
-    tailoring_strategy = analysis_data.get("tailoring_strategy", {})
     ats_scoring = analysis_data.get("ats_scoring", {})
-    
-    # Extract CV and JD skills (clean structured data)
-    cv_skills = skills_extraction.get("cv", {})
-    jd_skills = skills_extraction.get("jd", {})
+    cv_content = analysis_data.get("cv_content", {})
+    jd_content = analysis_data.get("jd_content", {})
     
     # Extract scores and metrics
     final_ats_score = ats_scoring.get("final_score", 0)
@@ -128,15 +123,6 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     tier1_keywords = keyword_guidance.get("tier1_always_add", {})
     tier2_keywords = keyword_guidance.get("tier2_add_if_evidence", {})
     tier3_keywords = keyword_guidance.get("tier3_never_add", {})
-    integration_instructions = keyword_guidance.get("integration_instructions", "")
-    
-    # Extract tailoring strategy
-    primary_objective = tailoring_strategy.get("primary_objective", "Optimize CV for target role")
-    emphasis_areas = tailoring_strategy.get("emphasis_areas", [])
-    de_emphasize_areas = tailoring_strategy.get("de_emphasize", [])
-    critical_additions = tailoring_strategy.get("critical_additions", {})
-    tone_guidance = tailoring_strategy.get("tone_guidance", "Professional and results-oriented")
-    industry_bridging = tailoring_strategy.get("industry_bridging", [])
     
     # Extract preliminary decision
     decision = preliminary_decision.get("decision", "UNKNOWN")
@@ -145,13 +131,70 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     primary_reason = preliminary_decision.get("primary_reason", "")
     critical_missing = preliminary_decision.get("critical_missing", [])
     implicit_likely = preliminary_decision.get("implicit_likely", [])
-    blocker_found = preliminary_decision.get("blocker_found", False)
+    
+    # Helper function to format lists
+    def format_list(items):
+        if not items:
+            return "N/A"
+        return '\n'.join(f'  - {item}' for item in items)
+    
+    def format_bullets(bullets):
+        if not bullets:
+            return "N/A"
+        return '\n'.join(f'  • {bullet}' for bullet in bullets[:10])  # Limit to 10
     
     prompt = f"""Strategic CV Optimization Recommendations Generator
 
 Role: Senior CV Strategist and Hiring Consultant with expertise in ATS optimization, skills matching, and strategic positioning.
 
 Objective: Generate precise, actionable recommendations in structured JSON format for programmatic CV generation.
+
+## JOB CONTEXT
+
+Role: {jd_content.get('role_title', 'N/A')}
+Department: {jd_content.get('department', 'N/A')}
+Level: {jd_content.get('role_level', 'N/A')}
+
+Context: {jd_content.get('context', 'N/A')}
+
+Key Responsibilities:
+{format_list(jd_content.get('key_responsibilities', []))}
+
+Required Skills: {', '.join(jd_content.get('required_skills', [])) if jd_content.get('required_skills') else 'N/A'}
+Preferred Skills: {', '.join(jd_content.get('preferred_skills', [])) if jd_content.get('preferred_skills') else 'N/A'}
+
+## CV EVIDENCE (For Tier 2 Evidence Checking)
+
+### Experience Bullets:
+{format_bullets(cv_content.get('experience_bullets', []))}
+
+### Technical Skills:
+{cv_content.get('skills_section', 'N/A')}
+
+### Projects:
+{format_list(cv_content.get('technical_projects', []))}
+
+### Certifications:
+{format_list(cv_content.get('certifications', []))}
+
+---
+
+## TIER 2 EVIDENCE CHECKING INSTRUCTIONS
+
+When categorizing Tier 2 keywords (add if evidence exists):
+1. Check if keyword or related concept appears in experience bullets
+2. Check if skills section mentions keyword or variation
+3. Check if projects demonstrate keyword capability
+4. Check if certifications validate keyword
+
+Example:
+- Missing keyword: "de-duplication"
+- CV evidence: "improving accuracy by 20%" (implies data cleaning/dedup)
+- Decision: Tier 2 ✅ (has semantic evidence)
+
+If NO evidence found in CV content → Move to Tier 3 ❌
+
+---
 
 ANALYSIS DATA:
 
@@ -221,13 +264,6 @@ Keyword Tiers (Reference Only - Use MISSING KEYWORDS lists below instead):
 - Tier 2 (Add with Evidence): Technical: {', '.join(tier2_keywords.get('technical', [])) if tier2_keywords.get('technical') else 'None'} | Soft: {', '.join(tier2_keywords.get('soft', [])) if tier2_keywords.get('soft') else 'None'}
 - Tier 3 (Never Add): Technical: {', '.join(tier3_keywords.get('technical', [])) if tier3_keywords.get('technical') else 'None'} | Domain: {', '.join(tier3_keywords.get('domain', [])) if tier3_keywords.get('domain') else 'None'}
 
-Strategic Guidance:
-- Primary Objective: {primary_objective}
-- Tone: {tone_guidance}
-- Emphasis: {', '.join(emphasis_areas) if emphasis_areas else 'Transferable skills and achievements'}
-- De-emphasize: {', '.join(de_emphasize_areas) if de_emphasize_areas else 'None'}
-- Bridging: {', '.join(industry_bridging) if industry_bridging else 'None'}
-
 Constraints:
 - No Fabrication: Only reframe/highlight existing CV experiences
 - Evidence Required: All recommendations need basis, integration, validation, risk
@@ -248,7 +284,7 @@ Return ONLY this JSON structure (no preamble, no markdown formatting, no code bl
     "target_score": {target_score},
     "improvement_needed": {improvement_needed},
     "overall_match_rate": {overall_match_rate},
-    "primary_objective": "{primary_objective}",
+    "primary_objective": "Optimize CV for {jd_content.get('role_title', 'target role')}",
     "key_challenge": "{industry_component.get('transition_difficulty', 'UNKNOWN')} industry transition from {industry_component.get('cv_industry', 'Unknown')} to {industry_component.get('jd_industry', 'Unknown')}"
   }},
   
@@ -340,10 +376,10 @@ Return ONLY this JSON structure (no preamble, no markdown formatting, no code bl
   
   "experience_reframing": {{
     "industry_transition": {{
-      "objective": "{primary_objective}",
-      "emphasis_areas": {emphasis_areas if emphasis_areas else ["Focus on transferable skills and achievements"]},
-      "de_emphasize": {de_emphasize_areas if de_emphasize_areas else []},
-      "bridging_statements": {industry_bridging if industry_bridging else []}
+      "objective": "Optimize CV for {jd_content.get('role_title', 'target role')}",
+      "emphasis_areas": ["Focus on transferable skills and achievements"],
+      "de_emphasize": [],
+      "bridging_statements": []
     }},
     
     "seniority_positioning": {{
@@ -383,16 +419,16 @@ Return ONLY this JSON structure (no preamble, no markdown formatting, no code bl
       "Document defense strategy for each addition"
     ],
     "phase3_positioning": [
-      "Adjust tone per guidance: {tone_guidance}",
+      "Adjust tone to be professional and results-oriented",
       "De-emphasize non-relevant skills",
       "Optimize for target seniority level"
     ]
   }},
   
   "tone_and_style": {{
-    "overall_tone": "{tone_guidance}",
-    "key_messages": {emphasis_areas if emphasis_areas else ["Transferable skills", "Business impact", "Quantified results"]},
-    "avoid_messages": {de_emphasize_areas if de_emphasize_areas else []}
+    "overall_tone": "Professional and results-oriented",
+    "key_messages": ["Transferable skills", "Business impact", "Quantified results"],
+    "avoid_messages": []
   }}
 }}
 ```

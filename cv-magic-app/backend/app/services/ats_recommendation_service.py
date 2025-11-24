@@ -12,6 +12,7 @@ This service creates highly optimized recommendation files with:
 import logging
 import json
 import re
+import sys
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from datetime import datetime
@@ -55,7 +56,9 @@ class ATSRecommendationService:
             Optimized dictionary for AI consumption or None if not found
         """
         try:
-            logger.info(f"🔍 [INPUT_RECOMMENDATION] Starting extraction for {company}")
+            logger.info("=" * 80)
+            logger.info(f"🔍 [INPUT_OPTIMIZATION] Starting input file generation for {company}")
+            logger.info("=" * 80)
             # Locate analysis file
             company_dir = self.base_dir / "applied_companies" / company
             analysis_file = TimestampUtils.find_latest_timestamped_file(
@@ -83,8 +86,16 @@ class ATSRecommendationService:
             # Parse and simplify each component
             preliminary_decision = self._extract_preliminary_decision(match_entries)
             match_summary = self._extract_match_summary(preextracted_entries)
-            component_summary = self._extract_component_summary(component_entries)
             ats_scoring = self._extract_ats_scoring(ats_entries)
+            
+            # Log what sections are in the original analysis file
+            logger.info(f"📂 [INPUT_OPTIMIZATION] Original analysis file sections:")
+            logger.info(f"   - cv_skills: {'✅' if cv_skills else '❌'}")
+            logger.info(f"   - jd_skills: {'✅' if jd_skills else '❌'}")
+            logger.info(f"   - match_entries: {len(match_entries)} entries")
+            logger.info(f"   - preextracted_entries: {len(preextracted_entries)} entries")
+            logger.info(f"   - component_entries: {len(component_entries)} entries")
+            logger.info(f"   - ats_entries: {len(ats_entries)} entries")
             
             # Debug: Log match summary
             technical_match = match_summary.get("by_category", {}).get("technical", {})
@@ -96,47 +107,122 @@ class ATSRecommendationService:
             logger.info(f"   - Soft: {len(soft_match.get('matched', []))} matched, {len(soft_match.get('missing', []))} missing")
             logger.info(f"   - Domain: {len(domain_match.get('matched', []))} matched, {len(domain_match.get('missing', []))} missing")
             
+            # Log optimization decisions for each section
+            logger.info("")
+            logger.info("🔧 [INPUT_OPTIMIZATION] Section Optimization Decisions:")
+            logger.info("-" * 80)
+            
+            # metadata section - REMOVED
+            logger.info("📦 [INPUT_OPTIMIZATION] Section: metadata")
+            logger.info(f"   ❌ REMOVED - Not used in AI prompt")
+            logger.info(f"   💡 Would have included: company, generated_at, ats_score_current, match_rate_current")
+            
+            # skills_extraction section - REMOVED
+            logger.info("📦 [INPUT_OPTIMIZATION] Section: skills_extraction")
+            cv_skills_count = sum(len(v) for v in [cv_skills.get("technical_skills", []), cv_skills.get("soft_skills", []), cv_skills.get("domain_keywords", [])])
+            jd_skills_count = sum(len(v) for v in [jd_skills.get("technical_skills", []), jd_skills.get("soft_skills", []), jd_skills.get("domain_keywords", [])])
+            logger.info(f"   ❌ REMOVED - Redundant with match_summary")
+            logger.info(f"   💡 Would have included: CV skills ({cv_skills_count}), JD skills ({jd_skills_count})")
+            
             # Generate optimized recommendation data
-            recommendation_data = {
-                "metadata": {
-                    "company": company,
-                    "generated_at": datetime.utcnow().isoformat(),
-                    "ats_score_current": ats_scoring.get("final_score", 0),
-                    "match_rate_current": match_summary.get("overall_match_rate", 0)
-                },
-                
-                # Clean structured skills (no verbose text)
-                "skills_extraction": {
-                    "cv": {
-                        "technical": cv_skills.get("technical_skills", []),
-                        "soft": cv_skills.get("soft_skills", []),
-                        "domain": cv_skills.get("domain_keywords", [])
-                    },
-                    "jd": {
-                        "technical": jd_skills.get("technical_skills", []),
-                        "soft": jd_skills.get("soft_skills", []),
-                        "domain": jd_skills.get("domain_keywords", [])
-                    }
-                },
-                
-                # Simplified preliminary decision (no verbose analysis)
-                "preliminary_decision": preliminary_decision,
-                
-                # Clean match summary (no emoji, no verbose reasoning)
-                "match_summary": match_summary,
-                
-                # Keyword tier classification for CV framework
-                "keyword_integration_guidance": self._classify_keywords(
-                    match_summary.get("missing_keywords", {}),
-                    cv_skills
-                ),
-                
-                # Simplified component summary (no redundant fields)
-                "component_summary": component_summary,
-                
-                # Clean ATS scoring (numbers only)
-                "ats_scoring": ats_scoring
+            logger.info("")
+            logger.info("🔨 [INPUT_OPTIMIZATION] Building optimized sections:")
+            logger.info("-" * 80)
+            
+            # Build preliminary_decision (optimized)
+            preliminary_decision_optimized = {
+                "decision": preliminary_decision.get("decision"),
+                "confidence": preliminary_decision.get("confidence"),
+                "match_score": preliminary_decision.get("match_score"),
+                "primary_reason": preliminary_decision.get("primary_reason"),
+                "critical_missing": preliminary_decision.get("critical_missing", []),
+                "implicit_likely": preliminary_decision.get("implicit_likely", [])
             }
+            logger.info("📦 [INPUT_OPTIMIZATION] Section: preliminary_decision")
+            logger.info(f"   ✅ Fields included: {list(preliminary_decision_optimized.keys())}")
+            logger.info(f"   ❌ Fields excluded: ['blocker_found', 'learnable_gaps']")
+            preliminary_size = sys.getsizeof(json.dumps(preliminary_decision_optimized))
+            logger.info(f"   📊 Size: ~{preliminary_size} bytes")
+            
+            # Build keyword guidance (optimized)
+            keyword_guidance = self._classify_keywords_optimized(
+                match_summary.get("missing_keywords", {}),
+                cv_skills
+            )
+            logger.info("📦 [INPUT_OPTIMIZATION] Section: keyword_integration_guidance")
+            logger.info(f"   ✅ Fields included: {list(keyword_guidance.keys())}")
+            logger.info(f"   ❌ Fields excluded: ['integration_instructions']")
+            keyword_size = sys.getsizeof(json.dumps(keyword_guidance))
+            logger.info(f"   📊 Size: ~{keyword_size} bytes")
+            
+            # Build component summary (optimized)
+            component_summary_optimized = self._extract_component_summary_optimized(component_entries)
+            logger.info("📦 [INPUT_OPTIMIZATION] Section: component_summary")
+            for component in ['technical', 'skills', 'experience', 'seniority', 'industry']:
+                if component in component_summary_optimized:
+                    comp_data = component_summary_optimized[component]
+                    logger.info(f"   📊 {component}:")
+                    logger.info(f"      ✅ Used fields: {list(comp_data.keys())}")
+                    logger.info(f"      ❌ Excluded: raw_scores.* (would add ~1-2KB per component)")
+            component_size = sys.getsizeof(json.dumps(component_summary_optimized))
+            logger.info(f"   📊 Total component_summary size: ~{component_size} bytes")
+            
+            # Extract CV content (NEW)
+            cv_content = self._extract_cv_content(company)
+            logger.info("📦 [INPUT_OPTIMIZATION] Section: cv_content (NEW)")
+            if cv_content and any(cv_content.values()):
+                logger.info(f"   ✅ cv_content added for Tier 2 evidence checking:")
+                logger.info(f"      - experience_bullets: {len(cv_content.get('experience_bullets', []))} bullets")
+                logger.info(f"      - skills_section: {len(cv_content.get('skills_section', ''))} chars")
+                logger.info(f"      - technical_projects: {len(cv_content.get('technical_projects', []))} projects")
+                logger.info(f"      - certifications: {len(cv_content.get('certifications', []))} certs")
+                cv_content_size = sys.getsizeof(json.dumps(cv_content))
+                logger.info(f"   📊 Size: ~{cv_content_size} bytes")
+            else:
+                logger.warning(f"   ❌ cv_content MISSING - Tier 2 evidence checking will be inaccurate!")
+            
+            # Extract JD content (NEW)
+            jd_content = self._extract_jd_content(company)
+            logger.info("📦 [INPUT_OPTIMIZATION] Section: jd_content (NEW)")
+            if jd_content and jd_content.get('role_title') != 'N/A':
+                logger.info(f"   ✅ jd_content added for context:")
+                logger.info(f"      - role_title: {jd_content.get('role_title', 'N/A')}")
+                logger.info(f"      - department: {jd_content.get('department', 'N/A')}")
+                logger.info(f"      - responsibilities: {len(jd_content.get('key_responsibilities', []))} items")
+                logger.info(f"      - required_skills: {len(jd_content.get('required_skills', []))} items")
+                logger.info(f"      - preferred_skills: {len(jd_content.get('preferred_skills', []))} items")
+                jd_content_size = sys.getsizeof(json.dumps(jd_content))
+                logger.info(f"   📊 Size: ~{jd_content_size} bytes")
+            else:
+                logger.warning(f"   ❌ jd_content MISSING - Context understanding will be limited!")
+            
+            # Build final recommendation data
+            recommendation_data = {
+                "preliminary_decision": preliminary_decision_optimized,
+                "match_summary": match_summary,
+                "keyword_integration_guidance": keyword_guidance,
+                "component_summary": component_summary_optimized,
+                "ats_scoring": ats_scoring,
+                "cv_content": cv_content,
+                "jd_content": jd_content
+            }
+            
+            # Calculate totals
+            total_size = sys.getsizeof(json.dumps(recommendation_data))
+            section_count = len(recommendation_data.keys())
+            
+            logger.info("")
+            logger.info("=" * 80)
+            logger.info("📊 [INPUT_OPTIMIZATION] Summary:")
+            logger.info(f"   Total sections: {section_count}")
+            logger.info(f"   Total size: ~{total_size} bytes ({total_size / 1024:.2f} KB)")
+            logger.info(f"   Sections included: {list(recommendation_data.keys())}")
+            logger.info("")
+            logger.info("📋 [INPUT_OPTIMIZATION] Section sizes:")
+            for section_name, section_data in recommendation_data.items():
+                section_size = sys.getsizeof(json.dumps(section_data))
+                logger.info(f"   {section_name}: ~{section_size} bytes ({section_size / total_size * 100:.1f}%)")
+            logger.info("=" * 80)
             
             # Debug: Log keyword classification
             keyword_guidance = recommendation_data.get("keyword_integration_guidance", {})
@@ -181,8 +267,28 @@ class ATSRecommendationService:
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             
-            file_size_kb = output_file.stat().st_size / 1024
-            logger.info(f"✅ Created optimized recommendation file: {output_file} ({file_size_kb:.1f}KB)")
+            # Detailed file size logging
+            file_size = output_file.stat().st_size
+            file_size_kb = file_size / 1024
+            
+            logger.info("")
+            logger.info("=" * 80)
+            logger.info("💾 [INPUT_OPTIMIZATION] File saved:")
+            logger.info(f"   Path: {output_file}")
+            logger.info(f"   Size: {file_size} bytes ({file_size_kb:.2f} KB)")
+            
+            # Compare with expected optimized size
+            if file_size > 6000:  # ~6KB threshold
+                logger.warning(f"   ⚠️  File larger than expected (target: <6KB)")
+                logger.warning(f"   💡 Check if raw_scores or skills_extraction are still included")
+            else:
+                logger.info(f"   ✅ File size within optimal range")
+            
+            # Estimate savings from optimization
+            estimated_unoptimized_size = file_size * 1.5  # Rough estimate
+            savings = estimated_unoptimized_size - file_size
+            logger.info(f"   💰 Estimated savings: ~{savings:.0f} bytes ({savings / 1024:.2f} KB)")
+            logger.info("=" * 80)
             
             return output_file
             
@@ -545,6 +651,84 @@ class ATSRecommendationService:
         
         return summary
     
+    def _extract_component_summary_optimized(self, component_entries: List[Dict]) -> Dict[str, Any]:
+        """Extract optimized component summary with only used fields"""
+        
+        def _to_float(value: Any) -> float:
+            try:
+                if value is None:
+                    return 0.0
+                return float(value)
+            except (ValueError, TypeError):
+                return 0.0
+        
+        if not component_entries:
+            return {
+                "technical": {"score": 0.0, "core_match": 0.0, "stack_fit": 0.0, "strengths": [], "gaps": []},
+                "skills": {"score": 0.0, "business_readiness": 0.0, "strengths": []},
+                "experience": {
+                    "alignment_score": 0.0,
+                    "years": 0.0,
+                    "corporate_years": 0.0,
+                    "strengths": []
+                },
+                "seniority": {
+                    "score": 0.0,
+                    "cv_level": "Unknown",
+                    "jd_level": "Unknown"
+                },
+                "industry": {
+                    "alignment_score": 0.0,
+                    "cv_industry": "Unknown",
+                    "jd_industry": "Unknown",
+                    "transition_difficulty": "UNKNOWN"
+                }
+            }
+        
+        latest_entry = component_entries[-1]
+        component_analyses = latest_entry.get("component_analyses", {})
+        extracted_scores = latest_entry.get("extracted_scores", {})
+        
+        technical_analysis = component_analyses.get("technical", {}).get("technical_analysis", {})
+        skills_analysis = component_analyses.get("skills", {})
+        experience_analysis = component_analyses.get("experience", {}).get("experience_analysis", {})
+        seniority_analysis = component_analyses.get("seniority", {}).get("seniority_analysis", {})
+        industry_analysis = component_analyses.get("industry", {}).get("industry_analysis", {})
+        
+        summary = {
+            "technical": {
+                "score": _to_float(technical_analysis.get("technical_depth_score", extracted_scores.get("technical_depth"))),
+                "core_match": _to_float(technical_analysis.get("core_skills_match_percentage", extracted_scores.get("core_skills_match_percentage"))),
+                "stack_fit": _to_float(technical_analysis.get("technical_stack_fit_percentage", extracted_scores.get("technical_stack_fit_percentage"))),
+                "strengths": technical_analysis.get("technical_strengths", []),
+                "gaps": technical_analysis.get("technical_gaps", [])
+            },
+            "skills": {
+                "score": _to_float(skills_analysis.get("overall_skills_score", extracted_scores.get("skills_relevance"))),
+                "business_readiness": _to_float(skills_analysis.get("business_readiness_score", extracted_scores.get("business_readiness"))),
+                "strengths": skills_analysis.get("strength_areas", [])
+            },
+            "experience": {
+                "alignment_score": _to_float(experience_analysis.get("alignment_score", extracted_scores.get("experience_alignment"))),
+                "years": _to_float(experience_analysis.get("cv_experience_years", 0)),
+                "corporate_years": _to_float(experience_analysis.get("cv_corporate_years", 0)),
+                "strengths": experience_analysis.get("experience_strengths", [])
+            },
+            "seniority": {
+                "score": _to_float(seniority_analysis.get("seniority_score", extracted_scores.get("seniority_match"))),
+                "cv_level": seniority_analysis.get("cv_responsibility_scope", "Unknown"),
+                "jd_level": seniority_analysis.get("jd_required_seniority", "Unknown")
+            },
+            "industry": {
+                "alignment_score": _to_float(industry_analysis.get("industry_alignment_score", extracted_scores.get("industry_fit"))),
+                "cv_industry": industry_analysis.get("cv_primary_industry", "Unknown"),
+                "jd_industry": industry_analysis.get("jd_target_industry", "Unknown"),
+                "transition_difficulty": industry_analysis.get("transition_type", industry_analysis.get("hiring_risk_assessment", "UNKNOWN"))
+            }
+        }
+        
+        return summary
+    
     def _extract_ats_scoring(self, ats_entries: List[Dict]) -> Dict[str, Any]:
         """Extract clean ATS scoring (numbers only, no verbose explanation)"""
         if not ats_entries:
@@ -572,10 +756,10 @@ class ATSRecommendationService:
             "scoring_version": latest_entry.get("scoring_version", "unknown")
         }
     
-    def _classify_keywords(self, missing_keywords: Dict[str, List[str]], 
+    def _classify_keywords_optimized(self, missing_keywords: Dict[str, List[str]], 
                           cv_skills: Dict[str, List[str]]) -> Dict[str, Any]:
         """
-        Classify missing keywords into tiers based on CV tailoring framework.
+        Classify missing keywords into tiers based on CV tailoring framework (OPTIMIZED).
         NOW WITH PRE-FILTERING: Removes keywords already present in the latest CV.
         
         Tier 1: Always add (generic/transferable)
@@ -648,13 +832,7 @@ class ATSRecommendationService:
             "tier1_always_add": {"technical": [], "soft": [], "domain": []},
             "tier2_add_if_evidence": {"technical": [], "soft": [], "domain": []},
             "tier3_never_add": {"technical": [], "soft": [], "domain": []},
-            "already_in_cv_filtered": list(set([kw for keywords in already_present.values() for kw in keywords])),
-            "integration_instructions": (
-                "Tier 1: Integrate ALL keywords into skills section and relevant bullets. "
-                "Tier 2: Integrate ONLY if semantic evidence exists in CV experience. "
-                "Tier 3: DO NOT add - domain-specific, unverifiable, or lacks evidence. "
-                "Already in CV: These keywords were filtered out as they already exist in the CV."
-            )
+            "already_in_cv_filtered": list(set([kw for keywords in already_present.values() for kw in keywords]))
         }
         
         cv_technical = [s.lower() for s in cv_skills.get("technical_skills", [])]
@@ -871,3 +1049,228 @@ class ATSRecommendationService:
             return not has_python
         
         return False
+    
+    def _extract_cv_content(self, company: str) -> Dict:
+        """Extract CV content for Tier 2 evidence checking"""
+        try:
+            # Try to load from latest tailored CV first, then original CV
+            cv_dir = self.base_dir / "cvs"
+            tailored_dir = cv_dir / "tailored"
+            original_dir = cv_dir / "original"
+            
+            cv_data = None
+            
+            # Try tailored CV first
+            if tailored_dir.exists():
+                tailored_files = list(tailored_dir.glob("*_tailored_cv_*.json"))
+                if tailored_files:
+                    latest_tailored = max(tailored_files, key=lambda f: f.stat().st_mtime)
+                    with open(latest_tailored, 'r', encoding='utf-8') as f:
+                        cv_data = json.load(f)
+                    logger.info(f"🔍 [CV_CONTENT] Loaded tailored CV: {latest_tailored.name}")
+            
+            # Fallback to original CV
+            if not cv_data:
+                original_cv = original_dir / "original_cv.json"
+                if original_cv.exists():
+                    with open(original_cv, 'r', encoding='utf-8') as f:
+                        cv_data = json.load(f)
+                    logger.info(f"🔍 [CV_CONTENT] Loaded original CV")
+            
+            if not cv_data:
+                logger.warning(f"⚠️ [CV_CONTENT] No CV data found")
+                return {
+                    "experience_bullets": [],
+                    "skills_section": "",
+                    "technical_projects": [],
+                    "certifications": []
+                }
+            
+            # Extract all experience bullets
+            experience_bullets = []
+            for exp in cv_data.get("experience", []):
+                bullets = exp.get("bullets", [])
+                experience_bullets.extend(bullets)
+            
+            # Extract skills section text
+            skills_text = []
+            for skill_cat in cv_data.get("skills", []):
+                skills = skill_cat.get("skills", [])
+                skills_text.extend(skills)
+            skills_section = ", ".join(skills_text)
+            
+            # Extract projects
+            technical_projects = []
+            for project in cv_data.get("projects", []):
+                title = project.get("title", project.get("name", ""))
+                desc = project.get("description", "")
+                project_desc = f"{title} - {desc}" if title and desc else title or desc
+                if project_desc:
+                    technical_projects.append(project_desc)
+            
+            # Extract certifications
+            certifications = []
+            for cert in cv_data.get("certifications", []):
+                if isinstance(cert, dict):
+                    cert_title = cert.get("title", cert.get("name", ""))
+                else:
+                    cert_title = str(cert)
+                if cert_title:
+                    certifications.append(cert_title)
+            
+            return {
+                "experience_bullets": experience_bullets,
+                "skills_section": skills_section,
+                "technical_projects": technical_projects,
+                "certifications": certifications
+            }
+        except Exception as e:
+            logger.error(f"❌ [CV_CONTENT] Error extracting CV content: {e}")
+            return {
+                "experience_bullets": [],
+                "skills_section": "",
+                "technical_projects": [],
+                "certifications": []
+            }
+    
+    def _extract_jd_content(self, company: str) -> Dict:
+        """Extract JD content for contextual understanding"""
+        try:
+            company_dir = self.base_dir / "applied_companies" / company
+            
+            # Try to load JD from jd_original.json
+            jd_file = TimestampUtils.find_latest_timestamped_file(
+                company_dir, "jd_original", "json"
+            )
+            if not jd_file:
+                jd_file = company_dir / "jd_original.json"
+            
+            if not jd_file.exists():
+                logger.warning(f"⚠️ [JD_CONTENT] JD file not found: {jd_file}")
+                return {
+                    "role_title": "N/A",
+                    "department": "N/A",
+                    "role_level": "Mid",
+                    "key_responsibilities": ["N/A"],
+                    "required_skills": ["N/A"],
+                    "preferred_skills": ["N/A"],
+                    "context": "N/A"
+                }
+            
+            with open(jd_file, 'r', encoding='utf-8') as f:
+                jd_data = json.load(f)
+            
+            # Extract from JD record
+            jd_record = jd_data.get("record", {})
+            jd_text = jd_data.get("text", "")
+            
+            return {
+                "role_title": jd_record.get("title", "N/A"),
+                "department": self._extract_department(jd_text),
+                "role_level": jd_record.get("level", "Mid"),
+                "key_responsibilities": self._extract_responsibilities(jd_text),
+                "required_skills": self._extract_required_skills(jd_text),
+                "preferred_skills": self._extract_preferred_skills(jd_text),
+                "context": self._extract_context(jd_text)
+            }
+        except Exception as e:
+            logger.error(f"❌ [JD_CONTENT] Error extracting JD content: {e}")
+            return {
+                "role_title": "N/A",
+                "department": "N/A",
+                "role_level": "Mid",
+                "key_responsibilities": ["N/A"],
+                "required_skills": ["N/A"],
+                "preferred_skills": ["N/A"],
+                "context": "N/A"
+            }
+    
+    def _extract_department(self, jd_text: str) -> str:
+        """Extract department from JD text"""
+        # Look for common department patterns
+        import re
+        patterns = [
+            r"department[:\s]+([^\n\.]+)",
+            r"team[:\s]+([^\n\.]+)",
+            r"division[:\s]+([^\n\.]+)"
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, jd_text, re.IGNORECASE)
+            if match:
+                return match.group(1).strip()
+        
+        return "N/A"
+    
+    def _extract_responsibilities(self, jd_text: str) -> List[str]:
+        """Extract key responsibilities from JD text"""
+        import re
+        
+        # Look for responsibilities section
+        responsibilities = []
+        
+        # Pattern 1: Bullet points after "responsibilities" heading
+        resp_section = re.search(
+            r"(?:responsibilities|duties|role)[:\s]*\n((?:[-•*]\s*.+\n?)+)",
+            jd_text,
+            re.IGNORECASE
+        )
+        
+        if resp_section:
+            bullets = re.findall(r"[-•*]\s*(.+)", resp_section.group(1))
+            responsibilities.extend([b.strip() for b in bullets[:5]])  # Limit to 5
+        
+        return responsibilities if responsibilities else ["N/A"]
+    
+    def _extract_required_skills(self, jd_text: str) -> List[str]:
+        """Extract required skills from JD text"""
+        import re
+        
+        # Look for required skills section
+        required_skills = []
+        
+        # Pattern: Skills after "required" heading
+        req_section = re.search(
+            r"(?:required|must have|essential)[:\s]*\n((?:[-•*]\s*.+\n?)+)",
+            jd_text,
+            re.IGNORECASE
+        )
+        
+        if req_section:
+            bullets = re.findall(r"[-•*]\s*(.+)", req_section.group(1))
+            required_skills.extend([b.strip() for b in bullets[:5]])  # Limit to 5
+        
+        return required_skills if required_skills else ["N/A"]
+    
+    def _extract_preferred_skills(self, jd_text: str) -> List[str]:
+        """Extract preferred skills from JD text"""
+        import re
+        
+        # Look for preferred skills section
+        preferred_skills = []
+        
+        # Pattern: Skills after "preferred" heading
+        pref_section = re.search(
+            r"(?:preferred|nice to have|desirable)[:\s]*\n((?:[-•*]\s*.+\n?)+)",
+            jd_text,
+            re.IGNORECASE
+        )
+        
+        if pref_section:
+            bullets = re.findall(r"[-•*]\s*(.+)", pref_section.group(1))
+            preferred_skills.extend([b.strip() for b in bullets[:5]])  # Limit to 5
+        
+        return preferred_skills if preferred_skills else ["N/A"]
+    
+    def _extract_context(self, jd_text: str) -> str:
+        """Extract context from JD text (first few sentences)"""
+        # Get first 200 characters or first 2 sentences
+        import re
+        
+        sentences = re.split(r'[.!?]\s+', jd_text[:500])
+        context = '. '.join(sentences[:2])
+        
+        if len(context) > 200:
+            context = context[:200] + "..."
+        
+        return context if context else "N/A"
