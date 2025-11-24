@@ -52,6 +52,10 @@ cv-magic-app/logs/
 cv-magic-app/backend_logs.txt
 cv-magic-app/frontend_logs.txt
 
+# User data files
+user/
+cv-magic-app/user/
+
 # Ignore nested accidental copy
 cv-magic-app/mobile_app/cv-magic-app/
 
