@@ -439,12 +439,16 @@ class JDProcessingService:
             additional_sections = processed_data.get("additional_sections", {})
             sections_count = len(sections) + len(additional_sections)
             
+            # Create serializable payload (exclude user object which can't be JSON serialized)
             processed_payload = {
-                **job_info,
+                "company_name": job_info.get("company_name"),
+                "job_title": job_info.get("job_title"),
+                "job_url": job_info.get("job_url"),
                 "length_chars": len(jd_text),
                 "processing_mode": "universal_ai" if optimizer.using_real_ai else "mock_fallback",
                 "sections": sections,
                 "additional_sections": additional_sections,
+                "processed_at": datetime.now().isoformat(),
             }
             
             with open(processed_file, "w", encoding="utf-8") as f:

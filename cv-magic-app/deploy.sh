@@ -198,12 +198,6 @@ deploy_full() {
         echo "🔍 Checking current directory and git status..."
         cd $VPS_PATH
         
-        echo "🧹 Clearing log files..."
-        mkdir -p logs
-        > logs/backend_logs.txt
-        > logs/frontend_logs.txt
-        echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
-        
         echo "📥 Pulling latest changes from $BRANCH branch..."
         git fetch origin
         git checkout $BRANCH
@@ -238,6 +232,12 @@ deploy_full() {
         
         echo "  - Checking disk space after cleanup..."
         df -h / || true
+        
+        echo "🧹 Clearing log files before building..."
+        mkdir -p logs
+        > logs/backend_logs.txt
+        > logs/frontend_logs.txt
+        echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
         
         echo "🔨 Building new containers..."
         docker compose build --no-cache

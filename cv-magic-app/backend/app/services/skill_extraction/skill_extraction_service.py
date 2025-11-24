@@ -176,25 +176,60 @@ class SkillExtractionService:
             return None
     
     async def _get_jd_data(self, db: Session, jd_url: str, user_id: int) -> Optional[Dict]:
-        """Get JD data by scraping URL"""
+        """Get JD data - prefers processed JD if available, otherwise scrapes URL"""
         logger.info(f"🔗 Getting JD data from {jd_url}")
         
         try:
-            # Scrape job description
-            jd_text = await scrape_job_description_async(jd_url)
-            
-            if jd_text.startswith("Error:") or len(jd_text.strip()) < 10:
-                logger.error(f"❌ Failed to scrape JD: {jd_text}")
-                return None
-            
-            logger.info(f"🔗 JD text scraped: {len(jd_text)} characters")
-            
-            # Create or get job application record
+            # Try to get existing job application record first
             job_app = db.query(JobApplication).filter(
                 JobApplication.job_url == jd_url,
                 JobApplication.user_id == user_id
             ).first()
             
+            # Try to use processed JD if company is known
+            jd_text = None
+            jd_source = "scraped"
+            
+            if job_app and job_app.company and job_app.company != "Unknown":
+                try:
+                    from app.services.jd_processing_service import get_jd_processing_service
+                    from app.utils.user_path_utils import get_user_base_path
+                    from pathlib import Path
+                    
+                    # Convert company name to slug format
+                    company_slug = job_app.company.lower().replace(" ", "_").replace("/", "_")
+                    
+                    jd_service = get_jd_processing_service(self.user_email)
+                    processed_jd_text = jd_service.get_jd_text_for_ai(company_slug, prefer_processed=True)
+                    
+                    if processed_jd_text:
+                        jd_text = processed_jd_text
+                        jd_source = "processed"
+                        logger.info(f"✅ [SKILL_EXTRACTION] Using PROCESSED JD for {company_slug} | "
+                                   f"Length: {len(jd_text)} chars")
+                    else:
+                        # Try original JD from file
+                        original_text = jd_service.get_original_jd_text(company_slug)
+                        if original_text:
+                            jd_text = original_text
+                            jd_source = "original_file"
+                            logger.info(f"📄 [SKILL_EXTRACTION] Using ORIGINAL JD file for {company_slug} | "
+                                       f"Length: {len(jd_text)} chars")
+                except Exception as e:
+                    logger.warning(f"⚠️ [SKILL_EXTRACTION] Error getting processed JD: {e}, will scrape")
+            
+            # Fallback to scraping if no processed/original JD found
+            if not jd_text:
+                logger.info(f"🔍 [SKILL_EXTRACTION] Scraping JD from URL: {jd_url}")
+                jd_text = await scrape_job_description_async(jd_url)
+                
+                if jd_text.startswith("Error:") or len(jd_text.strip()) < 10:
+                    logger.error(f"❌ Failed to scrape JD: {jd_text}")
+                    return None
+                
+                logger.info(f"🔗 JD text scraped: {len(jd_text)} characters")
+            
+            # Create or update job application record
             if not job_app:
                 # Create new job application record
                 job_app = JobApplication(
@@ -210,11 +245,19 @@ class SkillExtractionService:
                 db.commit()
                 db.refresh(job_app)
                 logger.info(f"📝 Created new job application record: ID {job_app.id}")
+            else:
+                # Update existing record with latest JD text
+                job_app.job_description = jd_text
+                db.commit()
+            
+            logger.info(f"✅ [SKILL_EXTRACTION] JD data retrieved | Source: {jd_source} | "
+                       f"Length: {len(jd_text)} chars")
             
             return {
                 "record": job_app,
                 "text": jd_text,
-                "url": jd_url
+                "url": jd_url,
+                "source": jd_source
             }
             
         except Exception as e:
