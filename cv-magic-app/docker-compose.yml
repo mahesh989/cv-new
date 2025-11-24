@@ -14,6 +14,7 @@ services:
       - DEBUG=false
       - DEVELOPMENT_MODE=false
       - LOG_LEVEL=INFO
+      - TZ=Australia/Sydney
       - DATABASE_URL=postgresql://mahesh:password123@postgres:5432/cv_app
       - DATABASE_HOST=postgres
       - DATABASE_PORT=5432
