@@ -593,17 +593,36 @@ TEXT TO ANALYZE:
             logger.info(f"🔍 [JD_PROCESSING] ===== STARTING JD PROCESSING CHECK =====")
             logger.info(f"🔍 [JD_PROCESSING] Company: {company_slug} | User provided: {user is not None} | "
                        f"User email: {user.email if user else 'None'} | JD length: {len(job_description)} chars")
+            logger.info(f"🔔 [JD_PROCESSING_TRIGGER] ===== TRIGGER POINT REACHED =====")
+            logger.info(f"🔔 [JD_PROCESSING_TRIGGER] Company slug: {company_slug}")
+            logger.info(f"🔔 [JD_PROCESSING_TRIGGER] User email (self.user_email): {self.user_email}")
+            logger.info(f"🔔 [JD_PROCESSING_TRIGGER] User object provided: {user is not None}")
+            logger.info(f"🔔 [JD_PROCESSING_TRIGGER] User email (from user object): {user.email if user else 'N/A'}")
+            logger.info(f"📏 [JD_PROCESSING_TRIGGER] JD text length: {len(job_description)} chars")
+            logger.info(f"📏 [JD_PROCESSING_TRIGGER] JD text preview (first 100 chars): {job_description[:100] if job_description else 'EMPTY'}")
+            logger.info(f"📏 [JD_PROCESSING_TRIGGER] JD text is empty: {not job_description or len(job_description.strip()) == 0}")
+            
             try:
+                logger.info(f"📦 [JD_PROCESSING_TRIGGER] Importing jd_processing_service...")
                 from app.services.jd_processing_service import get_jd_processing_service
+                logger.info(f"✅ [JD_PROCESSING_TRIGGER] Import successful")
                 
                 if not user:
-                    logger.warning(f"⚠️ [JD_PROCESSING] No user provided, skipping JD processing for {company_slug}")
+                    logger.warning(f"⚠️ [JD_PROCESSING_TRIGGER] ❌ BLOCKER: No user provided, skipping JD processing for {company_slug}")
                 elif not job_description or len(job_description.strip()) == 0:
-                    logger.warning(f"⚠️ [JD_PROCESSING] Empty JD text, skipping processing for {company_slug}")
+                    logger.warning(f"⚠️ [JD_PROCESSING_TRIGGER] ❌ BLOCKER: Empty JD text, skipping processing for {company_slug}")
                 else:
-                    logger.info(f"🔄 [JD_PROCESSING] Triggering JD processing for {company_slug} | "
-                               f"JD length: {len(job_description)} chars | User: {user.email}")
+                    logger.info(f"🔄 [JD_PROCESSING_TRIGGER] ✅ All checks passed, proceeding with processing")
+                    logger.info(f"🔄 [JD_PROCESSING_TRIGGER] Calling get_jd_processing_service(user_email='{self.user_email}')...")
                     jd_service = get_jd_processing_service(self.user_email)
+                    logger.info(f"✅ [JD_PROCESSING_TRIGGER] Service instance created: {jd_service}")
+                    logger.info(f"🔄 [JD_PROCESSING_TRIGGER] Calling process_jd_if_needed() with:")
+                    logger.info(f"   - company_name: {company_slug}")
+                    logger.info(f"   - jd_text length: {len(job_description)}")
+                    logger.info(f"   - job_title: {job_info.get('job_title')}")
+                    logger.info(f"   - job_url: {job_url}")
+                    logger.info(f"   - user: {user.email if user else 'None'}")
+                    
                     result = await jd_service.process_jd_if_needed(
                         company_name=company_slug,
                         jd_text=job_description,
@@ -611,14 +630,24 @@ TEXT TO ANALYZE:
                         job_url=job_url,
                         user=user
                     )
+                    
+                    logger.info(f"📤 [JD_PROCESSING_TRIGGER] Service call completed")
+                    logger.info(f"📤 [JD_PROCESSING_TRIGGER] Result type: {type(result)}")
+                    logger.info(f"📤 [JD_PROCESSING_TRIGGER] Result is None: {result is None}")
                     if result:
-                        logger.info(f"✅ [JD_PROCESSING] JD processing completed successfully for {company_slug}")
+                        logger.info(f"✅ [JD_PROCESSING_TRIGGER] ✅ SUCCESS: JD processing completed for {company_slug}")
+                        logger.info(f"✅ [JD_PROCESSING_TRIGGER] Result keys: {list(result.keys()) if isinstance(result, dict) else 'N/A'}")
                     else:
-                        logger.warning(f"⚠️ [JD_PROCESSING] JD processing returned None for {company_slug}")
+                        logger.warning(f"⚠️ [JD_PROCESSING_TRIGGER] ⚠️ WARNING: JD processing returned None for {company_slug}")
+            except ImportError as import_err:
+                import traceback
+                logger.error(f"❌ [JD_PROCESSING_TRIGGER] ❌ CRITICAL: Failed to import jd_processing_service: {import_err}")
+                logger.error(f"❌ [JD_PROCESSING_TRIGGER] Traceback: {traceback.format_exc()}")
             except Exception as proc_err:
                 import traceback
-                logger.error(f"❌ [JD_PROCESSING] Failed to process JD for {company_slug}: {proc_err}")
-                logger.error(f"❌ [JD_PROCESSING] Traceback: {traceback.format_exc()}")
+                logger.error(f"❌ [JD_PROCESSING_TRIGGER] ❌ ERROR: Failed to process JD for {company_slug}: {proc_err}")
+                logger.error(f"❌ [JD_PROCESSING_TRIGGER] Error type: {type(proc_err).__name__}")
+                logger.error(f"❌ [JD_PROCESSING_TRIGGER] Traceback: {traceback.format_exc()}")
                 # Don't fail the request - processing is optional
             logger.info(f"🔍 [JD_PROCESSING] ===== JD PROCESSING CHECK COMPLETE =====")
             

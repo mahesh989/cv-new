@@ -8,6 +8,7 @@ to convert processed JDs back to text when needed for AI operations.
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Any, Optional, Union, List
 from datetime import datetime
@@ -184,8 +185,14 @@ class JDProcessingService:
     """
     
     def __init__(self, user_email: str):
+        logger.info(f"🏗️ [JD_PROCESSING_SERVICE] ===== INITIALIZING SERVICE =====")
+        logger.info(f"🏗️ [JD_PROCESSING_SERVICE] User email: {user_email}")
         self.user_email = user_email
+        logger.info(f"🏗️ [JD_PROCESSING_SERVICE] Getting user base path...")
         self.base_path = get_user_base_path(user_email)
+        logger.info(f"🏗️ [JD_PROCESSING_SERVICE] Base path: {self.base_path}")
+        logger.info(f"🏗️ [JD_PROCESSING_SERVICE] Base path exists: {self.base_path.exists() if self.base_path else False}")
+        logger.info(f"🏗️ [JD_PROCESSING_SERVICE] ✅ Service initialized successfully")
     
     def _get_processed_jd_path(self, company_name: str) -> Optional[Path]:
         """
@@ -387,32 +394,56 @@ class JDProcessingService:
         Returns:
             Processed JD data if processing succeeds, None otherwise
         """
-        logger.info(f"🔍 [JD_PROCESSING] process_jd_if_needed called for {company_name} | "
-                   f"JD length: {len(jd_text)} chars | User: {user.email if user else 'None'}")
+        logger.info(f"🔍 [JD_PROCESSING] ===== process_jd_if_needed ENTRY POINT =====")
+        logger.info(f"🔍 [JD_PROCESSING] Company: {company_name}")
+        logger.info(f"🔍 [JD_PROCESSING] JD length: {len(jd_text)} chars")
+        logger.info(f"🔍 [JD_PROCESSING] User provided: {user is not None}")
+        logger.info(f"🔍 [JD_PROCESSING] User email: {user.email if user else 'None'}")
+        logger.info(f"🔍 [JD_PROCESSING] Job title: {job_title}")
+        logger.info(f"🔍 [JD_PROCESSING] Job URL: {job_url}")
+        logger.info(f"🔍 [JD_PROCESSING] Self user_email: {self.user_email}")
+        logger.info(f"🔍 [JD_PROCESSING] Base path: {self.base_path}")
         
         # Check if already processed
-        if self.has_processed_jd(company_name):
+        logger.info(f"🔍 [JD_PROCESSING] Checking if processed JD already exists...")
+        has_processed = self.has_processed_jd(company_name)
+        logger.info(f"🔍 [JD_PROCESSING] Has processed JD: {has_processed}")
+        if has_processed:
             logger.info(f"♻️ [JD_PROCESSING] Processed JD already exists for {company_name}, skipping processing")
-            return self.get_processed_jd(company_name)
+            existing = self.get_processed_jd(company_name)
+            logger.info(f"♻️ [JD_PROCESSING] Returning existing processed JD: {existing is not None}")
+            return existing
         
         if not user:
-            logger.warning(f"⚠️ [JD_PROCESSING] No user provided for JD processing, skipping for {company_name}")
+            logger.warning(f"⚠️ [JD_PROCESSING] ❌ BLOCKER: No user provided for JD processing, skipping for {company_name}")
             return None
         
         if not jd_text or len(jd_text.strip()) == 0:
-            logger.warning(f"⚠️ [JD_PROCESSING] Empty JD text provided for {company_name}, skipping processing")
+            logger.warning(f"⚠️ [JD_PROCESSING] ❌ BLOCKER: Empty JD text provided for {company_name}, skipping processing")
+            logger.warning(f"⚠️ [JD_PROCESSING] JD text is None: {jd_text is None}")
+            logger.warning(f"⚠️ [JD_PROCESSING] JD text length: {len(jd_text) if jd_text else 0}")
             return None
         
         try:
-            logger.info(f"🔄 [JD_PROCESSING] Starting JD processing for {company_name} | "
-                       f"Original length: {len(jd_text)} chars")
+            logger.info(f"🔄 [JD_PROCESSING] ===== STARTING PROCESSING LOGIC =====")
+            logger.info(f"🔄 [JD_PROCESSING] Company: {company_name}")
+            logger.info(f"🔄 [JD_PROCESSING] Original JD length: {len(jd_text)} chars")
             
             # Initialize AI service for user
-            ai_service.initialize_for_user(user)
-            logger.debug(f"🔧 [JD_PROCESSING] AI service initialized for user: {user.email}")
+            logger.info(f"🔧 [JD_PROCESSING] Initializing AI service for user: {user.email}")
+            try:
+                ai_service.initialize_for_user(user)
+                logger.info(f"✅ [JD_PROCESSING] AI service initialized successfully")
+            except Exception as ai_init_err:
+                logger.error(f"❌ [JD_PROCESSING] Failed to initialize AI service: {ai_init_err}")
+                import traceback
+                logger.error(f"❌ [JD_PROCESSING] AI init traceback: {traceback.format_exc()}")
+                raise
             
             # Process JD using the universal prompt
+            logger.info(f"🔧 [JD_PROCESSING] Creating JDOptimizer instance...")
             optimizer = JDOptimizer(ai_service=ai_service)
+            logger.info(f"✅ [JD_PROCESSING] JDOptimizer created | Using real AI: {optimizer.using_real_ai}")
             
             job_info = {
                 "company_name": company_name,
@@ -420,20 +451,41 @@ class JDProcessingService:
                 "job_url": job_url,
                 "user": user,  # Pass user for AI service
             }
+            logger.info(f"📋 [JD_PROCESSING] Job info prepared: {list(job_info.keys())}")
             
             logger.info(f"🤖 [JD_PROCESSING] Calling universal_jd_processing for {company_name}...")
-            processed_data = await optimizer.universal_jd_processing(jd_text, job_info)
+            logger.info(f"🤖 [JD_PROCESSING] JD text preview (first 200 chars): {jd_text[:200]}")
+            try:
+                processed_data = await optimizer.universal_jd_processing(jd_text, job_info)
+                logger.info(f"✅ [JD_PROCESSING] universal_jd_processing completed")
+                logger.info(f"📊 [JD_PROCESSING] Processed data type: {type(processed_data)}")
+                logger.info(f"📊 [JD_PROCESSING] Processed data is None: {processed_data is None}")
+            except Exception as processing_err:
+                logger.error(f"❌ [JD_PROCESSING] Error in universal_jd_processing: {processing_err}")
+                import traceback
+                logger.error(f"❌ [JD_PROCESSING] Processing traceback: {traceback.format_exc()}")
+                raise
             
             if not processed_data:
                 logger.error(f"❌ [JD_PROCESSING] universal_jd_processing returned None for {company_name}")
                 return None
             
+            logger.info(f"📊 [JD_PROCESSING] Processed data keys: {list(processed_data.keys()) if isinstance(processed_data, dict) else 'N/A'}")
+            
             # Save processed JD
+            logger.info(f"📁 [JD_PROCESSING] Preparing to save processed JD...")
             company_dir = self.base_path / "applied_companies" / company_name
+            logger.info(f"📁 [JD_PROCESSING] Company directory: {company_dir}")
+            logger.info(f"📁 [JD_PROCESSING] Company directory exists: {company_dir.exists()}")
+            logger.info(f"📁 [JD_PROCESSING] Creating company directory (parents=True, exist_ok=True)...")
             company_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"📁 [JD_PROCESSING] Company directory created/verified: {company_dir.exists()}")
+            logger.info(f"📁 [JD_PROCESSING] Directory writable: {os.access(company_dir, os.W_OK) if company_dir.exists() else False}")
             
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             processed_file = company_dir / f"jd_processed_{timestamp}.json"
+            logger.info(f"📁 [JD_PROCESSING] Target file: {processed_file}")
+            logger.info(f"📁 [JD_PROCESSING] Target file absolute path: {processed_file.absolute()}")
             
             sections = processed_data.get("sections", {})
             additional_sections = processed_data.get("additional_sections", {})
@@ -451,8 +503,34 @@ class JDProcessingService:
                 "processed_at": datetime.now().isoformat(),
             }
             
-            with open(processed_file, "w", encoding="utf-8") as f:
-                json.dump(processed_payload, f, ensure_ascii=False, indent=2)
+            # Ensure file is written completely and atomically
+            logger.info(f"💾 [JD_PROCESSING] Writing processed JD to file...")
+            logger.info(f"💾 [JD_PROCESSING] File path: {processed_file}")
+            logger.info(f"💾 [JD_PROCESSING] Payload size: {len(json.dumps(processed_payload))} bytes")
+            logger.info(f"💾 [JD_PROCESSING] Payload keys: {list(processed_payload.keys())}")
+            try:
+                with open(processed_file, "w", encoding="utf-8") as f:
+                    logger.info(f"💾 [JD_PROCESSING] File handle opened, writing JSON...")
+                    json.dump(processed_payload, f, ensure_ascii=False, indent=2)
+                    logger.info(f"💾 [JD_PROCESSING] JSON written, flushing...")
+                    f.flush()  # Force write to disk
+                    logger.info(f"💾 [JD_PROCESSING] Flushed, syncing to disk...")
+                    os.fsync(f.fileno())  # Ensure data is written to disk
+                    logger.info(f"💾 [JD_PROCESSING] File synced to disk")
+                
+                # Verify file was written
+                if processed_file.exists():
+                    file_size = processed_file.stat().st_size
+                    logger.info(f"✅ [JD_PROCESSING] File written successfully: {processed_file}")
+                    logger.info(f"✅ [JD_PROCESSING] File size: {file_size} bytes")
+                else:
+                    logger.error(f"❌ [JD_PROCESSING] File does not exist after write: {processed_file}")
+            except Exception as write_err:
+                logger.error(f"❌ [JD_PROCESSING] Failed to write processed JD file: {write_err}")
+                logger.error(f"❌ [JD_PROCESSING] Error type: {type(write_err).__name__}")
+                import traceback
+                logger.error(f"❌ [JD_PROCESSING] Write error traceback: {traceback.format_exc()}")
+                raise
             
             # Calculate reduction
             processed_text = self.processed_jd_to_text(processed_payload)
@@ -469,14 +547,29 @@ class JDProcessingService:
                 
         except Exception as e:
             import traceback
-            logger.error(f"❌ [JD_PROCESSING] Failed to process JD for {company_name}: {e}")
-            logger.error(f"❌ [JD_PROCESSING] Traceback: {traceback.format_exc()}")
+            logger.error(f"❌ [JD_PROCESSING] ===== EXCEPTION IN process_jd_if_needed =====")
+            logger.error(f"❌ [JD_PROCESSING] Company: {company_name}")
+            logger.error(f"❌ [JD_PROCESSING] Error: {e}")
+            logger.error(f"❌ [JD_PROCESSING] Error type: {type(e).__name__}")
+            logger.error(f"❌ [JD_PROCESSING] Error message: {str(e)}")
+            logger.error(f"❌ [JD_PROCESSING] Full traceback:")
+            logger.error(traceback.format_exc())
             # Don't raise - allow fallback to original JD
+            logger.error(f"❌ [JD_PROCESSING] Returning None (allowing fallback to original JD)")
             return None
 
 
 # Convenience function
 def get_jd_processing_service(user_email: str) -> JDProcessingService:
     """Get JD processing service for a user"""
-    return JDProcessingService(user_email)
+    logger.info(f"🏭 [JD_PROCESSING_FACTORY] Creating JDProcessingService for user: {user_email}")
+    try:
+        service = JDProcessingService(user_email)
+        logger.info(f"✅ [JD_PROCESSING_FACTORY] Service created successfully")
+        return service
+    except Exception as e:
+        logger.error(f"❌ [JD_PROCESSING_FACTORY] Failed to create service: {e}")
+        import traceback
+        logger.error(f"❌ [JD_PROCESSING_FACTORY] Traceback: {traceback.format_exc()}")
+        raise
 

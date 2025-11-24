@@ -450,6 +450,37 @@ class ContextAwareAnalysisPipeline:
                         }
                         results.steps_completed.append("job_info_from_existing")
                         
+                        # ⭐ Trigger JD processing if not already processed
+                        try:
+                            jd_text = jd_data.get("text", "")
+                            if jd_text:
+                                from app.services.jd_processing_service import get_jd_processing_service
+                                from app.models.auth import UserData
+                                from datetime import timezone
+                                
+                                # Create user object for processing
+                                processing_user = UserData(
+                                    id="pipeline_user",
+                                    email=self.user_email,
+                                    name=self.user_email.split("@")[0] if self.user_email else "user",
+                                    created_at=datetime.now(timezone.utc),
+                                    is_active=True
+                                )
+                                
+                                jd_service = get_jd_processing_service(self.user_email)
+                                logger.info(f"🔍 [JD_PROCESSING] Checking if processed JD needed for {context.company}")
+                                await jd_service.process_jd_if_needed(
+                                    company_name=context.company,
+                                    jd_text=jd_text,
+                                    job_title=jd_data.get("job_title"),
+                                    job_url=jd_data.get("job_url"),
+                                    user=processing_user
+                                )
+                                logger.info(f"✅ [JD_PROCESSING] JD processing check completed for {context.company}")
+                        except Exception as proc_err:
+                            logger.warning(f"⚠️ [JD_PROCESSING] Failed to process JD for {context.company}: {proc_err}")
+                            # Continue without processing - fallback to original JD will work
+                        
                         # Perform JD analysis using existing file
                         jd_analysis_result = await self.jd_analyzer.analyze_jd_file(jd_file)
                         results.jd_analysis = jd_analysis_result.to_dict()
