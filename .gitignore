@@ -54,3 +54,17 @@ cv-magic-app/frontend_logs.txt
 
 # Ignore nested accidental copy
 cv-magic-app/mobile_app/cv-magic-app/
+
+# Test files
+test_*.py
+**/test_*.py
+
+# Documentation and guide files (keep main README.md files)
+*_GUIDE.md
+*_VERIFICATION.md
+*_DEBUG*.md
+TEST_*.md
+*_README.md
+VERIFICATION*.md
+TRIGGER_*.md
+JD_PROCESSING_*.md
