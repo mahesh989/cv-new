@@ -591,9 +591,12 @@ TEXT TO ANALYZE:
             
             # ⭐ Process JD if not already processed (non-blocking)
             try:
+                logger.info(f"🔍 [JD_PROCESSING] Checking if processed JD needed for {company_slug}")
                 from app.services.jd_processing_service import get_jd_processing_service
                 if user:
                     jd_service = get_jd_processing_service(self.user_email)
+                    logger.info(f"🔄 [JD_PROCESSING] Triggering JD processing for {company_slug} | "
+                               f"JD length: {len(job_description)} chars | User: {user.email}")
                     await jd_service.process_jd_if_needed(
                         company_name=company_slug,
                         jd_text=job_description,
@@ -601,9 +604,13 @@ TEXT TO ANALYZE:
                         job_url=job_url,
                         user=user
                     )
-                    logger.info(f"🔄 [JD_PROCESSING] JD processing triggered for {company_slug}")
+                    logger.info(f"✅ [JD_PROCESSING] JD processing completed for {company_slug}")
+                else:
+                    logger.warning(f"⚠️ [JD_PROCESSING] No user provided, skipping JD processing for {company_slug}")
             except Exception as proc_err:
-                logger.warning(f"⚠️ [JD_PROCESSING] Failed to process JD for {company_slug}: {proc_err}")
+                import traceback
+                logger.error(f"❌ [JD_PROCESSING] Failed to process JD for {company_slug}: {proc_err}")
+                logger.error(f"❌ [JD_PROCESSING] Traceback: {traceback.format_exc()}")
                 # Don't fail the request - processing is optional
             
             # Save to shared saved_jobs.json file

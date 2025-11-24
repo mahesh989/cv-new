@@ -1715,56 +1715,93 @@ async def preliminary_analysis(
                         with open(job_info_file, 'w', encoding='utf-8') as f:
                             json.dump(job_metadata, f, indent=2, ensure_ascii=False)
                         logger.info(f"💾 [PIPELINE] Job info saved to: {job_info_file}")
-                    
-                    # ⭐ Process JD if not already processed (non-blocking)
+                else:
+                    logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
+                    # Load job_title from existing job_info if available
+                    job_title = None
                     try:
-                        from app.services.jd_processing_service import get_jd_processing_service
-                        from app.core.dependencies import get_current_user
-                        
-                        # Get user object for processing
-                        try:
-                            auth_header = request.headers.get("authorization")
-                            if auth_header and auth_header.startswith("Bearer "):
-                                token = auth_header.replace("Bearer ", "")
-                                token_data = verify_token(token)
-                                if token_data:
-                                    # Get user from database
-                                    from app.models.user import User
-                                    from app.database import get_database
-                                    from app.models.auth import UserData
-                                    from datetime import timezone
+                        job_info_files = list(company_dir.glob("job_info_*.json"))
+                        if job_info_files:
+                            latest_job_info = max(job_info_files, key=lambda f: f.stat().st_mtime)
+                            with open(latest_job_info, 'r', encoding='utf-8') as f:
+                                job_metadata = json.load(f)
+                                job_title = job_metadata.get('job_title')
+                    except Exception:
+                        pass
+                
+                # ⭐ ALWAYS try to process JD if not already processed (even if jd_original exists)
+                # This ensures processed JD is created for existing JDs too
+                try:
+                    logger.info(f"🔍 [JD_PROCESSING] Checking if processed JD needed for {company_name}")
+                    from app.services.jd_processing_service import get_jd_processing_service
+                    
+                    # Get user object for processing
+                    try:
+                        auth_header = request.headers.get("authorization")
+                        if auth_header and auth_header.startswith("Bearer "):
+                            token = auth_header.replace("Bearer ", "")
+                            token_data = verify_token(token)
+                            if token_data:
+                                # Get user from database
+                                from app.models.user import User
+                                from app.database import get_database
+                                from app.models.auth import UserData
+                                from datetime import timezone
+                                
+                                user_record = None
+                                for db in get_database():
+                                    user_record = db.query(User).filter(User.email == token_data.email).first()
+                                    break
+                                
+                                if user_record:
+                                    user = UserData(
+                                        id=str(user_record.id),
+                                        email=user_record.email,
+                                        name=user_record.full_name or user_record.username or "User",
+                                        created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
+                                        is_active=user_record.is_active
+                                    )
                                     
-                                    user_record = None
-                                    for db in get_database():
-                                        user_record = db.query(User).filter(User.email == token_data.email).first()
-                                        break
+                                    # Get JD text from file if jd_text is empty
+                                    jd_text_for_processing = jd_text or ""
+                                    if not jd_text_for_processing and existing_jd:
+                                        try:
+                                            with open(existing_jd, 'r', encoding='utf-8') as f:
+                                                jd_data = json.load(f)
+                                                jd_text_for_processing = jd_data.get('text', '')
+                                        except Exception:
+                                            pass
                                     
-                                    if user_record:
-                                        user = UserData(
-                                            id=str(user_record.id),
-                                            email=user_record.email,
-                                            name=user_record.full_name or user_record.username or "User",
-                                            created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
-                                            is_active=user_record.is_active
-                                        )
-                                        
+                                    if jd_text_for_processing:
                                         jd_service = get_jd_processing_service(user.email)
+                                        logger.info(f"🔄 [JD_PROCESSING] Triggering JD processing for {company_name} | "
+                                                   f"JD length: {len(jd_text_for_processing)} chars")
                                         await jd_service.process_jd_if_needed(
                                             company_name=company_name,
-                                            jd_text=jd_text or "",
+                                            jd_text=jd_text_for_processing,
                                             job_title=job_title,
                                             job_url=jd_url,
                                             user=user
                                         )
-                                        logger.info(f"🔄 [JD_PROCESSING] JD processing triggered for {company_name}")
-                        except Exception as proc_err:
-                            logger.warning(f"⚠️ [JD_PROCESSING] Failed to process JD for {company_name}: {proc_err}")
-                            # Don't fail the request - processing is optional
-                    except Exception as e:
-                        logger.warning(f"⚠️ [JD_PROCESSING] JD processing setup failed: {e}")
-                        # Continue without processing - fallback to original JD will work
-                else:
-                    logger.info(f"♻️ [PIPELINE] (preliminary-analysis) JD file already exists: {existing_jd}")
+                                        logger.info(f"✅ [JD_PROCESSING] JD processing completed for {company_name}")
+                                    else:
+                                        logger.warning(f"⚠️ [JD_PROCESSING] No JD text available for processing {company_name}")
+                                else:
+                                    logger.warning(f"⚠️ [JD_PROCESSING] User record not found for {token_data.email}")
+                            else:
+                                logger.warning(f"⚠️ [JD_PROCESSING] Invalid token data")
+                        else:
+                            logger.warning(f"⚠️ [JD_PROCESSING] No authorization header found")
+                    except Exception as proc_err:
+                        import traceback
+                        logger.error(f"❌ [JD_PROCESSING] Failed to process JD for {company_name}: {proc_err}")
+                        logger.error(f"❌ [JD_PROCESSING] Traceback: {traceback.format_exc()}")
+                        # Don't fail the request - processing is optional
+                except Exception as e:
+                    import traceback
+                    logger.error(f"❌ [JD_PROCESSING] JD processing setup failed for {company_name}: {e}")
+                    logger.error(f"❌ [JD_PROCESSING] Traceback: {traceback.format_exc()}")
+                    # Continue without processing - fallback to original JD will work
                 
                 # ALWAYS check for job_info files and add to saved_jobs.json (whether JD exists or not)
                 job_info_files = list(company_dir.glob("job_info_*.json"))
