@@ -426,18 +426,25 @@ class JDProcessingService:
         
         try:
             logger.info(f"🔄 [JD_PROCESSING] ===== STARTING PROCESSING LOGIC =====")
+            print(f"🔄 [JD_PROCESSING] ===== STARTING PROCESSING LOGIC =====")
             logger.info(f"🔄 [JD_PROCESSING] Company: {company_name}")
+            print(f"🔄 [JD_PROCESSING] Company: {company_name}")
             logger.info(f"🔄 [JD_PROCESSING] Original JD length: {len(jd_text)} chars")
+            print(f"🔄 [JD_PROCESSING] Original JD length: {len(jd_text)} chars")
             
             # Initialize AI service for user
             logger.info(f"🔧 [JD_PROCESSING] Initializing AI service for user: {user.email}")
+            print(f"🔧 [JD_PROCESSING] Initializing AI service for user: {user.email}")
             try:
                 ai_service.initialize_for_user(user)
                 logger.info(f"✅ [JD_PROCESSING] AI service initialized successfully")
+                print(f"✅ [JD_PROCESSING] AI service initialized successfully")
             except Exception as ai_init_err:
                 logger.error(f"❌ [JD_PROCESSING] Failed to initialize AI service: {ai_init_err}")
+                print(f"❌ [JD_PROCESSING] Failed to initialize AI service: {ai_init_err}")
                 import traceback
                 logger.error(f"❌ [JD_PROCESSING] AI init traceback: {traceback.format_exc()}")
+                print(f"❌ [JD_PROCESSING] AI init traceback: {traceback.format_exc()}")
                 raise
             
             # Process JD using the universal prompt
@@ -454,12 +461,17 @@ class JDProcessingService:
             logger.info(f"📋 [JD_PROCESSING] Job info prepared: {list(job_info.keys())}")
             
             logger.info(f"🤖 [JD_PROCESSING] Calling universal_jd_processing for {company_name}...")
+            print(f"🤖 [JD_PROCESSING] Calling universal_jd_processing for {company_name}...")
             logger.info(f"🤖 [JD_PROCESSING] JD text preview (first 200 chars): {jd_text[:200]}")
+            print(f"🤖 [JD_PROCESSING] JD text preview (first 200 chars): {jd_text[:200]}")
             try:
                 processed_data = await optimizer.universal_jd_processing(jd_text, job_info)
                 logger.info(f"✅ [JD_PROCESSING] universal_jd_processing completed")
+                print(f"✅ [JD_PROCESSING] universal_jd_processing completed")
                 logger.info(f"📊 [JD_PROCESSING] Processed data type: {type(processed_data)}")
                 logger.info(f"📊 [JD_PROCESSING] Processed data is None: {processed_data is None}")
+                print(f"📊 [JD_PROCESSING] Processed data type: {type(processed_data)}")
+                print(f"📊 [JD_PROCESSING] Processed data is None: {processed_data is None}")
             except Exception as processing_err:
                 logger.error(f"❌ [JD_PROCESSING] Error in universal_jd_processing: {processing_err}")
                 import traceback
@@ -491,40 +503,51 @@ class JDProcessingService:
             additional_sections = processed_data.get("additional_sections", {})
             sections_count = len(sections) + len(additional_sections)
             
-            # Create serializable payload (exclude user object which can't be JSON serialized)
+            # Create serializable payload with processed JD content (sections)
+            # This is the processed JD file - contains only processed content, not job_info metadata
             processed_payload = {
-                "company_name": job_info.get("company_name"),
-                "job_title": job_info.get("job_title"),
-                "job_url": job_info.get("job_url"),
-                "length_chars": len(jd_text),
-                "processing_mode": "universal_ai" if optimizer.using_real_ai else "mock_fallback",
                 "sections": sections,
                 "additional_sections": additional_sections,
+                "processing_mode": "universal_ai" if optimizer.using_real_ai else "mock_fallback",
                 "processed_at": datetime.now().isoformat(),
             }
             
+            # Calculate processed text length for stats
+            processed_text = self.processed_jd_to_text(processed_payload)
+            processed_payload["length_chars"] = len(processed_text)
+            
             # Ensure file is written completely and atomically
             logger.info(f"💾 [JD_PROCESSING] Writing processed JD to file...")
+            print(f"💾 [JD_PROCESSING] Writing processed JD to file...")
             logger.info(f"💾 [JD_PROCESSING] File path: {processed_file}")
+            print(f"💾 [JD_PROCESSING] File path: {processed_file}")
             logger.info(f"💾 [JD_PROCESSING] Payload size: {len(json.dumps(processed_payload))} bytes")
             logger.info(f"💾 [JD_PROCESSING] Payload keys: {list(processed_payload.keys())}")
+            print(f"💾 [JD_PROCESSING] Payload keys: {list(processed_payload.keys())}")
             try:
                 with open(processed_file, "w", encoding="utf-8") as f:
                     logger.info(f"💾 [JD_PROCESSING] File handle opened, writing JSON...")
+                    print(f"💾 [JD_PROCESSING] File handle opened, writing JSON...")
                     json.dump(processed_payload, f, ensure_ascii=False, indent=2)
                     logger.info(f"💾 [JD_PROCESSING] JSON written, flushing...")
+                    print(f"💾 [JD_PROCESSING] JSON written, flushing...")
                     f.flush()  # Force write to disk
                     logger.info(f"💾 [JD_PROCESSING] Flushed, syncing to disk...")
+                    print(f"💾 [JD_PROCESSING] Flushed, syncing to disk...")
                     os.fsync(f.fileno())  # Ensure data is written to disk
                     logger.info(f"💾 [JD_PROCESSING] File synced to disk")
+                    print(f"💾 [JD_PROCESSING] File synced to disk")
                 
                 # Verify file was written
                 if processed_file.exists():
                     file_size = processed_file.stat().st_size
                     logger.info(f"✅ [JD_PROCESSING] File written successfully: {processed_file}")
                     logger.info(f"✅ [JD_PROCESSING] File size: {file_size} bytes")
+                    print(f"✅ [JD_PROCESSING] File written successfully: {processed_file}")
+                    print(f"✅ [JD_PROCESSING] File size: {file_size} bytes")
                 else:
                     logger.error(f"❌ [JD_PROCESSING] File does not exist after write: {processed_file}")
+                    print(f"❌ [JD_PROCESSING] File does not exist after write: {processed_file}")
             except Exception as write_err:
                 logger.error(f"❌ [JD_PROCESSING] Failed to write processed JD file: {write_err}")
                 logger.error(f"❌ [JD_PROCESSING] Error type: {type(write_err).__name__}")
@@ -532,8 +555,7 @@ class JDProcessingService:
                 logger.error(f"❌ [JD_PROCESSING] Write error traceback: {traceback.format_exc()}")
                 raise
             
-            # Calculate reduction
-            processed_text = self.processed_jd_to_text(processed_payload)
+            # Calculate reduction (processed_text already calculated above)
             reduction = len(jd_text) - len(processed_text)
             reduction_pct = round((reduction / len(jd_text)) * 100, 1) if len(jd_text) > 0 else 0
             
@@ -542,6 +564,11 @@ class JDProcessingService:
                        f"Mode: {processed_payload['processing_mode']} | "
                        f"Sections: {sections_count} | "
                        f"Reduction: {len(jd_text)} → {len(processed_text)} chars ({reduction_pct}%)")
+            print(f"✅ [JD_PROCESSING] JD processed successfully for {company_name} | "
+                  f"File: {processed_file.name} | "
+                  f"Mode: {processed_payload['processing_mode']} | "
+                  f"Sections: {sections_count} | "
+                  f"Reduction: {len(jd_text)} → {len(processed_text)} chars ({reduction_pct}%)")
             
             return processed_payload
                 
