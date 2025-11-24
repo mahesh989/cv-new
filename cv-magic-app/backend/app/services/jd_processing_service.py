@@ -387,18 +387,29 @@ class JDProcessingService:
         Returns:
             Processed JD data if processing succeeds, None otherwise
         """
+        logger.info(f"🔍 [JD_PROCESSING] process_jd_if_needed called for {company_name} | "
+                   f"JD length: {len(jd_text)} chars | User: {user.email if user else 'None'}")
+        
         # Check if already processed
         if self.has_processed_jd(company_name):
-            logger.info(f"♻️ Processed JD already exists for {company_name}, skipping processing")
+            logger.info(f"♻️ [JD_PROCESSING] Processed JD already exists for {company_name}, skipping processing")
             return self.get_processed_jd(company_name)
         
         if not user:
-            logger.warning(f"⚠️ No user provided for JD processing, skipping for {company_name}")
+            logger.warning(f"⚠️ [JD_PROCESSING] No user provided for JD processing, skipping for {company_name}")
+            return None
+        
+        if not jd_text or len(jd_text.strip()) == 0:
+            logger.warning(f"⚠️ [JD_PROCESSING] Empty JD text provided for {company_name}, skipping processing")
             return None
         
         try:
+            logger.info(f"🔄 [JD_PROCESSING] Starting JD processing for {company_name} | "
+                       f"Original length: {len(jd_text)} chars")
+            
             # Initialize AI service for user
             ai_service.initialize_for_user(user)
+            logger.debug(f"🔧 [JD_PROCESSING] AI service initialized for user: {user.email}")
             
             # Process JD using the universal prompt
             optimizer = JDOptimizer(ai_service=ai_service)
@@ -410,8 +421,12 @@ class JDProcessingService:
                 "user": user,  # Pass user for AI service
             }
             
-            logger.info(f"🔄 Processing JD for {company_name}...")
+            logger.info(f"🤖 [JD_PROCESSING] Calling universal_jd_processing for {company_name}...")
             processed_data = await optimizer.universal_jd_processing(jd_text, job_info)
+            
+            if not processed_data:
+                logger.error(f"❌ [JD_PROCESSING] universal_jd_processing returned None for {company_name}")
+                return None
             
             # Save processed JD
             company_dir = self.base_path / "applied_companies" / company_name
@@ -420,22 +435,38 @@ class JDProcessingService:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             processed_file = company_dir / f"jd_processed_{timestamp}.json"
             
+            sections = processed_data.get("sections", {})
+            additional_sections = processed_data.get("additional_sections", {})
+            sections_count = len(sections) + len(additional_sections)
+            
             processed_payload = {
                 **job_info,
                 "length_chars": len(jd_text),
                 "processing_mode": "universal_ai" if optimizer.using_real_ai else "mock_fallback",
-                "sections": processed_data.get("sections", {}),
-                "additional_sections": processed_data.get("additional_sections", {}),
+                "sections": sections,
+                "additional_sections": additional_sections,
             }
             
             with open(processed_file, "w", encoding="utf-8") as f:
                 json.dump(processed_payload, f, ensure_ascii=False, indent=2)
             
-            logger.info(f"✅ JD processed successfully for {company_name}")
+            # Calculate reduction
+            processed_text = self.processed_jd_to_text(processed_payload)
+            reduction = len(jd_text) - len(processed_text)
+            reduction_pct = round((reduction / len(jd_text)) * 100, 1) if len(jd_text) > 0 else 0
+            
+            logger.info(f"✅ [JD_PROCESSING] JD processed successfully for {company_name} | "
+                       f"File: {processed_file.name} | "
+                       f"Mode: {processed_payload['processing_mode']} | "
+                       f"Sections: {sections_count} | "
+                       f"Reduction: {len(jd_text)} → {len(processed_text)} chars ({reduction_pct}%)")
+            
             return processed_payload
                 
         except Exception as e:
-            logger.error(f"❌ Failed to process JD for {company_name}: {e}")
+            import traceback
+            logger.error(f"❌ [JD_PROCESSING] Failed to process JD for {company_name}: {e}")
+            logger.error(f"❌ [JD_PROCESSING] Traceback: {traceback.format_exc()}")
             # Don't raise - allow fallback to original JD
             return None
 
