@@ -320,11 +320,7 @@ class JDAnalyzer:
                 if not self.user_email:
                     logger.warning(f"⚠️ [JD_ANALYZER] Cannot use processed JD: user_email not available")
                     print(f"⚠️ [JD_ANALYZER] Cannot use processed JD: user_email not available")
-            else:
-                if not company_name:
-                    logger.debug(f"📄 [JD_ANALYZER] Could not extract company name from path, using LEGACY file")
-                if not self.user_email:
-                    logger.debug(f"📄 [JD_ANALYZER] No user_email available, using LEGACY file")
+                logger.debug(f"📄 [JD_ANALYZER] Falling back to LEGACY file")
         except Exception as e:
             logger.warning(f"⚠️ [JD_ANALYZER] Error attempting processed JD, falling back to LEGACY file: {e}")
             # Continue with original file reading
