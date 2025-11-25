@@ -309,7 +309,16 @@ class JDProcessingService:
             if section_name in sections:
                 content = sections[section_name]
                 if isinstance(content, list):
-                    text_parts.append(f"{section_name}\n" + "\n".join(f"- {item}" if item else "" for item in content))
+                    # Check if items already have "- " prefix to avoid double dashes
+                    formatted_items = []
+                    for item in content:
+                        if item:
+                            # If item already starts with "- ", use it as-is; otherwise add "- "
+                            if item.strip().startswith("- "):
+                                formatted_items.append(item)
+                            else:
+                                formatted_items.append(f"- {item}")
+                    text_parts.append(f"{section_name}\n" + "\n".join(formatted_items))
                 elif isinstance(content, str):
                     text_parts.append(f"{section_name}\n{content}")
         
@@ -317,7 +326,16 @@ class JDProcessingService:
         for section_name, content in sections.items():
             if section_name not in section_order:
                 if isinstance(content, list):
-                    text_parts.append(f"{section_name}\n" + "\n".join(f"- {item}" if item else "" for item in content))
+                    # Check if items already have "- " prefix to avoid double dashes
+                    formatted_items = []
+                    for item in content:
+                        if item:
+                            # If item already starts with "- ", use it as-is; otherwise add "- "
+                            if item.strip().startswith("- "):
+                                formatted_items.append(item)
+                            else:
+                                formatted_items.append(f"- {item}")
+                    text_parts.append(f"{section_name}\n" + "\n".join(formatted_items))
                 elif isinstance(content, str):
                     text_parts.append(f"{section_name}\n{content}")
         

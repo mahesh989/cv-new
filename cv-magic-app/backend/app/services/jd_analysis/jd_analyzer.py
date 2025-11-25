@@ -345,13 +345,36 @@ class JDAnalyzer:
             # Try to parse JSON from response content
             content = response.content.strip()
             
+            # ⭐ DEBUG: Log raw response for troubleshooting
+            logger.debug(f"🔍 [JD_ANALYZER] Raw AI response (first 500 chars): {content[:500]}")
+            logger.debug(f"🔍 [JD_ANALYZER] Raw AI response length: {len(content)} chars")
+            print(f"🔍 [JD_ANALYZER] Raw AI response (first 500 chars): {content[:500]}")
+            print(f"🔍 [JD_ANALYZER] Raw AI response length: {len(content)} chars")
+            
             # Handle cases where AI might wrap JSON in markdown code blocks
             if content.startswith('```json'):
                 content = content.replace('```json', '').replace('```', '').strip()
+                logger.debug(f"🔍 [JD_ANALYZER] Removed ```json markdown fences")
             elif content.startswith('```'):
                 content = content.replace('```', '').strip()
+                logger.debug(f"🔍 [JD_ANALYZER] Removed ``` markdown fences")
             
             data = json.loads(content)
+            
+            # ⭐ DEBUG: Log parsed data structure
+            logger.debug(f"🔍 [JD_ANALYZER] Parsed JSON keys: {list(data.keys()) if isinstance(data, dict) else 'N/A'}")
+            if isinstance(data, dict):
+                required_skills = data.get('required_skills', {})
+                preferred_skills = data.get('preferred_skills', {})
+                logger.debug(f"🔍 [JD_ANALYZER] Required skills structure: {list(required_skills.keys()) if isinstance(required_skills, dict) else type(required_skills)}")
+                logger.debug(f"🔍 [JD_ANALYZER] Preferred skills structure: {list(preferred_skills.keys()) if isinstance(preferred_skills, dict) else type(preferred_skills)}")
+                if isinstance(required_skills, dict):
+                    for category, skills in required_skills.items():
+                        logger.debug(f"🔍 [JD_ANALYZER] Required {category}: {len(skills) if isinstance(skills, list) else 'N/A'} items")
+                if isinstance(preferred_skills, dict):
+                    for category, skills in preferred_skills.items():
+                        logger.debug(f"🔍 [JD_ANALYZER] Preferred {category}: {len(skills) if isinstance(skills, list) else 'N/A'} items")
+            print(f"🔍 [JD_ANALYZER] Parsed JSON keys: {list(data.keys()) if isinstance(data, dict) else 'N/A'}")
             
             # Validate required fields
             if not isinstance(data, dict):

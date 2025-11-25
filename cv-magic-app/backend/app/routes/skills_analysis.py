@@ -1621,7 +1621,79 @@ async def preliminary_analysis(
         except Exception as e:
             return JSONResponse(status_code=404, content={"error": f"Failed to load latest CV: {str(e)}"})
         
+        # ⭐ CRITICAL: Process JD BEFORE analysis to ensure processed JD is available
+        # This ensures the analysis uses the processed JD instead of the original
+        if company_name and user_email:
+            try:
+                logger.info(f"🔄 [PRELIM_ANALYSIS] Processing JD BEFORE analysis for {company_name}")
+                print(f"🔄 [PRELIM_ANALYSIS] Processing JD BEFORE analysis for {company_name}")
+                from app.services.jd_processing_service import get_jd_processing_service
+                
+                # Get user object for processing
+                try:
+                    auth_header = request.headers.get("authorization")
+                    if auth_header and auth_header.startswith("Bearer "):
+                        token = auth_header.replace("Bearer ", "")
+                        token_data = verify_token(token)
+                        if token_data:
+                            # Get user from database
+                            from app.models.user import User
+                            from app.database import get_database
+                            from app.models.auth import UserData
+                            from datetime import timezone
+                            
+                            user_record = None
+                            for db in get_database():
+                                user_record = db.query(User).filter(User.email == token_data.email).first()
+                                break
+                            
+                            if user_record:
+                                user = UserData(
+                                    id=str(user_record.id),
+                                    email=user_record.email,
+                                    name=user_record.full_name or user_record.username or "User",
+                                    created_at=user_record.created_at.replace(tzinfo=timezone.utc) if user_record.created_at.tzinfo is None else user_record.created_at,
+                                    is_active=user_record.is_active
+                                )
+                                
+                                # Extract job title from JD if available
+                                job_title = None
+                                try:
+                                    from app.services.job_extractor import extract_job_metadata
+                                    job_metadata = await extract_job_metadata(jd_text)
+                                    job_title = job_metadata.get('job_title') if job_metadata else None
+                                except Exception:
+                                    pass
+                                
+                                # Process JD NOW (before analysis)
+                                jd_service = get_jd_processing_service(user.email)
+                                logger.info(f"🔄 [PRELIM_ANALYSIS] Triggering JD processing BEFORE analysis for {company_name} | "
+                                           f"JD length: {len(jd_text)} chars")
+                                print(f"🔄 [PRELIM_ANALYSIS] Triggering JD processing BEFORE analysis for {company_name}")
+                                await jd_service.process_jd_if_needed(
+                                    company_name=company_name,
+                                    jd_text=jd_text,
+                                    job_title=job_title,
+                                    job_url=jd_url,
+                                    user=user
+                                )
+                                logger.info(f"✅ [PRELIM_ANALYSIS] JD processing completed BEFORE analysis for {company_name}")
+                                print(f"✅ [PRELIM_ANALYSIS] JD processing completed BEFORE analysis for {company_name}")
+                            else:
+                                logger.warning(f"⚠️ [PRELIM_ANALYSIS] User record not found for {token_data.email}")
+                except Exception as proc_err:
+                    import traceback
+                    logger.error(f"❌ [PRELIM_ANALYSIS] Failed to process JD BEFORE analysis for {company_name}: {proc_err}")
+                    logger.error(f"❌ [PRELIM_ANALYSIS] Traceback: {traceback.format_exc()}")
+                    # Continue with analysis - fallback to original JD will work
+            except Exception as e:
+                import traceback
+                logger.error(f"❌ [PRELIM_ANALYSIS] JD processing setup failed BEFORE analysis for {company_name}: {e}")
+                logger.error(f"❌ [PRELIM_ANALYSIS] Traceback: {traceback.format_exc()}")
+                # Continue with analysis - fallback to original JD will work
+        
         # Perform skills analysis with configuration
+        # Now processed JD should be available and will be used automatically
         result = await perform_preliminary_skills_analysis(
             cv_content=cv_content,
             jd_text=jd_text,

@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from app.core.auth import verify_token
 from app.services.jd_analysis import JDAnalyzer, JDAnalysisResult, analyze_and_save_company_jd, load_jd_analysis
 from app.utils.timestamp_utils import TimestampUtils
+from app.utils.user_path_utils import get_user_base_path
 from app.ai.ai_service import ai_service
 
 logger = logging.getLogger(__name__)
@@ -76,10 +77,18 @@ async def analyze_jd_endpoint(
         
         logger.info(f"🎯 JD Analysis request: Company={company_name}, ForceRefresh={force_refresh}")
         
+        # Extract user email from token
+        user_email = getattr(token_data, 'email', None) if token_data else None
+        if not user_email:
+            return JSONResponse(
+                status_code=401,
+                content={"error": "User email not found in token"}
+            )
+        
         # Short-circuit: if jd_original and an existing jd_analysis are present, reuse without re-analysis
         if not force_refresh:
-            base_dir = get_user_base_path(current_user.email)
-            company_dir = base_dir / company_name
+            base_dir = get_user_base_path(user_email)
+            company_dir = base_dir / "applied_companies" / company_name
             try:
                 jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
                 jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_analysis", "json") or (company_dir / "jd_analysis.json" if (company_dir / "jd_analysis.json").exists() else None)
@@ -116,8 +125,9 @@ async def analyze_jd_endpoint(
                 # If any error during guard, continue to normal flow
                 pass
 
-        # Perform analysis
-        result = await analyze_and_save_company_jd(
+        # Perform analysis using JDAnalyzer with user_email for processed JD support
+        analyzer = JDAnalyzer(user_email=user_email)
+        result = await analyzer.analyze_and_save_company_jd(
             company_name=company_name,
             force_refresh=force_refresh,
             temperature=temperature
