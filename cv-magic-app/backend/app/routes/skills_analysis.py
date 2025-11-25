@@ -3154,7 +3154,8 @@ async def perform_preliminary_skills_analysis(
         jd_source = "original (provided)"  # Track JD source for logging
         if company_name and user_email:
             try:
-                logger.debug(f"🔍 [SKILLS_ANALYSIS] Attempting to use processed JD for {company_name}")
+                logger.info(f"🔍 [SKILLS_ANALYSIS] Attempting to use processed JD for {company_name}")
+                print(f"🔍 [SKILLS_ANALYSIS] Attempting to use processed JD for {company_name}")
                 from app.services.jd_processing_service import get_jd_processing_service
                 jd_service = get_jd_processing_service(user_email)
                 processed_jd_text = jd_service.get_jd_text_for_ai(company_name, prefer_processed=True)
@@ -3162,24 +3163,32 @@ async def perform_preliminary_skills_analysis(
                     original_length = len(jd_text)
                     jd_text = processed_jd_text  # Use processed JD instead
                     jd_source = "processed"
-                    logger.info(f"✅ [SKILLS_ANALYSIS] Using PROCESSED JD for {company_name} | "
+                    logger.info(f"✅ [SKILLS_ANALYSIS] ✅ Using PROCESSED JD for {company_name} | "
                                f"Original: {original_length} chars → Processed: {len(jd_text)} chars | "
                                f"Reduction: {original_length - len(jd_text)} chars")
+                    print(f"✅ [SKILLS_ANALYSIS] ✅ Using PROCESSED JD for {company_name} | "
+                          f"Original: {original_length} chars → Processed: {len(jd_text)} chars")
                 else:
                     jd_source = "legacy (original)"
                     logger.info(f"📄 [SKILLS_ANALYSIS] Using LEGACY (original) JD for {company_name} | "
                                f"Length: {len(jd_text)} chars | "
                                f"Reason: Processed JD not available")
+                    print(f"📄 [SKILLS_ANALYSIS] Using LEGACY (original) JD for {company_name} | "
+                          f"Length: {len(jd_text)} chars")
             except Exception as e:
                 jd_source = "legacy (original, error)"
                 logger.warning(f"⚠️ [SKILLS_ANALYSIS] Error getting processed JD for {company_name}, "
                                f"using LEGACY (original) JD: {e} | Length: {len(jd_text)} chars")
+                print(f"⚠️ [SKILLS_ANALYSIS] Error getting processed JD for {company_name}, "
+                      f"using LEGACY (original) JD: {e}")
                 # Continue with original jd_text
         else:
             if not company_name:
                 logger.debug(f"📄 [SKILLS_ANALYSIS] No company_name provided, using original JD")
+                print(f"📄 [SKILLS_ANALYSIS] No company_name provided, using original JD")
             if not user_email:
                 logger.debug(f"📄 [SKILLS_ANALYSIS] No user_email provided, using original JD")
+                print(f"📄 [SKILLS_ANALYSIS] No user_email provided, using original JD")
         
         # Get configuration
         config = skills_analysis_config_service.get_config(config_name)

@@ -272,17 +272,22 @@ class JDAnalyzer:
                     company_name = path_parts[idx + 1]
             
             if company_name and self.user_email:
-                logger.debug(f"🔍 [JD_ANALYZER] Attempting to use processed JD for {company_name}")
+                logger.info(f"🔍 [JD_ANALYZER] Attempting to use processed JD for {company_name}")
+                print(f"🔍 [JD_ANALYZER] Attempting to use processed JD for {company_name}")
                 from app.services.jd_processing_service import get_jd_processing_service
                 jd_service = get_jd_processing_service(self.user_email)
                 processed_text = jd_service.get_jd_text_for_ai(company_name, prefer_processed=True)
                 if processed_text:
-                    logger.info(f"✅ [JD_ANALYZER] Using PROCESSED JD for {company_name} | "
+                    logger.info(f"✅ [JD_ANALYZER] ✅ Using PROCESSED JD for {company_name} | "
                                f"Source: jd_processing_service | Length: {len(processed_text)} chars")
+                    print(f"✅ [JD_ANALYZER] ✅ Using PROCESSED JD for {company_name} | "
+                          f"Length: {len(processed_text)} chars")
                     return processed_text
                 else:
                     logger.info(f"📄 [JD_ANALYZER] Processed JD not available for {company_name}, "
                                f"falling back to LEGACY file: {path.name}")
+                    print(f"📄 [JD_ANALYZER] Processed JD not available for {company_name}, "
+                          f"falling back to LEGACY file: {path.name}")
             else:
                 if not company_name:
                     logger.debug(f"📄 [JD_ANALYZER] Could not extract company name from path, using LEGACY file")
@@ -311,6 +316,8 @@ class JDAnalyzer:
             logger.info(f"📄 [JD_ANALYZER] Using LEGACY (original) JD file | "
                        f"Path: {path.name} | Length: {len(content)} chars | "
                        f"Reason: Processed JD not available or error occurred")
+            print(f"📄 [JD_ANALYZER] Using LEGACY (original) JD file | "
+                  f"Path: {path.name} | Length: {len(content)} chars")
             return content
             
         except Exception as e:
@@ -630,6 +637,7 @@ class JDAnalyzer:
                     try:
                         company_dir = self.base_analysis_path / "applied_companies" / company_name
                         jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json")
+                        # ⭐ Use _read_jd_file which automatically tries processed JD first
                         current_text = self._read_jd_file(jd_file) if jd_file and jd_file.exists() else None
                         current_hash = self._compute_jd_hash(current_text) if current_text else None
                         cached_hash = (cached_result.metadata or {}).get('jd_hash') if hasattr(cached_result, 'metadata') else None
@@ -650,6 +658,7 @@ class JDAnalyzer:
                     if jd_original and jd_analysis and jd_analysis.exists():
                         # If hash matches, reuse; else proceed to fresh analysis
                         try:
+                            # ⭐ Use _read_jd_file which automatically tries processed JD first
                             current_text = self._read_jd_file(jd_original)
                             current_hash = self._compute_jd_hash(current_text)
                             with open(jd_analysis, 'r', encoding='utf-8') as f:
@@ -663,7 +672,8 @@ class JDAnalyzer:
                     logger.debug(f"Guard check for existing JD files failed (continuing with analysis): {guard_err}")
             
             # Perform fresh analysis
-            logger.info(f"🔄 Analyzing JD for {company_name} (force_refresh={force_refresh})")
+            logger.info(f"🔄 [JD_ANALYZER] Analyzing JD for {company_name} (force_refresh={force_refresh})")
+            print(f"🔄 [JD_ANALYZER] Analyzing JD for {company_name} (force_refresh={force_refresh})")
             result = await self.analyze_company_jd(company_name, base_path=base_path, temperature=temperature)
             
             # Set company name and metadata

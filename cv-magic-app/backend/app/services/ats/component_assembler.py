@@ -87,7 +87,37 @@ class ComponentAssembler:
         return cv_content
 
     def _read_jd_text(self, company: str) -> str:
-        """Read JD text for a specific company."""
+        """
+        Read JD text for a specific company - NOW WITH PROCESSED JD SUPPORT
+        
+        Tries processed JD first (if available), falls back to original JD file.
+        This ensures better component analysis results while maintaining backward compatibility.
+        """
+        # ⭐ NEW: Try processed JD first (with fallback)
+        if self.user_email:
+            try:
+                logger.debug(f"🔍 [COMPONENT_ASSEMBLER] Attempting to use processed JD for {company}")
+                print(f"🔍 [COMPONENT_ASSEMBLER] Attempting to use processed JD for {company}")
+                from app.services.jd_processing_service import get_jd_processing_service
+                jd_service = get_jd_processing_service(self.user_email)
+                processed_text = jd_service.get_jd_text_for_ai(company, prefer_processed=True)
+                if processed_text:
+                    logger.info(f"✅ [COMPONENT_ASSEMBLER] ✅ Using PROCESSED JD for {company} | "
+                               f"Length: {len(processed_text)} chars")
+                    print(f"✅ [COMPONENT_ASSEMBLER] ✅ Using PROCESSED JD for {company} | Length: {len(processed_text)} chars")
+                    return processed_text
+                else:
+                    logger.info(f"📄 [COMPONENT_ASSEMBLER] Processed JD not available for {company}, "
+                               f"falling back to LEGACY file")
+                    print(f"📄 [COMPONENT_ASSEMBLER] Processed JD not available for {company}, falling back to LEGACY file")
+            except Exception as e:
+                logger.warning(f"⚠️ [COMPONENT_ASSEMBLER] Error attempting processed JD, falling back to LEGACY file: {e}")
+                print(f"⚠️ [COMPONENT_ASSEMBLER] Error attempting processed JD, falling back to LEGACY file: {e}")
+                # Continue with original file reading
+        else:
+            logger.debug(f"📄 [COMPONENT_ASSEMBLER] No user_email available, using LEGACY file")
+        
+        # ✅ FALLBACK: Original legacy behavior (unchanged)
         company_dir = self.base_dir / "applied_companies" / company
         jd_json = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
         
@@ -102,6 +132,11 @@ class ComponentAssembler:
         text = (data.get("text") or "").strip()
         if not text:
             raise ValueError("JD text is empty")
+        logger.info(f"📄 [COMPONENT_ASSEMBLER] Using LEGACY (original) JD file | "
+                   f"Path: {jd_json.name} | Length: {len(text)} chars | "
+                   f"Reason: Processed JD not available or error occurred")
+        print(f"📄 [COMPONENT_ASSEMBLER] Using LEGACY (original) JD file | "
+              f"Path: {jd_json.name} | Length: {len(text)} chars")
         return text
 
     def _read_matched_skills(self, company: str) -> str:

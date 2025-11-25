@@ -347,9 +347,14 @@ class CVJDMatcher:
                 logger.info(f"🧪 [CV_JD_MATCHER] CV content length={len(cv_content or '')}")
             
             # Get JD analysis data
+            # ⭐ NOTE: JD analysis already uses processed JD (via jd_analyzer.py)
+            # CV-JD matching benefits from processed JD indirectly through better keyword extraction
             if not jd_analysis_data:
                 jd_analysis_data = self._read_jd_analysis(company_name)
-                logger.info(f"📊 Loaded JD analysis for: {company_name}")
+                logger.info(f"📊 [CV_JD_MATCHER] Loaded JD analysis for: {company_name}")
+                print(f"📊 [CV_JD_MATCHER] Loaded JD analysis for: {company_name}")
+                logger.info(f"ℹ️ [CV_JD_MATCHER] JD analysis was created using processed JD (if available)")
+                print(f"ℹ️ [CV_JD_MATCHER] JD analysis was created using processed JD (if available)")
             
             # Extract keywords from JD analysis with fallback to skills-based extraction
             required_keywords = jd_analysis_data.get('required_keywords', [])

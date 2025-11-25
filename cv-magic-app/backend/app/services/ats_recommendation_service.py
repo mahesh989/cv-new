@@ -1134,35 +1134,85 @@ class ATSRecommendationService:
             }
     
     def _extract_jd_content(self, company: str) -> Dict:
-        """Extract JD content for contextual understanding"""
+        """
+        Extract JD content for contextual understanding - NOW WITH PROCESSED JD SUPPORT
+        
+        Tries processed JD first (if available), falls back to original JD file.
+        This ensures better extraction results while maintaining backward compatibility.
+        """
         try:
-            company_dir = self.base_dir / "applied_companies" / company
+            # ⭐ NEW: Try processed JD first (with fallback)
+            jd_text = None
+            jd_source = "legacy"
+            if self.user_email:
+                try:
+                    logger.debug(f"🔍 [ATS_RECOMMENDATION] Attempting to use processed JD for {company}")
+                    print(f"🔍 [ATS_RECOMMENDATION] Attempting to use processed JD for {company}")
+                    from app.services.jd_processing_service import get_jd_processing_service
+                    jd_service = get_jd_processing_service(self.user_email)
+                    processed_text = jd_service.get_jd_text_for_ai(company, prefer_processed=True)
+                    if processed_text:
+                        jd_text = processed_text
+                        jd_source = "processed"
+                        logger.info(f"✅ [ATS_RECOMMENDATION] ✅ Using PROCESSED JD for {company} | "
+                                   f"Length: {len(jd_text)} chars")
+                        print(f"✅ [ATS_RECOMMENDATION] ✅ Using PROCESSED JD for {company} | Length: {len(jd_text)} chars")
+                except Exception as e:
+                    logger.warning(f"⚠️ [ATS_RECOMMENDATION] Error attempting processed JD, falling back to LEGACY file: {e}")
+                    print(f"⚠️ [ATS_RECOMMENDATION] Error attempting processed JD, falling back to LEGACY file: {e}")
             
-            # Try to load JD from jd_original.json
-            jd_file = TimestampUtils.find_latest_timestamped_file(
-                company_dir, "jd_original", "json"
-            )
-            if not jd_file:
-                jd_file = company_dir / "jd_original.json"
+            # ✅ FALLBACK: Original legacy behavior (unchanged)
+            if not jd_text:
+                company_dir = self.base_dir / "applied_companies" / company
+                
+                # Try to load JD from jd_original.json
+                jd_file = TimestampUtils.find_latest_timestamped_file(
+                    company_dir, "jd_original", "json"
+                )
+                if not jd_file:
+                    jd_file = company_dir / "jd_original.json"
+                
+                if not jd_file.exists():
+                    logger.warning(f"⚠️ [JD_CONTENT] JD file not found: {jd_file}")
+                    return {
+                        "role_title": "N/A",
+                        "department": "N/A",
+                        "role_level": "Mid",
+                        "key_responsibilities": ["N/A"],
+                        "required_skills": ["N/A"],
+                        "preferred_skills": ["N/A"],
+                        "context": "N/A"
+                    }
+                
+                with open(jd_file, 'r', encoding='utf-8') as f:
+                    jd_data = json.load(f)
+                
+                # Extract from JD record
+                jd_record = jd_data.get("record", {})
+                jd_text = jd_data.get("text", "")
+                jd_source = "legacy"
+                logger.info(f"📄 [ATS_RECOMMENDATION] Using LEGACY (original) JD file | "
+                           f"Path: {jd_file.name} | Length: {len(jd_text)} chars | "
+                           f"Reason: Processed JD not available or error occurred")
+                print(f"📄 [ATS_RECOMMENDATION] Using LEGACY (original) JD file | "
+                      f"Path: {jd_file.name} | Length: {len(jd_text)} chars")
             
-            if not jd_file.exists():
-                logger.warning(f"⚠️ [JD_CONTENT] JD file not found: {jd_file}")
-                return {
-                    "role_title": "N/A",
-                    "department": "N/A",
-                    "role_level": "Mid",
-                    "key_responsibilities": ["N/A"],
-                    "required_skills": ["N/A"],
-                    "preferred_skills": ["N/A"],
-                    "context": "N/A"
-                }
-            
-            with open(jd_file, 'r', encoding='utf-8') as f:
-                jd_data = json.load(f)
-            
-            # Extract from JD record
-            jd_record = jd_data.get("record", {})
-            jd_text = jd_data.get("text", "")
+            # Extract from JD record (for metadata, always need original file for record data)
+            jd_record = {}
+            try:
+                company_dir = self.base_dir / "applied_companies" / company
+                jd_file = TimestampUtils.find_latest_timestamped_file(
+                    company_dir, "jd_original", "json"
+                )
+                if not jd_file:
+                    jd_file = company_dir / "jd_original.json"
+                if jd_file.exists():
+                    with open(jd_file, 'r', encoding='utf-8') as f:
+                        jd_data = json.load(f)
+                    jd_record = jd_data.get("record", {})
+            except Exception as e:
+                logger.debug(f"⚠️ [ATS_RECOMMENDATION] Could not load JD metadata: {e}")
+                jd_record = {}
             
             return {
                 "role_title": jd_record.get("title", "N/A"),
