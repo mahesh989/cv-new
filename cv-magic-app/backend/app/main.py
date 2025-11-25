@@ -56,7 +56,8 @@ try:
         logs_dir.mkdir(exist_ok=True)
         log_file = logs_dir / "backend_logs.txt"
     
-    file_handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
+    # RotatingFileHandler appends by default (mode='a'), ensuring logs accumulate
+    file_handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=3, encoding="utf-8", mode='a')
     file_handler.setLevel(getattr(logging, settings.LOG_LEVEL))
     file_handler.setFormatter(logging.Formatter(settings.LOG_FORMAT))
     root_logger = logging.getLogger()

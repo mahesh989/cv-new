@@ -207,6 +207,12 @@ deploy_full() {
         echo "  - Preserving database and user data volumes..."
         docker compose down --remove-orphans || true
         
+        echo "🧹 Clearing log files (after containers stopped)..."
+        mkdir -p logs
+        > logs/backend_logs.txt
+        > logs/frontend_logs.txt
+        echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
+        
         echo "🧹 Performing comprehensive Docker cleanup..."
         echo "  - Checking disk space before cleanup..."
         df -h / || true
@@ -232,12 +238,6 @@ deploy_full() {
         
         echo "  - Checking disk space after cleanup..."
         df -h / || true
-        
-        echo "🧹 Clearing log files before building..."
-        mkdir -p logs
-        > logs/backend_logs.txt
-        > logs/frontend_logs.txt
-        echo "  ✅ Cleared backend_logs.txt and frontend_logs.txt"
         
         echo "🔨 Building new containers..."
         docker compose build --no-cache
