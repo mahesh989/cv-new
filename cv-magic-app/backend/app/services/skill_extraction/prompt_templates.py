@@ -22,38 +22,40 @@ class SkillExtractionPrompts:
         return f"""You are a precision skill extractor for {document_type}s. Follow these rules STRICTLY:
 
 EXTRACTION RULES:
-1. VERBATIM ONLY - Copy exact phrases from text, never paraphrase or use synonyms
+1. VERBATIM ONLY - Copy exact phrases from text, never paraphrase
 2. STRIP QUALIFIERS - Remove "Advanced", "Expert", "Strong", "Excellent", "5+ years"
-3. STRIP VERSIONS - "Python 3.x" → "Python", "SQL Server 2019" → "SQL Server"
-4. STRIP PARENTHETICALS - "SQL (PostgreSQL, MySQL)" → "SQL"
-5. NO HALLUCINATION - Only extract what is explicitly written in the text
-6. DEDUPLICATE - If same skill appears with slightly different wording, keep the simpler version only
-   Examples: "problem-solving" + "proactive problem solving" → keep "problem-solving" only
-             "SQL" + "SQL databases" → keep "SQL" only
+3. STRIP VERSIONS - "Python 3.x" → "Python"
+4. NO HALLUCINATION - Only extract what is explicitly written
 
-CATEGORIZATION PRIORITY (Technical > Domain > Soft):
+DEDUPLICATION (CRITICAL):
+- Keep ONLY the shorter/simpler form when similar phrases exist
+- "problem-solving" + "proactive problem solving" → KEEP ONLY "problem-solving"
+- "analytical thinking" + "analytical skills" → KEEP ONLY "analytical thinking"
+- NEVER include both variations
 
-TECHNICAL SKILLS (highest priority):
-- Programming/query languages: Python, SQL, R, JavaScript, VBA, Java
-- Software tools: Power BI, Tableau, Excel, Salesforce, JIRA
-- Databases: PostgreSQL, MySQL, SQL Server, MongoDB, Oracle, MSSQL
-- Cloud platforms: AWS, Azure, GCP, Databricks, Snowflake
-- Technical processes: Data cleaning, Data preprocessing, ETL, Data transformation, Data mining, Statistical methods, Data modeling
-- Technical outputs: Dashboards, Reports, Data visualizations
-- Development tools: Docker, Git, APIs
+CATEGORIZATION (STRICT PRIORITY: Technical > Soft > Domain):
 
-SOFT SKILLS (only if EXPLICITLY stated):
-- Must have context like "skills", "ability to", "demonstrated", "excellent"
-- Examples: Communication, Collaboration, Problem-solving, Analytical thinking, Leadership
-- Stakeholder management, Time management, Project management, Attention to detail
-- DO NOT infer from actions (e.g., "led team" ≠ "Leadership" unless stated as skill)
+TECHNICAL SKILLS - PUT THESE HERE, NOT IN DOMAIN:
+- Languages: Python, SQL, R, JavaScript, VBA
+- Tools: Power BI, Tableau, Excel, Salesforce, JIRA
+- Databases: PostgreSQL, MySQL, SQL Server, MSSQL, MongoDB
+- Cloud: AWS, Azure, GCP, Databricks, Snowflake
+- DATA PROCESSES (ALWAYS TECHNICAL): Data cleaning, Data transformation, Data preprocessing, ETL, Data mining, Statistical methods, Data modeling, Data warehousing, Data pipelines
+- OUTPUTS (ALWAYS TECHNICAL): Dashboards, Reports, Data visualizations
 
-DOMAIN KEYWORDS (lowest priority):
-- Industry sectors: Healthcare, Financial Services, E-commerce, Nonprofit, Education
-- Business functions: Fundraising, Marketing campaigns, Risk management, Procurement
-- Regulatory terms: GDPR, HIPAA, NDIS, SOX compliance
-- Sector-specific: Social procurement, Clinical trials, Donor management, Food relief
-- EXCLUDE generic terms: "stakeholders", "insights", "best practices", "strategy", "analysis"
+SOFT SKILLS - ONLY if phrase contains "skill/skills/ability/abilities":
+- "numeracy skills" → SOFT (contains "skills")
+- "communication skills" → SOFT (contains "skills")  
+- "ability to collaborate" → SOFT (contains "ability")
+- "problem-solving abilities" → SOFT (contains "abilities")
+- "attention to detail" → SOFT (common soft skill phrase)
+
+DOMAIN KEYWORDS - ONLY industry/sector/regulatory terms:
+- Industries: Healthcare, Financial Services, Nonprofit, Charity, Education
+- Sectors: Food relief, Hunger relief, Social services
+- Regulatory: GDPR, HIPAA, NDIS, SOX
+- NEVER put data processes here (data cleaning, ETL, etc. are TECHNICAL)
+- EXCLUDE generic: "insights", "stakeholders", "best practices", "data-led insights"
 
 OUTPUT: Return ONLY three Python lists, nothing else."""
 
@@ -64,23 +66,19 @@ OUTPUT: Return ONLY three Python lists, nothing else."""
         """
         return f"""Extract skills from this {document_type}:
 
-═══════════════════════════════════════════════════════════════
 {document_text.strip()}
-═══════════════════════════════════════════════════════════════
 
-CRITICAL REMINDERS:
-- Technical PROCESSES (data cleaning, ETL, statistical methods) → TECHNICAL_SKILLS, not DOMAIN_KEYWORDS
-- Cognitive abilities if explicitly stated (numeracy, analytical skills) → SOFT_SKILLS
-- Industry/sector context (healthcare, nonprofit, food relief) → DOMAIN_KEYWORDS
-- Deduplicate: If "problem-solving" and "proactive problem solving" both appear, keep only "problem-solving"
-- Keep different concepts separate: "Data cleaning" and "Data preprocessing" are both kept
+BEFORE YOU OUTPUT, VERIFY:
+1. DATA PROCESSES in TECHNICAL? (data cleaning, data transformation, data warehousing, ETL → TECHNICAL, never Domain)
+2. NO DUPLICATES? (if "problem-solving" and "proactive problem solving" both found → keep ONLY "problem-solving")
+3. SOFT SKILLS have "skill/ability" context? (numeracy skills, communication skills → SOFT)
+4. DOMAIN is industry-only? (charity, food relief, nonprofit → DOMAIN. NOT data processes!)
+5. NO GENERIC terms in Domain? (remove: insights, stakeholders, best practices, data-led insights)
 
-OUTPUT FORMAT (exactly this, nothing else):
-TECHNICAL_SKILLS = ["skill1", "skill2", "skill3"]
-SOFT_SKILLS = ["skill1", "skill2"]
-DOMAIN_KEYWORDS = ["keyword1", "keyword2"]
-
-If a category has no skills, use empty list: TECHNICAL_SKILLS = []"""
+OUTPUT (exactly this format, nothing else):
+TECHNICAL_SKILLS = []
+SOFT_SKILLS = []
+DOMAIN_KEYWORDS = []"""
 
 
 def get_prompt(key: str, **kwargs) -> str:
