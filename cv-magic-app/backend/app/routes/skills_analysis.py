@@ -3322,13 +3322,31 @@ async def perform_preliminary_skills_analysis(
         reduction = original_length - len(jd_text)
         reduction_pct = round((reduction / original_length) * 100, 1) if original_length > 0 else 0
         
+        # Verify processed JD format (should have sections, not raw text)
+        has_sections = any(section in jd_text for section in [
+            "ROLE OVERVIEW", "KEY RESPONSIBILITIES", "TECHNICAL REQUIREMENTS"
+        ])
+        jd_preview = jd_text[:300].replace('\n', ' ')
+        
         logger.info(f"✅ [SKILLS_ANALYSIS] ✅✅✅ USING PROCESSED JD for {company_name} | "
                    f"Original: {original_length} chars → Processed: {len(jd_text)} chars | "
                    f"Reduction: {reduction} chars ({reduction_pct}%) | "
-                   f"Load time: {jd_load_time:.1f}ms")
+                   f"Load time: {jd_load_time:.1f}ms | "
+                   f"Has sections format: {has_sections}")
+        logger.info(f"📄 [SKILLS_ANALYSIS] Processed JD preview (first 300 chars): {jd_preview}")
+        
+        # ⭐ PRINT FULL PROCESSED JD TEXT BEING SENT TO AI FOR SKILLS ANALYSIS
+        logger.info(f"📋 [SKILLS_ANALYSIS] ========== FULL PROCESSED JD TEXT FOR SKILLS EXTRACTION ==========")
+        logger.info(f"📋 [SKILLS_ANALYSIS] Company: {company_name}")
+        logger.info(f"📋 [SKILLS_ANALYSIS] Total length: {len(jd_text)} characters")
+        logger.info(f"📋 [SKILLS_ANALYSIS] This processed JD text will be sent to AI for skills extraction:")
+        logger.info(f"📋 [SKILLS_ANALYSIS] Full processed JD text:\n{jd_text}")
+        logger.info(f"📋 [SKILLS_ANALYSIS] ========== END OF PROCESSED JD TEXT FOR SKILLS ANALYSIS ==========")
         print(f"✅ [SKILLS_ANALYSIS] ✅✅✅ USING PROCESSED JD for {company_name} | "
               f"Original: {original_length} chars → Processed: {len(jd_text)} chars | "
-              f"Reduction: {reduction} chars ({reduction_pct}%)")
+              f"Reduction: {reduction} chars ({reduction_pct}%) | "
+              f"Has sections: {has_sections}")
+        print(f"📋 [SKILLS_ANALYSIS] FULL PROCESSED JD TEXT FOR SKILLS EXTRACTION ({len(jd_text)} chars):\n{jd_text}")
         
         # Get configuration
         config = skills_analysis_config_service.get_config(config_name)

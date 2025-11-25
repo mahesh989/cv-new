@@ -104,7 +104,16 @@ class ComponentAssembler:
                 if processed_text:
                     logger.info(f"✅ [COMPONENT_ASSEMBLER] ✅ Using PROCESSED JD for {company} | "
                                f"Length: {len(processed_text)} chars")
+                    
+                    # ⭐ PRINT FULL PROCESSED JD TEXT BEING SENT TO AI FOR COMPONENT ANALYSIS
+                    logger.info(f"📋 [COMPONENT_ASSEMBLER] ========== FULL PROCESSED JD TEXT FOR COMPONENT ANALYSIS ==========")
+                    logger.info(f"📋 [COMPONENT_ASSEMBLER] Company: {company}")
+                    logger.info(f"📋 [COMPONENT_ASSEMBLER] Total length: {len(processed_text)} characters")
+                    logger.info(f"📋 [COMPONENT_ASSEMBLER] This processed JD text will be sent to AI for component analysis:")
+                    logger.info(f"📋 [COMPONENT_ASSEMBLER] Full processed JD text:\n{processed_text}")
+                    logger.info(f"📋 [COMPONENT_ASSEMBLER] ========== END OF PROCESSED JD TEXT FOR COMPONENT ANALYSIS ==========")
                     print(f"✅ [COMPONENT_ASSEMBLER] ✅ Using PROCESSED JD for {company} | Length: {len(processed_text)} chars")
+                    print(f"📋 [COMPONENT_ASSEMBLER] FULL PROCESSED JD TEXT FOR COMPONENT ANALYSIS ({len(processed_text)} chars):\n{processed_text}")
                     return processed_text
                 else:
                     logger.info(f"📄 [COMPONENT_ASSEMBLER] Processed JD not available for {company}, "

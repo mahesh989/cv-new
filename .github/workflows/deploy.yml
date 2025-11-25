@@ -69,13 +69,58 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     steps:
+      - name: Resolve VPS hostname to IP (if needed)
+        id: resolve-host
+        timeout-minutes: 2
+        run: |
+          HOST="${{ secrets.VPS_HOST }}"
+          # Check if it's already an IP address
+          if [[ $HOST =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Using IP address directly: $HOST"
+            echo "resolved_host=$HOST" >> $GITHUB_OUTPUT
+          else
+            echo "Resolving hostname: $HOST"
+            # Try multiple DNS servers and methods with timeouts
+            IP=""
+            
+            # Try getent (fastest, uses system resolver)
+            if [ -z "$IP" ]; then
+              IP=$(timeout 5 getent hosts $HOST 2>/dev/null | awk '{ print $1 }' | head -n1) || IP=""
+            fi
+            
+            # Try Google DNS
+            if [ -z "$IP" ]; then
+              IP=$(timeout 5 dig +short +time=3 +tries=2 $HOST @8.8.8.8 2>/dev/null | tail -n1) || IP=""
+            fi
+            
+            # Try Cloudflare DNS
+            if [ -z "$IP" ]; then
+              IP=$(timeout 5 dig +short +time=3 +tries=2 $HOST @1.1.1.1 2>/dev/null | tail -n1) || IP=""
+            fi
+            
+            # Try nslookup as last resort
+            if [ -z "$IP" ]; then
+              IP=$(timeout 5 nslookup $HOST 8.8.8.8 2>/dev/null | grep -A1 "Name:" | tail -n1 | awk '{print $2}') || IP=""
+            fi
+            
+            if [ -z "$IP" ]; then
+              echo "⚠️ Warning: Could not resolve $HOST, will try hostname directly"
+              echo "resolved_host=$HOST" >> $GITHUB_OUTPUT
+            else
+              echo "✅ Resolved $HOST to $IP"
+              echo "resolved_host=$IP" >> $GITHUB_OUTPUT
+            fi
+          fi
+      
       - name: Deploy Backend to VPS (Full Deployment)
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.VPS_HOST }}
+          host: ${{ steps.resolve-host.outputs.resolved_host || secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 10m
           script: |
             set -e
             echo "🔍 Checking current directory and git status..."

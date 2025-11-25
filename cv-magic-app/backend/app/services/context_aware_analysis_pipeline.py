@@ -697,8 +697,27 @@ class ContextAwareAnalysisPipeline:
             
             # Log JD source and size for performance tracking
             jd_source = "PROCESSED" if jd_service.has_processed_jd(context.company) else "RAW"
+            has_sections = any(section in jd_text for section in [
+                "ROLE OVERVIEW", "KEY RESPONSIBILITIES", "TECHNICAL REQUIREMENTS"
+            ]) if jd_source == "PROCESSED" else False
+            jd_preview = jd_text[:300].replace('\n', ' ')
+            
             logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Analyze match JD source: {jd_source} | "
-                       f"Size: {len(jd_text)} chars | Company: {context.company}")
+                       f"Size: {len(jd_text)} chars | Company: {context.company} | "
+                       f"Has sections format: {has_sections}")
+            logger.info(f"📄 [CONTEXT_AWARE_PIPELINE] JD preview (first 300 chars): {jd_preview}")
+            
+            # ⭐ PRINT FULL PROCESSED JD TEXT BEING SENT TO AI FOR ANALYZE MATCH
+            if jd_source == "PROCESSED":
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] ========== FULL PROCESSED JD TEXT FOR ANALYZE MATCH ==========")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] Company: {context.company}")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] Total length: {len(jd_text)} characters")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] This processed JD text will be sent to AI for analyze match:")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] Full processed JD text:\n{jd_text}")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] ========== END OF PROCESSED JD TEXT FOR ANALYZE MATCH ==========")
+                print(f"📋 [CONTEXT_AWARE_PIPELINE] FULL PROCESSED JD TEXT FOR ANALYZE MATCH ({len(jd_text)} chars):\n{jd_text}")
+            else:
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] JD will be sent to AI as TEXT (RAW JD, not processed)")
             
             if not cv_content or not jd_text:
                 logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] Missing CV or JD content for analyze match")

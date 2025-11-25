@@ -485,6 +485,16 @@ class EnhancedATSOrchestrator:
                         jd_source = "PROCESSED" if jd_service.has_processed_jd(company_name) else "RAW"
                         logger.info(f"✅ [Enhanced ATS] JD source: {jd_source} | "
                                    f"Length: {len(job_description)} chars | Company: {company_name}")
+                        
+                        # ⭐ PRINT FULL PROCESSED JD TEXT BEING SENT TO AI FOR ENHANCED ATS
+                        if jd_source == "PROCESSED":
+                            logger.info(f"📋 [Enhanced ATS] ========== FULL PROCESSED JD TEXT FOR ENHANCED ATS ANALYSIS ==========")
+                            logger.info(f"📋 [Enhanced ATS] Company: {company_name}")
+                            logger.info(f"📋 [Enhanced ATS] Total length: {len(job_description)} characters")
+                            logger.info(f"📋 [Enhanced ATS] This processed JD text will be sent to AI for enhanced ATS analysis:")
+                            logger.info(f"📋 [Enhanced ATS] Full processed JD text:\n{job_description}")
+                            logger.info(f"📋 [Enhanced ATS] ========== END OF PROCESSED JD TEXT FOR ENHANCED ATS ==========")
+                            print(f"📋 [Enhanced ATS] FULL PROCESSED JD TEXT FOR ENHANCED ATS ({len(job_description)} chars):\n{job_description}")
                 except Exception as e:
                     logger.warning(f"⚠️ [Enhanced ATS] Failed to load processed JD, falling back to raw JD: {e}")
             

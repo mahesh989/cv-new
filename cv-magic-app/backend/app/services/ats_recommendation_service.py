@@ -1156,7 +1156,16 @@ class ATSRecommendationService:
                         jd_source = "processed"
                         logger.info(f"✅ [ATS_RECOMMENDATION] ✅ Using PROCESSED JD for {company} | "
                                    f"Length: {len(jd_text)} chars")
+                        
+                        # ⭐ PRINT FULL PROCESSED JD TEXT BEING SENT TO AI FOR ATS RECOMMENDATIONS
+                        logger.info(f"📋 [ATS_RECOMMENDATION] ========== FULL PROCESSED JD TEXT FOR ATS RECOMMENDATIONS ==========")
+                        logger.info(f"📋 [ATS_RECOMMENDATION] Company: {company}")
+                        logger.info(f"📋 [ATS_RECOMMENDATION] Total length: {len(jd_text)} characters")
+                        logger.info(f"📋 [ATS_RECOMMENDATION] This processed JD text will be used for ATS recommendations:")
+                        logger.info(f"📋 [ATS_RECOMMENDATION] Full processed JD text:\n{jd_text}")
+                        logger.info(f"📋 [ATS_RECOMMENDATION] ========== END OF PROCESSED JD TEXT FOR ATS RECOMMENDATIONS ==========")
                         print(f"✅ [ATS_RECOMMENDATION] ✅ Using PROCESSED JD for {company} | Length: {len(jd_text)} chars")
+                        print(f"📋 [ATS_RECOMMENDATION] FULL PROCESSED JD TEXT FOR ATS RECOMMENDATIONS ({len(jd_text)} chars):\n{jd_text}")
                 except Exception as e:
                     logger.warning(f"⚠️ [ATS_RECOMMENDATION] Error attempting processed JD, falling back to LEGACY file: {e}")
                     print(f"⚠️ [ATS_RECOMMENDATION] Error attempting processed JD, falling back to LEGACY file: {e}")

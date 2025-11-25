@@ -375,12 +375,29 @@ class JDProcessingService:
                 except Exception:
                     pass
                 
+                # Log JD text preview to verify it's processed format (sections, not raw)
+                preview = processed_text[:300].replace('\n', ' ')
+                has_sections = any(section in processed_text for section in [
+                    "ROLE OVERVIEW", "KEY RESPONSIBILITIES", "TECHNICAL REQUIREMENTS"
+                ])
+                
                 logger.info(f"✅ [JD_PROCESSING] ✅ Using PROCESSED JD for {company_name} | "
                            f"Mode: {processing_mode} | Sections: {sections_count} | "
                            f"Length: {len(processed_text)} chars{size_reduction} | "
-                           f"Load time: {load_time:.1f}ms")
+                           f"Load time: {load_time:.1f}ms | "
+                           f"Has sections format: {has_sections}")
+                logger.info(f"📄 [JD_PROCESSING] Processed JD preview (first 300 chars): {preview}")
+                
+                # ⭐ PRINT FULL PROCESSED JD TEXT FOR VERIFICATION
+                logger.info(f"📋 [JD_PROCESSING] ========== FULL PROCESSED JD TEXT BEING SENT TO AI ==========")
+                logger.info(f"📋 [JD_PROCESSING] Company: {company_name}")
+                logger.info(f"📋 [JD_PROCESSING] Total length: {len(processed_text)} characters")
+                logger.info(f"📋 [JD_PROCESSING] Full processed JD text:\n{processed_text}")
+                logger.info(f"📋 [JD_PROCESSING] ========== END OF PROCESSED JD TEXT ==========")
                 print(f"✅ [JD_PROCESSING] ✅ Using PROCESSED JD for {company_name} | "
-                      f"Length: {len(processed_text)} chars{size_reduction}")
+                      f"Length: {len(processed_text)} chars{size_reduction} | "
+                      f"Has sections: {has_sections}")
+                print(f"📋 [JD_PROCESSING] FULL PROCESSED JD TEXT ({len(processed_text)} chars):\n{processed_text}")
                 return processed_text
             else:
                 logger.debug(f"⚠️ [JD_PROCESSING] No processed JD found for {company_name}, trying original JD")

@@ -305,8 +305,17 @@ class JDAnalyzer:
                 if processed_text:
                     logger.info(f"✅ [JD_ANALYZER] ✅ Using PROCESSED JD for {company_name} | "
                                f"Source: jd_processing_service | Length: {len(processed_text)} chars")
+                    
+                    # ⭐ PRINT FULL PROCESSED JD TEXT BEING SENT TO AI FOR JD ANALYSIS
+                    logger.info(f"📋 [JD_ANALYZER] ========== FULL PROCESSED JD TEXT FOR JD ANALYSIS ==========")
+                    logger.info(f"📋 [JD_ANALYZER] Company: {company_name}")
+                    logger.info(f"📋 [JD_ANALYZER] Total length: {len(processed_text)} characters")
+                    logger.info(f"📋 [JD_ANALYZER] This processed JD text will be sent to AI for keyword extraction:")
+                    logger.info(f"📋 [JD_ANALYZER] Full processed JD text:\n{processed_text}")
+                    logger.info(f"📋 [JD_ANALYZER] ========== END OF PROCESSED JD TEXT FOR JD ANALYSIS ==========")
                     print(f"✅ [JD_ANALYZER] ✅ Using PROCESSED JD for {company_name} | "
                           f"Length: {len(processed_text)} chars")
+                    print(f"📋 [JD_ANALYZER] FULL PROCESSED JD TEXT FOR JD ANALYSIS ({len(processed_text)} chars):\n{processed_text}")
                     return processed_text
                 else:
                     logger.info(f"📄 [JD_ANALYZER] Processed JD not available for {company_name}, "
