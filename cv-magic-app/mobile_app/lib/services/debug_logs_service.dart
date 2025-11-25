@@ -26,8 +26,8 @@ class DebugLogsService {
         };
       }
 
-      final uri = Uri.parse('$baseUrl/api/debug/logs/recent')
-          .replace(queryParameters: {
+      final uri =
+          Uri.parse('$baseUrl/api/debug/logs/recent').replace(queryParameters: {
         'lines': lines.toString(),
         if (filterKeyword != null) 'filter_keyword': filterKeyword,
       });
@@ -90,4 +90,3 @@ class DebugLogsService {
 }
 
 final debugLogsService = DebugLogsService();
-
