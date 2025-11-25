@@ -101,7 +101,7 @@ class JDAnalysisResult:
             'ai_model_used': self.ai_model_used,
             'processing_status': self.processing_status,
             'company_name': self.company_name,
-            'metadata': self.metadata
+            'metadata': self.metadata or {}  # ⭐ Ensure metadata is always a dict, never None
         }
     
     def get_all_keywords_set(self) -> set:
@@ -976,7 +976,14 @@ class JDAnalyzer:
                 self.base_analysis_path = Path(base_path)
             # Save result
             saved_path = self._save_analysis_result(company_name, result)
-            result.metadata = {"saved_path": saved_path}
+            # ⭐ FIX: Preserve existing metadata and ADD saved_path (don't overwrite!)
+            if result.metadata is None:
+                result.metadata = {}
+            result.metadata["saved_path"] = saved_path
+            
+            # Log final metadata for verification
+            logger.info(f"📋 [JD_ANALYZER] Final analysis metadata: used_processed_jd={result.metadata.get('used_processed_jd')}, "
+                       f"jd_source={result.metadata.get('jd_source')}, saved_path={saved_path}")
             
             return result
             

@@ -945,6 +945,33 @@ class ContextAwareAnalysisPipeline:
             logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Initial analysis completed in {results.processing_time:.2f}s")
             logger.info(f"📊 [CONTEXT_AWARE_PIPELINE] Steps completed: {len(results.steps_completed)}")
             
+            # ⭐ JD SOURCE VERIFICATION SUMMARY
+            try:
+                from app.services.jd_processing_service import get_jd_processing_service
+                jd_service = get_jd_processing_service(self.user_email)
+                has_processed_jd = jd_service.has_processed_jd(company)
+                
+                # Check if JD analysis was based on processed JD
+                jd_analysis_used_processed = False
+                if results.jd_analysis and isinstance(results.jd_analysis, dict):
+                    jd_analysis_metadata = results.jd_analysis.get('metadata', {}) or {}
+                    jd_analysis_used_processed = jd_analysis_metadata.get('used_processed_jd', False)
+                
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] ========== JD SOURCE VERIFICATION SUMMARY ==========")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] Company: {company}")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] Processed JD exists: {has_processed_jd}")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] JD Analysis used processed JD: {jd_analysis_used_processed}")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] Steps completed: {results.steps_completed}")
+                logger.info(f"📋 [CONTEXT_AWARE_PIPELINE] ========== END JD SOURCE VERIFICATION ==========")
+                print(f"📋 [CONTEXT_AWARE_PIPELINE] JD SOURCE: processed_jd_exists={has_processed_jd}, jd_analysis_used_processed={jd_analysis_used_processed}")
+                
+                # Warn if processed JD exists but wasn't used
+                if has_processed_jd and not jd_analysis_used_processed:
+                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] WARNING: Processed JD exists but JD analysis may not have used it!")
+                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] This could indicate a cache issue - consider force_refresh=True")
+            except Exception as e:
+                logger.debug(f"⚠️ [CONTEXT_AWARE_PIPELINE] Could not verify JD source: {e}")
+            
             # Persist snapshot so continuation + UI have baseline skills data
             saved_snapshot = self._persist_initial_skills_snapshot(context, results, jd_data, analyze_match_decision)
             if saved_snapshot:
