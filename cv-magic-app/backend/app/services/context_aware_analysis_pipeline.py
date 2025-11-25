@@ -695,6 +695,11 @@ class ContextAwareAnalysisPipeline:
                 logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No JD content found (neither processed nor original) for analyze match")
                 return None
             
+            # Log JD source and size for performance tracking
+            jd_source = "PROCESSED" if jd_service.has_processed_jd(context.company) else "RAW"
+            logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Analyze match JD source: {jd_source} | "
+                       f"Size: {len(jd_text)} chars | Company: {context.company}")
+            
             if not cv_content or not jd_text:
                 logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] Missing CV or JD content for analyze match")
                 return None

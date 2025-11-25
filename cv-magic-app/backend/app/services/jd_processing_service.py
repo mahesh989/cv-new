@@ -352,6 +352,9 @@ class JDProcessingService:
         Returns:
             JD text optimized for AI, or None if no JD found
         """
+        import time
+        start_time = time.time()
+        
         if prefer_processed:
             # Try processed JD first
             logger.debug(f"🔍 [JD_PROCESSING] Checking for processed JD: {company_name}")
@@ -360,9 +363,24 @@ class JDProcessingService:
                 processed_text = self.processed_jd_to_text(processed_jd)
                 processing_mode = processed_jd.get('processing_mode', 'unknown')
                 sections_count = len(processed_jd.get('sections', {}))
-                logger.info(f"✅ [JD_PROCESSING] Using PROCESSED JD for {company_name} | "
+                load_time = (time.time() - start_time) * 1000  # Convert to ms
+                
+                # Calculate size reduction if original available for comparison
+                size_reduction = ""
+                try:
+                    original_text = self.get_original_jd_text(company_name)
+                    if original_text:
+                        reduction_pct = round((1 - len(processed_text) / len(original_text)) * 100, 1) if len(original_text) > 0 else 0
+                        size_reduction = f" | Reduction: {len(original_text)} → {len(processed_text)} chars ({reduction_pct}%)"
+                except Exception:
+                    pass
+                
+                logger.info(f"✅ [JD_PROCESSING] ✅ Using PROCESSED JD for {company_name} | "
                            f"Mode: {processing_mode} | Sections: {sections_count} | "
-                           f"Length: {len(processed_text)} chars")
+                           f"Length: {len(processed_text)} chars{size_reduction} | "
+                           f"Load time: {load_time:.1f}ms")
+                print(f"✅ [JD_PROCESSING] ✅ Using PROCESSED JD for {company_name} | "
+                      f"Length: {len(processed_text)} chars{size_reduction}")
                 return processed_text
             else:
                 logger.debug(f"⚠️ [JD_PROCESSING] No processed JD found for {company_name}, trying original JD")
@@ -371,9 +389,14 @@ class JDProcessingService:
         logger.debug(f"🔍 [JD_PROCESSING] Loading original JD: {company_name}")
         original_text = self.get_original_jd_text(company_name)
         if original_text:
-            logger.info(f"📄 [JD_PROCESSING] Using LEGACY (original) JD for {company_name} | "
+            load_time = (time.time() - start_time) * 1000  # Convert to ms
+            reason = 'prefer_processed=False' if not prefer_processed else 'processed JD not available'
+            logger.info(f"📄 [JD_PROCESSING] ⚠️ Using LEGACY (original) JD for {company_name} | "
                        f"Length: {len(original_text)} chars | "
-                       f"Reason: {'prefer_processed=False' if not prefer_processed else 'processed JD not available'}")
+                       f"Reason: {reason} | "
+                       f"Load time: {load_time:.1f}ms")
+            print(f"📄 [JD_PROCESSING] ⚠️ Using LEGACY (original) JD for {company_name} | "
+                  f"Length: {len(original_text)} chars | Reason: {reason}")
             return original_text
         
         logger.warning(f"❌ [JD_PROCESSING] No JD found (neither processed nor original) for {company_name}")

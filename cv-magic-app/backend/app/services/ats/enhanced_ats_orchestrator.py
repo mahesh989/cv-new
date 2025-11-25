@@ -475,14 +475,16 @@ class EnhancedATSOrchestrator:
                     pass
             
             job_description = None
+            jd_source = "UNKNOWN"
             if user_email:
                 try:
                     from app.services.jd_processing_service import get_jd_processing_service
                     jd_service = get_jd_processing_service(user_email)
                     job_description = jd_service.get_jd_text_for_ai(company_name, prefer_processed=True)
                     if job_description:
-                        logger.info(f"✅ [Enhanced ATS] Using PROCESSED JD for {company_name} | "
-                                   f"Length: {len(job_description)} chars")
+                        jd_source = "PROCESSED" if jd_service.has_processed_jd(company_name) else "RAW"
+                        logger.info(f"✅ [Enhanced ATS] JD source: {jd_source} | "
+                                   f"Length: {len(job_description)} chars | Company: {company_name}")
                 except Exception as e:
                     logger.warning(f"⚠️ [Enhanced ATS] Failed to load processed JD, falling back to raw JD: {e}")
             
@@ -491,8 +493,9 @@ class EnhancedATSOrchestrator:
                 with open(jd_file, 'r') as f:
                     jd_data = json.load(f)
                     job_description = jd_data.get('text', '')
-                logger.info(f"📄 [Enhanced ATS] Using LEGACY (original) JD for {company_name} | "
-                           f"Length: {len(job_description)} chars")
+                jd_source = "RAW (fallback)"
+                logger.info(f"📄 [Enhanced ATS] ⚠️ Using LEGACY (original) JD for {company_name} | "
+                           f"Length: {len(job_description)} chars | Reason: Processed JD not available")
             
             # Run enhanced ATS analysis
             results = self.analyze_cv_job_fit(
