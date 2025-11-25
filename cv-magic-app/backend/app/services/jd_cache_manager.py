@@ -29,6 +29,8 @@ class JDCacheData:
         self.last_used: str = data.get('last_used', '')
         self.use_count: int = data.get('use_count', 0)
         self.cache_valid: bool = data.get('cache_valid', True)
+        # Metadata for JD source tracking
+        self.metadata: Dict[str, Any] = data.get('metadata', {})
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage"""
@@ -42,7 +44,8 @@ class JDCacheData:
             'cached_at': self.cached_at,
             'last_used': self.last_used,
             'use_count': self.use_count,
-            'cache_valid': self.cache_valid
+            'cache_valid': self.cache_valid,
+            'metadata': self.metadata
         }
     
     def mark_used(self):
@@ -133,12 +136,26 @@ class JDCacheManager:
             jd_url: Job description URL
             jd_data: Dictionary containing all JD analysis results
                     Expected keys: jd_skills, jd_analysis, job_info, jd_original
+                    Optional keys: metadata (with jd_source, processed_jd_length, etc.)
             
         Returns:
             True if caching successful, False otherwise
         """
         try:
             logger.info(f"💾 [JD_CACHE_MANAGER] Caching JD analysis for {company}")
+            
+            # Extract metadata from jd_data or create default
+            metadata = jd_data.get('metadata', {})
+            used_processed_jd = metadata.get('used_processed_jd', False) or metadata.get('jd_source') == 'processed'
+            
+            # Build metadata with JD source tracking
+            cache_metadata = {
+                'jd_source': 'processed' if used_processed_jd else 'raw',
+                'processed_jd_length': metadata.get('processed_jd_length'),
+                'cache_timestamp': datetime.now().isoformat(),
+                'company': company,
+                **metadata  # Include any other metadata from jd_data
+            }
             
             # Create cache data
             cache_data = JDCacheData({
@@ -151,8 +168,12 @@ class JDCacheManager:
                 'cached_at': datetime.now().isoformat(),
                 'last_used': datetime.now().isoformat(),
                 'use_count': 1,
-                'cache_valid': True
+                'cache_valid': True,
+                'metadata': cache_metadata
             })
+            
+            logger.info(f"📋 [JD_CACHE_MANAGER] Cache metadata: jd_source={cache_metadata['jd_source']}, "
+                       f"processed_jd_length={cache_metadata.get('processed_jd_length')}")
             
             # Save to file with timestamp
             success = self._save_jd_cache(company, cache_data)

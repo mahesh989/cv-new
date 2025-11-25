@@ -378,6 +378,15 @@ class ContextAwareAnalysisPipeline:
             if context.jd_cached and context.jd_cache_data:
                 # Use cached data
                 logger.info("♻️ [CONTEXT_AWARE_PIPELINE] Using cached JD analysis")
+                
+                # ⭐ CACHE VALIDATION: Check JD source
+                jd_source = context.jd_cache_data.metadata.get('jd_source', 'unknown') if context.jd_cache_data.metadata else 'unknown'
+                if jd_source != 'processed':
+                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Using cached analysis based on {jd_source.upper()} JD - may be outdated!")
+                    results.warnings.append(f"Cached analysis based on {jd_source} JD (processed JD preferred)")
+                else:
+                    logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Cached analysis based on PROCESSED JD - valid")
+                
                 results.jd_skills = context.jd_cache_data.jd_skills
                 results.jd_analysis = context.jd_cache_data.jd_analysis
                 results.job_info = context.jd_cache_data.job_info
@@ -550,11 +559,25 @@ class ContextAwareAnalysisPipeline:
                         return None
                 
                 # Cache the results for future use
+                # Determine if processed JD was used based on jd_analysis_result metadata
+                used_processed_jd = False
+                processed_jd_length = None
+                if jd_analysis_result and hasattr(jd_analysis_result, 'metadata') and jd_analysis_result.metadata:
+                    used_processed_jd = jd_analysis_result.metadata.get('used_processed_jd', False)
+                    processed_jd_length = jd_analysis_result.metadata.get('processed_jd_length')
+                
                 jd_data_to_cache = {
                     'jd_skills': {},  # Will be filled by skill extraction
                     'jd_analysis': results.jd_analysis,
                     'job_info': results.job_info,
-                    'jd_original': {}  # Will be filled from saved files
+                    'jd_original': {},  # Will be filled from saved files
+                    'metadata': {
+                        'used_processed_jd': used_processed_jd,
+                        'jd_source': 'processed' if used_processed_jd else 'raw',
+                        'processed_jd_length': processed_jd_length,
+                        'cache_timestamp': datetime.now().isoformat(),
+                        'company': context.company
+                    }
                 }
                 
                 jd_cache_manager.cache_jd_analysis(context.company, context.jd_url, jd_data_to_cache)

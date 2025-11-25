@@ -3430,6 +3430,13 @@ async def perform_preliminary_skills_analysis(
             pass
         
         # Extract JD skills using enhanced structured prompt
+        # ⭐ ADD JD LOGGING: Log JD text before skills extraction
+        logger.info(f"📋 [SKILLS_ANALYSIS] ========== JD TEXT FOR SKILLS EXTRACTION ==========")
+        logger.info(f"📋 [SKILLS_ANALYSIS] JD Source: PROCESSED")
+        logger.info(f"📋 [SKILLS_ANALYSIS] JD Length: {len(jd_text)} chars")
+        logger.info(f"📋 [SKILLS_ANALYSIS] JD Preview: {jd_text[:200]}...")
+        logger.info(f"📋 [SKILLS_ANALYSIS] ========== END JD TEXT ==========")
+        
         if logging_params["enable_detailed_logging"]:
             logger.info("🔍 [SKILLS_ANALYSIS] Extracting JD skills with detailed structured analysis...")
         
