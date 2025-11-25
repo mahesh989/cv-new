@@ -2958,6 +2958,54 @@ async def get_analysis_results(company: str, request: Request = None):
         
         base_dir = get_user_base_path(user_email)
         
+        # ⭐ CRITICAL FIX: Resolve URL-extracted company names to actual company names
+        # This was the bug that caused 404 errors - company passed as 'www_ethicaljobs_com_au'
+        # but files are saved under actual company name like 'Australia_for_UNHCR'
+        original_company = company
+        if is_url_extracted_company(company):
+            logger.info(f"🔍 [ANALYSIS_RESULTS] Company '{company}' looks URL-extracted, searching for actual company name...")
+            # Search through all job_info files to find matching URL-extracted slug
+            applied_root = base_dir / "applied_companies"
+            if applied_root.exists():
+                from urllib.parse import urlparse
+                for company_folder in applied_root.iterdir():
+                    if not company_folder.is_dir():
+                        continue
+                    # Check job_info files for matching URL that would produce this URL-extracted name
+                    job_info_files = list(company_folder.glob("job_info*.json"))
+                    for job_info_file in job_info_files:
+                        try:
+                            with open(job_info_file, 'r', encoding='utf-8') as f:
+                                job_info = json.load(f)
+                            
+                            # Get stored URL
+                            extracted_info = job_info.get('extracted_info', {})
+                            saved_url = (job_info.get('jd_url') or 
+                                        job_info.get('job_url') or 
+                                        extracted_info.get('jd_url') or 
+                                        extracted_info.get('job_url'))
+                            
+                            if saved_url:
+                                # Convert stored URL to URL-extracted format for comparison
+                                try:
+                                    parsed = urlparse(saved_url)
+                                    domain = parsed.netloc.replace('.', '_').replace('-', '_').lower()
+                                    if domain and domain == company.lower():
+                                        company = company_folder.name
+                                        logger.info(f"✅ [ANALYSIS_RESULTS] Resolved '{original_company}' -> '{company}' (matched JD URL domain)")
+                                        break
+                                except Exception:
+                                    pass
+                        except Exception as e:
+                            logger.debug(f"Could not read job_info from {job_info_file}: {e}")
+                            continue
+                    else:
+                        continue  # Only continue if inner loop didn't break
+                    break  # Break outer loop if inner loop broke
+            
+            if company == original_company:
+                logger.warning(f"⚠️ [ANALYSIS_RESULTS] Could not resolve URL-extracted company '{company}', using as-is")
+        
         # Normalize company param to match on-disk slug
         def _normalize_company_dir(base, name: str):
             # Try exact

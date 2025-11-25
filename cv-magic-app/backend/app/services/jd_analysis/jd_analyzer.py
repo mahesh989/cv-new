@@ -839,6 +839,9 @@ class JDAnalyzer:
             Exception: If analysis fails
         """
         try:
+            # ⭐ FIX: Track if cache should be invalidated due to processed JD
+            cache_invalidated_for_processed_jd = False
+            
             # Check for existing analysis unless force refresh
             if not force_refresh:
                 cached_result = self._load_analysis_result(company_name)
@@ -863,9 +866,11 @@ class JDAnalyzer:
                                     processed_jd_exists = jd_service.has_processed_jd(company_name)
                                     
                                     if processed_jd_exists and not cached_used_processed:
-                                        # Processed JD exists but cache wasn't based on it - invalidate
+                                        # Processed JD exists but cache wasn't based on it - INVALIDATE!
                                         logger.info(f"🔄 [JD_ANALYZER] Hash matches but cache wasn't based on processed JD. "
-                                                   f"Invalidating cache to use processed JD.")
+                                                   f"INVALIDATING cache to use processed JD.")
+                                        print(f"🔄 [JD_ANALYZER] CACHE INVALIDATED: processed JD exists but cache wasn't based on it")
+                                        cache_invalidated_for_processed_jd = True
                                         # Don't return cached_result, continue to re-analysis
                                     elif processed_jd_exists and cached_used_processed:
                                         # Both hash matches AND cache was based on processed JD - valid cache
@@ -878,9 +883,10 @@ class JDAnalyzer:
                                         return cached_result
                                 except Exception as e:
                                     logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD for cache validation: {e}")
-                                    # If check fails, use cache if hash matches (safe fallback)
-                                    logger.info(f"📂 [JD_ANALYZER] Using cached analysis for {company_name} (JD hash matched, processed JD check failed)")
-                                    return cached_result
+                                    # ⭐ FIX: Only use cached if we haven't marked for invalidation
+                                    if not cache_invalidated_for_processed_jd:
+                                        logger.info(f"📂 [JD_ANALYZER] Using cached analysis for {company_name} (JD hash matched, processed JD check failed)")
+                                        return cached_result
                             else:
                                 # No user_email, can't check processed JD - use cache if hash matches
                                 logger.info(f"📂 [JD_ANALYZER] Using cached analysis for {company_name} (JD hash matched)")
@@ -890,54 +896,65 @@ class JDAnalyzer:
                     except Exception:
                         # If any issue computing hash, fall back to previous guard below
                         pass
-                # If a JD original already exists in the company folder and an analysis file also exists,
-                # avoid re-running analysis again. This is a defensive guard against duplicate runs.
-                company_dir = self.base_analysis_path / "applied_companies" / company_name
-                try:
-                    jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
-                    jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json") or (company_dir / f"{company_name}_jd_analysis.json" if (company_dir / f"{company_name}_jd_analysis.json").exists() else None)
-                    if jd_original and jd_analysis and jd_analysis.exists():
-                        # If hash matches, reuse; else proceed to fresh analysis
-                        try:
-                            # ⭐ Use _read_jd_file which automatically tries processed JD first
-                            current_text = self._read_jd_file(jd_original)
-                            current_hash = self._compute_jd_hash(current_text)
-                            with open(jd_analysis, 'r', encoding='utf-8') as f:
-                                data = json.load(f)
-                            
-                            cached_hash = data.get('metadata', {}).get('jd_hash') if isinstance(data, dict) else None
-                            cached_used_processed = data.get('metadata', {}).get('used_processed_jd', False) if isinstance(data, dict) else False
-                            
-                            if isinstance(data, dict) and cached_hash == current_hash:
-                                # Hash matches, but also check if processed JD was used
-                                if self.user_email:
-                                    try:
-                                        from app.services.jd_processing_service import get_jd_processing_service
-                                        jd_service = get_jd_processing_service(self.user_email)
-                                        processed_jd_exists = jd_service.has_processed_jd(company_name)
-                                        
-                                        if processed_jd_exists and not cached_used_processed:
-                                            # Processed JD exists but cache wasn't based on it - invalidate
-                                            logger.info(f"🔄 [JD_ANALYZER] Hash matches but cache wasn't based on processed JD. "
-                                                       f"Invalidating cache to use processed JD.")
-                                            # Don't return, continue to re-analysis
-                                        elif processed_jd_exists and cached_used_processed:
-                                            # Both hash matches AND cache was based on processed JD - valid cache
-                                            logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name} "
-                                                       f"(hash matched AND was based on processed JD); skipping re-analysis")
-                                            return JDAnalysisResult(data)
-                                        elif not processed_jd_exists:
-                                            # No processed JD exists, hash matches - valid cache
-                                            logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
-                                            return JDAnalysisResult(data)
-                                    except Exception as e:
-                                        logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD for guard validation: {e}")
-                                        # If check fails, use cache if hash matches (safe fallback)
+                
+                # ⭐ FIX: Skip secondary guard if cache was invalidated for processed JD
+                if cache_invalidated_for_processed_jd:
+                    logger.info(f"🔄 [JD_ANALYZER] Skipping secondary cache check - cache was invalidated for processed JD")
+                else:
+                    # If a JD original already exists in the company folder and an analysis file also exists,
+                    # avoid re-running analysis again. This is a defensive guard against duplicate runs.
+                    company_dir = self.base_analysis_path / "applied_companies" / company_name
+                    try:
+                        jd_original = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json") or (company_dir / "jd_original.json" if (company_dir / "jd_original.json").exists() else None)
+                        jd_analysis = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json") or (company_dir / f"{company_name}_jd_analysis.json" if (company_dir / f"{company_name}_jd_analysis.json").exists() else None)
+                        if jd_original and jd_analysis and jd_analysis.exists():
+                            # If hash matches, reuse; else proceed to fresh analysis
+                            try:
+                                # ⭐ Use _read_jd_file which automatically tries processed JD first
+                                current_text = self._read_jd_file(jd_original)
+                                current_hash = self._compute_jd_hash(current_text)
+                                with open(jd_analysis, 'r', encoding='utf-8') as f:
+                                    data = json.load(f)
+                                
+                                cached_hash = data.get('metadata', {}).get('jd_hash') if isinstance(data, dict) else None
+                                cached_used_processed = data.get('metadata', {}).get('used_processed_jd', False) if isinstance(data, dict) else False
+                                
+                                if isinstance(data, dict) and cached_hash == current_hash:
+                                    # Hash matches, but also check if processed JD was used
+                                    if self.user_email:
+                                        try:
+                                            from app.services.jd_processing_service import get_jd_processing_service
+                                            jd_service = get_jd_processing_service(self.user_email)
+                                            processed_jd_exists = jd_service.has_processed_jd(company_name)
+                                            
+                                            if processed_jd_exists and not cached_used_processed:
+                                                # Processed JD exists but cache wasn't based on it - INVALIDATE!
+                                                logger.info(f"🔄 [JD_ANALYZER] (Guard) Hash matches but cache wasn't based on processed JD. "
+                                                           f"INVALIDATING cache to use processed JD.")
+                                                print(f"🔄 [JD_ANALYZER] (Guard) CACHE INVALIDATED: processed JD exists but cache wasn't based on it")
+                                                cache_invalidated_for_processed_jd = True
+                                                # Don't return, continue to re-analysis
+                                            elif processed_jd_exists and cached_used_processed:
+                                                # Both hash matches AND cache was based on processed JD - valid cache
+                                                logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name} "
+                                                           f"(hash matched AND was based on processed JD); skipping re-analysis")
+                                                return JDAnalysisResult(data)
+                                            elif not processed_jd_exists:
+                                                # No processed JD exists, hash matches - valid cache
+                                                logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
+                                                return JDAnalysisResult(data)
+                                        except Exception as e:
+                                            logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD for guard validation: {e}")
+                                            # ⭐ FIX: Only use cached if we haven't marked for invalidation
+                                            if not cache_invalidated_for_processed_jd:
+                                                logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
+                                                return JDAnalysisResult(data)
+                                    else:
+                                        # No user_email, can't check processed JD - use cache if hash matches
                                         logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
                                         return JDAnalysisResult(data)
-                                else:
-                                    # No user_email, can't check processed JD - use cache if hash matches
-                                    logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
+                                # ⭐ FIX: Don't return if cache was invalidated for processed JD
+                                if not cache_invalidated_for_processed_jd:
                                     return JDAnalysisResult(data)
                         except Exception:
                             logger.debug("Hash comparison failed; continuing with fresh analysis")
