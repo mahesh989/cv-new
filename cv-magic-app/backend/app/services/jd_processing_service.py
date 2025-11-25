@@ -404,15 +404,10 @@ class JDProcessingService:
         logger.info(f"🔍 [JD_PROCESSING] Self user_email: {self.user_email}")
         logger.info(f"🔍 [JD_PROCESSING] Base path: {self.base_path}")
         
-        # Check if already processed
-        logger.info(f"🔍 [JD_PROCESSING] Checking if processed JD already exists...")
-        has_processed = self.has_processed_jd(company_name)
-        logger.info(f"🔍 [JD_PROCESSING] Has processed JD: {has_processed}")
-        if has_processed:
-            logger.info(f"♻️ [JD_PROCESSING] Processed JD already exists for {company_name}, skipping processing")
-            existing = self.get_processed_jd(company_name)
-            logger.info(f"♻️ [JD_PROCESSING] Returning existing processed JD: {existing is not None}")
-            return existing
+        # ⭐ Always create a new timestamped processed JD file
+        # This ensures we always have a fresh processed JD, even if old ones exist
+        logger.info(f"🔄 [JD_PROCESSING] Always creating new timestamped processed JD file (existing files won't block processing)")
+        print(f"🔄 [JD_PROCESSING] Always creating new timestamped processed JD file (existing files won't block processing)")
         
         if not user:
             logger.warning(f"⚠️ [JD_PROCESSING] ❌ BLOCKER: No user provided for JD processing, skipping for {company_name}")
