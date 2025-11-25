@@ -587,13 +587,17 @@ class JDAnalyzer:
             with open(analysis_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            logger.info(f"📂 [JD_ANALYZER] Loaded existing JD analysis from: {analysis_file}")
-            
-            # ⭐ LOG: Check what JD was used for this cached analysis
-            # Try to determine if cached analysis was based on processed JD or raw JD
-            # by checking if the analysis metadata or keywords suggest processed JD format
+            # ⭐ CACHE-HIT LOGGING: Check if cached analysis was based on processed JD
+            analysis_metadata = data.get('metadata', {}) or {}
+            used_processed_jd = analysis_metadata.get('used_processed_jd', False)
             cached_keywords = data.get('required_keywords', []) + data.get('preferred_keywords', [])
+            
+            logger.info(f"📂 [JD_ANALYZER] Loaded existing JD analysis from: {analysis_file}")
             logger.info(f"📂 [JD_ANALYZER] Cached analysis contains {len(cached_keywords)} keywords")
+            logger.info(f"📋 [JD_ANALYZER] ⚡ USING CACHED ANALYSIS (based on processed JD: {used_processed_jd})")
+            logger.info(f"📋 [JD_ANALYZER] Cached JD source: {'PROCESSED' if used_processed_jd else 'RAW'}")
+            print(f"📋 [JD_ANALYZER] ⚡ USING CACHED ANALYSIS (based on processed JD: {used_processed_jd})")
+            print(f"📋 [JD_ANALYZER] Cached JD source: {'PROCESSED' if used_processed_jd else 'RAW'}")
             
             # Check if processed JD exists to compare
             if self.user_email:
@@ -847,9 +851,40 @@ class JDAnalyzer:
                         current_text = self._read_jd_file(jd_file) if jd_file and jd_file.exists() else None
                         current_hash = self._compute_jd_hash(current_text) if current_text else None
                         cached_hash = (cached_result.metadata or {}).get('jd_hash') if hasattr(cached_result, 'metadata') else None
+                        cached_used_processed = (cached_result.metadata or {}).get('used_processed_jd', False) if hasattr(cached_result, 'metadata') else False
+                        
+                        # ⭐ CACHE VALIDATION: Check both hash AND processed JD usage
                         if current_hash and cached_hash and current_hash == cached_hash:
-                            logger.info(f"📂 Using cached analysis for {company_name} (JD hash matched)")
-                            return cached_result
+                            # Hash matches, but also check if processed JD was used
+                            if self.user_email:
+                                try:
+                                    from app.services.jd_processing_service import get_jd_processing_service
+                                    jd_service = get_jd_processing_service(self.user_email)
+                                    processed_jd_exists = jd_service.has_processed_jd(company_name)
+                                    
+                                    if processed_jd_exists and not cached_used_processed:
+                                        # Processed JD exists but cache wasn't based on it - invalidate
+                                        logger.info(f"🔄 [JD_ANALYZER] Hash matches but cache wasn't based on processed JD. "
+                                                   f"Invalidating cache to use processed JD.")
+                                        # Don't return cached_result, continue to re-analysis
+                                    elif processed_jd_exists and cached_used_processed:
+                                        # Both hash matches AND cache was based on processed JD - valid cache
+                                        logger.info(f"📂 [JD_ANALYZER] Using cached analysis for {company_name} "
+                                                   f"(JD hash matched AND was based on processed JD)")
+                                        return cached_result
+                                    elif not processed_jd_exists:
+                                        # No processed JD exists, hash matches - valid cache
+                                        logger.info(f"📂 [JD_ANALYZER] Using cached analysis for {company_name} (JD hash matched)")
+                                        return cached_result
+                                except Exception as e:
+                                    logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD for cache validation: {e}")
+                                    # If check fails, use cache if hash matches (safe fallback)
+                                    logger.info(f"📂 [JD_ANALYZER] Using cached analysis for {company_name} (JD hash matched, processed JD check failed)")
+                                    return cached_result
+                            else:
+                                # No user_email, can't check processed JD - use cache if hash matches
+                                logger.info(f"📂 [JD_ANALYZER] Using cached analysis for {company_name} (JD hash matched)")
+                                return cached_result
                         else:
                             logger.info(f"🔁 Cached JD analysis exists but hash changed or missing; re-analyzing")
                     except Exception:
@@ -869,17 +904,49 @@ class JDAnalyzer:
                             current_hash = self._compute_jd_hash(current_text)
                             with open(jd_analysis, 'r', encoding='utf-8') as f:
                                 data = json.load(f)
-                            if isinstance(data, dict) and data.get('metadata', {}).get('jd_hash') == current_hash:
-                                logger.info(f"♻️ JD original and matching analysis already present for {company_name}; skipping re-analysis")
-                                return JDAnalysisResult(data)
+                            
+                            cached_hash = data.get('metadata', {}).get('jd_hash') if isinstance(data, dict) else None
+                            cached_used_processed = data.get('metadata', {}).get('used_processed_jd', False) if isinstance(data, dict) else False
+                            
+                            if isinstance(data, dict) and cached_hash == current_hash:
+                                # Hash matches, but also check if processed JD was used
+                                if self.user_email:
+                                    try:
+                                        from app.services.jd_processing_service import get_jd_processing_service
+                                        jd_service = get_jd_processing_service(self.user_email)
+                                        processed_jd_exists = jd_service.has_processed_jd(company_name)
+                                        
+                                        if processed_jd_exists and not cached_used_processed:
+                                            # Processed JD exists but cache wasn't based on it - invalidate
+                                            logger.info(f"🔄 [JD_ANALYZER] Hash matches but cache wasn't based on processed JD. "
+                                                       f"Invalidating cache to use processed JD.")
+                                            # Don't return, continue to re-analysis
+                                        elif processed_jd_exists and cached_used_processed:
+                                            # Both hash matches AND cache was based on processed JD - valid cache
+                                            logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name} "
+                                                       f"(hash matched AND was based on processed JD); skipping re-analysis")
+                                            return JDAnalysisResult(data)
+                                        elif not processed_jd_exists:
+                                            # No processed JD exists, hash matches - valid cache
+                                            logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
+                                            return JDAnalysisResult(data)
+                                    except Exception as e:
+                                        logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD for guard validation: {e}")
+                                        # If check fails, use cache if hash matches (safe fallback)
+                                        logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
+                                        return JDAnalysisResult(data)
+                                else:
+                                    # No user_email, can't check processed JD - use cache if hash matches
+                                    logger.info(f"♻️ [JD_ANALYZER] JD original and matching analysis already present for {company_name}; skipping re-analysis")
+                                    return JDAnalysisResult(data)
                         except Exception:
                             logger.debug("Hash comparison failed; continuing with fresh analysis")
                 except Exception as guard_err:
                     logger.debug(f"Guard check for existing JD files failed (continuing with analysis): {guard_err}")
             
             # Perform fresh analysis
-            logger.info(f"🔄 [JD_ANALYZER] Analyzing JD for {company_name} (force_refresh={force_refresh})")
-            print(f"🔄 [JD_ANALYZER] Analyzing JD for {company_name} (force_refresh={force_refresh})")
+            logger.info(f"🔄 [JD_ANALYZER] 🔄 PERFORMING NEW ANALYSIS with processed JD for {company_name} (force_refresh={force_refresh})")
+            print(f"🔄 [JD_ANALYZER] 🔄 PERFORMING NEW ANALYSIS with processed JD for {company_name} (force_refresh={force_refresh})")
             result = await self.analyze_company_jd(company_name, base_path=base_path, temperature=temperature)
             
             # Set company name and metadata
@@ -893,7 +960,14 @@ class JDAnalyzer:
                     if jd_service.has_processed_jd(company_name):
                         result.metadata = result.metadata or {}
                         result.metadata['used_processed_jd'] = True
+                        processed_jd = jd_service.get_processed_jd(company_name)
+                        if processed_jd:
+                            processed_text = jd_service.processed_jd_to_text(processed_jd)
+                            result.metadata['jd_source'] = 'processed'
+                            result.metadata['processed_jd_length'] = len(processed_text)
+                            result.metadata['timestamp'] = datetime.now().isoformat()
                         logger.info(f"✅ [JD_ANALYZER] Marked analysis as using processed JD for {company_name}")
+                        logger.info(f"✅ [JD_ANALYZER] Cache metadata: jd_source=processed, length={result.metadata.get('processed_jd_length')}")
                 except Exception as e:
                     logger.debug(f"⚠️ [JD_ANALYZER] Could not mark processed JD usage in metadata: {e}")
             

@@ -171,6 +171,21 @@ class CVJDMatcher:
             with open(analysis_file, 'r', encoding='utf-8') as file:
                 data = json.load(file)
             logger.info(f"📂 Loaded JD analysis from: {analysis_file}")
+            
+            # ⭐ JD SOURCE LOGGING: Check if analysis was based on processed JD
+            analysis_metadata = data.get('metadata', {}) or {}
+            used_processed_jd = analysis_metadata.get('used_processed_jd', False)
+            required_keywords = data.get('required_keywords', [])
+            preferred_keywords = data.get('preferred_keywords', [])
+            
+            logger.info(f"📋 [CV_JD_MATCHING] ========== JD ANALYSIS SOURCE ==========")
+            logger.info(f"📋 [CV_JD_MATCHING] Using JD analysis created from: {'PROCESSED JD' if used_processed_jd else 'RAW JD'}")
+            logger.info(f"📋 [CV_JD_MATCHING] Analysis file: {analysis_file}")
+            logger.info(f"📋 [CV_JD_MATCHING] Keywords count: {len(required_keywords)} required, {len(preferred_keywords)} preferred")
+            logger.info(f"📋 [CV_JD_MATCHING] Analysis metadata: used_processed_jd={used_processed_jd}")
+            logger.info(f"📋 [CV_JD_MATCHING] ========== END JD ANALYSIS SOURCE ==========")
+            print(f"📋 [CV_JD_MATCHING] Using JD analysis created from: {'PROCESSED JD' if used_processed_jd else 'RAW JD'}")
+            
             return data
         except Exception as e:
             logger.error(f"Error reading JD analysis file {analysis_file}: {e}")

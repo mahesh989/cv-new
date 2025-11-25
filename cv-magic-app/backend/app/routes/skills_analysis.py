@@ -1238,8 +1238,16 @@ async def initial_analysis(
     
     Use /continue-full-analysis/{company} to continue with expensive steps.
     """
+    import uuid
+    correlation_id = str(uuid.uuid4())[:8]
+    
     try:
         data = await request.json()
+        
+        # ⭐ CORRELATION ID TRACKING
+        logger.info(f"🔗 [ANALYSIS_FLOW] START - Correlation ID: {correlation_id}")
+        logger.info(f"🔗 [ANALYSIS_FLOW] Company: {data.get('company')}, JD URL: {data.get('jd_url')}")
+        print(f"🔗 [ANALYSIS_FLOW] START - Correlation ID: {correlation_id}")
         
         # Extract parameters
         jd_url = data.get("jd_url")
@@ -3262,6 +3270,10 @@ async def perform_preliminary_skills_analysis(
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
+        # ⭐ ENTRY LOGGING
+        logger.info(f"🎯 [SKILLS_ANALYSIS] ENTRY - Called for company: {company_name}")
+        logger.info(f"🎯 [SKILLS_ANALYSIS] ENTRY - CV filename: {cv_filename}, JD length: {len(jd_text)} chars")
+        print(f"🎯 [SKILLS_ANALYSIS] ENTRY - Called for company: {company_name}")
         # ⭐ STRICT: MUST use processed JD - NO FALLBACK, raise error if not available
         import time
         import asyncio
@@ -3532,6 +3544,10 @@ async def perform_preliminary_skills_analysis(
         
         if logging_params["enable_detailed_logging"]:
             logger.info(f"✅ [SKILLS_ANALYSIS] Analysis completed successfully")
+        
+        # ⭐ EXIT LOGGING (before return)
+        logger.info(f"🎯 [SKILLS_ANALYSIS] EXIT - Completed skills analysis for {company_name}")
+        print(f"🎯 [SKILLS_ANALYSIS] EXIT - Completed skills analysis for {company_name}")
         
         # Save results to file if enabled
         file_params = skills_analysis_config_service.get_file_parameters(config_name)
