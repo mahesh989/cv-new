@@ -1665,32 +1665,72 @@ async def preliminary_analysis(
                                 except Exception:
                                     pass
                                 
-                                # Process JD NOW (before analysis)
+                                # Process JD NOW (before analysis) - REQUIRED, no fallback
                                 jd_service = get_jd_processing_service(user.email)
                                 logger.info(f"🔄 [PRELIM_ANALYSIS] Triggering JD processing BEFORE analysis for {company_name} | "
                                            f"JD length: {len(jd_text)} chars")
                                 print(f"🔄 [PRELIM_ANALYSIS] Triggering JD processing BEFORE analysis for {company_name}")
-                                await jd_service.process_jd_if_needed(
+                                
+                                processed_result = await jd_service.process_jd_if_needed(
                                     company_name=company_name,
                                     jd_text=jd_text,
                                     job_title=job_title,
                                     job_url=jd_url,
                                     user=user
                                 )
-                                logger.info(f"✅ [PRELIM_ANALYSIS] JD processing completed BEFORE analysis for {company_name}")
-                                print(f"✅ [PRELIM_ANALYSIS] JD processing completed BEFORE analysis for {company_name}")
+                                
+                                # CRITICAL: Verify processed JD was created successfully
+                                if not processed_result:
+                                    error_msg = (
+                                        f"❌ [PRELIM_ANALYSIS] CRITICAL ERROR: JD processing failed for {company_name}. "
+                                        f"Processed JD is REQUIRED for skills analysis."
+                                    )
+                                    logger.error(error_msg)
+                                    raise ValueError(
+                                        f"JD processing failed for company '{company_name}'. "
+                                        f"Processed JD is required for skills analysis."
+                                    )
+                                
+                                # Verify processed JD file exists
+                                if not jd_service.has_processed_jd(company_name):
+                                    error_msg = (
+                                        f"❌ [PRELIM_ANALYSIS] CRITICAL ERROR: Processed JD file not found after processing for {company_name}"
+                                    )
+                                    logger.error(error_msg)
+                                    raise FileNotFoundError(
+                                        f"Processed JD file not found for company '{company_name}' after processing. "
+                                        f"Please retry the analysis."
+                                    )
+                                
+                                logger.info(f"✅ [PRELIM_ANALYSIS] JD processing completed successfully for {company_name} | "
+                                           f"Processed JD verified and ready")
+                                print(f"✅ [PRELIM_ANALYSIS] JD processing completed successfully for {company_name}")
                             else:
-                                logger.warning(f"⚠️ [PRELIM_ANALYSIS] User record not found for {token_data.email}")
+                                error_msg = f"❌ [PRELIM_ANALYSIS] CRITICAL ERROR: User record not found for {token_data.email}"
+                                logger.error(error_msg)
+                                raise ValueError(f"User record not found. Cannot process JD for skills analysis.")
                 except Exception as proc_err:
                     import traceback
-                    logger.error(f"❌ [PRELIM_ANALYSIS] Failed to process JD BEFORE analysis for {company_name}: {proc_err}")
+                    error_msg = (
+                        f"❌ [PRELIM_ANALYSIS] CRITICAL ERROR: Failed to process JD BEFORE analysis for {company_name}: {proc_err}"
+                    )
+                    logger.error(error_msg)
                     logger.error(f"❌ [PRELIM_ANALYSIS] Traceback: {traceback.format_exc()}")
-                    # Continue with analysis - fallback to original JD will work
+                    raise ValueError(
+                        f"JD processing failed for company '{company_name}': {str(proc_err)}. "
+                        f"Processed JD is required for skills analysis."
+                    )
             except Exception as e:
                 import traceback
-                logger.error(f"❌ [PRELIM_ANALYSIS] JD processing setup failed BEFORE analysis for {company_name}: {e}")
+                error_msg = (
+                    f"❌ [PRELIM_ANALYSIS] CRITICAL ERROR: JD processing setup failed BEFORE analysis for {company_name}: {e}"
+                )
+                logger.error(error_msg)
                 logger.error(f"❌ [PRELIM_ANALYSIS] Traceback: {traceback.format_exc()}")
-                # Continue with analysis - fallback to original JD will work
+                raise ValueError(
+                    f"JD processing setup failed for company '{company_name}': {str(e)}. "
+                    f"Processed JD is required for skills analysis."
+                )
         
         # Perform skills analysis with configuration
         # Now processed JD should be available and will be used automatically
@@ -3222,45 +3262,73 @@ async def perform_preliminary_skills_analysis(
 ) -> dict:
     """Perform preliminary skills analysis between CV and JD using AI prompts with detailed output"""
     try:
-        # ⭐ NEW: Try to use processed JD if company_name is available
-        jd_source = "original (provided)"  # Track JD source for logging
-        if company_name and user_email:
-            try:
-                logger.info(f"🔍 [SKILLS_ANALYSIS] Attempting to use processed JD for {company_name}")
-                print(f"🔍 [SKILLS_ANALYSIS] Attempting to use processed JD for {company_name}")
-                from app.services.jd_processing_service import get_jd_processing_service
-                jd_service = get_jd_processing_service(user_email)
+        # ⭐ STRICT: MUST use processed JD - NO FALLBACK, raise error if not available
+        import time
+        import asyncio
+        jd_load_start = time.time()
+        original_length = len(jd_text)
+        
+        # CRITICAL: company_name and user_email are REQUIRED for processed JD
+        if not company_name:
+            error_msg = f"❌ [SKILLS_ANALYSIS] CRITICAL ERROR: company_name is REQUIRED for processed JD lookup"
+            logger.error(error_msg)
+            raise ValueError("company_name is required for skills analysis. Processed JD cannot be loaded without company name.")
+        
+        if not user_email:
+            error_msg = f"❌ [SKILLS_ANALYSIS] CRITICAL ERROR: user_email is REQUIRED for processed JD lookup"
+            logger.error(error_msg)
+            raise ValueError("user_email is required for skills analysis. Processed JD cannot be loaded without user email.")
+        
+        # Get processed JD service
+        from app.services.jd_processing_service import get_jd_processing_service
+        jd_service = get_jd_processing_service(user_email)
+        
+        # Wait up to 3 seconds for processed JD to be created (in case it's still being processed)
+        logger.info(f"🔍 [SKILLS_ANALYSIS] Waiting for processed JD for {company_name} | "
+                   f"Original JD length: {original_length} chars")
+        processed_jd_text = None
+        max_wait_seconds = 3
+        wait_interval = 0.5
+        attempts = int(max_wait_seconds / wait_interval)
+        
+        for attempt in range(attempts):
+            has_processed = jd_service.has_processed_jd(company_name)
+            if has_processed:
                 processed_jd_text = jd_service.get_jd_text_for_ai(company_name, prefer_processed=True)
-                if processed_jd_text:
-                    original_length = len(jd_text)
-                    jd_text = processed_jd_text  # Use processed JD instead
-                    jd_source = "processed"
-                    logger.info(f"✅ [SKILLS_ANALYSIS] ✅ Using PROCESSED JD for {company_name} | "
-                               f"Original: {original_length} chars → Processed: {len(jd_text)} chars | "
-                               f"Reduction: {original_length - len(jd_text)} chars")
-                    print(f"✅ [SKILLS_ANALYSIS] ✅ Using PROCESSED JD for {company_name} | "
-                          f"Original: {original_length} chars → Processed: {len(jd_text)} chars")
-                else:
-                    jd_source = "legacy (original)"
-                    logger.info(f"📄 [SKILLS_ANALYSIS] Using LEGACY (original) JD for {company_name} | "
-                               f"Length: {len(jd_text)} chars | "
-                               f"Reason: Processed JD not available")
-                    print(f"📄 [SKILLS_ANALYSIS] Using LEGACY (original) JD for {company_name} | "
-                          f"Length: {len(jd_text)} chars")
-            except Exception as e:
-                jd_source = "legacy (original, error)"
-                logger.warning(f"⚠️ [SKILLS_ANALYSIS] Error getting processed JD for {company_name}, "
-                               f"using LEGACY (original) JD: {e} | Length: {len(jd_text)} chars")
-                print(f"⚠️ [SKILLS_ANALYSIS] Error getting processed JD for {company_name}, "
-                      f"using LEGACY (original) JD: {e}")
-                # Continue with original jd_text
-        else:
-            if not company_name:
-                logger.debug(f"📄 [SKILLS_ANALYSIS] No company_name provided, using original JD")
-                print(f"📄 [SKILLS_ANALYSIS] No company_name provided, using original JD")
-            if not user_email:
-                logger.debug(f"📄 [SKILLS_ANALYSIS] No user_email provided, using original JD")
-                print(f"📄 [SKILLS_ANALYSIS] No user_email provided, using original JD")
+                if processed_jd_text and len(processed_jd_text.strip()) > 0:
+                    break
+            if attempt < attempts - 1:
+                logger.debug(f"⏳ [SKILLS_ANALYSIS] Processed JD not ready yet, waiting... (attempt {attempt + 1}/{attempts})")
+                await asyncio.sleep(wait_interval)
+        
+        jd_load_time = (time.time() - jd_load_start) * 1000  # Convert to ms
+        
+        # STRICT: Raise error if processed JD is not available
+        if not processed_jd_text or len(processed_jd_text.strip()) == 0:
+            error_msg = (
+                f"❌ [SKILLS_ANALYSIS] CRITICAL ERROR: Processed JD is REQUIRED but not available for {company_name} | "
+                f"Processed JD exists: {jd_service.has_processed_jd(company_name)} | "
+                f"Wait time: {max_wait_seconds}s | "
+                f"Load time: {jd_load_time:.1f}ms"
+            )
+            logger.error(error_msg)
+            raise FileNotFoundError(
+                f"Processed JD is required for skills analysis but not found for company '{company_name}'. "
+                f"Please ensure JD processing completed successfully before running skills analysis."
+            )
+        
+        # Use processed JD (guaranteed to exist at this point)
+        jd_text = processed_jd_text
+        reduction = original_length - len(jd_text)
+        reduction_pct = round((reduction / original_length) * 100, 1) if original_length > 0 else 0
+        
+        logger.info(f"✅ [SKILLS_ANALYSIS] ✅✅✅ USING PROCESSED JD for {company_name} | "
+                   f"Original: {original_length} chars → Processed: {len(jd_text)} chars | "
+                   f"Reduction: {reduction} chars ({reduction_pct}%) | "
+                   f"Load time: {jd_load_time:.1f}ms")
+        print(f"✅ [SKILLS_ANALYSIS] ✅✅✅ USING PROCESSED JD for {company_name} | "
+              f"Original: {original_length} chars → Processed: {len(jd_text)} chars | "
+              f"Reduction: {reduction} chars ({reduction_pct}%)")
         
         # Get configuration
         config = skills_analysis_config_service.get_config(config_name)
@@ -3270,8 +3338,11 @@ async def perform_preliminary_skills_analysis(
         if logging_params["enable_detailed_logging"]:
             logger.info(f"🔍 [SKILLS_ANALYSIS] Starting AI-powered skills analysis for {cv_filename}")
             logger.info(f"🔍 [SKILLS_ANALYSIS] CV content length: {len(cv_content)} chars")
-            logger.info(f"🔍 [SKILLS_ANALYSIS] JD content length: {len(jd_text)} chars | Source: {jd_source}")
+            logger.info(f"🔍 [SKILLS_ANALYSIS] JD content length: {len(jd_text)} chars | "
+                       f"Source: PROCESSED (REQUIRED) | "
+                       f"Original was: {original_length} chars")
             logger.info(f"🔍 [SKILLS_ANALYSIS] Using config: {config_name or 'default'}")
+            logger.info(f"✅✅✅ [SKILLS_ANALYSIS] CONFIRMED: Using PROCESSED JD for skills extraction (REQUIRED)")
             # Lightweight CV content preview to aid debugging
             try:
                 _cv_preview = (cv_content or "")[:180].replace('\n', ' ')
