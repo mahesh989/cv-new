@@ -35,6 +35,7 @@ from app.routes.profile import router as profile_router  # Profile management ro
 # Import dependencies
 from app.core.model_dependency import get_current_model
 from app.routes.job_analysis import router as job_analysis_router
+from app.routes.debug_logs import router as debug_logs_router
 
 # Configure logging
 logging.basicConfig(
@@ -302,6 +303,7 @@ app.include_router(saved_jobs_router)  # Saved jobs routes
 app.include_router(api_keys_router)  # API key management routes
 app.include_router(ingest_router)  # Ingestion routes
 app.include_router(profile_router)  # Profile management routes
+app.include_router(debug_logs_router)  # Debug logs routes
 
 
 # Root endpoint

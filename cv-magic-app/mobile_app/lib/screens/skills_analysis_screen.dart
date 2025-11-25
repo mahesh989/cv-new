@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../controllers/skills_analysis_controller.dart';
 import '../widgets/skills_display_widget.dart';
 import '../widgets/job_input.dart';
+import '../widgets/debug_logs_widget.dart';
 import '../modules/cv/cv_selection_module.dart';
 import '../core/theme/app_theme.dart';
 
@@ -19,6 +20,7 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
   final TextEditingController _jdController = TextEditingController();
   final TextEditingController _jdUrlController = TextEditingController();
   String? _selectedCvFilename;
+  bool _showDebugLogs = false; // Toggle for debug logs panel
 
   @override
   void initState() {
@@ -52,6 +54,19 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
           backgroundColor: Colors.blue.shade600,
           foregroundColor: Colors.white,
           actions: [
+            // Debug logs toggle button
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _showDebugLogs = !_showDebugLogs;
+                });
+              },
+              icon: Icon(
+                _showDebugLogs ? Icons.bug_report : Icons.bug_report_outlined,
+                color: _showDebugLogs ? Colors.yellow : Colors.white,
+              ),
+              tooltip: _showDebugLogs ? 'Hide Debug Logs' : 'Show Debug Logs',
+            ),
             // Clear results action
             Consumer<SkillsAnalysisController>(
               builder: (context, controller, child) {
@@ -138,6 +153,27 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
                   return SkillsDisplayWidget(controller: controller);
                 },
               ),
+              
+              // Debug Logs Panel (collapsible)
+              if (_showDebugLogs) ...[
+                const SizedBox(height: 24),
+                const Text(
+                  'Debug Logs (JD Processing)',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 300, // Fixed height for debug panel
+                  child: DebugLogsWidget(
+                    filterKeyword: 'JD_PROCESSING',
+                    lines: 200,
+                    autoRefresh: true,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

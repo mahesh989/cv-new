@@ -25,19 +25,14 @@ class JDAnalysisResult:
     """Container for job description analysis results"""
     
     def __init__(self, data: Dict[str, Any]):
-        # Core analysis results (these will be merged from categories in to_dict())
-        self.required_keywords: List[str] = data.get('required_keywords', [])
-        self.preferred_keywords: List[str] = data.get('preferred_keywords', [])
-        self.all_keywords: List[str] = data.get('all_keywords', [])
-        self.experience_years: Optional[int] = data.get('experience_years')
-        
-        # Categorized structure
+        # Categorized structure (from AI response)
         self.required_skills: Dict[str, List[str]] = data.get('required_skills', {
             'technical': [],
             'soft_skills': [],
             'experience': [],
             'domain_knowledge': []
         })
+        
         self.preferred_skills: Dict[str, List[str]] = data.get('preferred_skills', {
             'technical': [],
             'soft_skills': [],
@@ -45,12 +40,42 @@ class JDAnalysisResult:
             'domain_knowledge': []
         })
         
+        # Merge categories into flat keyword lists for backward compatibility
+        # This ensures required_keywords and preferred_keywords are populated immediately
+        merged_required = []
+        for category, skills in self.required_skills.items():
+            if isinstance(skills, list):
+                merged_required.extend(skills)
+        
+        merged_preferred = []
+        for category, skills in self.preferred_skills.items():
+            if isinstance(skills, list):
+                merged_preferred.extend(skills)
+        
+        # Core analysis results (merged from categories)
+        # Use merged lists if top-level keys don't exist (for backward compatibility)
+        self.required_keywords: List[str] = data.get('required_keywords') if 'required_keywords' in data else merged_required
+        self.preferred_keywords: List[str] = data.get('preferred_keywords') if 'preferred_keywords' in data else merged_preferred
+        self.all_keywords: List[str] = data.get('all_keywords') if 'all_keywords' in data else (merged_required + merged_preferred)
+        self.experience_years: Optional[int] = data.get('experience_years')
+        
         # Metadata
-        self.analysis_timestamp: str = datetime.now().isoformat()
-        self.ai_model_used: Optional[str] = None
-        self.processing_status: str = "completed"
-        self.company_name: Optional[str] = None
-        self.metadata: Dict[str, Any] = {}
+        self.analysis_timestamp: str = data.get('analysis_timestamp', datetime.now().isoformat())
+        self.ai_model_used: Optional[str] = data.get('ai_model_used')
+        self.processing_status: str = data.get('processing_status', "completed")
+        self.company_name: Optional[str] = data.get('company_name')
+        self.metadata: Dict[str, Any] = data.get('metadata', {})
+        
+        # ⭐ DEBUG: Log keyword counts for troubleshooting
+        logger.debug(f"🔍 [JDAnalysisResult] Initialized with {len(self.required_keywords)} required and {len(self.preferred_keywords)} preferred keywords")
+        logger.debug(f"🔍 [JDAnalysisResult] Required categories: {list(self.required_skills.keys())}")
+        logger.debug(f"🔍 [JDAnalysisResult] Preferred categories: {list(self.preferred_skills.keys())}")
+        if len(self.required_keywords) == 0 and len(merged_required) > 0:
+            logger.warning(f"⚠️ [JDAnalysisResult] WARNING: Merged {len(merged_required)} required keywords but required_keywords is empty!")
+            print(f"⚠️ [JDAnalysisResult] WARNING: Merged {len(merged_required)} required keywords but required_keywords is empty!")
+        if len(self.required_keywords) > 0 or len(self.preferred_keywords) > 0:
+            logger.info(f"✅ [JDAnalysisResult] Successfully extracted {len(self.required_keywords)} required and {len(self.preferred_keywords)} preferred keywords")
+            print(f"✅ [JDAnalysisResult] Successfully extracted {len(self.required_keywords)} required and {len(self.preferred_keywords)} preferred keywords")
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert result to dictionary format with merged keywords from categories"""
