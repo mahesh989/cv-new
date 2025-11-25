@@ -956,8 +956,8 @@ class JDAnalyzer:
                                 # ⭐ FIX: Don't return if cache was invalidated for processed JD
                                 if not cache_invalidated_for_processed_jd:
                                     return JDAnalysisResult(data)
-                        except Exception:
-                            logger.debug("Hash comparison failed; continuing with fresh analysis")
+                            except Exception:
+                                logger.debug("Hash comparison failed; continuing with fresh analysis")
                 except Exception as guard_err:
                     logger.debug(f"Guard check for existing JD files failed (continuing with analysis): {guard_err}")
             
