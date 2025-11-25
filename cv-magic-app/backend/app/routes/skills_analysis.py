@@ -20,7 +20,7 @@ from app.core.model_dependency import get_current_model
 from app.services.skill_extraction import skill_extraction_service
 from app.services.cv_content_service import CVContentService
 from app.services.skills_analysis_config import skills_analysis_config_service
-from app.services.skill_extraction.prompt_templates import get_prompt as get_skill_prompt
+from app.services.skill_extraction.prompt_templates import get_prompt as get_skill_prompt, get_skill_prompts
 from app.services.skill_extraction.response_parser import SkillExtractionParser
 from app.services.skill_extraction.result_saver import SkillExtractionResultSaver
 from app.ai.ai_service import ai_service
@@ -3412,6 +3412,11 @@ async def perform_preliminary_skills_analysis(
         config = skills_analysis_config_service.get_config(config_name)
         ai_params = skills_analysis_config_service.get_ai_parameters(config_name)
         logging_params = skills_analysis_config_service.get_logging_parameters(config_name)
+        prompt_params = skills_analysis_config_service.get_prompt_parameters(config_name)
+        
+        # Check if using optimized prompts (cost-efficient mode)
+        use_optimized = prompt_params.get("use_optimized_prompts", False)
+        prompt_version = prompt_params.get("prompt_version", "verbose")
         
         if logging_params["enable_detailed_logging"]:
             logger.info(f"🔍 [SKILLS_ANALYSIS] Starting AI-powered skills analysis for {cv_filename}")
@@ -3420,6 +3425,7 @@ async def perform_preliminary_skills_analysis(
                        f"Source: PROCESSED (REQUIRED) | "
                        f"Original was: {original_length} chars")
             logger.info(f"🔍 [SKILLS_ANALYSIS] Using config: {config_name or 'default'}")
+            logger.info(f"🔍 [SKILLS_ANALYSIS] Prompt version: {prompt_version} (optimized={use_optimized})")
             logger.info(f"✅✅✅ [SKILLS_ANALYSIS] CONFIRMED: Using PROCESSED JD for skills extraction (REQUIRED)")
             # Lightweight CV content preview to aid debugging
             try:
@@ -3443,24 +3449,37 @@ async def perform_preliminary_skills_analysis(
             logger.info(f"🔍 [SKILLS_ANALYSIS] Provider available: {current_status.get('provider_available')}")
             logger.info(f"🔍 [SKILLS_ANALYSIS] Model from header: {current_model}")
         
-        # Extract CV skills using enhanced structured prompt
+        # Extract CV skills using appropriate prompt version
         if logging_params["enable_detailed_logging"]:
-            logger.info("🔍 [SKILLS_ANALYSIS] Extracting CV skills with detailed structured analysis...")
+            logger.info(f"🔍 [SKILLS_ANALYSIS] Extracting CV skills with {prompt_version} prompt...")
         
-        cv_structured_prompt = get_skill_prompt('combined_structured', text=cv_content, document_type="CV")
+        # Use unified prompt getter for both verbose and optimized modes
+        if use_optimized:
+            cv_prompts = get_skill_prompts("CV", cv_content, use_optimized=True)
+            cv_structured_prompt = cv_prompts["user_prompt"]
+            cv_system_prompt = cv_prompts["system_prompt"]
+            cv_max_tokens = cv_prompts["expected_max_tokens"]
+        else:
+            cv_structured_prompt = get_skill_prompt('combined_structured', text=cv_content, document_type="CV")
+            cv_system_prompt = None  # Use default from ai_service
+            cv_max_tokens = ai_params["max_tokens"]
         
         # Use configuration parameters
         cv_structured_response = await ai_service.generate_response(
             prompt=cv_structured_prompt,
+            system_prompt=cv_system_prompt if use_optimized else None,
             user=current_user,
             temperature=ai_params["temperature"],
-            max_tokens=ai_params["max_tokens"]
+            max_tokens=cv_max_tokens
         )
         cv_raw_response = cv_structured_response.content
         
-        # Parse the structured response
+        # Parse the structured response using appropriate parser
         cv_parser = SkillExtractionParser()
-        cv_parsed = cv_parser.parse_response(cv_raw_response, "CV")
+        if use_optimized:
+            cv_parsed = cv_parser.parse_optimized_response(cv_raw_response, "CV")
+        else:
+            cv_parsed = cv_parser.parse_response(cv_raw_response, "CV")
         cv_technical_skills = cv_parsed.get('technical_skills', [])
         cv_soft_skills = cv_parsed.get('soft_skills', [])
         cv_domain_keywords = cv_parsed.get('domain_keywords', [])
@@ -3486,22 +3505,35 @@ async def perform_preliminary_skills_analysis(
         logger.info(f"📋 [SKILLS_ANALYSIS] ========== END JD TEXT ==========")
         
         if logging_params["enable_detailed_logging"]:
-            logger.info("🔍 [SKILLS_ANALYSIS] Extracting JD skills with detailed structured analysis...")
+            logger.info(f"🔍 [SKILLS_ANALYSIS] Extracting JD skills with {prompt_version} prompt...")
         
-        jd_structured_prompt = get_skill_prompt('combined_structured', text=jd_text, document_type="Job Description")
+        # Use unified prompt getter for both verbose and optimized modes
+        if use_optimized:
+            jd_prompts = get_skill_prompts("Job Description", jd_text, use_optimized=True)
+            jd_structured_prompt = jd_prompts["user_prompt"]
+            jd_system_prompt = jd_prompts["system_prompt"]
+            jd_max_tokens = jd_prompts["expected_max_tokens"]
+        else:
+            jd_structured_prompt = get_skill_prompt('combined_structured', text=jd_text, document_type="Job Description")
+            jd_system_prompt = None
+            jd_max_tokens = ai_params["max_tokens"]
         
         # Use configuration parameters
         jd_structured_response = await ai_service.generate_response(
             prompt=jd_structured_prompt,
+            system_prompt=jd_system_prompt if use_optimized else None,
             user=current_user,
             temperature=ai_params["temperature"],
-            max_tokens=ai_params["max_tokens"]
+            max_tokens=jd_max_tokens
         )
         jd_raw_response = jd_structured_response.content
         
-        # Parse the structured response
+        # Parse the structured response using appropriate parser
         jd_parser = SkillExtractionParser()
-        jd_parsed = jd_parser.parse_response(jd_raw_response, "JD")
+        if use_optimized:
+            jd_parsed = jd_parser.parse_optimized_response(jd_raw_response, "JD")
+        else:
+            jd_parsed = jd_parser.parse_response(jd_raw_response, "JD")
         jd_technical_skills = jd_parsed.get('technical_skills', [])
         jd_soft_skills = jd_parsed.get('soft_skills', [])
         jd_domain_keywords = jd_parsed.get('domain_keywords', [])

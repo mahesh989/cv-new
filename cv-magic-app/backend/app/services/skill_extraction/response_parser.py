@@ -17,6 +17,61 @@ class SkillExtractionParser:
     """Parser for skill extraction AI responses"""
     
     @staticmethod
+    def parse_optimized_response(response_text: str, document_type: str) -> Dict[str, any]:
+        """
+        Optimized parser for the new compact prompt format.
+        
+        Expects output in format:
+        TECHNICAL_SKILLS = ["skill1", "skill2"]
+        SOFT_SKILLS = ["skill1", "skill2"]
+        DOMAIN_KEYWORDS = ["keyword1", "keyword2"]
+        
+        This is a streamlined parser that:
+        - Only tries the Python list format (no fallbacks needed for optimized prompts)
+        - Skips normalization since optimized prompts already output clean skills
+        - Minimal logging for efficiency
+        
+        Falls back to full parse_response() if Python format fails.
+        """
+        logger.debug(f"🚀 [{document_type.upper()}] Using optimized parser...")
+        
+        try:
+            # Extract Python lists (this should always work with optimized prompts)
+            technical_skills = SkillExtractionParser._extract_python_list(response_text, "TECHNICAL_SKILLS", document_type)
+            soft_skills = SkillExtractionParser._extract_python_list(response_text, "SOFT_SKILLS", document_type)
+            domain_keywords = SkillExtractionParser._extract_python_list(response_text, "DOMAIN_KEYWORDS", document_type)
+            
+            # If any list found, we have success
+            if technical_skills or soft_skills or domain_keywords:
+                total = len(technical_skills) + len(soft_skills) + len(domain_keywords)
+                logger.info(f"✅ [{document_type.upper()}] Optimized parser: {total} skills extracted")
+                
+                return {
+                    "soft_skills": soft_skills,
+                    "technical_skills": technical_skills,
+                    "domain_keywords": domain_keywords,
+                    "full_soft_skills": soft_skills,
+                    "full_technical_skills": technical_skills,
+                    "full_domain_keywords": domain_keywords,
+                    "normalized_skills": {
+                        "technical_skills": {"base": technical_skills, "full": technical_skills, "normalized": []},
+                        "soft_skills": {"base": soft_skills, "full": soft_skills, "normalized": []},
+                        "domain_keywords": {"base": domain_keywords, "full": domain_keywords, "normalized": []}
+                    },
+                    "raw_response": response_text,
+                    "parsing_success": True,
+                    "parser_mode": "optimized"
+                }
+            
+            # Fallback to full parser if optimized parsing failed
+            logger.warning(f"⚠️ [{document_type.upper()}] Optimized parser failed, falling back to full parser")
+            return SkillExtractionParser.parse_response(response_text, document_type)
+            
+        except Exception as e:
+            logger.error(f"❌ [{document_type.upper()}] Optimized parser error: {e}, falling back to full parser")
+            return SkillExtractionParser.parse_response(response_text, document_type)
+    
+    @staticmethod
     def parse_response(response_text: str, document_type: str) -> Dict[str, any]:
         """
         Parse AI response and extract skills

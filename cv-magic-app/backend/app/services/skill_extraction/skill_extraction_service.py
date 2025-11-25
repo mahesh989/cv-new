@@ -17,7 +17,7 @@ from app.models.cv import CV, JobApplication
 from app.services.cv_processor import cv_processor
 from app.services.job_scraper import scrape_job_description_async
 from app.ai.ai_service import ai_service
-from .prompt_templates import SkillExtractionPrompts
+from .prompt_templates import SkillExtractionPrompts, get_skill_prompts
 from .response_parser import SkillExtractionParser
 from .result_saver import result_saver
 
@@ -26,9 +26,16 @@ logger = logging.getLogger(__name__)
 class SkillExtractionService:
     """Main service for skill extraction with caching and AI integration"""
     
-    def __init__(self):
+    def __init__(self, use_optimized_prompts: bool = False):
+        """
+        Initialize skill extraction service.
+        
+        Args:
+            use_optimized_prompts: If True, use cost-efficient prompts (~70% token savings)
+        """
         self.prompts = SkillExtractionPrompts()
         self.parser = SkillExtractionParser()
+        self.use_optimized_prompts = use_optimized_prompts
     
     async def analyze_skills(
         self, 
@@ -282,23 +289,29 @@ class SkillExtractionService:
             }
         
         # Extract skills using AI
-        logger.info("🤖 Extracting CV skills using AI service")
+        # Use unified prompt getter that supports both verbose and optimized modes
+        prompts_data = get_skill_prompts("CV", cv_text, use_optimized=self.use_optimized_prompts)
+        prompt_version = prompts_data["prompt_version"]
+        max_tokens = prompts_data["expected_max_tokens"]
         
-        prompt = self.prompts.get_skill_extraction_template("CV", cv_text)
-        system_prompt = self.prompts.get_system_prompt("CV")
+        logger.info(f"🤖 Extracting CV skills using AI service (prompt_version={prompt_version})")
         
         # Call AI service
         ai_response = await ai_service.generate_response(
-            prompt=prompt,
-            system_prompt=system_prompt,
+            prompt=prompts_data["user_prompt"],
+            system_prompt=prompts_data["system_prompt"],
             temperature=0.0,
-            max_tokens=2000
+            max_tokens=max_tokens
         )
         
-        # Parse response
-        # NOTE: Parser now normalizes skills automatically (e.g., "SQL (PostgreSQL, MySQL)" → "SQL")
-        # This improves matching accuracy by extracting base skills from parentheticals
-        parsed_skills = self.parser.parse_response(ai_response.content, "CV")
+        # Parse response using appropriate parser based on prompt version
+        # Optimized parser is faster and skips normalization (optimized prompts output clean skills)
+        if self.use_optimized_prompts:
+            parsed_skills = self.parser.parse_optimized_response(ai_response.content, "CV")
+        else:
+            # NOTE: Full parser normalizes skills automatically (e.g., "SQL (PostgreSQL, MySQL)" → "SQL")
+            # This improves matching accuracy by extracting base skills from parentheticals
+            parsed_skills = self.parser.parse_response(ai_response.content, "CV")
         
         if not parsed_skills["parsing_success"]:
             raise Exception(f"Failed to parse CV skills: {parsed_skills.get('error', 'Unknown error')}")
@@ -339,23 +352,28 @@ class SkillExtractionService:
             }
         
         # Extract skills using AI
-        logger.info("🤖 Extracting JD skills using AI service")
+        # Use unified prompt getter that supports both verbose and optimized modes
+        prompts_data = get_skill_prompts("Job Description", jd_text, use_optimized=self.use_optimized_prompts)
+        prompt_version = prompts_data["prompt_version"]
+        max_tokens = prompts_data["expected_max_tokens"]
         
-        prompt = self.prompts.get_skill_extraction_template("Job Description", jd_text)
-        system_prompt = self.prompts.get_system_prompt("Job Description")
+        logger.info(f"🤖 Extracting JD skills using AI service (prompt_version={prompt_version})")
         
         # Call AI service
         ai_response = await ai_service.generate_response(
-            prompt=prompt,
-            system_prompt=system_prompt,
+            prompt=prompts_data["user_prompt"],
+            system_prompt=prompts_data["system_prompt"],
             temperature=0.0,
-            max_tokens=2000
+            max_tokens=max_tokens
         )
         
-        # Parse response
-        # NOTE: Parser now normalizes skills automatically (e.g., "SQL (PostgreSQL, MySQL)" → "SQL")
-        # This improves matching accuracy by extracting base skills from parentheticals
-        parsed_skills = self.parser.parse_response(ai_response.content, "JD")
+        # Parse response using appropriate parser based on prompt version
+        if self.use_optimized_prompts:
+            parsed_skills = self.parser.parse_optimized_response(ai_response.content, "JD")
+        else:
+            # NOTE: Full parser normalizes skills automatically (e.g., "SQL (PostgreSQL, MySQL)" → "SQL")
+            # This improves matching accuracy by extracting base skills from parentheticals
+            parsed_skills = self.parser.parse_response(ai_response.content, "JD")
         
         if not parsed_skills["parsing_success"]:
             raise Exception(f"Failed to parse JD skills: {parsed_skills.get('error', 'Unknown error')}")

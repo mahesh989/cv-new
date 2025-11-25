@@ -19,6 +19,10 @@ class SkillsAnalysisConfig:
     temperature: float = 0.0
     max_tokens: int = 4000
     
+    # Prompt Optimization Parameters (NEW)
+    use_optimized_prompts: bool = False  # Set True to use cost-efficient prompts (~70% token savings)
+    prompt_version: str = "verbose"  # "verbose" (original) or "optimized" (new efficient version)
+    
     # Analysis Parameters
     use_structured_analysis: bool = True
     extract_explicit_skills: bool = True
@@ -142,6 +146,14 @@ class SkillsAnalysisConfigService:
             "log_raw_responses": config.log_raw_responses
         }
     
+    def get_prompt_parameters(self, config_name: Optional[str] = None) -> Dict[str, Any]:
+        """Get prompt optimization parameters from configuration"""
+        config = self.get_config(config_name)
+        return {
+            "use_optimized_prompts": config.use_optimized_prompts,
+            "prompt_version": config.prompt_version
+        }
+    
     def list_configs(self) -> Dict[str, Any]:
         """List all available configurations"""
         configs = {
@@ -166,6 +178,8 @@ class SkillsAnalysisConfigService:
         return {
             "temperature": config.temperature,
             "max_tokens": config.max_tokens,
+            "use_optimized_prompts": config.use_optimized_prompts,
+            "prompt_version": config.prompt_version,
             "use_structured_analysis": config.use_structured_analysis,
             "extract_explicit_skills": config.extract_explicit_skills,
             "extract_implied_skills": config.extract_implied_skills,
@@ -230,6 +244,18 @@ def setup_predefined_configs():
         save_analysis_results=False,
         enable_detailed_logging=False,
         timeout_seconds=180
+    )
+    
+    # NEW: Cost-optimized configuration (~70% token savings)
+    skills_analysis_config_service.create_custom_config(
+        "optimized",
+        temperature=0.0,
+        max_tokens=1000,  # Much lower - optimized prompts produce concise output
+        use_optimized_prompts=True,
+        prompt_version="optimized",
+        extract_implied_skills=False,  # Optimized prompts only extract explicit
+        enable_detailed_logging=False,
+        timeout_seconds=120
     )
     
     logger.info("✅ [CONFIG] Predefined configurations setup complete")
