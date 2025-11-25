@@ -570,6 +570,21 @@ class JDAnalyzer:
             Exception: If analysis fails
         """
         try:
+            # ⭐ LOG THE JD TEXT BEING SENT TO AI FOR KEYWORD EXTRACTION
+            has_sections = any(section in jd_text for section in [
+                "ROLE OVERVIEW", "KEY RESPONSIBILITIES", "TECHNICAL REQUIREMENTS"
+            ])
+            jd_preview = jd_text[:300].replace('\n', ' ')
+            
+            logger.info(f"📋 [JD_ANALYZER] ========== JD TEXT FOR KEYWORD EXTRACTION ==========")
+            logger.info(f"📋 [JD_ANALYZER] JD text length: {len(jd_text)} characters")
+            logger.info(f"📋 [JD_ANALYZER] Has sections format (processed JD): {has_sections}")
+            logger.info(f"📋 [JD_ANALYZER] JD preview (first 300 chars): {jd_preview}")
+            logger.info(f"📋 [JD_ANALYZER] Full JD text being sent to AI for keyword extraction:")
+            logger.info(f"📋 [JD_ANALYZER] {jd_text}")
+            logger.info(f"📋 [JD_ANALYZER] ========== END OF JD TEXT FOR KEYWORD EXTRACTION ==========")
+            print(f"📋 [JD_ANALYZER] JD TEXT FOR KEYWORD EXTRACTION ({len(jd_text)} chars, has_sections={has_sections}):\n{jd_text}")
+            
             system_prompt, user_prompt = get_jd_analysis_prompts(jd_text)
             
             # Get actual user from database to get real user ID (required for API key lookup)
@@ -656,7 +671,9 @@ class JDAnalyzer:
         """
         try:
             jd_text = self._read_jd_file(file_path)
-            logger.info(f"📄 Analyzing JD file: {file_path}")
+            logger.info(f"📄 [JD_ANALYZER] Analyzing JD file: {file_path}")
+            logger.info(f"📄 [JD_ANALYZER] JD text loaded from file (length: {len(jd_text)} chars)")
+            logger.info(f"📄 [JD_ANALYZER] JD text will be passed to analyze_jd_text() which will log full content")
             
             result = await self.analyze_jd_text(jd_text, temperature)
             # Attach JD hash to metadata for de-duplication
