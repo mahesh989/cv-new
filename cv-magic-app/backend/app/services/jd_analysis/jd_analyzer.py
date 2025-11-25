@@ -958,8 +958,8 @@ class JDAnalyzer:
                                     return JDAnalysisResult(data)
                             except Exception:
                                 logger.debug("Hash comparison failed; continuing with fresh analysis")
-                except Exception as guard_err:
-                    logger.debug(f"Guard check for existing JD files failed (continuing with analysis): {guard_err}")
+                    except Exception as guard_err:
+                        logger.debug(f"Guard check for existing JD files failed (continuing with analysis): {guard_err}")
             
             # Perform fresh analysis
             logger.info(f"🔄 [JD_ANALYZER] 🔄 PERFORMING NEW ANALYSIS with processed JD for {company_name} (force_refresh={force_refresh})")
