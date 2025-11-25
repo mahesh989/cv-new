@@ -686,20 +686,14 @@ class ContextAwareAnalysisPipeline:
             user_selector = get_selector_for_user(self.user_email)
             cv_content = user_selector.get_cv_content_across_all(context.company)
             
-            # Get JD content
-            company_dir = self.base_dir / "applied_companies" / context.company
-            from app.utils.timestamp_utils import TimestampUtils
-            jd_file = TimestampUtils.find_latest_timestamped_file(company_dir, "jd_original", "json")
+            # ⭐ Get JD content using processed JD service (with fallback to raw JD)
+            from app.services.jd_processing_service import get_jd_processing_service
+            jd_service = get_jd_processing_service(self.user_email)
+            jd_text = jd_service.get_jd_text_for_ai(context.company, prefer_processed=True)
             
-            if not jd_file or not jd_file.exists():
-                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No JD file found for analyze match")
+            if not jd_text:
+                logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No JD content found (neither processed nor original) for analyze match")
                 return None
-            
-            import json
-            with open(jd_file, 'r', encoding='utf-8') as f:
-                jd_data = json.load(f)
-            
-            jd_text = jd_data.get('text', '') if isinstance(jd_data, dict) else str(jd_data)
             
             if not cv_content or not jd_text:
                 logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] Missing CV or JD content for analyze match")

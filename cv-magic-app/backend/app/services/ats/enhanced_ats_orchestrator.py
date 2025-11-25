@@ -460,10 +460,39 @@ class EnhancedATSOrchestrator:
             with open(cv_file, 'r') as f:
                 cv_content = f.read()
             
-            # Read JD content
-            with open(jd_file, 'r') as f:
-                jd_data = json.load(f)
-                job_description = jd_data.get('text', '')
+            # ⭐ Get JD content using processed JD service (with fallback to raw JD)
+            # Extract user_email from base_dir path if available, otherwise use None
+            user_email = getattr(self, 'user_email', None)
+            if not user_email and hasattr(self, 'base_dir'):
+                # Try to extract user email from path: user/{email}/cv-analysis/...
+                try:
+                    path_parts = Path(self.base_dir).parts
+                    if 'user' in path_parts:
+                        idx = path_parts.index('user')
+                        if idx + 1 < len(path_parts):
+                            user_email = path_parts[idx + 1]
+                except Exception:
+                    pass
+            
+            job_description = None
+            if user_email:
+                try:
+                    from app.services.jd_processing_service import get_jd_processing_service
+                    jd_service = get_jd_processing_service(user_email)
+                    job_description = jd_service.get_jd_text_for_ai(company_name, prefer_processed=True)
+                    if job_description:
+                        logger.info(f"✅ [Enhanced ATS] Using PROCESSED JD for {company_name} | "
+                                   f"Length: {len(job_description)} chars")
+                except Exception as e:
+                    logger.warning(f"⚠️ [Enhanced ATS] Failed to load processed JD, falling back to raw JD: {e}")
+            
+            # Fallback to raw JD if processed JD not available
+            if not job_description:
+                with open(jd_file, 'r') as f:
+                    jd_data = json.load(f)
+                    job_description = jd_data.get('text', '')
+                logger.info(f"📄 [Enhanced ATS] Using LEGACY (original) JD for {company_name} | "
+                           f"Length: {len(job_description)} chars")
             
             # Run enhanced ATS analysis
             results = self.analyze_cv_job_fit(

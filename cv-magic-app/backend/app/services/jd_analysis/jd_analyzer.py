@@ -315,6 +315,13 @@ class JDAnalyzer:
                           f"falling back to LEGACY file: {path.name}")
             else:
                 if not company_name:
+                    logger.warning(f"⚠️ [JD_ANALYZER] Cannot use processed JD: company_name not extracted from path {path}")
+                    print(f"⚠️ [JD_ANALYZER] Cannot use processed JD: company_name not extracted from path {path}")
+                if not self.user_email:
+                    logger.warning(f"⚠️ [JD_ANALYZER] Cannot use processed JD: user_email not available")
+                    print(f"⚠️ [JD_ANALYZER] Cannot use processed JD: user_email not available")
+            else:
+                if not company_name:
                     logger.debug(f"📄 [JD_ANALYZER] Could not extract company name from path, using LEGACY file")
                 if not self.user_email:
                     logger.debug(f"📄 [JD_ANALYZER] No user_email available, using LEGACY file")
@@ -488,23 +495,55 @@ class JDAnalyzer:
         """
         Load existing analysis result from JSON file
         
+        ⚠️ IMPORTANT: This method checks if processed JD exists and is newer than the analysis.
+        If processed JD is newer, returns None to force re-analysis with processed JD.
+        
         Args:
             company_name: Company name to load analysis for
             
         Returns:
-            JDAnalysisResult if found, None otherwise
+            JDAnalysisResult if found and still valid, None otherwise (to force re-analysis)
         """
         try:
             company_dir = self.base_analysis_path / "applied_companies" / company_name
             analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json")
             
             if not analysis_file or not analysis_file.exists():
+                logger.debug(f"📂 [JD_ANALYZER] No existing JD analysis found for {company_name}")
                 return None
+            
+            # ⭐ NEW: Check if processed JD exists and is newer than analysis
+            # If so, force re-analysis to use processed JD
+            if self.user_email:
+                try:
+                    from app.services.jd_processing_service import get_jd_processing_service
+                    jd_service = get_jd_processing_service(self.user_email)
+                    processed_jd_path = jd_service._get_processed_jd_path(company_name)
+                    
+                    if processed_jd_path and processed_jd_path.exists():
+                        # Compare timestamps: if processed JD is newer, re-analyze
+                        analysis_mtime = analysis_file.stat().st_mtime
+                        processed_mtime = processed_jd_path.stat().st_mtime
+                        
+                        if processed_mtime > analysis_mtime:
+                            logger.info(f"🔄 [JD_ANALYZER] Processed JD is newer than analysis "
+                                       f"(processed: {processed_mtime}, analysis: {analysis_mtime}). "
+                                       f"Forcing re-analysis with processed JD for {company_name}")
+                            print(f"🔄 [JD_ANALYZER] Processed JD is newer - forcing re-analysis for {company_name}")
+                            return None  # Force re-analysis
+                        else:
+                            logger.debug(f"📂 [JD_ANALYZER] Analysis is up-to-date (analysis: {analysis_mtime}, "
+                                        f"processed: {processed_mtime})")
+                except Exception as e:
+                    logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD timestamp: {e}")
+                    # Continue with loading existing analysis
             
             with open(analysis_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            logger.info(f"📂 Loaded existing JD analysis from: {analysis_file}")
+            logger.info(f"📂 [JD_ANALYZER] Loaded existing JD analysis from: {analysis_file}")
+            logger.warning(f"⚠️ [JD_ANALYZER] Using cached analysis - processed JD check was not performed. "
+                          f"Analysis may be based on original JD, not processed JD.")
             return JDAnalysisResult(data)
             
         except Exception as e:
