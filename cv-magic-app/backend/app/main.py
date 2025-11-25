@@ -43,10 +43,19 @@ logging.basicConfig(
     format=settings.LOG_FORMAT
 )
 
-# Add rotating file handler to write backend terminal output to backend/log.txt
+# Add rotating file handler to write backend terminal output to /app/logs/backend_logs.txt
 try:
-    backend_root = Path(__file__).resolve().parents[1]  # cv-magic-app/backend
-    log_file = backend_root / "log.txt"
+    # Try Docker logs location first, fallback to backend root
+    logs_dir = Path("/app/logs")
+    if logs_dir.exists():
+        log_file = logs_dir / "backend_logs.txt"
+    else:
+        # Fallback for local development
+        backend_root = Path(__file__).resolve().parents[1]  # cv-magic-app/backend
+        logs_dir = backend_root / "logs"
+        logs_dir.mkdir(exist_ok=True)
+        log_file = logs_dir / "backend_logs.txt"
+    
     file_handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
     file_handler.setLevel(getattr(logging, settings.LOG_LEVEL))
     file_handler.setFormatter(logging.Formatter(settings.LOG_FORMAT))
@@ -54,6 +63,7 @@ try:
     # Avoid duplicate handlers on reload
     if not any(isinstance(h, RotatingFileHandler) and getattr(h, 'baseFilename', '') == str(log_file) for h in root_logger.handlers):
         root_logger.addHandler(file_handler)
+        logging.getLogger(__name__).info(f"✅ Logging to: {log_file}")
 except Exception as e:
     # Fall back silently if file handler cannot be added
     logging.getLogger(__name__).warning(f"Unable to attach file log handler: {e}")
