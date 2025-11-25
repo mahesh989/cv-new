@@ -447,6 +447,27 @@ class JDProcessingService:
             optimizer = JDOptimizer(ai_service=ai_service)
             logger.info(f"✅ [JD_PROCESSING] JDOptimizer created | Using real AI: {optimizer.using_real_ai}")
             
+            # Get actual AI provider name from ai_service (e.g., "openai", "anthropic", "deepseek")
+            ai_provider_name = "unknown"
+            if optimizer.using_real_ai:
+                try:
+                    current_provider = ai_service.get_current_provider()
+                    if current_provider:
+                        ai_provider_name = current_provider.provider_name
+                        logger.info(f"🔍 [JD_PROCESSING] Using AI provider: {ai_provider_name}")
+                        print(f"🔍 [JD_PROCESSING] Using AI provider: {ai_provider_name}")
+                    else:
+                        # Fallback to config provider name
+                        provider_name = ai_service.config.get_current_provider()
+                        if provider_name:
+                            ai_provider_name = provider_name
+                            logger.info(f"🔍 [JD_PROCESSING] Using AI provider from config: {ai_provider_name}")
+                            print(f"🔍 [JD_PROCESSING] Using AI provider from config: {ai_provider_name}")
+                except Exception as provider_err:
+                    logger.warning(f"⚠️ [JD_PROCESSING] Could not get provider name: {provider_err}, using 'ai_service'")
+                    print(f"⚠️ [JD_PROCESSING] Could not get provider name: {provider_err}, using 'ai_service'")
+                    ai_provider_name = "ai_service"
+            
             job_info = {
                 "company_name": company_name,
                 "job_title": job_title or "Unknown",
@@ -500,10 +521,12 @@ class JDProcessingService:
             
             # Create serializable payload with processed JD content (sections)
             # This is the processed JD file - contains only processed content, not job_info metadata
+            # Use actual AI provider name (e.g., "openai", "anthropic", "deepseek") instead of generic "universal_ai"
+            processing_mode = ai_provider_name if optimizer.using_real_ai else "mock_fallback"
             processed_payload = {
                 "sections": sections,
                 "additional_sections": additional_sections,
-                "processing_mode": "universal_ai" if optimizer.using_real_ai else "mock_fallback",
+                "processing_mode": processing_mode,
                 "processed_at": datetime.now().isoformat(),
             }
             
