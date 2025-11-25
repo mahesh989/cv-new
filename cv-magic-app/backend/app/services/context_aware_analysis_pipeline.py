@@ -394,12 +394,71 @@ class ContextAwareAnalysisPipeline:
                 logger.info("🆕 [CONTEXT_AWARE_PIPELINE] Performing fresh JD analysis")
                 
                 # First check if JD analysis already exists
+                # ⭐ CACHE INVALIDATION: Check if processed JD exists and should force refresh
+                force_refresh = False
+                if self.user_email:
+                    try:
+                        from app.services.jd_processing_service import get_jd_processing_service
+                        jd_service = get_jd_processing_service(self.user_email)
+                        if jd_service.has_processed_jd(context.company):
+                            logger.info(f"🔄 [CONTEXT_AWARE_PIPELINE] Processed JD exists for {context.company}, "
+                                       f"checking if cache invalidation is needed")
+                            # Check if cached analysis was based on processed JD
+                            from pathlib import Path
+                            from app.utils.timestamp_utils import TimestampUtils
+                            company_dir = self.base_dir / "applied_companies" / context.company
+                            analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{context.company}_jd_analysis", "json")
+                            
+                            if analysis_file and analysis_file.exists():
+                                try:
+                                    import json
+                                    with open(analysis_file, 'r', encoding='utf-8') as f:
+                                        analysis_data = json.load(f)
+                                    analysis_metadata = analysis_data.get('metadata', {})
+                                    used_processed_jd = analysis_metadata.get('used_processed_jd', False)
+                                    
+                                    if not used_processed_jd:
+                                        logger.info(f"🔄 [CONTEXT_AWARE_PIPELINE] Cached analysis was NOT based on processed JD. "
+                                                   f"Forcing refresh to use processed JD")
+                                        force_refresh = True
+                                    else:
+                                        logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Cached analysis was based on processed JD, "
+                                                   f"can reuse it")
+                                except Exception as e:
+                                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Could not check analysis metadata: {e}")
+                                    # If we can't check, let analyze_company_jd() handle cache invalidation
+                            else:
+                                logger.info(f"🔄 [CONTEXT_AWARE_PIPELINE] No cached analysis found, will use processed JD")
+                    except Exception as e:
+                        logger.debug(f"⚠️ [CONTEXT_AWARE_PIPELINE] Could not check processed JD: {e}")
+                
                 try:
-                    jd_analysis_result = await self.jd_analyzer.analyze_company_jd(context.company)
+                    logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Checking for existing JD analysis for {context.company} "
+                               f"(force_refresh={force_refresh})")
+                    # Use analyze_and_save_company_jd with force_refresh if processed JD exists
+                    if force_refresh:
+                        jd_analysis_result = await self.jd_analyzer.analyze_and_save_company_jd(
+                            context.company, 
+                            force_refresh=True
+                        )
+                    else:
+                        jd_analysis_result = await self.jd_analyzer.analyze_company_jd(context.company)
+                    
                     if jd_analysis_result and jd_analysis_result.all_keywords:
-                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] Found existing JD analysis, using it")
+                        if force_refresh:
+                            logger.info("✅ [CONTEXT_AWARE_PIPELINE] Re-analyzed JD with processed JD (cache was invalidated)")
+                            results.steps_completed.append("jd_analysis_refreshed_with_processed_jd")
+                        else:
+                            logger.info("✅ [CONTEXT_AWARE_PIPELINE] Found existing JD analysis, using it")
+                            # Check if it was based on processed JD
+                            if hasattr(jd_analysis_result, 'metadata') and jd_analysis_result.metadata:
+                                used_processed = jd_analysis_result.metadata.get('used_processed_jd', False)
+                                if used_processed:
+                                    logger.info("✅ [CONTEXT_AWARE_PIPELINE] Cached analysis was based on processed JD")
+                                else:
+                                    logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Cached analysis may not be based on processed JD")
+                            results.steps_completed.append("jd_analysis_existing")
                         results.jd_analysis = jd_analysis_result.to_dict()
-                        results.steps_completed.append("jd_analysis_existing")
                         
                         # Try to get job info from existing files
                         from pathlib import Path

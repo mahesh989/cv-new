@@ -476,11 +476,25 @@ class JDAnalyzer:
             company_dir = self.base_analysis_path / "applied_companies" / company_name
             company_dir.mkdir(parents=True, exist_ok=True)
             
-            # Reuse existing analysis file if present to avoid duplicates for same JD URL/text
+            # ⭐ CACHE INVALIDATION: Check if we should update existing file or create new one
+            # If re-analyzing with processed JD, update existing file to mark it as using processed JD
             existing = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json")
             if existing and existing.exists():
-                logger.info(f"♻️ JD analysis already exists, reusing: {existing}")
-                return str(existing)
+                # Check if this result has processed JD metadata
+                result_dict = result.to_dict()
+                used_processed_jd = (result_dict.get('metadata', {}) or {}).get('used_processed_jd', False)
+                
+                if used_processed_jd:
+                    # Update existing file with processed JD metadata
+                    logger.info(f"🔄 [JD_ANALYZER] Updating existing analysis file with processed JD metadata: {existing}")
+                    with open(existing, 'w', encoding='utf-8') as f:
+                        json.dump(result_dict, f, indent=2, ensure_ascii=False)
+                    logger.info(f"✅ [JD_ANALYZER] Updated analysis file with processed JD flag")
+                    return str(existing)
+                else:
+                    # Reuse existing file if not using processed JD
+                    logger.info(f"♻️ JD analysis already exists, reusing: {existing}")
+                    return str(existing)
 
             # Otherwise save analysis result with timestamp
             timestamp = TimestampUtils.get_timestamp()
@@ -517,8 +531,8 @@ class JDAnalyzer:
                 logger.debug(f"📂 [JD_ANALYZER] No existing JD analysis found for {company_name}")
                 return None
             
-            # ⭐ NEW: Check if processed JD exists and is newer than analysis
-            # If so, force re-analysis to use processed JD
+            # ⭐ CACHE INVALIDATION: Check if processed JD exists
+            # If processed JD exists, invalidate cache to force re-analysis with processed JD
             if self.user_email:
                 try:
                     from app.services.jd_processing_service import get_jd_processing_service
@@ -526,27 +540,84 @@ class JDAnalyzer:
                     processed_jd_path = jd_service._get_processed_jd_path(company_name)
                     
                     if processed_jd_path and processed_jd_path.exists():
-                        # Compare timestamps: if processed JD is newer, re-analyze
+                        # ⭐ AGGRESSIVE CACHE INVALIDATION: Always invalidate if processed JD exists
+                        # This ensures we always use processed JD when available, even if cached analysis exists
                         analysis_mtime = analysis_file.stat().st_mtime
                         processed_mtime = processed_jd_path.stat().st_mtime
                         
+                        # Check if processed JD is newer OR if analysis doesn't have processed JD metadata
+                        should_invalidate = False
+                        reason = ""
+                        
                         if processed_mtime > analysis_mtime:
-                            logger.info(f"🔄 [JD_ANALYZER] Processed JD is newer than analysis "
-                                       f"(processed: {processed_mtime}, analysis: {analysis_mtime}). "
-                                       f"Forcing re-analysis with processed JD for {company_name}")
-                            print(f"🔄 [JD_ANALYZER] Processed JD is newer - forcing re-analysis for {company_name}")
+                            should_invalidate = True
+                            reason = f"Processed JD is newer (processed: {processed_mtime}, analysis: {analysis_mtime})"
+                        else:
+                            # Even if processed JD is older, check if analysis was based on processed JD
+                            # If analysis metadata doesn't indicate processed JD was used, invalidate
+                            try:
+                                with open(analysis_file, 'r', encoding='utf-8') as f:
+                                    analysis_data = json.load(f)
+                                analysis_metadata = analysis_data.get('metadata', {})
+                                used_processed_jd = analysis_metadata.get('used_processed_jd', False)
+                                
+                                if not used_processed_jd:
+                                    should_invalidate = True
+                                    reason = "Cached analysis was not based on processed JD (metadata missing 'used_processed_jd' flag)"
+                            except Exception:
+                                # If we can't read metadata, assume it's not based on processed JD
+                                should_invalidate = True
+                                reason = "Cannot verify if cached analysis used processed JD (metadata read failed)"
+                        
+                        if should_invalidate:
+                            logger.info(f"🔄 [JD_ANALYZER] 🔄 CACHE INVALIDATED: {reason}")
+                            logger.info(f"🔄 [JD_ANALYZER] Forcing re-analysis with processed JD for {company_name}")
+                            logger.info(f"🔄 [JD_ANALYZER] Cached analysis file: {analysis_file}")
+                            logger.info(f"🔄 [JD_ANALYZER] Processed JD file: {processed_jd_path}")
+                            print(f"🔄 [JD_ANALYZER] 🔄 CACHE INVALIDATED: {reason}")
+                            print(f"🔄 [JD_ANALYZER] Forcing re-analysis with processed JD for {company_name}")
                             return None  # Force re-analysis
                         else:
-                            logger.debug(f"📂 [JD_ANALYZER] Analysis is up-to-date (analysis: {analysis_mtime}, "
-                                        f"processed: {processed_mtime})")
+                            logger.debug(f"📂 [JD_ANALYZER] Analysis is up-to-date and based on processed JD "
+                                        f"(analysis: {analysis_mtime}, processed: {processed_mtime})")
                 except Exception as e:
-                    logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD timestamp: {e}")
-                    # Continue with loading existing analysis
+                    logger.warning(f"⚠️ [JD_ANALYZER] Could not check processed JD for cache invalidation: {e}")
+                    # Continue with loading existing analysis if check fails
             
             with open(analysis_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
             logger.info(f"📂 [JD_ANALYZER] Loaded existing JD analysis from: {analysis_file}")
+            
+            # ⭐ LOG: Check what JD was used for this cached analysis
+            # Try to determine if cached analysis was based on processed JD or raw JD
+            # by checking if the analysis metadata or keywords suggest processed JD format
+            cached_keywords = data.get('required_keywords', []) + data.get('preferred_keywords', [])
+            logger.info(f"📂 [JD_ANALYZER] Cached analysis contains {len(cached_keywords)} keywords")
+            
+            # Check if processed JD exists to compare
+            if self.user_email:
+                try:
+                    from app.services.jd_processing_service import get_jd_processing_service
+                    jd_service = get_jd_processing_service(self.user_email)
+                    processed_jd_path = jd_service._get_processed_jd_path(company_name)
+                    
+                    if processed_jd_path and processed_jd_path.exists():
+                        # Load processed JD to show what SHOULD be used
+                        processed_jd = jd_service.get_processed_jd(company_name)
+                        if processed_jd:
+                            processed_text = jd_service.processed_jd_to_text(processed_jd)
+                            logger.warning(f"⚠️ [JD_ANALYZER] ⚠️⚠️⚠️ USING CACHED ANALYSIS (may be based on OLD/RAW JD)")
+                            logger.warning(f"⚠️ [JD_ANALYZER] Processed JD exists ({len(processed_text)} chars) but cached analysis is being reused")
+                            logger.warning(f"⚠️ [JD_ANALYZER] Cached analysis file: {analysis_file}")
+                            logger.warning(f"⚠️ [JD_ANALYZER] Processed JD file: {processed_jd_path}")
+                            logger.warning(f"⚠️ [JD_ANALYZER] To use processed JD, delete cached analysis or force re-analysis")
+                            print(f"⚠️ [JD_ANALYZER] ⚠️⚠️⚠️ USING CACHED ANALYSIS - Processed JD exists but not being used!")
+                            print(f"⚠️ [JD_ANALYZER] Cached: {analysis_file}")
+                            print(f"⚠️ [JD_ANALYZER] Processed JD available: {processed_jd_path}")
+                except Exception as e:
+                    logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD for cached analysis warning: {e}")
+            
             logger.warning(f"⚠️ [JD_ANALYZER] Using cached analysis - processed JD check was not performed. "
                           f"Analysis may be based on original JD, not processed JD.")
             return JDAnalysisResult(data)
@@ -692,7 +763,7 @@ class JDAnalyzer:
             raise Exception(f"Failed to analyze job description file: {e}")
     
     async def analyze_company_jd(self, company_name: str, base_path: Optional[str] = None, 
-                                temperature: float = 0.0) -> JDAnalysisResult:
+                                temperature: float = 0.0, force_processed_jd: bool = False) -> JDAnalysisResult:
         """
         Analyze job description using company name pattern
         
@@ -700,6 +771,7 @@ class JDAnalyzer:
             company_name: Company name (e.g., "Australia_for_UNHCR")
             base_path: Base path for JD files (optional, uses default if not provided)
             temperature: AI temperature for consistency (default: 0.0)
+            force_processed_jd: If True, force use of processed JD even if cached analysis exists
             
         Returns:
             JDAnalysisResult with extracted keywords
@@ -708,6 +780,31 @@ class JDAnalyzer:
             FileNotFoundError: If JD file doesn't exist
             Exception: If analysis fails
         """
+        # ⭐ CACHE INVALIDATION: Check if processed JD exists and should invalidate cache
+        if self.user_email and not force_processed_jd:
+            try:
+                from app.services.jd_processing_service import get_jd_processing_service
+                jd_service = get_jd_processing_service(self.user_email)
+                if jd_service.has_processed_jd(company_name):
+                    # Check if cached analysis exists and if it was based on processed JD
+                    company_dir = Path(base_path or str(self.base_analysis_path)) / "applied_companies" / company_name
+                    analysis_file = TimestampUtils.find_latest_timestamped_file(company_dir, f"{company_name}_jd_analysis", "json")
+                    
+                    if analysis_file and analysis_file.exists():
+                        try:
+                            with open(analysis_file, 'r', encoding='utf-8') as f:
+                                analysis_data = json.load(f)
+                            analysis_metadata = analysis_data.get('metadata', {})
+                            used_processed_jd = analysis_metadata.get('used_processed_jd', False)
+                            
+                            if not used_processed_jd:
+                                logger.info(f"🔄 [JD_ANALYZER] Processed JD exists but cached analysis wasn't based on it. "
+                                           f"Cache will be invalidated by _load_analysis_result()")
+                        except Exception:
+                            pass  # If we can't check, let _load_analysis_result() handle it
+            except Exception as e:
+                logger.debug(f"⚠️ [JD_ANALYZER] Could not check processed JD before analysis: {e}")
+        
         if not base_path:
             base_path = str(self.base_analysis_path)
         
@@ -787,6 +884,18 @@ class JDAnalyzer:
             
             # Set company name and metadata
             result.company_name = company_name
+            
+            # ⭐ MARK METADATA: Indicate that this analysis used processed JD (if available)
+            if self.user_email:
+                try:
+                    from app.services.jd_processing_service import get_jd_processing_service
+                    jd_service = get_jd_processing_service(self.user_email)
+                    if jd_service.has_processed_jd(company_name):
+                        result.metadata = result.metadata or {}
+                        result.metadata['used_processed_jd'] = True
+                        logger.info(f"✅ [JD_ANALYZER] Marked analysis as using processed JD for {company_name}")
+                except Exception as e:
+                    logger.debug(f"⚠️ [JD_ANALYZER] Could not mark processed JD usage in metadata: {e}")
             
             # Ensure base path is user-scoped when saving if provided
             if base_path:
