@@ -237,7 +237,7 @@ class SkillCategorizer:
         'fda', 'compliance', 'audit', 'regulatory',
         
         # Business domains (field-specific)
-        'accounting', 'commerce', 'economics', 'procurement',
+        'business', 'accounting', 'commerce', 'economics', 'procurement',
         'fundraising', 'underwriting', 'actuarial', 'treasury',
         'food relief', 'hunger relief', 'disaster relief',
         'clinical trials', 'drug development', 'patient care',
@@ -259,27 +259,39 @@ class SkillCategorizer:
         """
         Rule-based categorization for a single term
         Returns: 'technical', 'soft', 'domain', or 'exclude'
+        
+        ⚠️ CRITICAL FIX: Checks SOFT_INDICATORS before TECHNICAL_INDICATORS to prevent
+        false matches. The issue was that single-character technical indicators (like 'r')
+        were matching as substrings in soft skills (e.g., "interpersonal", "presentation").
+        
+        By checking SOFT_INDICATORS first, we ensure soft skills are correctly identified
+        before technical substring matching can cause false positives.
         """
         term_lower = term.lower().strip()
         
         # Priority 1: Check if should be excluded (generic terms)
+        # Only exclude if the exclusion is an exact match or the term contains the exclusion
+        # (e.g., "data analytics" in "data analytics tools" → exclude)
+        # But NOT if exclusion contains term (e.g., "business intelligence" contains "business" → don't exclude)
         for exclusion in SkillCategorizer.GENERIC_EXCLUSIONS:
-            if exclusion == term_lower or exclusion in term_lower:
+            if exclusion == term_lower or (len(exclusion) <= len(term_lower) and exclusion in term_lower):
                 return 'exclude'
         
-        # Priority 2: Check technical (highest priority after exclusions)
-        for indicator in SkillCategorizer.TECHNICAL_INDICATORS:
-            if indicator in term_lower:
-                return 'technical'
-        
-        # Priority 3: Check soft skills
+        # ⭐ CRITICAL FIX: Check SOFT_INDICATORS BEFORE TECHNICAL_INDICATORS
+        # This prevents single-character technical indicators (like 'r') from
+        # incorrectly matching soft skills (e.g., "interpersonal", "presentation")
         for indicator in SkillCategorizer.SOFT_INDICATORS:
-            if indicator in term_lower:
+            if indicator == term_lower or indicator in term_lower:
                 return 'soft'
+        
+        # Priority 3: Check technical (after soft to avoid false matches)
+        for indicator in SkillCategorizer.TECHNICAL_INDICATORS:
+            if indicator == term_lower or indicator in term_lower:
+                return 'technical'
         
         # Priority 4: Check domain
         for indicator in SkillCategorizer.DOMAIN_INDICATORS:
-            if indicator in term_lower:
+            if indicator == term_lower or indicator in term_lower:
                 return 'domain'
         
         # Default: exclude if uncertain (better safe than wrong category)
