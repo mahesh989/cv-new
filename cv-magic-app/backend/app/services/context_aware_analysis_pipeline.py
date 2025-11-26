@@ -18,7 +18,7 @@ from pathlib import Path
 from app.unified_latest_file_selector import FileContext
 from app.services.jd_cache_manager import jd_cache_manager, JDCacheData
 from app.services.skill_extraction.skill_extraction_service import SkillExtractionService
-from app.services.skill_extraction.prompt_templates import SkillCategorizer
+from app.services.skill_extraction.prompt_templates import SkillCategorizer, get_skill_prompts
 from app.services.cv_jd_matching.cv_jd_matcher import CVJDMatcher
 from app.services.jd_analysis.jd_analyzer import JDAnalyzer
 from app.services.job_extraction_service import JobExtractionService
@@ -282,30 +282,39 @@ class ContextAwareAnalysisPipeline:
                 is_active=True
             )
             
-            # Use AI service to extract skills from CV text
-            cv_prompt = f"""
-            Analyze the following CV and extract skills, experience, and qualifications.
+            # Use centralized skill extraction prompt with proper categorization rules
+            skill_prompts = get_skill_prompts("CV", cv_text)
             
-            CV Content:
-            {cv_text}
+            # Extend prompt to request additional CV fields
+            cv_prompt = skill_prompts["user_prompt"] + """
+
+IMPORTANT: Your output must include ALL these fields in valid JSON format:
+
+{
+    "technical_skills": ["skill1", "skill2", ...],
+    "soft_skills": ["skill1", "skill2", ...],
+    "domain_keywords": ["domain1", "domain2", ...],
+    "experience_years": <number>,
+    "education": ["degree1", "degree2", ...],
+    "certifications": ["cert1", "cert2", ...],
+    "languages": ["lang1", "lang2", ...],
+    "summary": "Brief 2-3 sentence professional summary"
+}
+
+Extract experience_years by counting total years of professional experience mentioned.
+List education degrees/qualifications in reverse chronological order.
+Include any certifications, licenses, or professional qualifications.
+List all languages mentioned (both programming and human languages can be here).
+"""
             
-            Return a JSON object with the following structure:
-            {{
-                "technical_skills": ["skill1", "skill2", ...],
-                "soft_skills": ["skill1", "skill2", ...],
-                "experience_years": number,
-                "education": ["degree1", "degree2", ...],
-                "certifications": ["cert1", "cert2", ...],
-                "languages": ["lang1", "lang2", ...],
-                "summary": "Brief summary of the candidate"
-            }}
-            """
+            logger.debug(f"🔍 [CONTEXT_AWARE_PIPELINE] CV extraction using centralized prompt from prompt_templates.py")
             
             cv_response = await ai_service.generate_response(
                 prompt=cv_prompt,
+                system_prompt=skill_prompts["system_prompt"],  # Contains categorization rules
                 user=current_user,
                 temperature=0.0,
-                max_tokens=1000
+                max_tokens=1500  # Increased for extra fields
             )
             
             parsed_payload = self._parse_ai_structured_response(cv_response.content)
