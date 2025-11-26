@@ -404,7 +404,19 @@ class ContextAwareAnalysisPipeline:
                 else:
                     logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Cached analysis based on PROCESSED JD - valid")
                 
-                results.jd_skills = context.jd_cache_data.jd_skills
+                # Apply SkillCategorizer to cached JD skills
+                cached_jd_skills = context.jd_cache_data.jd_skills
+                if cached_jd_skills and isinstance(cached_jd_skills, dict):
+                    logger.debug(f"Cached JD skills BEFORE categorization - Technical: {cached_jd_skills.get('technical_skills', [])[:5]}")
+                    corrected = SkillCategorizer.recategorize_skills(cached_jd_skills)
+                    cached_jd_skills = {
+                        "technical_skills": corrected["technical_skills"],
+                        "soft_skills": corrected["soft_skills"],
+                        "domain_keywords": corrected["domain_keywords"]
+                    }
+                    logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to cached JD skills")
+                    logger.debug(f"Cached JD skills AFTER categorization - Technical: {cached_jd_skills.get('technical_skills', [])[:5]}")
+                results.jd_skills = cached_jd_skills
                 results.jd_analysis = context.jd_cache_data.jd_analysis
                 results.job_info = context.jd_cache_data.job_info
                 results.steps_skipped.append("jd_analysis_cached")
@@ -927,7 +939,17 @@ class ContextAwareAnalysisPipeline:
             if not results.jd_skills and results.jd_analysis:
                 results.jd_skills = self._summarize_jd_skills(results.jd_analysis)
             elif isinstance(jd_data, dict) and jd_data.get('jd_skills'):
-                results.jd_skills = jd_data.get('jd_skills', {})
+                # Apply SkillCategorizer to cached jd_skills too
+                cached_jd_skills = jd_data.get('jd_skills', {})
+                if cached_jd_skills:
+                    logger.debug(f"JD skills from cache BEFORE categorization - Domain: {cached_jd_skills.get('domain_keywords', [])}")
+                    corrected = SkillCategorizer.recategorize_skills(cached_jd_skills)
+                    cached_jd_skills["technical_skills"] = corrected["technical_skills"]
+                    cached_jd_skills["soft_skills"] = corrected["soft_skills"]
+                    cached_jd_skills["domain_keywords"] = corrected["domain_keywords"]
+                    logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to cached JD skills")
+                    logger.debug(f"JD skills from cache AFTER categorization - Domain: {cached_jd_skills['domain_keywords']}")
+                results.jd_skills = cached_jd_skills
             
             # Step 4: CV Skills Extraction
             cv_skills = await self._extract_cv_skills(context, results)
