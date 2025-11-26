@@ -1,12 +1,12 @@
 """
-Skill Extraction Prompts - Production Optimized
-Single unified prompt system for maximum efficiency and accuracy
+Skill Extraction Prompts - Production Optimized with Rule-Based Validation
+Single unified prompt system with automatic categorization correction
 
 Key Design:
-- Single prompt version (no verbose/optimized split)
-- Direct Python list output (no unused evidence generation)
-- Clear, non-contradictory rules
-- Optimized for cost and accuracy
+- Rule-based prompt (no hardcoded examples)
+- Direct Python list output
+- Automatic post-processing validation
+- Works for ANY IT job description
 """
 
 
@@ -16,8 +16,7 @@ class SkillExtractionPrompts:
     @staticmethod
     def get_system_prompt(document_type: str) -> str:
         """
-        System prompt - loaded once per conversation (cost-efficient)
-        Contains all extraction rules to minimize per-request token usage
+        System prompt - Universal rules that work for ANY job description
         """
         return f"""You are a precision skill extractor for {document_type}s. Follow these rules STRICTLY:
 
@@ -33,52 +32,316 @@ DEDUPLICATION (CRITICAL):
 - "analytical thinking" + "analytical skills" → KEEP ONLY "analytical thinking"
 - NEVER include both variations
 
-CATEGORIZATION (STRICT PRIORITY: Technical > Soft > Domain):
+═══════════════════════════════════════════════════════════════
+UNIVERSAL CATEGORIZATION RULES (Work for ANY job type)
+═══════════════════════════════════════════════════════════════
 
-TECHNICAL SKILLS - PUT THESE HERE, NOT IN DOMAIN:
-- Languages: Python, SQL, R, JavaScript, VBA
-- Tools: Power BI, Tableau, Excel, Salesforce, JIRA
-- Databases: PostgreSQL, MySQL, SQL Server, MSSQL, MongoDB
-- Cloud: AWS, Azure, GCP, Databricks, Snowflake
-- DATA PROCESSES (ALWAYS TECHNICAL): Data cleaning, Data transformation, Data preprocessing, ETL, Data mining, Statistical methods, Data modeling, Data warehousing, Data pipelines
-- OUTPUTS (ALWAYS TECHNICAL): Dashboards, Reports, Data visualizations
+RULE 1: TECHNICAL SKILLS
+A term is TECHNICAL if it meets ANY of these tests:
 
-SOFT SKILLS - ONLY if phrase contains "skill/skills/ability/abilities":
-- "numeracy skills" → SOFT (contains "skills")
-- "communication skills" → SOFT (contains "skills")  
-- "ability to collaborate" → SOFT (contains "ability")
-- "problem-solving abilities" → SOFT (contains "abilities")
-- "attention to detail" → SOFT (common soft skill phrase)
+TEST 1 - SOFTWARE/TOOL: "Can you install/download/purchase this?"
+  ✓ YES → TECHNICAL
+  Examples: Excel, Python, JIRA, Docker, Kubernetes, Salesforce
 
-DOMAIN KEYWORDS - ONLY industry/sector/regulatory terms:
-- Industries: Healthcare, Financial Services, Nonprofit, Charity, Education
-- Sectors: Food relief, Hunger relief, Social services
-- Regulatory: GDPR, HIPAA, NDIS, SOX
-- NEVER put data processes here (data cleaning, ETL, etc. are TECHNICAL)
-- EXCLUDE generic: "insights", "stakeholders", "best practices", "data-led insights"
+TEST 2 - EXECUTABLE PROCESS: "Can a computer execute/automate this?"
+  ✓ YES → TECHNICAL
+  Examples: data cleaning, ETL, data transformation, data warehousing,
+           statistical methods, API integration, unit testing, CI/CD
+
+TEST 3 - TECHNICAL ARTIFACT: "Is this created using software tools?"
+  ✓ YES → TECHNICAL
+  Examples: dashboards, data pipelines, APIs, reports, data models
+
+TEST 4 - PROGRAMMING LANGUAGE: "Used to write code or query data?"
+  ✓ YES → TECHNICAL
+  Examples: Python, SQL, JavaScript, R, VBA, DAX
+
+═══════════════════════════════════════════════════════════════
+
+RULE 2: SOFT SKILLS
+A term is SOFT if it meets BOTH:
+
+TEST 1 - HUMAN INTERACTION: "Requires human-to-human interaction?"
+TEST 2 - BEHAVIORAL: "Is it a behavioral trait or interpersonal skill?"
+  ✓ BOTH YES → SOFT SKILL
+  Examples: communication, leadership, collaboration, teamwork,
+           problem-solving, attention to detail, analytical thinking
+
+═══════════════════════════════════════════════════════════════
+
+RULE 3: DOMAIN KEYWORDS
+A term is DOMAIN if it meets ANY:
+
+TEST 1 - INDUSTRY/SECTOR: "Specific industry or business vertical?"
+  ✓ YES → DOMAIN
+  Examples: Healthcare, Finance, E-commerce, Nonprofit, Manufacturing
+
+TEST 2 - REGULATORY: "Regulation, standard, or compliance requirement?"
+  ✓ YES → DOMAIN
+  Examples: GDPR, HIPAA, SOX, ISO 27001, NDIS
+
+TEST 3 - BUSINESS DOMAIN: "Industry-specific business function?"
+  ✓ YES → DOMAIN
+  Examples: Clinical trials, Underwriting, Food relief, Accounting
+
+CRITICAL EXCLUSIONS - DO NOT PUT IN DOMAIN:
+✗ Generic terms: "stakeholders", "insights", "best practices", "data-driven"
+✗ Data processes: data cleaning, ETL (these are TECHNICAL)
+✗ Generic analytics: "data analytics" (too broad, not industry-specific)
+
+═══════════════════════════════════════════════════════════════
+
+PRIORITY ORDER (if term could fit multiple):
+TECHNICAL > SOFT > DOMAIN
+
+Examples:
+- "Machine Learning" → TECHNICAL (executable process)
+- "Agile" → TECHNICAL (methodology with specific practices)
+- "Cloud computing" → TECHNICAL (technical practice)
+- "Customer service" → SOFT (human interaction)
 
 OUTPUT: Return ONLY three Python lists, nothing else."""
 
     @staticmethod
     def get_skill_extraction_template(document_type: str, document_text: str) -> str:
         """
-        User prompt - compact extraction request with text and format specification
+        User prompt - Decision framework for categorization
         """
         return f"""Extract skills from this {document_type}:
 
 {document_text.strip()}
 
-BEFORE YOU OUTPUT, VERIFY:
-1. DATA PROCESSES in TECHNICAL? (data cleaning, data transformation, data warehousing, ETL → TECHNICAL, never Domain)
-2. NO DUPLICATES? (if "problem-solving" and "proactive problem solving" both found → keep ONLY "problem-solving")
-3. SOFT SKILLS have "skill/ability" context? (numeracy skills, communication skills → SOFT)
-4. DOMAIN is industry-only? (charity, food relief, nonprofit → DOMAIN. NOT data processes!)
-5. NO GENERIC terms in Domain? (remove: insights, stakeholders, best practices, data-led insights)
+═══════════════════════════════════════════════════════════════
+APPLY THESE TESTS TO EACH TERM:
+═══════════════════════════════════════════════════════════════
+
+FOR EACH EXTRACTED TERM, ASK:
+
+QUESTION 1: "Can I install this? OR Can a computer execute this?"
+├─ YES → TECHNICAL_SKILLS
+└─ NO  → Go to QUESTION 2
+
+QUESTION 2: "Human interaction + Behavioral trait?"
+├─ YES → SOFT_SKILLS
+└─ NO  → Go to QUESTION 3
+
+QUESTION 3: "Industry/Sector OR Regulatory term?"
+├─ YES → DOMAIN_KEYWORDS
+└─ NO  → EXCLUDE (too generic)
+
+═══════════════════════════════════════════════════════════════
+SELF-CHECK BEFORE OUTPUT:
+═══════════════════════════════════════════════════════════════
+
+TECHNICAL_SKILLS:
+[ ] All software/tools? (Excel, Python, Power BI)
+[ ] All data processes? (data cleaning, ETL, data transformation)
+[ ] All technical artifacts? (dashboards, APIs, pipelines)
+[ ] NO soft skills? (remove: communication, teamwork)
+[ ] NO generic terms? (remove: "insights", "stakeholders")
+
+SOFT_SKILLS:
+[ ] All human interaction + behavioral? (communication, leadership)
+[ ] NO duplicates? (keep shortest form only)
+[ ] NO technical tools? (remove: Excel, Python)
+
+DOMAIN_KEYWORDS:
+[ ] All industry-specific? (Healthcare, Nonprofit, Accounting)
+[ ] All regulatory? (GDPR, HIPAA, SOX)
+[ ] NO data processes? (remove: data cleaning, ETL)
+[ ] NO generic buzzwords? (remove: "insights", "data analytics")
 
 OUTPUT (exactly this format, nothing else):
 TECHNICAL_SKILLS = []
 SOFT_SKILLS = []
 DOMAIN_KEYWORDS = []"""
+
+
+class SkillCategorizer:
+    """
+    Rule-based categorizer - Automatically fixes LLM categorization mistakes
+    This runs AFTER LLM extraction as a validation layer
+    """
+    
+    # Technical indicators (substring matching - lowercase)
+    TECHNICAL_INDICATORS = {
+        # Programming languages
+        'python', 'sql', 'javascript', 'java', 'c++', 'r', 'scala', 'go',
+        'ruby', 'php', 'swift', 'kotlin', 'typescript', 'vba', 'matlab',
+        
+        # Tools & Software
+        'excel', 'power bi', 'tableau', 'looker', 'qlik', 'jira', 'confluence',
+        'salesforce', 'sap', 'oracle', 'git', 'github', 'gitlab', 'bitbucket',
+        
+        # Databases
+        'sql server', 'mssql', 'postgresql', 'mysql', 'mongodb', 'redis',
+        'cassandra', 'dynamodb', 'snowflake', 'bigquery', 'redshift',
+        
+        # Cloud platforms
+        'aws', 'azure', 'gcp', 'cloud', 'databricks', 'kubernetes', 'docker',
+        
+        # Data processes (ALWAYS TECHNICAL)
+        'data cleaning', 'data transformation', 'data preprocessing',
+        'data warehousing', 'data mining', 'data modeling', 'data pipeline',
+        'etl', 'elt', 'data integration', 'data migration', 'data collection',
+        
+        # Technical processes
+        'ci/cd', 'api', 'rest api', 'microservices', 'automation',
+        'testing', 'unit testing', 'integration testing', 'deployment',
+        'version control', 'containerization',
+        
+        # Analytics & ML
+        'machine learning', 'deep learning', 'nlp', 'natural language processing',
+        'computer vision', 'neural network', 'algorithm', 'statistical methods',
+        'regression', 'classification', 'clustering', 'time series',
+        
+        # Technical artifacts/outputs
+        'dashboard', 'data visualization', 'report', 'data model',
+        'architecture', 'framework', 'library', 'pipeline',
+        
+        # Methodologies (technical practices)
+        'agile', 'scrum', 'kanban', 'devops', 'lean', 'waterfall'
+    }
+    
+    # Soft skill indicators
+    SOFT_INDICATORS = {
+        'communication', 'collaboration', 'teamwork', 'leadership',
+        'interpersonal', 'presentation', 'negotiation', 'mentoring',
+        'coaching', 'facilitation', 'influencing',
+        'attention to detail', 'time management', 'organization',
+        'adaptability', 'flexibility', 'resilience', 'creativity',
+        'critical thinking', 'problem-solving', 'analytical thinking',
+        'decision-making', 'strategic thinking', 'innovation',
+        'stakeholder management', 'client relationship', 'customer service'
+    }
+    
+    # Domain indicators (industry/sector/regulatory only)
+    DOMAIN_INDICATORS = {
+        # Industries
+        'healthcare', 'health', 'medical', 'clinical', 'pharmaceutical',
+        'finance', 'financial', 'banking', 'insurance', 'investment',
+        'retail', 'e-commerce', 'ecommerce', 'consumer goods',
+        'manufacturing', 'automotive', 'aerospace', 'defense',
+        'telecom', 'telecommunications', 'media', 'entertainment',
+        'nonprofit', 'charity', 'ngo', 'social services',
+        'education', 'academic', 'university', 'school',
+        'government', 'public sector', 'municipal',
+        'energy', 'utilities', 'oil and gas', 'renewable',
+        'real estate', 'property', 'construction',
+        'logistics', 'transportation', 'supply chain',
+        'hospitality', 'tourism', 'food service',
+        
+        # Regulations & Compliance
+        'gdpr', 'hipaa', 'sox', 'sarbanes-oxley', 'pci-dss', 'pci dss',
+        'iso', 'iso 27001', 'iso 9001', 'ndis', 'finra', 'sec',
+        'fda', 'compliance', 'audit', 'regulatory',
+        
+        # Business domains (field-specific)
+        'accounting', 'commerce', 'economics', 'procurement',
+        'fundraising', 'underwriting', 'actuarial', 'treasury',
+        'food relief', 'hunger relief', 'disaster relief',
+        'clinical trials', 'drug development', 'patient care',
+        'risk management', 'fraud detection', 'credit scoring'
+    }
+    
+    # Generic terms to ALWAYS EXCLUDE from domain
+    GENERIC_EXCLUSIONS = {
+        'stakeholders', 'insights', 'best practices', 'data-driven',
+        'decision-making', 'business processes', 'strategy', 'strategic',
+        'innovation', 'trends', 'patterns', 'analysis', 'reporting',
+        'data analytics', 'analytics', 'business intelligence',
+        'performance', 'optimization', 'improvement', 'efficiency',
+        'quality', 'accuracy', 'integrity', 'management'
+    }
+    
+    @staticmethod
+    def categorize_term(term: str) -> str:
+        """
+        Rule-based categorization for a single term
+        Returns: 'technical', 'soft', 'domain', or 'exclude'
+        """
+        term_lower = term.lower().strip()
+        
+        # Priority 1: Check if should be excluded (generic terms)
+        for exclusion in SkillCategorizer.GENERIC_EXCLUSIONS:
+            if exclusion == term_lower or exclusion in term_lower:
+                return 'exclude'
+        
+        # Priority 2: Check technical (highest priority after exclusions)
+        for indicator in SkillCategorizer.TECHNICAL_INDICATORS:
+            if indicator in term_lower:
+                return 'technical'
+        
+        # Priority 3: Check soft skills
+        for indicator in SkillCategorizer.SOFT_INDICATORS:
+            if indicator in term_lower:
+                return 'soft'
+        
+        # Priority 4: Check domain
+        for indicator in SkillCategorizer.DOMAIN_INDICATORS:
+            if indicator in term_lower:
+                return 'domain'
+        
+        # Default: exclude if uncertain (better safe than wrong category)
+        return 'exclude'
+    
+    @staticmethod
+    def recategorize_skills(skills_dict: dict) -> dict:
+        """
+        Re-categorize ALL skills using rule-based logic
+        This fixes any LLM categorization mistakes automatically
+        
+        Args:
+            skills_dict: Dict with 'technical_skills', 'soft_skills', 'domain_keywords'
+        
+        Returns:
+            Dict with corrected categorization
+        """
+        # Collect all unique terms from all categories
+        all_terms = []
+        for category in ['technical_skills', 'soft_skills', 'domain_keywords']:
+            all_terms.extend(skills_dict.get(category, []))
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_terms = []
+        for term in all_terms:
+            term_lower = term.lower()
+            if term_lower not in seen:
+                seen.add(term_lower)
+                unique_terms.append(term)
+        
+        # Recategorize each term using rules
+        technical = []
+        soft = []
+        domain = []
+        
+        for term in unique_terms:
+            category = SkillCategorizer.categorize_term(term)
+            if category == 'technical':
+                technical.append(term)
+            elif category == 'soft':
+                soft.append(term)
+            elif category == 'domain':
+                domain.append(term)
+            # 'exclude' terms are dropped
+        
+        # Deduplicate soft skills (keep shortest variant)
+        soft_deduped = {}
+        for skill in soft:
+            # Remove common qualifiers to find base skill
+            base = skill.lower()
+            for qualifier in ['strong ', 'excellent ', 'proactive ', 'effective ', 'good ']:
+                base = base.replace(qualifier, '')
+            
+            if base not in soft_deduped or len(skill) < len(soft_deduped[base]):
+                soft_deduped[base] = skill
+        
+        return {
+            'technical_skills': sorted(technical),
+            'soft_skills': sorted(soft_deduped.values()),
+            'domain_keywords': sorted(domain)
+        }
 
 
 def get_prompt(key: str, **kwargs) -> str:
@@ -103,28 +366,25 @@ def get_prompt(key: str, **kwargs) -> str:
     document_type = kwargs.get("document_type", "document")
 
     if key == "combined_structured":
-        # Main extraction prompt
+        # Main extraction prompt with universal rules
         extractor = SkillExtractionPrompts()
         return extractor.get_skill_extraction_template(document_type, text)
     
     elif key == "technical_skills":
         return f"""Extract ONLY technical skills from this text. Return a comma-separated list.
 
-RULES:
-1. VERBATIM - Use exact words from text
-2. NO QUALIFIERS - Remove "Advanced", "Expert", "5+ years"
-3. TECHNICAL ONLY - Programming languages, tools, databases, cloud platforms, technical processes
+UNIVERSAL RULE: A skill is TECHNICAL if you can answer YES to:
+"Can I install/download this?" OR "Can a computer execute this?"
 
 WHAT TO EXTRACT:
-✓ Languages: Python, SQL, R, JavaScript
-✓ Tools: Power BI, Tableau, Excel, Salesforce
-✓ Databases: PostgreSQL, MySQL, SQL Server
-✓ Cloud: AWS, Azure, GCP
-✓ Processes: Data cleaning, ETL, Data preprocessing
+✓ Software/Tools (Excel, Python, JIRA, Docker)
+✓ Programming Languages (SQL, JavaScript, R)
+✓ Data Processes (data cleaning, ETL, data transformation)
+✓ Technical Artifacts (dashboards, APIs, pipelines)
 
 WHAT TO AVOID:
 ✗ Soft skills (Communication, Leadership)
-✗ Domain terms (Healthcare, Marketing)
+✗ Domain terms (Healthcare, Finance)
 ✗ Generic words (Analysis, Management)
 
 Text:
@@ -135,22 +395,18 @@ Return format: skill1, skill2, skill3 (comma-separated, no brackets)"""
     elif key == "soft_skills":
         return f"""Extract ONLY soft skills from this text. Return a comma-separated list.
 
-RULES:
-1. MUST BE EXPLICITLY STATED - Look for "Strong [skill]", "Ability to [action]", "[Skill] skills"
-2. VERBATIM - Use exact wording (without qualifiers)
-3. NO INFERENCE - Don't assume skills from actions
+UNIVERSAL RULE: A skill is SOFT if it requires:
+Human interaction + Behavioral trait
 
 WHAT TO EXTRACT (if explicitly mentioned):
 ✓ Communication, Collaboration, Teamwork, Leadership
 ✓ Problem-solving, Analytical thinking, Critical thinking
-✓ Stakeholder management, Time management, Project management
-✓ Attention to detail, Adaptability
+✓ Attention to detail, Time management, Adaptability
 
 WHAT TO AVOID:
-✗ Technical skills (Python, SQL)
-✗ Domain terms (Healthcare, Marketing)
-✗ Inferred skills ("led team" ≠ "Leadership" unless stated)
-✗ Personality traits ("motivated" unless "self-motivated" stated as skill)
+✗ Technical skills (Python, SQL, Excel)
+✗ Domain terms (Healthcare, Finance)
+✗ Generic terms (Analysis, Management)
 
 Text:
 {text}
@@ -160,23 +416,18 @@ Return format: skill1, skill2, skill3 (comma-separated, no brackets)"""
     elif key == "domain_keywords":
         return f"""Extract ONLY domain-specific keywords from this text. Return a comma-separated list.
 
-RULES:
-1. VERBATIM - Use exact phrases from text
-2. DOMAIN-SPECIFIC - Industry/business/sector terms only
-3. NO GENERIC TERMS - Exclude common buzzwords
-4. NOT TECHNICAL TOOLS - Those belong in technical skills
+UNIVERSAL RULE: A term is DOMAIN if it's:
+Industry/Sector OR Regulatory/Compliance term
 
 WHAT TO EXTRACT:
-✓ Industry sectors: Healthcare, Financial Services, E-commerce, Nonprofit
-✓ Business functions: Fundraising, Risk management, Procurement
-✓ Regulatory: GDPR, HIPAA, NDIS, SOX compliance
-✓ Domain processes: Clinical trials, Social procurement, Food relief
+✓ Industries: Healthcare, Finance, E-commerce, Nonprofit
+✓ Regulations: GDPR, HIPAA, SOX, ISO 27001
+✓ Domain Functions: Clinical trials, Underwriting, Food relief
 
 WHAT TO AVOID (TOO GENERIC):
-✗ "Stakeholders", "Insights", "Trends", "Analysis"
-✗ "Best practices", "Strategy", "Innovation"
+✗ "Stakeholders", "Insights", "Best practices", "Data analytics"
 ✗ Technical tools (SQL, Power BI)
-✗ Soft skills (Communication, Leadership)
+✗ Data processes (data cleaning, ETL)
 
 Text:
 {text}
@@ -209,24 +460,24 @@ def get_skill_prompts(document_type: str, document_text: str, use_optimized: boo
     Returns:
         Dict with 'system_prompt' and 'user_prompt' keys
     """
-    # Note: use_optimized parameter is kept for backward compatibility but ignored
-    # All prompts are now optimized by default
     return {
         "system_prompt": SkillExtractionPrompts.get_system_prompt(document_type),
         "user_prompt": SkillExtractionPrompts.get_skill_extraction_template(document_type, document_text),
-        "expected_max_tokens": 500  # Optimized output size
+        "expected_max_tokens": 500,
+        "prompt_version": "optimized"  # Always optimized with rule-based validation
     }
 
 
 def validate_extraction_quality(skills_dict: dict) -> dict:
     """
     Validate extracted skills meet quality standards
+    NOW WITH AUTOMATIC CORRECTION
     
     Args:
         skills_dict: Dict with 'technical_skills', 'soft_skills', 'domain_keywords'
         
     Returns:
-        Dict with validation results and warnings
+        Dict with validation results, warnings, and CORRECTED skills
     """
     warnings = []
     
@@ -234,13 +485,24 @@ def validate_extraction_quality(skills_dict: dict) -> dict:
     generic_terms = {
         'stakeholders', 'insights', 'trends', 'decision-making', 
         'business processes', 'analysis', 'reporting', 'management',
-        'data-driven', 'best practices', 'strategy', 'innovation'
+        'data-driven', 'best practices', 'strategy', 'innovation',
+        'data analytics'
     }
     
     domain_keywords = [k.lower() for k in skills_dict.get('domain_keywords', [])]
     for term in generic_terms:
         if term in domain_keywords:
-            warnings.append(f"Generic domain term detected: '{term}' - consider removing")
+            warnings.append(f"Generic domain term detected: '{term}' - will be removed")
+    
+    # Check for data processes in wrong category
+    data_processes = {
+        'data cleaning', 'data transformation', 'data warehousing',
+        'etl', 'data mining', 'data preprocessing', 'data modeling'
+    }
+    
+    for term in domain_keywords:
+        if term.lower() in data_processes:
+            warnings.append(f"Data process in Domain: '{term}' - should be Technical")
     
     # Check for qualifiers
     qualifier_words = [
@@ -271,14 +533,19 @@ def validate_extraction_quality(skills_dict: dict) -> dict:
     soft_domain_overlap = soft_set & domain_set
     
     if tech_soft_overlap:
-        warnings.append(f"Duplicates in Technical & Soft Skills: {list(tech_soft_overlap)[:3]}")
+        warnings.append(f"Duplicates in Technical & Soft: {list(tech_soft_overlap)[:3]}")
     if tech_domain_overlap:
         warnings.append(f"Duplicates in Technical & Domain: {list(tech_domain_overlap)[:3]}")
     if soft_domain_overlap:
-        warnings.append(f"Duplicates in Soft Skills & Domain: {list(soft_domain_overlap)[:3]}")
+        warnings.append(f"Duplicates in Soft & Domain: {list(soft_domain_overlap)[:3]}")
+    
+    # AUTOMATIC CORRECTION using rule-based categorizer
+    corrected_skills = SkillCategorizer.recategorize_skills(skills_dict)
     
     return {
         'is_valid': len(warnings) == 0,
         'warnings': warnings,
-        'quality_score': max(0, 100 - (len(warnings) * 10))
+        'quality_score': max(0, 100 - (len(warnings) * 10)),
+        'corrected_skills': corrected_skills,  # NEW: Auto-corrected version
+        'corrections_applied': len(warnings) > 0
     }

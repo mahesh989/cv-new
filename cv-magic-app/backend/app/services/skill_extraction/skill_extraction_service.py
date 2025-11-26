@@ -17,7 +17,7 @@ from app.models.cv import CV, JobApplication
 from app.services.cv_processor import cv_processor
 from app.services.job_scraper import scrape_job_description_async
 from app.ai.ai_service import ai_service
-from .prompt_templates import SkillExtractionPrompts, get_skill_prompts
+from .prompt_templates import SkillExtractionPrompts, get_skill_prompts, SkillCategorizer
 from .response_parser import SkillExtractionParser
 from .result_saver import result_saver
 
@@ -316,6 +316,13 @@ class SkillExtractionService:
         if not parsed_skills["parsing_success"]:
             raise Exception(f"Failed to parse CV skills: {parsed_skills.get('error', 'Unknown error')}")
         
+        # Apply rule-based validation to fix LLM categorization mistakes
+        corrected_skills = SkillCategorizer.recategorize_skills(parsed_skills)
+        parsed_skills["technical_skills"] = corrected_skills["technical_skills"]
+        parsed_skills["soft_skills"] = corrected_skills["soft_skills"]
+        parsed_skills["domain_keywords"] = corrected_skills["domain_keywords"]
+        logger.info(f"✅ Applied rule-based skill recategorization for CV")
+        
         # Cache results in database
         cv_record.technical_skills = json.dumps(parsed_skills["technical_skills"])
         cv_record.soft_skills = json.dumps(parsed_skills["soft_skills"])
@@ -377,6 +384,13 @@ class SkillExtractionService:
         
         if not parsed_skills["parsing_success"]:
             raise Exception(f"Failed to parse JD skills: {parsed_skills.get('error', 'Unknown error')}")
+        
+        # Apply rule-based validation to fix LLM categorization mistakes
+        corrected_skills = SkillCategorizer.recategorize_skills(parsed_skills)
+        parsed_skills["technical_skills"] = corrected_skills["technical_skills"]
+        parsed_skills["soft_skills"] = corrected_skills["soft_skills"]
+        parsed_skills["domain_keywords"] = corrected_skills["domain_keywords"]
+        logger.info(f"✅ Applied rule-based skill recategorization for JD")
         
         # Cache results in database
         skills_cache = {
