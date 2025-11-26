@@ -18,6 +18,7 @@ from pathlib import Path
 from app.unified_latest_file_selector import FileContext
 from app.services.jd_cache_manager import jd_cache_manager, JDCacheData
 from app.services.skill_extraction.skill_extraction_service import SkillExtractionService
+from app.services.skill_extraction.prompt_templates import SkillCategorizer
 from app.services.cv_jd_matching.cv_jd_matcher import CVJDMatcher
 from app.services.jd_analysis.jd_analyzer import JDAnalyzer
 from app.services.job_extraction_service import JobExtractionService
@@ -343,6 +344,22 @@ class ContextAwareAnalysisPipeline:
                 "languages": parsed_payload.get("languages", []),
                 "summary": parsed_payload.get("summary") or "CV analysis completed"
             }
+            
+            # Apply rule-based categorization to fix LLM mistakes
+            logger.debug(f"CV skills BEFORE categorization - Domain: {cv_skills.get('domain_keywords', [])}")
+            skills_for_categorization = {
+                "technical_skills": cv_skills.get("technical_skills", []),
+                "soft_skills": cv_skills.get("soft_skills", []),
+                "domain_keywords": cv_skills.get("domain_keywords", [])
+            }
+            corrected = SkillCategorizer.recategorize_skills(skills_for_categorization)
+            
+            # Update with corrected categorization (keep other fields unchanged)
+            cv_skills["technical_skills"] = corrected["technical_skills"]
+            cv_skills["soft_skills"] = corrected["soft_skills"]
+            cv_skills["domain_keywords"] = corrected["domain_keywords"]
+            logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to CV skills")
+            logger.debug(f"CV skills AFTER categorization - Domain: {cv_skills['domain_keywords']}")
             
             return {
                 "cv_skills": cv_skills,
@@ -1192,6 +1209,16 @@ class ContextAwareAnalysisPipeline:
         
         for key in summary:
             summary[key] = sorted(summary[key], key=lambda s: s.lower())
+        
+        # Apply rule-based categorization to fix LLM mistakes
+        logger.debug(f"JD skills BEFORE categorization - Domain: {summary.get('domain_keywords', [])}")
+        corrected = SkillCategorizer.recategorize_skills(summary)
+        summary["technical_skills"] = corrected["technical_skills"]
+        summary["soft_skills"] = corrected["soft_skills"]
+        summary["domain_keywords"] = corrected["domain_keywords"]
+        logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to JD skills")
+        logger.debug(f"JD skills AFTER categorization - Domain: {summary['domain_keywords']}")
+        
         return summary
     
     def _persist_initial_skills_snapshot(
