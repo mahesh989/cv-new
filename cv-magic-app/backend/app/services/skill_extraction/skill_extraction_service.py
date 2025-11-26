@@ -304,6 +304,9 @@ class SkillExtractionService:
             max_tokens=max_tokens
         )
         
+        # 🔍 DEBUG: Log raw LLM response for troubleshooting
+        logger.info(f"🔍 RAW CV LLM RESPONSE:\n{ai_response.content}")
+        
         # Parse response using appropriate parser based on prompt version
         # Optimized parser is faster and skips normalization (optimized prompts output clean skills)
         if self.use_optimized_prompts:
@@ -373,6 +376,9 @@ class SkillExtractionService:
             temperature=0.0,
             max_tokens=max_tokens
         )
+        
+        # 🔍 DEBUG: Log raw LLM response for troubleshooting
+        logger.info(f"🔍 RAW JD LLM RESPONSE:\n{ai_response.content}")
         
         # Parse response using appropriate parser based on prompt version
         if self.use_optimized_prompts:

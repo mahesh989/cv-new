@@ -31,17 +31,28 @@ PREFERRED KEYWORDS - Extract from text that uses softer/optional language:
 - From sections like "Preferred", "Nice to Have", "Desirable"
 
 CATEGORIZATION GUIDELINES:
-1. **Technical Skills**: Programming languages, software tools, frameworks, databases, technologies, platforms
-   - Examples: SQL, Python, Power BI, Tableau, Excel, VBA, AWS, Azure, Git, Docker
+
+1. **Technical Skills**: Programming languages, software tools, frameworks, databases, technologies, platforms, AND technical processes
+   - Languages/Tools: SQL, Python, Power BI, Tableau, Excel, VBA, AWS, Azure, Git, Docker
+   - Technical Processes: Data cleaning, Data transformation, ETL, Data modeling, Data mining, Statistical methods
+   - NOTE: Data processes are TECHNICAL skills, not domain knowledge
    
 2. **Soft Skills**: Communication, leadership, teamwork, problem-solving, analytical thinking, interpersonal skills
-   - Examples: Communication, Leadership, Project Management, Teamwork, Problem Solving, Analytical Thinking
+   - Examples: Communication, Leadership, Project Management, Teamwork, Problem Solving, Analytical Thinking, Numeracy skills
    
 3. **Experience**: Years of experience, seniority levels, role-specific experience requirements
    - Examples: "2+ years experience", "Senior level", "5+ years preferred", "Entry level"
    
-4. **Domain Knowledge**: Industry knowledge, business processes, methodologies, certifications, sector expertise
-   - Examples: "Data warehouse", "Marketing campaigns", "Financial modeling", "Agile methodology", "GDPR compliance"
+4. **Domain Knowledge**: Industry sectors, educational backgrounds, regulatory knowledge, sector-specific terms
+   - Industry Sectors: Healthcare, Finance, E-commerce, Nonprofit, Retail, Manufacturing
+   - Educational Backgrounds: Accounting, Commerce, Business, Economics, Marketing, Data Analytics (when mentioned as "background in X" or "degree in X")
+   - Regulatory/Compliance: GDPR, HIPAA, SOX, ISO standards, NDIS
+   - Sector-specific: Clinical trials, Underwriting, Food relief, Hunger relief, Charity
+   
+   **What NOT to include in domain_knowledge:**
+   - Technical processes (data cleaning, ETL, data transformation → these are TECHNICAL)
+   - Generic terms (stakeholders, insights, best practices, data-led insights)
+   - Broad technical fields (data analytics, business intelligence → too generic)
 
 EXTRACTION GUIDELINES:
 1. Focus on concrete, actionable keywords (technologies, tools, methodologies, skills)
@@ -57,20 +68,28 @@ Respond with a JSON object only, no additional text:
 {
     "experience_years": number_or_null,
     "required_skills": {
-        "technical": ["SQL", "Power BI", "VBA"],
-        "soft_skills": ["communication", "project management"],
-        "domain_knowledge": ["data warehouse", "marketing campaigns"]
+        "technical": ["SQL", "Power BI", "Data cleaning", "Data transformation"],
+        "soft_skills": ["communication", "numeracy skills", "problem-solving"],
+        "domain_knowledge": ["Accounting", "Commerce", "Healthcare", "GDPR"]
     },
     "preferred_skills": {
-        "technical": ["Tableau", "Python"],
+        "technical": ["Tableau", "Python", "ETL"],
         "soft_skills": ["leadership"],
-        "domain_knowledge": ["machine learning"]
+        "domain_knowledge": ["Finance", "Marketing"]
     }
 }"""
 
 JD_ANALYSIS_USER_PROMPT = """Analyze the following job description and extract required and preferred keywords/skills with proper categorization:
 
 {job_description}
+
+IMPORTANT EXTRACTION RULES:
+1. When you see "background from X, Y, Z" or "degree in X" → extract X, Y, Z as domain_knowledge
+   Example: "background from Accounting, Commerce, Business" → domain_knowledge: ["Accounting", "Commerce", "Business"]
+2. Technical processes (data cleaning, ETL, data transformation, data mining) → TECHNICAL skills, NOT domain_knowledge
+3. Industry sectors (Healthcare, Finance, Nonprofit, Charity) → domain_knowledge
+4. Regulatory terms (GDPR, HIPAA, NDIS) → domain_knowledge
+5. Deduplicate: If "problem-solving" and "proactive problem solving" both appear → keep only "problem-solving"
 
 Remember to:
 1. Classify keywords based on the language context they appear in

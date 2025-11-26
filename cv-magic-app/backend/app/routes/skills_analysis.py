@@ -3474,6 +3474,9 @@ async def perform_preliminary_skills_analysis(
         )
         cv_raw_response = cv_structured_response.content
         
+        # 🔍 DEBUG: Log raw CV LLM response for troubleshooting
+        logger.info(f"🔍 RAW CV LLM RESPONSE:\n{cv_raw_response}")
+        
         # Parse the structured response using appropriate parser
         cv_parser = SkillExtractionParser()
         if use_optimized:
@@ -3527,6 +3530,9 @@ async def perform_preliminary_skills_analysis(
             max_tokens=jd_max_tokens
         )
         jd_raw_response = jd_structured_response.content
+        
+        # 🔍 DEBUG: Log raw JD LLM response for troubleshooting
+        logger.info(f"🔍 RAW JD LLM RESPONSE:\n{jd_raw_response}")
         
         # Parse the structured response using appropriate parser
         jd_parser = SkillExtractionParser()
