@@ -164,10 +164,13 @@ class SkillCategorizer:
     """
     
     # Technical indicators (substring matching - lowercase)
+    # ⚠️ IMPORTANT: Single-character indicators (like 'r') are handled separately
+    # to avoid false positives (e.g., 'r' matching 'charity')
     TECHNICAL_INDICATORS = {
-        # Programming languages
-        'python', 'sql', 'javascript', 'java', 'c++', 'r', 'scala', 'go',
+        # Programming languages (excluding single-char 'r' - handled in EXACT_MATCH_ONLY)
+        'python', 'sql', 'javascript', 'java', 'c++', 'scala',  # 'go' in EXACT_MATCH
         'ruby', 'php', 'swift', 'kotlin', 'typescript', 'vba', 'matlab',
+        'r programming', 'r language', 'r studio', 'rstudio',  # R with context
         
         # Tools & Software
         'excel', 'power bi', 'tableau', 'looker', 'qlik', 'jira', 'confluence',
@@ -254,32 +257,40 @@ class SkillCategorizer:
         'quality', 'accuracy', 'integrity', 'management'
     }
     
+    # Single-character or short indicators that must match EXACTLY (no substring matching)
+    # These would cause false positives with substring matching (e.g., 'r' in 'charity')
+    EXACT_MATCH_INDICATORS = {
+        'r': 'technical',      # R programming language
+        'c': 'technical',      # C programming language
+        'go': 'technical',     # Go programming language (also matches 'algorithm' with substring)
+    }
+    
     @staticmethod
     def categorize_term(term: str) -> str:
         """
         Rule-based categorization for a single term
         Returns: 'technical', 'soft', 'domain', or 'exclude'
         
-        ⚠️ CRITICAL FIX: Checks SOFT_INDICATORS before TECHNICAL_INDICATORS to prevent
-        false matches. The issue was that single-character technical indicators (like 'r')
-        were matching as substrings in soft skills (e.g., "interpersonal", "presentation").
-        
-        By checking SOFT_INDICATORS first, we ensure soft skills are correctly identified
-        before technical substring matching can cause false positives.
+        ⚠️ CRITICAL FIX: 
+        1. Check EXACT_MATCH_INDICATORS first for single-char terms (e.g., 'r', 'c')
+        2. Check SOFT_INDICATORS before TECHNICAL_INDICATORS to prevent false matches
+        3. Use substring matching only for multi-character indicators
         """
         term_lower = term.lower().strip()
         
+        # Priority 0: Check exact-match-only indicators (single chars like 'r', 'c')
+        # These are checked FIRST because they require exact match to avoid false positives
+        # e.g., "R" should be technical, but "charity" should NOT match 'r'
+        if term_lower in SkillCategorizer.EXACT_MATCH_INDICATORS:
+            return SkillCategorizer.EXACT_MATCH_INDICATORS[term_lower]
+        
         # Priority 1: Check if should be excluded (generic terms)
         # Only exclude if the exclusion is an exact match or the term contains the exclusion
-        # (e.g., "data analytics" in "data analytics tools" → exclude)
-        # But NOT if exclusion contains term (e.g., "business intelligence" contains "business" → don't exclude)
         for exclusion in SkillCategorizer.GENERIC_EXCLUSIONS:
             if exclusion == term_lower or (len(exclusion) <= len(term_lower) and exclusion in term_lower):
                 return 'exclude'
         
-        # ⭐ CRITICAL FIX: Check SOFT_INDICATORS BEFORE TECHNICAL_INDICATORS
-        # This prevents single-character technical indicators (like 'r') from
-        # incorrectly matching soft skills (e.g., "interpersonal", "presentation")
+        # Priority 2: Check SOFT_INDICATORS BEFORE TECHNICAL_INDICATORS
         for indicator in SkillCategorizer.SOFT_INDICATORS:
             if indicator == term_lower or indicator in term_lower:
                 return 'soft'
