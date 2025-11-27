@@ -522,35 +522,14 @@ class AIRecommendationGenerator:
         # Title
         lines.append(f"# CV Tailoring Strategy Report for {company}\n")
         
-        # Priority Gaps
+        # Immediate Action Required - Missing Keywords
         priority_gaps = json_data.get("priority_gaps", {})
         if priority_gaps:
-            lines.append("## Priority Gap Analysis\n")
-            
-            # Keyword coverage gaps
-            keyword_gaps = priority_gaps.get("keyword_coverage_gaps", {})
-            if keyword_gaps:
-                lines.append("**Keyword Coverage Gaps:**")
-                lines.append(f"- Technical Gap: {keyword_gaps.get('technical_gap_percentage', 0):.1f}%")
-                lines.append(f"- Soft Skills Gap: {keyword_gaps.get('soft_gap_percentage', 0):.1f}%")
-                lines.append(f"- Domain Gap: {keyword_gaps.get('domain_gap_percentage', 0):.1f}%")
-                lines.append(f"- Overall Keyword Gap: {keyword_gaps.get('overall_keyword_gap', 0):.1f}%\n")
-            
-            # Component gaps
-            component_gaps = priority_gaps.get("component_gaps", {})
-            if component_gaps:
-                lines.append("**Component Alignment Gaps:**")
-                lines.append(f"- Technical Depth Gap: {component_gaps.get('technical_depth_gap', 0):.1f}%")
-                lines.append(f"- Experience Alignment Gap: {component_gaps.get('experience_alignment_gap', 0):.1f}%")
-                lines.append(f"- Industry Fit Gap: {component_gaps.get('industry_fit_gap', 0):.1f}%")
-                lines.append(f"- Seniority Alignment Gap: {component_gaps.get('seniority_alignment_gap', 0):.1f}%\n")
-            
-            # Immediate action items
             immediate = priority_gaps.get("immediate_action_items", {})
             if immediate:
                 category1 = immediate.get("category1_missing_counts", {})
                 if category1:
-                    lines.append("**Immediate Action Required (Missing Keywords):**")
+                    lines.append("## Immediate Action Required (Missing Keywords)\n")
                     lines.append(f"- Technical: {category1.get('technical', 0)}")
                     lines.append(f"- Soft Skills: {category1.get('soft', 0)}")
                     lines.append(f"- Domain: {category1.get('domain', 0)}")
