@@ -81,7 +81,7 @@ class _DebugLogsWidgetState extends State<DebugLogsWidget> {
         .pollLogs(
           lines: widget.lines,
           filterKeyword: widget.filterKeyword,
-          interval: const Duration(seconds: 2),
+          interval: const Duration(seconds: 10),  // Changed from 2s to 10s
         )
         .listen((result) {
       if (mounted) {

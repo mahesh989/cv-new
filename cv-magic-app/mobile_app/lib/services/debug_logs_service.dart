@@ -67,7 +67,7 @@ class DebugLogsService {
   Stream<Map<String, dynamic>> pollLogs({
     int lines = 100,
     String? filterKeyword,
-    Duration interval = const Duration(seconds: 2),
+    Duration interval = const Duration(seconds: 10),  // Changed from 2s to 10s
   }) async* {
     while (true) {
       try {

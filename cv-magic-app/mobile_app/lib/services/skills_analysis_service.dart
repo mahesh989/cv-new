@@ -502,14 +502,15 @@ class SkillsAnalysisService {
   }
 
   /// Wait for complete analysis results with polling
+  /// Poll interval increased to 10 seconds after initial data loads to reduce API calls
   static Future<Map<String, dynamic>?> waitForCompleteResults(String company,
-      {int maxWaitTimeSeconds = 30}) async {
+      {int maxWaitTimeSeconds = 120}) async {
     print('🔄 [ATS_DEBUG] ===== waitForCompleteResults START =====');
     print('   Company: $company');
     print('   Max wait time: $maxWaitTimeSeconds seconds');
 
-    const pollInterval = Duration(seconds: 2);
-    final maxAttempts = maxWaitTimeSeconds ~/ 2;
+    const pollInterval = Duration(seconds: 10);  // Changed from 2s to 10s
+    final maxAttempts = maxWaitTimeSeconds ~/ 10;  // Adjusted for new interval
     print('   Max attempts: $maxAttempts');
     print('   Poll interval: ${pollInterval.inSeconds} seconds');
 
@@ -519,8 +520,8 @@ class SkillsAnalysisService {
       try {
         final completeResults = await getCompleteAnalysisResults(company);
         if (completeResults != null) {
-          print(
-              '✅ [ATS_DEBUG] Complete results obtained after ${attempt * 2} seconds');
+        print(
+            '✅ [ATS_DEBUG] Complete results obtained after ${attempt * 10} seconds');
           print('   Result keys: ${completeResults.keys.toList()}');
           print('   Has ATS: ${completeResults.containsKey('ats_score')}');
           print(
