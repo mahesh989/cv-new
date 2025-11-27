@@ -285,8 +285,56 @@ class ContextAwareAnalysisPipeline:
             # Use centralized skill extraction prompt with proper categorization rules
             skill_prompts = get_skill_prompts("CV", cv_text)
             
-            # Extend prompt to request additional CV fields
+            # Extend prompt with CV-SPECIFIC extraction rules + additional fields
             cv_prompt = skill_prompts["user_prompt"] + """
+
+═══════════════════════════════════════════════════════════════
+CV-SPECIFIC EXTRACTION RULES
+═══════════════════════════════════════════════════════════════
+
+**RULE 1: Parse Piped/Slashed Skills**
+If you see skills separated by pipes (|) or slashes (/), extract each one:
+- "Python|SQL|Machine Learning" → Extract ["Python", "SQL", "Machine Learning"]
+- "Tableau/Power BI" → Extract ["Tableau", "Power BI"]
+
+**RULE 2: Extract from Experience Descriptions**
+Don't just look at skills section - extract from work experience too:
+
+Action Verbs → Technical Skills:
+- "Built CV Agent with Flutter/Dart" → Extract ["Flutter", "Dart"]
+- "Implemented algorithms using PyTorch" → Extract ["PyTorch"]
+- "Automated ETL pipeline" → Extract ["ETL", "pipeline automation"]
+- "Created Tableau dashboards" → Extract ["Tableau", "dashboard development"]
+- "Used scikit-learn for..." → Extract ["scikit-learn"]
+- "Deployed on AWS" → Extract ["AWS"]
+
+Action Verbs → Soft Skills:
+- "Collaborated with teams" → Extract "collaboration"
+- "Optimized customer support" → Extract "problem-solving"
+- "Analyzed client databases" → Extract "analytical thinking"
+- "Evaluated and improved" → Extract "critical thinking"
+- "Provided detailed feedback" → Extract "attention to detail"
+
+**RULE 3: Extract Domain from Industry Mentions**
+Look for industry/sector mentions throughout CV:
+
+From Experience:
+- "property tech" → Extract as domain_keyword
+- "construction" → Extract as domain_keyword
+- "AI sectors" → Extract "AI" as domain_keyword
+
+From Projects:
+- "Heart Attack Risk Prediction" → Extract "Healthcare" as domain_keyword
+- Healthcare/medical projects → Extract relevant industry
+
+**RULE 4: Extract Technologies from Projects**
+Parse project descriptions for specific technologies:
+- "Built with PyTorch" → Extract "PyTorch"
+- "Used scikit-learn" → Extract "scikit-learn"
+- "TensorFlow model" → Extract "TensorFlow"
+- "Statistical Analysis" → Extract "Statistical Analysis"
+
+═══════════════════════════════════════════════════════════════
 
 IMPORTANT: Your output must include ALL these fields in valid JSON format:
 
@@ -301,10 +349,12 @@ IMPORTANT: Your output must include ALL these fields in valid JSON format:
     "summary": "Brief 2-3 sentence professional summary"
 }
 
-Extract experience_years by counting total years of professional experience mentioned.
-List education degrees/qualifications in reverse chronological order.
-Include any certifications, licenses, or professional qualifications.
-List all languages mentioned (both programming and human languages can be here).
+CRITICAL REMINDERS:
+- Look at ENTIRE CV (not just skills section)
+- Extract soft skills from action verbs ("collaborated", "optimized", "analyzed")
+- Extract domain from industry context ("property tech", "construction", "Healthcare")
+- Parse piped/slashed skill lists ("Python|SQL", "Tableau/Power BI")
+- Include technologies from project descriptions (PyTorch, scikit-learn, TensorFlow)
 """
             
             logger.debug(f"🔍 [CONTEXT_AWARE_PIPELINE] CV extraction using centralized prompt from prompt_templates.py")
