@@ -45,9 +45,485 @@ class ATSRecommendationService:
         self.user_email = user_email
         self.base_dir = get_user_base_path(user_email)
     
+    # ==================== SCHEMA V3.0 HELPER METHODS ====================
+    
+    def _get_schema_version(self) -> str:
+        """Get current schema version"""
+        return "3.0"
+    
+    def _build_keyword_with_context(
+        self,
+        keyword: str,
+        category: str,
+        priority: str,
+        cv_content: Dict,
+        cv_skills: Dict
+    ) -> Dict:
+        """
+        Build a keyword entry with strategic context
+        
+        Returns:
+            {
+                "keyword": str,
+                "priority": "critical" | "important" | "optional",
+                "reasoning": str,
+                "cv_evidence": str | None,
+                "evidence_strength": "strong" | "moderate" | "weak" | "none",
+                "integration_hints": List[str],
+                "risk": "low" | "medium" | "high"
+            }
+        """
+        keyword_lower = keyword.lower()
+        
+        # Check for evidence in CV content
+        cv_text = " ".join(cv_content.get('experience_bullets', []))
+        cv_text += " " + cv_content.get('skills_section', '')
+        
+        evidence = None
+        evidence_strength = "none"
+        
+        # Direct mention
+        if keyword_lower in cv_text.lower():
+            evidence = f"Explicitly mentioned: '{keyword}'"
+            evidence_strength = "strong"
+        else:
+            # Semantic evidence
+            semantic_match = self._find_semantic_evidence(keyword_lower, cv_text, cv_skills)
+            if semantic_match:
+                evidence = semantic_match
+                evidence_strength = "moderate"
+        
+        # Determine integration hints based on category and evidence
+        integration_hints = []
+        if category == "technical":
+            integration_hints = ["skills section"]
+            if evidence_strength in ["strong", "moderate"]:
+                integration_hints.append("relevant experience bullets")
+        elif category == "soft":
+            integration_hints = ["skills section"]
+            if evidence_strength in ["strong", "moderate"]:
+                integration_hints.append("leadership/collaboration bullets")
+        elif category == "domain":
+            if evidence_strength in ["strong", "moderate"]:
+                integration_hints = ["summary", "industry-specific bullets"]
+        
+        # Determine risk level
+        if evidence_strength == "strong":
+            risk = "low"
+        elif evidence_strength == "moderate":
+            risk = "medium"
+        else:
+            risk = "high" if category == "domain" else "medium"
+        
+        # Generate reasoning
+        reasoning = self._generate_keyword_reasoning(keyword, category, evidence_strength)
+        
+        return {
+            "keyword": keyword,
+            "priority": priority,
+            "reasoning": reasoning,
+            "cv_evidence": evidence,
+            "evidence_strength": evidence_strength,
+            "integration_hints": integration_hints,
+            "risk": risk
+        }
+    
+    def _find_semantic_evidence(self, keyword: str, cv_text: str, cv_skills: Dict) -> Optional[str]:
+        """Find semantic evidence for a keyword in CV text"""
+        # Synonym mapping
+        synonyms = {
+            "excel": ["spreadsheet", "data analysis", "pivot table", "vlookup"],
+            "data cleaning": ["data preparation", "data accuracy", "data quality", "improving accuracy"],
+            "data mining": ["data analysis", "pattern recognition", "insight extraction"],
+            "data transformation": ["data processing", "etl", "data pipeline"],
+            "data visualization": ["dashboard", "chart", "graph", "visual report"],
+            "statistical methods": ["statistical analysis", "statistics", "quantitative analysis"],
+            "collaboration": ["team", "cross-functional", "worked with", "stakeholder"],
+            "communication": ["presented", "reporting", "stakeholder", "client interaction"],
+            "presentation skills": ["presented", "dashboard", "reporting", "stakeholder communication"],
+            "interpersonal skill": ["collaboration", "team", "stakeholder", "client"],
+            "mssql": ["sql", "database", "query"],
+            "dashboard development": ["dashboard", "power bi", "tableau", "visualization"],
+        }
+        
+        cv_text_lower = cv_text.lower()
+        
+        for synonym in synonyms.get(keyword.lower(), []):
+            if synonym in cv_text_lower:
+                return f"Implied by: '{synonym}'"
+        
+        # Check related skills
+        for skill in cv_skills.get("technical_skills", []):
+            if keyword.lower() in skill.lower() or skill.lower() in keyword.lower():
+                return f"Related skill: '{skill}'"
+        
+        return None
+    
+    def _generate_keyword_reasoning(self, keyword: str, category: str, evidence_strength: str) -> str:
+        """Generate reasoning for why this keyword should be added"""
+        if evidence_strength == "strong":
+            return f"Already demonstrated in CV, needs explicit mention"
+        elif evidence_strength == "moderate":
+            return f"Semantic evidence exists in CV, safe to integrate"
+        elif category == "soft":
+            return f"Universal soft skill, transferable across roles"
+        elif category == "technical":
+            return f"Required by JD, add if verifiable experience exists"
+        else:
+            return f"JD requirement, assess evidence before adding"
+    
+    def _build_evidence_index(self, cv_content: Dict) -> Dict:
+        """Build lightweight evidence index instead of full CV content"""
+        experience_bullets = cv_content.get('experience_bullets', [])
+        skills_section = cv_content.get('skills_section', '')
+        skills_lower = skills_section.lower()
+        bullets_text = " ".join(experience_bullets).lower()
+        
+        return {
+            "experience_bullets_count": len(experience_bullets),
+            "has_power_bi": "power bi" in skills_lower,
+            "has_sql": "sql" in skills_lower,
+            "has_python": "python" in skills_lower,
+            "has_excel": "excel" in skills_lower,
+            "has_dashboards": "dashboard" in bullets_text,
+            "has_data_analysis": "data analysis" in bullets_text or "analyzed" in bullets_text,
+            "quantified_achievements": sum(1 for bullet in experience_bullets if '%' in bullet),
+            "projects_count": len(cv_content.get('technical_projects', [])),
+            "certifications_count": len(cv_content.get('certifications', []))
+        }
+    
+    def _build_jd_context_summary(self, jd_content: Dict) -> Dict:
+        """Build lightweight JD summary instead of full content"""
+        responsibilities = jd_content.get('key_responsibilities', [])
+        
+        return {
+            "role_title": jd_content.get('role_title', 'N/A'),
+            "role_level": jd_content.get('role_level', 'Unknown'),
+            "key_focus": responsibilities[:4] if len(responsibilities) > 4 else responsibilities,
+            "required_background": self._extract_background_summary(jd_content.get('context', '')),
+            "culture": jd_content.get('department', 'N/A')
+        }
+    
+    def _extract_background_summary(self, context: str) -> str:
+        """Extract required background from context (first sentence or key phrase)"""
+        if not context or context == "N/A":
+            return "N/A"
+        
+        # Extract first sentence
+        sentences = context.split('.')
+        if sentences:
+            return sentences[0].strip()[:150]  # Max 150 chars
+        
+        return context[:150]
+    
+    def _build_gap_analysis(
+        self,
+        match_summary: Dict,
+        component_summary: Dict,
+        ats_scoring: Dict
+    ) -> Dict:
+        """Build structured gap analysis with impact levels"""
+        gaps = []
+        
+        # Technical gaps
+        for skill in match_summary.get("by_category", {}).get("technical", {}).get("missing", []):
+            impact = self._determine_gap_impact(skill, "technical", component_summary)
+            gaps.append({
+                "skill": skill,
+                "category": "technical",
+                "impact": impact,
+                "mitigation": self._suggest_mitigation(skill, "technical")
+            })
+        
+        # Soft skill gaps
+        for skill in match_summary.get("by_category", {}).get("soft", {}).get("missing", []):
+            impact = self._determine_gap_impact(skill, "soft", component_summary)
+            gaps.append({
+                "skill": skill,
+                "category": "soft",
+                "impact": impact,
+                "mitigation": self._suggest_mitigation(skill, "soft")
+            })
+        
+        # Domain gaps
+        for skill in match_summary.get("by_category", {}).get("domain", {}).get("missing", []):
+            gaps.append({
+                "skill": skill,
+                "category": "domain",
+                "impact": "low",  # Domain gaps usually low impact for transferable roles
+                "mitigation": "Emphasize adaptability and quick learning"
+            })
+        
+        # Calculate summary
+        summary = {
+            "critical": len([g for g in gaps if g["impact"] == "critical"]),
+            "high": len([g for g in gaps if g["impact"] == "high"]),
+            "medium": len([g for g in gaps if g["impact"] == "medium"]),
+            "low": len([g for g in gaps if g["impact"] == "low"]),
+            "by_category": {
+                "technical": len([g for g in gaps if g["category"] == "technical"]),
+                "soft": len([g for g in gaps if g["category"] == "soft"]),
+                "domain": len([g for g in gaps if g["category"] == "domain"])
+            }
+        }
+        
+        return {
+            "gaps": gaps,
+            "summary": summary
+        }
+    
+    def _determine_gap_impact(self, skill: str, category: str, component_summary: Dict) -> str:
+        """Determine impact level of a missing skill"""
+        skill_lower = skill.lower()
+        
+        # Critical technical skills
+        if category == "technical":
+            critical_keywords = ["sql", "python", "excel", "power bi", "tableau"]
+            if any(kw in skill_lower for kw in critical_keywords):
+                return "critical"
+            
+            # High impact if component score is low
+            tech_score = component_summary.get("technical", {}).get("score", 0)
+            if tech_score < 60:
+                return "high"
+            
+            return "medium"
+        
+        # Soft skills generally medium-low impact
+        if category == "soft":
+            return "medium"
+        
+        return "low"
+    
+    def _suggest_mitigation(self, skill: str, category: str) -> str:
+        """Suggest mitigation strategy for a gap"""
+        skill_lower = skill.lower()
+        
+        if "excel" in skill_lower:
+            return "Add to skills section with proficiency level (e.g., 'Advanced Excel')"
+        elif "sql" in skill_lower:
+            return "Mention SQL variant experience if applicable"
+        elif category == "soft":
+            return f"Highlight in skills section and demonstrate through experience bullets"
+        else:
+            return f"Add to relevant section if verifiable experience exists"
+    
+    def _build_ats_quick_wins(self, ats_scoring: Dict, match_summary: Dict, keyword_strategy: Dict) -> List[Dict]:
+        """Build actionable quick wins for ATS improvement"""
+        quick_wins = []
+        
+        current_score = ats_scoring.get("final_score", 0)
+        target_score = ats_scoring.get("target_score", 75.0)
+        gap = target_score - current_score
+        
+        # Quick win 1: Add Tier 1 keywords
+        tier1_count = sum(
+            len(keyword_strategy.get("tier1_immediate", {}).get(cat, []))
+            for cat in ["technical", "soft", "domain"]
+        )
+        if tier1_count > 0:
+            quick_wins.append({
+                "action": f"Add all {tier1_count} Tier 1 keywords to appropriate sections",
+                "expected_gain": round(min(tier1_count * 1.5, gap * 0.3), 1),
+                "effort": "low"
+            })
+        
+        # Quick win 2: Enhance matched keywords
+        matched_count = len(match_summary.get("by_category", {}).get("technical", {}).get("matched", []))
+        if matched_count > 0:
+            quick_wins.append({
+                "action": f"Enhance {matched_count} already-matched keywords in experience bullets",
+                "expected_gain": round(min(matched_count * 0.8, gap * 0.25), 1),
+                "effort": "low"
+            })
+        
+        # Quick win 3: Add Tier 2 with strong evidence
+        tier2_strong = [
+            kw for kw in keyword_strategy.get("tier2_conditional", {}).get("technical", [])
+            if isinstance(kw, dict) and kw.get("evidence_strength") == "strong"
+        ]
+        if tier2_strong:
+            quick_wins.append({
+                "action": f"Add {len(tier2_strong)} Tier 2 keywords with strong evidence",
+                "expected_gain": round(min(len(tier2_strong) * 1.2, gap * 0.2), 1),
+                "effort": "medium"
+            })
+        
+        return quick_wins
+    
+    def _extract_top_strengths(self, component_summary: Dict, limit: int = 3) -> List[str]:
+        """Extract top strengths from component summary"""
+        strengths = []
+        
+        # Technical strengths
+        tech_strengths = component_summary.get("technical", {}).get("strengths", [])
+        strengths.extend(tech_strengths[:limit])
+        
+        # Skills strengths
+        if len(strengths) < limit:
+            skills_strengths = component_summary.get("skills", {}).get("strengths", [])
+            remaining = limit - len(strengths)
+            strengths.extend(skills_strengths[:remaining])
+        
+        # Experience strengths
+        if len(strengths) < limit:
+            exp_strengths = component_summary.get("experience", {}).get("strengths", [])
+            remaining = limit - len(strengths)
+            strengths.extend(exp_strengths[:remaining])
+        
+        return strengths[:limit]
+    
+    def _identify_risk_factors(self, component_summary: Dict, match_summary: Dict) -> List[str]:
+        """Identify risk factors from component analysis"""
+        risks = []
+        
+        # Industry transition risk
+        industry = component_summary.get("industry", {})
+        if industry.get("transition_difficulty") in ["Moderate", "High", "UNKNOWN"]:
+            risks.append(
+                f"Industry transition: {industry.get('cv_industry', 'Unknown')} → "
+                f"{industry.get('jd_industry', 'Unknown')}"
+            )
+        
+        # Seniority mismatch risk
+        seniority = component_summary.get("seniority", {})
+        if seniority.get("score", 0) < 60:
+            risks.append(
+                f"Seniority gap: CV level '{seniority.get('cv_level', 'Unknown')}' vs "
+                f"JD level '{seniority.get('jd_level', 'Unknown')}'"
+            )
+        
+        # Technical gap risk
+        technical = component_summary.get("technical", {})
+        if technical.get("score", 0) < 65:
+            missing_count = len(match_summary.get("by_category", {}).get("technical", {}).get("missing", []))
+            risks.append(f"Technical skills gap: {missing_count} missing skills")
+        
+        return risks
+    
+    def _generate_positioning_strategy(self, component_summary: Dict, jd_context: Dict) -> str:
+        """Generate positioning strategy based on CV-JD analysis"""
+        industry = component_summary.get("industry", {})
+        technical = component_summary.get("technical", {})
+        
+        cv_industry = industry.get("cv_industry", "Unknown")
+        jd_industry = jd_context.get("culture", "Unknown")
+        tech_score = technical.get("score", 0)
+        
+        if tech_score >= 75:
+            return (
+                f"Emphasize strong technical foundation ({tech_score:.0f}/100) and transferable "
+                f"analytical skills. Frame {cv_industry} experience as relevant to {jd_industry} context."
+            )
+        else:
+            return (
+                f"Highlight transferable skills and quick learning ability. Position "
+                f"{cv_industry} background as bringing fresh perspective to {jd_industry}."
+            )
+    
+    def _build_keyword_strategy_v3(
+        self,
+        missing_keywords: Dict[str, List[str]],
+        cv_content: Dict,
+        cv_skills: Dict,
+        jd_content: Dict
+    ) -> Dict:
+        """
+        Build keyword strategy v3.0 with strategic context
+        REPLACES: _classify_keywords_optimized for v3.0 schema
+        """
+        # Get existing keywords (for filtering)
+        existing_keywords_lower = self._extract_existing_cv_keywords()
+        
+        # Filter missing keywords
+        filtered_missing = {}
+        already_present = {}
+        
+        for category, keywords in missing_keywords.items():
+            filtered_missing[category] = []
+            already_present[category] = []
+            
+            for keyword in keywords:
+                if self._keyword_exists_in_cv(keyword.lower(), existing_keywords_lower):
+                    already_present[category].append(keyword)
+                else:
+                    filtered_missing[category].append(keyword)
+        
+        # Log filtering
+        total_filtered = sum(len(kws) for kws in filtered_missing.values())
+        total_already = sum(len(kws) for kws in already_present.values())
+        logger.info(f"🔍 [KEYWORD_FILTER v3.0] {total_filtered} new keywords, {total_already} already in CV")
+        
+        # Classify into tiers WITH CONTEXT
+        strategy = {
+            "tier1_immediate": {"technical": [], "soft": [], "domain": []},
+            "tier2_conditional": {"technical": [], "soft": [], "domain": []},
+            "tier3_avoid": {"technical": [], "soft": [], "domain": []},
+            "already_strong": list(set([kw for kws in already_present.values() for kw in kws]))
+        }
+        
+        # Tier 1 patterns (generic/transferable)
+        tier1_patterns = {
+            "soft": ["communication", "collaboration", "teamwork", "problem solving",
+                    "analytical thinking", "attention to detail", "interpersonal",
+                    "presentation", "time management", "adaptability", "numeracy", "proactive"],
+            "technical": ["data analysis", "data visualization", "reporting",
+                         "dashboard development", "business intelligence"]
+        }
+        
+        # Tier 3 patterns (domain-specific/unverifiable)
+        tier3_patterns = {
+            "domain": ["food relief", "charity", "non-profit", "humanitarian",
+                      "fundraising", "volunteer", "donor", "nfp", "not for profit"],
+            "certifications": ["pmp", "scrum master", "aws certified", "cissp"]
+        }
+        
+        for category in ["technical", "soft", "domain"]:
+            for keyword in filtered_missing.get(category, []):
+                keyword_lower = keyword.lower()
+                
+                # Check Tier 1
+                is_tier1 = any(pattern in keyword_lower for pattern in tier1_patterns.get(category, []))
+                
+                if is_tier1:
+                    priority = "important" if category == "soft" else "critical"
+                    kw_context = self._build_keyword_with_context(
+                        keyword, category, priority, cv_content, cv_skills
+                    )
+                    strategy["tier1_immediate"][category].append(kw_context)
+                    continue
+                
+                # Check Tier 3
+                is_tier3 = any(
+                    pattern in keyword_lower 
+                    for pattern in tier3_patterns.get("domain", []) + tier3_patterns.get("certifications", [])
+                )
+                
+                if is_tier3:
+                    strategy["tier3_avoid"][category].append({
+                        "keyword": keyword,
+                        "reasoning": "Domain-specific or certification without CV evidence",
+                        "risk": "high",
+                        "alternative": "Emphasize adaptability and transferable skills"
+                    })
+                    continue
+                
+                # Default: Tier 2
+                priority = "critical" if category == "technical" else "optional"
+                kw_context = self._build_keyword_with_context(
+                    keyword, category, priority, cv_content, cv_skills
+                )
+                kw_context["require_validation"] = True
+                strategy["tier2_conditional"][category].append(kw_context)
+        
+        return strategy
+    
+    # ==================== END SCHEMA V3.0 HELPER METHODS ====================
+    
     def extract_ats_recommendation_data(self, company: str) -> Optional[Dict[str, Any]]:
         """
         Extract and optimize recommendation data from skills analysis file
+        SCHEMA v3.0: Streamlined structure with strategic context
         
         Args:
             company: Company name
@@ -57,8 +533,9 @@ class ATSRecommendationService:
         """
         try:
             logger.info("=" * 80)
-            logger.info(f"🔍 [INPUT_OPTIMIZATION] Starting input file generation for {company}")
+            logger.info(f"🔍 [INPUT_OPTIMIZATION v3.0] Starting input file generation for {company}")
             logger.info("=" * 80)
+            
             # Locate analysis file
             company_dir = self.base_dir / "applied_companies" / company
             analysis_file = TimestampUtils.find_latest_timestamped_file(
@@ -83,13 +560,16 @@ class ATSRecommendationService:
             component_entries = analysis_data.get("component_analysis_entries", [])
             ats_entries = analysis_data.get("ats_calculation_entries", [])
             
-            # Parse and simplify each component
+            # Parse components
             preliminary_decision = self._extract_preliminary_decision(match_entries)
             match_summary = self._extract_match_summary(preextracted_entries)
+            component_summary_optimized = self._extract_component_summary_optimized(component_entries)
             ats_scoring = self._extract_ats_scoring(ats_entries)
+            cv_content = self._extract_cv_content(company)
+            jd_content = self._extract_jd_content(company)
             
             # Log what sections are in the original analysis file
-            logger.info(f"📂 [INPUT_OPTIMIZATION] Original analysis file sections:")
+            logger.info(f"📂 [INPUT_OPTIMIZATION v3.0] Original analysis file sections:")
             logger.info(f"   - cv_skills: {'✅' if cv_skills else '❌'}")
             logger.info(f"   - jd_skills: {'✅' if jd_skills else '❌'}")
             logger.info(f"   - match_entries: {len(match_entries)} entries")
@@ -101,140 +581,161 @@ class ATSRecommendationService:
             technical_match = match_summary.get("by_category", {}).get("technical", {})
             soft_match = match_summary.get("by_category", {}).get("soft", {})
             domain_match = match_summary.get("by_category", {}).get("domain", {})
-            logger.info(f"📊 [INPUT_RECOMMENDATION] Match Summary:")
+            logger.info(f"📊 [INPUT_RECOMMENDATION v3.0] Match Summary:")
             logger.info(f"   - Overall match rate: {match_summary.get('overall_match_rate', 0)}%")
             logger.info(f"   - Technical: {len(technical_match.get('matched', []))} matched, {len(technical_match.get('missing', []))} missing")
             logger.info(f"   - Soft: {len(soft_match.get('matched', []))} matched, {len(soft_match.get('missing', []))} missing")
             logger.info(f"   - Domain: {len(domain_match.get('matched', []))} matched, {len(domain_match.get('missing', []))} missing")
             
-            # Log optimization decisions for each section
-            logger.info("")
-            logger.info("🔧 [INPUT_OPTIMIZATION] Section Optimization Decisions:")
-            logger.info("-" * 80)
+            # ==================== NEW v3.0 STRUCTURE ====================
             
-            # metadata section - REMOVED
-            logger.info("📦 [INPUT_OPTIMIZATION] Section: metadata")
-            logger.info(f"   ❌ REMOVED - Not used in AI prompt")
-            logger.info(f"   💡 Would have included: company, generated_at, ats_score_current, match_rate_current")
-            
-            # skills_extraction section - REMOVED
-            logger.info("📦 [INPUT_OPTIMIZATION] Section: skills_extraction")
-            cv_skills_count = sum(len(v) for v in [cv_skills.get("technical_skills", []), cv_skills.get("soft_skills", []), cv_skills.get("domain_keywords", [])])
-            jd_skills_count = sum(len(v) for v in [jd_skills.get("technical_skills", []), jd_skills.get("soft_skills", []), jd_skills.get("domain_keywords", [])])
-            logger.info(f"   ❌ REMOVED - Redundant with match_summary")
-            logger.info(f"   💡 Would have included: CV skills ({cv_skills_count}), JD skills ({jd_skills_count})")
-            
-            # Generate optimized recommendation data
-            logger.info("")
-            logger.info("🔨 [INPUT_OPTIMIZATION] Building optimized sections:")
-            logger.info("-" * 80)
-            
-            # Build preliminary_decision (optimized)
-            preliminary_decision_optimized = {
-                "decision": preliminary_decision.get("decision"),
-                "confidence": preliminary_decision.get("confidence"),
-                "match_score": preliminary_decision.get("match_score"),
-                "primary_reason": preliminary_decision.get("primary_reason"),
-                "critical_missing": preliminary_decision.get("critical_missing", []),
-                "implicit_likely": preliminary_decision.get("implicit_likely", [])
-            }
-            logger.info("📦 [INPUT_OPTIMIZATION] Section: preliminary_decision")
-            logger.info(f"   ✅ Fields included: {list(preliminary_decision_optimized.keys())}")
-            logger.info(f"   ❌ Fields excluded: ['blocker_found', 'learnable_gaps']")
-            preliminary_size = sys.getsizeof(json.dumps(preliminary_decision_optimized))
-            logger.info(f"   📊 Size: ~{preliminary_size} bytes")
-            
-            # Build keyword guidance (optimized)
-            keyword_guidance = self._classify_keywords_optimized(
+            # Build keyword strategy with context (REPLACES _classify_keywords_optimized)
+            keyword_strategy = self._build_keyword_strategy_v3(
                 match_summary.get("missing_keywords", {}),
-                cv_skills
+                cv_content,
+                cv_skills,
+                jd_content
             )
-            logger.info("📦 [INPUT_OPTIMIZATION] Section: keyword_integration_guidance")
-            logger.info(f"   ✅ Fields included: {list(keyword_guidance.keys())}")
-            logger.info(f"   ❌ Fields excluded: ['integration_instructions']")
-            keyword_size = sys.getsizeof(json.dumps(keyword_guidance))
-            logger.info(f"   📊 Size: ~{keyword_size} bytes")
             
-            # Build component summary (optimized)
-            component_summary_optimized = self._extract_component_summary_optimized(component_entries)
-            logger.info("📦 [INPUT_OPTIMIZATION] Section: component_summary")
-            for component in ['technical', 'skills', 'experience', 'seniority', 'industry']:
-                if component in component_summary_optimized:
-                    comp_data = component_summary_optimized[component]
-                    logger.info(f"   📊 {component}:")
-                    logger.info(f"      ✅ Used fields: {list(comp_data.keys())}")
-                    logger.info(f"      ❌ Excluded: raw_scores.* (would add ~1-2KB per component)")
-            component_size = sys.getsizeof(json.dumps(component_summary_optimized))
-            logger.info(f"   📊 Total component_summary size: ~{component_size} bytes")
+            # Build gap analysis
+            gap_analysis = self._build_gap_analysis(
+                match_summary,
+                component_summary_optimized,
+                ats_scoring
+            )
             
-            # Extract CV content (NEW)
-            cv_content = self._extract_cv_content(company)
-            logger.info("📦 [INPUT_OPTIMIZATION] Section: cv_content (NEW)")
-            if cv_content and any(cv_content.values()):
-                logger.info(f"   ✅ cv_content added for Tier 2 evidence checking:")
-                logger.info(f"      - experience_bullets: {len(cv_content.get('experience_bullets', []))} bullets")
-                logger.info(f"      - skills_section: {len(cv_content.get('skills_section', ''))} chars")
-                logger.info(f"      - technical_projects: {len(cv_content.get('technical_projects', []))} projects")
-                logger.info(f"      - certifications: {len(cv_content.get('certifications', []))} certs")
-                cv_content_size = sys.getsizeof(json.dumps(cv_content))
-                logger.info(f"   📊 Size: ~{cv_content_size} bytes")
-            else:
-                logger.warning(f"   ❌ cv_content MISSING - Tier 2 evidence checking will be inaccurate!")
+            # Build ATS quick wins
+            ats_quick_wins = self._build_ats_quick_wins(
+                ats_scoring,
+                match_summary,
+                keyword_strategy
+            )
             
-            # Extract JD content (NEW)
-            jd_content = self._extract_jd_content(company)
-            logger.info("📦 [INPUT_OPTIMIZATION] Section: jd_content (NEW)")
-            if jd_content and jd_content.get('role_title') != 'N/A':
-                logger.info(f"   ✅ jd_content added for context:")
-                logger.info(f"      - role_title: {jd_content.get('role_title', 'N/A')}")
-                logger.info(f"      - department: {jd_content.get('department', 'N/A')}")
-                logger.info(f"      - responsibilities: {len(jd_content.get('key_responsibilities', []))} items")
-                logger.info(f"      - required_skills: {len(jd_content.get('required_skills', []))} items")
-                logger.info(f"      - preferred_skills: {len(jd_content.get('preferred_skills', []))} items")
-                jd_content_size = sys.getsizeof(json.dumps(jd_content))
-                logger.info(f"   📊 Size: ~{jd_content_size} bytes")
-            else:
-                logger.warning(f"   ❌ jd_content MISSING - Context understanding will be limited!")
+            # Build evidence index (lightweight CV summary)
+            evidence_index = self._build_evidence_index(cv_content)
             
-            # Build final recommendation data
+            # Build JD context summary (lightweight JD summary)
+            jd_context_summary = self._build_jd_context_summary(jd_content)
+            
+            # ==================== STREAMLINED v3.0 OUTPUT ====================
+            
             recommendation_data = {
-                "preliminary_decision": preliminary_decision_optimized,
-                "match_summary": match_summary,
-                "keyword_integration_guidance": keyword_guidance,
-                "component_summary": component_summary_optimized,
-                "ats_scoring": ats_scoring,
-                "cv_content": cv_content,
-                "jd_content": jd_content
+                "meta": {
+                    "company": company,
+                    "job_title": jd_content.get('role_title', 'N/A'),
+                    "generated_at": datetime.now().isoformat(),
+                    "schema_version": self._get_schema_version(),
+                    "iteration": 1  # TODO: Detect iteration number
+                },
+                
+                "decision": {
+                    "verdict": preliminary_decision.get("decision", "UNKNOWN"),
+                    "confidence": preliminary_decision.get("confidence", 0),
+                    "match_score": preliminary_decision.get("match_score", 0),
+                    "reasoning": {
+                        "strengths": self._extract_top_strengths(component_summary_optimized, 3),
+                        "critical_gaps": preliminary_decision.get("critical_missing", []),
+                        "risk_factors": self._identify_risk_factors(component_summary_optimized, match_summary)
+                    },
+                    "positioning_strategy": self._generate_positioning_strategy(
+                        component_summary_optimized, jd_context_summary
+                    )
+                },
+                
+                "keyword_strategy": keyword_strategy,
+                
+                "gap_analysis": gap_analysis,
+                
+                "ats_intelligence": {
+                    "current_score": ats_scoring.get("final_score", 0),
+                    "target_score": 75.0,
+                    "gap": max(0, 75.0 - ats_scoring.get("final_score", 0)),
+                    "breakdown": {
+                        "keyword_match": ats_scoring.get("category1_keywords", 0),
+                        "semantic_match": ats_scoring.get("category2_ai_analysis", 0),
+                        "formatting": 0
+                    },
+                    "quick_wins": ats_quick_wins,
+                    "improvement_path": {
+                        "phase1": f"Quick wins ({min(15, ats_scoring.get('improvement_needed', 0) * 0.6):.0f}-20 points)",
+                        "phase2": "Evidence-based additions (5-10 points)",
+                        "phase3": "Experience reframing (5 points)"
+                    }
+                },
+                
+                "component_scores": component_summary_optimized,
+                
+                "evidence_index": evidence_index,
+                
+                "jd_context_summary": jd_context_summary,
+                
+                # ==================== BACKWARD COMPATIBILITY ====================
+                # Keep legacy fields during migration (can be removed after prompt update)
+                "_legacy": {
+                    "preliminary_decision": {
+                        "decision": preliminary_decision.get("decision"),
+                        "confidence": preliminary_decision.get("confidence"),
+                        "match_score": preliminary_decision.get("match_score"),
+                        "primary_reason": preliminary_decision.get("primary_reason"),
+                        "critical_missing": preliminary_decision.get("critical_missing", []),
+                        "implicit_likely": preliminary_decision.get("implicit_likely", [])
+                    },
+                    "match_summary": {
+                        "overall_match_rate": match_summary.get("overall_match_rate", 0),
+                        "by_category": match_summary.get("by_category", {})
+                        # NOTE: missing_keywords REMOVED (redundant with keyword_strategy)
+                    },
+                    "keyword_integration_guidance": self._classify_keywords_optimized(
+                        match_summary.get("missing_keywords", {}),
+                        cv_skills
+                    ),
+                    "ats_scoring": ats_scoring
+                }
             }
             
-            # Calculate totals
+            # ==================== LOGGING ====================
+            
             total_size = sys.getsizeof(json.dumps(recommendation_data))
-            section_count = len(recommendation_data.keys())
+            v3_only_data = {k: v for k, v in recommendation_data.items() if k != "_legacy"}
+            v3_size = sys.getsizeof(json.dumps(v3_only_data))
+            legacy_size = total_size - v3_size
             
             logger.info("")
             logger.info("=" * 80)
-            logger.info("📊 [INPUT_OPTIMIZATION] Summary:")
-            logger.info(f"   Total sections: {section_count}")
+            logger.info("📊 [INPUT_OPTIMIZATION v3.0] Summary:")
+            logger.info(f"   Schema version: {self._get_schema_version()}")
+            logger.info(f"   Total sections: {len(recommendation_data.keys())}")
+            logger.info(f"   V3.0 core size: ~{v3_size} bytes ({v3_size / 1024:.2f} KB)")
+            logger.info(f"   Legacy compat size: ~{legacy_size} bytes ({legacy_size / 1024:.2f} KB)")
             logger.info(f"   Total size: ~{total_size} bytes ({total_size / 1024:.2f} KB)")
-            logger.info(f"   Sections included: {list(recommendation_data.keys())}")
             logger.info("")
-            logger.info("📋 [INPUT_OPTIMIZATION] Section sizes:")
-            for section_name, section_data in recommendation_data.items():
-                section_size = sys.getsizeof(json.dumps(section_data))
-                logger.info(f"   {section_name}: ~{section_size} bytes ({section_size / total_size * 100:.1f}%)")
+            logger.info("📦 [v3.0] REMOVED redundancies:")
+            logger.info(f"   ❌ match_summary.missing_keywords (now in keyword_strategy)")
+            logger.info(f"   ❌ cv_content full text (replaced with evidence_index: 10 fields)")
+            logger.info(f"   ❌ jd_content full text (replaced with jd_context_summary: 5 fields)")
+            logger.info("")
+            logger.info("📦 [v3.0] ADDED strategic context:")
+            logger.info(f"   ✅ keyword_strategy: {sum(len(keyword_strategy.get('tier1_immediate', {}).get(c, [])) for c in ['technical', 'soft', 'domain'])} tier1, "
+                       f"{sum(len(keyword_strategy.get('tier2_conditional', {}).get(c, [])) for c in ['technical', 'soft', 'domain'])} tier2, "
+                       f"{sum(len(keyword_strategy.get('tier3_avoid', {}).get(c, [])) for c in ['technical', 'soft', 'domain'])} tier3")
+            logger.info(f"   ✅ gap_analysis: {gap_analysis['summary']['critical']} critical, {gap_analysis['summary']['high']} high, {gap_analysis['summary']['medium']} medium gaps")
+            logger.info(f"   ✅ ats_intelligence.quick_wins: {len(ats_quick_wins)} actionable items")
+            logger.info(f"   ✅ decision.positioning_strategy: strategic guidance added")
             logger.info("=" * 80)
             
-            # Debug: Log keyword classification
-            keyword_guidance = recommendation_data.get("keyword_integration_guidance", {})
-            logger.info(f"🔍 [INPUT_RECOMMENDATION] Keyword Classification:")
-            logger.info(f"   - Tier 1 (always add): Technical={len(keyword_guidance.get('tier1_always_add', {}).get('technical', []))}, Soft={len(keyword_guidance.get('tier1_always_add', {}).get('soft', []))}")
-            logger.info(f"   - Tier 2 (with evidence): Technical={len(keyword_guidance.get('tier2_add_if_evidence', {}).get('technical', []))}, Soft={len(keyword_guidance.get('tier2_add_if_evidence', {}).get('soft', []))}")
-            logger.info(f"   - Tier 3 (never add): Technical={len(keyword_guidance.get('tier3_never_add', {}).get('technical', []))}, Domain={len(keyword_guidance.get('tier3_never_add', {}).get('domain', []))}")
-            logger.info(f"   - Already in CV (filtered): {len(keyword_guidance.get('already_in_cv_filtered', []))}")
+            # Log keyword strategy details
+            logger.info(f"🔍 [INPUT_RECOMMENDATION v3.0] Keyword Strategy:")
+            for tier_name, tier_key in [("Tier 1 (immediate)", "tier1_immediate"), ("Tier 2 (conditional)", "tier2_conditional"), ("Tier 3 (avoid)", "tier3_avoid")]:
+                tier_data = keyword_strategy.get(tier_key, {})
+                tech_count = len(tier_data.get('technical', []))
+                soft_count = len(tier_data.get('soft', []))
+                domain_count = len(tier_data.get('domain', []))
+                logger.info(f"   - {tier_name}: Technical={tech_count}, Soft={soft_count}, Domain={domain_count}")
+            logger.info(f"   - Already strong: {len(keyword_strategy.get('already_strong', []))}")
             
             # Debug: Log final recommendation data summary
             missing_counts = ats_scoring.get("missing_counts", {})
-            logger.info(f"✅ [INPUT_RECOMMENDATION] Created recommendation data:")
+            logger.info(f"✅ [INPUT_RECOMMENDATION v3.0] Created recommendation data:")
             logger.info(f"   - ATS Score: {ats_scoring.get('final_score', 0)}")
             logger.info(f"   - Missing counts: Technical={missing_counts.get('technical', 0)}, Soft={missing_counts.get('soft', 0)}, Domain={missing_counts.get('domain', 0)}")
             
