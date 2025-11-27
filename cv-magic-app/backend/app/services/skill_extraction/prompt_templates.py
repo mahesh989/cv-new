@@ -94,11 +94,42 @@ CRITICAL EXCLUSIONS - DO NOT PUT IN DOMAIN:
 PRIORITY ORDER (if term could fit multiple):
 TECHNICAL > SOFT > DOMAIN
 
+═══════════════════════════════════════════════════════════════
+UNIVERSAL EXTRACTION ENHANCEMENT RULES
+═══════════════════════════════════════════════════════════════
+
+**PATTERN 1: Action-to-Deliverable Conversion**
+When CV says: "[Action Verb] + [Technical Noun]"
+Extract as: "[Technical Noun]" or "[Technical Noun] development"
+
+Action Verbs: developed, built, created, designed, implemented, deployed,
+              configured, maintained, optimized, automated, analyzed
+
 Examples:
-- "Machine Learning" → TECHNICAL (executable process)
-- "Agile" → TECHNICAL (methodology with specific practices)
-- "Cloud computing" → TECHNICAL (technical practice)
-- "Customer service" → SOFT (human interaction)
+- "developed dashboards" → "dashboard development" or "dashboards"
+- "built data pipelines" → "data pipelines" or "pipeline development"
+- "created reports" → "reporting"
+- "designed APIs" → "API design" or "APIs"
+
+**PATTERN 2: Preserve Specific Technology Names**
+Keep exact technology names. Do NOT generalize.
+- "PostgreSQL" → "PostgreSQL" (not just "database")
+- "React" → "React" (not just "JavaScript")
+- "Terraform" → "Terraform" (not just "IaC")
+- "MSSQL" → "MSSQL" (keep specific, also extract "SQL" if mentioned)
+
+**PATTERN 3: Keep Compound Terms Together**
+Multi-word technical concepts → Keep as single term
+- "machine learning" → Don't split
+- "cloud computing" → Don't split
+- "data warehousing" → Don't split
+- "continuous integration" → Don't split
+
+**PATTERN 4: Educational Background as Domain**
+When you see: "degree in [X]" or "background in [Y]"
+Extract X, Y as DOMAIN_KEYWORDS
+- "Master in Data Science" → "Data Science" (domain)
+- "Bachelor in Computer Science" → "Computer Science" (domain)
 
 OUTPUT: Return ONLY three Python lists, nothing else."""
 
@@ -130,6 +161,15 @@ QUESTION 3: "Industry/Sector OR Regulatory term?"
 └─ NO  → EXCLUDE (too generic)
 
 ═══════════════════════════════════════════════════════════════
+EXTRACTION ENHANCEMENTS:
+═══════════════════════════════════════════════════════════════
+
+1. **Action-to-Deliverable**: "developed dashboards" → "dashboard development"
+2. **Preserve Specificity**: "PostgreSQL" stays as "PostgreSQL"
+3. **Keep Compounds Together**: "machine learning" → don't split
+4. **Educational Background → Domain**: "degree in Finance" → domain
+
+═══════════════════════════════════════════════════════════════
 SELF-CHECK BEFORE OUTPUT:
 ═══════════════════════════════════════════════════════════════
 
@@ -137,19 +177,17 @@ TECHNICAL_SKILLS:
 [ ] All software/tools? (Excel, Python, Power BI)
 [ ] All data processes? (data cleaning, ETL, data transformation)
 [ ] All technical artifacts? (dashboards, APIs, pipelines)
-[ ] NO soft skills? (remove: communication, teamwork)
-[ ] NO generic terms? (remove: "insights", "stakeholders")
+[ ] Specific tech names preserved? (MSSQL, PostgreSQL, not just "SQL")
 
 SOFT_SKILLS:
 [ ] All human interaction + behavioral? (communication, leadership)
 [ ] NO duplicates? (keep shortest form only)
-[ ] NO technical tools? (remove: Excel, Python)
 
 DOMAIN_KEYWORDS:
-[ ] All industry-specific? (Healthcare, Nonprofit, Accounting)
+[ ] All industry-specific? (Healthcare, Nonprofit, Finance)
 [ ] All regulatory? (GDPR, HIPAA, SOX)
-[ ] NO data processes? (remove: data cleaning, ETL)
-[ ] NO generic buzzwords? (remove: "insights", "data analytics")
+[ ] Educational backgrounds included? (Computer Science, Business)
+[ ] NO data processes? (those are TECHNICAL)
 
 OUTPUT (exactly this format, nothing else):
 TECHNICAL_SKILLS = []
