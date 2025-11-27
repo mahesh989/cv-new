@@ -3189,8 +3189,11 @@ async def get_analysis_results(company: str, request: Request = None):
         
         if ai_recommendation_file.exists():
             try:
+                logger.info(f"📄 [API] Loading AI recommendation from: {ai_recommendation_file}")
                 with open(ai_recommendation_file, 'r', encoding='utf-8') as f:
                     ai_data = json.load(f)
+                
+                logger.info(f"📄 [API] AI recommendation keys: {list(ai_data.keys())}")
                 
                 # Handle different file formats
                 if "recommendation_content" in ai_data:

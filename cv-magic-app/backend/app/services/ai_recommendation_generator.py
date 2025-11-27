@@ -771,7 +771,7 @@ class AIRecommendationGenerator:
         return "\n".join(lines)
     
     def _save_ai_recommendation(self, company: str, recommendation_data: Dict[str, Any]) -> bool:
-        """Save the AI recommendation data as JSON file (without recommendation_content)"""
+        """Save the AI recommendation data as JSON file (now includes recommendation_content for frontend)"""
         try:
             company_dir = self.base_dir / "applied_companies" / company
             company_dir.mkdir(parents=True, exist_ok=True)
@@ -779,8 +779,8 @@ class AIRecommendationGenerator:
             timestamp = TimestampUtils.get_timestamp()
             output_file = company_dir / f"{company}_ai_recommendation_{timestamp}.json"
             
-            # Create a copy without recommendation_content field
-            data_to_save = {k: v for k, v in recommendation_data.items() if k != "recommendation_content"}
+            # Save complete data including recommendation_content for frontend display
+            data_to_save = recommendation_data.copy()
             
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(data_to_save, f, indent=2, ensure_ascii=False)
