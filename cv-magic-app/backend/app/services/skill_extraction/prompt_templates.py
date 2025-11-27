@@ -7,7 +7,13 @@ Key Design:
 - Direct Python list output
 - Automatic post-processing validation
 - Works for ANY IT job description
+- Uses shared universal patterns (same as JD extraction)
 """
+
+# Import shared universal patterns (same patterns used in jd_analysis_prompt.py)
+from app.services.skill_extraction.universal_extraction_patterns import (
+    get_universal_patterns_for_prompt
+)
 
 
 class SkillExtractionPrompts:
@@ -17,7 +23,11 @@ class SkillExtractionPrompts:
     def get_system_prompt(document_type: str) -> str:
         """
         System prompt - Universal rules that work for ANY job description
+        Uses shared universal patterns (same as JD extraction)
         """
+        # Get shared universal patterns (same patterns used by jd_analysis_prompt.py)
+        universal_patterns = get_universal_patterns_for_prompt()
+        
         return f"""You are a precision skill extractor for {document_type}s. Follow these rules STRICTLY:
 
 EXTRACTION RULES:
@@ -93,43 +103,7 @@ CRITICAL EXCLUSIONS - DO NOT PUT IN DOMAIN:
 
 PRIORITY ORDER (if term could fit multiple):
 TECHNICAL > SOFT > DOMAIN
-
-═══════════════════════════════════════════════════════════════
-UNIVERSAL EXTRACTION ENHANCEMENT RULES
-═══════════════════════════════════════════════════════════════
-
-**PATTERN 1: Action-to-Deliverable Conversion**
-When CV says: "[Action Verb] + [Technical Noun]"
-Extract as: "[Technical Noun]" or "[Technical Noun] development"
-
-Action Verbs: developed, built, created, designed, implemented, deployed,
-              configured, maintained, optimized, automated, analyzed
-
-Examples:
-- "developed dashboards" → "dashboard development" or "dashboards"
-- "built data pipelines" → "data pipelines" or "pipeline development"
-- "created reports" → "reporting"
-- "designed APIs" → "API design" or "APIs"
-
-**PATTERN 2: Preserve Specific Technology Names**
-Keep exact technology names. Do NOT generalize.
-- "PostgreSQL" → "PostgreSQL" (not just "database")
-- "React" → "React" (not just "JavaScript")
-- "Terraform" → "Terraform" (not just "IaC")
-- "MSSQL" → "MSSQL" (keep specific, also extract "SQL" if mentioned)
-
-**PATTERN 3: Keep Compound Terms Together**
-Multi-word technical concepts → Keep as single term
-- "machine learning" → Don't split
-- "cloud computing" → Don't split
-- "data warehousing" → Don't split
-- "continuous integration" → Don't split
-
-**PATTERN 4: Educational Background as Domain**
-When you see: "degree in [X]" or "background in [Y]"
-Extract X, Y as DOMAIN_KEYWORDS
-- "Master in Data Science" → "Data Science" (domain)
-- "Bachelor in Computer Science" → "Computer Science" (domain)
+{universal_patterns['system']}
 
 OUTPUT: Return ONLY three Python lists, nothing else."""
 
