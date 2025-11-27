@@ -4,13 +4,15 @@ AI Recommendation Prompt Template
 This template generates strategic CV optimization recommendations based on comprehensive analysis data
 including CV/JD analysis, skills comparison, component analysis, and ATS scores.
 
-UPDATED: Compatible with optimized recommendation input structure
+UPDATED: Compatible with v3.0 schema (with _legacy fallback)
 OUTPUT: Structured JSON for machine-readable CV generation
 """
 
 def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     """
     Generate AI recommendation prompt using optimized analysis data
+    
+    Supports both v3.0 schema and legacy format with automatic detection.
     
     Args:
         company: Company name
@@ -23,7 +25,85 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     logger = logging.getLogger(__name__)
     logger.info(f"🔍 [AI_PROMPT] Generating prompt for {company}")
     
-    # Extract optimized data structures
+    # ==================== SCHEMA VERSION DETECTION ====================
+    schema_version = analysis_data.get("meta", {}).get("schema_version", "1.0")
+    is_v3 = schema_version.startswith("3.")
+    
+    if is_v3:
+        logger.info(f"✅ [AI_PROMPT] Using v3.0 schema for {company}")
+    else:
+        logger.info(f"📋 [AI_PROMPT] Using legacy schema for {company}")
+    
+    # ==================== DATA EXTRACTION (v3.0 with legacy fallback) ====================
+    
+    # For v3.0, use new structure; for legacy, use old structure
+    if is_v3:
+        # v3.0 structure
+        legacy = analysis_data.get("_legacy", {})
+        
+        # Decision data
+        decision_data = analysis_data.get("decision", {})
+        preliminary_decision = {
+            "decision": decision_data.get("verdict", "UNKNOWN"),
+            "confidence": decision_data.get("confidence", 0),
+            "match_score": decision_data.get("match_score", 0),
+            "primary_reason": decision_data.get("positioning_strategy", ""),
+            "critical_missing": decision_data.get("reasoning", {}).get("critical_gaps", []),
+            "implicit_likely": []
+        }
+        
+        # Match summary from legacy (still needed for keyword lists)
+        match_summary = legacy.get("match_summary", {})
+        
+        # Keyword strategy v3.0 (rich context)
+        keyword_strategy_v3 = analysis_data.get("keyword_strategy", {})
+        keyword_guidance = legacy.get("keyword_integration_guidance", {})
+        
+        # Component scores
+        component_summary = analysis_data.get("component_scores", {})
+        
+        # ATS intelligence v3.0
+        ats_intel = analysis_data.get("ats_intelligence", {})
+        ats_scoring = {
+            "final_score": ats_intel.get("current_score", 0),
+            "target_score": ats_intel.get("target_score", 75.0),
+            "improvement_needed": ats_intel.get("gap", 0),
+            "category1_keywords": ats_intel.get("breakdown", {}).get("keyword_match", 0),
+            "category2_ai_analysis": ats_intel.get("breakdown", {}).get("semantic_match", 0),
+            "missing_counts": legacy.get("ats_scoring", {}).get("missing_counts", {}),
+            "status": "Active"
+        }
+        
+        # Quick wins from v3.0
+        quick_wins = ats_intel.get("quick_wins", [])
+        
+        # Gap analysis v3.0
+        gap_analysis = analysis_data.get("gap_analysis", {})
+        
+        # Evidence index (lightweight CV summary)
+        evidence_index = analysis_data.get("evidence_index", {})
+        
+        # JD context summary (lightweight)
+        jd_context = analysis_data.get("jd_context_summary", {})
+        jd_content = {
+            "role_title": jd_context.get("role_title", "N/A"),
+            "department": jd_context.get("culture", "N/A"),
+            "role_level": jd_context.get("role_level", "N/A"),
+            "context": jd_context.get("required_background", "N/A"),
+            "key_responsibilities": jd_context.get("key_focus", []),
+            "required_skills": [],
+            "preferred_skills": []
+        }
+        
+        # CV content - reconstruct from evidence_index for v3.0
+        cv_content = {
+            "experience_bullets": [],  # Not stored in v3.0 (use evidence_index)
+            "skills_section": f"Power BI: {'Yes' if evidence_index.get('has_power_bi') else 'No'}, SQL: {'Yes' if evidence_index.get('has_sql') else 'No'}, Python: {'Yes' if evidence_index.get('has_python') else 'No'}, Excel: {'Yes' if evidence_index.get('has_excel') else 'No'}",
+            "technical_projects": [],
+            "certifications": []
+        }
+    else:
+        # Legacy structure (original format)
     preliminary_decision = analysis_data.get("preliminary_decision", {})
     match_summary = analysis_data.get("match_summary", {})
     keyword_guidance = analysis_data.get("keyword_integration_guidance", {})
@@ -31,6 +111,10 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     ats_scoring = analysis_data.get("ats_scoring", {})
     cv_content = analysis_data.get("cv_content", {})
     jd_content = analysis_data.get("jd_content", {})
+        keyword_strategy_v3 = {}
+        quick_wins = []
+        gap_analysis = {}
+        evidence_index = {}
     
     # Extract scores and metrics
     final_ats_score = ats_scoring.get("final_score", 0)
@@ -119,10 +203,48 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     seniority_component = component_summary.get("seniority", {})
     industry_component = component_summary.get("industry", {})
     
-    # Extract keyword tiers
+    # Extract keyword tiers (v3.0 or legacy)
+    if is_v3 and keyword_strategy_v3:
+        # v3.0: Extract from keyword_strategy with rich context
+        tier1_v3 = keyword_strategy_v3.get("tier1_immediate", {})
+        tier2_v3 = keyword_strategy_v3.get("tier2_conditional", {})
+        tier3_v3 = keyword_strategy_v3.get("tier3_avoid", {})
+        already_strong = keyword_strategy_v3.get("already_strong", [])
+        
+        # Convert v3.0 keyword objects to simple lists for counting
+        tier1_keywords = {
+            "technical": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier1_v3.get("technical", [])],
+            "soft": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier1_v3.get("soft", [])],
+            "domain": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier1_v3.get("domain", [])]
+        }
+        tier2_keywords = {
+            "technical": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier2_v3.get("technical", [])],
+            "soft": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier2_v3.get("soft", [])],
+            "domain": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier2_v3.get("domain", [])]
+        }
+        tier3_keywords = {
+            "technical": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier3_v3.get("technical", [])],
+            "soft": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier3_v3.get("soft", [])],
+            "domain": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in tier3_v3.get("domain", [])]
+        }
+        
+        # Add already_strong to already_in_cv_filtered
+        already_in_cv_filtered = list(set(already_in_cv_filtered + already_strong))
+        
+        logger.info(f"📊 [AI_PROMPT v3.0] Keyword Strategy:")
+        logger.info(f"   - Tier 1 (immediate): {len(tier1_keywords.get('technical', []))} tech, {len(tier1_keywords.get('soft', []))} soft")
+        logger.info(f"   - Tier 2 (conditional): {len(tier2_keywords.get('technical', []))} tech, {len(tier2_keywords.get('soft', []))} soft")
+        logger.info(f"   - Tier 3 (avoid): {len(tier3_keywords.get('technical', []))} tech, {len(tier3_keywords.get('domain', []))} domain")
+        logger.info(f"   - Already strong: {len(already_strong)} keywords")
+    else:
+        # Legacy format
     tier1_keywords = keyword_guidance.get("tier1_always_add", {})
     tier2_keywords = keyword_guidance.get("tier2_add_if_evidence", {})
     tier3_keywords = keyword_guidance.get("tier3_never_add", {})
+        tier1_v3 = {}
+        tier2_v3 = {}
+        tier3_v3 = {}
+        already_strong = []
     
     # Extract preliminary decision
     decision = preliminary_decision.get("decision", "UNKNOWN")
@@ -142,6 +264,70 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
         if not bullets:
             return "N/A"
         return '\n'.join(f'  • {bullet}' for bullet in bullets[:10])  # Limit to 10
+    
+    def format_v3_keywords(keyword_list, category_name):
+        """Format v3.0 keywords with rich context"""
+        if not keyword_list:
+            return "  None"
+        
+        lines = []
+        for kw in keyword_list:
+            if isinstance(kw, dict):
+                keyword = kw.get("keyword", "Unknown")
+                reasoning = kw.get("reasoning", "N/A")
+                cv_evidence = kw.get("cv_evidence", "None")
+                evidence_strength = kw.get("evidence_strength", "none")
+                hints = kw.get("integration_hints", [])
+                risk = kw.get("risk", "medium")
+                
+                lines.append(f"  - {keyword}")
+                lines.append(f"      Reasoning: {reasoning}")
+                if cv_evidence:
+                    lines.append(f"      CV Evidence: {cv_evidence} (strength: {evidence_strength})")
+                if hints:
+                    lines.append(f"      Integration: {', '.join(hints)}")
+                lines.append(f"      Risk: {risk}")
+            else:
+                lines.append(f"  - {kw}")
+        
+        return '\n'.join(lines)
+    
+    def format_gap_analysis(gap_analysis):
+        """Format v3.0 gap analysis"""
+        if not gap_analysis:
+            return "N/A"
+        
+        gaps = gap_analysis.get("gaps", [])
+        summary = gap_analysis.get("summary", {})
+        
+        lines = []
+        lines.append(f"Summary: {summary.get('critical', 0)} critical, {summary.get('high', 0)} high, {summary.get('medium', 0)} medium, {summary.get('low', 0)} low")
+        lines.append("")
+        
+        for gap in gaps[:10]:  # Limit to 10
+            skill = gap.get("skill", "Unknown")
+            category = gap.get("category", "unknown")
+            impact = gap.get("impact", "unknown")
+            mitigation = gap.get("mitigation", "N/A")
+            lines.append(f"  - {skill} ({category}, {impact} impact)")
+            lines.append(f"    Mitigation: {mitigation}")
+        
+        return '\n'.join(lines)
+    
+    def format_quick_wins(quick_wins):
+        """Format v3.0 quick wins"""
+        if not quick_wins:
+            return "N/A"
+        
+        lines = []
+        for i, win in enumerate(quick_wins, 1):
+            action = win.get("action", "N/A")
+            gain = win.get("expected_gain", 0)
+            effort = win.get("effort", "unknown")
+            lines.append(f"  {i}. {action}")
+            lines.append(f"     Expected gain: +{gain} points | Effort: {effort}")
+        
+        return '\n'.join(lines)
     
     prompt = f"""Strategic CV Optimization Recommendations Generator
 
@@ -255,14 +441,57 @@ ATS Breakdown:
 - Category 1 (Keywords): {category1_score} points (Missing: {missing_counts.get('technical', 0)} technical, {missing_counts.get('soft', 0)} soft, {missing_counts.get('domain', 0)} domain)
 - Category 2 (AI Analysis): {category2_score} points
 
+{'## PRE-ANALYZED KEYWORD STRATEGY (v3.0)' if is_v3 else ''}
+{'''
+The following keywords have been pre-analyzed with reasoning, CV evidence, and integration hints.
+Use this analysis to guide your final categorization:
+
+### TIER 1 - IMMEDIATE INTEGRATION (Pre-analyzed):
+These keywords are safe to add immediately:
+
+Technical:
+''' + format_v3_keywords(tier1_v3.get('technical', []), 'technical') + '''
+
+Soft Skills:
+''' + format_v3_keywords(tier1_v3.get('soft', []), 'soft') + '''
+
+### TIER 2 - CONDITIONAL (Pre-analyzed):
+These keywords require validation against CV evidence:
+
+Technical:
+''' + format_v3_keywords(tier2_v3.get('technical', []), 'technical') + '''
+
+Soft Skills:
+''' + format_v3_keywords(tier2_v3.get('soft', []), 'soft') + '''
+
+Domain:
+''' + format_v3_keywords(tier2_v3.get('domain', []), 'domain') + '''
+
+### TIER 3 - AVOID (Pre-analyzed):
+These keywords should not be added:
+
+''' + format_v3_keywords(tier3_v3.get('technical', []) + tier3_v3.get('domain', []), 'avoid') + '''
+
+### GAP ANALYSIS:
+''' + format_gap_analysis(gap_analysis) + '''
+
+### QUICK WINS:
+''' + format_quick_wins(quick_wins) + '''
+
+### ALREADY STRONG IN CV:
+''' + (', '.join(already_strong[:15]) if already_strong else 'None') + '''
+
+---
+''' if is_v3 else '''
 ⚠️ NOTE: The "Keyword Tiers" section above shows PRE-CLASSIFIED keywords from previous analysis. 
 You MUST re-categorize ALL missing keywords listed in the "MISSING KEYWORDS" section below, 
 regardless of any pre-classification. ONLY use the missing keywords lists for categorization.
 
 Keyword Tiers (Reference Only - Use MISSING KEYWORDS lists below instead):
-- Tier 1 (Always Add): Technical: {', '.join(tier1_keywords.get('technical', [])) if tier1_keywords.get('technical') else 'None'} | Soft: {', '.join(tier1_keywords.get('soft', [])) if tier1_keywords.get('soft') else 'None'}
-- Tier 2 (Add with Evidence): Technical: {', '.join(tier2_keywords.get('technical', [])) if tier2_keywords.get('technical') else 'None'} | Soft: {', '.join(tier2_keywords.get('soft', [])) if tier2_keywords.get('soft') else 'None'}
-- Tier 3 (Never Add): Technical: {', '.join(tier3_keywords.get('technical', [])) if tier3_keywords.get('technical') else 'None'} | Domain: {', '.join(tier3_keywords.get('domain', [])) if tier3_keywords.get('domain') else 'None'}
+- Tier 1 (Always Add): Technical: ''' + (', '.join(tier1_keywords.get('technical', [])) if tier1_keywords.get('technical') else 'None') + ''' | Soft: ''' + (', '.join(tier1_keywords.get('soft', [])) if tier1_keywords.get('soft') else 'None') + '''
+- Tier 2 (Add with Evidence): Technical: ''' + (', '.join(tier2_keywords.get('technical', [])) if tier2_keywords.get('technical') else 'None') + ''' | Soft: ''' + (', '.join(tier2_keywords.get('soft', [])) if tier2_keywords.get('soft') else 'None') + '''
+- Tier 3 (Never Add): Technical: ''' + (', '.join(tier3_keywords.get('technical', [])) if tier3_keywords.get('technical') else 'None') + ''' | Domain: ''' + (', '.join(tier3_keywords.get('domain', [])) if tier3_keywords.get('domain') else 'None') + '''
+'''}
 
 Constraints:
 - No Fabrication: Only reframe/highlight existing CV experiences
@@ -456,9 +685,16 @@ Return ONLY this JSON structure (no preamble, no markdown formatting, no code bl
 
     # Debug: Log prompt generation
     logger.info(f"✅ [AI_PROMPT] Generated prompt ({len(prompt)} characters)")
+    logger.info(f"   - Schema version: {schema_version}")
     logger.info(f"   - Contains {len(technical_match.get('missing', []))} technical missing keywords")
     logger.info(f"   - Contains {len(soft_match.get('missing', []))} soft missing keywords")
     logger.info(f"   - Contains {len(domain_match.get('missing', []))} domain missing keywords")
+    
+    if is_v3:
+        logger.info(f"   [v3.0] Pre-analyzed Tier 1: {len(tier1_keywords.get('technical', []))} tech, {len(tier1_keywords.get('soft', []))} soft")
+        logger.info(f"   [v3.0] Pre-analyzed Tier 2: {len(tier2_keywords.get('technical', []))} tech, {len(tier2_keywords.get('soft', []))} soft")
+        logger.info(f"   [v3.0] Gap analysis: {len(gap_analysis.get('gaps', []))} gaps identified")
+        logger.info(f"   [v3.0] Quick wins: {len(quick_wins)} actions")
     
     return prompt
 

@@ -673,12 +673,12 @@ class ATSRecommendationService:
                 # Keep legacy fields during migration (can be removed after prompt update)
                 "_legacy": {
                     "preliminary_decision": {
-                        "decision": preliminary_decision.get("decision"),
-                        "confidence": preliminary_decision.get("confidence"),
-                        "match_score": preliminary_decision.get("match_score"),
-                        "primary_reason": preliminary_decision.get("primary_reason"),
-                        "critical_missing": preliminary_decision.get("critical_missing", []),
-                        "implicit_likely": preliminary_decision.get("implicit_likely", [])
+                "decision": preliminary_decision.get("decision"),
+                "confidence": preliminary_decision.get("confidence"),
+                "match_score": preliminary_decision.get("match_score"),
+                "primary_reason": preliminary_decision.get("primary_reason"),
+                "critical_missing": preliminary_decision.get("critical_missing", []),
+                "implicit_likely": preliminary_decision.get("implicit_likely", [])
                     },
                     "match_summary": {
                         "overall_match_rate": match_summary.get("overall_match_rate", 0),
@@ -686,8 +686,8 @@ class ATSRecommendationService:
                         # NOTE: missing_keywords REMOVED (redundant with keyword_strategy)
                     },
                     "keyword_integration_guidance": self._classify_keywords_optimized(
-                        match_summary.get("missing_keywords", {}),
-                        cv_skills
+                match_summary.get("missing_keywords", {}),
+                cv_skills
                     ),
                     "ats_scoring": ats_scoring
                 }
