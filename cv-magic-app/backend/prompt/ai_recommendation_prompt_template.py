@@ -104,13 +104,13 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
         }
     else:
         # Legacy structure (original format)
-    preliminary_decision = analysis_data.get("preliminary_decision", {})
-    match_summary = analysis_data.get("match_summary", {})
-    keyword_guidance = analysis_data.get("keyword_integration_guidance", {})
-    component_summary = analysis_data.get("component_summary", {})
-    ats_scoring = analysis_data.get("ats_scoring", {})
-    cv_content = analysis_data.get("cv_content", {})
-    jd_content = analysis_data.get("jd_content", {})
+        preliminary_decision = analysis_data.get("preliminary_decision", {})
+        match_summary = analysis_data.get("match_summary", {})
+        keyword_guidance = analysis_data.get("keyword_integration_guidance", {})
+        component_summary = analysis_data.get("component_summary", {})
+        ats_scoring = analysis_data.get("ats_scoring", {})
+        cv_content = analysis_data.get("cv_content", {})
+        jd_content = analysis_data.get("jd_content", {})
         keyword_strategy_v3 = {}
         quick_wins = []
         gap_analysis = {}
@@ -238,9 +238,9 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
         logger.info(f"   - Already strong: {len(already_strong)} keywords")
     else:
         # Legacy format
-    tier1_keywords = keyword_guidance.get("tier1_always_add", {})
-    tier2_keywords = keyword_guidance.get("tier2_add_if_evidence", {})
-    tier3_keywords = keyword_guidance.get("tier3_never_add", {})
+        tier1_keywords = keyword_guidance.get("tier1_always_add", {})
+        tier2_keywords = keyword_guidance.get("tier2_add_if_evidence", {})
+        tier3_keywords = keyword_guidance.get("tier3_never_add", {})
         tier1_v3 = {}
         tier2_v3 = {}
         tier3_v3 = {}
