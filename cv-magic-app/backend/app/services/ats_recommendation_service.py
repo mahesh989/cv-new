@@ -667,47 +667,19 @@ class ATSRecommendationService:
                 
                 "evidence_index": evidence_index,
                 
-                "jd_context_summary": jd_context_summary,
-                
-                # ==================== BACKWARD COMPATIBILITY ====================
-                # Keep legacy fields during migration (can be removed after prompt update)
-                "_legacy": {
-                    "preliminary_decision": {
-                "decision": preliminary_decision.get("decision"),
-                "confidence": preliminary_decision.get("confidence"),
-                "match_score": preliminary_decision.get("match_score"),
-                "primary_reason": preliminary_decision.get("primary_reason"),
-                "critical_missing": preliminary_decision.get("critical_missing", []),
-                "implicit_likely": preliminary_decision.get("implicit_likely", [])
-                    },
-                    "match_summary": {
-                        "overall_match_rate": match_summary.get("overall_match_rate", 0),
-                        "by_category": match_summary.get("by_category", {})
-                        # NOTE: missing_keywords REMOVED (redundant with keyword_strategy)
-                    },
-                    "keyword_integration_guidance": self._classify_keywords_optimized(
-                match_summary.get("missing_keywords", {}),
-                cv_skills
-                    ),
-                    "ats_scoring": ats_scoring
-                }
+                "jd_context_summary": jd_context_summary
             }
             
             # ==================== LOGGING ====================
             
             total_size = sys.getsizeof(json.dumps(recommendation_data))
-            v3_only_data = {k: v for k, v in recommendation_data.items() if k != "_legacy"}
-            v3_size = sys.getsizeof(json.dumps(v3_only_data))
-            legacy_size = total_size - v3_size
             
             logger.info("")
             logger.info("=" * 80)
             logger.info("📊 [INPUT_OPTIMIZATION v3.0] Summary:")
             logger.info(f"   Schema version: {self._get_schema_version()}")
             logger.info(f"   Total sections: {len(recommendation_data.keys())}")
-            logger.info(f"   V3.0 core size: ~{v3_size} bytes ({v3_size / 1024:.2f} KB)")
-            logger.info(f"   Legacy compat size: ~{legacy_size} bytes ({legacy_size / 1024:.2f} KB)")
-            logger.info(f"   Total size: ~{total_size} bytes ({total_size / 1024:.2f} KB)")
+            logger.info(f"   File size: ~{total_size} bytes ({total_size / 1024:.2f} KB)")
             logger.info("")
             logger.info("📦 [v3.0] REMOVED redundancies:")
             logger.info(f"   ❌ match_summary.missing_keywords (now in keyword_strategy)")

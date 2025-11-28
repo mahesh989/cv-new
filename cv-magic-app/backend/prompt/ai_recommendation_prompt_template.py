@@ -4,7 +4,7 @@ AI Recommendation Prompt Template
 This template generates strategic CV optimization recommendations based on comprehensive analysis data
 including CV/JD analysis, skills comparison, component analysis, and ATS scores.
 
-UPDATED: Compatible with v3.0 schema (with _legacy fallback)
+UPDATED: Fully migrated to v3.0 schema (no legacy dependency)
 OUTPUT: Structured JSON for machine-readable CV generation
 """
 
@@ -12,7 +12,7 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     """
     Generate AI recommendation prompt using optimized analysis data
     
-    Supports both v3.0 schema and legacy format with automatic detection.
+    Supports v3.0 schema (primary) and legacy format (fallback for old files).
     
     Args:
         company: Company name
@@ -38,9 +38,7 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
     
     # For v3.0, use new structure; for legacy, use old structure
     if is_v3:
-        # v3.0 structure
-        legacy = analysis_data.get("_legacy", {})
-        
+        # v3.0 structure - fully migrated, no legacy dependency
         # Decision data
         decision_data = analysis_data.get("decision", {})
         preliminary_decision = {
@@ -52,33 +50,88 @@ def generate_ai_recommendation_prompt(company: str, analysis_data: dict) -> str:
             "implicit_likely": []
         }
         
-        # Match summary from legacy (still needed for keyword lists)
-        match_summary = legacy.get("match_summary", {})
-        
         # Keyword strategy v3.0 (rich context)
         keyword_strategy_v3 = analysis_data.get("keyword_strategy", {})
-        keyword_guidance = legacy.get("keyword_integration_guidance", {})
+        
+        # Gap analysis v3.0
+        gap_analysis = analysis_data.get("gap_analysis", {})
+        gap_summary = gap_analysis.get("summary", {})
+        
+        # Reconstruct match_summary from v3.0 data (for compatibility with prompt)
+        
+        # Calculate match rates from gap analysis
+        # If we have gaps, we can infer match rates
+        total_technical_gaps = gap_summary.get("by_category", {}).get("technical", 0)
+        total_soft_gaps = gap_summary.get("by_category", {}).get("soft", 0)
+        total_domain_gaps = gap_summary.get("by_category", {}).get("domain", 0)
+        
+        # Reconstruct match_summary structure (for compatibility with prompt)
+        match_summary = {
+            "overall_match_rate": decision_data.get("match_score", 0),
+            "by_category": {
+                "technical": {
+                    "matched": keyword_strategy_v3.get("already_strong", []),
+                    "missing": [gap.get("skill") for gap in gap_analysis.get("gaps", []) if gap.get("category") == "technical"],
+                    "match_rate": max(0, 100 - (total_technical_gaps * 10))  # Rough estimate
+                },
+                "soft": {
+                    "matched": [],
+                    "missing": [gap.get("skill") for gap in gap_analysis.get("gaps", []) if gap.get("category") == "soft"],
+                    "match_rate": max(0, 100 - (total_soft_gaps * 10))  # Rough estimate
+                },
+                "domain": {
+                    "matched": [],
+                    "missing": [gap.get("skill") for gap in gap_analysis.get("gaps", []) if gap.get("category") == "domain"],
+                    "match_rate": max(0, 100 - (total_domain_gaps * 10))  # Rough estimate
+                }
+            }
+        }
+        
+        # Keyword guidance - use keyword_strategy directly (no legacy needed)
+        keyword_guidance = {
+            "tier1_always_add": {
+                "technical": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier1_immediate", {}).get("technical", [])],
+                "soft": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier1_immediate", {}).get("soft", [])],
+                "domain": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier1_immediate", {}).get("domain", [])]
+            },
+            "tier2_add_if_evidence": {
+                "technical": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier2_conditional", {}).get("technical", [])],
+                "soft": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier2_conditional", {}).get("soft", [])],
+                "domain": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier2_conditional", {}).get("domain", [])]
+            },
+            "tier3_never_add": {
+                "technical": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier3_avoid", {}).get("technical", [])],
+                "soft": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier3_avoid", {}).get("soft", [])],
+                "domain": [kw.get("keyword", kw) if isinstance(kw, dict) else kw for kw in keyword_strategy_v3.get("tier3_avoid", {}).get("domain", [])]
+            },
+            "already_in_cv_filtered": keyword_strategy_v3.get("already_strong", [])
+        }
         
         # Component scores
         component_summary = analysis_data.get("component_scores", {})
         
         # ATS intelligence v3.0
         ats_intel = analysis_data.get("ats_intelligence", {})
+        
+        # Calculate missing_counts from gap_analysis
+        missing_counts = {
+            "technical": gap_summary.get("by_category", {}).get("technical", 0),
+            "soft": gap_summary.get("by_category", {}).get("soft", 0),
+            "domain": gap_summary.get("by_category", {}).get("domain", 0)
+        }
+        
         ats_scoring = {
             "final_score": ats_intel.get("current_score", 0),
             "target_score": ats_intel.get("target_score", 75.0),
             "improvement_needed": ats_intel.get("gap", 0),
             "category1_keywords": ats_intel.get("breakdown", {}).get("keyword_match", 0),
             "category2_ai_analysis": ats_intel.get("breakdown", {}).get("semantic_match", 0),
-            "missing_counts": legacy.get("ats_scoring", {}).get("missing_counts", {}),
+            "missing_counts": missing_counts,
             "status": "Active"
         }
         
         # Quick wins from v3.0
         quick_wins = ats_intel.get("quick_wins", [])
-        
-        # Gap analysis v3.0
-        gap_analysis = analysis_data.get("gap_analysis", {})
         
         # Evidence index (lightweight CV summary)
         evidence_index = analysis_data.get("evidence_index", {})

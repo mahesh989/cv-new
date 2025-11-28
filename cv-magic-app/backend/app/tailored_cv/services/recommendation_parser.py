@@ -1117,27 +1117,36 @@ class RecommendationParser:
         
         for idx, exp in enumerate(source_experience, 1):
             logger.info(f"  - Processing experience {idx}/{len(source_experience)}")
-            # Parse duration into start/end dates
-            duration = exp.get('duration', '')
-            dates = duration.split('–') if '–' in duration else duration.split('-')
             
-            start_date = dates[0].strip() if dates else ''
-            end_date = dates[1].strip() if len(dates) > 1 else 'Present'
+            # Handle both formats: new format (start_date/end_date/bullets) and old format (duration/responsibilities/achievements)
+            if 'start_date' in exp or 'end_date' in exp:
+                # New format: direct start_date/end_date/bullets
+                start_date = exp.get('start_date', '')
+                end_date = exp.get('end_date', 'Present')
+                bullets = exp.get('bullets', [])
+                title = exp.get('position', exp.get('title', ''))  # Support both 'position' and 'title'
+            else:
+                # Old format: parse duration and combine responsibilities/achievements
+                duration = exp.get('duration', '')
+                dates = duration.split('–') if '–' in duration else duration.split('-')
+                start_date = dates[0].strip() if dates else ''
+                end_date = dates[1].strip() if len(dates) > 1 else 'Present'
+                bullets = exp.get('responsibilities', []) + exp.get('achievements', [])
+                title = exp.get('title', '')
             
-            bullets = exp.get('responsibilities', []) + exp.get('achievements', [])
             experience_entry = {
                 'company': exp.get('company', '').split(',')[0],  # Remove location part if present
-                'title': exp.get('title', ''),
+                'title': title,
                 'location': exp.get('location', ''),
                 'start_date': start_date,
                 'end_date': end_date,
-                'bullets': bullets
+                'bullets': bullets if isinstance(bullets, list) else []
             }
             logger.info(f"    • Company: {experience_entry['company']}")
             logger.info(f"    • Title: {experience_entry['title']}")
             logger.info(f"    • Duration: {start_date} to {end_date}")
-            logger.info(f"    • Bullets: {len(bullets)}")
-            if experience_entry['bullets']:  # Only add if we have content
+            logger.info(f"    • Bullets: {len(experience_entry['bullets'])}")
+            if experience_entry['bullets'] or experience_entry['company']:  # Add if we have bullets or company
                 experience.append(experience_entry)
         
         logger.info(f"Converted {len(experience)} experience entries")
@@ -1148,22 +1157,29 @@ class RecommendationParser:
         logger.info(f"  - Source skill categories: {list(skills_data.keys())}")
         skills = []
         
-        # Technical skills
+        # Technical skills - handle both array format and descriptive text format
         logger.info("  - Processing technical skills:")
+        tech_skills_list = skills_data.get('technical_skills', [])
         tech_skills = []
-        for skill in skills_data.get('technical_skills', []):
-            # Extract the main skill from the descriptive text
-            # e.g., "Advanced SQL skills, proficient in..." -> "SQL"
-            if 'SQL' in skill:
-                tech_skills.append('SQL')
-            if 'Power BI' in skill:
-                tech_skills.append('Power BI')
-            if 'Python' in skill:
-                tech_skills.append('Python')
-            if 'Excel' in skill:
-                tech_skills.append('Excel')
-            if 'data analysis' in skill.lower():
-                tech_skills.append('Data Analysis')
+        
+        for skill in tech_skills_list:
+            if isinstance(skill, str):
+                # Check if it's a simple skill name (new format) or descriptive text (old format)
+                if len(skill) < 50 and not any(word in skill.lower() for word in ['proficient', 'advanced', 'experienced', 'skilled']):
+                    # Simple skill name - use directly
+                    tech_skills.append(skill)
+                else:
+                    # Descriptive text - extract key skills (old format handling)
+                    if 'SQL' in skill:
+                        tech_skills.append('SQL')
+                    if 'Power BI' in skill:
+                        tech_skills.append('Power BI')
+                    if 'Python' in skill:
+                        tech_skills.append('Python')
+                    if 'Excel' in skill:
+                        tech_skills.append('Excel')
+                    if 'data analysis' in skill.lower():
+                        tech_skills.append('Data Analysis')
         
         if tech_skills:
             tech_skills = list(set(tech_skills))  # Remove duplicates
@@ -1172,49 +1188,74 @@ class RecommendationParser:
                 'skills': tech_skills
             })
             logger.info(f"    • Extracted {len(tech_skills)} unique technical skills")
-            logger.info(f"    • Skills: {', '.join(tech_skills)}")
+            logger.info(f"    • Skills: {', '.join(tech_skills[:5])}{'...' if len(tech_skills) > 5 else ''}")
         
-        # Soft skills
-        soft_skills = [
-            skill.split(',')[0]  # Take the main skill part
-            for skill in skills_data.get('soft_skills', [])
-        ]
+        # Soft skills - handle both array format and descriptive text format
+        soft_skills_list = skills_data.get('soft_skills', [])
+        soft_skills = []
+        for skill in soft_skills_list:
+            if isinstance(skill, str):
+                # Take the main skill part (before comma if present)
+                skill_name = skill.split(',')[0].strip()
+                if skill_name:
+                    soft_skills.append(skill_name)
+        
         if soft_skills:
+            soft_skills = list(set(soft_skills))  # Remove duplicates
             skills.append({
                 'category': 'Soft Skills',
                 'skills': soft_skills
             })
+            logger.info(f"    • Extracted {len(soft_skills)} soft skills")
         
-        # Domain expertise
-        domain_skills = [
-            skill.split(',')[0]  # Take the main skill part
-            for skill in skills_data.get('domain_expertise', [])
-        ]
+        # Domain expertise - handle both array format and descriptive text format
+        domain_skills_list = skills_data.get('domain_expertise', [])
+        domain_skills = []
+        for skill in domain_skills_list:
+            if isinstance(skill, str):
+                # Take the main skill part (before comma if present)
+                skill_name = skill.split(',')[0].strip()
+                if skill_name:
+                    domain_skills.append(skill_name)
+        
         if domain_skills:
+            domain_skills = list(set(domain_skills))  # Remove duplicates
             skills.append({
                 'category': 'Domain Expertise',
                 'skills': domain_skills
             })
+            logger.info(f"    • Extracted {len(domain_skills)} domain skills")
         
-        # If no explicit soft/domain skills, extract from key_skills
-        if not soft_skills and not domain_skills:
+        # Key skills - handle as additional technical or soft skills
+        key_skills_list = skills_data.get('key_skills', [])
+        if key_skills_list:
             key_skills = []
-            for skill in skills_data.get('key_skills', []):
-                if any(term in skill.lower() for term in ['communication', 'interpersonal', 'teamwork', 'leadership']):
-                    soft_skills.append(skill.split(',')[0])
-                else:
-                    key_skills.append(skill.split(',')[0])
+            for skill in key_skills_list:
+                if isinstance(skill, str):
+                    skill_name = skill.split(',')[0].strip()
+                    if skill_name:
+                        # Categorize as soft skill if it matches soft skill patterns
+                        if any(term in skill_name.lower() for term in ['communication', 'interpersonal', 'teamwork', 'leadership', 'collaboration']):
+                            if skill_name not in soft_skills:
+                                soft_skills.append(skill_name)
+                        else:
+                            key_skills.append(skill_name)
             
-            if soft_skills:
-                skills.append({
-                    'category': 'Soft Skills',
-                    'skills': list(set(soft_skills))  # Remove duplicates
-                })
             if key_skills:
-                skills.append({
-                    'category': 'Key Skills',
-                    'skills': list(set(key_skills))  # Remove duplicates
-                })
+                key_skills = list(set(key_skills))  # Remove duplicates
+                # Add to technical skills if not already there
+                existing_tech = set(tech_skills)
+                new_key_skills = [s for s in key_skills if s not in existing_tech]
+                if new_key_skills:
+                    # Update technical skills if we have a category, otherwise create new
+                    if skills and skills[0]['category'] == 'Technical Skills':
+                        skills[0]['skills'].extend(new_key_skills)
+                        skills[0]['skills'] = list(set(skills[0]['skills']))  # Remove duplicates
+                    else:
+                        skills.append({
+                            'category': 'Key Skills',
+                            'skills': new_key_skills
+                        })
         
         logger.info(f"Converted {len(skills)} skill categories")
         
@@ -1251,14 +1292,21 @@ class RecommendationParser:
         
         for idx, edu in enumerate(source_education, 1):
             logger.info(f"  - Processing education {idx}/{len(source_education)}")
+            # Handle both formats: new format (graduation_date) and old format (year)
+            graduation_date = edu.get('graduation_date', edu.get('year', ''))
+            # Handle relevant_coursework as both array and single value
+            relevant_coursework = edu.get('relevant_coursework', edu.get('relevant_courses', []))
+            if isinstance(relevant_coursework, str):
+                relevant_coursework = [relevant_coursework] if relevant_coursework else []
+            
             education_entry = {
                 'institution': edu.get('institution', ''),
                 'degree': edu.get('degree', ''),
                 'location': edu.get('location', ''),
-                'graduation_date': edu.get('year', ''),  # Map 'year' to 'graduation_date'
+                'graduation_date': graduation_date,
                 'gpa': edu.get('gpa', ''),
-                'relevant_coursework': edu.get('relevant_courses'),
-                'honors': edu.get('honors')
+                'relevant_coursework': relevant_coursework if isinstance(relevant_coursework, list) else [],
+                'honors': edu.get('honors', '')
             }
             logger.info(f"    • Institution: {education_entry['institution']}")
             logger.info(f"    • Degree: {education_entry['degree']}")
