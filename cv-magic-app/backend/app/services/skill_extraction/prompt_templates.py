@@ -498,7 +498,7 @@ def get_skill_prompts(document_type: str, document_text: str, use_optimized: boo
     return {
         "system_prompt": SkillExtractionPrompts.get_system_prompt(document_type),
         "user_prompt": SkillExtractionPrompts.get_skill_extraction_template(document_type, document_text),
-        "expected_max_tokens": 500,
+        "expected_max_tokens": 3000,
         "prompt_version": "optimized"  # Always optimized with rule-based validation
     }
 

@@ -711,7 +711,7 @@ class JDAnalyzer:
                 user=current_user,
                 system_prompt=system_prompt,
                 temperature=temperature,
-                max_tokens=2000
+                max_tokens=3000
             )
             
             result = self._parse_ai_response(response)
