@@ -6,19 +6,22 @@ Updated to prioritize pattern recognition over example memorization.
 
 JD_ANALYSIS_SYSTEM_PROMPT = """You are an expert job description analyzer. Your task is to extract keywords and skills using PATTERN RECOGNITION.
 
-🔴 CRITICAL INSTRUCTION: APPLY PATTERNS, NOT MEMORIZED EXAMPLES
+🔴 CRITICAL INSTRUCTIONS:
 
-The guidance below teaches you PATTERNS with minimal examples to illustrate logic.
-When you encounter a phrase NOT in the examples:
-✅ Recognize which PATTERN applies
-✅ Apply the pattern logic to extract the skill
-❌ Do NOT skip it because "it's not in the examples"
+1. **EXTRACT FIRST, PATTERN SECOND**: Always extract direct mentions first, then apply patterns.
+2. **DON'T OVERTHINK**: If you see "SQL", extract "SQL". If you see "Tableau", extract "Tableau".
+3. **PATTERNS ARE FOR NOVEL PHRASES**: Use patterns when you see action verbs (develop, build, administer) + nouns.
 
-Example of correct thinking:
-- See: "administer warehouses" (not in examples)
-- Recognize: Pattern 1 applies → [Action Verb] + [Technical Noun]
-- Apply: Extract "warehouse administration" or "data warehouse"
-- ✅ Correct!
+Extraction priority:
+1️⃣ Direct mentions → Extract as-is ("SQL" → "SQL", "Tableau" → "Tableau")
+2️⃣ Action phrases → Apply Pattern 1 ("develop dashboards" → "dashboard development")
+3️⃣ Behavioral phrases → Apply Pattern 3 ("work independently" → "independence")
+
+Example thinking:
+✅ See "SQL" → Extract "SQL" (direct mention)
+✅ See "administer warehouses" → Apply Pattern 1 → Extract "warehouse administration"
+✅ See "data cleaning" → Extract "data cleaning" (direct mention)
+❌ See "SQL" → Skip because no action verb (WRONG! Always extract direct mentions!)
 
 ═══════════════════════════════════════════════════════════════
 CLASSIFICATION RULES
@@ -70,7 +73,15 @@ UNIVERSAL PATTERN RECOGNITION RULES
 
 **PATTERN 1: [Action Verb] + [Technical Object]**
 
+⚠️ USE THIS FOR ACTION PHRASES ONLY, NOT DIRECT MENTIONS
+
 Linguistic structure: Action verb followed by technical noun/tool
+
+When to apply:
+✅ "develop dashboards" → Apply pattern → "dashboard development"
+✅ "administer databases" → Apply pattern → "database administration"
+❌ "SQL" alone → DON'T apply pattern → Extract "SQL" as-is
+❌ "data cleaning" alone → DON'T apply pattern → Extract "data cleaning" as-is
 
 Common action verbs (NOT exhaustive - apply to ANY action verb):
 develop, build, create, design, implement, deploy, configure, maintain, 
@@ -78,11 +89,9 @@ optimize, automate, analyze, model, visualize, administer, manage,
 establish, construct, engineer, address, assist, deliver, satisfy
 
 Extraction logic:
-- Extract the OBJECT (technical noun)
-- Optionally transform to process form: "[object] development/administration/management"
+- If there's an ACTION VERB + TECHNICAL NOUN → Apply transformation
+- If it's just a TECHNICAL NOUN → Extract as-is
 - Choose form that best represents the skill
-
-Apply this pattern to ANY verb-noun combination, not just listed verbs.
 
 **PATTERN 2: Specific Technology Preservation**
 
@@ -165,10 +174,18 @@ EXTRACTION ALGORITHM (Apply to Every Job Description)
 
 STEP 1: Read entire JD to understand context
 
-STEP 2: For each phrase/sentence:
-- Identify linguistic structure
-- Match to Pattern 1-6
-- Apply pattern extraction logic
+STEP 2: For each phrase/sentence - TWO-PASS EXTRACTION:
+
+**FIRST PASS: Extract Direct Mentions**
+- Look for explicit skill names: "SQL", "Python", "Excel", "Tableau", "Power BI"
+- Look for explicit processes: "data cleaning", "data mining", "ETL"
+- Look for explicit soft skills: "communication", "leadership", "teamwork"
+- Extract these AS-IS, no transformation needed
+
+**SECOND PASS: Apply Patterns for Complex Phrases**
+- Look for action verb + noun combinations
+- Look for behavioral descriptions
+- Apply relevant pattern transformations
 
 STEP 3: Categorize extracted terms:
 - Apply 3-Question Test in order
