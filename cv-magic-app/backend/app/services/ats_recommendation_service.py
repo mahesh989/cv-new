@@ -845,10 +845,31 @@ class ATSRecommendationService:
             }
         
         latest_entry = match_entries[-1]
+        
+        # Try structured fields first (new format)
+        if "decision" in latest_entry:
+            decision = latest_entry.get("decision", "UNKNOWN")
+            match_score = latest_entry.get("match_score", 0)
+            confidence = latest_entry.get("confidence", 0)
+            critical_missing = latest_entry.get("critical_missing", [])
+            implicit_likely = latest_entry.get("implicit_likely", [])
+            
+            return {
+                "decision": decision,
+                "match_score": match_score,
+                "confidence": confidence,
+                "should_proceed": decision in ["PROCEED", "CONDITIONAL", "MAYBE"],
+                "critical_missing": critical_missing if isinstance(critical_missing, list) else [],
+                "implicit_likely": implicit_likely if isinstance(implicit_likely, list) else [],
+                "learnable_gaps": [],
+                "primary_reason": latest_entry.get("primary_reason", "")
+            }
+        
+        # Fallback to parsing content string (legacy format)
         content = latest_entry.get("content", "")
         
         # Extract structured decision fields
-        decision_match = re.search(r"DECISION:\s*(PROCEED|MAYBE|DONT_PROCEED)", content, re.IGNORECASE)
+        decision_match = re.search(r"DECISION:\s*(PROCEED|MAYBE|DONT_PROCEED|CONDITIONAL)", content, re.IGNORECASE)
         match_score_match = re.search(r"MATCH_SCORE:\s*(\d+)", content)
         confidence_match = re.search(r"CONFIDENCE:\s*(\d+)", content)
         
@@ -909,6 +930,25 @@ class ATSRecommendationService:
             }
         
         latest_entry = preextracted_entries[-1]
+        
+        # Try structured fields first (new format)
+        if "overall_match_rate" in latest_entry or "by_category" in latest_entry:
+            match_summary = {
+                "overall_match_rate": latest_entry.get("overall_match_rate", 0),
+                "by_category": latest_entry.get("by_category", {
+                    "technical": {"matched": [], "missing": [], "match_rate": 0},
+                    "soft": {"matched": [], "missing": [], "match_rate": 0},
+                    "domain": {"matched": [], "missing": [], "match_rate": 0}
+                }),
+                "missing_keywords": latest_entry.get("missing_keywords", {
+                    "technical": [],
+                    "soft": [],
+                    "domain": []
+                })
+            }
+            return match_summary
+        
+        # Fallback to parsing content string (legacy format)
         content = latest_entry.get("content", "")
         
         # Initialize structure
@@ -1423,11 +1463,22 @@ class ATSRecommendationService:
                 cv_data = json.load(f)
             
             # Extract from skills
-            for skill_cat in cv_data.get('skills', []):
-                if isinstance(skill_cat, dict):
-                    for skill in skill_cat.get('skills', []):
-                        if skill:
-                            keywords.add(str(skill).lower())
+            # Handle both old format (list of dicts) and new format (dict of lists)
+            skills_data = cv_data.get('skills', {})
+            if isinstance(skills_data, dict):
+                # New format: {"technical_skills": [...], "soft_skills": [...], ...}
+                for skill_list in skills_data.values():
+                    if isinstance(skill_list, list):
+                        for skill in skill_list:
+                            if skill:
+                                keywords.add(str(skill).lower())
+            elif isinstance(skills_data, list):
+                # Old format: [{"skills": [...]}, ...]
+                for skill_cat in skills_data:
+                    if isinstance(skill_cat, dict):
+                        for skill in skill_cat.get('skills', []):
+                            if skill:
+                                keywords.add(str(skill).lower())
             
             # Extract from experience bullets (2-3 word phrases)
             for exp in cv_data.get('experience', []):
@@ -1594,10 +1645,22 @@ class ATSRecommendationService:
                 experience_bullets.extend(bullets)
             
             # Extract skills section text
+            # Handle both old format (list of dicts) and new format (dict of lists)
             skills_text = []
-            for skill_cat in cv_data.get("skills", []):
-                skills = skill_cat.get("skills", [])
-                skills_text.extend(skills)
+            skills_data = cv_data.get("skills", {})
+            
+            if isinstance(skills_data, dict):
+                # New format: {"technical_skills": [...], "soft_skills": [...], ...}
+                for skill_list in skills_data.values():
+                    if isinstance(skill_list, list):
+                        skills_text.extend(skill_list)
+            elif isinstance(skills_data, list):
+                # Old format: [{"skills": [...]}, ...]
+                for skill_cat in skills_data:
+                    if isinstance(skill_cat, dict):
+                        skills = skill_cat.get("skills", [])
+                        skills_text.extend(skills)
+            
             skills_section = ", ".join(skills_text)
             
             # Extract projects
