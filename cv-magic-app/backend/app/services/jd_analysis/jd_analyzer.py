@@ -17,6 +17,7 @@ from app.ai.ai_service import ai_service
 from app.ai.base_provider import AIResponse
 from app.utils.timestamp_utils import TimestampUtils
 from .jd_analysis_prompt import get_jd_analysis_prompts
+from .jd_skill_sections_prompt import get_three_section_prompts
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,13 @@ class JDAnalysisResult:
         self.all_keywords: List[str] = data.get('all_keywords') if 'all_keywords' in data else (merged_required + merged_preferred)
         self.experience_years: Optional[int] = data.get('experience_years')
         
+        # Additional summaries (lightweight sections)
+        self.three_section_skills: Dict[str, List[str]] = data.get('three_section_skills', {
+            'technical_skills': [],
+            'soft_skills': [],
+            'domain_knowledge': []
+        })
+        
         # Metadata
         self.analysis_timestamp: str = data.get('analysis_timestamp', datetime.now().isoformat())
         self.ai_model_used: Optional[str] = data.get('ai_model_used')
@@ -95,6 +103,7 @@ class JDAnalysisResult:
             'experience_years': self.experience_years,
             'required_skills': self.required_skills,
             'preferred_skills': self.preferred_skills,
+            'three_section_skills': self.three_section_skills,
             'required_keywords': merged_required,
             'preferred_keywords': merged_preferred,
             'analysis_timestamp': self.analysis_timestamp,
@@ -457,6 +466,44 @@ class JDAnalyzer:
             logger.error(f"Error parsing AI response: {e}")
             raise ValueError(f"Failed to parse analysis result: {e}")
     
+    async def _generate_three_section_skills(self, jd_text: str, current_user: 'UserData') -> Optional[Dict[str, List[str]]]:
+        """
+        Generate lightweight technical/soft/domain skill lists for quick consumption.
+        
+        Returns None on failure without interrupting main JD analysis.
+        """
+        try:
+            system_prompt, user_prompt = get_three_section_prompts(jd_text)
+            response = await self.ai_service.generate_response(
+                prompt=user_prompt,
+                user=current_user,
+                system_prompt=system_prompt,
+                temperature=0.0,
+                max_tokens=1200
+            )
+            
+            content = response.content.strip()
+            if content.startswith('```json'):
+                content = content.replace('```json', '').replace('```', '').strip()
+            elif content.startswith('```'):
+                content = content.replace('```', '').strip()
+            
+            data = json.loads(content)
+            section_data = {
+                'technical_skills': data.get('technical_skills', []),
+                'soft_skills': data.get('soft_skills', []),
+                'domain_knowledge': data.get('domain_knowledge', [])
+            }
+            
+            logger.info(f"✅ [JD_ANALYZER] Generated three-section JD skills summary "
+                        f"(tech={len(section_data['technical_skills'])}, "
+                        f"soft={len(section_data['soft_skills'])}, "
+                        f"domain={len(section_data['domain_knowledge'])})")
+            return section_data
+        except Exception as e:
+            logger.warning(f"⚠️ [JD_ANALYZER] Failed to generate three-section skills summary: {e}")
+            return None
+    
     def _save_analysis_result(self, company_name: str, result: JDAnalysisResult) -> str:
         """
         Save analysis result to JSON file
@@ -715,6 +762,13 @@ class JDAnalyzer:
             )
             
             result = self._parse_ai_response(response)
+            
+            # Generate lightweight three-section summary (non-blocking)
+            section_summary = await self._generate_three_section_skills(jd_text, current_user)
+            if section_summary:
+                result.three_section_skills = section_summary
+                result.metadata = result.metadata or {}
+                result.metadata['three_section_skills'] = section_summary
             
             logger.info(f"✅ JD analysis completed. Found {len(result.required_keywords)} required "
                        f"and {len(result.preferred_keywords)} preferred keywords")

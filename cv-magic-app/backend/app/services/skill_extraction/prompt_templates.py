@@ -11,9 +11,14 @@ Key Design:
 """
 
 # Import shared universal patterns (same patterns used in jd_analysis_prompt.py)
+import os
+
 from app.services.skill_extraction.universal_extraction_patterns import (
     get_universal_patterns_for_prompt
 )
+
+# Toggle simplified skill prompts here (True = test.py style, False = legacy)
+USE_SIMPLE_SKILL_PROMPTS = True
 
 
 class SkillExtractionPrompts:
@@ -167,6 +172,50 @@ OUTPUT (exactly this format, nothing else):
 TECHNICAL_SKILLS = []
 SOFT_SKILLS = []
 DOMAIN_KEYWORDS = []"""
+
+
+def get_simple_skill_prompts(document_type: str, document_text: str) -> dict:
+    """
+    Minimal three-section prompt inspired by backend/test.py.
+    Produces the same Python list assignments expected by existing parsers.
+    """
+    doc_label = document_type.lower()
+    system_prompt = f"""You are a skilled {doc_label} analyzer. Extract skills and categorize them into
+technical skills, soft skills, and domain keywords. Return ONLY valid Python list assignments.
+
+CATEGORIZATION RULES:
+- TECHNICAL: Tools (SQL, Excel), technical processes (data cleaning, ETL), and artifacts (dashboards, APIs)
+- SOFT SKILLS: Human interaction + behavioral traits (communication, leadership, stakeholder management)
+- DOMAIN KEYWORDS: Industry or regulatory terms (Healthcare, Finance, Nonprofit, GDPR, fundraising)
+
+EXTRACTION RULES:
+- Extract direct mentions AS-IS and keep compounds intact (machine learning, cloud computing)
+- Remove qualifiers: "strong SQL" → "SQL"
+- Preserve specific tools: "Power BI" stays "Power BI"
+- Include implied skills only when clearly supported by the text
+
+OUTPUT (STRICT):
+TECHNICAL_SKILLS = [...]
+SOFT_SKILLS = [...]
+DOMAIN_KEYWORDS = [...]
+
+No commentary, explanations, or markdown."""
+
+    user_prompt = f"""Extract ALL skills from this {document_type} and categorize them:
+{document_text.strip()}
+
+Return EXACTLY this format with three Python lists (use double quotes, comma-separated values):
+TECHNICAL_SKILLS = ["SQL", "Power BI"]
+SOFT_SKILLS = ["communication", "problem-solving"]
+DOMAIN_KEYWORDS = ["Healthcare", "Nonprofit"]
+"""
+
+    return {
+        "system_prompt": system_prompt,
+        "user_prompt": user_prompt,
+        "expected_max_tokens": 1500,
+        "prompt_version": "simple",
+    }
 
 
 class SkillCategorizer:
@@ -495,6 +544,9 @@ def get_skill_prompts(document_type: str, document_text: str, use_optimized: boo
     Returns:
         Dict with 'system_prompt' and 'user_prompt' keys
     """
+    if USE_SIMPLE_SKILL_PROMPTS:
+        return get_simple_skill_prompts(document_type, document_text)
+    
     return {
         "system_prompt": SkillExtractionPrompts.get_system_prompt(document_type),
         "user_prompt": SkillExtractionPrompts.get_skill_extraction_template(document_type, document_text),
