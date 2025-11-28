@@ -372,7 +372,8 @@ class SkillExtractionService:
             "Job Description",
             jd_text,
             use_optimized=self.use_optimized_prompts,
-            allow_simple=True
+            allow_simple=True,
+            simple_mode="structured"
         )
         prompt_version = prompts_data["prompt_version"]
         max_tokens = prompts_data["expected_max_tokens"]
