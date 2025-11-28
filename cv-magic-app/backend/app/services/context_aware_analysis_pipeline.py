@@ -283,7 +283,12 @@ class ContextAwareAnalysisPipeline:
             )
             
             # Use centralized skill extraction prompt with proper categorization rules
-            skill_prompts = get_skill_prompts("CV", cv_text)
+            skill_prompts = get_skill_prompts(
+                "CV",
+                cv_text,
+                allow_simple=True,
+                simple_mode="structured"
+            )
             
             # Extend prompt with CV-SPECIFIC extraction rules + additional fields
             cv_prompt = skill_prompts["user_prompt"] + """

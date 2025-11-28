@@ -218,6 +218,64 @@ DOMAIN_KEYWORDS = ["Healthcare", "Nonprofit"]
     }
 
 
+def get_simple_structured_skill_prompts(document_type: str, document_text: str) -> dict:
+    """
+    Simplified instructions that still return the full structured JSON payload
+    required by the context-aware pipeline (skills + metadata fields).
+    """
+    doc_label = document_type.lower()
+    system_prompt = f"""You are a precise {doc_label} skill extractor. Use short, direct
+rules to classify each term into technical, soft, or domain categories.
+
+SIMPLE CLASSIFICATION:
+- Technical: tools/technologies (SQL, Power BI), executable processes (ETL, dashboards),
+  or technical artifacts (APIs, data pipelines).
+- Soft: people-facing or behavioral skills (communication, collaboration, stakeholder management,
+  problem-solving, attention to detail).
+- Domain: industries, sectors, regulatory or mission-specific terms (Healthcare, Nonprofit, GDPR,
+  fundraising).
+
+RULES:
+- Copy exact phrases from the document; remove qualifiers ("strong SQL" → "SQL").
+- Keep compound terms intact ("machine learning", "cloud computing").
+- If a term fits multiple categories, use priority Technical > Soft > Domain.
+- Never invent skills that are not clearly implied.
+
+OUTPUT FORMAT (STRICT JSON ONLY):
+{{
+  "technical_skills": [],
+  "soft_skills": [],
+  "domain_keywords": [],
+  "experience_years": number_or_null,
+  "education": [],
+  "certifications": [],
+  "languages": [],
+  "summary": "2-3 sentence professional summary"
+}}
+
+No narration, no Markdown—just JSON."""
+
+    user_prompt = f"""Analyze this {document_type} and return the JSON exactly in the format above.
+Document:
+
+{document_text.strip()}
+
+CHECKLIST BEFORE OUTPUT:
+1. Technical skills include all tools, software, data processes, and artifacts found in the text.
+2. Soft skills include interpersonal/behavioral phrases (communication, stakeholder management, etc.).
+3. Domain keywords cover industries, missions, regulatory terms (Nonprofit, Fundraising, GDPR, etc.).
+4. experience_years is a number if explicitly stated, otherwise null.
+5. education / certifications / languages arrays list any entries mentioned (empty array if none).
+6. summary is a concise 2-3 sentence description covering role scope and strengths."""
+
+    return {
+        "system_prompt": system_prompt,
+        "user_prompt": user_prompt,
+        "expected_max_tokens": 2000,
+        "prompt_version": "simple_structured",
+    }
+
+
 class SkillCategorizer:
     """
     Rule-based categorizer - Automatically fixes LLM categorization mistakes
@@ -532,7 +590,13 @@ Return format: keyword1, keyword2, keyword3 (comma-separated, no brackets)"""
         )
 
 
-def get_skill_prompts(document_type: str, document_text: str, use_optimized: bool = True) -> dict:
+def get_skill_prompts(
+    document_type: str,
+    document_text: str,
+    use_optimized: bool = True,
+    allow_simple: bool = False,
+    simple_mode: str = "assignments"
+) -> dict:
     """
     Get both system and user prompts for skill extraction
     
@@ -544,7 +608,9 @@ def get_skill_prompts(document_type: str, document_text: str, use_optimized: boo
     Returns:
         Dict with 'system_prompt' and 'user_prompt' keys
     """
-    if USE_SIMPLE_SKILL_PROMPTS:
+    if allow_simple and USE_SIMPLE_SKILL_PROMPTS:
+        if simple_mode == "structured":
+            return get_simple_structured_skill_prompts(document_type, document_text)
         return get_simple_skill_prompts(document_type, document_text)
     
     return {

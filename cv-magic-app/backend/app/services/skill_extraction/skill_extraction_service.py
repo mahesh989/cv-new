@@ -290,7 +290,12 @@ class SkillExtractionService:
         
         # Extract skills using AI
         # Use unified prompt getter that supports both verbose and optimized modes
-        prompts_data = get_skill_prompts("CV", cv_text, use_optimized=self.use_optimized_prompts)
+        prompts_data = get_skill_prompts(
+            "CV",
+            cv_text,
+            use_optimized=self.use_optimized_prompts,
+            allow_simple=True
+        )
         prompt_version = prompts_data["prompt_version"]
         max_tokens = prompts_data["expected_max_tokens"]
         
@@ -363,7 +368,12 @@ class SkillExtractionService:
         
         # Extract skills using AI
         # Use unified prompt getter that supports both verbose and optimized modes
-        prompts_data = get_skill_prompts("Job Description", jd_text, use_optimized=self.use_optimized_prompts)
+        prompts_data = get_skill_prompts(
+            "Job Description",
+            jd_text,
+            use_optimized=self.use_optimized_prompts,
+            allow_simple=True
+        )
         prompt_version = prompts_data["prompt_version"]
         max_tokens = prompts_data["expected_max_tokens"]
         
