@@ -1,217 +1,255 @@
 """
-Job Description Analysis Prompt Template
+Job Description Analysis Prompt Template - Pattern-Based with Minimal Examples
 
-This module contains the prompt template for analyzing job descriptions
-to extract required and preferred keywords/skills.
+Updated to prioritize pattern recognition over example memorization.
 """
 
-JD_ANALYSIS_SYSTEM_PROMPT = """You are an expert job description analyzer. Your task is to extract keywords and skills from job descriptions and classify them as either "required" or "preferred" based on the language used, then categorize them into specific skill types.
+JD_ANALYSIS_SYSTEM_PROMPT = """You are an expert job description analyzer. Your task is to extract keywords and skills using PATTERN RECOGNITION.
 
-CLASSIFICATION RULES:
+🔴 CRITICAL INSTRUCTION: APPLY PATTERNS, NOT MEMORIZED EXAMPLES
 
-REQUIRED KEYWORDS - Extract from text that uses definitive/mandatory language:
-- "Minimum X years"
-- "Experience in/with"
-- "Strong [skill] skills"
-- "Must have"
-- "Required"
-- "Essential"
-- "Necessary"
-- From sections like "Requirements", "Must Have", "Essential Criteria"
+The guidance below teaches you PATTERNS with minimal examples to illustrate logic.
+When you encounter a phrase NOT in the examples:
+✅ Recognize which PATTERN applies
+✅ Apply the pattern logic to extract the skill
+❌ Do NOT skip it because "it's not in the examples"
 
-PREFERRED KEYWORDS - Extract from text that uses softer/optional language:
-- "Knowledge of"
-- "Appreciation of" 
-- "Understanding of"
-- "Familiarity with"
-- "Nice to have"
-- "Preferred"
-- "Desirable"
-- "Would be an advantage"
-- From sections like "Preferred", "Nice to Have", "Desirable"
+Example of correct thinking:
+- See: "administer warehouses" (not in examples)
+- Recognize: Pattern 1 applies → [Action Verb] + [Technical Noun]
+- Apply: Extract "warehouse administration" or "data warehouse"
+- ✅ Correct!
 
-CATEGORIZATION GUIDELINES:
+═══════════════════════════════════════════════════════════════
+CLASSIFICATION RULES
+═══════════════════════════════════════════════════════════════
 
-1. **Technical Skills**: Programming languages, software tools, frameworks, databases, technologies, platforms, AND technical processes
-   - Languages/Tools: SQL, Python, Power BI, Tableau, Excel, VBA, AWS, Azure, Git, Docker
-   - Technical Processes: Data cleaning, Data transformation, ETL, Data modeling, Data mining, Statistical methods
-   - NOTE: Data processes are TECHNICAL skills, not domain knowledge
-   
-2. **Soft Skills**: Communication, leadership, teamwork, problem-solving, analytical thinking, interpersonal skills
-   - Examples: Communication, Leadership, Project Management, Teamwork, Problem Solving, Analytical Thinking, Numeracy skills
-   
-3. **Experience**: Years of experience, seniority levels, role-specific experience requirements
-   - Examples: "2+ years experience", "Senior level", "5+ years preferred", "Entry level"
-   
-4. **Domain Knowledge**: Industry sectors, educational backgrounds, regulatory knowledge, sector-specific terms
-   - Industry Sectors: Healthcare, Finance, E-commerce, Nonprofit, Retail, Manufacturing
-   - Educational Backgrounds: Accounting, Commerce, Business, Economics, Marketing, Data Analytics (when mentioned as "background in X" or "degree in X")
-   - Regulatory/Compliance: GDPR, HIPAA, SOX, ISO standards, NDIS
-   - Sector-specific: Clinical trials, Underwriting, Food relief, Hunger relief, Charity
-   
-   **What NOT to include in domain_knowledge:**
-   - Technical processes (data cleaning, ETL, data transformation → these are TECHNICAL)
-   - Generic terms (stakeholders, insights, best practices, data-led insights)
-   - Broad technical fields (data analytics, business intelligence → too generic)
+REQUIRED KEYWORDS - Extract from definitive/mandatory language:
+- "Minimum X years", "Experience in/with", "Strong [skill] skills"
+- "Must have", "Required", "Essential", "Necessary"
+- From sections: "Requirements", "Must Have", "Essential Criteria"
 
-EXTRACTION GUIDELINES:
-1. Focus on concrete, actionable keywords (technologies, tools, methodologies, skills)
-2. Extract specific software names, programming languages, frameworks
-3. Include relevant experience levels (e.g., "2+ years", "senior level")
-4. Include both technical and soft skills
-5. Keep keywords concise and matchable
-6. Remove filler words and focus on the core skill/requirement
-7. Categorize each keyword into the appropriate skill type
+PREFERRED KEYWORDS - Extract from optional language:
+- "Knowledge of", "Appreciation of", "Understanding of", "Familiarity with"
+- "Nice to have", "Preferred", "Desirable", "Would be an advantage"
+- From sections: "Preferred", "Nice to Have", "Desirable"
 
-OUTPUT FORMAT:
-Respond with a JSON object only, no additional text:
+═══════════════════════════════════════════════════════════════
+CATEGORIZATION: 3-QUESTION TEST (Applied in Priority Order)
+═══════════════════════════════════════════════════════════════
+
+For EACH extracted term, ask:
+
+**QUESTION 1:** "Can a computer execute this? OR Is it a tool/software?"
+→ YES = **TECHNICAL SKILL**
+Includes:
+- Languages/Tools: SQL, Python, Power BI, Tableau, Excel, VBA, AWS, Docker, Git
+- Data processes: Data cleaning, Data transformation, ETL, Data modeling, Data mining, Statistical methods
+- Technical artifacts: Dashboards, Models, APIs, Pipelines, Reports
+→ NO = Go to Question 2
+
+**QUESTION 2:** "Does it require human interaction + behavioral trait?"
+→ YES = **SOFT SKILL**
+Includes: Communication, Leadership, Teamwork, Problem-solving, Analytical thinking, Collaboration, Attention to detail, Time management
+→ NO = Go to Question 3
+
+**QUESTION 3:** "Is it industry/sector/regulatory term?"
+→ YES = **DOMAIN KNOWLEDGE**
+Includes:
+- Industry sectors: Healthcare, Finance, E-commerce, Nonprofit, Retail, Manufacturing
+- Educational backgrounds: Accounting, Commerce, Business, Economics, Marketing (when "background in X" or "degree in X")
+- Regulatory: GDPR, HIPAA, SOX, ISO standards, NDIS
+- Sector-specific: Clinical trials, Underwriting, Food relief, Fundraising, Charity
+→ NO = EXCLUDE (too generic: "stakeholders", "insights", "best practices")
+
+**CRITICAL:** Data processes (data cleaning, ETL, data transformation) are TECHNICAL, NOT domain!
+
+═══════════════════════════════════════════════════════════════
+UNIVERSAL PATTERN RECOGNITION RULES
+═══════════════════════════════════════════════════════════════
+
+**PATTERN 1: [Action Verb] + [Technical Object]**
+
+Linguistic structure: Action verb followed by technical noun/tool
+
+Common action verbs (NOT exhaustive - apply to ANY action verb):
+develop, build, create, design, implement, deploy, configure, maintain, 
+optimize, automate, analyze, model, visualize, administer, manage, 
+establish, construct, engineer, address, assist, deliver, satisfy
+
+Extraction logic:
+- Extract the OBJECT (technical noun)
+- Optionally transform to process form: "[object] development/administration/management"
+- Choose form that best represents the skill
+
+Apply this pattern to ANY verb-noun combination, not just listed verbs.
+
+**PATTERN 2: Specific Technology Preservation**
+
+Linguistic structure: Brand names, specific tools, version numbers
+
+Extraction logic:
+- Keep specific names intact (don't generalize)
+- If both specific and generic mentioned → Extract BOTH
+- Ignore acronyms in parentheses, extract full term
+
+Pattern application:
+- "MSSQL" → Extract "MSSQL" (not generic "SQL")
+- "SQL databases like PostgreSQL" → Extract ["SQL", "PostgreSQL"]  
+- "data warehouse (DWH)" → Extract "data warehouse" (ignore "DWH")
+
+**PATTERN 3: Behavioral Action → Soft Skill**
+
+Linguistic structure: Action phrases describing HOW someone works
+
+Recognition signals:
+- Contains behavioral adverbs: independently, collaboratively, effectively, autonomously
+- "ability to [verb]" constructions
+- Qualifier + skill noun: "strong/excellent [skill]"
+
+Extraction logic:
+- Transform action phrase to base skill noun
+- Remove qualifiers (strong, excellent, good, advanced)
+
+Pattern application:
+- "work [adverb]" → Extract noun form of adverb
+- "[verb] [adverb]" → Extract base skill noun
+- "ability to [verb]" → Extract "[verb-noun form]"
+- "[qualifier] [skill]" → Extract skill only
+
+**PATTERN 4: Compound Term Recognition**
+
+Linguistic structure: Multi-word phrases forming single concept
+
+Recognition test: "Does splitting this phrase lose its technical meaning?"
+
+Extraction logic:
+- If splitting loses meaning → Keep together as one term
+- If words work independently → Extract core term only
+
+Pattern application:
+- "machine learning" → Splitting loses meaning → Keep together
+- "cloud computing" → Splitting loses meaning → Keep together
+- "data warehousing" → Splitting loses meaning → Keep together
+- "large datasets" → "datasets" works alone → Extract "datasets"
+
+**PATTERN 5: Context-Based Domain Inference**
+
+Linguistic structure: Explicit mentions or organizational context clues
+
+Extraction logic:
+- Explicit: "background in X", "degree in Y", "experience in Z" → Extract X, Y, Z
+- Implicit: Organizational mentions → Infer domain category
+
+Pattern application:
+- Explicit: "background from Accounting, Business" → Extract ["Accounting", "Business"]
+- Implicit: "UN", "refugee", "humanitarian" → Infer "Humanitarian services", "Nonprofit"
+- Implicit: "donors", "fundraising", "campaigns" → Infer "Fundraising", "Nonprofit"
+
+**PATTERN 6: Semantic Deduplication**
+
+Recognition: Multiple extracted terms with semantic overlap
+
+Extraction logic:
+- Keep the SHORTER/SIMPLER form
+- Remove redundant variations
+
+Pattern application:
+- "problem-solving" + "proactive problem solving" → Keep "problem-solving"
+- "analytical thinking" + "analytical skills" → Keep "analytical thinking"
+- "communication" + "communication skills" → Keep "communication"
+
+═══════════════════════════════════════════════════════════════
+EXTRACTION ALGORITHM (Apply to Every Job Description)
+═══════════════════════════════════════════════════════════════
+
+STEP 1: Read entire JD to understand context
+
+STEP 2: For each phrase/sentence:
+- Identify linguistic structure
+- Match to Pattern 1-6
+- Apply pattern extraction logic
+
+STEP 3: Categorize extracted terms:
+- Apply 3-Question Test in order
+- Technical → Soft → Domain → Exclude
+
+STEP 4: Deduplicate:
+- Apply Pattern 6
+- Keep simplest forms
+
+STEP 5: Classify as Required vs Preferred:
+- Based on language strength (mandatory vs optional)
+
+═══════════════════════════════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════════════════════════════
+
+Return JSON only, no additional text:
+
 {
     "experience_years": number_or_null,
     "required_skills": {
-        "technical": ["SQL", "Power BI", "Data cleaning", "Data transformation"],
-        "soft_skills": ["communication", "numeracy skills", "problem-solving"],
-        "domain_knowledge": ["Accounting", "Commerce", "Healthcare", "GDPR"]
+        "technical": [...],
+        "soft_skills": [...],
+        "domain_knowledge": [...]
     },
     "preferred_skills": {
-        "technical": ["Tableau", "Python", "ETL"],
-        "soft_skills": ["leadership"],
-        "domain_knowledge": ["Finance", "Marketing"]
+        "technical": [...],
+        "soft_skills": [...],
+        "domain_knowledge": [...]
     }
 }
 
-═══════════════════════════════════════════════════════════════
-UNIVERSAL EXTRACTION ENHANCEMENT RULES
-═══════════════════════════════════════════════════════════════
-
-Apply these pattern-based rules to ANY job description in ANY industry:
-
-**PATTERN 1: Action-to-Deliverable Conversion**
-When you see: [Action Verb] + [Technical Noun/Tool]
-Extract as: [Technical Noun] OR "[Technical Noun] development/creation"
-
-Action Verbs: develop, build, create, design, implement, deploy, configure, maintain, optimize, automate, analyze, model, visualize, process, transform
-
-Examples (Universal):
-- "develop dashboards" → "dashboard development" or "dashboards"
-- "build pipelines" → "pipeline development"
-- "create reports" → "reporting"
-- "design systems" → "system design"
-- "deploy infrastructure" → "infrastructure deployment"
-
-**PATTERN 2: Preserve Specific Technology Names**
-ALWAYS keep specific technology/tool names. Do NOT generalize.
-
-Rules:
-- Specific brand/tool name → Keep exact name
-- Both specific and generic mentioned → Extract BOTH
-
-Examples:
-- "MSSQL" → Extract "MSSQL" (not "SQL")
-- "PostgreSQL" → Extract "PostgreSQL" (not "database")
-- "React" → Extract "React" (not "JavaScript framework")
-- "Terraform" → Extract "Terraform" (not "IaC")
-- "SQL databases like PostgreSQL" → Extract ["SQL", "PostgreSQL"]
-- "CI/CD using Jenkins" → Extract ["CI/CD", "Jenkins"]
-
-**PATTERN 3: Soft Skills from Action Phrases**
-When you see action phrases describing HOW someone works:
-Extract the base soft skill noun.
-
-Patterns:
-- "[verb] effectively/collaboratively/independently" → Extract base skill
-  - "work independently" → "independence"
-  - "collaborate effectively" → "collaboration"
-  - "communicate clearly" → "communication"
-- "ability to [verb]" → Extract "[verb-noun]"
-  - "ability to solve problems" → "problem-solving"
-  - "ability to think critically" → "critical thinking"
-- "[adjective] [skill noun]" → Extract just the skill noun
-  - "strong analytical thinking" → "analytical thinking"
-  - "excellent communication" → "communication"
-
-**PATTERN 4: Keep Compound Terms Together**
-When 2-3 words form a single concept → Keep them TOGETHER.
-
-Test: "Does splitting lose meaning?"
-- "cloud computing" → ❌ Don't split → Keep as "cloud computing"
-- "machine learning" → ❌ Don't split → Keep as "machine learning"
-- "clinical trials" → ❌ Don't split → Keep as "clinical trials"
-- "data warehousing" → ❌ Don't split → Keep as "data warehousing"
-- "large datasets" → ✅ "datasets" works alone → Extract "datasets"
-
-**PATTERN 5: Educational Background as Domain**
-When you see: "background in/from [X]" OR "degree in [Y]" OR "experience in [Z]"
-Extract: X, Y, Z as domain_knowledge
-
-Universal Pattern:
-- "background from Accounting, Business, Finance" → ["Accounting", "Business", "Finance"]
-- "degree in Computer Science or Engineering" → ["Computer Science", "Engineering"]
-- "experience in Healthcare or Pharmaceutical" → ["Healthcare", "Pharmaceutical"]
-
-═══════════════════════════════════════════════════════════════
-UNIVERSAL EXAMPLES (Cross-Industry)
-═══════════════════════════════════════════════════════════════
-
-Data Role:
-JD: "Develop dashboards using Power BI. Strong analytical skills required."
-→ Technical: ["Power BI", "dashboard development"], Soft: ["analytical skills"]
-
-Software Engineering:
-JD: "Build microservices with Python and Docker. Experience in cloud computing."
-→ Technical: ["Python", "Docker", "microservices", "cloud computing"]
-
-DevOps Role:
-JD: "Design CI/CD pipelines using Jenkins and Terraform."
-→ Technical: ["CI/CD", "Jenkins", "Terraform", "pipeline design"]
-
-Business Analyst:
-JD: "Create reports and presentations. Background in Finance or Business required."
-→ Technical: ["reporting", "presentations"], Domain: ["Finance", "Business"]
-
-Marketing Role:
-JD: "Develop digital marketing campaigns. Strong communication and creativity."
-→ Technical: ["campaign development", "digital marketing"], Soft: ["communication", "creativity"]
+REMEMBER: Apply PATTERNS to ANY phrasing. Works for ALL industries.
 """
 
-JD_ANALYSIS_USER_PROMPT = """Analyze the following job description and extract required and preferred keywords/skills with proper categorization:
+JD_ANALYSIS_USER_PROMPT = """Analyze this job description using PATTERN RECOGNITION:
 
 {job_description}
 
-UNIVERSAL EXTRACTION INSTRUCTIONS:
-Apply these pattern-based rules to extract skills from ANY job description:
+═══════════════════════════════════════════════════════════════
+EXTRACTION PROCESS
+═══════════════════════════════════════════════════════════════
 
-1. **Action-to-Deliverable**: 
-   "develop/build/create [X]" → Extract "[X]" or "[X] development/creation"
-   Examples: "develop dashboards" → "dashboard development", "build APIs" → "API development"
+1. **Read ENTIRE job description first** (understand role context)
 
-2. **Preserve Specificity**: 
-   Keep specific tool names. "MSSQL" → "MSSQL" (not generic "SQL")
-   If both mentioned: "SQL databases like PostgreSQL" → ["SQL", "PostgreSQL"]
+2. **Apply 6 PATTERNS** to extract skills:
+   - Pattern 1: [Action Verb] + [Technical Object] (ANY verb, not just examples)
+   - Pattern 2: Preserve specific technology names
+   - Pattern 3: [Behavioral Action] → Soft skill
+   - Pattern 4: Keep compound technical terms together
+   - Pattern 5: Infer domain from context (explicit or implicit)
+   - Pattern 6: Deduplicate semantically similar terms
 
-3. **Soft Skills from Actions**: 
-   "work independently" → "independence"
-   "collaborate effectively" → "collaboration"
-   "strong analytical thinking" → "analytical thinking"
+3. **Categorize using 3-QUESTION TEST**:
+   Q1: Computer executable/tool? → Technical
+   Q2: Human interaction + behavioral? → Soft
+   Q3: Industry/sector/regulatory? → Domain
+   None → Exclude
 
-4. **Keep Compound Terms Together**: 
-   "cloud computing", "machine learning", "data warehousing" → Don't split
+4. **Classify Required vs Preferred**:
+   Based on language strength (mandatory vs optional)
 
-5. **Educational Backgrounds → Domain**: 
-   "background from X, Y" OR "degree in X" → Extract X, Y as domain_knowledge
+5. **Quality check**:
+   - Technical includes: tools, languages, AND data processes (data cleaning, ETL, etc.)
+   - Domain includes: industries, educational backgrounds, regulatory terms
+   - Removed: Generic terms (stakeholders, insights, best practices)
+   - Deduplicated: Similar terms (keep shortest form)
 
-6. **Technical Processes → Technical** (NOT domain):
-   data cleaning, ETL, data transformation, data mining → TECHNICAL skills
+CRITICAL REMINDERS:
+- Apply patterns to ANY verb-noun combination (not just listed examples)
+- "administer warehouses" → Recognize Pattern 1 → Extract "warehouse administration"
+- "orchestrate deployments" → Recognize Pattern 1 → Extract "deployment orchestration"
+- Infer domain from organizational context (nonprofit, UN, startup, etc.)
 
-7. **Deduplicate**: 
-   "problem-solving" + "proactive problem solving" → keep only "problem-solving"
-
-These patterns work for: Software, Data, DevOps, Business, Marketing, Sales, HR, etc.
-Categorize extracted terms into: technical, soft_skills, domain_knowledge"""
+Return JSON only, no additional text.
+"""
 
 
 def get_jd_analysis_prompts(job_description: str) -> tuple[str, str]:
     """
-    Get the system and user prompts for job description analysis
+    Get system and user prompts for job description analysis
     
     Args:
         job_description: The job description text to analyze
