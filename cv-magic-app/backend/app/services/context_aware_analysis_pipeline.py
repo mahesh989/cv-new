@@ -561,6 +561,33 @@ CRITICAL REMINDERS:
                                     logger.warning(f"⚠️ [CONTEXT_AWARE_PIPELINE] Cached analysis may not be based on processed JD")
                             results.steps_completed.append("jd_analysis_existing")
                         results.jd_analysis = jd_analysis_result.to_dict()
+
+                        # Build three-section JD skills snapshot from JDAnalysisResult.three_section_skills when available
+                        try:
+                            three_section = results.jd_analysis.get("three_section_skills") or {}
+                            tech_3 = three_section.get("technical_skills") or three_section.get("technical") or []
+                            soft_3 = three_section.get("soft_skills") or three_section.get("soft") or []
+                            domain_3 = three_section.get("domain_knowledge") or three_section.get("domain_keywords") or []
+
+                            if any([tech_3, soft_3, domain_3]):
+                                jd_simple = {
+                                    "technical_skills": tech_3,
+                                    "soft_skills": soft_3,
+                                    "domain_keywords": domain_3,
+                                }
+                                logger.debug(
+                                    "[CONTEXT_AWARE_PIPELINE] JD three_section_skills (fresh) BEFORE categorization - "
+                                    f"Tech: {len(tech_3)}, Soft: {len(soft_3)}, Domain: {len(domain_3)}"
+                                )
+                                corrected = SkillCategorizer.recategorize_skills(jd_simple)
+                                results.jd_skills = {
+                                    "technical_skills": corrected["technical_skills"],
+                                    "soft_skills": corrected["soft_skills"],
+                                    "domain_keywords": corrected["domain_keywords"],
+                                }
+                                logger.info("✅ [CONTEXT_AWARE_PIPELINE] Using JD three_section_skills (fresh) for jd_skills")
+                        except Exception as jd_simple_err:
+                            logger.debug(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to build three-section JD snapshot: {jd_simple_err}")
                         
                         # Try to get job info from existing files
                         from pathlib import Path
@@ -660,7 +687,8 @@ CRITICAL REMINDERS:
                     processed_jd_length = jd_analysis_result.metadata.get('processed_jd_length')
                 
                 jd_data_to_cache = {
-                    'jd_skills': {},  # Will be filled by skill extraction
+                    # Cache JD three-section snapshot so future runs can reuse it without recomputing
+                    'jd_skills': results.jd_skills if isinstance(results.jd_skills, dict) else {},
                     'jd_analysis': results.jd_analysis,
                     'job_info': results.job_info,
                     'jd_original': {},  # Will be filled from saved files
