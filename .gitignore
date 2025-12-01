@@ -72,3 +72,8 @@ TEST_*.md
 VERIFICATION*.md
 TRIGGER_*.md
 JD_PROCESSING_*.md
+
+# Test files (single-file tests)
+test.py
+**/test.py
+
