@@ -1001,7 +1001,32 @@ CRITICAL REMINDERS:
             
             # Summarize JD skills for downstream consumers
             if not results.jd_skills and results.jd_analysis:
-                results.jd_skills = self._summarize_jd_skills(results.jd_analysis)
+                # Prefer the JD analyzer's own three-section summary if available
+                three_section = results.jd_analysis.get("three_section_skills") or {}
+                tech_3 = three_section.get("technical_skills") or three_section.get("technical") or []
+                soft_3 = three_section.get("soft_skills") or three_section.get("soft") or []
+                domain_3 = three_section.get("domain_knowledge") or three_section.get("domain_keywords") or []
+
+                if any([tech_3, soft_3, domain_3]):
+                    jd_simple = {
+                        "technical_skills": tech_3,
+                        "soft_skills": soft_3,
+                        "domain_keywords": domain_3,
+                    }
+                    logger.debug(
+                        "[CONTEXT_AWARE_PIPELINE] JD three_section_skills BEFORE categorization - "
+                        f"Tech: {len(tech_3)}, Soft: {len(soft_3)}, Domain: {len(domain_3)}"
+                    )
+                    corrected = SkillCategorizer.recategorize_skills(jd_simple)
+                    results.jd_skills = {
+                        "technical_skills": corrected["technical_skills"],
+                        "soft_skills": corrected["soft_skills"],
+                        "domain_keywords": corrected["domain_keywords"],
+                    }
+                    logger.info("✅ [CONTEXT_AWARE_PIPELINE] Using JD three_section_skills for jd_skills")
+                else:
+                    # Fallback: derive a three-section summary from the 8-section analysis
+                    results.jd_skills = self._summarize_jd_skills(results.jd_analysis)
             elif isinstance(jd_data, dict) and jd_data.get('jd_skills'):
                 # Apply SkillCategorizer to cached jd_skills too
                 cached_jd_skills = jd_data.get('jd_skills', {})
