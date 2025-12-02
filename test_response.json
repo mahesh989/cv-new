@@ -1,0 +1,387 @@
+{
+    "success": true,
+    "company": "Australia_for_UNHCR",
+    "requires_user_decision": true,
+    "analyze_match_decision": {
+        "decision": "PROCEED",
+        "confidence": 85,
+        "match_score": 85,
+        "primary_reason": "The candidate's skills and experience align well with the job requirements, with no critical missing skills.",
+        "critical_missing": [],
+        "implicit_likely": [
+            "Excel",
+            "VBA"
+        ],
+        "learnable_gaps": [],
+        "blocker_found": false,
+        "should_proceed": true,
+        "raw_content": "DECISION: PROCEED  \nCONFIDENCE: 85  \nMATCH_SCORE: 85  \n\nPRIMARY_REASON: The candidate's skills and experience align well with the job requirements, with no critical missing skills.\n\nCRITICAL_MISSING: None  \nIMPLICIT_LIKELY: Excel, VBA  \nLEARNABLE_GAPS: None  \n\nBLOCKER_FOUND: No  \n\n---  \nDETAILED_ANALYSIS:  \n1. **Skills Match**: The candidate has strong SQL skills, experience with Power BI, and data analysis expertise, which are core requirements for the role. The CV also indicates experience with data warehousing and business intelligence tools, aligning with the job's technical requirements. Excel and VBA are likely implicit skills given the candidate's data analysis background.\n\n2. **Experience and Domain Match**: The candidate has over 2 years of relevant experience, which meets the job's requirement. The experience in data analysis and AI engineering, along with project management and stakeholder collaboration, aligns well with the responsibilities of the role. The candidate's work in various sectors, including property tech and construction, provides transferable skills applicable to the humanitarian focus of the UNHCR role."
+    },
+    "processing_time": 20.16809,
+    "steps_completed": [
+        "jd_analysis_existing",
+        "job_info_existing",
+        "cv_skills_extraction",
+        "cv_jd_matching",
+        "analyze_match"
+    ],
+    "steps_skipped": [],
+    "results": {
+        "cv_skills": {
+            "technical_skills": [
+                "A/B Testing",
+                "AWS",
+                "Cloud Computing",
+                "Computer Vision",
+                "Data Warehousing",
+                "Deep Learning",
+                "Docker",
+                "ETL",
+                "Git",
+                "GitHub",
+                "Machine Learning",
+                "MySQL",
+                "NLP",
+                "PostgreSQL",
+                "Power BI",
+                "Python",
+                "REST APIs",
+                "SQL",
+                "Snowflake",
+                "Tableau",
+                "Time Series",
+                "pipeline automation"
+            ],
+            "soft_skills": [
+                "analytical thinking",
+                "attention to detail",
+                "collaboration",
+                "critical thinking",
+                "problem-solving"
+            ],
+            "domain_keywords": [
+                "Healthcare",
+                "construction",
+                "property tech"
+            ],
+            "experience_years": 2,
+            "education": [
+                "Master of Data Science",
+                "PhD in Physics",
+                "Master in Theoretical Physics",
+                "Bachelor of Science in Information Technology"
+            ],
+            "certifications": [
+                "Snowflake Data Engineering Professional",
+                "Snowflake Data Warehousing Professional",
+                "Google Analytics Certification",
+                "SQL Essential Training"
+            ],
+            "languages": [],
+            "summary": "Results-driven Data Analyst and AI Engineer with over 2 years of experience delivering data-driven solutions across property tech, construction, and AI sectors. Proven track record in building production AI applications, automating data pipelines, and creating actionable dashboards that drive efficiency gains."
+        },
+        "jd_skills": {
+            "technical_skills": [
+                "BI report authoring",
+                "Excel",
+                "Power BI",
+                "SQL",
+                "Tableau",
+                "VBA"
+            ],
+            "soft_skills": [
+                "bulk communications",
+                "communication",
+                "customer service",
+                "multi-channel communication"
+            ],
+            "domain_keywords": [
+                "Fundraising"
+            ]
+        },
+        "jd_analysis": {
+            "experience_years": 2,
+            "required_skills": {
+                "technical": [
+                    "data mining",
+                    "profile analysis",
+                    "analytical model building",
+                    "BI report authoring",
+                    "Power BI",
+                    "data extraction",
+                    "data manipulation",
+                    "segmentation strategies",
+                    "report production",
+                    "projection model building",
+                    "segmentation model building",
+                    "data warehouse administration",
+                    "Excel",
+                    "VBA",
+                    "SQL",
+                    "database knowledge",
+                    "business intelligence tools",
+                    "data querying",
+                    "data extraction"
+                ],
+                "soft_skills": [
+                    "project management",
+                    "autonomy",
+                    "stakeholder management",
+                    "communication",
+                    "customer service"
+                ],
+                "domain_knowledge": [
+                    "fundraising",
+                    "nonprofit",
+                    "marketing campaigns",
+                    "data governance"
+                ],
+                "experience": []
+            },
+            "preferred_skills": {
+                "technical": [],
+                "soft_skills": [],
+                "domain_knowledge": [],
+                "experience": []
+            },
+            "three_section_skills": {
+                "technical_skills": [
+                    "data-mining",
+                    "profile analysis",
+                    "analytical models",
+                    "BI report authoring",
+                    "Power BI",
+                    "data extract requirements",
+                    "manipulating data",
+                    "bulk communications",
+                    "projection models",
+                    "segmentation models",
+                    "data warehouse",
+                    "Excel",
+                    "VBA",
+                    "SQL",
+                    "database knowledge",
+                    "business intelligence tools",
+                    "Tableau",
+                    "querying",
+                    "extracting data",
+                    "relational databases"
+                ],
+                "soft_skills": [
+                    "project management",
+                    "stakeholder management",
+                    "communication",
+                    "customer service",
+                    "appreciation of data issues",
+                    "autonomy"
+                ],
+                "domain_knowledge": [
+                    "Fundraising",
+                    "Marketing",
+                    "donor-centricity",
+                    "multi-channel communication",
+                    "data governance regulations"
+                ]
+            },
+            "required_keywords": [
+                "data mining",
+                "profile analysis",
+                "analytical model building",
+                "BI report authoring",
+                "Power BI",
+                "data extraction",
+                "data manipulation",
+                "segmentation strategies",
+                "report production",
+                "projection model building",
+                "segmentation model building",
+                "data warehouse administration",
+                "Excel",
+                "VBA",
+                "SQL",
+                "database knowledge",
+                "business intelligence tools",
+                "data querying",
+                "data extraction",
+                "project management",
+                "autonomy",
+                "stakeholder management",
+                "communication",
+                "customer service",
+                "fundraising",
+                "nonprofit",
+                "marketing campaigns",
+                "data governance"
+            ],
+            "preferred_keywords": [],
+            "analysis_timestamp": "2025-12-02T15:41:15.626698",
+            "ai_model_used": "openai/gpt-4o",
+            "processing_status": "completed",
+            "company_name": null,
+            "metadata": {
+                "three_section_skills": {
+                    "technical_skills": [
+                        "data-mining",
+                        "profile analysis",
+                        "analytical models",
+                        "BI report authoring",
+                        "Power BI",
+                        "data extract requirements",
+                        "manipulating data",
+                        "bulk communications",
+                        "projection models",
+                        "segmentation models",
+                        "data warehouse",
+                        "Excel",
+                        "VBA",
+                        "SQL",
+                        "database knowledge",
+                        "business intelligence tools",
+                        "Tableau",
+                        "querying",
+                        "extracting data",
+                        "relational databases"
+                    ],
+                    "soft_skills": [
+                        "project management",
+                        "stakeholder management",
+                        "communication",
+                        "customer service",
+                        "appreciation of data issues",
+                        "autonomy"
+                    ],
+                    "domain_knowledge": [
+                        "Fundraising",
+                        "Marketing",
+                        "donor-centricity",
+                        "multi-channel communication",
+                        "data governance regulations"
+                    ]
+                },
+                "jd_hash": "9944ec04223ec174b448b230ab7860cd6f6c2d00593f9308866832505434bb71"
+            }
+        },
+        "job_info": {
+            "company_name": "Australia for UNHCR",
+            "job_title": "Data Analyst",
+            "location": "Sydney, Australia",
+            "experience_required": "Unknown",
+            "seniority_level": "Unknown",
+            "industry": "International Aid and Development",
+            "phone_number": null,
+            "email": null,
+            "website": null,
+            "work_type": "Hybrid",
+            "extracted_at": "2025-12-02T15:16:11.009747",
+            "job_url": "https://www.ethicaljobs.com.au/members/australiaforunhcr/data-analyst"
+        },
+        "cv_jd_matching": {
+            "company_name": "Australia_for_UNHCR",
+            "cv_analysis_timestamp": "2025-12-02T15:41:28.077449",
+            "matched_required_keywords": [
+                "data mining",
+                "analytical model building",
+                "BI report authoring",
+                "Power BI",
+                "data extraction",
+                "data manipulation",
+                "report production",
+                "Excel",
+                "SQL",
+                "database knowledge",
+                "business intelligence tools",
+                "data querying",
+                "project management",
+                "autonomy",
+                "stakeholder management",
+                "communication",
+                "customer service"
+            ],
+            "matched_preferred_keywords": [],
+            "missed_required_keywords": [
+                "profile analysis",
+                "segmentation strategies",
+                "projection model building",
+                "segmentation model building",
+                "data warehouse administration",
+                "VBA",
+                "fundraising",
+                "nonprofit",
+                "marketing campaigns",
+                "data governance"
+            ],
+            "missed_preferred_keywords": [],
+            "match_counts": {
+                "total_required_keywords": 26,
+                "total_preferred_keywords": 0,
+                "matched_required_count": 17,
+                "matched_preferred_count": 0
+            },
+            "matching_notes": {
+                "data mining": "Inferred from data analysis and data extraction activities",
+                "analytical model building": "Mentioned in context of AI and ML model development",
+                "BI report authoring": "Found in experience with Power BI and Tableau",
+                "Power BI": "Explicitly listed in skills and experience",
+                "data extraction": "Mentioned in experience with Python",
+                "data manipulation": "Inferred from data analysis and Python scripting",
+                "report production": "Inferred from dashboard creation and client reporting",
+                "Excel": "Found in technical skills section",
+                "SQL": "Mentioned multiple times in experience",
+                "database knowledge": "Inferred from SQL and PostgreSQL experience",
+                "business intelligence tools": "Inferred from Power BI and Tableau usage",
+                "data querying": "Inferred from SQL and database analysis",
+                "project management": "Inferred from project descriptions and team collaboration",
+                "autonomy": "Inferred from freelance and contract work",
+                "stakeholder management": "Inferred from collaboration with cross-functional teams",
+                "communication": "Inferred from collaboration and reporting activities",
+                "customer service": "Inferred from customer support optimization"
+            },
+            "ai_model_used": "openai/gpt-4o",
+            "processing_status": "completed",
+            "cv_file_path": "user/shivani@gmail.com/cv-analysis/cvs/original/original_cv.txt",
+            "metadata": {}
+        }
+    },
+    "jd_three_section_skills": {
+        "technical_skills": [
+            "data-mining",
+            "profile analysis",
+            "analytical models",
+            "BI report authoring",
+            "Power BI",
+            "data extract requirements",
+            "manipulating data",
+            "bulk communications",
+            "projection models",
+            "segmentation models",
+            "data warehouse",
+            "Excel",
+            "VBA",
+            "SQL",
+            "database knowledge",
+            "business intelligence tools",
+            "Tableau",
+            "querying",
+            "extracting data",
+            "relational databases"
+        ],
+        "soft_skills": [
+            "project management",
+            "stakeholder management",
+            "communication",
+            "customer service",
+            "appreciation of data issues",
+            "autonomy"
+        ],
+        "domain_knowledge": [
+            "Fundraising",
+            "Marketing",
+            "donor-centricity",
+            "multi-channel communication",
+            "data governance regulations"
+        ]
+    },
+    "warnings": [],
+    "errors": []
+}
+

@@ -468,25 +468,36 @@ CRITICAL REMINDERS:
                 else:
                     logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Cached analysis based on PROCESSED JD - valid")
                 
-                # Apply SkillCategorizer to cached JD skills
-                cached_jd_skills = context.jd_cache_data.jd_skills
-                if cached_jd_skills and isinstance(cached_jd_skills, dict):
-                    logger.debug(f"Cached JD skills BEFORE categorization - Technical: {cached_jd_skills.get('technical_skills', [])[:5]}")
-                    corrected = SkillCategorizer.recategorize_skills(cached_jd_skills)
-                    cached_jd_skills = {
-                        "technical_skills": corrected["technical_skills"],
-                        "soft_skills": corrected["soft_skills"],
-                        "domain_keywords": corrected["domain_keywords"]
-                    }
-                    logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to cached JD skills")
-                    logger.debug(f"Cached JD skills AFTER categorization - Technical: {cached_jd_skills.get('technical_skills', [])[:5]}")
-                results.jd_skills = cached_jd_skills
+                # ⭐ SKIP jd_skills generation if three_section_skills exists (avoid duplication)
                 results.jd_analysis = context.jd_cache_data.jd_analysis
                 results.job_info = context.jd_cache_data.job_info
                 results.steps_skipped.append("jd_analysis_cached")
                 
+                # ⭐ Populate jd_skills from three_section_skills if available, otherwise use cached
+                if results.jd_analysis and isinstance(results.jd_analysis, dict):
+                    three_section = results.jd_analysis.get("three_section_skills")
+                    if three_section:
+                        # Populate jd_skills from three_section_skills (map domain_knowledge -> domain_keywords)
+                        results.jd_skills = {
+                            "technical_skills": three_section.get("technical_skills", []),
+                            "soft_skills": three_section.get("soft_skills", []),
+                            "domain_keywords": three_section.get("domain_knowledge", []),  # Map domain_knowledge to domain_keywords
+                        }
+                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] Populated jd_skills from three_section_skills")
+                    else:
+                        # Only use cached jd_skills if three_section_skills doesn't exist (backward compatibility)
+                        cached_jd_skills = context.jd_cache_data.jd_skills
+                        if cached_jd_skills and isinstance(cached_jd_skills, dict):
+                            logger.debug(f"Cached JD skills BEFORE categorization - Technical: {cached_jd_skills.get('technical_skills', [])[:5]}")
+                            corrected = SkillCategorizer.recategorize_skills(cached_jd_skills)
+                            results.jd_skills = {
+                                "technical_skills": corrected["technical_skills"],
+                                "soft_skills": corrected["soft_skills"],
+                                "domain_keywords": corrected["domain_keywords"]
+                            }
+                            logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to cached JD skills (no three_section_skills)")
+                
                 return {
-                    'jd_skills': results.jd_skills,
                     'jd_analysis': results.jd_analysis,
                     'job_info': results.job_info,
                     'jd_original': context.jd_cache_data.jd_original
@@ -562,32 +573,12 @@ CRITICAL REMINDERS:
                             results.steps_completed.append("jd_analysis_existing")
                         results.jd_analysis = jd_analysis_result.to_dict()
 
-                        # Build three-section JD skills snapshot from JDAnalysisResult.three_section_skills when available
-                        try:
-                            three_section = results.jd_analysis.get("three_section_skills") or {}
-                            tech_3 = three_section.get("technical_skills") or three_section.get("technical") or []
-                            soft_3 = three_section.get("soft_skills") or three_section.get("soft") or []
-                            domain_3 = three_section.get("domain_knowledge") or three_section.get("domain_keywords") or []
-
-                            if any([tech_3, soft_3, domain_3]):
-                                jd_simple = {
-                                    "technical_skills": tech_3,
-                                    "soft_skills": soft_3,
-                                    "domain_keywords": domain_3,
-                                }
-                                logger.debug(
-                                    "[CONTEXT_AWARE_PIPELINE] JD three_section_skills (fresh) BEFORE categorization - "
-                                    f"Tech: {len(tech_3)}, Soft: {len(soft_3)}, Domain: {len(domain_3)}"
-                                )
-                                corrected = SkillCategorizer.recategorize_skills(jd_simple)
-                                results.jd_skills = {
-                                    "technical_skills": corrected["technical_skills"],
-                                    "soft_skills": corrected["soft_skills"],
-                                    "domain_keywords": corrected["domain_keywords"],
-                                }
-                                logger.info("✅ [CONTEXT_AWARE_PIPELINE] Using JD three_section_skills (fresh) for jd_skills")
-                        except Exception as jd_simple_err:
-                            logger.debug(f"⚠️ [CONTEXT_AWARE_PIPELINE] Failed to build three-section JD snapshot: {jd_simple_err}")
+                        # ⭐ SKIP jd_skills generation if three_section_skills exists (avoid duplication)
+                        three_section = results.jd_analysis.get("three_section_skills") or {}
+                        if three_section:
+                            logger.info("✅ [CONTEXT_AWARE_PIPELINE] three_section_skills exists - skipping jd_skills generation")
+                        else:
+                            logger.debug("⚠️ [CONTEXT_AWARE_PIPELINE] No three_section_skills found - jd_skills will not be generated")
                         
                         # Try to get job info from existing files
                         from pathlib import Path
@@ -686,9 +677,19 @@ CRITICAL REMINDERS:
                     used_processed_jd = jd_analysis_result.metadata.get('used_processed_jd', False)
                     processed_jd_length = jd_analysis_result.metadata.get('processed_jd_length')
                 
+                # ⭐ Don't cache jd_skills if three_section_skills exists (avoid duplication)
+                jd_skills_to_cache = {}
+                if results.jd_skills and isinstance(results.jd_skills, dict):
+                    jd_skills_to_cache = results.jd_skills
+                elif results.jd_analysis and isinstance(results.jd_analysis, dict):
+                    # Only cache jd_skills if three_section_skills doesn't exist (backward compatibility)
+                    three_section = results.jd_analysis.get("three_section_skills")
+                    if not three_section:
+                        jd_skills_to_cache = results.jd_skills if isinstance(results.jd_skills, dict) else {}
+                
                 jd_data_to_cache = {
-                    # Cache JD three-section snapshot so future runs can reuse it without recomputing
-                    'jd_skills': results.jd_skills if isinstance(results.jd_skills, dict) else {},
+                    # Cache JD three-section snapshot only if three_section_skills doesn't exist
+                    'jd_skills': jd_skills_to_cache,
                     'jd_analysis': results.jd_analysis,
                     'job_info': results.job_info,
                     'jd_original': {},  # Will be filled from saved files
@@ -1033,19 +1034,20 @@ CRITICAL REMINDERS:
             if results.jd_analysis and isinstance(results.jd_analysis, dict):
                 required_skills = results.jd_analysis.get("required_skills")
                 if not required_skills or not isinstance(required_skills, dict):
-                    logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] jd_analysis.required_skills missing or invalid, attempting to derive from jd_skills")
-                    # Try to derive required_skills from jd_skills if available
-                    if results.jd_skills and isinstance(results.jd_skills, dict):
+                    logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] jd_analysis.required_skills missing or invalid, attempting to derive from three_section_skills")
+                    # Try to derive required_skills from three_section_skills if available
+                    three_section = results.jd_analysis.get("three_section_skills") or {}
+                    if three_section:
                         results.jd_analysis["required_skills"] = {
-                            "technical": results.jd_skills.get("technical_skills", []),
-                            "soft_skills": results.jd_skills.get("soft_skills", []),
-                            "domain_knowledge": results.jd_skills.get("domain_keywords", []),
+                            "technical": three_section.get("technical_skills", []),
+                            "soft_skills": three_section.get("soft_skills", []),
+                            "domain_knowledge": three_section.get("domain_knowledge", []),
                             "experience": []  # Empty for now, can be populated from jd_analysis if available
                         }
-                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] Derived required_skills from jd_skills for frontend compatibility")
+                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] Derived required_skills from three_section_skills for frontend compatibility")
                     else:
                         # Last resort: use _summarize_jd_skills to build it
-                        logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No jd_skills available, using _summarize_jd_skills to build required_skills")
+                        logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No three_section_skills available, using _summarize_jd_skills to build required_skills")
                         summarized = self._summarize_jd_skills(results.jd_analysis)
                         results.jd_analysis["required_skills"] = {
                             "technical": summarized.get("technical_skills", []),
@@ -1059,46 +1061,35 @@ CRITICAL REMINDERS:
                     logger.debug(f"   Soft: {len(required_skills.get('soft_skills', []))} skills")
                     logger.debug(f"   Domain: {len(required_skills.get('domain_knowledge', []))} skills")
             
-            # Summarize JD skills for downstream consumers (if not already set)
-            if not results.jd_skills and results.jd_analysis:
-                # Prefer the JD analyzer's own three-section summary if available
+            # ⭐ Populate jd_skills from three_section_skills if available, otherwise generate/use cached
+            if results.jd_analysis and isinstance(results.jd_analysis, dict):
                 three_section = results.jd_analysis.get("three_section_skills") or {}
-                tech_3 = three_section.get("technical_skills") or three_section.get("technical") or []
-                soft_3 = three_section.get("soft_skills") or three_section.get("soft") or []
-                domain_3 = three_section.get("domain_knowledge") or three_section.get("domain_keywords") or []
-
-                if any([tech_3, soft_3, domain_3]):
-                    jd_simple = {
-                        "technical_skills": tech_3,
-                        "soft_skills": soft_3,
-                        "domain_keywords": domain_3,
-                    }
-                    logger.debug(
-                        "[CONTEXT_AWARE_PIPELINE] JD three_section_skills BEFORE categorization - "
-                        f"Tech: {len(tech_3)}, Soft: {len(soft_3)}, Domain: {len(domain_3)}"
-                    )
-                    corrected = SkillCategorizer.recategorize_skills(jd_simple)
+                if three_section:
+                    # Populate jd_skills from three_section_skills (map domain_knowledge -> domain_keywords)
                     results.jd_skills = {
-                        "technical_skills": corrected["technical_skills"],
-                        "soft_skills": corrected["soft_skills"],
-                        "domain_keywords": corrected["domain_keywords"],
+                        "technical_skills": three_section.get("technical_skills", []),
+                        "soft_skills": three_section.get("soft_skills", []),
+                        "domain_keywords": three_section.get("domain_knowledge", []),  # Map domain_knowledge to domain_keywords
                     }
-                    logger.info("✅ [CONTEXT_AWARE_PIPELINE] Using JD three_section_skills for jd_skills")
+                    logger.info("✅ [CONTEXT_AWARE_PIPELINE] Populated jd_skills from three_section_skills")
                 else:
-                    # Fallback: derive a three-section summary from the 8-section analysis
-                    results.jd_skills = self._summarize_jd_skills(results.jd_analysis)
-            elif isinstance(jd_data, dict) and jd_data.get('jd_skills'):
-                # Apply SkillCategorizer to cached jd_skills too
-                cached_jd_skills = jd_data.get('jd_skills', {})
-                if cached_jd_skills:
-                    logger.debug(f"JD skills from cache BEFORE categorization - Domain: {cached_jd_skills.get('domain_keywords', [])}")
-                    corrected = SkillCategorizer.recategorize_skills(cached_jd_skills)
-                    cached_jd_skills["technical_skills"] = corrected["technical_skills"]
-                    cached_jd_skills["soft_skills"] = corrected["soft_skills"]
-                    cached_jd_skills["domain_keywords"] = corrected["domain_keywords"]
-                    logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to cached JD skills")
-                    logger.debug(f"JD skills from cache AFTER categorization - Domain: {cached_jd_skills['domain_keywords']}")
-                results.jd_skills = cached_jd_skills
+                    # Only generate jd_skills if three_section_skills doesn't exist
+                    if isinstance(jd_data, dict) and jd_data.get('jd_skills'):
+                        # Use cached jd_skills if available
+                        cached_jd_skills = jd_data.get('jd_skills', {})
+                        if cached_jd_skills:
+                            logger.debug(f"JD skills from cache BEFORE categorization - Domain: {cached_jd_skills.get('domain_keywords', [])}")
+                            corrected = SkillCategorizer.recategorize_skills(cached_jd_skills)
+                            results.jd_skills = {
+                                "technical_skills": corrected["technical_skills"],
+                                "soft_skills": corrected["soft_skills"],
+                                "domain_keywords": corrected["domain_keywords"],
+                            }
+                            logger.info(f"✅ [CONTEXT_AWARE_PIPELINE] Applied SkillCategorizer to cached JD skills (no three_section_skills)")
+                    else:
+                        # Fallback: derive a three-section summary from the 8-section analysis
+                        results.jd_skills = self._summarize_jd_skills(results.jd_analysis)
+                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] Generated jd_skills from 8-section analysis (no three_section_skills)")
             
             # Step 4: CV Skills Extraction
             cv_skills = await self._extract_cv_skills(context, results)
@@ -1300,7 +1291,23 @@ CRITICAL REMINDERS:
                 with open(skills_file, 'r', encoding='utf-8') as f:
                     saved_skills = json.load(f)
                 results.cv_skills = saved_skills.get("cv_skills", {})
-                results.jd_skills = saved_skills.get("jd_skills", {})
+                
+                # ⭐ Prefer three_section_skills from jd_analysis if available, otherwise use saved jd_skills
+                if results.jd_analysis and isinstance(results.jd_analysis, dict):
+                    three_section = results.jd_analysis.get("three_section_skills")
+                    if three_section:
+                        # Populate jd_skills from three_section_skills (map domain_knowledge -> domain_keywords)
+                        results.jd_skills = {
+                            "technical_skills": three_section.get("technical_skills", []),
+                            "soft_skills": three_section.get("soft_skills", []),
+                            "domain_keywords": three_section.get("domain_knowledge", []),  # Map domain_knowledge to domain_keywords
+                        }
+                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] Populated jd_skills from three_section_skills (loaded from saved file)")
+                    else:
+                        results.jd_skills = saved_skills.get("jd_skills", {})
+                else:
+                    results.jd_skills = saved_skills.get("jd_skills", {})
+                
                 # Some historical files may include comprehensive analysis fields or job info
                 if saved_skills.get("job_info"):
                     results.job_info = saved_skills.get("job_info", {})
@@ -1401,7 +1408,11 @@ CRITICAL REMINDERS:
     ) -> Optional[str]:
         """Save CV/JD skills snapshot so continuation + UI can reuse it."""
         try:
-            if not (results.cv_skills or results.jd_skills):
+            # Check if we have skills data (either jd_skills or three_section_skills)
+            has_jd_skills = results.jd_skills and isinstance(results.jd_skills, dict)
+            has_three_section = results.jd_analysis and isinstance(results.jd_analysis, dict) and results.jd_analysis.get("three_section_skills")
+            
+            if not (results.cv_skills or has_jd_skills or has_three_section):
                 logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No skills data to persist for snapshot")
                 return None
             
@@ -1439,9 +1450,20 @@ CRITICAL REMINDERS:
                 cv_summary = results.cv_skills.get("summary")
             jd_summary = self._build_jd_summary(results.jd_analysis)
             
+            # ⭐ Derive jd_skills from three_section_skills if jd_skills doesn't exist
+            jd_skills_for_save = results.jd_skills or {}
+            if not jd_skills_for_save and results.jd_analysis and isinstance(results.jd_analysis, dict):
+                three_section = results.jd_analysis.get("three_section_skills") or {}
+                if three_section:
+                    jd_skills_for_save = {
+                        "technical_skills": three_section.get("technical_skills", []),
+                        "soft_skills": three_section.get("soft_skills", []),
+                        "domain_keywords": three_section.get("domain_knowledge", []),
+                    }
+            
             saved_file_path = result_saver.save_analysis_results(
                 cv_skills=results.cv_skills or {},
-                jd_skills=results.jd_skills or {},
+                jd_skills=jd_skills_for_save,
                 jd_url=context.jd_url or "preliminary_analysis",
                 cv_filename=cv_filename,
                 user_id=context.user_id,
@@ -1476,7 +1498,16 @@ CRITICAL REMINDERS:
         """Generate pre-extracted comparison text and append to analysis file."""
         try:
             cv_skills = results.cv_skills or {}
+            # ⭐ Derive jd_skills from three_section_skills if jd_skills doesn't exist
             jd_skills = results.jd_skills or {}
+            if not jd_skills and results.jd_analysis and isinstance(results.jd_analysis, dict):
+                three_section = results.jd_analysis.get("three_section_skills") or {}
+                if three_section:
+                    jd_skills = {
+                        "technical_skills": three_section.get("technical_skills", []),
+                        "soft_skills": three_section.get("soft_skills", []),
+                        "domain_keywords": three_section.get("domain_knowledge", []),
+                    }
             if not any(cv_skills.get(key) for key in ("technical_skills", "soft_skills", "domain_keywords")):
                 logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No CV skills available for pre-extracted comparison")
                 return

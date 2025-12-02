@@ -31,13 +31,16 @@ class ContextAwareAnalysisService {
       );
 
       print('📡 [INITIAL_ANALYSIS_SERVICE] Received response from API');
-      print('📡 [INITIAL_ANALYSIS_SERVICE] Raw result keys: ${result.keys.toList()}');
+      print(
+          '📡 [INITIAL_ANALYSIS_SERVICE] Raw result keys: ${result.keys.toList()}');
 
       stopwatch.stop();
 
-      print('📊 [INITIAL_ANALYSIS_SERVICE] About to parse InitialAnalysisResult from JSON');
+      print(
+          '📊 [INITIAL_ANALYSIS_SERVICE] About to parse InitialAnalysisResult from JSON');
       final analysisResult = InitialAnalysisResult.fromJson(result);
-      print('📊 [INITIAL_ANALYSIS_SERVICE] Successfully parsed InitialAnalysisResult');
+      print(
+          '📊 [INITIAL_ANALYSIS_SERVICE] Successfully parsed InitialAnalysisResult');
 
       // Return with execution duration
       final finalResult = InitialAnalysisResult(
@@ -52,7 +55,8 @@ class ContextAwareAnalysisService {
 
       return finalResult;
     } catch (e, stackTrace) {
-      print('❌ [INITIAL_ANALYSIS_SERVICE] Exception in performInitialAnalysis: $e');
+      print(
+          '❌ [INITIAL_ANALYSIS_SERVICE] Exception in performInitialAnalysis: $e');
       print('❌ [INITIAL_ANALYSIS_SERVICE] Stack trace: $stackTrace');
 
       // Enhanced error handling
@@ -104,7 +108,8 @@ class ContextAwareAnalysisService {
       );
 
       print('📡 [CONTINUE_FULL_ANALYSIS_SERVICE] Received response from API');
-      print('📡 [CONTINUE_FULL_ANALYSIS_SERVICE] Raw result keys: ${result.keys.toList()}');
+      print(
+          '📡 [CONTINUE_FULL_ANALYSIS_SERVICE] Raw result keys: ${result.keys.toList()}');
 
       stopwatch.stop();
 
@@ -695,7 +700,7 @@ class CVRecommendation {
 /// Result model for initial analysis (stops after analyze match)
 class InitialAnalysisResult {
   final bool success;
-  final String? company;  // Corrected company name from backend
+  final String? company; // Corrected company name from backend
   final bool requiresUserDecision;
   final AnalyzeMatchDecision? analyzeMatchDecision;
   final InitialAnalysisResults? results;
@@ -717,7 +722,7 @@ class InitialAnalysisResult {
   factory InitialAnalysisResult.fromJson(Map<String, dynamic> json) {
     return InitialAnalysisResult(
       success: json['success'] ?? false,
-      company: json['company'],  // Get corrected company name
+      company: json['company'], // Get corrected company name
       requiresUserDecision: json['requires_user_decision'] ?? false,
       analyzeMatchDecision: json['analyze_match_decision'] != null
           ? AnalyzeMatchDecision.fromJson(
@@ -808,33 +813,37 @@ class InitialAnalysisResults {
 
   factory InitialAnalysisResults.fromJson(Map<String, dynamic> json) {
     // Extract JD skills for side-by-side display
-    // Priority order:
-    // 1. json['jd_three_section_skills'] (top-level field from backend)
-    // 2. jd_analysis['three_section_skills'] (nested in jd_analysis)
-    // 3. jd_analysis['required_skills'] (fallback - 8-section format)
-    // 4. json['jd_skills'] (last resort)
+    // Single source: jd_analysis.three_section_skills (consolidated location)
+    // Fallbacks: jd_analysis.required_skills (8-section format) or json['jd_skills']
     Map<String, dynamic> jdSkillsForDisplay;
-    
+
     // Debug: Log the entire json structure first
     print('🔍 [INITIAL_ANALYSIS] ====== PARSING JD SKILLS ======');
     print('   JSON keys received: ${json.keys.toList()}');
-    
-    // Priority 1: Check top-level jd_three_section_skills
-    final jdThreeSectionTop = json['jd_three_section_skills'] as Map<String, dynamic>?;
-    if (jdThreeSectionTop != null && jdThreeSectionTop.isNotEmpty) {
-      print('✅ [INITIAL_ANALYSIS] Found jd_three_section_skills at top level');
-      final technicalList = List<String>.from(jdThreeSectionTop['technical_skills'] ?? []);
-      final softList = List<String>.from(jdThreeSectionTop['soft_skills'] ?? []);
+
+    final jdAnalysis = Map<String, dynamic>.from(json['jd_analysis'] ?? {});
+    print('   jd_analysis present: ${jdAnalysis.isNotEmpty}');
+
+    // Priority 1: Use jd_analysis.three_section_skills (single source of truth)
+    final threeSection =
+        jdAnalysis['three_section_skills'] as Map<String, dynamic>?;
+
+    if (threeSection != null && threeSection.isNotEmpty) {
+      print('✅ [INITIAL_ANALYSIS] Found jd_analysis.three_section_skills');
+      final technicalList =
+          List<String>.from(threeSection['technical_skills'] ?? []);
+      final softList = List<String>.from(threeSection['soft_skills'] ?? []);
       // Map domain_knowledge to domain_keywords for frontend widget
-      final domainList = List<String>.from(jdThreeSectionTop['domain_knowledge'] ?? []);
-      
+      final domainList =
+          List<String>.from(threeSection['domain_knowledge'] ?? []);
+
       jdSkillsForDisplay = {
         'technical_skills': technicalList,
         'soft_skills': softList,
         'domain_keywords': domainList,
       };
-      
-      print('   ✅ Using jd_three_section_skills (top-level)');
+
+      print('   ✅ Using jd_analysis.three_section_skills');
       print('   Technical: ${technicalList.length} skills');
       print('   Soft: ${softList.length} skills');
       print('   Domain: ${domainList.length} skills');
@@ -842,70 +851,58 @@ class InitialAnalysisResults {
         print('   Sample technical: ${technicalList.take(5).toList()}');
       }
     } else {
-      // Priority 2: Check jd_analysis.three_section_skills
-      final jdAnalysis = Map<String, dynamic>.from(json['jd_analysis'] ?? {});
-      final threeSection = jdAnalysis['three_section_skills'] as Map<String, dynamic>?;
-      
-      if (threeSection != null && threeSection.isNotEmpty) {
-        print('✅ [INITIAL_ANALYSIS] Found jd_analysis.three_section_skills');
-        final technicalList = List<String>.from(threeSection['technical_skills'] ?? []);
-        final softList = List<String>.from(threeSection['soft_skills'] ?? []);
-        // Map domain_knowledge to domain_keywords for frontend widget
-        final domainList = List<String>.from(threeSection['domain_knowledge'] ?? []);
-        
+      // Priority 2: Fallback to jd_analysis.required_skills (8-section format)
+      final requiredSkills =
+          jdAnalysis['required_skills'] as Map<String, dynamic>?;
+
+      if (requiredSkills != null && requiredSkills.isNotEmpty) {
+        print(
+            '⚠️ [INITIAL_ANALYSIS] Using jd_analysis.required_skills (fallback - 8-section format)');
+        final technicalList = requiredSkills['technical'] != null
+            ? List<String>.from(requiredSkills['technical'] is List
+                ? requiredSkills['technical']
+                : [])
+            : <String>[];
+        final softList = requiredSkills['soft_skills'] != null
+            ? List<String>.from(requiredSkills['soft_skills'] is List
+                ? requiredSkills['soft_skills']
+                : [])
+            : <String>[];
+        final domainList = requiredSkills['domain_knowledge'] != null
+            ? List<String>.from(requiredSkills['domain_knowledge'] is List
+                ? requiredSkills['domain_knowledge']
+                : [])
+            : <String>[];
+
         jdSkillsForDisplay = {
           'technical_skills': technicalList,
           'soft_skills': softList,
           'domain_keywords': domainList,
         };
-        
-        print('   ✅ Using jd_analysis.three_section_skills');
+
         print('   Technical: ${technicalList.length} skills');
         print('   Soft: ${softList.length} skills');
         print('   Domain: ${domainList.length} skills');
       } else {
-        // Priority 3: Fallback to jd_analysis.required_skills (8-section format)
-        final requiredSkills = jdAnalysis['required_skills'] as Map<String, dynamic>?;
-        
-        if (requiredSkills != null && requiredSkills.isNotEmpty) {
-          print('⚠️ [INITIAL_ANALYSIS] Using jd_analysis.required_skills (fallback)');
-          final technicalList = requiredSkills['technical'] != null
-              ? List<String>.from(requiredSkills['technical'] is List ? requiredSkills['technical'] : [])
-              : <String>[];
-          final softList = requiredSkills['soft_skills'] != null
-              ? List<String>.from(requiredSkills['soft_skills'] is List ? requiredSkills['soft_skills'] : [])
-              : <String>[];
-          final domainList = requiredSkills['domain_knowledge'] != null
-              ? List<String>.from(requiredSkills['domain_knowledge'] is List ? requiredSkills['domain_knowledge'] : [])
-              : <String>[];
-          
-          jdSkillsForDisplay = {
-            'technical_skills': technicalList,
-            'soft_skills': softList,
-            'domain_keywords': domainList,
-          };
-          
-          print('   Technical: ${technicalList.length} skills');
-          print('   Soft: ${softList.length} skills');
-          print('   Domain: ${domainList.length} skills');
-        } else {
-          // Priority 4: Last resort - use json['jd_skills']
-          print('⚠️ [INITIAL_ANALYSIS] Using json[jd_skills] (last resort)');
-          final fallbackJdSkills = Map<String, dynamic>.from(json['jd_skills'] ?? {});
-          jdSkillsForDisplay = {
-            'technical_skills': List<String>.from(fallbackJdSkills['technical_skills'] ?? []),
-            'soft_skills': List<String>.from(fallbackJdSkills['soft_skills'] ?? []),
-            'domain_keywords': List<String>.from(fallbackJdSkills['domain_keywords'] ?? []),
-          };
-        }
+        // Priority 3: Last resort - use json['jd_skills']
+        print('⚠️ [INITIAL_ANALYSIS] Using json[jd_skills] (last resort)');
+        final fallbackJdSkills =
+            Map<String, dynamic>.from(json['jd_skills'] ?? {});
+        jdSkillsForDisplay = {
+          'technical_skills':
+              List<String>.from(fallbackJdSkills['technical_skills'] ?? []),
+          'soft_skills':
+              List<String>.from(fallbackJdSkills['soft_skills'] ?? []),
+          'domain_keywords':
+              List<String>.from(fallbackJdSkills['domain_keywords'] ?? []),
+        };
       }
     }
-    
-    print('🔍 [INITIAL_ANALYSIS] Final jdSkillsForDisplay keys: ${jdSkillsForDisplay.keys.toList()}');
+
+    print(
+        '🔍 [INITIAL_ANALYSIS] Final jdSkillsForDisplay keys: ${jdSkillsForDisplay.keys.toList()}');
     print('🔍 [INITIAL_ANALYSIS] ====== END PARSING ======');
-    
-    final jdAnalysis = Map<String, dynamic>.from(json['jd_analysis'] ?? {});
-    
+
     return InitialAnalysisResults(
       cvSkills: Map<String, dynamic>.from(json['cv_skills'] ?? {}),
       jdSkills: jdSkillsForDisplay,

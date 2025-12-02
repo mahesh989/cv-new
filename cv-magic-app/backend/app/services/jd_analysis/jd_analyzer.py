@@ -780,8 +780,8 @@ class JDAnalyzer:
             section_summary = await self._generate_three_section_skills(jd_text, current_user)
             if section_summary:
                 result.three_section_skills = section_summary
-                result.metadata = result.metadata or {}
-                result.metadata['three_section_skills'] = section_summary
+                # Note: three_section_skills is stored only in result.three_section_skills
+                # (not in metadata to avoid duplication)
             
             logger.info(f"✅ JD analysis completed. Found {len(result.required_keywords)} required "
                        f"and {len(result.preferred_keywords)} preferred keywords")

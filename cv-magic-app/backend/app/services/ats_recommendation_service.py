@@ -554,7 +554,25 @@ class ATSRecommendationService:
             
             # Extract components
             cv_skills = analysis_data.get("cv_skills", {})
-            jd_skills = analysis_data.get("jd_skills", {})
+            
+            # ⭐ Prefer three_section_skills from jd_analysis if available, otherwise use saved jd_skills
+            jd_analysis = analysis_data.get("jd_analysis", {})
+            jd_skills = {}
+            if jd_analysis and isinstance(jd_analysis, dict):
+                three_section = jd_analysis.get("three_section_skills")
+                if three_section:
+                    # Populate jd_skills from three_section_skills (map domain_knowledge -> domain_keywords)
+                    jd_skills = {
+                        "technical_skills": three_section.get("technical_skills", []),
+                        "soft_skills": three_section.get("soft_skills", []),
+                        "domain_keywords": three_section.get("domain_knowledge", []),  # Map domain_knowledge to domain_keywords
+                    }
+                    logger.info("✅ [ATS_RECOMMENDATION] Using jd_skills from three_section_skills")
+                else:
+                    jd_skills = analysis_data.get("jd_skills", {})
+            else:
+                jd_skills = analysis_data.get("jd_skills", {})
+            
             match_entries = analysis_data.get("analyze_match_entries", [])
             preextracted_entries = analysis_data.get("preextracted_comparison_entries", [])
             component_entries = analysis_data.get("component_analysis_entries", [])
