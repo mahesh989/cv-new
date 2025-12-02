@@ -810,46 +810,91 @@ class InitialAnalysisResults {
     // Extract JD skills from jd_analysis.required_skills for side-by-side display
     // Map field names: technical -> technical_skills, domain_knowledge -> domain_keywords
     Map<String, dynamic> jdSkillsForDisplay;
+    
+    // Debug: Log the entire json structure first
+    print('🔍 [INITIAL_ANALYSIS] ====== PARSING JD SKILLS ======');
+    print('   JSON keys received: ${json.keys.toList()}');
+    
     final jdAnalysis = Map<String, dynamic>.from(json['jd_analysis'] ?? {});
-    
-    // Debug: Log what we have
-    print('🔍 [INITIAL_ANALYSIS] Parsing JD skills...');
     print('   jd_analysis present: ${jdAnalysis.isNotEmpty}');
-    print('   jd_analysis keys: ${jdAnalysis.keys.toList()}');
+    if (jdAnalysis.isNotEmpty) {
+      print('   jd_analysis keys: ${jdAnalysis.keys.toList()}');
+    }
     
+    // Try to extract from jd_analysis.required_skills
     final requiredSkills = jdAnalysis['required_skills'] as Map<String, dynamic>?;
     print('   required_skills present: ${requiredSkills != null}');
     
-    if (requiredSkills != null && requiredSkills.isNotEmpty) {
+    if (requiredSkills != null) {
+      print('   required_skills type: ${requiredSkills.runtimeType}');
+      print('   required_skills isNotEmpty: ${requiredSkills.isNotEmpty}');
       print('   required_skills keys: ${requiredSkills.keys.toList()}');
-      print('   technical count: ${(requiredSkills['technical'] as List?)?.length ?? 0}');
-      print('   soft_skills count: ${(requiredSkills['soft_skills'] as List?)?.length ?? 0}');
-      print('   domain_knowledge count: ${(requiredSkills['domain_knowledge'] as List?)?.length ?? 0}');
       
-      // Transform required_skills structure to match frontend format
-      final technicalList = List<String>.from(requiredSkills['technical'] ?? []);
-      final softList = List<String>.from(requiredSkills['soft_skills'] ?? []);
-      final domainList = List<String>.from(requiredSkills['domain_knowledge'] ?? []);
+      // Check each field individually
+      final technicalRaw = requiredSkills['technical'];
+      final softRaw = requiredSkills['soft_skills'];
+      final domainRaw = requiredSkills['domain_knowledge'];
       
-      jdSkillsForDisplay = {
-        'technical_skills': technicalList,
-        'soft_skills': softList,
-        'domain_keywords': domainList,
-      };
+      print('   technical type: ${technicalRaw.runtimeType}');
+      print('   technical value: $technicalRaw');
+      print('   soft_skills type: ${softRaw.runtimeType}');
+      print('   domain_knowledge type: ${domainRaw.runtimeType}');
       
-      print('✅ [INITIAL_ANALYSIS] Using jd_analysis.required_skills for side-by-side display');
-      print('   Technical: ${technicalList.length} skills');
-      print('   Soft: ${softList.length} skills');
-      print('   Domain: ${domainList.length} skills');
-      print('   Sample technical: ${technicalList.take(3).toList()}');
+      if (requiredSkills.isNotEmpty) {
+        // Transform required_skills structure to match frontend format
+        final technicalList = technicalRaw != null 
+            ? List<String>.from(technicalRaw is List ? technicalRaw : [])
+            : <String>[];
+        final softList = softRaw != null
+            ? List<String>.from(softRaw is List ? softRaw : [])
+            : <String>[];
+        final domainList = domainRaw != null
+            ? List<String>.from(domainRaw is List ? domainRaw : [])
+            : <String>[];
+        
+        print('   technicalList length: ${technicalList.length}');
+        print('   softList length: ${softList.length}');
+        print('   domainList length: ${domainList.length}');
+        
+        jdSkillsForDisplay = {
+          'technical_skills': technicalList,
+          'soft_skills': softList,
+          'domain_keywords': domainList,
+        };
+        
+        print('✅ [INITIAL_ANALYSIS] Using jd_analysis.required_skills for side-by-side display');
+        print('   Technical: ${technicalList.length} skills');
+        print('   Soft: ${softList.length} skills');
+        print('   Domain: ${domainList.length} skills');
+        if (technicalList.isNotEmpty) {
+          print('   Sample technical: ${technicalList.take(5).toList()}');
+        }
+        if (softList.isNotEmpty) {
+          print('   Sample soft: ${softList.take(3).toList()}');
+        }
+        if (domainList.isNotEmpty) {
+          print('   Sample domain: ${domainList.take(3).toList()}');
+        }
+      } else {
+        print('⚠️ [INITIAL_ANALYSIS] required_skills is empty map, using fallback');
+        jdSkillsForDisplay = Map<String, dynamic>.from(json['jd_skills'] ?? {});
+      }
     } else {
       // Fallback to jd_skills if required_skills not available
+      print('⚠️ [INITIAL_ANALYSIS] jd_analysis.required_skills is null');
       final fallbackJdSkills = Map<String, dynamic>.from(json['jd_skills'] ?? {});
-      print('⚠️ [INITIAL_ANALYSIS] jd_analysis.required_skills not found or empty');
       print('   Using jd_skills fallback');
       print('   jd_skills keys: ${fallbackJdSkills.keys.toList()}');
+      if (fallbackJdSkills.isNotEmpty) {
+        print('   jd_skills technical_skills: ${fallbackJdSkills['technical_skills']}');
+        print('   jd_skills soft_skills: ${fallbackJdSkills['soft_skills']}');
+        print('   jd_skills domain_keywords: ${fallbackJdSkills['domain_keywords']}');
+      }
       jdSkillsForDisplay = fallbackJdSkills;
     }
+    
+    print('🔍 [INITIAL_ANALYSIS] Final jdSkillsForDisplay keys: ${jdSkillsForDisplay.keys.toList()}');
+    print('🔍 [INITIAL_ANALYSIS] ====== END PARSING ======');
     
     return InitialAnalysisResults(
       cvSkills: Map<String, dynamic>.from(json['cv_skills'] ?? {}),

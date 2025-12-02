@@ -1027,7 +1027,39 @@ CRITICAL REMINDERS:
                 results.errors.append("JD analysis failed")
                 return results
             
-            # Summarize JD skills for downstream consumers
+            # ⭐ CRITICAL: Ensure jd_analysis.required_skills exists for frontend
+            # The frontend expects jd_analysis.required_skills for side-by-side display
+            # Even if jd_skills is already set from cache, we need to ensure required_skills is present
+            if results.jd_analysis and isinstance(results.jd_analysis, dict):
+                required_skills = results.jd_analysis.get("required_skills")
+                if not required_skills or not isinstance(required_skills, dict):
+                    logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] jd_analysis.required_skills missing or invalid, attempting to derive from jd_skills")
+                    # Try to derive required_skills from jd_skills if available
+                    if results.jd_skills and isinstance(results.jd_skills, dict):
+                        results.jd_analysis["required_skills"] = {
+                            "technical": results.jd_skills.get("technical_skills", []),
+                            "soft_skills": results.jd_skills.get("soft_skills", []),
+                            "domain_knowledge": results.jd_skills.get("domain_keywords", []),
+                            "experience": []  # Empty for now, can be populated from jd_analysis if available
+                        }
+                        logger.info("✅ [CONTEXT_AWARE_PIPELINE] Derived required_skills from jd_skills for frontend compatibility")
+                    else:
+                        # Last resort: use _summarize_jd_skills to build it
+                        logger.warning("⚠️ [CONTEXT_AWARE_PIPELINE] No jd_skills available, using _summarize_jd_skills to build required_skills")
+                        summarized = self._summarize_jd_skills(results.jd_analysis)
+                        results.jd_analysis["required_skills"] = {
+                            "technical": summarized.get("technical_skills", []),
+                            "soft_skills": summarized.get("soft_skills", []),
+                            "domain_knowledge": summarized.get("domain_keywords", []),
+                            "experience": []
+                        }
+                else:
+                    logger.info("✅ [CONTEXT_AWARE_PIPELINE] jd_analysis.required_skills present and valid")
+                    logger.debug(f"   Technical: {len(required_skills.get('technical', []))} skills")
+                    logger.debug(f"   Soft: {len(required_skills.get('soft_skills', []))} skills")
+                    logger.debug(f"   Domain: {len(required_skills.get('domain_knowledge', []))} skills")
+            
+            # Summarize JD skills for downstream consumers (if not already set)
             if not results.jd_skills and results.jd_analysis:
                 # Prefer the JD analyzer's own three-section summary if available
                 three_section = results.jd_analysis.get("three_section_skills") or {}
