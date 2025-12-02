@@ -1307,6 +1307,23 @@ async def initial_analysis(
             logger.info(f"✅ Initial analysis completed in {results.processing_time:.2f}s")
             logger.info(f"📊 Analyze match decision: {results.analyze_match_decision}")
             
+            # Extract 3-section skills from jd_analysis for easy inspection in Chrome DevTools
+            jd_three_section_skills = {}
+            if results.jd_analysis and isinstance(results.jd_analysis, dict):
+                three_section = results.jd_analysis.get("three_section_skills") or {}
+                if three_section:
+                    jd_three_section_skills = {
+                        "technical_skills": three_section.get("technical_skills", []),
+                        "soft_skills": three_section.get("soft_skills", []),
+                        "domain_knowledge": three_section.get("domain_knowledge", [])
+                    }
+                    logger.info(f"✅ [INITIAL_ANALYSIS_API] Extracted 3-section skills for inspection: "
+                              f"tech={len(jd_three_section_skills.get('technical_skills', []))}, "
+                              f"soft={len(jd_three_section_skills.get('soft_skills', []))}, "
+                              f"domain={len(jd_three_section_skills.get('domain_knowledge', []))}")
+                else:
+                    logger.warning("⚠️ [INITIAL_ANALYSIS_API] No three_section_skills found in jd_analysis")
+            
             # Prepare response
             response_data = {
                 "success": True,
@@ -1323,6 +1340,8 @@ async def initial_analysis(
                     "job_info": results.job_info,
                     "cv_jd_matching": results.cv_jd_matching
                 },
+                # ⭐ NEW: Dedicated field for 3-section JD skills (easy to inspect in Chrome DevTools)
+                "jd_three_section_skills": jd_three_section_skills,
                 "warnings": results.warnings,
                 "errors": results.errors
             }

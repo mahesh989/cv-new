@@ -807,28 +807,10 @@ class InitialAnalysisResults {
   });
 
   factory InitialAnalysisResults.fromJson(Map<String, dynamic> json) {
-    // Extract jd_skills from jd_analysis.required_skills for side-by-side display
-    // Map field names: technical -> technical_skills, domain_knowledge -> domain_keywords
-    Map<String, dynamic> jdSkillsForDisplay;
-    final jdAnalysis = Map<String, dynamic>.from(json['jd_analysis'] ?? {});
-    final requiredSkills = jdAnalysis['required_skills'] as Map<String, dynamic>?;
-    
-    if (requiredSkills != null) {
-      // Transform required_skills structure to match frontend format
-      jdSkillsForDisplay = {
-        'technical_skills': List<String>.from(requiredSkills['technical'] ?? []),
-        'soft_skills': List<String>.from(requiredSkills['soft_skills'] ?? []),
-        'domain_keywords': List<String>.from(requiredSkills['domain_knowledge'] ?? []),
-      };
-    } else {
-      // Fallback to jd_skills if required_skills not available
-      jdSkillsForDisplay = Map<String, dynamic>.from(json['jd_skills'] ?? {});
-    }
-    
     return InitialAnalysisResults(
       cvSkills: Map<String, dynamic>.from(json['cv_skills'] ?? {}),
-      jdSkills: jdSkillsForDisplay,
-      jdAnalysis: jdAnalysis,
+      jdSkills: Map<String, dynamic>.from(json['jd_skills'] ?? {}),
+      jdAnalysis: Map<String, dynamic>.from(json['jd_analysis'] ?? {}),
       jobInfo: Map<String, dynamic>.from(json['job_info'] ?? {}),
       cvJdMatching: Map<String, dynamic>.from(json['cv_jd_matching'] ?? {}),
     );
