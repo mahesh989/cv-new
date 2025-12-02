@@ -1307,8 +1307,11 @@ async def initial_analysis(
             logger.info(f"✅ Initial analysis completed in {results.processing_time:.2f}s")
             logger.info(f"📊 Analyze match decision: {results.analyze_match_decision}")
             
-            # Extract 3-section skills from jd_analysis for easy inspection in Chrome DevTools
+            # Extract 3-section skills for easy inspection in Chrome DevTools
+            # Try multiple sources: jd_analysis.three_section_skills, jd_skills, or jd_analysis.metadata
             jd_three_section_skills = {}
+            
+            # Priority 1: Check jd_analysis.three_section_skills
             if results.jd_analysis and isinstance(results.jd_analysis, dict):
                 three_section = results.jd_analysis.get("three_section_skills") or {}
                 if three_section:
@@ -1317,12 +1320,37 @@ async def initial_analysis(
                         "soft_skills": three_section.get("soft_skills", []),
                         "domain_knowledge": three_section.get("domain_knowledge", [])
                     }
-                    logger.info(f"✅ [INITIAL_ANALYSIS_API] Extracted 3-section skills for inspection: "
-                              f"tech={len(jd_three_section_skills.get('technical_skills', []))}, "
-                              f"soft={len(jd_three_section_skills.get('soft_skills', []))}, "
-                              f"domain={len(jd_three_section_skills.get('domain_knowledge', []))}")
-                else:
-                    logger.warning("⚠️ [INITIAL_ANALYSIS_API] No three_section_skills found in jd_analysis")
+                    logger.info(f"✅ [INITIAL_ANALYSIS_API] Extracted 3-section skills from jd_analysis.three_section_skills")
+            
+            # Priority 2: Fallback to jd_skills (which should have the 3-section format)
+            if not jd_three_section_skills and results.jd_skills and isinstance(results.jd_skills, dict):
+                if "technical_skills" in results.jd_skills or "soft_skills" in results.jd_skills or "domain_keywords" in results.jd_skills:
+                    jd_three_section_skills = {
+                        "technical_skills": results.jd_skills.get("technical_skills", []),
+                        "soft_skills": results.jd_skills.get("soft_skills", []),
+                        "domain_knowledge": results.jd_skills.get("domain_keywords", [])  # Note: domain_keywords vs domain_knowledge
+                    }
+                    logger.info(f"✅ [INITIAL_ANALYSIS_API] Extracted 3-section skills from jd_skills (fallback)")
+            
+            # Priority 3: Check metadata
+            if not jd_three_section_skills and results.jd_analysis and isinstance(results.jd_analysis, dict):
+                metadata = results.jd_analysis.get("metadata", {})
+                if isinstance(metadata, dict) and "three_section_skills" in metadata:
+                    three_section = metadata["three_section_skills"]
+                    jd_three_section_skills = {
+                        "technical_skills": three_section.get("technical_skills", []),
+                        "soft_skills": three_section.get("soft_skills", []),
+                        "domain_knowledge": three_section.get("domain_knowledge", [])
+                    }
+                    logger.info(f"✅ [INITIAL_ANALYSIS_API] Extracted 3-section skills from jd_analysis.metadata")
+            
+            if jd_three_section_skills:
+                logger.info(f"✅ [INITIAL_ANALYSIS_API] 3-section skills for inspection: "
+                          f"tech={len(jd_three_section_skills.get('technical_skills', []))}, "
+                          f"soft={len(jd_three_section_skills.get('soft_skills', []))}, "
+                          f"domain={len(jd_three_section_skills.get('domain_knowledge', []))}")
+            else:
+                logger.warning("⚠️ [INITIAL_ANALYSIS_API] No three_section_skills found in any source")
             
             # Prepare response
             response_data = {
