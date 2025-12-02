@@ -14,9 +14,11 @@ CATEGORIZATION RULES:
 EXTRACTION RULES:
 - Extract direct mentions AS-IS
 - Remove qualifiers: "strong SQL" → "SQL"
-- Preserve specific tools: "Power BI" → "Power BI"
+- Preserve specific tools: "Power BI" → "Power BI", "Tableau" → "Tableau"
+- Extract ALL mentioned tools (if "Power BI, Tableau, etc." → extract both)
 - Include implied skills from context
-- Dont extract skills that are not mentioned in the job description"""
+- Don't extract skills that are not mentioned in the job description
+- Remove duplicates (same skill listed multiple times)"""
 
 
 def get_three_section_prompts(job_description: str) -> tuple[str, str]:

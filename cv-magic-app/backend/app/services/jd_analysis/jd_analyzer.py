@@ -489,10 +489,23 @@ class JDAnalyzer:
                 content = content.replace('```', '').strip()
             
             data = json.loads(content)
+            
+            # Remove duplicates (case-insensitive) and empty strings
+            def deduplicate_skills(skills_list: List[str]) -> List[str]:
+                seen = set()
+                result = []
+                for skill in skills_list:
+                    if skill and isinstance(skill, str):
+                        skill_lower = skill.strip().lower()
+                        if skill_lower and skill_lower not in seen:
+                            seen.add(skill_lower)
+                            result.append(skill.strip())
+                return result
+            
             section_data = {
-                'technical_skills': data.get('technical_skills', []),
-                'soft_skills': data.get('soft_skills', []),
-                'domain_knowledge': data.get('domain_knowledge', [])
+                'technical_skills': deduplicate_skills(data.get('technical_skills', [])),
+                'soft_skills': deduplicate_skills(data.get('soft_skills', [])),
+                'domain_knowledge': deduplicate_skills(data.get('domain_knowledge', []))
             }
             
             logger.info(f"✅ [JD_ANALYZER] Generated three-section JD skills summary "
