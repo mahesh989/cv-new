@@ -7,14 +7,15 @@ on:
       - 'cv-magic-app/mobile_app/**'
       - 'cv-magic-app/backend/**'
       - '.github/workflows/deploy.yml'
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   # Check which paths changed
   changes:
     runs-on: ubuntu-latest
     outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
-      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch' }}
+      backend: ${{ steps.filter.outputs.backend == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
@@ -29,7 +30,8 @@ jobs:
   build-and-deploy-frontend:
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    # Run if frontend files changed OR if manually triggered
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v3
       
