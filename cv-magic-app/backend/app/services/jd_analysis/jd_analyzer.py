@@ -90,20 +90,28 @@ class JDAnalysisResult:
         # Merge all categories into required_keywords and preferred_keywords
         merged_required = []
         merged_preferred = []
-        
+
         # Merge from required_skills
         for category, skills in self.required_skills.items():
             merged_required.extend(skills)
-        
+
         # Merge from preferred_skills
         for category, skills in self.preferred_skills.items():
             merged_preferred.extend(skills)
-        
+
+        # Combine three_section_skills into flat list
+        three_section_all = []
+        if self.three_section_skills:
+            three_section_all.extend(self.three_section_skills.get('technical_skills', []))
+            three_section_all.extend(self.three_section_skills.get('soft_skills', []))
+            three_section_all.extend(self.three_section_skills.get('domain_knowledge', []))
+
         return {
             'experience_years': self.experience_years,
             'required_skills': self.required_skills,
             'preferred_skills': self.preferred_skills,
             'three_section_skills': self.three_section_skills,
+            'three_section_all_keywords': three_section_all,  # NEW: Combined flat list
             'required_keywords': merged_required,
             'preferred_keywords': merged_preferred,
             'analysis_timestamp': self.analysis_timestamp,
@@ -490,22 +498,71 @@ class JDAnalyzer:
             
             data = json.loads(content)
             
-            # Remove duplicates (case-insensitive) and empty strings
-            def deduplicate_skills(skills_list: List[str]) -> List[str]:
-                seen = set()
-                result = []
+            # Remove duplicates (case-insensitive) and normalize qualifiers
+            def deduplicate_skills(skills_list: List[str], is_soft_skills: bool = False) -> List[str]:
+                """
+                Deduplicate skills, with special handling for soft skills to remove qualifiers.
+                
+                Args:
+                    skills_list: List of skills to deduplicate
+                    is_soft_skills: If True, applies qualifier removal for soft skills
+                    
+                Returns:
+                    Deduplicated list of skills
+                """
+                seen = {}
+                qualifiers = ['proactive ', 'strong ', 'excellent ', 'effective ', 'good ', 
+                            'advanced ', 'exceptional ', 'outstanding ', 'superior ']
+                
                 for skill in skills_list:
-                    if skill and isinstance(skill, str):
-                        skill_lower = skill.strip().lower()
-                        if skill_lower and skill_lower not in seen:
-                            seen.add(skill_lower)
-                            result.append(skill.strip())
-                return result
+                    if not skill or not isinstance(skill, str):
+                        continue
+                    
+                    skill = skill.strip()
+                    if not skill:
+                        continue
+                    
+                    # Normalize: convert hyphens to spaces for comparison
+                    skill_normalized = skill.lower().replace('-', ' ').replace('_', ' ')
+                    
+                    # For soft skills, remove qualifiers to find base skill
+                    if is_soft_skills:
+                        base_skill = skill_normalized
+                        has_qualifier = False
+                        for qualifier in qualifiers:
+                            if base_skill.startswith(qualifier):
+                                base_skill = base_skill[len(qualifier):].strip()
+                                has_qualifier = True
+                                break
+                        
+                        # Use base skill for deduplication check
+                        if base_skill and base_skill not in seen:
+                            seen[base_skill] = skill
+                        elif base_skill in seen:
+                            # Prefer version without qualifier, or shorter version if both have qualifiers
+                            existing = seen[base_skill]
+                            existing_has_qualifier = any(existing.lower().startswith(q) for q in qualifiers)
+                            
+                            if not has_qualifier and existing_has_qualifier:
+                                # Current skill has no qualifier, prefer it
+                                seen[base_skill] = skill
+                            elif has_qualifier and not existing_has_qualifier:
+                                # Existing skill has no qualifier, keep it
+                                pass
+                            elif len(skill) < len(existing):
+                                # Both have qualifiers or both don't, prefer shorter
+                                seen[base_skill] = skill
+                    else:
+                        # For technical/domain skills, simple case-insensitive deduplication
+                        if skill_normalized not in seen:
+                            seen[skill_normalized] = skill
+                
+                return sorted(list(seen.values()))
             
             section_data = {
-                'technical_skills': deduplicate_skills(data.get('technical_skills', [])),
-                'soft_skills': deduplicate_skills(data.get('soft_skills', [])),
-                'domain_knowledge': deduplicate_skills(data.get('domain_knowledge', []))
+                'technical_skills': deduplicate_skills(data.get('technical_skills', []), is_soft_skills=False),
+                'soft_skills': deduplicate_skills(data.get('soft_skills', []), is_soft_skills=True),
+                'domain_knowledge': deduplicate_skills(data.get('domain_knowledge', []), is_soft_skills=False)
             }
             
             logger.info(f"✅ [JD_ANALYZER] Generated three-section JD skills summary "

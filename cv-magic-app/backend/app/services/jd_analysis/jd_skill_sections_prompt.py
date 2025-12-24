@@ -13,12 +13,15 @@ CATEGORIZATION RULES:
 
 EXTRACTION RULES:
 - Extract direct mentions AS-IS
-- Remove qualifiers: "strong SQL" → "SQL"
+- Remove qualifiers from ALL skills: "strong SQL" → "SQL", "proactive problem-solving" → "problem-solving"
+- Remove behavioral adverbs: "work independently" → "independence", "collaborate effectively" → "collaboration"
+- Common qualifiers to remove: "strong", "excellent", "proactive", "effective", "good", "advanced", "exceptional"
 - Preserve specific tools: "Power BI" → "Power BI", "Tableau" → "Tableau"
 - Extract ALL mentioned tools (if "Power BI, Tableau, etc." → extract both)
 - Include implied skills from context
 - Don't extract skills that are not mentioned in the job description
-- Remove duplicates (same skill listed multiple times)"""
+- Remove duplicates (same skill listed multiple times)
+- For soft skills, extract the base skill without qualifiers: "proactive problem solving" and "problem-solving" should both become "problem-solving""""
 
 
 def get_three_section_prompts(job_description: str) -> tuple[str, str]:

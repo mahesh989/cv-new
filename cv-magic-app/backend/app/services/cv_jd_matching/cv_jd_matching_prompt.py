@@ -30,22 +30,16 @@ MATCHING GUIDELINES:
 4. **Be Thorough**: Check all sections of the CV for keyword presence
 5. **Be Accurate**: Only mark as matched if the skill is genuinely present
 
-OUTPUT FORMAT - CRITICAL: RETURN ONLY VALID JSON:
-
-⚠️  IMPORTANT: ALL STRING VALUES MUST BE ENCLOSED IN DOUBLE QUOTES
-⚠️  CRITICAL: NO UNQUOTED TEXT IN VALUES - EVERYTHING MUST BE QUOTED
-⚠️  REQUIRED: Use this EXACT schema with properly quoted string values:
+OUTPUT FORMAT:
+Return a JSON object with this exact structure:
 
 {
-  "matched_required_keywords": ["keyword1", "keyword2"],
-  "matched_preferred_keywords": ["keyword1", "keyword2"],
-  "missed_required_keywords": ["keyword1", "keyword2"],
-  "missed_preferred_keywords": ["keyword1", "keyword2"],
+  "matched_keywords": ["keyword1", "keyword2", "keyword3"],
+  "missed_keywords": ["keyword4", "keyword5"],
   "match_counts": {
-    "total_required_keywords": 10,
-    "total_preferred_keywords": 3,
-    "matched_required_count": 6,
-    "matched_preferred_count": 2
+    "total_keywords": 5,
+    "matched_count": 3,
+    "missed_count": 2
   },
   "matching_notes": {
     "Excel": "Found in technical skills section",
@@ -54,58 +48,53 @@ OUTPUT FORMAT - CRITICAL: RETURN ONLY VALID JSON:
   }
 }
 
-🚨 ABSOLUTELY CRITICAL: All values in matching_notes MUST be surrounded by double quotes.
-🚨 DO NOT write: "Excel": Found in skills (WRONG - will break JSON parsing)
-🚨 ALWAYS write: "Excel": "Found in skills" (CORRECT - proper JSON format)
+MATCHING NOTES REQUIREMENTS:
+- Provide notes for ALL MATCHED keywords explaining where/how they were found
+- Optionally provide notes for MISSED keywords if they're borderline cases or close matches
+- Format: {"keyword": "brief explanation (10 words max)"}
+- Focus on helping candidate understand where skills appear and why keywords were matched/missed
+- Examples:
+  * Matched: "SQL" → "Found in database experience section"
+  * Matched: "Python" → "Listed in technical skills and used in projects"
+  * Missed (optional): "VBA" → "Not mentioned, but Excel experience suggests familiarity"
 
-**INSTRUCTIONS**:
+INSTRUCTIONS:
 - Be intelligent about semantic matching
 - Only mark as MISSING if truly no equivalent skill exists
-- Provide clear, helpful reasoning for each decision
-- Focus on helping candidate understand gaps
+- Provide clear, helpful reasoning for each matched keyword in matching_notes
+- Focus on helping candidate understand gaps and where their skills appear
 
 """
 
 CV_JD_MATCHING_USER_PROMPT = """Analyze the following CV content against the job description keywords and determine which keywords are present using intelligent matching.
 
 JOB DESCRIPTION KEYWORDS TO MATCH:
-Required Keywords: {required_keywords}
-Preferred Keywords: {preferred_keywords}
+Keywords: {all_keywords}
 
 CV CONTENT:
 {cv_content}
 
 INSTRUCTIONS:
-1. Go through each required keyword and check if it exists in the CV (using smart matching)
-2. Go through each preferred keyword and check if it exists in the CV (using smart matching)
-3. Separate matched keywords from missed keywords
-4. Provide accurate counts for all categories
-5. Include notes about any smart matches or context analysis
+1. Go through each keyword and check if it exists in the CV (using smart matching)
+2. Separate matched keywords from missed keywords
+3. Provide accurate counts
+4. For matching_notes: Include notes for ALL matched keywords (required). Optionally include notes for missed keywords if they're borderline cases
 
 Remember to use intelligent matching - look for semantic meaning, synonyms, variations, and context, not just exact text matches.
 
-🚨 CRITICAL JSON FORMATTING REQUIREMENTS:
-1. Return ONLY valid JSON - no markdown, no code blocks, no additional text
-2. ALL string values MUST be enclosed in double quotes
-3. In matching_notes section, values MUST be quoted strings like: "Excel": "Found in skills"
-4. DO NOT use unquoted text in values - this will break JSON parsing
-5. Test your JSON mentally before responding - it must be parseable
-
-Return ONLY the JSON response."""
+Return ONLY the JSON response with no additional text."""
 
 def get_cv_jd_matching_prompts(
-    cv_content: str, 
-    required_keywords: list, 
-    preferred_keywords: list
+    cv_content: str,
+    all_keywords: list
 ) -> tuple[str, str]:
     """
     Get the system and user prompts for CV-JD matching analysis
-    
+
     Args:
         cv_content: The CV text content to analyze
-        required_keywords: List of required keywords from JD analysis
-        preferred_keywords: List of preferred keywords from JD analysis
-        
+        all_keywords: List of all keywords from JD three_section_skills
+
     Returns:
         Tuple of (system_prompt, user_prompt)
     """
@@ -113,7 +102,6 @@ def get_cv_jd_matching_prompts(
         CV_JD_MATCHING_SYSTEM_PROMPT,
         CV_JD_MATCHING_USER_PROMPT.format(
             cv_content=cv_content,
-            required_keywords=required_keywords,
-            preferred_keywords=preferred_keywords
+            all_keywords=all_keywords
         )
     )

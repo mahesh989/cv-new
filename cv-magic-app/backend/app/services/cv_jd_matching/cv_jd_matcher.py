@@ -22,12 +22,26 @@ logger = logging.getLogger(__name__)
 class CVJDMatchResult:
     """Container for CV-JD matching results"""
     
-    def __init__(self, data: Dict[str, Any]):
-        # Core matching results
-        self.matched_required_keywords: List[str] = data.get('matched_required_keywords', [])
-        self.matched_preferred_keywords: List[str] = data.get('matched_preferred_keywords', [])
-        self.missed_required_keywords: List[str] = data.get('missed_required_keywords', [])
-        self.missed_preferred_keywords: List[str] = data.get('missed_preferred_keywords', [])
+    def __init__(self, data: Dict[str, Any], jd_analysis_data: Optional[Dict[str, Any]] = None):
+        # Raw matching results (from AI - all keywords together)
+        self.matched_keywords: List[str] = data.get('matched_keywords', [])
+        self.missed_keywords: List[str] = data.get('missed_keywords', [])
+
+        # Classified results (required/preferred split for backward compatibility)
+        self.matched_required_keywords: List[str] = []
+        self.matched_preferred_keywords: List[str] = []
+        self.missed_required_keywords: List[str] = []
+        self.missed_preferred_keywords: List[str] = []
+
+        # Classify matched/missed keywords if JD analysis is provided
+        if jd_analysis_data:
+            self._classify_matched_keywords(jd_analysis_data)
+        else:
+            # Fallback: Use legacy format if provided, otherwise assume all are required
+            self.matched_required_keywords = data.get('matched_required_keywords', self.matched_keywords)
+            self.matched_preferred_keywords = data.get('matched_preferred_keywords', [])
+            self.missed_required_keywords = data.get('missed_required_keywords', self.missed_keywords)
+            self.missed_preferred_keywords = data.get('missed_preferred_keywords', [])
         
         # Match counts
         self.match_counts: Dict[str, int] = data.get('match_counts', {})
@@ -42,12 +56,19 @@ class CVJDMatchResult:
         self.company_name: Optional[str] = None
         self.cv_file_path: Optional[str] = None
         self.metadata: Dict[str, Any] = {}
+        
+        # Validate and fix data consistency
+        self._validate_and_fix()
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert result to dictionary format"""
         return {
             'company_name': self.company_name,
             'cv_analysis_timestamp': self.analysis_timestamp,
+            # Raw results (from AI)
+            'matched_keywords': self.matched_keywords,
+            'missed_keywords': self.missed_keywords,
+            # Classified results (for backward compatibility)
             'matched_required_keywords': self.matched_required_keywords,
             'matched_preferred_keywords': self.matched_preferred_keywords,
             'missed_required_keywords': self.missed_required_keywords,
@@ -62,12 +83,13 @@ class CVJDMatchResult:
     
     def get_match_percentage(self) -> Dict[str, float]:
         """Calculate match percentages"""
-        total_required = self.match_counts.get('total_required_keywords', 0)
-        total_preferred = self.match_counts.get('total_preferred_keywords', 0)
-        
-        matched_required = self.match_counts.get('matched_required_count', 0)
-        matched_preferred = self.match_counts.get('matched_preferred_count', 0)
-        
+        # Use classified counts for backward compatibility
+        total_required = len(self.matched_required_keywords) + len(self.missed_required_keywords)
+        total_preferred = len(self.matched_preferred_keywords) + len(self.missed_preferred_keywords)
+
+        matched_required = len(self.matched_required_keywords)
+        matched_preferred = len(self.matched_preferred_keywords)
+
         return {
             'required_match_percentage': (matched_required / total_required * 100) if total_required > 0 else 0.0,
             'preferred_match_percentage': (matched_preferred / total_preferred * 100) if total_preferred > 0 else 0.0,
@@ -81,6 +103,95 @@ class CVJDMatchResult:
     def get_all_missed_keywords(self) -> List[str]:
         """Get all missed keywords (required + preferred)"""
         return self.missed_required_keywords + self.missed_preferred_keywords
+    
+    def _validate_and_fix(self):
+        """
+        Validate consistency and auto-fix common issues in matching results.
+        
+        Fixes:
+        - Counts that don't match actual list lengths
+        - Duplicate keywords across matched/missed lists
+        - Duplicate keywords within lists
+        - Total counts that don't match matched + missed
+        """
+        # Remove duplicates within each list (preserve order)
+        self.matched_keywords = list(dict.fromkeys(self.matched_keywords))
+        self.missed_keywords = list(dict.fromkeys(self.missed_keywords))
+
+        # Remove duplicates between matched and missed lists (trust matched more)
+        matched_set = set(self.matched_keywords)
+        missed_set = set(self.missed_keywords)
+        duplicates = matched_set & missed_set
+
+        if duplicates:
+            logger.warning(f"⚠️ [VALIDATION] Found {len(duplicates)} keywords in both matched and missed: {duplicates}")
+            self.missed_keywords = [k for k in self.missed_keywords if k not in duplicates]
+            missed_set = set(self.missed_keywords)
+
+        # Fix counts to match actual list lengths
+        actual_matched = len(self.matched_keywords)
+        actual_missed = len(self.missed_keywords)
+
+        reported_matched = self.match_counts.get('matched_count', actual_matched)
+        reported_missed = self.match_counts.get('missed_count', actual_missed)
+
+        if reported_matched != actual_matched:
+            logger.warning(f"⚠️ [VALIDATION] Fixing matched_count: {reported_matched} → {actual_matched}")
+            self.match_counts['matched_count'] = actual_matched
+
+        if reported_missed != actual_missed:
+            logger.warning(f"⚠️ [VALIDATION] Fixing missed_count: {reported_missed} → {actual_missed}")
+            self.match_counts['missed_count'] = actual_missed
+
+        # Validate and fix total count
+        # Total should equal matched + missed
+        total_from_lists = actual_matched + actual_missed
+        reported_total = self.match_counts.get('total_keywords', total_from_lists)
+
+        if reported_total != total_from_lists:
+            logger.warning(f"⚠️ [VALIDATION] Fixing total_keywords: {reported_total} → {total_from_lists} (matched={actual_matched} + missed={actual_missed})")
+            self.match_counts['total_keywords'] = total_from_lists
+
+        # Log validation summary
+        if duplicates or reported_matched != actual_matched or reported_missed != actual_missed or reported_total != total_from_lists:
+            logger.info(f"✅ [VALIDATION] Data consistency fixed. Final counts: {actual_matched}/{total_from_lists} matched, {actual_missed} missed")
+
+    def _classify_matched_keywords(self, jd_analysis_data: Dict[str, Any]):
+        """
+        Classify matched/missed keywords back into required/preferred categories
+        for backward compatibility with bonus calculator.
+        """
+        # Get original required/preferred keywords from JD analysis
+        required_keywords = jd_analysis_data.get('required_keywords', [])
+        preferred_keywords = jd_analysis_data.get('preferred_keywords', [])
+
+        # Create sets for fast lookup
+        required_set = set(required_keywords)
+        preferred_set = set(preferred_keywords)
+
+        # Classify matched keywords
+        for keyword in self.matched_keywords:
+            if keyword in required_set:
+                self.matched_required_keywords.append(keyword)
+            elif keyword in preferred_set:
+                self.matched_preferred_keywords.append(keyword)
+            else:
+                # Keyword not in either category (shouldn't happen, but handle gracefully)
+                logger.warning(f"⚠️ [CLASSIFICATION] Matched keyword '{keyword}' not found in required or preferred lists")
+                self.matched_required_keywords.append(keyword)  # Default to required
+
+        # Classify missed keywords
+        for keyword in self.missed_keywords:
+            if keyword in required_set:
+                self.missed_required_keywords.append(keyword)
+            elif keyword in preferred_set:
+                self.missed_preferred_keywords.append(keyword)
+            else:
+                # Keyword not in either category
+                logger.warning(f"⚠️ [CLASSIFICATION] Missed keyword '{keyword}' not found in required or preferred lists")
+                self.missed_required_keywords.append(keyword)  # Default to required
+
+        logger.info(f"✅ [CLASSIFICATION] Classified {len(self.matched_keywords)} matched and {len(self.missed_keywords)} missed keywords into required/preferred categories")
 
 class CVJDMatcher:
     """CV-JD Matcher using centralized AI system"""
@@ -119,20 +230,57 @@ class CVJDMatcher:
                     content = file.read().strip()
             if not content:
                 raise ValueError(f"CV file is empty: {path}")
-            # Add basic content validation - at least some text beyond basic contact info
-            content_lines = [line.strip() for line in content.split('\n') if line.strip() and not line.startswith('=')]
             
-            # Remove common header lines that don't contain matchable content
-            content_lines = [line for line in content_lines 
-                           if not any(header in line.lower() for header in 
-                                    ['original cv text', 'cv file:', 'extracted:', 'length:', 'character'])]
-                           
-            if len(content_lines) <= 2:  # Assuming first line might be contact info
-                raise ValueError(f"CV file contains insufficient content for matching: {path}")
+            # Validate CV has matchable content
+            self._validate_cv_content(content, path)
+            
             return content
         except Exception as e:
             logger.error(f"Error reading CV file {path}: {e}")
             raise IOError(f"Failed to read CV file: {e}")
+    
+    def _validate_cv_content(self, content: str, file_path: Union[str, Path] = None) -> None:
+        """
+        Validate CV has sufficient matchable content.
+        
+        Args:
+            content: CV content text
+            file_path: Optional file path for error messages
+            
+        Raises:
+            ValueError: If CV content is insufficient for matching
+        """
+        # Check minimum character count (excluding whitespace)
+        clean_content = ''.join(content.split())
+        if len(clean_content) < 200:  # Minimum 200 characters
+            path_info = f" ({file_path})" if file_path else ""
+            raise ValueError(f"CV content too short for matching{path_info}. Minimum 200 characters required, found {len(clean_content)}")
+        
+        # Check for skill-related sections (at least one should exist)
+        content_lower = content.lower()
+        skill_indicators = [
+            'experience', 'skills', 'education', 'projects', 
+            'work', 'employment', 'qualifications', 'summary',
+            'objective', 'professional', 'career', 'background'
+        ]
+        has_sections = any(indicator in content_lower for indicator in skill_indicators)
+        
+        if not has_sections:
+            logger.warning(f"⚠️ [VALIDATION] CV may be missing standard sections (experience, skills, etc.)")
+            # Don't fail, just warn - some CVs might have non-standard formats
+        
+        # Additional check: ensure there's substantial text beyond just headers
+        # Count non-empty lines that aren't just separators
+        lines = [line.strip() for line in content.split('\n') if line.strip()]
+        # Filter out lines that are mostly separators or very short
+        substantial_lines = [
+            line for line in lines 
+            if len(line) > 10 and not all(c in '=-_*# ' for c in line[:20])
+        ]
+        
+        if len(substantial_lines) < 3:
+            path_info = f" ({file_path})" if file_path else ""
+            logger.warning(f"⚠️ [VALIDATION] CV has very few substantial lines{path_info}. May have limited matchable content.")
     
     def _read_jd_analysis(self, company_name: str, base_path: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -192,7 +340,7 @@ class CVJDMatcher:
             raise IOError(f"Failed to read JD analysis file: {e}")
     
     
-    def _parse_ai_response(self, response: AIResponse) -> CVJDMatchResult:
+    def _parse_ai_response(self, response: AIResponse, jd_analysis_data: Optional[Dict[str, Any]] = None) -> CVJDMatchResult:
         """
         Parse AI response into structured result
         
@@ -203,66 +351,38 @@ class CVJDMatcher:
             CVJDMatchResult object
             
         Raises:
-            ValueError: If response can't be parsed
+            json.JSONDecodeError: If JSON parsing fails (cleanup handled in retry loop)
+            ValueError: If response structure is invalid
         """
-        try:
-            # Try to parse JSON from response content
-            content = response.content.strip()
-            
-            # Handle cases where AI might wrap JSON in markdown code blocks
-            if content.startswith('```json'):
-                content = content.replace('```json', '').replace('```', '').strip()
-            elif content.startswith('```'):
-                content = content.replace('```', '').strip()
-            
-            data = json.loads(content)
-            
-            # Validate required fields
-            if not isinstance(data, dict):
-                raise ValueError("Response is not a valid JSON object")
-            
-            # Ensure all required fields exist
-            required_fields = [
-                'matched_required_keywords', 'matched_preferred_keywords',
-                'missed_required_keywords', 'missed_preferred_keywords',
-                'match_counts'
-            ]
-            
-            for field in required_fields:
-                if field not in data:
-                    data[field] = [] if 'keywords' in field else {}
-            
-            result = CVJDMatchResult(data)
-            result.ai_model_used = f"{response.provider}/{response.model}"
-            
-            return result
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse AI response as JSON: {e}")
-            logger.error(f"Response content: {response.content}")
-            
-            # Try to fix common JSON issues
-            try:
-                cleaned_content = self._clean_json_response(response.content)
-                data = json.loads(cleaned_content)
-                logger.info("✅ Successfully fixed and parsed malformed JSON response")
-                
-                # Ensure all required fields exist
-                for field in ['matched_required_keywords', 'matched_preferred_keywords', 
-                             'missed_required_keywords', 'missed_preferred_keywords', 'matching_notes']:
-                    if field not in data:
-                        data[field] = [] if 'keywords' in field else {}
-                
-                result = CVJDMatchResult(data)
-                result.ai_model_used = f"{response.provider}/{response.model}"
-                return result
-                
-            except Exception as fix_error:
-                logger.error(f"Failed to fix JSON response: {fix_error}")
-                raise ValueError(f"AI response is not valid JSON: {e}")
-        except Exception as e:
-            logger.error(f"Error parsing AI response: {e}")
-            raise ValueError(f"Failed to parse matching result: {e}")
+        # Try to parse JSON from response content
+        content = response.content.strip()
+        
+        # Handle cases where AI might wrap JSON in markdown code blocks
+        if content.startswith('```json'):
+            content = content.replace('```json', '').replace('```', '').strip()
+        elif content.startswith('```'):
+            content = content.replace('```', '').strip()
+        
+        data = json.loads(content)
+        
+        # Validate required fields
+        if not isinstance(data, dict):
+            raise ValueError("Response is not a valid JSON object")
+        
+        # Ensure all required fields exist
+        required_fields = [
+            'matched_keywords', 'missed_keywords',
+            'match_counts'
+        ]
+
+        for field in required_fields:
+            if field not in data:
+                data[field] = [] if 'keywords' in field else {}
+        
+        result = CVJDMatchResult(data, jd_analysis_data)
+        result.ai_model_used = f"{response.provider}/{response.model}"
+        
+        return result
     
     def _clean_json_response(self, content: str) -> str:
         """
@@ -319,7 +439,7 @@ class CVJDMatcher:
             company_name: Company name for the analysis
             cv_file_path: Path to CV file (optional, uses default if not provided)
             jd_analysis_data: JD analysis data (optional, loads from file if not provided)
-            temperature: AI temperature for consistency (default: 0.3)
+            temperature: AI temperature for consistency (default: 0.0 for deterministic matching)
             
         Returns:
             CVJDMatchResult with matching results
@@ -371,36 +491,47 @@ class CVJDMatcher:
                 logger.info(f"ℹ️ [CV_JD_MATCHER] JD analysis was created using processed JD (if available)")
                 print(f"ℹ️ [CV_JD_MATCHER] JD analysis was created using processed JD (if available)")
             
-            # Extract keywords from JD analysis with fallback to skills-based extraction
-            required_keywords = jd_analysis_data.get('required_keywords', [])
-            preferred_keywords = jd_analysis_data.get('preferred_keywords', [])
-            
-            # If no direct keywords found, try to extract from skills
-            if not required_keywords and 'required_skills' in jd_analysis_data:
-                skills = jd_analysis_data['required_skills']
-                for category in ['technical', 'soft_skills', 'domain_knowledge']:
-                    required_keywords.extend(skills.get(category, []))
-            
-            if not preferred_keywords and 'preferred_skills' in jd_analysis_data:
-                skills = jd_analysis_data['preferred_skills']
-                for category in ['technical', 'soft_skills', 'domain_knowledge']:
-                    preferred_keywords.extend(skills.get(category, []))
-            
-            if not required_keywords and not preferred_keywords:
+            # Extract keywords from JD analysis - use three_section_skills as primary source
+            all_keywords = jd_analysis_data.get('three_section_all_keywords', [])
+
+            # Fallback: If no three_section_all_keywords, try to extract from three_section_skills directly
+            if not all_keywords and 'three_section_skills' in jd_analysis_data:
+                three_section = jd_analysis_data['three_section_skills']
+                all_keywords.extend(three_section.get('technical_skills', []))
+                all_keywords.extend(three_section.get('soft_skills', []))
+                all_keywords.extend(three_section.get('domain_knowledge', []))
+
+            # Final fallback: Use required/preferred keywords (for backward compatibility)
+            if not all_keywords:
+                required_keywords = jd_analysis_data.get('required_keywords', [])
+                preferred_keywords = jd_analysis_data.get('preferred_keywords', [])
+                all_keywords = required_keywords + preferred_keywords
+
+            if not all_keywords:
                 raise ValueError("No keywords found in JD analysis data")
-            
+
             # Remove duplicates while preserving order
-            required_keywords = list(dict.fromkeys(required_keywords))
-            preferred_keywords = list(dict.fromkeys(preferred_keywords))
-            
-            logger.info(f"🔍 Found {len(required_keywords)} required and {len(preferred_keywords)} preferred keywords")
+            all_keywords = list(dict.fromkeys(all_keywords))
+
+            logger.info(f"🔍 Found {len(all_keywords)} keywords from three_section_skills for CV-JD matching")
             
             # Get prompts
             system_prompt, user_prompt = get_cv_jd_matching_prompts(
                 cv_content=cv_content,
-                required_keywords=required_keywords,
-                preferred_keywords=preferred_keywords
+                all_keywords=all_keywords
             )
+            
+            # Determine if we can use structured outputs (JSON mode)
+            # OpenAI supports response_format for JSON mode, which eliminates JSON parsing issues
+            response_format_kwargs = {}
+            
+            # Check current provider to determine structured output support
+            current_provider_name = self.ai_service.config.get_current_provider()
+            if current_provider_name == "openai":
+                # OpenAI JSON mode - forces valid JSON output, eliminating parsing issues
+                # This allows the model to focus on matching quality rather than JSON formatting
+                response_format_kwargs = {"response_format": {"type": "json_object"}}
+                logger.info("✅ [CV_JD_MATCHER] Using OpenAI JSON mode for structured output")
             
             # Retry logic for AI service calls
             last_error = None
@@ -417,29 +548,65 @@ class CVJDMatcher:
                         is_active=True
                     )
                     
-                    # Call AI service
+                    # Call AI service with structured output if supported
                     response = await self.ai_service.generate_response(
                         prompt=user_prompt,
                         user=current_user,
                         system_prompt=system_prompt,
                         temperature=temperature,
-                        max_tokens=3000
+                        max_tokens=3000,
+                        **response_format_kwargs
                     )
                     
-                    # Parse response
-                    result = self._parse_ai_response(response)
-                    result.company_name = company_name
-                    result.cv_file_path = cv_file_path
-                    
-                    logger.info(f"✅ CV-JD matching completed. Found {len(result.matched_required_keywords)} matched required keywords")
-                    
-                    return result
-                    
-                except json.JSONDecodeError as e:
-                    logger.error(f"❌ CRITICAL: JSON parsing failed immediately: {e}")
-                    logger.error(f"❌ STOPPING PROCESS: No retries for JSON parsing errors")
-                    # Re-raise the exception to trigger the main error handling
-                    raise
+                    # Try parsing with cleanup on JSON errors
+                    try:
+                        result = self._parse_ai_response(response, jd_analysis_data)
+                        result.company_name = company_name
+                        result.cv_file_path = cv_file_path
+                        
+                        logger.info(f"✅ CV-JD matching completed. Found {len(result.matched_required_keywords)} matched required keywords")
+                        
+                        return result
+                        
+                    except json.JSONDecodeError as json_err:
+                        # Try cleanup on first attempt before retrying with fresh API call
+                        if attempt == 0:
+                            try:
+                                logger.warning(f"⚠️ JSON parsing failed, attempting cleanup...")
+                                cleaned_content = self._clean_json_response(response.content)
+                                data = json.loads(cleaned_content)
+                                
+                                # Ensure all required fields exist
+                                required_fields = [
+                                    'matched_required_keywords', 'matched_preferred_keywords',
+                                    'missed_required_keywords', 'missed_preferred_keywords',
+                                    'match_counts'
+                                ]
+                                for field in required_fields:
+                                    if field not in data:
+                                        data[field] = [] if 'keywords' in field else {}
+                                
+                                result = CVJDMatchResult(data)
+                                result.ai_model_used = f"{response.provider}/{response.model}"
+                                result.company_name = company_name
+                                result.cv_file_path = cv_file_path
+                                
+                                logger.info("✅ Successfully fixed and parsed malformed JSON response")
+                                logger.info(f"✅ CV-JD matching completed. Found {len(result.matched_required_keywords)} matched required keywords")
+                                
+                                return result
+                                
+                            except Exception as cleanup_error:
+                                logger.warning(f"⚠️ JSON cleanup failed: {cleanup_error}")
+                                # Will continue to retry with fresh API call
+                        
+                        # If cleanup failed or not first attempt, continue to retry
+                        last_error = json_err
+                        logger.warning(f"⚠️ Attempt {attempt + 1}/{max_retries} - JSON parse failed: {json_err}")
+                        if attempt < max_retries - 1:
+                            logger.info(f"🔄 Retrying CV-JD matching with fresh API call...")
+                            await asyncio.sleep(1)  # Brief delay before retry
+                        continue
                     
                 except Exception as e:
                     last_error = e
@@ -530,7 +697,7 @@ async def match_cv_against_company_jd(
     company_name: str,
     cv_file_path: Optional[str] = None,
     force_refresh: bool = False,
-    temperature: float = 0.3,
+    temperature: float = 0.0,
     user_email: str = None
 ) -> CVJDMatchResult:
     """Convenience function to match CV against company JD"""
@@ -541,7 +708,7 @@ async def match_and_save_cv_jd(
     company_name: str,
     cv_file_path: Optional[str] = None,
     force_refresh: bool = False,
-    temperature: float = 0.3,
+    temperature: float = 0.0,
     jd_analysis_data: Optional[Dict[str, Any]] = None,
     user_email: str = None
 ) -> CVJDMatchResult:
@@ -562,7 +729,7 @@ async def match_and_save_cv_jd(
         # Save results
         matcher._save_match_result(result, company_name)
     except ValueError as ve:
-        if "insufficient content" in str(ve):
+        if "too short" in str(ve) or "insufficient content" in str(ve):
             logger.error(f"❌ CV file for {company_name} does not contain enough content for matching. Please ensure the CV includes relevant experience and skills.")
         elif "No keywords found" in str(ve):
             logger.error(f"❌ No keywords found in JD analysis for {company_name}. Please ensure the job description has been properly analyzed.")
