@@ -1,6 +1,6 @@
 class AppConfig {
   // Base URL for API and static assets
-  static const String baseUrl = 'http://cvagent.duckdns.org';
+  static const String baseUrl = 'https://cvagent.duckdns.org';
 
   // API endpoints
   static const String apiBaseUrl = '$baseUrl'; // No /api suffix
