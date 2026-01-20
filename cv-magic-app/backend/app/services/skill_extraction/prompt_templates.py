@@ -40,6 +40,15 @@ EXTRACTION RULES:
 2. STRIP QUALIFIERS - Remove "Advanced", "Expert", "Strong", "Excellent", "5+ years"
 3. STRIP VERSIONS - "Python 3.x" → "Python"
 4. NO HALLUCINATION - Only extract what is explicitly written
+5. SCAN ALL TEXT - Extract from every section equally (Skills, Experience, Projects, Summary)
+6. NO SECTION BIAS - Don't favor explicit "Skills:" sections over narrative text
+
+TOOL + DELIVERABLE RULE (CRITICAL):
+When a tool and deliverable appear together, extract BOTH separately:
+- "Power BI dashboards" → Extract: ["Power BI", "dashboards"]
+- "SQL reports" → Extract: ["SQL", "reports"]
+- "Python pipelines" → Extract: ["Python", "pipelines"]
+- "Tableau visualizations" → Extract: ["Tableau", "visualizations"]
 
 DEDUPLICATION (CRITICAL):
 - Keep ONLY the shorter/simpler form when similar phrases exist
@@ -122,6 +131,22 @@ OUTPUT: Return ONLY three Python lists, nothing else."""
 {document_text.strip()}
 
 ═══════════════════════════════════════════════════════════════
+CRITICAL: SCAN ALL TEXT EQUALLY (NO SECTION BIAS)
+═══════════════════════════════════════════════════════════════
+
+⚠️ Extract from EVERY section, not just "Skills:" heading
+- Scan: Skills sections, Experience bullets, Project descriptions, Summaries
+- NO BIAS: Treat all text equally regardless of structure or formatting
+
+⚠️ TOOL + DELIVERABLE PATTERN (Extract BOTH separately):
+When you see patterns like:
+  "Built Power BI dashboards..." → Extract: "Power BI" AND "dashboards"
+  "Created SQL reports..." → Extract: "SQL" AND "reports"
+  "Developed Python pipelines..." → Extract: "Python" AND "pipelines"
+
+NEVER extract ONLY the tool and ignore the deliverable!
+
+═══════════════════════════════════════════════════════════════
 APPLY THESE TESTS TO EACH TERM:
 ═══════════════════════════════════════════════════════════════
 
@@ -143,24 +168,27 @@ QUESTION 3: "Industry/Sector OR Regulatory term?"
 EXTRACTION ENHANCEMENTS:
 ═══════════════════════════════════════════════════════════════
 
-1. **Action-to-Deliverable**: "developed dashboards" → "dashboard development"
+1. **Action-to-Deliverable**: "developed dashboards" → "dashboards"
 2. **Preserve Specificity**: "PostgreSQL" stays as "PostgreSQL"
 3. **Keep Compounds Together**: "machine learning" → don't split
-4. **Educational Background → Domain**: "degree in Finance" → domain
+4. **Educational Background → Domain**: "degree in Finance" → Finance
 
 ═══════════════════════════════════════════════════════════════
 SELF-CHECK BEFORE OUTPUT:
 ═══════════════════════════════════════════════════════════════
 
 TECHNICAL_SKILLS:
-[ ] All software/tools? (Excel, Python, Power BI)
-[ ] All data processes? (data cleaning, ETL, data transformation)
-[ ] All technical artifacts? (dashboards, APIs, pipelines)
+[ ] All software/tools? (Excel, Python, Power BI, SQL, Tableau)
+[ ] All data processes? (data cleaning, ETL, data transformation, data warehousing)
+[ ] All technical artifacts? (dashboards, reports, APIs, pipelines, visualizations, data models)
 [ ] Specific tech names preserved? (MSSQL, PostgreSQL, not just "SQL")
+[ ] Extracted from ALL sections? (not just "Skills:" heading)
+[ ] BOTH tool AND deliverable when together? ("Power BI dashboards" → "Power BI" + "dashboards")
 
 SOFT_SKILLS:
-[ ] All human interaction + behavioral? (communication, leadership)
+[ ] All human interaction + behavioral? (communication, leadership, collaboration)
 [ ] NO duplicates? (keep shortest form only)
+[ ] Extracted from ALL sections? (experience bullets, summaries, etc.)
 
 DOMAIN_KEYWORDS:
 [ ] All industry-specific? (Healthcare, Nonprofit, Finance)
