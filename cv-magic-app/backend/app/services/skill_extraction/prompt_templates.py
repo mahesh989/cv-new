@@ -212,7 +212,7 @@ def get_simple_skill_prompts(document_type: str, document_text: str) -> dict:
 technical skills, soft skills, and domain keywords. Return ONLY valid Python list assignments.
 
 CATEGORIZATION RULES:
-- TECHNICAL: Tools (SQL, Excel), technical processes (data cleaning, ETL), and artifacts (dashboards, APIs)
+- TECHNICAL: Tools (SQL, Excel), technical processes (data cleaning, ETL), and artifacts (dashboards, APIs, reports, visualizations, pipelines)
 - SOFT SKILLS: Human interaction + behavioral traits (communication, leadership, stakeholder management)
 - DOMAIN KEYWORDS: Industry or regulatory terms (Healthcare, Finance, Nonprofit, GDPR, fundraising)
 
@@ -223,6 +223,8 @@ EXTRACTION RULES:
 - Include implied skills only when clearly supported by the text
 - SCAN ALL SECTIONS: Extract from Skills, Experience, Projects, Summary equally
 - TOOL + DELIVERABLE: "Power BI dashboards" → extract ["Power BI", "dashboards"] separately
+- DELIVERABLE VARIANTS: "reporting" → "reports", "visualization" → "visualizations", "pipeline automation" → "pipelines"
+- ALWAYS extract if present: dashboards, reports, visualizations, pipelines, APIs, data models
 
 OUTPUT (STRICT):
 TECHNICAL_SKILLS = [...]
@@ -237,10 +239,11 @@ No commentary, explanations, or markdown."""
 ⚠️ CRITICAL: 
 - Scan ALL text (not just "Skills:" sections) - include Experience, Projects, Summary
 - When you see "Power BI dashboards", extract BOTH "Power BI" AND "dashboards" separately
-- When you see "SQL reports", extract BOTH "SQL" AND "reports"
+- Extract deliverables even as variants: "reporting" → "reports", "visualization" → "visualizations"
+- ALWAYS extract if present: dashboards, reports, visualizations, pipelines, APIs, data models
 
 Return EXACTLY this format with three Python lists (use double quotes, comma-separated values):
-TECHNICAL_SKILLS = ["SQL", "Power BI", "dashboards", "reports"]
+TECHNICAL_SKILLS = ["SQL", "Power BI", "dashboards", "reports", "visualizations", "pipelines"]
 SOFT_SKILLS = ["communication", "problem-solving"]
 DOMAIN_KEYWORDS = ["Healthcare", "Nonprofit"]
 """
@@ -264,7 +267,7 @@ rules to classify each term into technical, soft, or domain categories.
 
 SIMPLE CLASSIFICATION:
 - Technical: tools/technologies (SQL, Power BI), executable processes (ETL, dashboards),
-  or technical artifacts (APIs, data pipelines).
+  or technical artifacts (APIs, data pipelines, reports, visualizations).
 - Soft: people-facing or behavioral skills (communication, collaboration, stakeholder management,
   problem-solving, attention to detail).
 - Domain: industries, sectors, regulatory or mission-specific terms (Healthcare, Nonprofit, GDPR,
@@ -277,6 +280,8 @@ RULES:
 - Never invent skills that are not clearly implied.
 - SCAN ALL SECTIONS: Extract from Skills, Experience, Projects, Summary - treat all equally.
 - TOOL + DELIVERABLE: When you see "Power BI dashboards", extract BOTH "Power BI" AND "dashboards" separately.
+- EXTRACT DELIVERABLES: Always extract: dashboards, reports, visualizations, pipelines, APIs, data models
+  (even if they appear as "reporting", "visualization", "pipeline automation" - normalize to base form)
 
 OUTPUT FORMAT (STRICT JSON ONLY):
 {{
@@ -303,19 +308,27 @@ CRITICAL EXTRACTION INSTRUCTIONS:
 ⚠️ TOOL + DELIVERABLE - When you see "Power BI dashboards", extract BOTH:
    • "Power BI" (tool)
    • "dashboards" (deliverable)
-   Examples: "SQL reports" → ["SQL", "reports"]
-             "Python pipelines" → ["Python", "pipelines"]
-             "Tableau visualizations" → ["Tableau", "visualizations"]
+   
+⚠️ DELIVERABLE VARIANTS - Extract base form even if text uses variants:
+   • "stakeholder reporting" OR "client reporting" → extract "reports"
+   • "data visualizations" OR "clear visualizations" → extract "visualizations"  
+   • "ETL pipeline" OR "pipeline automation" → extract "pipelines"
+   • "Power BI dashboards" → extract BOTH "Power BI" AND "dashboards"
+   • "Tableau dashboards" → extract BOTH "Tableau" AND "dashboards"
+
+⚠️ MANDATORY DELIVERABLES TO CHECK (if mentioned anywhere):
+   dashboards, reports, visualizations, pipelines, APIs, data models, ETL
 
 CHECKLIST BEFORE OUTPUT:
 1. Technical skills include all tools, software, data processes, and artifacts found in ALL sections.
 2. If you see tool+deliverable together (e.g., "Power BI dashboards"), extract BOTH separately.
-3. Scan experience bullets thoroughly - don't just look at "Skills" section.
-4. Soft skills include interpersonal/behavioral phrases (communication, stakeholder management, etc.).
-5. Domain keywords cover industries, missions, regulatory terms (Nonprofit, Fundraising, GDPR, etc.).
-6. experience_years is a number if explicitly stated, otherwise null.
-7. education / certifications / languages arrays list any entries mentioned (empty array if none).
-8. summary is a concise 2-3 sentence description covering role scope and strengths."""
+3. Check for deliverable variants: "reporting" → "reports", "visualization" → "visualizations"
+4. Scan experience bullets thoroughly - don't just look at "Skills" section.
+5. Soft skills include interpersonal/behavioral phrases (communication, stakeholder management, etc.).
+6. Domain keywords cover industries, missions, regulatory terms (Nonprofit, Fundraising, GDPR, etc.).
+7. experience_years is a number if explicitly stated, otherwise null.
+8. education / certifications / languages arrays list any entries mentioned (empty array if none).
+9. summary is a concise 2-3 sentence description covering role scope and strengths."""
 
     return {
         "system_prompt": system_prompt,
