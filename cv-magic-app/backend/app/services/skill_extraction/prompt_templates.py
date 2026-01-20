@@ -221,6 +221,8 @@ EXTRACTION RULES:
 - Remove qualifiers: "strong SQL" → "SQL"
 - Preserve specific tools: "Power BI" stays "Power BI"
 - Include implied skills only when clearly supported by the text
+- SCAN ALL SECTIONS: Extract from Skills, Experience, Projects, Summary equally
+- TOOL + DELIVERABLE: "Power BI dashboards" → extract ["Power BI", "dashboards"] separately
 
 OUTPUT (STRICT):
 TECHNICAL_SKILLS = [...]
@@ -232,8 +234,13 @@ No commentary, explanations, or markdown."""
     user_prompt = f"""Extract ALL skills from this {document_type} and categorize them:
 {document_text.strip()}
 
+⚠️ CRITICAL: 
+- Scan ALL text (not just "Skills:" sections) - include Experience, Projects, Summary
+- When you see "Power BI dashboards", extract BOTH "Power BI" AND "dashboards" separately
+- When you see "SQL reports", extract BOTH "SQL" AND "reports"
+
 Return EXACTLY this format with three Python lists (use double quotes, comma-separated values):
-TECHNICAL_SKILLS = ["SQL", "Power BI"]
+TECHNICAL_SKILLS = ["SQL", "Power BI", "dashboards", "reports"]
 SOFT_SKILLS = ["communication", "problem-solving"]
 DOMAIN_KEYWORDS = ["Healthcare", "Nonprofit"]
 """
@@ -268,6 +275,8 @@ RULES:
 - Keep compound terms intact ("machine learning", "cloud computing").
 - If a term fits multiple categories, use priority Technical > Soft > Domain.
 - Never invent skills that are not clearly implied.
+- SCAN ALL SECTIONS: Extract from Skills, Experience, Projects, Summary - treat all equally.
+- TOOL + DELIVERABLE: When you see "Power BI dashboards", extract BOTH "Power BI" AND "dashboards" separately.
 
 OUTPUT FORMAT (STRICT JSON ONLY):
 {{
@@ -288,13 +297,25 @@ Document:
 
 {document_text.strip()}
 
+CRITICAL EXTRACTION INSTRUCTIONS:
+⚠️ SCAN ALL TEXT EQUALLY - Extract from every section (Skills, Experience, Projects, Summary)
+⚠️ NO SECTION BIAS - Don't favor "Skills:" headings over experience bullets or narrative text
+⚠️ TOOL + DELIVERABLE - When you see "Power BI dashboards", extract BOTH:
+   • "Power BI" (tool)
+   • "dashboards" (deliverable)
+   Examples: "SQL reports" → ["SQL", "reports"]
+             "Python pipelines" → ["Python", "pipelines"]
+             "Tableau visualizations" → ["Tableau", "visualizations"]
+
 CHECKLIST BEFORE OUTPUT:
-1. Technical skills include all tools, software, data processes, and artifacts found in the text.
-2. Soft skills include interpersonal/behavioral phrases (communication, stakeholder management, etc.).
-3. Domain keywords cover industries, missions, regulatory terms (Nonprofit, Fundraising, GDPR, etc.).
-4. experience_years is a number if explicitly stated, otherwise null.
-5. education / certifications / languages arrays list any entries mentioned (empty array if none).
-6. summary is a concise 2-3 sentence description covering role scope and strengths."""
+1. Technical skills include all tools, software, data processes, and artifacts found in ALL sections.
+2. If you see tool+deliverable together (e.g., "Power BI dashboards"), extract BOTH separately.
+3. Scan experience bullets thoroughly - don't just look at "Skills" section.
+4. Soft skills include interpersonal/behavioral phrases (communication, stakeholder management, etc.).
+5. Domain keywords cover industries, missions, regulatory terms (Nonprofit, Fundraising, GDPR, etc.).
+6. experience_years is a number if explicitly stated, otherwise null.
+7. education / certifications / languages arrays list any entries mentioned (empty array if none).
+8. summary is a concise 2-3 sentence description covering role scope and strengths."""
 
     return {
         "system_prompt": system_prompt,
