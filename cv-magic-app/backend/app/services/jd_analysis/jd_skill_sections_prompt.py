@@ -22,6 +22,7 @@ EXTRACTION RULES:
 - Don't extract skills that are not mentioned in the job description
 - Remove duplicates (same skill listed multiple times)
 - For soft skills, extract the base skill without qualifiers: 'proactive problem solving' and 'problem-solving' should both become 'problem-solving'
+"""
 
 
 def get_three_section_prompts(job_description: str) -> tuple[str, str]:
