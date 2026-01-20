@@ -34,6 +34,8 @@ jobs:
     if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # needed so git diff, versioning, and flutter build see history
       
       - uses: subosito/flutter-action@v2
         with:
@@ -71,6 +73,10 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # needed so git diff HEAD~1 works for change detection
+
       - name: Resolve VPS hostname to IP (if needed)
         id: resolve-host
         timeout-minutes: 2
