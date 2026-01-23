@@ -24,6 +24,7 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
 # Copy app
+COPY .rebuild-trigger /app/
 COPY app /app/app
 COPY migrations /app/migrations
 COPY prompt /app/prompt
