@@ -54,7 +54,11 @@ DEDUPLICATION (CRITICAL):
 - Keep ONLY the shorter/simpler form when similar phrases exist
 - "problem-solving" + "proactive problem solving" → KEEP ONLY "problem-solving"
 - "analytical thinking" + "analytical skills" → KEEP ONLY "analytical thinking"
-- NEVER include both variations
+- SEMANTIC DUPLICATES: If skills mean the same thing, keep only ONE:
+  • "data extraction" + "extracting data" → KEEP ONLY "data extraction" (noun form)
+  • "data requirements" + "requirements gathering" → KEEP ONLY "requirements gathering"
+  • "querying" + "query writing" → KEEP ONLY "querying" (shorter form)
+- NEVER include both variations or semantically identical skills
 
 ═══════════════════════════════════════════════════════════════
 UNIVERSAL CATEGORIZATION RULES (Work for ANY job type)
@@ -244,6 +248,9 @@ No commentary, explanations, or markdown."""
 - For technical artifacts (dashboards, reports, visualizations, pipelines, APIs, etc.):
   → Extract the base deliverable regardless of how it appears in text
   → Normalize to plural form for consistency
+- REMOVE SEMANTIC DUPLICATES: If you extract skills that mean the same thing, keep only ONE
+  → "data extraction" + "extracting data" = keep only "data extraction"
+  → "querying" + "query writing" = keep only "querying" (shorter form)
 
 Return EXACTLY this format with three Python lists (use double quotes, comma-separated values):
 TECHNICAL_SKILLS = ["SQL", "Python", "dashboards", "reports"]
@@ -289,6 +296,10 @@ RULES:
   • If text mentions "pipeline" anywhere → extract "pipelines"
   • If text mentions "dashboard" anywhere → extract "dashboards"
   This applies to ANY technical artifact, not just these examples.
+- SEMANTIC DEDUPLICATION: If you extract skills that mean the same thing, keep only ONE:
+  • "data extraction" + "extracting data" → keep only "data extraction" (noun form preferred)
+  • "requirement analysis" + "analyzing requirements" → keep only "requirement analysis"
+  • Choose the shorter, simpler, or noun form when both exist
 
 OUTPUT FORMAT (STRICT JSON ONLY):
 {{
@@ -326,15 +337,22 @@ CRITICAL EXTRACTION INSTRUCTIONS:
    • Text contains "API" (singular/plural) → extract "APIs"
    • This rule applies to ANY technical artifact mentioned in the document
 
+⚠️ SEMANTIC DEDUPLICATION - Before finalizing, remove semantic duplicates:
+   • If you have "data extraction" AND "extracting data" → keep only "data extraction"
+   • If you have "requirement analysis" AND "analyzing requirements" → keep only "requirement analysis"
+   • Prefer noun forms over verb forms; prefer shorter forms over longer
+   • Only keep skills that are MEANINGFULLY different
+
 CHECKLIST BEFORE OUTPUT:
 1. Scanned ALL sections (Skills, Experience, Projects, Summary) for technical artifacts?
 2. Extracted BOTH tool AND deliverable when they appear together?
 3. Normalized technical artifacts to base plural form?
-4. Soft skills include interpersonal/behavioral phrases (communication, stakeholder management, etc.).
-5. Domain keywords cover industries, missions, regulatory terms (Healthcare, Nonprofit, GDPR, etc.).
-6. experience_years is a number if explicitly stated, otherwise null.
-7. education / certifications / languages arrays list any entries mentioned (empty array if none).
-8. summary is a concise 2-3 sentence description covering role scope and strengths."""
+4. Removed semantic duplicates (skills that mean the same thing)?
+5. Soft skills include interpersonal/behavioral phrases (communication, stakeholder management, etc.).
+6. Domain keywords cover industries, missions, regulatory terms (Healthcare, Nonprofit, GDPR, etc.).
+7. experience_years is a number if explicitly stated, otherwise null.
+8. education / certifications / languages arrays list any entries mentioned (empty array if none).
+9. summary is a concise 2-3 sentence description covering role scope and strengths."""
 
     return {
         "system_prompt": system_prompt,
