@@ -170,17 +170,22 @@ class ContextAwareAnalysisPipeline:
             cv_context = user_selector.get_latest_cv_for_company(company, jd_url, "")
             context.cv_context = cv_context
             
-            # Record JD usage for tracking
-            from app.services.jd_usage_tracker import jd_usage_tracker
-            # Provide fallback text if no URL is available
-            jd_text_fallback = f"JD for {company}" if not jd_url else ""
+            # Record JD usage for tracking (use user-specific tracker to match unified selector)
+            from app.services.jd_usage_tracker import JDUsageTracker
+            # Create user-specific tracker (same as unified selector uses)
+            user_jd_tracker = JDUsageTracker(self.user_email)
+            # Use EXACT same logic as unified selector for matching
+            effective_jd_url = jd_url if jd_url and jd_url.strip() else ""
+            effective_jd_text = "" if jd_url else "default_jd_text"  # Match unified selector logic
             
             logger.info(f"🔍 [CONTEXT_AWARE_PIPELINE] Recording JD usage:")
             logger.info(f"- jd_url: {jd_url}")
-            logger.info(f"- jd_text_fallback: {jd_text_fallback}")
+            logger.info(f"- effective_jd_url: {effective_jd_url}")
+            logger.info(f"- effective_jd_text: {effective_jd_text}")
             logger.info(f"- company: {company}")
+            logger.info(f"- user_email: {self.user_email}")
             
-            jd_usage_tracker.record_jd_usage(jd_url, jd_text_fallback, company, "")
+            user_jd_tracker.record_jd_usage(effective_jd_url, effective_jd_text, company, "")
             
             if not cv_context.exists:
                 results.errors.append(f"No CV found for company: {company}")
