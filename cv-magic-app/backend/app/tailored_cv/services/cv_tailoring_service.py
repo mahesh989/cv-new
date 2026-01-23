@@ -684,11 +684,10 @@ ABSOLUTE REQUIREMENTS - YOU MUST IMPLEMENT ALL OF THESE:
 
 3. TIERED KEYWORD INTEGRATION RULES:
    - TIER 1 (Always): Generic role keywords, synonyms, standard industry terms, soft skills with clear evidence
-   - TIER 2 (If Evidence): Transferable tools, platform-agnostic terms, generic technical categories
+   - TIER 2 (If Evidence): Apply semantic evidence principles (Tool↔Process, Concept↔Implementation, Category↔Specific, Synonym relationships)
    - TIER 3 (Never): Specific tool variants, advanced features, certifications, domain expertise without experience
-   - ONLY add keywords that have semantic matches or clear evidence in the original CV
-   - NEVER add keywords that cannot be reasonably inferred from existing experience
-   - Look for synonyms and related terms in the original CV before adding keywords
+   - SEMANTIC EVIDENCE: Use relationship principles to identify valid evidence (see Tier 2 section below)
+   - NEVER add keywords that cannot be reasonably inferred from existing experience using these principles
    
    CORRECT APPROACH:
    Original: "Analyzed customer support data to improve response strategies"
@@ -975,11 +974,36 @@ YOUR TASK - TRANSFORM THIS CV:
    These require semantic evidence from your CV:
 """ + (self._format_tier_keywords(recommendations.tier2_keywords) if recommendations.tier2_keywords else '   - Use important_gaps from recommendations if tier2_keywords not available') + """
    
-   For EACH Tier 2 keyword:
-   - ONLY add if you can find semantic evidence in the original CV
-   - Look for related experiences, projects, or skills
-   - Use the validation guidance provided in recommendations
-   - If no evidence exists, DO NOT add the keyword
+   SEMANTIC EVIDENCE PRINCIPLES (Apply to ANY keyword):
+   For EACH Tier 2 keyword, check if the original CV contains SEMANTICALLY RELATED evidence:
+   
+   PRINCIPLE 1: TOOL ↔ PROCESS RELATIONSHIP
+   - If CV has a TOOL → related PROCESSES/ACTIONS are valid evidence
+   - If CV has a PROCESS → related TOOLS are valid evidence
+   - Examples: CV has "SQL" → "querying", "database queries", "data retrieval" are valid
+   - Examples: CV has "data analysis" → "Excel", "Python", "statistical tools" are valid
+   
+   PRINCIPLE 2: CONCEPT ↔ IMPLEMENTATION RELATIONSHIP
+   - If CV has a CONCEPT → related IMPLEMENTATIONS are valid evidence
+   - If CV has an IMPLEMENTATION → related CONCEPTS are valid evidence
+   - Examples: CV has "relational database" → "database design", "data modeling" are valid
+   - Examples: CV has "ETL" → "data integration", "data transformation" are valid
+   
+   PRINCIPLE 3: CATEGORY ↔ SPECIFIC RELATIONSHIP
+   - If CV has a CATEGORY → specific items in that category are valid evidence
+   - If CV has a SPECIFIC → the category it belongs to is valid evidence
+   - Examples: CV has "BI tools" → "Power BI", "Tableau", "Qlik" are valid
+   - Examples: CV has "Power BI" → "business intelligence", "data visualization" are valid
+   
+   PRINCIPLE 4: SYNONYM & VARIATION RELATIONSHIP
+   - If CV has a skill → synonyms, variations, or related terms are valid evidence
+   - Examples: CV has "communication" → "stakeholder engagement", "presentation" are valid
+   - Examples: CV has "project management" → "coordination", "planning" are valid
+   
+   DECISION RULE:
+   - If ANY of these principles apply → ADD the keyword (evidence exists)
+   - If NONE apply → DO NOT add the keyword (no evidence)
+   - Use the validation guidance provided in recommendations for context
    
    **TIER 3 KEYWORDS (NEVER ADD - High Risk):**
    These must NEVER be added to the CV:
