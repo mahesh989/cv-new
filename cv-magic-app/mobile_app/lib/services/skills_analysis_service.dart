@@ -10,14 +10,14 @@ class SkillsAnalysisService {
     required bool isRerun,
     bool includeTailoring = true,
   }) async {
-    print('=== CONTEXT-AWARE ANALYSIS SERVICE CALLED ===');
-    print('JD URL: $jdUrl');
-    print('Company: $company');
-    print('Is Rerun: $isRerun');
-    print('Include Tailoring: $includeTailoring');
+    debugPrint('=== CONTEXT-AWARE ANALYSIS SERVICE CALLED ===');
+    debugPrint('JD URL: $jdUrl');
+    debugPrint('Company: $company');
+    debugPrint('Is Rerun: $isRerun');
+    debugPrint('Include Tailoring: $includeTailoring');
 
     try {
-      print('🚀 [CONTEXT_AWARE_SERVICE] Starting context-aware analysis');
+      debugPrint('🚀 [CONTEXT_AWARE_SERVICE] Starting context-aware analysis');
 
       final stopwatch = Stopwatch()..start();
 
@@ -32,17 +32,17 @@ class SkillsAnalysisService {
         },
       );
 
-      print('📡 [CONTEXT_AWARE_SERVICE] Received response from API');
-      print(
+      debugPrint('📡 [CONTEXT_AWARE_SERVICE] Received response from API');
+      debugPrint(
           '📡 [CONTEXT_AWARE_SERVICE] Raw result type: ${result.runtimeType}');
-      print(
+      debugPrint(
           '📡 [CONTEXT_AWARE_SERVICE] Raw result keys: ${result.keys.toList()}');
 
       stopwatch.stop();
 
       // Convert context-aware result to SkillsAnalysisResult format
       final analysisResult = _convertContextAwareResult(result);
-      print(
+      debugPrint(
           '📊 [CONTEXT_AWARE_SERVICE] Successfully converted to SkillsAnalysisResult');
 
       // Return with execution duration
@@ -62,9 +62,9 @@ class SkillsAnalysisService {
 
       return finalResult;
     } catch (e, stackTrace) {
-      print(
+      debugPrint(
           '❌ [CONTEXT_AWARE_SERVICE] Exception in performContextAwareAnalysis: $e');
-      print('❌ [CONTEXT_AWARE_SERVICE] Stack trace: $stackTrace');
+      debugPrint('❌ [CONTEXT_AWARE_SERVICE] Stack trace: $stackTrace');
 
       // Enhanced error handling for different error types
       if (e.toString().contains('404') || e.toString().contains('not found')) {
@@ -99,13 +99,13 @@ class SkillsAnalysisService {
     required String cvFilename,
     required String jdText,
   }) async {
-    print('=== FRONTEND SERVICE CALLED ===');
-    print('CV: $cvFilename');
-    print('JD length: ${jdText.length}');
+    debugPrint('=== FRONTEND SERVICE CALLED ===');
+    debugPrint('CV: $cvFilename');
+    debugPrint('JD length: ${jdText.length}');
     try {
-      print('🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis');
-      print('   CV: $cvFilename');
-      print('   JD text length: ${jdText.length}');
+      debugPrint('🚀 [SERVICE_DEBUG] Starting performPreliminaryAnalysis');
+      debugPrint('   CV: $cvFilename');
+      debugPrint('   JD text length: ${jdText.length}');
 
       final stopwatch = Stopwatch()..start();
 
@@ -118,54 +118,54 @@ class SkillsAnalysisService {
         },
       );
 
-      print('📡 [SERVICE_DEBUG] Received response from API');
-      print('📡 [SERVICE_DEBUG] Raw result type: ${result.runtimeType}');
-      print('📡 [SERVICE_DEBUG] Raw result: $result');
-      print('   Response keys: ${result.keys.toList()}');
-      print(
+      debugPrint('📡 [SERVICE_DEBUG] Received response from API');
+      debugPrint('📡 [SERVICE_DEBUG] Raw result type: ${result.runtimeType}');
+      debugPrint('📡 [SERVICE_DEBUG] Raw result: $result');
+      debugPrint('   Response keys: ${result.keys.toList()}');
+      debugPrint(
           '   cv_comprehensive_analysis present: ${result.containsKey("cv_comprehensive_analysis")}');
-      print(
+      debugPrint(
           '   jd_comprehensive_analysis present: ${result.containsKey("jd_comprehensive_analysis")}');
-      print(
+      debugPrint(
           '🔍 [ANALYZE_MATCH_SERVICE] analyze_match present: ${result.containsKey("analyze_match")}');
       if (result.containsKey('analyze_match')) {
         final analyzeMatch = result['analyze_match'] as Map<String, dynamic>?;
-        print('🔍 [ANALYZE_MATCH_SERVICE] analyze_match data: $analyzeMatch');
+        debugPrint('🔍 [ANALYZE_MATCH_SERVICE] analyze_match data: $analyzeMatch');
         if (analyzeMatch != null) {
-          print(
+          debugPrint(
               '🔍 [ANALYZE_MATCH_SERVICE] raw_analysis length: ${(analyzeMatch['raw_analysis'] as String?)?.length ?? 0}');
-          print(
+          debugPrint(
               '🔍 [ANALYZE_MATCH_SERVICE] company_name: ${analyzeMatch['company_name']}');
-          print(
+          debugPrint(
               '🔍 [ANALYZE_MATCH_SERVICE] has error: ${analyzeMatch.containsKey('error')}');
         }
       }
       if (result.containsKey('cv_comprehensive_analysis')) {
         final cvAnalysis = result['cv_comprehensive_analysis'] as String?;
-        print(
+        debugPrint(
             '   cv_comprehensive_analysis length: ${cvAnalysis?.length ?? 0}');
       }
       if (result.containsKey('jd_comprehensive_analysis')) {
         final jdAnalysis = result['jd_comprehensive_analysis'] as String?;
-        print(
+        debugPrint(
             '   jd_comprehensive_analysis length: ${jdAnalysis?.length ?? 0}');
       }
 
       stopwatch.stop();
 
-      print('📊 [SERVICE_DEBUG] About to parse SkillsAnalysisResult from JSON');
+      debugPrint('📊 [SERVICE_DEBUG] About to parse SkillsAnalysisResult from JSON');
       final analysisResult = SkillsAnalysisResult.fromJson(result);
-      print('📊 [SERVICE_DEBUG] Successfully parsed SkillsAnalysisResult');
-      print(
+      debugPrint('📊 [SERVICE_DEBUG] Successfully parsed SkillsAnalysisResult');
+      debugPrint(
           '   CV comprehensive analysis length: ${analysisResult.cvComprehensiveAnalysis?.length ?? 0}');
-      print(
+      debugPrint(
           '   JD comprehensive analysis length: ${analysisResult.jdComprehensiveAnalysis?.length ?? 0}');
-      print(
+      debugPrint(
           '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch in parsed result: ${analysisResult.analyzeMatch != null}');
       if (analysisResult.analyzeMatch != null) {
-        print(
+        debugPrint(
             '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch raw analysis length: ${analysisResult.analyzeMatch!.rawAnalysis.length}');
-        print(
+        debugPrint(
             '🔍 [ANALYZE_MATCH_SERVICE] analyzeMatch company name: ${analysisResult.analyzeMatch!.companyName}');
       }
 
@@ -185,17 +185,17 @@ class SkillsAnalysisService {
         preextractedCompanyName: analysisResult.preextractedCompanyName,
       );
 
-      print(
+      debugPrint(
           '🔍 [SERVICE_DEBUG] Final result analyzeMatch: ${finalResult.analyzeMatch != null}');
       if (finalResult.analyzeMatch != null) {
-        print(
+        debugPrint(
             '🔍 [SERVICE_DEBUG] Final result analyzeMatch raw analysis length: ${finalResult.analyzeMatch!.rawAnalysis.length}');
       }
 
       return finalResult;
     } catch (e, stackTrace) {
-      print('❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: $e');
-      print('❌ [SERVICE_ERROR] Stack trace: $stackTrace');
+      debugPrint('❌ [SERVICE_ERROR] Exception in performPreliminaryAnalysis: $e');
+      debugPrint('❌ [SERVICE_ERROR] Stack trace: $stackTrace');
 
       // Enhanced error handling for different error types
       if (e.toString().contains('404') || e.toString().contains('not found')) {
@@ -245,16 +245,16 @@ class SkillsAnalysisService {
       );
 
       if (result['cached'] == true) {
-        print('🔍 [CACHE_DEBUG] Found cached results');
-        print(
+        debugPrint('🔍 [CACHE_DEBUG] Found cached results');
+        debugPrint(
             '🔍 [CACHE_DEBUG] Cached data keys: ${result['data'].keys.toList()}');
-        print(
+        debugPrint(
             '🔍 [CACHE_DEBUG] Cached analyze_match present: ${result['data'].containsKey('analyze_match')}');
         final cachedResult = SkillsAnalysisResult.fromJson(result['data']);
-        print(
+        debugPrint(
             '🔍 [CACHE_DEBUG] Parsed cached analyzeMatch: ${cachedResult.analyzeMatch != null}');
         if (cachedResult.analyzeMatch != null) {
-          print(
+          debugPrint(
               '🔍 [CACHE_DEBUG] Cached analyzeMatch raw analysis length: ${cachedResult.analyzeMatch!.rawAnalysis.length}');
         }
         return cachedResult;
@@ -371,38 +371,38 @@ class SkillsAnalysisService {
   static Future<Map<String, dynamic>?> getCompleteAnalysisResults(
       String company) async {
     try {
-      print('📊 [POLLING] Checking for complete results for company: $company');
+      debugPrint('📊 [POLLING] Checking for complete results for company: $company');
 
       final result = await APIService.makeAuthenticatedCall(
         endpoint: '/analysis-results/$company',
         method: 'GET',
       );
       try {
-        print('📦 [POLLING] analysis-results keys: ${result.keys.toList()}');
+        debugPrint('📦 [POLLING] analysis-results keys: ${result.keys.toList()}');
       } catch (_) {}
 
       if (result['success'] == true && result['data'] != null) {
         final data = result['data'] as Map<String, dynamic>;
-        print('📊 [POLLING] data keys: ${data.keys.toList()}');
-        print(
+        debugPrint('📊 [POLLING] data keys: ${data.keys.toList()}');
+        debugPrint(
             '📊 [POLLING] Component analysis present: ${data['component_analysis'] != null}');
-        print('📊 [POLLING] ATS score present: ${data['ats_score'] != null}');
-        print(
+        debugPrint('📊 [POLLING] ATS score present: ${data['ats_score'] != null}');
+        debugPrint(
             '📊 [POLLING] AI recommendation present: ${data['ai_recommendation'] != null}');
-        print(
+        debugPrint(
             '📊 [POLLING] Tailored CV present: ${data['tailored_cv'] != null}');
         try {
           final ats = data['ats_score'] as Map<String, dynamic>?;
           if (ats != null) {
-            print('🧩 [POLLING] ats_score keys: ${ats.keys.toList()}');
-            print('🧩 [POLLING] final_ats_score: ${ats['final_ats_score']}');
+            debugPrint('🧩 [POLLING] ats_score keys: ${ats.keys.toList()}');
+            debugPrint('🧩 [POLLING] final_ats_score: ${ats['final_ats_score']}');
             final breakdown = ats['breakdown'] as Map<String, dynamic>?;
-            print('🧩 [POLLING] breakdown present: ${breakdown != null}');
+            debugPrint('🧩 [POLLING] breakdown present: ${breakdown != null}');
           }
           final ai = data['ai_recommendation'] as Map<String, dynamic>?;
           if (ai != null) {
-            print('🤖 [POLLING] ai_recommendation keys: ${ai.keys.toList()}');
-            print(
+            debugPrint('🤖 [POLLING] ai_recommendation keys: ${ai.keys.toList()}');
+            debugPrint(
                 '🤖 [POLLING] content length: ${(ai['content'] as String?)?.length ?? 0}');
           }
         } catch (_) {}
@@ -413,17 +413,17 @@ class SkillsAnalysisService {
             data['ai_recommendation'] != null;
 
         if (hasAny) {
-          print('✅ [POLLING] Results available (partial or complete)');
+          debugPrint('✅ [POLLING] Results available (partial or complete)');
           return data;
         }
 
-        print('⏳ [POLLING] Still waiting for results...');
+        debugPrint('⏳ [POLLING] Still waiting for results...');
         return null;
       }
 
       return null;
     } catch (e) {
-      print('❌ [POLLING] Error getting complete results: $e');
+      debugPrint('❌ [POLLING] Error getting complete results: $e');
       return null;
     }
   }
@@ -431,29 +431,29 @@ class SkillsAnalysisService {
   /// Wait for complete analysis results with polling
   static Future<Map<String, dynamic>?> waitForCompleteResults(String company,
       {int maxWaitTimeSeconds = 30}) async {
-    print('🔄 [POLLING] Starting polling for complete results...');
+    debugPrint('🔄 [POLLING] Starting polling for complete results...');
 
     const pollInterval = Duration(seconds: 2);
     final maxAttempts = maxWaitTimeSeconds ~/ 2;
 
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-      print('🔄 [POLLING] Attempt $attempt/$maxAttempts');
+      debugPrint('🔄 [POLLING] Attempt $attempt/$maxAttempts');
 
       final completeResults = await getCompleteAnalysisResults(company);
       if (completeResults != null) {
-        print(
+        debugPrint(
             '✅ [POLLING] Complete results obtained after ${attempt * 2} seconds');
         return completeResults;
       }
 
       if (attempt < maxAttempts) {
-        print(
+        debugPrint(
             '⏳ [POLLING] Waiting ${pollInterval.inSeconds}s before next attempt...');
         await Future.delayed(pollInterval);
       }
     }
 
-    print('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
+    debugPrint('⚠️ [POLLING] Polling timed out after $maxWaitTimeSeconds seconds');
     return null;
   }
 

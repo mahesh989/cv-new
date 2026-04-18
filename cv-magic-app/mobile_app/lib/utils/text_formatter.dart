@@ -370,7 +370,7 @@ class SkillsAnalysisFormattedText extends StatelessWidget {
 class SkillsAnalysisAdapters {
   static PreextractedComparisonResult parsePreextractedRaw(String raw) {
     // ignore: avoid_print
-    print('[SkillsAnalysisAdapters] parsePreextractedRaw length=${raw.length}');
+    debugPrint('[SkillsAnalysisAdapters] parsePreextractedRaw length=${raw.length}');
     return PreextractedParser.parse(raw);
   }
 }

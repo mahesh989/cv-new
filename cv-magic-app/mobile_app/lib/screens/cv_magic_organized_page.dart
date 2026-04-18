@@ -74,7 +74,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
     // Add listener to jdController to debug changes and trigger rebuilds
     jdController.addListener(() {
-      print(
+      debugPrint(
           '🔍 [DEBUG] CV Magic: jdController changed - length: ${jdController.text.length}');
 
       // Force a rebuild of the widget to update button state
@@ -252,24 +252,24 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
                           final isAnalyzing = _skillsController.isLoading;
 
                           // Comprehensive debug logging
-                          print('=== BUTTON STATE CHECK ===');
-                          print(
+                          debugPrint('=== BUTTON STATE CHECK ===');
+                          debugPrint(
                               '🔍 [DEBUG] Button state - canAnalyze: $canAnalyze, isAnalyzing: $isAnalyzing');
-                          print(
+                          debugPrint(
                               '🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
-                          print(
+                          debugPrint(
                               '🔍 [DEBUG] selectedCVFilename != null: ${selectedCVFilename != null}');
-                          print(
+                          debugPrint(
                               '🔍 [DEBUG] jdController.text.length: ${jdController.text.length}');
-                          print(
+                          debugPrint(
                               '🔍 [DEBUG] jdController.text.trim().length: ${jdController.text.trim().length}');
-                          print(
+                          debugPrint(
                               '🔍 [DEBUG] jdController.text.trim().isEmpty: ${jdController.text.trim().isEmpty}');
-                          print(
+                          debugPrint(
                               '🔍 [DEBUG] jdController.text.trim().isNotEmpty: ${jdController.text.trim().isNotEmpty}');
-                          print(
+                          debugPrint(
                               '🔍 [DEBUG] _skillsController.isLoading: ${_skillsController.isLoading}');
-                          print('=== END BUTTON CHECK ===');
+                          debugPrint('=== END BUTTON CHECK ===');
 
                           return ElevatedButton.icon(
                             onPressed: (canAnalyze && !isAnalyzing)
@@ -425,28 +425,28 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
 
   /// Analyze skills by comparing CV with Job Description
   Future<void> _analyzeSkills() async {
-    print('🔍 [DEBUG] _analyzeSkills called');
-    print('🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
-    print('🔍 [DEBUG] jdController.text: "${jdController.text}"');
-    print(
+    debugPrint('🔍 [DEBUG] _analyzeSkills called');
+    debugPrint('🔍 [DEBUG] selectedCVFilename: $selectedCVFilename');
+    debugPrint('🔍 [DEBUG] jdController.text: "${jdController.text}"');
+    debugPrint(
         '🔍 [DEBUG] jdController.text.trim().isEmpty: ${jdController.text.trim().isEmpty}');
-    print(
+    debugPrint(
         '🔍 [DEBUG] _skillsController.isLoading: ${_skillsController.isLoading}');
 
     // Prevent multiple simultaneous calls
     if (_skillsController.isLoading) {
-      print('⚠️ [DEBUG] Analysis already in progress, ignoring duplicate call');
+      debugPrint('⚠️ [DEBUG] Analysis already in progress, ignoring duplicate call');
       return;
     }
 
     if (selectedCVFilename == null || jdController.text.trim().isEmpty) {
-      print('❌ [DEBUG] Cannot analyze - missing CV or JD');
+      debugPrint('❌ [DEBUG] Cannot analyze - missing CV or JD');
       _showSnackBar('Please select a CV and enter a job description first',
           isError: true);
       return;
     }
 
-    print('✅ [DEBUG] Starting skills analysis...');
+    debugPrint('✅ [DEBUG] Starting skills analysis...');
     try {
       await _skillsController.performAnalysis(
         cvFilename: selectedCVFilename!,
@@ -461,7 +461,7 @@ class _CVMagicOrganizedPageState extends State<CVMagicOrganizedPage>
             isError: true);
       }
     } catch (e) {
-      print('❌ [DEBUG] Error in _analyzeSkills: $e');
+      debugPrint('❌ [DEBUG] Error in _analyzeSkills: $e');
       _showSnackBar('Error performing skills analysis: $e', isError: true);
     }
   }

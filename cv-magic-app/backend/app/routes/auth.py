@@ -192,6 +192,41 @@ async def login(credentials: LoginRequest, db: Session = Depends(get_database)):
     )
 
 
+@router.post("/firebase/sync")
+async def firebase_sync(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_database),
+):
+    """
+    Called by the Flutter app immediately after Firebase sign-in.
+
+    Verifies the Firebase ID token, auto-provisions a local user record on
+    first login, and returns the user profile.  Subsequent calls are
+    idempotent — they just return the existing profile.
+    """
+    from app.core.firebase_admin_sdk import verify_firebase_token
+    from app.core.dependencies import _get_or_create_firebase_user
+
+    decoded = verify_firebase_token(credentials.credentials)
+    if decoded is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Firebase ID token",
+        )
+
+    user_data = _get_or_create_firebase_user(decoded, db)
+    return {
+        "success": True,
+        "message": "Firebase user synced successfully",
+        "user": {
+            "id": user_data.id,
+            "email": user_data.email,
+            "name": user_data.name,
+            "is_active": user_data.is_active,
+        },
+    }
+
+
 @router.post("/logout")
 async def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """User logout endpoint"""

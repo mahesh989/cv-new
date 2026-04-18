@@ -340,12 +340,12 @@ class SkillExtractionService:
         # Log CV analysis
         if "raw_response" in cv_skills:
             cv_formatted = self.parser.format_for_logging(cv_skills, "CV")
-            print(cv_formatted)
+            logger.debug(cv_formatted)
         
         # Log JD analysis
         if "raw_response" in jd_skills:
             jd_formatted = self.parser.format_for_logging(jd_skills, "JD")
-            print(jd_formatted)
+            logger.debug(jd_formatted)
 
 
 # Global service instance

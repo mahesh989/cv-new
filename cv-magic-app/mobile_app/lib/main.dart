@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
+import 'firebase_options.dart';
 import 'services/ai_model_service.dart';
+import 'services/auth_service.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize AI Model Service with backend sync
+  // Initialise Firebase before everything else
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Initialise AI Model Service with backend sync
   await aiModelService.initializeWithBackend();
 
-  debugPrint('🚀 CV Agent Mobile App initialized');
+  debugPrint('🚀 CV Agent Mobile App initialised');
 
   runApp(const CVAgentApp());
 }
@@ -27,9 +35,7 @@ class CVAgentApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<AIModelService>.value(
-          value: aiModelService,
-        ),
+        ChangeNotifierProvider<AIModelService>.value(value: aiModelService),
       ],
       child: MaterialApp(
         title: 'CV Agent',
@@ -41,6 +47,10 @@ class CVAgentApp extends StatelessWidget {
   }
 }
 
+/// Listens to Firebase auth state changes and decides which screen to show.
+///
+/// This replaces the old SharedPreferences polling approach — Firebase tells
+/// us instantly when the user signs in or out, including on cold start.
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
@@ -49,128 +59,38 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
-  bool _isLoggedIn = false;
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _checkAuthStatus();
     _setupAIServiceNotifications();
   }
 
   void _setupAIServiceNotifications() {
-    // Set up callback for AI service authentication notifications
     aiModelService.setAuthRequiredCallback(() {
-      if (mounted && !_isLoggedIn) {
-        _showAuthInfoNotification();
+      if (mounted && authService.currentUser == null) {
+        _showSnackBar(
+          '🔐 AI features require login. Please sign in.',
+          Colors.orange,
+        );
       }
     });
   }
 
-  void _showAuthInfoNotification() {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text(
-          '🔐 AI features require login. Please sign in to access full functionality.',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: 'Got it',
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
-      ),
-    );
-  }
-
-  Future<void> _checkAuthStatus() async {
-    try {
-      // Simulate checking auth status
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Check if user was previously logged in
-      final prefs = await SharedPreferences.getInstance();
-      final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
-
-      setState(() {
-        _isLoggedIn = isLoggedIn;
-        _isLoading = false;
-      });
-
-      debugPrint(
-          '🔐 Auth status checked: ${isLoggedIn ? "Logged in" : "Logged out"}');
-    } catch (e) {
-      debugPrint('❌ Error checking auth status: $e');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _onLogin() {
-    setState(() {
-      _isLoggedIn = true;
-    });
-    debugPrint('✅ User logged in successfully');
-
-    // Sync AI model with backend after authentication
+  void _onSignedIn() {
     aiModelService.syncAfterAuth();
-
-    // Show success notification
-    _showLoginSuccessNotification();
+    _showSnackBar('🎉 Welcome! AI features are now available.', Colors.green);
   }
 
-  void _showLoginSuccessNotification() {
-    if (!mounted) return;
+  void _onSignedOut() {
+    _showSnackBar('👋 Logged out. Sign in to use AI features.', Colors.blue);
+  }
 
+  void _showSnackBar(String message, Color color) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text(
-          '🎉 Welcome! AI features are now available.',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  void _onLogout() async {
-    // Clear authentication data
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('is_logged_in');
-    await prefs.remove('auth_token');
-    await prefs.remove('user_email');
-    await prefs.remove('user_name');
-
-    setState(() {
-      _isLoggedIn = false;
-    });
-    debugPrint('👋 User logged out');
-
-    // Show logout notification
-    _showLogoutNotification();
-  }
-
-  void _showLogoutNotification() {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text(
-          '👋 Logged out. AI features require login to access.',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.blue,
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: color,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
       ),
@@ -179,71 +99,71 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: AppTheme.neutralGray50,
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // App logo
-                Icon(
-                  Icons.description_rounded,
-                  size: 80,
+    return StreamBuilder<User?>(
+      stream: authService.authStateChanges,
+      builder: (context, snapshot) {
+        // Waiting for Firebase to emit the first auth state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const _SplashScreen();
+        }
+
+        final user = snapshot.data;
+
+        if (user != null) {
+          // User is signed in
+          return HomeScreen(
+            onLogout: () async {
+              await authService.signOut();
+              _onSignedOut();
+            },
+          );
+        }
+
+        // User is not signed in
+        return AuthScreen(
+          onLogin: _onSignedIn,
+        );
+      },
+    );
+  }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.neutralGray50,
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.description_rounded, size: 80, color: Colors.white),
+              SizedBox(height: 24),
+              Text(
+                'CV Agent',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
-                SizedBox(height: 24),
-
-                // App title
-                Text(
-                  'CV Agent',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 8),
-
-                // Subtitle
-                Text(
-                  'AI-Powered Resume Optimization',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-                SizedBox(height: 48),
-
-                // Loading indicator
-                SpinKitFadingCircle(
-                  color: Colors.white,
-                  size: 50,
-                ),
-                SizedBox(height: 16),
-
-                Text(
-                  'Loading...',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'AI-Powered Resume Optimisation',
+                style: TextStyle(fontSize: 16, color: Colors.white70),
+              ),
+              SizedBox(height: 48),
+              SpinKitFadingCircle(color: Colors.white, size: 50),
+              SizedBox(height: 16),
+              Text('Loading…', style: TextStyle(color: Colors.white70, fontSize: 14)),
+            ],
           ),
         ),
-      );
-    }
-
-    if (!_isLoggedIn) {
-      return AuthScreen(onLogin: _onLogin);
-    }
-
-    return HomeScreen(onLogout: _onLogout);
+      ),
+    );
   }
 }

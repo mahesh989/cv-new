@@ -196,9 +196,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onTabTapped(int index) {
-    print('🔄 [HOME_SCREEN] Tab tapped: $index');
+    debugPrint('🔄 [HOME_SCREEN] Tab tapped: $index');
     if (index == 4) {
-      print('📊 [HOME_SCREEN] Job Tracking tab selected - triggering refresh');
+      debugPrint('📊 [HOME_SCREEN] Job Tracking tab selected - triggering refresh');
       // Trigger refresh of job tracking screen when tab is selected
       _jobTrackingKey.currentState?.refreshJobs();
     }

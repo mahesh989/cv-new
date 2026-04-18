@@ -92,27 +92,27 @@ TEXT TO ANALYZE:
         
         # Step 1: Try AI extraction if auth token is provided
         if auth_token:
-            print(f"🔍 Starting AI extraction with token: {auth_token[:20]}...")
+            logger.debug(f"🔍 Starting AI extraction with token: {auth_token[:20]}...")
             try:
                 ai_result = await self._try_ai_extraction(job_description, auth_token, user)
-                print(f"🔍 AI extraction result: {ai_result}")
+                logger.debug(f"🔍 AI extraction result: {ai_result}")
                 if ai_result and "error" not in ai_result:
-                    print(f"✅ AI extraction successful: {ai_result.get('company_name', 'Unknown')}")
+                    logger.debug(f"✅ AI extraction successful: {ai_result.get('company_name', 'Unknown')}")
                     return ai_result
                 else:
-                    print(f"⚠️ AI extraction failed: {ai_result.get('error', 'Unknown error')}")
+                    logger.debug(f"⚠️ AI extraction failed: {ai_result.get('error', 'Unknown error')}")
             except Exception as e:
-                print(f"⚠️ AI extraction exception: {str(e)}")
-                print(f"⚠️ Exception details: {repr(e)}")
+                logger.debug(f"⚠️ AI extraction exception: {str(e)}")
+                logger.debug(f"⚠️ Exception details: {repr(e)}")
         else:
-            print(f"⚠️ No auth token provided, skipping AI extraction")
+            logger.debug(f"⚠️ No auth token provided, skipping AI extraction")
         
         # Step 2: Fallback to rule-based extraction
-        print("⚠️ Using rule-based extraction as fallback")
+        logger.debug("⚠️ Using rule-based extraction as fallback")
         try:
             return self._extract_with_rules(job_description)
         except Exception as e:
-            print(f"Rule-based extraction failed: {str(e)}")
+            logger.debug(f"Rule-based extraction failed: {str(e)}")
             # Step 3: Return minimal default if everything fails
             return self._get_default_job_info()
     
@@ -125,10 +125,10 @@ TEXT TO ANALYZE:
             prompt = prompt_template.replace('{job_description}', job_description[:3000])
             
             # Use enhanced AI service with API key validation
-            from app.services.enhanced_ai_service import enhanced_ai_service
-            
+            from app.ai.ai_service import ai_service
+
             try:
-                ai_response = await enhanced_ai_service.generate_response_with_validation(
+                ai_response = await ai_service.generate_response_with_validation(
                     prompt=prompt,
                     user=user,
                     system_prompt="You are a precise job information extractor. CRITICAL: Return ONLY a valid JSON object that starts with { and ends with }. Do NOT wrap in code blocks. Do NOT add any text before or after the JSON. Use double quotes for all keys. If information is not available, use null. Your response must be parsable by json.loads() without modification.",
@@ -145,19 +145,19 @@ TEXT TO ANALYZE:
                 logger.debug("AI response length: %s", len(response_text))
                 logger.debug("Response type: %s", type(response_text))
                 logger.debug("Response preview: %s", str(response_text)[:200] + "...")
-                print(f"🤖 AI raw response (first 100 chars): '{response_text[:100]}'")
-                print(f"🤖 AI raw response (last 50 chars): '{response_text[-50:]}'")
-                print(f"🤖 Response length: {len(response_text)} characters")
-                print(f"🤖 Starts with: '{response_text[:10]}'")
+                logger.debug(f"🤖 AI raw response (first 100 chars): '{response_text[:100]}'")
+                logger.debug(f"🤖 AI raw response (last 50 chars): '{response_text[-50:]}'")
+                logger.debug(f"🤖 Response length: {len(response_text)} characters")
+                logger.debug(f"🤖 Starts with: '{response_text[:10]}'")
                 
                 # Parse the AI response as JSON
                 job_info = self._parse_ai_response(response_text)
                 if job_info and self._validate_ai_response(job_info):
                     validated_info = self._validate_job_info(job_info)
-                    print(f"✅ Successfully extracted and validated job info: {validated_info.get('company_name', 'Unknown')}")
+                    logger.debug(f"✅ Successfully extracted and validated job info: {validated_info.get('company_name', 'Unknown')}")
                     return validated_info
                 else:
-                    print(f"❌ AI response failed validation")
+                    logger.debug(f"❌ AI response failed validation")
                     return {"error": "AI response failed validation"}
                 
             except Exception as ai_error:
@@ -277,13 +277,13 @@ TEXT TO ANALYZE:
         has_required_field = any(field in data and data[field] and str(data[field]).strip() for field in required_fields)
         
         if not has_required_field:
-            print(f"⚠️ AI response missing required fields: {list(data.keys())}")
+            logger.debug(f"⚠️ AI response missing required fields: {list(data.keys())}")
             return False
         
         # Validate field types
         for field in ['company_name', 'job_title', 'location', 'experience_required', 'seniority_level', 'industry']:
             if field in data and data[field] is not None and not isinstance(data[field], str):
-                print(f"⚠️ Field '{field}' has invalid type: {type(data[field])}")
+                logger.debug(f"⚠️ Field '{field}' has invalid type: {type(data[field])}")
                 return False
         
         return True
@@ -314,8 +314,8 @@ TEXT TO ANALYZE:
                 continue
         
         logger.warning("All JSON parsing attempts failed")
-        print(f"❌ Could not parse AI response with any method")
-        print(f"❌ Full response: {repr(response)}")
+        logger.debug(f"❌ Could not parse AI response with any method")
+        logger.debug(f"❌ Full response: {repr(response)}")
         return None
     
     def _attempt_direct_json_parse(self, response: str) -> Optional[Dict[str, Any]]:

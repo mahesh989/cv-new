@@ -61,10 +61,10 @@ class SkillsExtractor {
       }
     }
     
-    print('🔧 [SKILLS_EXTRACTOR] Extracted from comprehensive analysis:');
-    print('   Technical Skills: ${technicalSkills.length} - ${technicalSkills.take(3).join(", ")}${technicalSkills.length > 3 ? "..." : ""}');
-    print('   Soft Skills: ${softSkills.length} - ${softSkills.take(3).join(", ")}${softSkills.length > 3 ? "..." : ""}');
-    print('   Domain Keywords: ${domainKeywords.length} - ${domainKeywords.take(3).join(", ")}${domainKeywords.length > 3 ? "..." : ""}');
+    debugPrint('🔧 [SKILLS_EXTRACTOR] Extracted from comprehensive analysis:');
+    debugPrint('   Technical Skills: ${technicalSkills.length} - ${technicalSkills.take(3).join(", ")}${technicalSkills.length > 3 ? "..." : ""}');
+    debugPrint('   Soft Skills: ${softSkills.length} - ${softSkills.take(3).join(", ")}${softSkills.length > 3 ? "..." : ""}');
+    debugPrint('   Domain Keywords: ${domainKeywords.length} - ${domainKeywords.take(3).join(", ")}${domainKeywords.length > 3 ? "..." : ""}');
     
     return SkillsData(
       technicalSkills: technicalSkills,
@@ -126,10 +126,10 @@ class SkillsExtractor {
     final cleanedSoft = softSkills.toSet().toList();
     final cleanedDomain = domainKeywords.toSet().toList();
     
-    print('🔧 [SKILLS_EXTRACTOR] Advanced extraction completed:');
-    print('   Technical Skills: ${cleanedTechnical.length}');
-    print('   Soft Skills: ${cleanedSoft.length}');
-    print('   Domain Keywords: ${cleanedDomain.length}');
+    debugPrint('🔧 [SKILLS_EXTRACTOR] Advanced extraction completed:');
+    debugPrint('   Technical Skills: ${cleanedTechnical.length}');
+    debugPrint('   Soft Skills: ${cleanedSoft.length}');
+    debugPrint('   Domain Keywords: ${cleanedDomain.length}');
     
     return SkillsData(
       technicalSkills: cleanedTechnical,

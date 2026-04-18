@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/saved_jobs_service.dart';
-import '../widgets/job_tracking/saved_jobs_table_final.dart';
+import '../widgets/job_tracking/saved_jobs_table.dart';
 import '../core/theme/app_theme.dart';
 
 class JobTrackingScreen extends StatefulWidget {

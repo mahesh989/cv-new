@@ -556,21 +556,21 @@ if __name__ == "__main__":
         # Example: Match CV against Australia for UNHCR JD
         try:
             result = await match_and_save_cv_jd("Australia_for_UNHCR")
-            print("✅ CV-JD matching completed!")
-            print(f"Company: {result.company_name}")
-            print(f"Matched Required: {len(result.matched_required_keywords)}")
-            print(f"Matched Preferred: {len(result.matched_preferred_keywords)}")
-            print(f"Missed Required: {len(result.missed_required_keywords)}")
-            print(f"Missed Preferred: {len(result.missed_preferred_keywords)}")
+            logger.debug("✅ CV-JD matching completed!")
+            logger.debug(f"Company: {result.company_name}")
+            logger.debug(f"Matched Required: {len(result.matched_required_keywords)}")
+            logger.debug(f"Matched Preferred: {len(result.matched_preferred_keywords)}")
+            logger.debug(f"Missed Required: {len(result.missed_required_keywords)}")
+            logger.debug(f"Missed Preferred: {len(result.missed_preferred_keywords)}")
             
             # Show match percentages
             percentages = result.get_match_percentage()
-            print(f"\n📊 Match Percentages:")
-            print(f"Required: {percentages['required_match_percentage']:.1f}%")
-            print(f"Preferred: {percentages['preferred_match_percentage']:.1f}%")
-            print(f"Overall: {percentages['overall_match_percentage']:.1f}%")
+            logger.debug(f"\n📊 Match Percentages:")
+            logger.debug(f"Required: {percentages['required_match_percentage']:.1f}%")
+            logger.debug(f"Preferred: {percentages['preferred_match_percentage']:.1f}%")
+            logger.debug(f"Overall: {percentages['overall_match_percentage']:.1f}%")
             
         except Exception as e:
-            print(f"❌ Error: {e}")
+            logger.debug(f"❌ Error: {e}")
     
     asyncio.run(main())

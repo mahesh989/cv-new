@@ -152,13 +152,13 @@ class ContextAwareAnalysisController extends ChangeNotifier {
     _isRerun = isRerun;
 
     try {
-      print('🚀 [CONTEXT_AWARE_CONTROLLER] Starting context-aware analysis');
-      print('   JD URL: $jdUrl');
-      print('   Company: $company');
-      print('   Is Rerun: $isRerun');
+      debugPrint('🚀 [CONTEXT_AWARE_CONTROLLER] Starting context-aware analysis');
+      debugPrint('   JD URL: $jdUrl');
+      debugPrint('   Company: $company');
+      debugPrint('   Is Rerun: $isRerun');
 
       // First, get CV context for user feedback
-      print('🔍 [CONTEXT_AWARE_CONTROLLER] Getting CV context...');
+      debugPrint('🔍 [CONTEXT_AWARE_CONTROLLER] Getting CV context...');
       _cvContext = await ContextAwareAnalysisService.getCVContext(
         company: company,
         isRerun: isRerun,
@@ -177,7 +177,7 @@ class ContextAwareAnalysisController extends ChangeNotifier {
       }
 
       // Perform the analysis
-      print('🔍 [CONTEXT_AWARE_CONTROLLER] Performing analysis...');
+      debugPrint('🔍 [CONTEXT_AWARE_CONTROLLER] Performing analysis...');
       _result = await ContextAwareAnalysisService.performContextAwareAnalysis(
         jdUrl: jdUrl,
         company: company,

@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'ai_model_service.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
+import 'auth_service.dart';
 
 class APIService {
   static const String baseUrl = AppConfig.baseUrl;
@@ -12,11 +13,10 @@ class APIService {
   // Get the current selected model from AI service
   static String? get currentModelId => aiModelService.currentModelId;
 
-  // Get auth token from shared preferences
+  // Get Firebase ID token for the current user
   static Future<String?> _getAuthToken() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('auth_token');
+      return await authService.getIdToken();
     } catch (e) {
       return null;
     }
@@ -32,9 +32,9 @@ class APIService {
     final token = await _getAuthToken();
     final url = Uri.parse('$baseUrl$apiPrefix$endpoint');
 
-    print('🔍 [API_SERVICE] Making authenticated call to: $endpoint');
-    print('🔍 [API_SERVICE] Token available: ${token != null}');
-    print(
+    debugPrint('🔍 [API_SERVICE] Making authenticated call to: $endpoint');
+    debugPrint('🔍 [API_SERVICE] Token available: ${token != null}');
+    debugPrint(
       '🔍 [API_SERVICE] Token preview: ${token?.substring(0, 20) ?? "null"}...',
     );
 
@@ -73,8 +73,8 @@ class APIService {
         throw Exception('Unsupported HTTP method: $method');
     }
 
-    print('🔍 [API_SERVICE] Response status: ${response.statusCode}');
-    print(
+    debugPrint('🔍 [API_SERVICE] Response status: ${response.statusCode}');
+    debugPrint(
       '🔍 [API_SERVICE] Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...',
     );
 

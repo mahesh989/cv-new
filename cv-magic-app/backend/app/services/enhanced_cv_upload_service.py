@@ -384,7 +384,7 @@ class EnhancedCVUploadService:
         user: Any = None
     ) -> Dict[str, Any]:
         """Parse text content into structured CV format"""
-        print(f"🔍 [DEBUG] _parse_to_structured_format called with user: {user is not None}")
+        logger.debug(f"🔍 [DEBUG] _parse_to_structured_format called with user: {user is not None}")
         try:
             # Initialize AI service for this user if not already done
             logger.info(f"🔍 [CV_UPLOAD] Checking user parameter: {user is not None}")

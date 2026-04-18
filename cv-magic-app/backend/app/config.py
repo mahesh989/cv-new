@@ -1,9 +1,12 @@
+import logging
 """
 Application configuration settings
 """
 import os
 import json
 from typing import List
+
+logger = logging.getLogger(__name__)
 
 try:
     from pydantic_settings import BaseSettings
@@ -48,18 +51,30 @@ class Settings(BaseSettings):
     BYPASS_AUTH: bool = False  # For testing without auth
     
     # CORS Settings
+    # Note: "*" wildcard cannot be used alongside allow_credentials=True (CORS spec).
+    # All permitted origins must be listed explicitly.
+    # Override at runtime via the ALLOWED_ORIGINS env var (JSON array string).
     ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000", 
+        # Local development
+        "http://localhost:3000",
         "http://localhost:3001",
+        "http://localhost:8000",
         "http://localhost:8080",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
         "http://127.0.0.1:8080",
-        "http://localhost:53350",  # Flutter web ports
-        "http://localhost:58155",  # Flutter web ports
-        "http://127.0.0.1:53350",  # Flutter web ports
-        "http://127.0.0.1:58155",  # Flutter web ports
-        "*"  # Allow all origins for development
+        # Flutter web dev ports
+        "http://localhost:53350",
+        "http://localhost:58155",
+        "http://127.0.0.1:53350",
+        "http://127.0.0.1:58155",
+        # Production — Vercel deployments
+        "https://vercel-deploy.vercel.app",
+        "https://vercel-deploy-2fuzu768c-maheshwor-tiwaris-projects.vercel.app",
+        "https://*-maheshwor-tiwaris-projects.vercel.app",
+        # Production — server IPs
+        "http://13.210.217.204:3000",
+        "http://13.210.217.204:8080",
     ]
     ALLOWED_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
     ALLOWED_HEADERS: List[str] = [
@@ -140,4 +155,4 @@ settings = Settings()
 # Override for development
 if settings.DEVELOPMENT_MODE:
     settings.JWT_EXPIRATION_MINUTES = 480  # 8 hours for development
-    print(f"🔧 Development mode: JWT expiration set to {settings.JWT_EXPIRATION_MINUTES} minutes")
+    logger.debug(f"🔧 Development mode: JWT expiration set to {settings.JWT_EXPIRATION_MINUTES} minutes")

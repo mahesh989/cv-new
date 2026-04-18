@@ -491,7 +491,7 @@ class SkillsDisplayWidget extends StatelessWidget {
                   }
 
                   // ignore: avoid_print
-                  print(
+                  debugPrint(
                       '🎨 [AI_WIDGET] Building with isLoading: false, hasRecommendation: true, isEmpty: ${ai.isEmpty}');
                   debugPrint(
                       '✅ [SKILLS_DISPLAY] Building AIRecommendationsWidget with content length: ${ai.content.length}');

@@ -67,7 +67,6 @@ class UnifiedLatestFileSelector:
         """
         try:
             import logging
-            logger = logging.getLogger(__name__)
             
             logger.info(f"🔍 [UNIFIED_SELECTOR] Checking JD first-time usage:")
             logger.info(f"- jd_url: {jd_url}")
@@ -93,7 +92,6 @@ class UnifiedLatestFileSelector:
             
         except Exception as e:
             import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"⚠️ [UNIFIED_SELECTOR] Error checking JD usage, defaulting to first-time: {e}")
             # Default to first-time usage on error to be safe
             return True
@@ -113,34 +111,34 @@ class UnifiedLatestFileSelector:
         
         # Use JD URL for company uniqueness if provided, otherwise use company name
         effective_company = self._get_effective_company_name(company, jd_url)
-        print(f"🔍 Searching for CV for company: {company} (effective: {effective_company})")
+        logger.debug(f"🔍 Searching for CV for company: {company} (effective: {effective_company})")
         
         # Check if this is first-time JD usage
         is_first_time = self._is_jd_first_time_usage(jd_url, jd_text)
         
         if is_first_time:
-            print("🆕 First-time JD usage detected - using original CV")
+            logger.debug("🆕 First-time JD usage detected - using original CV")
             return self._get_original_cv_for_company(effective_company)
         else:
-            print("🔄 Subsequent JD usage - using latest CV (original or tailored)")
+            logger.debug("🔄 Subsequent JD usage - using latest CV (original or tailored)")
             return self.get_latest_cv_across_all(effective_company)
     
     def _get_original_cv_for_company(self, company: str) -> FileContext:
         """Get original CV for a company"""
-        print(f"🔍 Searching for original CV for company: {company}")
+        logger.debug(f"🔍 Searching for original CV for company: {company}")
         
         candidates = self._find_original_cv_files(company)
-        print(f"📁 Found {len(candidates)} original CV candidates")
+        logger.debug(f"📁 Found {len(candidates)} original CV candidates")
         
         if not candidates:
-            print("❌ No original CV candidates found")
+            logger.debug("❌ No original CV candidates found")
             raise FileNotFoundError(f"No original CV found for company: {company}")
         
         # Select the latest original CV
         candidates.sort(key=lambda c: c[2], reverse=True)
         json_path, txt_path, timestamp = candidates[0]
         
-        print(f"✅ Selected original CV: {json_path}")
+        logger.debug(f"✅ Selected original CV: {json_path}")
         return FileContext(
             json_path=json_path,
             txt_path=txt_path,
@@ -167,17 +165,17 @@ class UnifiedLatestFileSelector:
         if not self.user_email:
             raise ValueError("user_email must be provided for file selection operations")
             
-        print(f"🔍 Searching for tailored CV ONLY for company: {company}")
+        logger.debug(f"🔍 Searching for tailored CV ONLY for company: {company}")
         
         candidates = self._find_tailored_cv_files(company)
-        print(f"📁 Found {len(candidates)} tailored CV candidates")
+        logger.debug(f"📁 Found {len(candidates)} tailored CV candidates")
         
         if not candidates:
-            print("❌ No tailored CV candidates found")
+            logger.debug("❌ No tailored CV candidates found")
             raise FileNotFoundError(f"No tailored CV found for company: {company}. Please generate a tailored CV first.")
         
         latest_cv = self._select_best_cv_candidate(candidates, company)
-        print(f"✅ Selected tailored CV: {latest_cv.file_type} - {latest_cv.json_path}")
+        logger.debug(f"✅ Selected tailored CV: {latest_cv.file_type} - {latest_cv.json_path}")
         return latest_cv
 
     def _get_tailored_cv_for_company(self, company: str) -> FileContext:
@@ -193,7 +191,7 @@ class UnifiedLatestFileSelector:
         if not self.user_email:
             raise ValueError("user_email must be provided for file selection operations")
             
-        print(f"🔍 Searching for latest CV across tailored+original for company: {company}")
+        logger.debug(f"🔍 Searching for latest CV across tailored+original for company: {company}")
         candidates: List[Tuple[Path, Optional[Path], str, str]] = []  # (json, txt, ts, type)
 
         # Tailored candidates (per-user cvs/tailored folder)
@@ -217,7 +215,7 @@ class UnifiedLatestFileSelector:
                     mtime = 0
                 debug_rows.append(f"type={ftype}, ts={ts}, mtime={mtime}, json={json_path}")
             if debug_rows:
-                print("🧭 [UNIFIED] CV candidates before sort:\n  - " + "\n  - ".join(debug_rows))
+                logger.debug("🧭 [UNIFIED] CV candidates before sort:\n  - " + "\n  - ".join(debug_rows))
         except Exception as _e:
             # best-effort logging only
             pass
@@ -232,7 +230,7 @@ class UnifiedLatestFileSelector:
             return (ts, mtime)
         candidates.sort(key=_candidate_key, reverse=True)
         json_path, txt_path, ts, ftype = candidates[0]
-        print(f"📄 [UNIFIED] Latest CV resolved → type={ftype}, ts={ts}, json={json_path}, txt={txt_path}")
+        logger.debug(f"📄 [UNIFIED] Latest CV resolved → type={ftype}, ts={ts}, json={json_path}, txt={txt_path}")
         return FileContext(
             json_path=json_path,
             txt_path=txt_path,
@@ -247,7 +245,7 @@ class UnifiedLatestFileSelector:
         Get the latest analysis file for a company
         analysis_type: "skills_analysis", "cv_jd_match_results", "job_info"
         """
-        print(f"🔍 Searching for latest {analysis_type} for company: {company}")
+        logger.debug(f"🔍 Searching for latest {analysis_type} for company: {company}")
 
         search_locations = [
             self.base_path / company,
@@ -260,11 +258,11 @@ class UnifiedLatestFileSelector:
                 all_candidates.extend(self._find_analysis_files(location, company, analysis_type))
 
         if not all_candidates:
-            print(f"❌ No {analysis_type} files found for {company}")
+            logger.debug(f"❌ No {analysis_type} files found for {company}")
             return FileContext(exists=False, company=company)
 
         latest_analysis = self._select_best_analysis_candidate(all_candidates, company, analysis_type)
-        print(f"✅ Selected latest {analysis_type}: {latest_analysis.json_path}")
+        logger.debug(f"✅ Selected latest {analysis_type}: {latest_analysis.json_path}")
         return latest_analysis
 
     def get_cv_content_for_analysis(self, company: str) -> str:
@@ -277,7 +275,7 @@ class UnifiedLatestFileSelector:
                         if content.strip():
                             return content
                 except Exception as e:
-                    print(f"⚠️ Error reading {file_path}: {e}")
+                    logger.debug(f"⚠️ Error reading {file_path}: {e}")
                     continue
         raise FileNotFoundError(f"No readable tailored CV content found for company: {company}")
 
@@ -287,18 +285,18 @@ class UnifiedLatestFileSelector:
             raise ValueError("user_email must be provided for file selection operations")
             
         cv_context = self.get_latest_cv_across_all(company)
-        print(f"📄 [UNIFIED] Reading CV content from: txt={cv_context.txt_path}, json={cv_context.json_path}")
+        logger.debug(f"📄 [UNIFIED] Reading CV content from: txt={cv_context.txt_path}, json={cv_context.json_path}")
         for file_path in [cv_context.txt_path, cv_context.json_path]:
             if file_path and file_path.exists():
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
                         preview = content[:400].replace('\n', ' ') if content else ''
-                        print(f"🧪 [UNIFIED] CV content length={len(content) if content else 0}, preview='{preview}'")
+                        logger.debug(f"🧪 [UNIFIED] CV content length={len(content) if content else 0}, preview='{preview}'")
                         if content.strip():
                             return content
                 except Exception as e:
-                    print(f"⚠️ Error reading {file_path}: {e}")
+                    logger.debug(f"⚠️ Error reading {file_path}: {e}")
                     continue
         raise FileNotFoundError(f"No readable CV content found (tailored/original) for company: {company}")
 
@@ -456,7 +454,7 @@ class UnifiedLatestFileSelector:
                     url_hash = hashlib.md5(jd_url.encode()).hexdigest()[:8]
                     effective_company = f"{company}_for_{url_hash}"
             except Exception as e:
-                print(f"⚠️ Error parsing JD URL {jd_url}: {e}, using company name")
+                logger.debug(f"⚠️ Error parsing JD URL {jd_url}: {e}, using company name")
                 effective_company = company
         else:
             effective_company = company

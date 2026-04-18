@@ -202,7 +202,7 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
                     ? 'Re-analyze Skills'
                     : 'Analyze Skills';
 
-            print(
+            debugPrint(
                 '🔍 Button state: canAnalyze=$canAnalyze, isLoading=${controller.isLoading}, hasResults=${controller.hasResults}');
 
             return SizedBox(
@@ -258,10 +258,10 @@ class _SkillsAnalysisScreenState extends State<SkillsAnalysisScreen> {
         _jdController.text.trim().length >= 10;
     final canAnalyze = hasCv && hasJd;
 
-    print(
+    debugPrint(
         '🔍 Button check: hasCv=$hasCv, hasJd=$hasJd, canAnalyze=$canAnalyze');
-    print('   CV: $_selectedCvFilename');
-    print('   JD length: ${_jdController.text.trim().length}');
+    debugPrint('   CV: $_selectedCvFilename');
+    debugPrint('   JD length: ${_jdController.text.trim().length}');
 
     return canAnalyze;
   }

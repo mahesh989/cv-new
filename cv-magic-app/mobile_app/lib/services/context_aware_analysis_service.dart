@@ -11,14 +11,14 @@ class ContextAwareAnalysisService {
     required bool isRerun,
     bool includeTailoring = true,
   }) async {
-    print('=== CONTEXT-AWARE ANALYSIS SERVICE CALLED ===');
-    print('JD URL: $jdUrl');
-    print('Company: $company');
-    print('Is Rerun: $isRerun');
-    print('Include Tailoring: $includeTailoring');
+    debugPrint('=== CONTEXT-AWARE ANALYSIS SERVICE CALLED ===');
+    debugPrint('JD URL: $jdUrl');
+    debugPrint('Company: $company');
+    debugPrint('Is Rerun: $isRerun');
+    debugPrint('Include Tailoring: $includeTailoring');
 
     try {
-      print('🚀 [CONTEXT_AWARE_SERVICE] Starting context-aware analysis');
+      debugPrint('🚀 [CONTEXT_AWARE_SERVICE] Starting context-aware analysis');
 
       final stopwatch = Stopwatch()..start();
 
@@ -33,10 +33,10 @@ class ContextAwareAnalysisService {
         },
       );
 
-      print('📡 [CONTEXT_AWARE_SERVICE] Received response from API');
-      print(
+      debugPrint('📡 [CONTEXT_AWARE_SERVICE] Received response from API');
+      debugPrint(
           '📡 [CONTEXT_AWARE_SERVICE] Raw result type: ${result.runtimeType}');
-      print(
+      debugPrint(
           '📡 [CONTEXT_AWARE_SERVICE] Raw result keys: ${result.keys.toList()}');
 
       // Check for tailored CV not found error
@@ -46,10 +46,10 @@ class ContextAwareAnalysisService {
 
       stopwatch.stop();
 
-      print(
+      debugPrint(
           '📊 [CONTEXT_AWARE_SERVICE] About to parse ContextAwareAnalysisResult from JSON');
       final analysisResult = ContextAwareAnalysisResult.fromJson(result);
-      print(
+      debugPrint(
           '📊 [CONTEXT_AWARE_SERVICE] Successfully parsed ContextAwareAnalysisResult');
 
       // Return with execution duration
@@ -64,9 +64,9 @@ class ContextAwareAnalysisService {
 
       return finalResult;
     } catch (e, stackTrace) {
-      print(
+      debugPrint(
           '❌ [CONTEXT_AWARE_SERVICE] Exception in performContextAwareAnalysis: $e');
-      print('❌ [CONTEXT_AWARE_SERVICE] Stack trace: $stackTrace');
+      debugPrint('❌ [CONTEXT_AWARE_SERVICE] Stack trace: $stackTrace');
 
       // Enhanced error handling for different error types
       if (e.toString().contains('404') || e.toString().contains('not found')) {
@@ -101,28 +101,28 @@ class ContextAwareAnalysisService {
     required String company,
     required bool isRerun,
   }) async {
-    print('=== CV CONTEXT SERVICE CALLED ===');
-    print('Company: $company');
-    print('Is Rerun: $isRerun');
+    debugPrint('=== CV CONTEXT SERVICE CALLED ===');
+    debugPrint('Company: $company');
+    debugPrint('Is Rerun: $isRerun');
 
     try {
-      print('🔍 [CV_CONTEXT_SERVICE] Getting CV context information');
+      debugPrint('🔍 [CV_CONTEXT_SERVICE] Getting CV context information');
 
       final result = await APIService.makeAuthenticatedCall(
         endpoint: '/cv-context/$company?is_rerun=$isRerun',
         method: 'GET',
       );
 
-      print('📡 [CV_CONTEXT_SERVICE] Received response from API');
-      print('📡 [CV_CONTEXT_SERVICE] Raw result keys: ${result.keys.toList()}');
+      debugPrint('📡 [CV_CONTEXT_SERVICE] Received response from API');
+      debugPrint('📡 [CV_CONTEXT_SERVICE] Raw result keys: ${result.keys.toList()}');
 
       final contextResult = CVContextResult.fromJson(result);
-      print('📊 [CV_CONTEXT_SERVICE] Successfully parsed CVContextResult');
+      debugPrint('📊 [CV_CONTEXT_SERVICE] Successfully parsed CVContextResult');
 
       return contextResult;
     } catch (e, stackTrace) {
-      print('❌ [CV_CONTEXT_SERVICE] Exception in getCVContext: $e');
-      print('❌ [CV_CONTEXT_SERVICE] Stack trace: $stackTrace');
+      debugPrint('❌ [CV_CONTEXT_SERVICE] Exception in getCVContext: $e');
+      debugPrint('❌ [CV_CONTEXT_SERVICE] Stack trace: $stackTrace');
 
       return CVContextResult.error('Failed to get CV context: $e');
     }

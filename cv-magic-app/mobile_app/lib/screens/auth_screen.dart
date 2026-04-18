@@ -1,669 +1,419 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../core/theme/app_theme.dart';
-import '../config/config.dart';
+import '../services/auth_service.dart';
 
+/// Login / Registration screen backed by Firebase Auth.
+///
+/// Supports:
+///   • Email + password sign-in and registration
+///   • Google Sign-In (OAuth)
+///   • Password reset via email
 class AuthScreen extends StatefulWidget {
-  final VoidCallback onLogin;
+  final VoidCallback? onLogin;
 
-  const AuthScreen({super.key, required this.onLogin});
+  const AuthScreen({super.key, this.onLogin});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
-  late TabController _tabController;
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-
-  // Controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
 
-  // States
+  bool _isLogin = true;
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+
+  late AnimationController _animController;
+  late Animation<double> _fadeAnim;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-
-    _animationController = AnimationController(
-      duration: AppTheme.normalAnimation,
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppTheme.smoothCurve,
-    ));
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: AppTheme.smoothCurve,
-    ));
-
-    _animationController.forward();
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeIn),
+    );
+    _animController.forward();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
-    _animationController.dispose();
+    _animController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleEmailAuth() async {
-    print('🔵 [FRONTEND] Starting authentication process');
+  // ── Auth actions ───────────────────────────────────────────────────────────
+
+  Future<void> _submitEmailForm() async {
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
-    // Determine if this is login or registration based on tab index
-    final isLogin = _tabController.index == 0;
-    final endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-    print(
-        '🔵 [FRONTEND] Tab index: ${_tabController.index}, isLogin: $isLogin, endpoint: $endpoint');
-
     try {
-      // Get trimmed values
-      final email = _emailController.text.trim();
-      final password = _passwordController.text.trim();
-      final name = _nameController.text.trim();
-
-      print('🔵 [FRONTEND] Raw form values:');
-      print('  - Email: "${_emailController.text}" -> trimmed: "$email"');
-      print(
-          '  - Password: "${_passwordController.text}" -> trimmed: "$password" (length: ${password.length})');
-      print('  - Name: "${_nameController.text}" -> trimmed: "$name"');
-
-      // Validate required fields with early return
-      if (email.isEmpty) {
-        print('🔴 [FRONTEND] Validation failed: Email is empty');
-        setState(() => _isLoading = false);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                '❌ Email is required to create your account',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-        return;
-      }
-
-      if (password.isEmpty) {
-        print('🔴 [FRONTEND] Validation failed: Password is empty');
-        setState(() => _isLoading = false);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                '❌ Password is required for security',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-        return;
-      }
-
-      if (!isLogin && name.isEmpty) {
-        print(
-            '🔴 [FRONTEND] Validation failed: Name is empty for registration');
-        setState(() => _isLoading = false);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                '❌ Name is required to personalize your account',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-        return;
-      }
-
-      // Additional validation for password length
-      if (password.length < 6) {
-        print(
-            '🔴 [FRONTEND] Validation failed: Password too short (${password.length} characters)');
-        setState(() => _isLoading = false);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                '❌ Password must be at least 6 characters for security',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-        return;
-      }
-
-      // Basic email format validation
-      if (!email.contains('@') || !email.contains('.')) {
-        print('🔴 [FRONTEND] Validation failed: Invalid email format');
-        setState(() => _isLoading = false);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                '❌ Please enter a valid email address (e.g., user@example.com)',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-        return;
-      }
-
-      print('✅ [FRONTEND] All validations passed');
-
-      // Prepare request body based on endpoint
-      Map<String, dynamic> requestBody;
-      if (isLogin) {
-        requestBody = {
-          'email': email,
-          'password': password,
-        };
-        print('🔵 [FRONTEND] Login request body: $requestBody');
+      if (_isLogin) {
+        await authService.signInWithEmail(
+          _emailController.text,
+          _passwordController.text,
+        );
       } else {
-        // Registration requires name field
-        requestBody = {
-          'email': email,
-          'password': password,
-          'name': name,
-        };
-        print('🔵 [FRONTEND] Registration request body: $requestBody');
-      }
-
-      // Call backend endpoint
-      final url = '${AppConfig.baseUrl}$endpoint';
-      print('🔵 [FRONTEND] Making HTTP request to: $url');
-      print(
-          '🔵 [FRONTEND] Request headers: {\'Content-Type\': \'application/json\'}');
-      print('🔵 [FRONTEND] Request body: ${jsonEncode(requestBody)}');
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
-      );
-
-      print('🔵 [FRONTEND] HTTP response received:');
-      print('  - Status code: ${response.statusCode}');
-      print('  - Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        print('✅ [FRONTEND] HTTP 200 - Success response');
-        final data = jsonDecode(response.body);
-        print('🔵 [FRONTEND] Parsed response data: $data');
-
-        if (isLogin) {
-          print('🔵 [FRONTEND] Processing login response');
-          // Login response includes tokens
-          final accessToken = data['access_token'];
-          print(
-              '🔵 [FRONTEND] Access token received: ${accessToken.substring(0, 20)}...');
-
-          // Save authentication data
-          print(
-              '🔵 [FRONTEND] Saving authentication data to SharedPreferences');
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('is_logged_in', true);
-          await prefs.setString('auth_token', accessToken);
-          await prefs.setString('user_email', email);
-          await prefs.setString('user_name', name);
-          print('✅ [FRONTEND] Authentication data saved successfully');
-
-          if (mounted) {
-            print('🔵 [FRONTEND] Showing success message and calling onLogin');
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  '🎉 Welcome back! AI features are now available.',
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: AppTheme.primaryTeal,
-                behavior: SnackBarBehavior.floating,
-                duration: Duration(seconds: 3),
-              ),
-            );
-
-            widget.onLogin();
-          }
-        } else {
-          print('🔵 [FRONTEND] Processing registration response');
-          // Registration response - no tokens, just success message
-          if (mounted) {
-            print(
-                '🔵 [FRONTEND] Showing registration success message and switching to login tab');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text(
-                  '🎉 Account created successfully! Please sign in to access AI features.',
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: AppTheme.primaryTeal,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 4),
-                action: SnackBarAction(
-                  label: 'Sign In',
-                  textColor: Colors.white,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
-                ),
-              ),
-            );
-
-            // Switch to login tab after successful registration
-            _tabController.animateTo(0);
-          }
-        }
-      } else {
-        print('🔴 [FRONTEND] HTTP Error - Status code: ${response.statusCode}');
-        // Handle specific error responses
-        String errorMessage = '${isLogin ? "Login" : "Registration"} failed';
-        try {
-          final errorData = jsonDecode(response.body);
-          print('🔵 [FRONTEND] Error response data: $errorData');
-          if (errorData['detail'] != null) {
-            errorMessage = errorData['detail'].toString();
-            print('🔵 [FRONTEND] Extracted error message: $errorMessage');
-          }
-        } catch (e) {
-          // If we can't parse the error, use the status code
-          errorMessage =
-              '${isLogin ? "Login" : "Registration"} failed: ${response.statusCode}';
-          print('🔴 [FRONTEND] Could not parse error response: $e');
-        }
-        print('🔴 [FRONTEND] Throwing exception with message: $errorMessage');
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      print('🔴 [FRONTEND] Exception caught: $e');
-      if (mounted) {
-        print('🔵 [FRONTEND] Showing error message to user');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '❌ ${isLogin ? "Login" : "Registration"} failed: $e',
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-            action: SnackBarAction(
-              label: 'Try Again',
-              textColor: Colors.white,
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              },
-            ),
-          ),
+        await authService.registerWithEmail(
+          _emailController.text,
+          _passwordController.text,
+          _nameController.text,
         );
       }
+      widget.onLogin?.call();
+    } on FirebaseAuthException catch (e) {
+      _showError(_friendlyError(e));
+    } catch (e) {
+      _showError('Unexpected error: $e');
     } finally {
-      print(
-          '🔵 [FRONTEND] Authentication process completed, setting loading to false');
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isGoogleLoading = true);
-
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isLoading = true);
     try {
-      // Call backend login endpoint with Google user credentials
-      final response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': 'demo@gmail.com',
-          'password': 'google123',
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final accessToken = data['access_token'];
-
-        // Save authentication data
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_logged_in', true);
-        await prefs.setString('auth_token', accessToken);
-        await prefs.setString('user_email', 'demo@gmail.com');
-        await prefs.setString('user_name', 'Demo User');
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('🎉 Welcome! Signed in with Google'),
-              backgroundColor: AppTheme.primaryTeal,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-
-          widget.onLogin();
-        }
-      } else {
-        throw Exception('Google sign-in failed: ${response.statusCode}');
-      }
+      final cred = await authService.signInWithGoogle();
+      if (cred != null) widget.onLogin?.call();
+    } on FirebaseAuthException catch (e) {
+      _showError(_friendlyError(e));
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Google sign-in failed: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      _showError('Google sign-in failed: $e');
     } finally {
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
+
+  Future<void> _sendPasswordReset() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showError('Enter your email address first.');
+      return;
+    }
+    try {
+      await authService.sendPasswordResetEmail(email);
+      _showSnackBar('Reset email sent to $email', Colors.green);
+    } on FirebaseAuthException catch (e) {
+      _showError(_friendlyError(e));
+    }
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  String _friendlyError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'No account found for that email.';
+      case 'wrong-password':
+        return 'Incorrect password. Try again or reset it.';
+      case 'email-already-in-use':
+        return 'An account already exists. Sign in instead.';
+      case 'weak-password':
+        return 'Password must be at least 6 characters.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'too-many-requests':
+        return 'Too many attempts. Wait a moment and try again.';
+      case 'network-request-failed':
+        return 'Network error. Check your connection.';
+      case 'popup-closed-by-user':
+      case 'canceled':
+        return 'Sign-in cancelled.';
+      default:
+        return e.message ?? 'Authentication failed. Please try again.';
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red[700],
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 4),
+    ));
+  }
+
+  void _showSnackBar(String message, Color color) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message, style: const TextStyle(color: Colors.white)),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenHeight < 700;
-
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.neutralGray50,
-              Color(0xFFE0F2F1),
-              Color(0xFFE3F2FD),
-            ],
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
         child: SafeArea(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.only(
-                      left: 24.0,
-                      right: 24.0,
-                      top: isSmallScreen ? 16.0 : 32.0,
-                      bottom: keyboardHeight > 0 ? 16.0 : 32.0,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        child: AppTheme.createCard(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildHeader(isSmallScreen, keyboardHeight),
-                              _buildTabBar(),
-                              const SizedBox(height: 24),
-                              _buildTabContent(isSmallScreen),
-                              const SizedBox(height: 16),
-                              _buildDivider(),
-                              const SizedBox(height: 16),
-                              _buildGoogleSignInButton(),
-                              const SizedBox(height: 16),
-                              _buildDemoNotice(isSmallScreen),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 32),
+                    _buildCard(),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(bool isSmallScreen, double keyboardHeight) {
-    if (isSmallScreen && keyboardHeight > 0) return const SizedBox.shrink();
-
+  Widget _buildHeader() {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.description_rounded,
-            size: isSmallScreen ? 36 : 48,
-            color: Colors.white,
-          ),
+          child: const Icon(Icons.description_rounded,
+              size: 56, color: Colors.white),
         ),
         const SizedBox(height: 16),
-        Text(
+        const Text(
           'CV Agent',
-          style: AppTheme.displaySmall.copyWith(
-            color: AppTheme.primaryTeal,
-            fontWeight: FontWeight.w800,
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 1,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Text(
-          'AI-Powered Resume Optimization',
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.neutralGray600,
-          ),
-          textAlign: TextAlign.center,
+          'AI-Powered Resume Optimisation',
+          style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8)),
         ),
-        const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildCard() {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.neutralGray100,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildToggle(),
+          const SizedBox(height: 24),
+          _buildForm(),
+          if (_isLogin) _buildForgotPassword(),
+          const SizedBox(height: 8),
+          _buildPrimaryButton(),
+          const SizedBox(height: 20),
+          _buildDivider(),
+          const SizedBox(height: 20),
+          _buildGoogleButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
       ),
-      child: TabBar(
-        controller: _tabController,
-        indicator: BoxDecoration(
-          gradient: AppTheme.primaryGradient,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        labelColor: Colors.white,
-        unselectedLabelColor: AppTheme.neutralGray600,
-        labelStyle: AppTheme.bodyMedium.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: AppTheme.bodyMedium,
-        tabs: const [
-          Tab(text: 'Sign In'),
-          Tab(text: 'Sign Up'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabContent(bool isSmallScreen) {
-    return SizedBox(
-      height: isSmallScreen ? 280 : 320,
-      child: TabBarView(
-        controller: _tabController,
+      child: Row(
         children: [
-          _buildSignInForm(),
-          _buildSignUpForm(),
+          _tab('Sign In', _isLogin, () => setState(() => _isLogin = true)),
+          _tab('Register', !_isLogin, () => setState(() => _isLogin = false)),
         ],
       ),
     );
   }
 
-  Widget _buildSignInForm() {
+  Widget _tab(String label, bool active, VoidCallback onTap) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: active ? AppTheme.primaryTeal : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: active ? Colors.white : Colors.grey[600],
+              fontWeight: active ? FontWeight.bold : FontWeight.normal,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm() {
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          TextFormField(
-            controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'Email *',
-              prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Enter your email address',
+          if (!_isLogin) ...[
+            _field(
+              controller: _nameController,
+              label: 'Full Name',
+              icon: Icons.person_outline,
+              validator: (v) =>
+                  (v == null || v.trim().length < 2) ? 'Enter your name' : null,
             ),
+            const SizedBox(height: 16),
+          ],
+          _field(
+            controller: _emailController,
+            label: 'Email',
+            icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return 'Enter your email';
+              if (!v.contains('@')) return 'Enter a valid email';
+              return null;
+            },
           ),
           const SizedBox(height: 16),
-          TextFormField(
+          _field(
             controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Password *',
-              prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Enter your password',
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
-              ),
-            ),
+            label: 'Password',
+            icon: Icons.lock_outline,
             obscureText: _obscurePassword,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: AppTheme.createGradientButton(
-              text: 'Sign In',
-              onPressed: _handleEmailAuth,
-              isLoading: _isLoading,
-              icon: Icons.login_rounded,
+            suffixIcon: IconButton(
+              icon: Icon(_obscurePassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined),
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
             ),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🔗 Password reset email sent (demo)'),
-                  backgroundColor: AppTheme.primaryTeal,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Enter your password';
+              if (!_isLogin && v.length < 6) {
+                return 'Password must be at least 6 characters';
+              }
+              return null;
             },
-            child: Text(
-              'Forgot Password?',
-              style: AppTheme.labelMedium.copyWith(
-                color: AppTheme.primaryTeal,
-              ),
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSignUpForm() {
-    return Form(
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Full Name *',
-              prefixIcon: Icon(Icons.person_outlined),
-              hintText: 'Enter your full name',
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'Email *',
-              prefixIcon: Icon(Icons.email_outlined),
-              hintText: 'Enter your email address',
-            ),
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Password *',
-              prefixIcon: const Icon(Icons.lock_outlined),
-              hintText: 'Enter your password (min 6 characters)',
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+  Widget _field({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: AppTheme.primaryTeal),
+        suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: Colors.grey[50],
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.primaryTeal, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForgotPassword() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: _isLoading ? null : _sendPasswordReset,
+        child: Text('Forgot password?',
+            style: TextStyle(color: AppTheme.primaryTeal, fontSize: 13)),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton() {
+    return SizedBox(
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _submitEmailForm,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primaryTeal,
+          foregroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 2,
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
+              )
+            : Text(
+                _isLogin ? 'Sign In' : 'Create Account',
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            ),
-            obscureText: _obscurePassword,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: AppTheme.createGradientButton(
-              text: 'Create Account',
-              onPressed: _handleEmailAuth,
-              isLoading: _isLoading,
-              icon: Icons.person_add_rounded,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -671,80 +421,48 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   Widget _buildDivider() {
     return Row(
       children: [
-        const Expanded(child: Divider(color: AppTheme.neutralGray300)),
+        const Expanded(child: Divider()),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'OR',
-            style: AppTheme.labelMedium.copyWith(
-              color: AppTheme.neutralGray600,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text('or',
+              style: TextStyle(color: Colors.grey[500], fontSize: 13)),
         ),
-        const Expanded(child: Divider(color: AppTheme.neutralGray300)),
+        const Expanded(child: Divider()),
       ],
     );
   }
 
-  Widget _buildGoogleSignInButton() {
+  Widget _buildGoogleButton() {
     return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
-        icon: _isGoogleLoading
-            ? const SpinKitFadingCircle(
-                color: AppTheme.primaryTeal,
-                size: 20,
-              )
-            : const Icon(
-                Icons.g_mobiledata,
-                size: 24,
-                color: Colors.red,
-              ),
-        label: Text(
-          _isGoogleLoading ? 'Signing in...' : 'Continue with Google',
-          style: AppTheme.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      height: 52,
+      child: OutlinedButton(
+        onPressed: _isLoading ? null : _signInWithGoogle,
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          side: const BorderSide(color: AppTheme.neutralGray300),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          side: BorderSide(color: Colors.grey[300]!),
+          backgroundColor: Colors.white,
         ),
-      ),
-    );
-  }
-
-  Widget _buildDemoNotice(bool isSmallScreen) {
-    return Container(
-      padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryTeal.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.primaryTeal.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            color: AppTheme.primaryTeal,
-            size: isSmallScreen ? 18 : 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '✨ Demo Mode: Click Sign In to login instantly (no credentials required)',
-              style: AppTheme.bodySmall.copyWith(
-                color: AppTheme.primaryTeal,
-                fontWeight: FontWeight.w500,
-              ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'G',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4285F4)),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Text(
+              'Continue with Google',
+              style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
       ),
     );
   }

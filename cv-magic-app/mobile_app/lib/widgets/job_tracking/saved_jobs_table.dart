@@ -96,10 +96,10 @@ class _SavedJobsTableState extends State<SavedJobsTable>
 
   @override
   Widget build(BuildContext context) {
-    print(
+    debugPrint(
         '📊 [SAVED_JOBS_TABLE] Building table with ${widget.jobs.length} jobs');
     for (var job in widget.jobs) {
-      print(
+      debugPrint(
           '📋 [SAVED_JOBS_TABLE] Job: ${job['company_name']} - ${job['job_title']}');
     }
 

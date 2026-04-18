@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from typing import Dict, Any, Optional
@@ -5,6 +6,8 @@ from typing import Dict, Any, Optional
 from ..services.job_extraction_service import JobExtractionService
 from ..core.dependencies import get_current_user
 from ..models.auth import UserData
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/job-analysis", tags=["Job Analysis"])
 
@@ -54,7 +57,7 @@ async def extract_and_save_job(request: Request, current_user: UserData = Depend
             
             if "error" in result:
                 # Log the error but don't crash the API
-                print(f"Job analysis error: {result['error']}")
+                logger.debug(f"Job analysis error: {result['error']}")
                 raise HTTPException(status_code=400, detail=f"Job analysis failed: {result['error']}")
             
             return JSONResponse(content=result)
@@ -62,7 +65,7 @@ async def extract_and_save_job(request: Request, current_user: UserData = Depend
         except HTTPException:
             raise
         except Exception as e:
-            print(f"Unexpected error in job analysis: {str(e)}")
+            logger.debug(f"Unexpected error in job analysis: {str(e)}")
             raise HTTPException(status_code=500, detail="Job analysis service temporarily unavailable")
         
     except HTTPException:

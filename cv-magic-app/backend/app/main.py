@@ -101,23 +101,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Add CORS middleware — origins are managed in app/config.py (Settings.ALLOWED_ORIGINS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://vercel-deploy-2fuzu768c-maheshwor-tiwaris-projects.vercel.app",
-        "https://vercel-deploy.vercel.app",
-        "https://*-maheshwor-tiwaris-projects.vercel.app",  # Allow all Vercel preview deployments
-        "http://localhost:8000",
-        "http://localhost:3000",
-        "http://localhost:8080",
-        "http://13.210.217.204:3000",
-        "http://13.210.217.204:8080",
-    ],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=settings.ALLOWED_METHODS,
     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-    expose_headers=["*"],  # Expose all headers
+    expose_headers=["*"],
 )
 
 # Add authentication debugging middleware
@@ -334,8 +325,8 @@ async def quick_login():
     access_token = create_access_token(user_dict)
     refresh_token = create_refresh_token(user.id)
     
-    print(f"🔑 Quick login created for user: {user.email}")
-    print(f"🔑 Token preview: {access_token[:30]}...")
+    logger.debug(f"🔑 Quick login created for user: {user.email}")
+    logger.debug(f"🔑 Token preview: {access_token[:30]}...")
     
     return TokenResponse(
         access_token=access_token,

@@ -50,7 +50,7 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
       // Add listener for player states
       _controller.addListener(() {
         if (_controller.value.errorCode != 0) {
-          print('🎬 YouTube player error: ${_controller.value.errorCode}');
+          debugPrint('🎬 YouTube player error: ${_controller.value.errorCode}');
           setState(() {
             _isLoading = false;
             _hasError = true;
@@ -66,7 +66,7 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
       });
 
     } catch (e) {
-      print('🎬 YouTube player initialization error: $e');
+      debugPrint('🎬 YouTube player initialization error: $e');
       setState(() {
         _isLoading = false;
         _hasError = true;

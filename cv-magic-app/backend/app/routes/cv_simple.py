@@ -1,786 +1,431 @@
 """
-Simplified CV processing routes with improved structure
+CV processing routes — upload, list, read, delete, and tailored-CV management.
 """
-import logging
-import os
-import shutil
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Request, Depends
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
-from ..services.cv_processor import cv_processor
-from ..services.enhanced_cv_upload_service import EnhancedCVUploadService
-from ..core.dependencies import get_current_user
-from ..models.auth import UserData
+from app.core.dependencies import get_current_user
+from app.models.auth import UserData
+from app.services.cv_processor import cv_processor
+from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
+from app.unified_latest_file_selector import get_selector_for_user
+from app.utils.user_path_utils import get_user_base_path, get_user_uploads_path
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cv", tags=["CV Processing"])
 
-# Constants - now handled by EnhancedCVUploadService
-ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt'}
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
-# Helper function to get user-specific upload directory
-def get_user_upload_dir(user_email: str) -> Path:
-    """Get user-specific upload directory"""
-    from app.utils.user_path_utils import get_user_uploads_path
-    upload_dir = get_user_uploads_path(user_email)
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    return upload_dir
 
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+def _uploads_dir(user_email: str) -> Path:
+    """Return (and create) the user-specific upload directory."""
+    path = get_user_uploads_path(user_email)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _tailored_timestamp(filepath: Path):
+    """Extract sortable datetime from tailored-CV filename, falling back to mtime."""
+    try:
+        ts = filepath.name.split("_tailored_cv_")[1].replace(".txt", "")
+        return datetime.strptime(ts, "%Y%m%d_%H%M%S")
+    except Exception:
+        return filepath.stat().st_mtime
+
+
+# ── Routes ───────────────────────────────────────────────────────────────────
 
 @router.post("/upload")
 async def upload_cv(
-    cv: UploadFile = File(...), 
-    current_user: UserData = Depends(get_current_user)
+    cv: UploadFile = File(...),
+    current_user: UserData = Depends(get_current_user),
 ):
-    """Upload a CV file only (no structured processing) - user-specific path isolated"""
-    
+    """Upload a CV file (no structured processing)."""
     if not cv.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
-    
     try:
-        logger.info(f"Uploading {cv.filename} for user: {current_user.email}")
-        
-        # Create service instance with current user's email - user-specific path isolated
-        upload_service = EnhancedCVUploadService(user_email=current_user.email)
-        result = await upload_service.upload_cv_only(cv_file=cv)
-        
-        logger.info(f"✅ {cv.filename} uploaded successfully for user: {current_user.email}")
-        
+        svc = EnhancedCVUploadService(user_email=current_user.email)
+        result = await svc.upload_cv_only(cv_file=cv)
+        logger.info(f"CV uploaded: {cv.filename} for {current_user.email}")
         return JSONResponse(content={
-            "message": "CV uploaded successfully. Select from list to process into structured format.",
-            "filename": result['filename'],
-            "size": result['file_size'],
-            "type": result['file_type'],
-            "upload_path": result['upload_path'],
+            "message": "CV uploaded successfully.",
+            "filename": result["filename"],
+            "size": result["file_size"],
+            "type": result["file_type"],
+            "upload_path": result["upload_path"],
             "structured_processing": False,
-            "user_email": current_user.email
+            "user_email": current_user.email,
         })
-        
     except Exception as e:
-        logger.error(f"Error uploading CV for user {current_user.email}: {str(e)}")
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Error uploading CV: {str(e)}"
-        )
-
-
-from app.utils.user_path_utils import get_user_uploads_path
+        logger.error(f"Error uploading CV for {current_user.email}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error uploading CV: {e}")
 
 
 @router.get("/list")
 async def list_cvs(current_user: UserData = Depends(get_current_user)):
-    """List all uploaded CVs with metadata"""
-    
+    """List all uploaded CVs with metadata."""
     try:
-        cvs = []
         upload_dir = get_user_uploads_path(current_user.email)
+        cvs = []
         if upload_dir.exists():
-            for file_path in upload_dir.iterdir():
-                if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
+            for fp in upload_dir.iterdir():
+                if fp.is_file() and fp.suffix.lower() in ALLOWED_EXTENSIONS:
                     try:
-                        stat = file_path.stat()
-                        cvs.append({
-                            "filename": file_path.name,
-                            "size": stat.st_size,
-                            "type": file_path.suffix[1:].upper(),
-                            "uploaded_date": stat.st_mtime
-                        })
+                        st = fp.stat()
+                        cvs.append({"filename": fp.name, "size": st.st_size,
+                                    "type": fp.suffix[1:].upper(), "uploaded_date": st.st_mtime})
                     except Exception as e:
-                        logger.warning(f"Error reading file metadata for {file_path.name}: {e}")
-                        continue
-        
-        # Sort by filename for consistency
-        cvs.sort(key=lambda x: x['filename'])
-        
-        logger.info(f"Listed {len(cvs)} CV files")
-        
-        return JSONResponse(content={
-            "uploaded_cvs": [cv["filename"] for cv in cvs],  # Keep compatibility
-            "cv_details": cvs,
-            "total_count": len(cvs)
-        })
-        
+                        logger.warning(f"Error reading metadata for {fp.name}: {e}")
+        cvs.sort(key=lambda x: x["filename"])
+        return JSONResponse(content={"uploaded_cvs": [c["filename"] for c in cvs],
+                                     "cv_details": cvs, "total_count": len(cvs)})
     except Exception as e:
-        logger.error(f"Error listing CVs: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error listing CVs: {str(e)}")
+        logger.error(f"Error listing CVs: {e}")
+        raise HTTPException(status_code=500, detail=f"Error listing CVs: {e}")
 
 
 @router.get("/content/{filename}")
 async def get_cv_content(
-    filename: str, 
+    filename: str,
     auto_structure: bool = False,
-    current_user: UserData = Depends(get_current_user)
+    current_user: UserData = Depends(get_current_user),
 ):
-    """Get CV content with optional structured processing - user-specific path isolated"""
-    
+    """Get CV content with optional structured processing."""
     try:
-        upload_dir = get_user_upload_dir(current_user.email)
-        file_path = upload_dir / filename
-        
+        file_path = _uploads_dir(current_user.email) / filename
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
-        
-        # Extract text using improved processor (fast operation)
+
         result = cv_processor.extract_text_from_file(file_path)
-        
-        if not result['success']:
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Failed to extract text: {result['error']}"
-            )
-        
-        # Get file metadata
-        stat = file_path.stat()
-        
-        logger.info(f"CV content extracted: {filename} ({len(result['text'])} characters)")
-        
-        response_content = {
+        if not result["success"]:
+            raise HTTPException(status_code=500, detail=f"Failed to extract text: {result['error']}")
+
+        st = file_path.stat()
+        response: dict = {
             "filename": filename,
-            "content": result['text'],
-            "metadata": result.get('metadata', {}),
-            "file_info": {
-                "size": stat.st_size,
-                "type": file_path.suffix[1:].upper(),
-                "uploaded_date": stat.st_mtime
-            },
-            "extraction_info": {
-                "method": result.get('method', 'unknown'),
-                "character_count": len(result['text']),
-                "word_count": len(result['text'].split())
-            }
+            "content": result["text"],
+            "metadata": result.get("metadata", {}),
+            "file_info": {"size": st.st_size, "type": file_path.suffix[1:].upper(), "uploaded_date": st.st_mtime},
+            "extraction_info": {"method": result.get("method", "unknown"),
+                                "character_count": len(result["text"]),
+                                "word_count": len(result["text"].split())},
         }
-        
-        # Only do structured processing if explicitly requested
+
         if auto_structure:
             try:
-                logger.info(f"Auto-processing {filename} into structured format...")
-                # Create user-specific enhanced CV upload service
-                from app.services.enhanced_cv_upload_service import EnhancedCVUploadService
-                user_enhanced_cv_upload_service = EnhancedCVUploadService(user_email=current_user.email)
-                processing_result = await user_enhanced_cv_upload_service.process_existing_cv(
-                    filename=filename
-                )
-                
-                if processing_result['success']:
-                    structured_cv = user_enhanced_cv_upload_service.load_structured_cv()
-                    
-                    response_content["processing_info"] = {
+                svc = EnhancedCVUploadService(user_email=current_user.email)
+                proc = await svc.process_existing_cv(filename=filename)
+                if proc["success"]:
+                    response["processing_info"] = {
                         "structured_processing": True,
-                        "structured_cv_path": processing_result['structured_cv_path'],
-                        "validation_report": processing_result['validation_report'],
-                        "sections_found": processing_result['sections_found'],
-                        "unknown_sections": processing_result.get('unknown_sections', []),
-                        "processing_timestamp": processing_result['processing_timestamp']
+                        "structured_cv_path": proc["structured_cv_path"],
+                        "validation_report": proc["validation_report"],
+                        "sections_found": proc["sections_found"],
+                        "unknown_sections": proc.get("unknown_sections", []),
+                        "processing_timestamp": proc["processing_timestamp"],
                     }
-                    
-                    if structured_cv:
-                        response_content["structured_cv"] = structured_cv
-                        
-                    logger.info(f"✅ {filename} processed into structured format successfully")
+                    structured = svc.load_structured_cv()
+                    if structured:
+                        response["structured_cv"] = structured
                 else:
-                    response_content["processing_info"] = {
-                        "structured_processing": False,
-                        "error": "Failed to process into structured format"
-                    }
-                    
+                    response["processing_info"] = {"structured_processing": False, "error": "Processing failed"}
             except Exception as e:
-                logger.error(f"Error during structured processing {filename}: {str(e)}")
-                response_content["processing_info"] = {
-                    "structured_processing": False,
-                    "error": str(e)
-                }
-        
-        return JSONResponse(content=response_content)
-        
+                logger.error(f"Error during structured processing of {filename}: {e}")
+                response["processing_info"] = {"structured_processing": False, "error": str(e)}
+
+        return JSONResponse(content=response)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error extracting CV content: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error extracting CV content: {str(e)}")
+        logger.error(f"Error extracting CV content: {e}")
+        raise HTTPException(status_code=500, detail=f"Error extracting CV content: {e}")
 
 
 @router.post("/process-structured/{filename}")
 async def process_cv_structured(
     filename: str,
-    current_user: UserData = Depends(get_current_user)
+    current_user: UserData = Depends(get_current_user),
 ):
-    """Process CV into structured format and save as original_cv.json - user-specific path isolated"""
-    
+    """Process a CV into structured format (original_cv.json)."""
     try:
-        upload_dir = get_user_upload_dir(current_user.email)
-        file_path = upload_dir / filename
-        
+        file_path = _uploads_dir(current_user.email) / filename
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
-        
-        logger.info(f"Processing {filename} into structured format...")
-        
-        # Process into structured format
-        processing_result = await enhanced_cv_upload_service.process_existing_cv(
-            filename=filename
-        )
-        
-        if processing_result['success']:
-            logger.info(f"✅ {filename} processed and saved as original_cv.json")
-            
+
+        svc = EnhancedCVUploadService(user_email=current_user.email)
+        proc = await svc.process_existing_cv(filename=filename)
+        if proc["success"]:
             return JSONResponse(content={
-                "success": True,
-                "message": "CV processed into structured format successfully",
-                "filename": filename,
-                "structured_cv_path": processing_result['structured_cv_path'],
-                "sections_found": processing_result['sections_found'],
-                "validation_report": processing_result['validation_report'],
-                "processing_timestamp": processing_result['processing_timestamp']
+                "success": True, "message": "CV processed into structured format successfully",
+                "filename": filename, "structured_cv_path": proc["structured_cv_path"],
+                "sections_found": proc["sections_found"], "validation_report": proc["validation_report"],
+                "processing_timestamp": proc["processing_timestamp"],
             })
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to process CV into structured format"
-            )
-            
+        raise HTTPException(status_code=500, detail="Failed to process CV into structured format")
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error processing structured CV: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing structured CV: {str(e)}")
+        logger.error(f"Error processing structured CV: {e}")
+        raise HTTPException(status_code=500, detail=f"Error processing structured CV: {e}")
 
 
 @router.get("/preview/{filename}")
 async def get_cv_preview(
-    filename: str, 
+    filename: str,
     max_length: int = 500,
-    current_user: UserData = Depends(get_current_user)
+    current_user: UserData = Depends(get_current_user),
 ):
-    """Get CV content preview with customizable length - user-specific path isolated"""
-    
+    """Get a CV content preview."""
     try:
-        upload_dir = get_user_upload_dir(current_user.email)
-        file_path = upload_dir / filename
-        
+        file_path = _uploads_dir(current_user.email) / filename
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
-        
-        # Extract text
+
         result = cv_processor.extract_text_from_file(file_path)
-        
-        if not result['success']:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to extract text: {result['error']}"
-            )
-        
-        # Generate preview
-        full_text = result['text']
+        if not result["success"]:
+            raise HTTPException(status_code=500, detail=f"Failed to extract text: {result['error']}")
+
+        full_text = result["text"]
         preview = cv_processor.get_text_preview(full_text, max_length)
-        
-        # Extract basic info
-        basic_info = cv_processor.extract_basic_info(full_text)
-        
-        logger.info(f"CV preview generated: {filename} ({len(preview)} characters)")
-        
         return JSONResponse(content={
-            "filename": filename,
-            "preview": preview,
-            "full_length": len(full_text),
-            "preview_length": len(preview),
-            "is_truncated": len(full_text) > max_length,
-            "basic_info": basic_info,
-            "extraction_method": result.get('method', 'unknown')
+            "filename": filename, "preview": preview, "full_length": len(full_text),
+            "preview_length": len(preview), "is_truncated": len(full_text) > max_length,
+            "basic_info": cv_processor.extract_basic_info(full_text),
+            "extraction_method": result.get("method", "unknown"),
         })
-        
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error generating CV preview: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating CV preview: {str(e)}")
+        logger.error(f"Error generating CV preview: {e}")
+        raise HTTPException(status_code=500, detail=f"Error generating CV preview: {e}")
 
 
 @router.get("/latest-cv-content")
 async def get_latest_cv_content(current_user: UserData = Depends(get_current_user)):
-    """
-    Get the latest CV content (from either original or tailored folder) for frontend preview
-    This is a general endpoint that doesn't require a company name
-    """
+    """Get the latest CV content (original or tailored) for frontend preview."""
     try:
-        logger.info("📄 Latest CV content request")
-        
-        # Use unified CV selector to get the latest CV for this user (no company context)
-        from app.unified_latest_file_selector import get_selector_for_user
         selector = get_selector_for_user(current_user.email)
-        # Use company-agnostic latest across all by scanning original folder when no company is provided
-        # Fallback: if no tailored found, original base file will be considered
         cv_ctx = selector.get_latest_cv_across_all("__any__")
-        
+
         if not cv_ctx or not cv_ctx.txt_path:
-            raise HTTPException(
-                status_code=404,
-                detail="No CV text file found in cvs folders"
-            )
-        
-        latest_txt_file = Path(str(cv_ctx.txt_path))
-        
-        # Check if it exists
-        if not latest_txt_file.exists():
-            raise HTTPException(
-                status_code=404,
-                detail=f"CV text file not found: {latest_txt_file}"
-            )
-        
-        # Read the text content
-        with open(latest_txt_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        logger.info(f"✅ Served latest CV content: {latest_txt_file.name} from {cv_ctx.file_type} folder ({len(content)} characters)")
-        
+            raise HTTPException(status_code=404, detail="No CV text file found")
+
+        txt_file = Path(str(cv_ctx.txt_path))
+        if not txt_file.exists():
+            raise HTTPException(status_code=404, detail=f"CV text file not found: {txt_file}")
+
+        content = txt_file.read_text(encoding="utf-8")
         return JSONResponse(content={
-            "success": True,
-            "content": content,
-            "filename": latest_txt_file.name,
+            "success": True, "content": content, "filename": txt_file.name,
             "source_folder": cv_ctx.file_type,
-            "metadata": {
-                "file_size": len(content),
-                "last_modified": latest_txt_file.stat().st_mtime,
-                "dynamic_selection": True
-            }
+            "metadata": {"file_size": len(content), "last_modified": txt_file.stat().st_mtime,
+                         "dynamic_selection": True},
         })
-        
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ Failed to get latest CV content: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get latest CV content: {str(e)}"
-        )
+        logger.error(f"Failed to get latest CV content: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get latest CV content: {e}")
 
 
 @router.get("/read-tailored-cv/{company_name}")
-async def read_tailored_cv(company_name: str, current_user: UserData = Depends(get_current_user)):
-    """
-    Read tailored CV content for frontend preview - STRICT MODE
-    
-    This endpoint serves the most recent tailored CV text content for a company.
-    It ONLY looks in the tailored folder and raises an error if no tailored CV is found.
-    NO FALLBACK to original CV.
-    """
+async def read_tailored_cv(
+    company_name: str,
+    current_user: UserData = Depends(get_current_user),
+):
+    """Read tailored CV content for frontend preview (strict — no fallback to original)."""
     try:
-        logger.info(f"📄 Tailored CV content request for {company_name}")
-        
-        # Use unified file selector (user-scoped) to get the latest TAILORED CV ONLY
-        from app.unified_latest_file_selector import get_selector_for_user
         selector = get_selector_for_user(current_user.email)
-        
-        # Use the strict method that only looks in tailored folder
-        cv_context = selector.get_latest_tailored_cv_only(company_name)
-        
-        if not cv_context.exists or not cv_context.txt_path:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No tailored CV found for company: {company_name}. Please generate a tailored CV first."
-            )
-        
-        latest_txt_file = cv_context.txt_path
-        
-        # Check if it exists
-        if not latest_txt_file.exists():
-            raise HTTPException(
-                status_code=404,
-                detail=f"Tailored CV text file not found: {latest_txt_file}"
-            )
-        
-        # Read the text content
-        with open(latest_txt_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        logger.info(f"✅ Served TAILORED CV content: {latest_txt_file.name} from {cv_context.file_type} folder ({len(content)} characters)")
-        
+        ctx = selector.get_latest_tailored_cv_only(company_name)
+
+        if not ctx.exists or not ctx.txt_path:
+            raise HTTPException(status_code=404,
+                                detail=f"No tailored CV found for '{company_name}'. Generate one first.")
+
+        txt_file = ctx.txt_path
+        if not txt_file.exists():
+            raise HTTPException(status_code=404, detail=f"Tailored CV file not found: {txt_file}")
+
+        content = txt_file.read_text(encoding="utf-8")
         return JSONResponse(content={
-            "success": True,
-            "content": content,
-            "filename": latest_txt_file.name,
-            "company": company_name,
-            "source_folder": cv_context.file_type,
-            "metadata": {
-                "file_size": len(content),
-                "last_modified": latest_txt_file.stat().st_mtime,
-                "timestamp": cv_context.timestamp,
-                "dynamic_selection": True
-            }
+            "success": True, "content": content, "filename": txt_file.name, "company": company_name,
+            "source_folder": ctx.file_type,
+            "metadata": {"file_size": len(content), "last_modified": txt_file.stat().st_mtime,
+                         "timestamp": ctx.timestamp, "dynamic_selection": True},
         })
-        
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ Failed to get tailored CV content: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get tailored CV content: {str(e)}"
-        )
+        logger.error(f"Failed to get tailored CV content: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get tailored CV content: {e}")
 
 
 @router.get("/latest-tailored-cv")
 async def get_latest_tailored_cv(current_user: UserData = Depends(get_current_user)):
-    """
-    Get the most recent tailored CV across all companies
-    
-    This endpoint finds the latest tailored CV file across all company folders
-    and returns its content for frontend preview.
-    """
+    """Get the most recent tailored CV across all companies."""
     try:
-        logger.info("📄 Fetching latest tailored CV across all companies")
-        
-        # Path to cv-analysis folder (user-isolated)
-        from app.utils.user_path_utils import get_user_base_path
-        cv_analysis_path = get_user_base_path(current_user.email)
-        
-        if not cv_analysis_path.exists():
-            raise HTTPException(
-                status_code=404,
-                detail="CV analysis folder not found"
-            )
-        
-        # Find all tailored CV text files in the cvs/tailored folder
-        all_tailored_files = []
-        
-        # Check in the global cvs/tailored directory
-        tailored_dir = cv_analysis_path / "cvs" / "tailored"
-        if tailored_dir.exists():
-            # Look for all tailored CV files
-            company_files = list(tailored_dir.glob("*_tailored_cv_*.txt"))
-            all_tailored_files.extend(company_files)
-            logger.info(f"Found {len(company_files)} tailored CV files in {tailored_dir}")
-        
-        if not all_tailored_files:
-            raise HTTPException(
-                status_code=404,
-                detail="No tailored CV files found in company-specific cvs/tailored folders"
-            )
-        
-        # Sort by timestamp in filename first, then by modified time as fallback
-        def get_timestamp(filepath):
-            try:
-                # Extract timestamp from filename pattern company_tailored_cv_YYYYMMDD_HHMMSS.txt
-                filename = filepath.name
-                timestamp_part = filename.split('_tailored_cv_')[1].replace('.txt', '')
-                # Convert to datetime for proper comparison
-                from datetime import datetime
-                return datetime.strptime(timestamp_part, '%Y%m%d_%H%M%S')
-            except:
-                # Fallback to file modification time if filename parsing fails
-                return filepath.stat().st_mtime
-        
-        latest_txt_file = max(all_tailored_files, key=get_timestamp)
-        
-        # Extract company name from filename (e.g., "Australia_for_UNHCR_tailored_cv_20250921_150701.txt")
-        filename = latest_txt_file.name
-        company_name = filename.split('_tailored_cv_')[0] if '_tailored_cv_' in filename else "Unknown"
-        
-        # Read the text content
-        with open(latest_txt_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        logger.info(f"✅ Served latest tailored CV: {latest_txt_file.name} from {company_name} ({len(content)} characters)")
-        
+        base = get_user_base_path(current_user.email)
+        tailored_dir = base / "cvs" / "tailored"
+
+        if not tailored_dir.exists():
+            raise HTTPException(status_code=404, detail="No tailored CV files found")
+
+        files = list(tailored_dir.glob("*_tailored_cv_*.txt"))
+        if not files:
+            raise HTTPException(status_code=404, detail="No tailored CV files found")
+
+        latest = max(files, key=_tailored_timestamp)
+        company_name = latest.name.split("_tailored_cv_")[0] if "_tailored_cv_" in latest.name else "Unknown"
+        content = latest.read_text(encoding="utf-8")
+
         return JSONResponse(content={
-            "success": True,
-            "content": content,
-            "filename": latest_txt_file.name,
-            "company": company_name,
-            "metadata": {
-                "file_size": len(content),
-                "last_modified": latest_txt_file.stat().st_mtime,
-                "file_path": str(latest_txt_file)
-            }
+            "success": True, "content": content, "filename": latest.name, "company": company_name,
+            "metadata": {"file_size": len(content), "last_modified": latest.stat().st_mtime,
+                         "file_path": str(latest)},
         })
-        
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ Failed to get latest tailored CV: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get latest tailored CV: {str(e)}"
-        )
+        logger.error(f"Failed to get latest tailored CV: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get latest tailored CV: {e}")
+
 
 @router.get("/available-companies")
 async def get_available_companies(current_user: UserData = Depends(get_current_user)):
-    """
-    Get list of available companies with tailored CVs - user-specific path isolated
-    
-    Returns companies that have tailored CV files available for preview.
-    """
+    """List companies that have tailored CVs available."""
     try:
-        logger.info(f"📋 Fetching available companies for user: {current_user.email}")
-        
-        # Path to cv-analysis folder
-        from app.utils.user_path_utils import get_user_base_path
-        cv_analysis_path = get_user_base_path(current_user.email)
+        base = get_user_base_path(current_user.email)
         companies = []
-        
-        if cv_analysis_path.exists():
-            for company_dir in (cv_analysis_path / "applied_companies").iterdir():
-                if company_dir.is_dir() and company_dir.name != "__pycache__":
-                    # Check if it has tailored CV files with company-specific naming
-                    company_name = company_dir.name
-                    tailored_files = list(company_dir.glob(f"{company_name}_tailored_cv_*.txt"))
-                    if not tailored_files:
-                        # Fallback to any tailored CV files
-                        tailored_files = list(company_dir.glob("*tailored_cv_*.txt"))
-                    
-                    if tailored_files:
-                        companies.append({
-                            "company": company_name,
-                            "display_name": company_name.replace('_', ' '),
-                            "has_tailored_cv": True,
-                            "last_updated": max(tailored_files, key=lambda p: p.stat().st_mtime).stat().st_mtime
-                        })
-        
-        logger.info(f"✅ Found {len(companies)} companies with tailored CVs")
-        
-        return JSONResponse(content={
-            "success": True,
-            "companies": companies,
-            "total_count": len(companies)
-        })
-        
+        applied = base / "applied_companies"
+        if applied.exists():
+            for company_dir in applied.iterdir():
+                if not company_dir.is_dir() or company_dir.name == "__pycache__":
+                    continue
+                name = company_dir.name
+                files = list(company_dir.glob(f"{name}_tailored_cv_*.txt")) \
+                        or list(company_dir.glob("*tailored_cv_*.txt"))
+                if files:
+                    companies.append({
+                        "company": name,
+                        "display_name": name.replace("_", " "),
+                        "has_tailored_cv": True,
+                        "last_updated": max(files, key=lambda p: p.stat().st_mtime).stat().st_mtime,
+                    })
+        return JSONResponse(content={"success": True, "companies": companies, "total_count": len(companies)})
     except Exception as e:
-        logger.error(f"❌ Failed to get available companies: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve companies: {str(e)}"
-        )
+        logger.error(f"Failed to get available companies: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve companies: {e}")
 
 
 @router.delete("/{filename}")
 async def delete_cv(
     filename: str,
-    current_user: UserData = Depends(get_current_user)
+    current_user: UserData = Depends(get_current_user),
 ):
-    """Delete a CV file - user-specific path isolated"""
-    
+    """Delete a CV file."""
     try:
-        upload_dir = get_user_upload_dir(current_user.email)
-        file_path = upload_dir / filename
-        
+        file_path = _uploads_dir(current_user.email) / filename
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="CV file not found")
-        
-        # Delete the file
         file_path.unlink()
-        
-        logger.info(f"CV deleted successfully: {filename}")
-        
-        return JSONResponse(content={
-            "message": "CV deleted successfully",
-            "filename": filename
-        })
-        
+        logger.info(f"CV deleted: {filename}")
+        return JSONResponse(content={"message": "CV deleted successfully", "filename": filename})
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error deleting CV: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error deleting CV: {str(e)}")
-
+        logger.error(f"Error deleting CV: {e}")
+        raise HTTPException(status_code=500, detail=f"Error deleting CV: {e}")
 
 
 @router.get("/stats")
 async def get_upload_stats(current_user: UserData = Depends(get_current_user)):
-    """Get upload directory statistics - user-specific path isolated"""
-    
+    """Get upload directory statistics."""
     try:
-        upload_dir = get_user_upload_dir(current_user.email)
-        stats = {
-            "total_files": 0,
-            "total_size": 0,
-            "file_types": {},
-            "upload_directory": str(upload_dir.absolute()),
-            "user_email": current_user.email
-        }
-        
+        upload_dir = _uploads_dir(current_user.email)
+        stats: dict = {"total_files": 0, "total_size": 0, "file_types": {},
+                       "upload_directory": str(upload_dir.absolute()), "user_email": current_user.email}
         if upload_dir.exists():
-            for file_path in upload_dir.iterdir():
-                if file_path.is_file() and file_path.suffix.lower() in ALLOWED_EXTENSIONS:
+            for fp in upload_dir.iterdir():
+                if fp.is_file() and fp.suffix.lower() in ALLOWED_EXTENSIONS:
                     stats["total_files"] += 1
-                    file_size = file_path.stat().st_size
-                    stats["total_size"] += file_size
-                    
-                    file_type = file_path.suffix[1:].upper()
-                    if file_type not in stats["file_types"]:
-                        stats["file_types"][file_type] = {"count": 0, "size": 0}
-                    
-                    stats["file_types"][file_type]["count"] += 1
-                    stats["file_types"][file_type]["size"] += file_size
-        
-        # Convert total size to MB for readability
+                    sz = fp.stat().st_size
+                    stats["total_size"] += sz
+                    ft = fp.suffix[1:].upper()
+                    stats["file_types"].setdefault(ft, {"count": 0, "size": 0})
+                    stats["file_types"][ft]["count"] += 1
+                    stats["file_types"][ft]["size"] += sz
         stats["total_size_mb"] = round(stats["total_size"] / (1024 * 1024), 2)
-        
-        logger.info(f"Upload stats retrieved: {stats['total_files']} files")
-        
         return JSONResponse(content=stats)
-        
     except Exception as e:
-        logger.error(f"Error getting upload stats: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting upload stats: {str(e)}")
+        logger.error(f"Error getting upload stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting upload stats: {e}")
 
 
 @router.put("/tailored-cv/save")
-async def save_tailored_cv(request: Request, current_user: UserData = Depends(get_current_user)):
-    """Save edited tailored CV content back to the file - user-specific path isolated"""
+async def save_tailored_cv(
+    request: Request,
+    current_user: UserData = Depends(get_current_user),
+):
+    """Save edited tailored CV content back to file."""
     try:
         data = await request.json()
-        
-        # 🔍 DEBUG: Log the incoming request data
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Received request data keys: {list(data.keys())}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Request data: {json.dumps(data, indent=2)[:500]}...")
-        
-        # Extract parameters
         company_name = data.get("company_name")
-        cv_content = data.get("cv_content")  # This should be the edited CV content
-        filename = data.get("filename")  # Optional: specific filename to update
-        
-        # 🔍 DEBUG: Log extracted parameters
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - Company: {company_name}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - Filename: {filename}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - CV Content type: {type(cv_content)}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Extracted - CV Content length: {len(str(cv_content)) if cv_content else 0}")
-        
-        # Validate required parameters
+        cv_content = data.get("cv_content")
+        filename = data.get("filename")
+
         if not company_name:
-            logger.error("❌ [TAILORED_CV_SAVE] Missing company_name")
-            return JSONResponse(
-                status_code=400,
-                content={"error": "company_name is required"}
-            )
-        
+            return JSONResponse(status_code=400, content={"error": "company_name is required"})
         if not cv_content:
-            logger.error("❌ [TAILORED_CV_SAVE] Missing cv_content")
-            return JSONResponse(
-                status_code=400,
-                content={"error": "cv_content is required"}
-            )
-        
-        # Determine the file to save to
-        from app.utils.user_path_utils import get_user_base_path
-        cv_analysis_path = get_user_base_path(current_user.email)
-        company_path = cv_analysis_path / company_name
-        
-        # 🔍 DEBUG: Log path information
-        logger.info(f"🔍 [TAILORED_CV_SAVE] CV Analysis path: {cv_analysis_path.absolute()}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Company path: {company_path.absolute()}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Company path exists: {company_path.exists()}")
-        
+            return JSONResponse(status_code=400, content={"error": "cv_content is required"})
+
+        base = get_user_base_path(current_user.email)
+        company_path = base / company_name
         if not company_path.exists():
-            logger.error(f"❌ [TAILORED_CV_SAVE] Company directory not found: {company_path}")
-            return JSONResponse(
-                status_code=404,
-                content={"error": f"Company directory not found: {company_name}"}
-            )
-        
-        # Find the tailored CV file to update
+            return JSONResponse(status_code=404, content={"error": f"Company directory not found: {company_name}"})
+
         if filename:
-            # Use specific filename if provided
-            target_file = company_path / filename
-            logger.info(f"🔍 [TAILORED_CV_SAVE] Using specified filename: {target_file}")
-            if not target_file.exists():
-                logger.error(f"❌ [TAILORED_CV_SAVE] Specified file not found: {target_file}")
-                return JSONResponse(
-                    status_code=404,
-                    content={"error": f"File not found: {filename}"}
-                )
+            target = company_path / filename
+            if not target.exists():
+                return JSONResponse(status_code=404, content={"error": f"File not found: {filename}"})
         else:
-            # Find the latest tailored CV file
-            tailored_files = list(company_path.glob("*tailored_cv*.json"))
-            logger.info(f"🔍 [TAILORED_CV_SAVE] Found {len(tailored_files)} tailored CV files")
-            for file in tailored_files:
-                logger.info(f"🔍 [TAILORED_CV_SAVE] - {file.name}")
-            
-            if not tailored_files:
-                logger.error(f"❌ [TAILORED_CV_SAVE] No tailored CV files found for {company_name}")
-                return JSONResponse(
-                    status_code=404,
-                    content={"error": f"No tailored CV files found for {company_name}"}
-                )
-            target_file = max(tailored_files, key=lambda p: p.stat().st_mtime)
-            logger.info(f"🔍 [TAILORED_CV_SAVE] Selected latest file: {target_file.name}")
-        
-        # Load existing file to preserve metadata
+            candidates = list(company_path.glob("*tailored_cv*.json"))
+            if not candidates:
+                return JSONResponse(status_code=404, content={"error": f"No tailored CV files found for {company_name}"})
+            target = max(candidates, key=lambda p: p.stat().st_mtime)
+
         try:
-            logger.info(f"🔍 [TAILORED_CV_SAVE] Loading existing file: {target_file}")
-            with open(target_file, 'r', encoding='utf-8') as f:
-                existing_data = json.load(f)
-            logger.info(f"🔍 [TAILORED_CV_SAVE] Existing data keys: {list(existing_data.keys()) if isinstance(existing_data, dict) else 'Not a dict'}")
-            logger.info(f"🔍 [TAILORED_CV_SAVE] Existing data type: {type(existing_data)}")
-        except Exception as e:
-            logger.warning(f"⚠️ [TAILORED_CV_SAVE] Could not load existing file {target_file}: {e}")
-            existing_data = {}
-        
-        # 🔍 DEBUG: Log the merge process
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Merging data - CV content type: {type(cv_content)}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Merging data - Existing data type: {type(existing_data)}")
-        
-        # Update the CV content while preserving metadata
-        if isinstance(existing_data, dict):
-            # If it's structured data, update the content field
+            existing = json.loads(target.read_text(encoding="utf-8"))
+        except Exception:
+            existing = {}
+
+        if isinstance(existing, dict):
             if isinstance(cv_content, dict):
-                # If cv_content is structured, merge it
-                logger.info("🔍 [TAILORED_CV_SAVE] Merging structured CV content with existing data")
-                existing_data.update(cv_content)
+                existing.update(cv_content)
             else:
-                # If cv_content is text, update the text field
-                logger.info("🔍 [TAILORED_CV_SAVE] Updating text field with CV content")
-                existing_data["text"] = cv_content
-            existing_data["updated_at"] = datetime.now().isoformat()
-            existing_data["manually_edited"] = True
-            updated_data = existing_data
+                existing["text"] = cv_content
+            existing["updated_at"] = datetime.now().isoformat()
+            existing["manually_edited"] = True
+            updated = existing
         else:
-            # If existing data is not structured, create new structure
-            logger.info("🔍 [TAILORED_CV_SAVE] Creating new structured data")
-            updated_data = {
-                "content": cv_content,
-                "updated_at": datetime.now().isoformat(),
-                "manually_edited": True,
-                "original_data": existing_data
-            }
-        
-        # 🔍 DEBUG: Log before saving
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Final data keys: {list(updated_data.keys()) if isinstance(updated_data, dict) else 'Not a dict'}")
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Saving to file: {target_file}")
-        
-        # Save the updated content
-        with open(target_file, 'w', encoding='utf-8') as f:
-            json.dump(updated_data, f, ensure_ascii=False, indent=2)
-        
-        logger.info(f"✅ [TAILORED_CV_SAVE] Successfully saved to: {target_file}")
-        
-        # All tailored CVs are now saved to company-specific folders in applied_companies
-        
-        logger.info(f"🎉 [TAILORED_CV_SAVE] Tailored CV saved successfully: {target_file}")
-        
-        response_data = {
-            "success": True,
-            "message": "Tailored CV saved successfully",
-            "company": company_name,
-            "filename": target_file.name,
-            "file_path": str(target_file),
-            "updated_at": updated_data.get("updated_at")
-        }
-        
-        logger.info(f"🔍 [TAILORED_CV_SAVE] Returning response: {response_data}")
-        
-        return JSONResponse(content=response_data)
-        
+            updated = {"content": cv_content, "updated_at": datetime.now().isoformat(),
+                       "manually_edited": True, "original_data": existing}
+
+        target.write_text(json.dumps(updated, ensure_ascii=False, indent=2), encoding="utf-8")
+        logger.info(f"Tailored CV saved: {target}")
+
+        return JSONResponse(content={
+            "success": True, "message": "Tailored CV saved successfully",
+            "company": company_name, "filename": target.name,
+            "file_path": str(target), "updated_at": updated.get("updated_at"),
+        })
     except Exception as e:
-        logger.error(f"❌ [TAILORED_CV_SAVE] Error saving tailored CV: {str(e)}")
-        logger.error(f"❌ [TAILORED_CV_SAVE] Exception type: {type(e)}")
-        import traceback
-        logger.error(f"❌ [TAILORED_CV_SAVE] Traceback: {traceback.format_exc()}")
-        return JSONResponse(
-            status_code=500,
-            content={"error": f"Failed to save tailored CV: {str(e)}"}
-        )
+        logger.error(f"Error saving tailored CV: {e}")
+        return JSONResponse(status_code=500, content={"error": f"Failed to save tailored CV: {e}"})

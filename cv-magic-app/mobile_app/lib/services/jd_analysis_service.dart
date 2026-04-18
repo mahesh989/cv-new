@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
 
 class JDAnalysisService {
   static const String baseUrl = AppConfig.baseUrl; // Configured backend URL

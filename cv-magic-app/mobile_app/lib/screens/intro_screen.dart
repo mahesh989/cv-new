@@ -161,8 +161,8 @@ class _IntroScreenState extends State<IntroScreen>
           // Debug: Ensure we're using the correct video ID
           Builder(
             builder: (context) {
-              print('🎯 Using YouTube Video ID: ${AppConfig.youtubeVideoId}');
-              print(
+              debugPrint('🎯 Using YouTube Video ID: ${AppConfig.youtubeVideoId}');
+              debugPrint(
                   '🎯 Expected URL: https://www.youtube.com/embed/${AppConfig.youtubeVideoId}');
 
               // Make height responsive: larger on bigger screens, minimum 300px

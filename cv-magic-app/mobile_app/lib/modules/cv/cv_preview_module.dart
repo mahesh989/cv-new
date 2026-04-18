@@ -48,18 +48,18 @@ class _CVPreviewModuleState extends State<CVPreviewModule> {
     });
 
     try {
-      print('🔍 [CV_PREVIEW] Loading CV content for: $filename');
+      debugPrint('🔍 [CV_PREVIEW] Loading CV content for: $filename');
       final data = await APIService.makeAuthenticatedCall(
         endpoint: '/cv/content/$filename',
         method: 'GET',
       );
-      print('🔍 [CV_PREVIEW] API response received: ${data.keys}');
-      print('🔍 [CV_PREVIEW] Content length: ${data['content']?.length ?? 0}');
+      debugPrint('🔍 [CV_PREVIEW] API response received: ${data.keys}');
+      debugPrint('🔍 [CV_PREVIEW] Content length: ${data['content']?.length ?? 0}');
       setState(() {
         cvContent = data['content'];
       });
     } catch (e) {
-      print('❌ [CV_PREVIEW] Error loading CV content: $e');
+      debugPrint('❌ [CV_PREVIEW] Error loading CV content: $e');
       setState(() {
         cvContent = 'Error loading CV content: $e';
       });

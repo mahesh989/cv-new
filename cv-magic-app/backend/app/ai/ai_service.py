@@ -6,6 +6,7 @@ handling dynamic switching, and providing a unified interface for AI operations.
 """
 
 from typing import Dict, List, Optional, Any, Type, Tuple
+from fastapi import HTTPException, status
 from app.ai.ai_config import ai_config
 from app.ai.base_provider import BaseAIProvider, AIResponse
 from app.ai.providers import OpenAIProvider, AnthropicProvider, DeepSeekProvider
@@ -660,6 +661,108 @@ Remember to use intelligent matching - look for semantic meaning, synonyms, vari
             temperature=0.0,
             max_tokens=3000
         )
+
+
+    # ---------------------------------------------------------------------------
+    # API key validation helpers (merged from EnhancedAIService)
+    # ---------------------------------------------------------------------------
+
+    _MODEL_TO_PROVIDER: Dict[str, str] = {
+        'gpt-4o': 'openai', 'gpt-4o-mini': 'openai', 'gpt-4-turbo': 'openai',
+        'gpt-3.5-turbo': 'openai', 'gpt-5-nano': 'openai',
+        'claude-3.5-sonnet': 'anthropic', 'claude-3.5-sonnet-20241022': 'anthropic',
+        'claude-3-haiku': 'anthropic', 'claude-3-5-haiku-20241022': 'anthropic',
+        'claude-3-opus': 'anthropic', 'claude-3-opus-20240229': 'anthropic',
+        'deepseek-chat': 'deepseek', 'deepseek-coder': 'deepseek',
+        'deepseek-reasoner': 'deepseek',
+    }
+
+    _PROVIDER_DISPLAY_NAMES: Dict[str, str] = {
+        'openai': 'OpenAI',
+        'anthropic': 'Anthropic (Claude)',
+        'deepseek': 'DeepSeek',
+    }
+
+    def _get_provider_from_model(self, model_id: str) -> Optional[str]:
+        """Return provider name for a model ID, or None if unknown."""
+        return self._MODEL_TO_PROVIDER.get(model_id)
+
+    def _get_provider_display_name(self, provider: str) -> str:
+        return self._PROVIDER_DISPLAY_NAMES.get(provider, provider.title() if provider else "Unknown")
+
+    def _validate_provider_api_key(self, provider: str, user: Any) -> Tuple[bool, str]:
+        """Validate that the user has a working API key for *provider*."""
+        try:
+            from app.services.user_api_key_manager import user_api_key_manager
+            user_key = user_api_key_manager.get_api_key(user, provider)
+            if not user_key:
+                return False, f"No API key configured for {provider}."
+            return user_api_key_manager.validate_api_key(user, provider, user_key)
+        except Exception as e:
+            logger.error(f"Error validating API key for {provider}: {e}")
+            return False, f"Failed to validate API key for {provider}: {e}"
+
+    async def generate_response_with_validation(
+        self,
+        prompt: str,
+        user: Any,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        provider_name: Optional[str] = None,
+        model_name: Optional[str] = None,
+        **kwargs,
+    ) -> AIResponse:
+        """Generate an AI response after validating the user's API key.
+
+        Raises HTTPException (400) when the key is missing/invalid so callers
+        get a structured error instead of a raw exception.
+        """
+        try:
+            if provider_name:
+                target_provider = provider_name
+            elif model_name:
+                target_provider = self._get_provider_from_model(model_name)
+                if not target_provider:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Unknown model: {model_name}",
+                    )
+            else:
+                target_provider = self.config.get_current_provider()
+
+            is_valid, message = self._validate_provider_api_key(target_provider, user)
+            if not is_valid:
+                provider_display = self._get_provider_display_name(target_provider)
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={
+                        "error": "API_KEY_REQUIRED",
+                        "message": f"API key required for {provider_display}",
+                        "provider": target_provider,
+                        "provider_display": provider_display,
+                        "details": message,
+                        "action_required": "Please configure your API key for this provider",
+                    },
+                )
+
+            return await self.generate_response(
+                prompt=prompt,
+                user=user,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                provider_name=provider_name,
+                **kwargs,
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error in generate_response_with_validation: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"AI service error: {e}",
+            )
 
 
 # Global AI service instance

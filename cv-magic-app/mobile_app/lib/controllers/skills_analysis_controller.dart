@@ -159,14 +159,14 @@ class SkillsAnalysisController extends ChangeNotifier {
 
     try {
       // Check for cached results first
-      print('🔍 [CONTROLLER_DEBUG] Checking for cached results...');
+      debugPrint('🔍 [CONTROLLER_DEBUG] Checking for cached results...');
       final cachedResult = await SkillsAnalysisService.getCachedAnalysis(
         cvFilename: cvFilename,
         jdText: jdText,
       );
 
       if (cachedResult != null) {
-        print('🔍 [CONTROLLER_DEBUG] Found cached results!');
+        debugPrint('🔍 [CONTROLLER_DEBUG] Found cached results!');
         _result = cachedResult;
         _executionDuration = Duration.zero; // Cached results are instant
         _setState(SkillsAnalysisState.completed);
@@ -174,13 +174,13 @@ class SkillsAnalysisController extends ChangeNotifier {
         _showNotification('✅ Analysis completed using cached results!');
         return;
       } else {
-        print(
+        debugPrint(
           '🔍 [CONTROLLER_DEBUG] No cached results found, proceeding with fresh analysis',
         );
       }
 
       // Perform fresh analysis
-      print('=== CONTROLLER CALLING SERVICE ===');
+      debugPrint('=== CONTROLLER CALLING SERVICE ===');
       debugPrint('[SKILLS_ANALYSIS] Starting fresh analysis...');
       debugPrint('   CV: $cvFilename');
       debugPrint('   JD text length: ${jdText.length} chars');
@@ -193,8 +193,8 @@ class SkillsAnalysisController extends ChangeNotifier {
         jdText: jdText,
       );
 
-      print('=== CONTROLLER RECEIVED RESULT ===');
-      print('Result success: ${result.isSuccess}');
+      debugPrint('=== CONTROLLER RECEIVED RESULT ===');
+      debugPrint('Result success: ${result.isSuccess}');
 
       if (result.isSuccess) {
         debugPrint('✅ [SKILLS_ANALYSIS] Analysis completed successfully');
@@ -263,7 +263,7 @@ class SkillsAnalysisController extends ChangeNotifier {
     _currentCvFilename = company; // Store for compatibility
 
     try {
-      print('🚀 [SKILLS_ANALYSIS_CONTROLLER] Starting context-aware analysis');
+      debugPrint('🚀 [SKILLS_ANALYSIS_CONTROLLER] Starting context-aware analysis');
 
       // First, parse the job description and save job details
       try {
@@ -284,9 +284,9 @@ class SkillsAnalysisController extends ChangeNotifier {
         debugPrint('⚠️ [SKILLS_CONTROLLER] Error saving job details: $e');
         // Continue with analysis even if saving fails
       }
-      print('   JD URL: $jdUrl');
-      print('   Company: $company');
-      print('   Is Rerun: $isRerun');
+      debugPrint('   JD URL: $jdUrl');
+      debugPrint('   Company: $company');
+      debugPrint('   Is Rerun: $isRerun');
 
       _result = await SkillsAnalysisService.performContextAwareAnalysis(
         jdUrl: jdUrl,
@@ -351,11 +351,11 @@ class SkillsAnalysisController extends ChangeNotifier {
   // Always fetch and display the latest AI recommendation for the company
   // This is invoked right after a successful context-aware analysis
   Future<void> _tryShowLatestAIRecommendation(String company) async {
-    print(
+    debugPrint(
         '🔍 [AI_REC] Fetching for company: $company, loading: $_showAIRecommendationLoading, results: $_showAIRecommendationResults');
     // Avoid regressing UI if we already have results
     if (_showAIRecommendationResults && _result?.aiRecommendation != null) {
-      print('ℹ️ [AI_REC] Recommendations already present; skipping fetch');
+      debugPrint('ℹ️ [AI_REC] Recommendations already present; skipping fetch');
       return;
     }
     // Strict behavior: set loading, then require file to exist; otherwise surface error
@@ -379,7 +379,7 @@ class SkillsAnalysisController extends ChangeNotifier {
           _fullResult =
               _fullResult!.copyWith(aiRecommendation: aiRecommendation);
         }
-        print(
+        debugPrint(
             '✅ [AI_REC] Found recommendation, storing for later display (content length: ${aiRecommendation.content.length})');
 
         // Only show AI recommendations if ATS score has already been displayed
@@ -391,10 +391,10 @@ class SkillsAnalysisController extends ChangeNotifier {
           }
           notifyListeners();
           _showNotification('🤖 Latest AI recommendations are ready!');
-          print(
+          debugPrint(
               '✅ [AI_REC] Showing AI recommendations (ATS score already displayed)');
         } else {
-          print(
+          debugPrint(
               '⏳ [AI_REC] AI recommendations ready but waiting for ATS score to be displayed first');
         }
         return;
@@ -417,7 +417,7 @@ class SkillsAnalysisController extends ChangeNotifier {
         if (_fullResult != null) {
           _fullResult = _fullResult!.copyWith(aiRecommendation: retry);
         }
-        print(
+        debugPrint(
             '✅ [AI_REC] Found recommendation after retry, storing for later display (content length: ${retry.content.length})');
 
         // Only show AI recommendations if ATS score has already been displayed
@@ -429,10 +429,10 @@ class SkillsAnalysisController extends ChangeNotifier {
           }
           notifyListeners();
           _showNotification('🤖 Latest AI recommendations are ready!');
-          print(
+          debugPrint(
               '✅ [AI_REC] Showing AI recommendations after retry (ATS score already displayed)');
         } else {
-          print(
+          debugPrint(
               '⏳ [AI_REC] AI recommendations ready after retry but waiting for ATS score to be displayed first');
         }
         return;
@@ -442,7 +442,7 @@ class SkillsAnalysisController extends ChangeNotifier {
       if (_fullResult != null) {
         _fullResult = _fullResult!.copyWith(aiRecommendation: latest);
       }
-      print(
+      debugPrint(
           '✅ [AI_REC] Found recommendation, storing for later display (content length: ${latest.content.length})');
 
       // Only show AI recommendations if ATS score has already been displayed
@@ -454,10 +454,10 @@ class SkillsAnalysisController extends ChangeNotifier {
         }
         notifyListeners();
         _showNotification('🤖 Latest AI recommendations are ready!');
-        print(
+        debugPrint(
             '✅ [AI_REC] Showing AI recommendations (ATS score already displayed)');
       } else {
-        print(
+        debugPrint(
             '⏳ [AI_REC] AI recommendations ready but waiting for ATS score to be displayed first');
       }
     } catch (e) {
@@ -628,12 +628,12 @@ class SkillsAnalysisController extends ChangeNotifier {
       company = _fullResult?.preextractedCompanyName;
     }
     if (company == null || company.trim().isEmpty) {
-      print('❌ [POLLING] No company name found for polling');
+      debugPrint('❌ [POLLING] No company name found for polling');
       _finishAnalysis();
       return;
     }
 
-    print('🔄 [POLLING] Starting polling for complete results...');
+    debugPrint('🔄 [POLLING] Starting polling for complete results...');
     _showNotification(
       '🔧 Running advanced analysis (component analysis & ATS calculation)...',
     );
@@ -643,7 +643,7 @@ class SkillsAnalysisController extends ChangeNotifier {
           await SkillsAnalysisService.waitForCompleteResults(company);
 
       if (completeResults != null) {
-        print('✅ [POLLING] Complete results obtained!');
+        debugPrint('✅ [POLLING] Complete results obtained!');
 
         // Parse component analysis
         ComponentAnalysisResult? componentAnalysis;
@@ -651,7 +651,7 @@ class SkillsAnalysisController extends ChangeNotifier {
           componentAnalysis = ComponentAnalysisResult.fromJson(
             completeResults['component_analysis'],
           );
-          print(
+          debugPrint(
             '📊 [POLLING] Component analysis parsed: ${componentAnalysis.extractedScores.length} scores',
           );
         }
@@ -660,7 +660,7 @@ class SkillsAnalysisController extends ChangeNotifier {
         ATSResult? atsResult;
         if (completeResults['ats_score'] != null) {
           atsResult = ATSResult.fromJson(completeResults['ats_score']);
-          print('🎯 [POLLING] ATS result parsed: ${atsResult.finalATSScore}');
+          debugPrint('🎯 [POLLING] ATS result parsed: ${atsResult.finalATSScore}');
         }
 
         // Parse AI recommendation
@@ -669,7 +669,7 @@ class SkillsAnalysisController extends ChangeNotifier {
           aiRecommendation = AIRecommendationResult.fromJson(
             completeResults['ai_recommendation'],
           );
-          print(
+          debugPrint(
             '🤖 [POLLING] AI recommendation parsed: ${aiRecommendation.content.length} chars',
           );
         }
@@ -683,7 +683,7 @@ class SkillsAnalysisController extends ChangeNotifier {
 
         // Store AI recommendation but don't show it yet - wait for ATS score to be displayed first
         if (aiRecommendation != null && !_showAIRecommendationResults) {
-          print(
+          debugPrint(
               '✅ [POLLING] AI recommendation available, storing for later display');
           // Don't show AI recommendations yet - they will be shown after ATS score
           // Just store the data for when it's time to display
@@ -703,7 +703,7 @@ class SkillsAnalysisController extends ChangeNotifier {
           // Then show ATS loading after AI Skills Analysis is done
           Timer(Duration(seconds: 12), () {
             // Show ATS loading state and notification
-            print('🔍 [CONTROLLER] Setting ATS loading state to true');
+            debugPrint('🔍 [CONTROLLER] Setting ATS loading state to true');
             _showATSLoading = true;
             notifyListeners();
             _showNotification('⚡ Generating enhanced ATS analysis...');
@@ -731,7 +731,7 @@ class SkillsAnalysisController extends ChangeNotifier {
               Timer(Duration(seconds: 2), () {
                 if (_fullResult?.aiRecommendation != null &&
                     !_showAIRecommendationResults) {
-                  print(
+                  debugPrint(
                       '✅ [ATS_COMPLETE] Now showing AI recommendations after ATS score');
                   _showAIRecommendationLoading = false;
                   _showAIRecommendationResults = true;
@@ -749,14 +749,14 @@ class SkillsAnalysisController extends ChangeNotifier {
           _finishAnalysis();
         }
       } else {
-        print('⚠️ [POLLING] Polling timed out, analysis incomplete');
+        debugPrint('⚠️ [POLLING] Polling timed out, analysis incomplete');
         _showNotification(
           '⚠️ Advanced analysis timed out - basic analysis complete',
         );
         _finishAnalysis();
       }
     } catch (e) {
-      print('❌ [POLLING] Error during polling: $e');
+      debugPrint('❌ [POLLING] Error during polling: $e');
       _showNotification(
         '⚠️ Advanced analysis failed - basic analysis complete',
       );
@@ -799,7 +799,7 @@ class SkillsAnalysisController extends ChangeNotifier {
         if (company.isNotEmpty) {
           final aiFile =
               await SkillsAnalysisService.fetchLatestAIRecommendation(company);
-          print(
+          debugPrint(
               '📁 [FILE_CHECK] AI file exists and has content: ${aiFile?.hasContent}');
         }
       } catch (_) {}
@@ -809,6 +809,6 @@ class SkillsAnalysisController extends ChangeNotifier {
   void _triggerClearResults() {
     _executionDuration = _fullResult?.executionDuration ?? Duration.zero;
     notifyListeners();
-    print('🏁 [CONTROLLER] Analysis fully completed');
+    debugPrint('🏁 [CONTROLLER] Analysis fully completed');
   }
 }

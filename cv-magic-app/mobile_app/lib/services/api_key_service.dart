@@ -1,18 +1,18 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
+import 'auth_service.dart';
 
 class APIKeyService {
   static const String _baseUrl = AppConfig.baseUrl;
 
-  /// Get authentication token from SharedPreferences
+  /// Get Firebase ID token for the current user
   Future<String?> _getAuthToken() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('auth_token');
+      return await authService.getIdToken();
     } catch (e) {
-      print('Error getting auth token: $e');
+      debugPrint('Error getting auth token: $e');
       return null;
     }
   }
@@ -48,7 +48,7 @@ class APIKeyService {
 
       return false;
     } catch (e) {
-      print('Error setting API key: $e');
+      debugPrint('Error setting API key: $e');
       return false;
     }
   }
@@ -77,7 +77,7 @@ class APIKeyService {
 
       return false;
     } catch (e) {
-      print('Error validating API key: $e');
+      debugPrint('Error validating API key: $e');
       return false;
     }
   }
@@ -118,7 +118,7 @@ class APIKeyService {
 
       return {};
     } catch (e) {
-      print('Error getting providers status: $e');
+      debugPrint('Error getting providers status: $e');
       return {};
     }
   }
@@ -147,7 +147,7 @@ class APIKeyService {
 
       return false;
     } catch (e) {
-      print('Error removing API key: $e');
+      debugPrint('Error removing API key: $e');
       return false;
     }
   }
@@ -176,7 +176,7 @@ class APIKeyService {
 
       return false;
     } catch (e) {
-      print('Error clearing all API keys: $e');
+      debugPrint('Error clearing all API keys: $e');
       return false;
     }
   }

@@ -1,3 +1,4 @@
+import logging
 """
 Helper script to verify the file paths are being created correctly.
 """
@@ -8,6 +9,8 @@ from datetime import datetime
 import json
 
 from .user_path_utils import (
+
+logger = logging.getLogger(__name__)
     get_user_base_path,
     get_user_company_analysis_paths,
     get_user_cv_paths,
@@ -53,7 +56,7 @@ def verify_company_paths(company: str, user_email: Optional[str] = None) -> Dict
             results[name] = True
         except Exception as e:
             results[name] = False
-            print(f"Failed to create {name}: {e}")
+            logger.debug(f"Failed to create {name}: {e}")
     
     # Verify CV directories
     for name, path in cv_paths.items():
@@ -66,7 +69,7 @@ def verify_company_paths(company: str, user_email: Optional[str] = None) -> Dict
             test_file.unlink()  # Clean up test file
         except Exception as e:
             results[f"cv_{name}"] = False
-            print(f"Failed to verify CV directory {name}: {e}")
+            logger.debug(f"Failed to verify CV directory {name}: {e}")
     
     # Clean up test files
     for path in required_files.values():
@@ -83,38 +86,38 @@ def print_company_structure(company: str, user_email: Optional[str] = None) -> N
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     paths = get_user_company_analysis_paths(user_email, company)
     
-    print(f"Directory structure for {company}:")
-    print("user/")
-    print(f"└── user_{user_email}/")
-    print("    └── cv-analysis/")
-    print("        ├── applied_companies/")
-    print(f"        │   └── {company}/")
+    logger.debug(f"Directory structure for {company}:")
+    logger.debug("user/")
+    logger.debug(f"└── user_{user_email}/")
+    logger.debug("    └── cv-analysis/")
+    logger.debug("        ├── applied_companies/")
+    logger.debug(f"        │   └── {company}/")
     
     # List all files that should be in the company directory
     for name, path_func in paths.items():
         path = path_func(timestamp)
-        print(f"        │       ├── {path.name}")
+        logger.debug(f"        │       ├── {path.name}")
     
-    print("        ├── cvs/")
-    print("        │   ├── original/")
-    print("        │   │   ├── original_cv.txt")
-    print("        │   │   └── original_cv.json")
-    print("        │   └── tailored/")
-    print(f"        │       └── {company}_tailored_cv_{timestamp}.json")
-    print("        ├── saved_jobs/")
-    print("        │   └── saved_jobs.json")
-    print("        └── uploads/")
+    logger.debug("        ├── cvs/")
+    logger.debug("        │   ├── original/")
+    logger.debug("        │   │   ├── original_cv.txt")
+    logger.debug("        │   │   └── original_cv.json")
+    logger.debug("        │   └── tailored/")
+    logger.debug(f"        │       └── {company}_tailored_cv_{timestamp}.json")
+    logger.debug("        ├── saved_jobs/")
+    logger.debug("        │   └── saved_jobs.json")
+    logger.debug("        └── uploads/")
 
 if __name__ == "__main__":
     # Test for a company
     company = "Australia_for_UNHCR"
-    print("\nVerifying paths...")
+    logger.debug("\nVerifying paths...")
     results = verify_company_paths(company)
     
-    print("\nResults:")
+    logger.debug("\nResults:")
     for name, success in results.items():
         status = "✅" if success else "❌"
-        print(f"{status} {name}")
+        logger.debug(f"{status} {name}")
     
-    print("\nExpected structure:")
+    logger.debug("\nExpected structure:")
     print_company_structure(company)

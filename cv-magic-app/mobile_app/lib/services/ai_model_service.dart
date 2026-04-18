@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/ai_model.dart';
-import '../config/config.dart';
+import '../core/config/app_config.dart';
+import 'auth_service.dart';
 
 class AIModelService extends ChangeNotifier {
   static final AIModelService _instance = AIModelService._internal();
@@ -209,8 +210,7 @@ class AIModelService extends ChangeNotifier {
   Future<void> _syncModelWithBackend(String modelId) async {
     try {
       // Get authentication token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await authService.getIdToken();
 
       final headers = {
         'Content-Type': 'application/json',
@@ -258,8 +258,7 @@ class AIModelService extends ChangeNotifier {
   Future<Map<String, dynamic>?> getBackendStatus() async {
     try {
       // Get authentication token
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await authService.getIdToken();
 
       final headers = {
         'Content-Type': 'application/json',

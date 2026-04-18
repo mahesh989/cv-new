@@ -82,14 +82,14 @@ class _JobInputState extends State<JobInput> with TickerProviderStateMixin {
           widget.jdUrlController.text.trim());
 
       if (result != null && result.isNotEmpty) {
-        print(
+        debugPrint(
             '🔍 [DEBUG] JobInput: Setting jdController.text with ${result.length} characters');
         widget.jdController.text = result;
-        print(
+        debugPrint(
             '🔍 [DEBUG] JobInput: jdController.text.length after setting: ${widget.jdController.text.length}');
         _showSnackBar('Job description extracted successfully!');
       } else {
-        print(
+        debugPrint(
             '❌ [DEBUG] JobInput: No job description found or result is empty');
         _showSnackBar('No job description found at the provided URL',
             isError: true);
